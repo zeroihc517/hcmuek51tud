@@ -1,85 +1,294 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thời Khóa Biểu (08/09-14/09)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhóm 2 - Lớp 12 Toán 2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: url('https://thuthuatnhanh.com/wp-content/uploads/2022/06/Hinh-nen-iPad-4K.jpg') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 3rem;
+            color: white;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            padding: 20px 0;
+        }
+
+        .members {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px auto;
+        }
+
+        .member-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: 2px solid red;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 20px;
+            width: 200px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .member-card img {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .member-card a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .member-card a:hover {
+            text-decoration: underline;
+        }
+
+        /* Hiệu ứng hover */
+        .member-card:hover {
+            transform: scale(1.1); /* Tăng kích thước */
+            border-color: yellow; /* Đổi màu viền */
+            animation: border-flash 0.6s infinite; /* Hiệu ứng nhấp nháy */
+        }
+
+        /* Keyframes cho nhấp nháy viền */
+        @keyframes border-flash {
+            0% { border-color: yellow; }
+            50% { border-color: red; }
+            100% { border-color: yellow; }
+        }
+
+        table {
+            width: 50%;
+            border-collapse: collapse;
+            margin: 40px auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        th, td {
+            padding: 20px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover td {
+            background-color: #e1f5fe;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            font-size: 1.5rem;
+            padding: 20px;
+            color: white;
+            font-weight: bold;
+            border-top: 3px solid #4CAF50;
+        }
+.web-access {
+    text-align: center;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border: 2px solid #4CAF50;
+    border-radius: 10px;
+    width: fit-content;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Thêm hiệu ứng phóng to và bóng mượt */
+}
+
+.web-access:hover {
+    transform: scale(1.1); /* Phóng to 10% */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Thêm bóng đổ */
+}
+
+.web-access a {
+    text-decoration: none;
+    font-size: 1.5rem;
+    color: #4CAF50;
+    font-weight: bold;
+    transition: color 0.3s ease; /* Hiệu ứng mượt khi thay đổi màu */
+}
+
+.web-access a:hover {
+    color: #2c7a39; /* Đổi màu chữ khi di chuột */
+}
+/* Tạo hiệu ứng cho các liên kết trong bảng */
+table a {
+    text-decoration: none;
+    color: #007bff; /* Màu mặc định */
+    font-size: 1.1rem;
+    font-weight: bold;
+    transition: transform 0.3s ease, color 0.3s ease; /* Hiệu ứng mượt */
+}
+
+table a:hover {
+    transform: scale(1.1); /* Phóng to 10% */
+    color: #0056b3; /* Đổi màu khi di chuột */
+    text-decoration: underline; /* Gạch chân khi di chuột */
+}
+/* Mũi tên và dòng chữ */
+.arrow-text {
+    position: fixed; /* Cố định vị trí */
+    top: 50%; /* Canh giữa theo chiều dọc */
+    left: 10px; /* Canh lề trái */
+    transform: translateY(-50%); /* Dịch chuyển chính giữa theo trục Y */
+    font-size: 1.2rem;
+    color: #ffffff;
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.7); /* Nền màu đen mờ */
+    padding: 10px 20px;
+    border-radius: 20px; /* Bo tròn góc */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Bóng mờ */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Khoảng cách giữa mũi tên và chữ */
+}
+
+/* Mũi tên */
+.arrow-text::before {
+    content: "➔"; /* Biểu tượng mũi tên */
+    font-size: 1.5rem;
+    color: #4CAF50; /* Màu mũi tên */
+    animation: bounce 1.5s infinite; /* Hiệu ứng nhấp nháy */
+}
+
+/* Hiệu ứng nhấp nháy */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(5px); /* Dịch mũi tên qua phải */
+    }
+}
+ /* Định dạng tiêu đề */
+    .table-title {
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: bold;
+        color: white;
+        background-color: blue;
+        padding: 10px 20px;
+        margin: 30px auto 10px;
+        width: fit-content;
+        border-radius: 10px;
+        position: relative;
+        overflow: hidden;
+        border: 3px solid transparent;
+        animation: border-animation 2s infinite;
+    }
+
+    /* Hiệu ứng viền chạy */
+    @keyframes border-animation {
+        0% { border-color: red; }
+        25% { border-color: yellow; }
+        50% { border-color: blue; }
+        75% { border-color: green; }
+        100% { border-color: red; }
+    }
+    </style>
+
+
 </head>
-<body class="bg-gray-100 text-gray-900">
-  <div class="max-w-7xl mx-auto p-4 sm:p-6">
-    <!-- Tiêu đề -->
-    <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-center text-red-600 mb-2">
-      THỜI KHÓA BIỂU HỌC KÌ 1
-    </h1>
-    <p class="text-base sm:text-xl md:text-2xl text-center italic text-blue-600 mb-6">
-      (Từ ngày 08/09/2025 - 14/09/2025)
-    </p>
-
-    <!-- Bảng thời khóa biểu -->
-    <div class="overflow-x-auto shadow-lg rounded-2xl bg-white">
-      <table class="min-w-[900px] w-full table-fixed border-collapse border border-gray-400">
+<body>
+    <h1>Trường Đại học Sư phạm Thành phố Hồ Chí Minh - TUD K51</h1>
+    
+<div class="table-title">Thời khóa biểu Học kì 1 - Năm 1</div>
+    <table>
         <thead>
-          <tr class="bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs sm:text-sm md:text-base">
-            <th class="p-2 sm:p-3 border border-gray-400 w-[8%]">Buổi</th>
-            <th class="p-2 sm:p-3 border border-gray-400 w-[13%]">Thứ 2</th>
-            <th class="p-2 sm:p-3 border border-gray-400 w-[13%]">Thứ 3</th>
-            <th class="p-2 sm:p-3 border border-gray-400 w-[13%]">Thứ 4</th>
-            <th class="p-2 sm:p-3 border border-gray-400 w-[13%]">Thứ 5</th>
-            <th class="p-2 sm:p-3 border border-gray-400 w-[13%]">Thứ 6</th>
-            <th class="p-2 sm:p-3 border border-gray-400 w-[13%]">Thứ 7</th>
-            <th class="p-2 sm:p-3 border border-gray-400 w-[13%]">Chủ Nhật</th>
-          </tr>
+            <tr>
+                <th>STT</th>
+                <th>Liên Kết</th>
+            </tr>
         </thead>
+            <tr>
+              <td>01</td>
+                <td>
+                    <a href="1. TKB (8.9-14.9).html">TKB 8/9-14/9</a>
+                </td>
+            </tr>
+            
+                        <tr>
+              <td>02</td>
+                <td>
+                    <a href="2. TKB (15.9-21.9).html">TKB 15/9-21/9</a>
+                </td>
+            </tr>
 
-        <tbody class="text-center text-xs sm:text-sm md:text-base">
-          <!-- Buổi sáng -->
-          <tr class="bg-gray-50">
-            <td rowspan="6" class="p-2 sm:p-3 font-semibold">Sáng</td>
-            <td class="p-2 sm:p-3"></td>
-		<td class="p-2 sm:p-3"></td>
-<td class="p-2 sm:p-3"></td>
-            <td class="p-2 sm:p-3 bg-sky-100">
-              <span class="text-red-600 font-bold">8:00 - 11:30</span><br>
-              <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank"
-                 class="text-blue-600 font-semibold hover:text-blue-800">Cơ sở: An Dương Vương</a><br>
-              Sinh hoạt công dân<br>
-            </td>
+                        <tr>
+              <td>03</td>
+                <td>
+                    <a href="3. TKB (22.9-5.10).html">TKB 22/9-05/10</a>
+                </td>
+            </tr>
+                        <tr>
+              <td>04</td>
+                <td>
+                    <a href="4. TKB (6.10-12.10).html">TKB 06/10-12/10</a>
+                </td>
+            </tr>
+                        <tr>
+              <td>05</td>
+                <td>
+                    <a href="5. TKB (13.10-19.10).html">TKB 13/10-19/10</a>
+                </td>
+            </tr>
+                        <tr>
+              <td>06</td>
+                <td>
+                    <a href="6. TKB (20.10-26.10).html">TKB 20/10-26/10</a>
+                </td>
+            </tr>
+                        <tr>
+              <td>07</td>
+                <td>
+                    <a href="7. TKB (27.10-02.11).html">TKB 27/10-02/11</a>
+                </td>
+            </tr>
+                        <tr>
+              <td>08</td>
+                <td>
+                    <a href="8. TKB (03.11-16.11).html">TKB 03/11-16/11</a>
+                </td>
+            </tr>
+                        <tr>
+              <td>09</td>
+                <td>
+                    <a href="9. TKB (17.11-23.11).html">TKB 17/11-23/11</a>
+                </td>
+            </tr>
+              <td>10</td>
+                <td>
+                    <a href="10. TKB (24.11-21.12).html">TKB 24/11-21/12</a>
+                </td>
+            </tr>
 
-<td class="p-2 sm:p-3"></td>
-            <td class="p-2 sm:p-3 bg-sky-100">
-              <span class="text-red-600 font-bold">7:00 - 10:30</span><br>
-              <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank"
-                 class="text-blue-600 font-semibold hover:text-blue-800">Cơ sở: An Dương Vương</a><br>
-              Sinh hoạt với cố vấn lãnh đạo, học tập<br>
-            </td>
-          </tr>
         </tbody>
+    </table>
 
-        <tbody class="text-center text-xs sm:text-sm md:text-base border-t-4 border-blue-600">
-          <!-- Buổi chiều -->
-          <tr class="bg-gray-50">
-            <td rowspan="6" class="p-2 sm:p-3 font-semibold">Chiều</td>
-<td class="p-2 sm:p-3"></td>
-<td class="p-2 sm:p-3"></td>
-<td class="p-2 sm:p-3"></td>
-            <td class="p-2 sm:p-3 bg-sky-100">
-              <span class="text-red-600 font-bold">13:30 - 17:00</span><br>
-              <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank"
-                 class="text-blue-600 font-semibold hover:text-blue-800">Cơ sở: An Dương Vương</a><br>
-              Sinh hoạt công dân<br>
-            </td>
-
-        </tbody>
-
-        <tbody class="text-center text-xs sm:text-sm md:text-base border-t-4 border-blue-600">
-          <!-- Buổi tối -->
-          <tr class="bg-gray-50">
-            <td rowspan="6" class="p-2 sm:p-3 font-semibold">Tối</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
 </body>
 </html>
