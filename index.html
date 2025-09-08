@@ -1,298 +1,159 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nhóm 2 - Lớp 12 Toán 2</title>
-    <link href="https://cellphones.com.vn/sforum/wp-content/uploads/2023/06/tai-hinh-nen-dep-nhat-the-gioi-57.jpg" rel="stylesheet">
-    <style>
-        body {
-            background: url('https://hcmue.edu.vn/images/TruongDHSP.jpg') no-repeat center center fixed;
-            background-size: cover;
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 0;
-            color: white;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TUD K51</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin:0;
+    font-family:'Inter',roboto;
+    background: url('https://khoinguonsangtao.vn/wp-content/uploads/2022/09/hinh-nen-galaxy-1.jpg') no-repeat center center fixed;
+    background-size: cover;
+    color: #222;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    min-height:100vh;
+  }
 
-        h1 {
-            text-align: center;
-            margin-top: 30px;
-            font-size: 3rem;
-            color: white;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-            padding: 20px 0;
-        }
+  h1 {
+    margin-top:40px;
+    font-size:2.5rem;
+    font-weight:800;
+    color:white;
+    text-shadow:2px 2px 10px rgba(0,0,0,0.4);
+    text-align:center;
+    letter-spacing:1px;
+  }
 
-        .members {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 30px auto;
-        }
+  .table-title {
+    margin:20px auto 10px;
+    font-size:1.8rem;
+    font-weight:700;
+    padding:12px 25px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(12px);
+    border-radius:15px;
+    border: 2px solid rgba(255,255,255,0.3);
+    color: #fff;
+    box-shadow:0 6px 20px rgba(0,0,0,0.3);
+    text-align:center;
+    letter-spacing:0.5px;
+  }
 
-        .member-card {
-            background-color: rgba(255, 255, 255, 0.9);
-            color: #333;
-            border: 2px solid red;
-            border-radius: 10px;
-            margin: 10px;
-            padding: 20px;
-            width: 200px;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s ease, border-color 0.3s ease;
-        }
+  table {
+    width:60%;
+    max-width:500px;
+    border-collapse: separate;
+    border-spacing:0;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 12px 30px rgba(0,0,0,0.3);
+    margin-bottom:40px;
+  }
 
-        .member-card img {
-            width: 100%;
-            border-radius: 10px;
-        }
+  th, td {
+    padding:18px 12px;
+    text-align:center;
+    font-weight:600;
+    font-size:1.2rem; /* Chữ to hơn */
+    transition: all 0.3s ease;
+  }
 
-        .member-card a {
-            color: #007bff;
-            text-decoration: none;
-            font-weight: bold;
-        }
+  th {
+    background: rgba(0, 150, 255, 0.7);
+    color:white;
+    font-weight:700;
+    letter-spacing:1px;
+  }
 
-        .member-card a:hover {
-            text-decoration: underline;
-        }
+  tbody tr:nth-child(n+1) {
+    background: rgba(255,255,255,0.85);
+    color:#222;
+    font-weight:500;
+    font-size:1.15rem; /* Chữ to hơn */
+  }
 
-        /* Hiệu ứng hover */
-        .member-card:hover {
-            transform: scale(1.1); /* Tăng kích thước */
-            border-color: yellow; /* Đổi màu viền */
-            animation: border-flash 0.6s infinite; /* Hiệu ứng nhấp nháy */
-        }
+  tr {
+    transition: all 0.4s ease;
+    cursor: pointer;
+  }
 
-        /* Keyframes cho nhấp nháy viền */
-        @keyframes border-flash {
-            0% { border-color: yellow; }
-            50% { border-color: red; }
-            100% { border-color: yellow; }
-        }
+  tr:hover {
+    transform: translateY(-3px) scale(1.01);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    background: rgba(255,255,255,0.95);
+  }
 
-        table {
-            width: 50%;
-            border-collapse: collapse;
-            margin: 40px auto;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            background-color: rgba(255, 255, 255, 0.9);
-        }
+  a {
+    color:#0072ff;
+    font-weight:600;
+    text-decoration:none;
+    transition: all 0.3s ease;
+    font-family:'Inter', sans-serif;
+  }
 
-        th, td {
-            padding: 20px;
-            text-align: left;
-            border-bottom: 2px solid #ddd;
-            font-size: 1.2rem;
-            color: #333;
-        }
+  a:hover {
+    color:#0056b3;
+    text-shadow:0 0 6px #0072ff;
+    transform: scale(1.05);
+  }
 
-        th {
-            background-color: #4CAF50;
-            color: white;
-            font-weight: bold;
-        }
+  .footer {
+    margin-bottom:30px;
+    font-size:1rem;
+    color:white;
+    opacity:0.9;
+    font-weight:400;
+    letter-spacing:0.5px;
+  }
 
-        tr:hover td {
-            background-color: #e1f5fe;
-        }
+  /* Responsive */
+  @media (max-width:768px) {
+    h1 { font-size:2rem; margin-top:30px; }
+    .table-title { font-size:1.5rem; padding:10px 20px; }
+    table { width:80%; max-width:400px; }
+    th, td { padding:15px 10px; font-size:1.05rem; }
+    tbody tr:nth-child(n+1) { font-size:1rem; }
+  }
 
-        .footer {
-            text-align: center;
-            margin-top: 50px;
-            font-size: 1.5rem;
-            padding: 20px;
-            color: white;
-            font-weight: bold;
-            border-top: 3px solid #4CAF50;
-        }
-.web-access {
-    text-align: center;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: rgba(255, 255, 255, 0.8);
-    border: 2px solid #4CAF50;
-    border-radius: 10px;
-    width: fit-content;
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Thêm hiệu ứng phóng to và bóng mượt */
-}
-
-.web-access:hover {
-    transform: scale(1.1); /* Phóng to 10% */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); /* Thêm bóng đổ */
-}
-
-.web-access a {
-    text-decoration: none;
-    font-size: 1.5rem;
-    color: #4CAF50;
-    font-weight: bold;
-    transition: color 0.3s ease; /* Hiệu ứng mượt khi thay đổi màu */
-}
-
-.web-access a:hover {
-    color: #2c7a39; /* Đổi màu chữ khi di chuột */
-}
-/* Tạo hiệu ứng cho các liên kết trong bảng */
-table a {
-    text-decoration: none;
-    color: #007bff; /* Màu mặc định */
-    font-size: 1.1rem;
-    font-weight: bold;
-    transition: transform 0.3s ease, color 0.3s ease; /* Hiệu ứng mượt */
-}
-
-table a:hover {
-    transform: scale(1.1); /* Phóng to 10% */
-    color: #0056b3; /* Đổi màu khi di chuột */
-    text-decoration: underline; /* Gạch chân khi di chuột */
-}
-/* Mũi tên và dòng chữ */
-.arrow-text {
-    position: fixed; /* Cố định vị trí */
-    top: 50%; /* Canh giữa theo chiều dọc */
-    left: 10px; /* Canh lề trái */
-    transform: translateY(-50%); /* Dịch chuyển chính giữa theo trục Y */
-    font-size: 1.2rem;
-    color: #ffffff;
-    font-weight: bold;
-    background: rgba(0, 0, 0, 0.7); /* Nền màu đen mờ */
-    padding: 10px 20px;
-    border-radius: 20px; /* Bo tròn góc */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Bóng mờ */
-    display: flex;
-    align-items: center;
-    gap: 10px; /* Khoảng cách giữa mũi tên và chữ */
-}
-
-/* Mũi tên */
-.arrow-text::before {
-    content: "➔"; /* Biểu tượng mũi tên */
-    font-size: 1.5rem;
-    color: #4CAF50; /* Màu mũi tên */
-    animation: bounce 1.5s infinite; /* Hiệu ứng nhấp nháy */
-}
-
-/* Hiệu ứng nhấp nháy */
-@keyframes bounce {
-    0%, 100% {
-        transform: translateX(0);
-    }
-    50% {
-        transform: translateX(5px); /* Dịch mũi tên qua phải */
-    }
-}
- /* Định dạng tiêu đề */
-    .table-title {
-        text-align: center;
-        font-size: 1.8rem;
-        font-weight: bold;
-        color: white;
-        background-color: blue;
-        padding: 10px 20px;
-        margin: 30px auto 10px;
-        width: fit-content;
-        border-radius: 10px;
-        position: relative;
-        overflow: hidden;
-        border: 3px solid transparent;
-        animation: border-animation 2s infinite;
-    }
-
-    /* Hiệu ứng viền chạy */
-    @keyframes border-animation {
-        0% { border-color: red; }
-        25% { border-color: yellow; }
-        50% { border-color: blue; }
-        75% { border-color: green; }
-        100% { border-color: red; }
-    }
-    </style>
-
-
+  @media (max-width:480px) {
+    h1 { font-size:1.5rem; }
+    .table-title { font-size:1.2rem; padding:8px 15px; }
+    table { width:90%; max-width:350px; }
+    th, td { padding:12px 8px; font-size:0.95rem; }
+    tbody tr:nth-child(n+1) { font-size:0.9rem; }
+  }
+</style>
 </head>
 <body>
-    <h1>Trường Đại học Sư phạm Thành phố Hồ Chí Minh - TUD K51</h1>
-    
+<h1>Trường Đại học Sư phạm TP.HCM - TUD K51</h1>
 <div class="table-title">Thời khóa biểu Học kì 1 - Năm 1</div>
-    <table>
-        <thead>
-            <tr>
-                <th>STT</th>
-                <th>Liên Kết</th>
-            </tr>
-        </thead>
-            <tr>
-              <td>01</td>
-                <td>
-                    <a href="HK1/01. TKB (8.9-14.9).html">TKB 8/9-14/9</a>
-                </td>
-            </tr>
-            
-                        <tr>
-              <td>02</td>
-                <td>
-                    <a href="HK1/02. TKB (15.9-21.9).html">TKB 15/9-21/9</a>
-                </td>
-            </tr>
-
-                        <tr>
-              <td>03</td>
-                <td>
-                    <a href="HK1/03. TKB (22.9-5.10).html">TKB 22/9-05/10</a>
-                </td>
-            </tr>
-                        <tr>
-              <td>04</td>
-                <td>
-                    <a href="HK1/04. TKB (6.10-12.10).html">TKB 06/10-12/10</a>
-                </td>
-            </tr>
-                        <tr>
-              <td>05</td>
-                <td>
-                    <a href="HK1/05. TKB (13.10-19.10).html">TKB 13/10-19/10</a>
-                </td>
-            </tr>
-                        <tr>
-              <td>06</td>
-                <td>
-                    <a href="HK1/06. TKB (20.10-26.10).html">TKB 20/10-26/10</a>
-                </td>
-            </tr>
-                        <tr>
-              <td>07</td>
-                <td>
-                    <a href="HK1/07. TKB (27.10-02.11).html">TKB 27/10-02/11</a>
-                </td>
-            </tr>
-                        <tr>
-              <td>08</td>
-                <td>
-                    <a href="HK1/08. TKB (03.11-16.11).html">TKB 03/11-16/11</a>
-                </td>
-            </tr>
-                        <tr>
-              <td>09</td>
-                <td>
-                    <a href="HK1/09. TKB (17.11-23.11).html">TKB 17/11-23/11</a>
-                </td>
-            </tr>
-              <td>10</td>
-                <td>
-                    <a href="HK1/10. TKB (24.11-21.12).html">TKB 24/11-21/12</a>
-                </td>
-            </tr>
-              <td>11</td>
-                <td>
-                    <a href="HK1/LichthiHK1.html">Lịch thi HK1</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
+<table>
+<thead>
+<tr>
+<th>STT</th>
+<th>Liên Kết</th>
+</tr>
+</thead>
+<tbody>
+<tr><td>01</td><td><a href="HK1/01. TKB (8.9-14.9).html">TKB 8/9-14/9</a></td></tr>
+<tr><td>02</td><td><a href="HK1/02. TKB (15.9-21.9).html">TKB 15/9-21/9</a></td></tr>
+<tr><td>03</td><td><a href="HK1/03. TKB (22.9-5.10).html">TKB 22/9-05/10</a></td></tr>
+<tr><td>04</td><td><a href="HK1/04. TKB (6.10-12.10).html">TKB 06/10-12/10</a></td></tr>
+<tr><td>05</td><td><a href="HK1/05. TKB (13.10-19.10).html">TKB 13/10-19/10</a></td></tr>
+<tr><td>06</td><td><a href="HK1/06. TKB (20.10-26.10).html">TKB 20/10-26/10</a></td></tr>
+<tr><td>07</td><td><a href="HK1/07. TKB (27.10-02.11).html">TKB 27/10-02/11</a></td></tr>
+<tr><td>08</td><td><a href="HK1/08. TKB (03.11-16.11).html">TKB 03/11-16/11</a></td></tr>
+<tr><td>09</td><td><a href="HK1/09. TKB (17.11-23.11).html">TKB 17/11-23/11</a></td></tr>
+<tr><td>10</td><td><a href="HK1/10. TKB (24.11-21.12).html">TKB 24/11-21/12</a></td></tr>
+<tr><td>11</td><td><a href="HK1/LichthiHK1.html">Lịch thi HK1</a></td></tr>
+</tbody>
+</table>
+<div class="footer">&copy; 2025-2026 TUD K51</div>
 </body>
 </html>
