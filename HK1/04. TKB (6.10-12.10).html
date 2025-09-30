@@ -8,242 +8,264 @@
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 
-  <style>
-    :root {
-      --accent:#1f7ed1;
-      --muted:#6b7280;
-      --bg:#f6f8fb;
-      --text:#0f172a;
-      --radius:14px;
-    }
-    * {box-sizing:border-box; margin:0; padding:0;}
-    body {
-      font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial;
-      background:var(--bg);
-      color:var(--text);
-      line-height:1.6;
-    }
+<style>
 
-    .wrap {
-      max-width:1200px;
-      margin:0 auto;
-      padding:24px;
-    }
-
-    header {
-      text-align:center;
-      margin-bottom:20px;
-    }
-    header h1 {
-      margin-bottom:6px;
-      font-size:26px;
-      font-weight:800;
-      color:#c62828;
-      letter-spacing:0.5px;
-    }
-    header p {
-      font-size:15px;
-      color:var(--accent);
-      font-weight:600;
-    }
-
-    /* bảng */
-    .table-container {
-      overflow-x:auto;
-      border-radius:var(--radius);
-      box-shadow:0 10px 30px rgba(0,0,0,0.08);
-      background:white;
-    }
-    .sched {
-      width:100%;
-      border-collapse:collapse;
-      min-width:900px;
-    }
-    .sched thead th {
-      position:sticky;
-      top:0;
-      background:linear-gradient(180deg,rgba(31,126,209,0.12),rgba(31,126,209,0.04));
-      color:#06315d;
-      font-weight:700;
-      padding:12px 6px;
-      font-size:14px;
-      text-align:center;
-      border-bottom:2px solid rgba(0,0,0,0.08);
-      z-index:2;
-    }
-    .sched th,.sched td {
-      border:1px solid rgba(0,0,0,0.08);
-      padding:8px;
-      text-align:center;
-      font-size:13px;
-      transition:background 0.25s;
-    }
-    .sched tbody tr:nth-child(even) {
-      background:#fafafa;
-    }
-   .sched th.day,
-.sched td.day {
-  width: calc((100% - 220px) / 7); /* 220px là tổng 3 cột Buổi + Tiết + Thời gian */
-  min-width: 120px; /* đảm bảo không bị quá nhỏ khi thu màn hình */
-}
-      background:#e8f4ff;
-    }
-
-    /* cột đặc biệt */
-    .col-buoi {width:65px; font-weight:700; background:#f9fafb;}
-    .col-tiet {width:50px; background:#f9fafb;}
-.col-time {width:105px; background:#f9fafb; color:var(--muted); font-weight:600;}
-
-    /* block */
-    .block {
-      border-radius:10px;
-      padding:10px;
-      font-size:13px;
-      line-height:1.5;
-      background:#e0f2fe;
-      box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05);
-    }
-    .block .time {color:#dc2626; font-weight:700;}
-    .block .room {color:#4b5563; font-style:italic;}
-    .block a {
-      color:#2563eb;
-      font-weight:600;
-      text-decoration:none;
-    }
-    .block a:hover {
-      text-decoration:underline;
-    }
-
-    /* note */
-    .note-box {
-      margin-top:24px;
-      background:#fff;
-      border-radius:var(--radius);
-      padding:20px;
-      box-shadow:0 8px 24px rgba(0,0,0,0.05);
-    }
-    .note-box h2 {
-      font-size:18px;
-      font-weight:700;
-      margin-bottom:12px;
-      color:#374151;
-      border-left:4px solid var(--accent);
-      padding-left:10px;
-    }
-    .note-box ul {
-      list-style:none;
-    }
-    .note-box li {
-      font-size:14px;
-      margin-bottom:12px;
-      display:flex;
-      align-items:center;
-    }
-    .note-box li span.square {
-      width:16px; height:16px;
-      margin-right:10px;
-      border-radius:4px;
-      flex-shrink:0;
-      box-shadow:0 1px 2px rgba(0,0,0,0.1) inset;
-    }
-    .note-box a {
-      color:#1f2937;
-      text-decoration:none;
-      font-weight:500;
-    }
-    .note-box a:hover {
-      color:#1d4ed8;
-      text-decoration:underline;
-    }
-
-    /* responsive nhỏ */
-    @media (max-width:768px) {
-      header h1 {font-size:20px;}
-      header p {font-size:13px;}
-      .sched th,.sched td {font-size:12px; padding:6px;}
-    }
-/* khung ngoài */
-.online-box {
-  margin-top: 32px;
-  padding: 24px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, #fff7ed, #fee2e2);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-  border: 2px solid #fecaca;
+:root {
+  --accent:#1f7ed1;
+  --muted:#6b7280;
+  --bg:#f6f8fb;
+  --text:#0f172a;
+  --radius:14px;
 }
 
-/* tiêu đề */
-.online-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #b91c1c;
-  text-align: center;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial;
+ 
+  color:var(--text);
+  line-height:1.6;
+}
+.wrap{max-width:1200px;margin:0 auto;padding:24px;}
+
+header{text-align:center;margin-bottom:20px;}
+header h1{
+  margin-bottom:6px;
+  font-size:26px;
+  font-weight:800;
+  color:#c62828;
+  letter-spacing:0.5px;
+}
+header p{font-size:15px;color:var(--accent);font-weight:600;}
+
+/* BẢNG */
+.table-container{
+  overflow-x:auto;
+  border-radius:var(--radius);
+  background:white;
+  box-shadow:0 8px 28px rgba(0,0,0,0.06);
+}
+.sched{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  min-width:900px;
+}
+.sched thead th{
+  position:sticky;
+  top:0;
+  background:linear-gradient(180deg,#e8f4ff,#f9fbfd);
+  color:#06315d;
+  font-weight:700;
+  padding:14px 6px;
+  font-size:14px;
+  text-align:center;
+  border-bottom:2px solid #dbeafe;
+  z-index:2;
+}
+.sched th,.sched td{
+  border:1px solid #e5e7eb;
+  padding:12px 8px;
+  text-align:center;
+  font-size:13.5px;
+  transition:background 0.25s,box-shadow 0.25s;
+}
+.sched tbody tr:nth-child(even){background:#fafafa;}
+.sched tbody tr:hover td{background:#f0f9ff;}
+.sched th.day,.sched td.day{
+  min-width:120px;
 }
 
-/* grid 2 cột */
-.online-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+/* Cột đặc biệt */
+.col-buoi{width:70px;font-weight:700;background:#f3f4f6;}
+.col-tiet{width:60px;background:#f3f4f6;}
+.col-time{width:110px;background:#f3f4f6;color:var(--muted);font-weight:600;}
+
+/* BLOCK môn học */
+.block{
+  border-radius:12px;
+  padding:10px;
+  font-size:13px;
+  line-height:1.55;
+  background:#e0f2fe;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05);
+}
+.block .time{color:#dc2626;font-weight:700;}
+.block .room{color:#4b5563;font-style:italic;}
+.block a{
+  color:#2563eb;
+  font-weight:600;
+  text-decoration:none;
+}
+.block a:hover{text-decoration:underline;}
+
+/* NOTE */
+.note-box{
+  margin-top:24px;
+  background:#fff;
+  border-radius:var(--radius);
+  padding:20px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.05);
+}
+.note-box h2{
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:12px;
+  color:#374151;
+  border-left:4px solid var(--accent);
+  padding-left:10px;
+}
+.note-box ul{list-style:none;}
+.note-box li{
+  font-size:14px;
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+}
+.note-box li span.square{
+  width:16px;height:16px;
+  margin-right:10px;
+  border-radius:4px;
+  flex-shrink:0;
+  box-shadow:0 1px 2px rgba(0,0,0,0.1) inset;
+}
+.note-box a{
+  color:#1f2937;
+  text-decoration:none;
+  font-weight:500;
+}
+.note-box a:hover{color:#1d4ed8;text-decoration:underline;}
+
+/* ONLINE */
+.online-box{
+  position: relative;
+  margin-top:32px;
+  padding:24px;
+  border-radius:20px;
+  /* Tím pastel nhẹ */
+  background:linear-gradient(
+      135deg,
+      #f8f5ff,
+      #ede9fe,
+      #f3e8ff,
+      #e9d5ff,
+      #f8f5ff
+  );
+  background-size:400% 400%;
+  animation: sparkleSoft 20s ease infinite; /* ✨ chuyển màu rất chậm */
+  box-shadow:0 0 12px rgba(216,180,254,0.25), 0 0 20px rgba(192,132,252,0.15);
+  border:2px solid #e9d5ff; /* viền tím pastel rất nhạt */
 }
 
-/* thẻ card */
-.online-card {
-  background: white;
-  border-radius: 16px;
-  padding: 20px;
-  text-align: center;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-.online-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+/* Chuyển động gradient nhẹ nhàng */
+@keyframes sparkleSoft {
+  0%   {background-position:0% 50%;}
+  50%  {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
 }
 
-.online-card h3 {
-  font-size: 16px;
-  font-weight: 700;
-  color: #111827;
-  margin: 10px 0 6px;
-}
-.online-card .desc {
-  font-size: 14px;
-  color: #374151;
-  margin-bottom: 10px;
-}
-
-/* tag hệ thống */
-.tag {
-  display: inline-block;
-  padding: 4px 12px;
-  background: #dbeafe;
-  color: #1e40af;
-  font-weight: 600;
-  border-radius: 999px;
-  font-size: 13px;
+/* Các đốm sáng mờ, nhẹ */
+.online-box::after{
+  content:"";
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  border-radius:20px;
+  background-image:
+     radial-gradient(circle at 20% 30%, rgba(255,255,255,0.12) 1px, transparent 1px),
+     radial-gradient(circle at 80% 60%, rgba(255,255,255,0.1) 1px, transparent 1px),
+     radial-gradient(circle at 40% 80%, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 180px 180px;
+  pointer-events:none;
 }
 
-/* icon vòng tròn */
-.icon-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  margin: 0 auto 10px;
+.online-title{
+  font-size:22px;
+  font-weight:800;
+  color:#b91c1c;
+  text-align:center;
+  margin-bottom:20px;
+  text-transform:uppercase;
+  letter-spacing:1px;
 }
-.icon-circle.fire { background: #fee2e2; color: #b91c1c; }
-.icon-circle.alert { background: #fef9c3; color: #92400e; }
+.online-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+.online-card{
+  background:white;
+  border-radius:16px;
+  padding:20px;
+  text-align:center;
+  box-shadow:0 3px 8px rgba(0,0,0,0.05);
+  transition:transform 0.25s ease,box-shadow 0.25s ease;
+}
+.online-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 6px 14px rgba(0,0,0,0.08);
+}
+.online-card h3{
+  font-size:16px;
+  font-weight:700;
+  color:#111827;
+  margin:10px 0 6px;
+}
+.online-card .desc{
+  font-size:14px;
+  color:#374151;
+  margin-bottom:10px;
+}
+.tag{
+  display:inline-block;
+  padding:4px 12px;
+  background:#dbeafe;
+  color:#1e40af;
+  font-weight:600;
+  border-radius:999px;
+  font-size:13px;
+}
 
-  </style>
+.icon-circle{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  margin:0 auto 10px;
+}
+.icon-circle.fire{background:#fee2e2;color:#b91c1c;}
+.icon-circle.alert{background:#fef9c3;color:#92400e;}
+
+/* Responsive nhỏ */
+@media (max-width:768px){
+  header h1{font-size:20px;}
+  header p{font-size:13px;}
+  .sched th,.sched td{font-size:12px;padding:6px;}
+}
+/* Giữ ô có nội dung nền cũ, nhưng ô trống luôn trắng */
+.sched td.day:empty {
+  background: #ffffff !important;
+}
+.banner {
+  text-align: center;      /* canh giữa banner */
+  margin-top: 40px;        /* khoảng cách trên nếu cần */
+  margin-bottom: 20px;     /* cách dòng tiêu đề */
+}
+
+.banner img {
+  max-width: 100%;         /* co giãn theo chiều rộng trang */
+  height: auto;            /* giữ đúng tỉ lệ ảnh */
+}
+
+</style>
+
 </head>
 <body>
+<div class="banner">
+  <img src="anhnen.png" alt="Banner HCMUE">
+</div>
   <div class="wrap">
     <header>
       <h1>THỜI KHÓA BIỂU HỌC KÌ I - Năm 1 (2025 - 2026)</h1>
@@ -255,8 +277,7 @@
         <thead>
           <tr>
             <th class="col-buoi">Buổi</th>
-            <th class="col-tiet">Tiết</th>
-            <th class="col-time">Thời gian</th>
+            <th class="col-tiet">Ca</th>
             <th class="day">Thứ 2</th>
             <th class="day">Thứ 3</th>
             <th class="day">Thứ 4</th>
@@ -269,9 +290,8 @@
         <tbody>
   <!-- Sáng -->
 <tr>
-  <td class="col-buoi" rowspan="6">Sáng</td>
+  <td class="col-buoi" rowspan="2">Sáng</td>
   <td class="col-tiet">1</td>
-  <td class="col-time">6:30 - 7:20</td>
   <td class="day"></td>
   <td class="day"></td>
   <td class="day"></td>
@@ -281,45 +301,8 @@
 </tr>
 <tr>
   <td class="col-tiet">2</td>
-  <td class="col-time">7:20 - 8:10</td>
   <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-</tr>
-<tr>
-  <td class="col-tiet">3</td>
-  <td class="col-time">8:10 - 9:00</td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td colspan="1" rowspan="4" 
-    style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">8:10 - 11:40</span><br>
-    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" 
-       style="color:#2563eb; font-weight:600; text-decoration:none;">
-       Cơ sở: An Dương Vương
-    </a><br>
-    <span>Lập trình cơ bản</span><br>
-    <span style="color:#4b5563; font-style:italic;">Phòng: C.201</span>
-  </div>
-</td>
-  <td class="day"></td>
-
-</tr>
-<tr>
-
-
-
-  <td class="col-tiet">4</td>
-  <td class="col-time">9:10 - 10:00</td>
-  <td class="day"></td>
-  <!-- Thứ 3: gộp 3 tiết (4–6) -->
-<td colspan="1" rowspan="3" 
+<td colspan="1" rowspan="1" 
     style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
   <div>
     <span style="color:#dc2626; font-weight:bold;">9:10 - 11:40</span><br>
@@ -332,7 +315,7 @@
   </div>
 </td>
 
-<td colspan="1" rowspan="3" 
+<td colspan="1" rowspan="1" 
     style="background-color:#fef9c3; border-radius:8px; padding:10px; text-align:center;">
   <div>
     <span style="color:#dc2626; font-weight:bold;">9:10 - 11:40</span><br>
@@ -344,7 +327,7 @@
   </div>
 </td>  
 
-<td colspan="1" rowspan="3" 
+<td colspan="1" rowspan="1" 
     style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
   <div>
     <span style="color:#dc2626; font-weight:bold;">9:10 - 11:40</span><br>
@@ -356,32 +339,25 @@
     <span style="color:#4b5563; font-style:italic;">Phòng: B.218</span>
   </div>
 </td>
-  <td class="day"></td>
-</tr>
-
-
-
-<tr>
-  <td class="col-tiet">5</td>
-  <td class="col-time">10:00 - 10:50</td>
-  <td class="day"></td>
-  <td class="day"></td>
-
-</tr>
-<tr>
-  <td class="col-tiet">6</td>
-  <td class="col-time">10:50 - 11:40</td>
-  <td class="day"></td>
-  <!-- Thứ 3 đã gộp ở trên -->
-  <td class="day"></td>
-
+    <td colspan="1" rowspan="1" 
+    style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
+  <div>
+    <span style="color:#dc2626; font-weight:bold;">9:10 - 11:40</span><br>
+    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" 
+       style="color:#2563eb; font-weight:600; text-decoration:none;">
+       Cơ sở: An Dương Vương
+    </a><br>
+    <span>Lập trình cơ bản</span><br>
+    <span style="color:#4b5563; font-style:italic;">Phòng: I.102</span>
+  </div>
+</td>
 
 </tr>
 
         <!-- Chiều -->
-        <tr><td class="col-buoi" rowspan="6">Chiều</td>
-          <td class="col-tiet">7</td><td class="col-time">12:30 - 13:20</td>
-           <td colspan="1" rowspan="4" 
+        <tr><td class="col-buoi" rowspan="2">Chiều</td>
+          <td class="col-tiet">3</td>
+           <td colspan="1" rowspan="1" 
     style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
   <div>
     <span style="color:#dc2626; font-weight:bold;">12:30 - 16:00</span><br>
@@ -393,8 +369,20 @@
     <span style="color:#4b5563; font-style:italic;">Phòng: C.201</span>
   </div>
 </td>
-    <td class="day"></td>
-           <td colspan="1" rowspan="4" 
+    
+           <td colspan="1" rowspan="2" 
+    style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
+  <div>
+    <span style="color:#dc2626; font-weight:bold;">13:30 - 16:30</span><br>
+    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" 
+       style="color:#2563eb; font-weight:600; text-decoration:none;">
+       Cơ sở: An Dương Vương
+    </a><br>
+    <span>Sinh hoạt HDSD Thư viện</span><br>
+    <span style="color:#4b5563; font-style:italic;">Phòng: C.201</span>
+  </div>
+</td>
+           <td colspan="1" rowspan="1" 
     style="background:#fff3e0; border-radius:8px; padding:10px; text-align:center;">
   <div>
     <span style="color:#dc2626; font-weight:bold;">12:30 - 16:00</span><br>
@@ -412,28 +400,10 @@
 
         </tr>
 
-        <tr><td class="col-tiet">8</td><td class="col-time">13:20 - 14:10</td>
- <td colspan="1" rowspan="4" 
-    style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">13:30 - 16:30</span><br>
-    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" 
-       style="color:#2563eb; font-weight:600; text-decoration:none;">
-       Cơ sở: An Dương Vương
-    </a><br>
-    <span>Thư viện</span><br>
-    <span style="color:#4b5563; font-style:italic;">Phòng: 6.8 Lầu 6 Thư viện</span>
-  </div>
-</td>
-            
-          </td><td class="day"></td><td class="day"></td><td class="day"></td>
-        </tr>
-        <tr><td class="col-tiet">9</td><td class="col-time">14:10 - 15:00</td>
-          <td class="day"></td><td class="day"></td><td class="day"></td>
-        </tr>
-        <tr><td class="col-tiet">10</td><td class="col-time">15:10 - 16:00</td>
-   
-           <td colspan="1" rowspan="3" 
+           <tr><td class="col-tiet">4</td>
+          <td class="day"></td>
+<td class="day"></td>
+           <td colspan="1" rowspan="1" 
     style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
   <div>
     <span style="color:#dc2626; font-weight:bold;">15:10 - 17:40</span><br>
@@ -446,7 +416,7 @@
   </div>
 </td>
 <td class="day"></td>
-           <td colspan="1" rowspan="3" 
+           <td colspan="1" rowspan="1" 
     style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
   <div>
     <span style="color:#dc2626; font-weight:bold;">15:10 - 17:40</span><br>
@@ -459,12 +429,6 @@
   </div>
 </td>
 
-        </tr>
-        <tr><td class="col-tiet">11</td><td class="col-time">16:00 - 16:50</td>
-          <td class="day"></td><td class="day"></td><td class="day"></td>
-        </tr>
-        <tr><td class="col-tiet">12</td><td class="col-time">16:50 - 17:40</td>
-          <td class="day"></td><td class="day"></td><td class="day"></td><td class="day"></td>
         </tr>
 
        
@@ -480,7 +444,7 @@
   <div class="online-grid">
     <!-- Sinh hoạt công dân -->
     <div class="online-card">
-      <div class="icon-circle fire">🔥</div>
+      <div class="icon-circle fire">📖</div>
       <h3>15/9 - 05/11</h3>
       <p class="desc">Pháp luật đại cương</p>
       <span class="tag">VLE</span>
@@ -488,8 +452,8 @@
 
     <!-- Sinh hoạt thời sự -->
     <div class="online-card">
-      <div class="icon-circle alert">📣</div>
-      <h3>06/10 - 19/11/2025</h3>
+      <div class="icon-circle alert">📖</div>
+      <h3>Từ 06/10/2025</h3>
       <p class="desc">Tâm lý học đại cương</p>
       <span class="tag">VLE</span>
     </div>
@@ -533,4 +497,3 @@
   </div> <!-- đóng .wrap -->
 </body>
 </html>
-
