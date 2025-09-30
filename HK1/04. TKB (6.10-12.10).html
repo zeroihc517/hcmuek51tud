@@ -258,7 +258,18 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
   max-width: 100%;         /* co giãn theo chiều rộng trang */
   height: auto;            /* giữ đúng tỉ lệ ảnh */
 }
-
+/* Đường kẻ phân cách Sáng - Chiều */
+.sched tr.divider td {
+    background-image: linear-gradient(90deg, #60a5fa, #2563eb, #60a5fa);
+  background-size: 50% 50%;
+  animation: sparkleLine 4s linear infinite;
+}
+/* Animation chạy gradient */
+@keyframes sparkleLine {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 </style>
 
 </head>
@@ -352,6 +363,10 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
   </div>
 </td>
 
+</tr>
+<!-- Đường kẻ ngang phân cách Sáng - Chiều -->
+<tr class="divider">
+  <td colspan="8"></td>
 </tr>
 
         <!-- Chiều -->
