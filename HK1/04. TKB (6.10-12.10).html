@@ -21,7 +21,10 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
   font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial;
- 
+    -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
   color:var(--text);
   line-height:1.6;
 }
@@ -518,8 +521,31 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
     </div>
 
   </div> <!-- đóng .wrap -->
+   <script>
+// Chặn chuột phải
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+// Chặn copy
+document.addEventListener("copy", e => {
+  e.preventDefault();
+  alert("🚫 Không được copy nội dung này!");
+});
+
+// Chặn cut & paste
+document.addEventListener("cut", e => e.preventDefault());
+document.addEventListener("paste", e => e.preventDefault());
+
+// Chặn Ctrl + C
+document.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
+    e.preventDefault();
+    alert("🚫 Copy bị khóa!");
+  }
+});
+</script>
 </body>
 </html>
+
 
 
 
