@@ -237,7 +237,9 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
 }
 .icon-circle.fire{background:#fee2e2;color:#b91c1c;}
 .icon-circle.alert{background:#fef9c3;color:#92400e;}
-
+.icon-circle.success {
+  background-color: #86efac; /* xanh lá */
+}
 /* Responsive nhỏ */
 @media (max-width:768px){
   header h1{font-size:20px;}
@@ -260,7 +262,7 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
 }
 /* Đường kẻ phân cách Sáng - Chiều */
 .sched tr.divider td {
-    background-image: linear-gradient(90deg, #f9a8d4, #ec4899, #f9a8d4);
+    background-image: linear-gradient(90deg, #fdba74, #f97316, #fdba74);
   background-size: 50% 50%;
   animation: sparkleLine 4s linear infinite;
 }
@@ -472,7 +474,13 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
       <p class="desc">Tâm lý học đại cương</p>
       <span class="tag">VLE</span>
     </div>
-     <div class="online-grid">
+       <!-- Sinh hoạt thời sự -->
+    <div class="online-card">
+      <div class="icon-circle success">📖</div>
+      <h3>Từ 20/10/2025</h3>
+      <p class="desc">Triết học Mác-Lênin</p>
+      <span class="tag">VLE</span>
+    </div>
 
 
   </div>
@@ -512,6 +520,7 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
   </div> <!-- đóng .wrap -->
 </body>
 </html>
+
 
 
 
