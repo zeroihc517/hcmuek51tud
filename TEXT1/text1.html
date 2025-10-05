@@ -235,7 +235,7 @@
     const correct = {
       mcq: {1:'C',2:'B',3:'A',4:'A',5:'B',6:'C',7:'D',8:'A',9:'B',10:'C',11:'A',12:'B'},
       tf: {1: [true,false,true,false],2: [true,true,false,false],3: [false,true,true,true],4: [true,false,false,true]},
-      short: {1:17.2,2:180,3:42,4:7,5:100,6:3}
+      short: {1:17.2,2:14894,3:42,4:7,5:100,6:3}
     };
 
     /* STATE */
@@ -401,7 +401,45 @@ for(let i=1;i<=SHORT_COUNT;i++){
       <div class="short-answer" style="margin-top:8px">
         <input type="number" name="p3q${i}" placeholder="Dùng dấu . để biểu diễn số thập phân. VD: 3.25">
       </div>`;
+  } else if (i==2) { 
+q.innerHTML = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${qNum}</div>
+          <div class="qtitle">Cho một hồ cá rộng <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <mrow>
+    <mn>1000</mn>
+    <msup>
+      <mi>m</mi>
+      <mn>2</mn>
+    </msup>
+  </mrow>
+</math> dự định nuôi một loại cá có đặc điểm sinh trường qua nghiên cứu là cứ <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <mrow>
+    <mn>1</mn>
+    <msup><mi>m</mi><mn>2</mn></msup>
+  </mrow>
+</math> rộng thả <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <mrow>
+    <mn>n</mn>
+  </mrow>
+</math>
+ con cá thì sau một vụ khối lượng một con cá thu được là <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <mrow>
+    <mi>P</mi><mo>(</mo><mi>n</mi><mo>)</mo>
+    <mo>=</mo>
+    <mn>1400</mn><mo>-</mo><mn>47</mn><mi>n</mi>
+  </mrow>
+</math>. Để tổng khối lượng cá của hồ thu hoạch được sau một vụ nuôi lớn nhất thì số cá cần thả vào hồ phải bằng bao nhiêu?</div>
+        </div>
+        <div><button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button></div>
+      </div>
+      <div class="short-answer" style="margin-top:8px">
+        <input type="number" name="p3q${i}" placeholder="Dùng dấu . để biểu diễn số thập phân. VD: 3.25">
+      </div>`;
   } else {
+
+
     // các câu trả lời ngắn khác giữ nguyên bố cục cũ
     q.innerHTML = `
       <div class="q-head">
