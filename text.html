@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Thi trực tuyến — Demo (header removed) — Random from Bank</title>
+  <title>Thi trực tuyến — Demo — Topic-based Random</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root{
@@ -168,59 +168,72 @@
     const SHORT_COUNT = 6;
     const TOTAL_Q = MCQ_COUNT + TF_COUNT + SHORT_COUNT;
 
-    /* ===== YOUR QUESTION BANKS (replace with your ~100 items each) =====
-       Format examples below. Replace the sample arrays with your full banks.
+    /* ===== QUESTION BANKS (replace with your full banks) =====
+       Each item SHOULD include a `topic` field if you want topic-based selection.
+       MCQ_BANK items: { id, q, choices: {A,B,C,D}, correct, topic }
+       TF_BANK items: { id, topic, statements: [s1,s2,s3,s4], truths: [bool,...] }
+       SHORT_BANK items: { id, q, answer, tolerance?, topic }
     */
     const MCQ_BANK = [
-     { id:"mcq-001", q:"1+1 = ?", choices:{A:"1", B:"2", C:"3", D:"4"}, correct:"B" },
-  { id:"mcq-002", q:"2+3 = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"HELLO = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+3â = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+s3 = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+3s = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+d3 = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+f3 = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+ư3 = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+d3 = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+3f = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+g3 = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+h3 = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+3e = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+ư3 = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+3g = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+3b = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
- { id:"mcq-002", q:"2+3e = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A" },
-
+      { id:"mcq-001", q:"1+1 = ?", choices:{A:"1", B:"2", C:"3", D:"4"}, correct:"B", topic:"Số học" },
+      { id:"mcq-002", q:"2+3 = ?", choices:{A:"5", B:"4", C:"3", D:"2"}, correct:"A", topic:"Số học" },
+      { id:"mcq-003", q:"Tổng góc tam giác là bao nhiêu?", choices:{A:"90°", B:"180°", C:"270°", D:"360°"}, correct:"B", topic:"Hình học" },
+      { id:"mcq-004", q:"Căn bậc hai của 9 là?", choices:{A:"1", B:"2", C:"3", D:"4"}, correct:"C", topic:"Số học" },
+      { id:"mcq-005", q:"Số nguyên tố nhỏ nhất là?", choices:{A:"0", B:"1", C:"2", D:"3"}, correct:"C", topic:"Số học" },
+      { id:"mcq-006", q:"Đường trung bình của tam giác có tính chất?", choices:{A:"Song song với đáy", B:"Vuông góc với đáy", C:"Trùng đáy", D:"Không có"}, correct:"A", topic:"Hình học" },
+      { id:"mcq-007", q:"Phương trình 2x=6 thì x bằng?", choices:{A:"1", B:"2", C:"3", D:"4"}, correct:"C", topic:"Đại số" },
+      { id:"mcq-008", q:"Nếu x=3, thì 2x+1 = ?", choices:{A:"6", B:"7", C:"8", D:"5"}, correct:"B", topic:"Đại số" },
+      { id:"mcq-009", q:"Chu vi hình vuông cạnh 4 là?", choices:{A:"8", B:"12", C:"16", D:"4"}, correct:"C", topic:"Hình học" },
+      { id:"mcq-010", q:"15 chia 3 = ?", choices:{A:"3", B:"4", C:"5", D:"6"}, correct:"C", topic:"Số học" },
+      { id:"mcq-011", q:"2^3 = ?", choices:{A:"6", B:"8", C:"9", D:"4"}, correct:"B", topic:"Số học" },
+      { id:"mcq-012", q:"Tập hợp rỗng có bao nhiêu phần tử?", choices:{A:"0", B:"1", C:"2", D:"-1"}, correct:"A", topic:"Logic" },
+{ id:"mcq-013", q:"1+0 = ?", choices:{A:"1", B:"2", C:"3", D:"4"}, correct:"B", topic:"Số học" },
+{ id:"mcq-014", q:"1+3 = ?", choices:{A:"1", B:"2", C:"3", D:"4"}, correct:"B", topic:"Số học" },
+{ id:"mcq-015", q:"1+5 = ?", choices:{A:"1", B:"2", C:"3", D:"4"}, correct:"B", topic:"Số học" },
+{ id:"mcq-016", q:"1+7 = ?", choices:{A:"1", B:"2", C:"3", D:"4"}, correct:"B", topic:"Số học" },
+      // ... add up to ~100 items
     ];
 
     const TF_BANK = [
-     { id:"tf-001", topic:"Số nguyên", statements:["1 là lẻ","2 là chẵn","0 là số âm?","-1<0"], truths:[true,true,false,true] },
-      { topic: "TF sample 2", statements: ["S2.1", "S2.2", "S2.3", "S2.4"] },
-      { topic: "TF sample 3", statements: ["S3.1", "S3.2", "S3.3", "S3.4"] },
-      { topic: "TF sample 4", statements: ["S4.1", "S4.2", "S4.3", "S4.4"] },
-      { topic: "TF sample 5", statements: ["S5.1", "S5.2", "S5.3", "S5.4"] }
-      /* ... up to ~100 entries ... */
+      { id:"tf-001", topic:"Số nguyên", statements:["1 là lẻ","2 là chẵn","0 là số âm","-1 < 0"], truths:[true,true,false,true] },
+      { id:"tf-002", topic:"Hình học", statements:["Tam giác có 3 cạnh","Hình vuông có 4 cạnh","Hình tròn có góc","Đường thẳng không có điểm đầu"], truths:[true,true,false,true] },
+      { id:"tf-003", topic:"Đại số", statements:["x+x=2x đúng","0 chia cho 0 là hợp lệ","(a+b)^2=a^2+2ab+b^2","1/2=0.5"], truths:[true,false,true,true] },
+      { id:"tf-004", topic:"Logic", statements:["Mệnh đề luôn đúng nếu sai","p và q đúng thì p hợp lệ","Nếu A thì B là mệnh đề","Phủ định của đúng là sai"], truths:[false,true,true,true] },
+      // ... add more
     ];
 
     const SHORT_BANK = [
-    { id:"short-001", q:"Tổng 5 + 7 = ?", answer:12 },
-      { q: "Short sample 2: Tính ...", answer: 180 },
-      { q: "Short sample 3: Tính ...", answer: 42 },
-      { q: "Short sample 4: Tính ...", answer: 7 },
-      { q: "Short sample 5: Tính ...", answer: 100 }
-      /* ... up to ~100 entries ... */
+      { id:"short-001", q:"Tổng 5 + 7 = ?", answer:12, topic:"Số học" },
+      { id:"short-002", q:"Tích 6 × 7 = ?", answer:42, topic:"Số học" },
+      { id:"short-003", q:"Chu vi hình chữ nhật 3×4 = ?", answer:14, topic:"Hình học" },
+      { id:"short-004", q:"Số nguyên tố sau 2 là ?", answer:3, topic:"Số học" },
+      { id:"short-005", q:"Độ dài cạnh tam giác vuông nếu hai cạnh là 3,4 thì cạnh huyền ?", answer:5, topic:"Hình học" }
+      // ... add more
     ];
     /* ===== END BANKS ===== */
+
+    /* ===== TOPIC PLANS (length must equal corresponding COUNT) =====
+       Put the topic name string for each position, or '__any__' to accept any topic.
+       Example: first two MCQ from "Số học", next two from "Hình học", others any.
+    */
+    const MCQ_TOPIC_PLAN = [
+      "Số học","Số học",
+      "Hình học","Hình học",
+      "__any__","__any__","Đại số","Đại số","Hình học","__any__","__any__","Logic"
+    ]; // length = MCQ_COUNT
+
+    const TF_TOPIC_PLAN = ["Số nguyên","Hình học","Đại số","Logic"]; // length = TF_COUNT
+
+    const SHORT_TOPIC_PLAN = ["Số học","Số học","Hình học","Số học","Hình học","__any__"]; // length = SHORT_COUNT
 
     /* ===== STATE ===== */
     let flagged = {};
     let submitted = false;
-    // selected questions arrays (after drawing from bank)
     let selectedMCQs = [];
     let selectedTFs = [];
     let selectedShorts = [];
 
-    /* LOAD selection if exists (so same exam persists) */
+    /* Storage helpers */
     function loadSelectedFromStorage(){
       const raw = localStorage.getItem('quiz_selected');
       if(!raw) return false;
@@ -235,14 +248,12 @@
       }catch(e){ console.warn('loadSelectedFromStorage', e); }
       return false;
     }
-
-    /* Save selected sets */
     function saveSelectedToStorage(){
       const payload = { mcq: selectedMCQs, tf: selectedTFs, short: selectedShorts };
       localStorage.setItem('quiz_selected', JSON.stringify(payload));
     }
 
-    /* Utility: Fisher-Yates shuffle */
+    /* Fisher-Yates shuffle */
     function shuffleArray(arr){
       const a = arr.slice();
       for(let i=a.length-1;i>0;i--){
@@ -252,39 +263,89 @@
       return a;
     }
 
-    /* Draw random sample without duplicates */
+    /* ===== drawFromBank: topic-plan aware ===== */
     function drawFromBank(){
-      // Ensure bank sizes are sufficient
-      if(MCQ_BANK.length < MCQ_COUNT || TF_BANK.length < TF_COUNT || SHORT_BANK.length < SHORT_COUNT){
-        console.warn('Warning: your banks have fewer items than required counts.');
+      // Build maps topic -> list (deep-ish clones)
+      const clone = (o)=> JSON.parse(JSON.stringify(o));
+      const mcqMap = {};
+      MCQ_BANK.forEach((it, idx)=>{ const t = it.topic||'__none__'; if(!mcqMap[t]) mcqMap[t]=[]; mcqMap[t].push(Object.assign({}, clone(it), {_bankIndex: idx})); });
+      const tfMap = {};
+      TF_BANK.forEach((it, idx)=>{ const t = it.topic||'__none__'; if(!tfMap[t]) tfMap[t]=[]; tfMap[t].push(Object.assign({}, clone(it), {_bankIndex: idx})); });
+      const shortMap = {};
+      SHORT_BANK.forEach((it, idx)=>{ const t = it.topic||'__none__'; if(!shortMap[t]) shortMap[t]=[]; shortMap[t].push(Object.assign({}, clone(it), {_bankIndex: idx})); });
+
+      function pickRandomAndRemove(arr){ if(!arr||arr.length===0) return null; const i=Math.floor(Math.random()*arr.length); return arr.splice(i,1)[0]; }
+      function pickFromMapByTopic(map, topic){ if(map[topic] && map[topic].length>0) return pickRandomAndRemove(map[topic]); return null; }
+      function collectAllRemaining(map){ const list=[]; Object.keys(map).forEach(k=>{ while(map[k]&&map[k].length) list.push(map[k].shift()); }); return list; }
+
+      // MCQ selection
+      selectedMCQs = [];
+      const mcqPlan = Array.isArray(MCQ_TOPIC_PLAN) && MCQ_TOPIC_PLAN.length===MCQ_COUNT ? MCQ_TOPIC_PLAN : Array(MCQ_COUNT).fill('__any__');
+      // first pass: pick from requested topics
+      for(let pos=0; pos<MCQ_COUNT; pos++){
+        const topic = mcqPlan[pos];
+        let picked = null;
+        if(topic && topic !== '__any__') picked = pickFromMapByTopic(mcqMap, topic);
+        selectedMCQs.push(picked);
+      }
+      // fallback: collect remaining and fill nulls
+      let fallback = shuffleArray(collectAllRemaining(mcqMap));
+      for(let i=0;i<selectedMCQs.length;i++){
+        if(selectedMCQs[i]===null) selectedMCQs[i] = fallback.shift() || null;
+      }
+      // final safety fill from original bank if still null
+      for(let i=0;i<selectedMCQs.length;i++){
+        if(selectedMCQs[i]===null){
+          const filler = MCQ_BANK.slice().filter(x=>!selectedMCQs.find(s=>s && s.id===x.id))[0] || null;
+          selectedMCQs[i] = filler ? Object.assign({}, clone(filler)) : null;
+        }
       }
 
-      const mcqPool = shuffleArray(MCQ_BANK);
-      const tfPool = shuffleArray(TF_BANK);
-      const shortPool = shuffleArray(SHORT_BANK);
+      // TF selection
+      selectedTFs = [];
+      const tfPlan = Array.isArray(TF_TOPIC_PLAN) && TF_TOPIC_PLAN.length===TF_COUNT ? TF_TOPIC_PLAN : Array(TF_COUNT).fill('__any__');
+      for(let pos=0; pos<TF_COUNT; pos++){
+        const topic = tfPlan[pos];
+        let picked = null;
+        if(topic && topic !== '__any__') picked = pickFromMapByTopic(tfMap, topic);
+        selectedTFs.push(picked);
+      }
+      let tfFallback = shuffleArray(collectAllRemaining(tfMap));
+      for(let i=0;i<selectedTFs.length;i++) if(selectedTFs[i]===null) selectedTFs[i] = tfFallback.shift() || null;
+      for(let i=0;i<selectedTFs.length;i++) if(selectedTFs[i]===null){
+        const filler = TF_BANK.slice().filter(x=>!selectedTFs.find(s=>s && s.id===x.id))[0] || null;
+        selectedTFs[i] = filler ? Object.assign({}, clone(filler)) : null;
+      }
 
-      selectedMCQs = mcqPool.slice(0, MCQ_COUNT).map((it, idx) => {
-        // include an id for reference if needed
-        return Object.assign({ _bankIndex: idx }, it);
-      });
-      selectedTFs = tfPool.slice(0, TF_COUNT).map((it, idx) => Object.assign({ _bankIndex: idx }, it));
-      selectedShorts = shortPool.slice(0, SHORT_COUNT).map((it, idx) => Object.assign({ _bankIndex: idx }, it));
+      // SHORT selection
+      selectedShorts = [];
+      const shortPlan = Array.isArray(SHORT_TOPIC_PLAN) && SHORT_TOPIC_PLAN.length===SHORT_COUNT ? SHORT_TOPIC_PLAN : Array(SHORT_COUNT).fill('__any__');
+      for(let pos=0; pos<SHORT_COUNT; pos++){
+        const topic = shortPlan[pos];
+        let picked = null;
+        if(topic && topic !== '__any__') picked = pickFromMapByTopic(shortMap, topic);
+        selectedShorts.push(picked);
+      }
+      let shortFallback = shuffleArray(collectAllRemaining(shortMap));
+      for(let i=0;i<selectedShorts.length;i++) if(selectedShorts[i]===null) selectedShorts[i] = shortFallback.shift() || null;
+      for(let i=0;i<selectedShorts.length;i++) if(selectedShorts[i]===null){
+        const filler = SHORT_BANK.slice().filter(x=>!selectedShorts.find(s=>s && s.id===x.id))[0] || null;
+        selectedShorts[i] = filler ? Object.assign({}, clone(filler)) : null;
+      }
+
+      // Save selection so page reload keeps same exam
       saveSelectedToStorage();
     }
 
-    /* If stored selection exists, load it; else draw new */
     function ensureSelection(){
       const ok = loadSelectedFromStorage();
-      if(!ok){
-        drawFromBank();
-      }
+      if(!ok) drawFromBank();
     }
 
-    /* DOM initial text */
+    /* ===== DOM / render / behaviors ===== */
     document.getElementById('totalQ').textContent = `0/${TOTAL_Q}`;
     document.getElementById('footerTotal').textContent = `0/${TOTAL_Q}`;
 
-    /* RENDER QUESTIONS from selected arrays */
     function renderQuestions(){
       const part1 = document.getElementById('part1'); part1.innerHTML = '<h3>Phần 1. Trắc nghiệm</h3>';
       const part2 = document.getElementById('part2'); part2.innerHTML = '<h3>Phần 2. Đúng/Sai (mỗi câu có 4 ý)</h3>';
@@ -301,15 +362,15 @@
             <div><button type="button" class="flag-btn" onclick="toggleFlag(${qNum}, this)">🚩 Gắn cờ</button></div>
           </div>
           <div class="options">
-            <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. ${escapeHtml(item.choices.A||'')}</label>
-            <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. ${escapeHtml(item.choices.B||'')}</label>
-            <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. ${escapeHtml(item.choices.C||'')}</label>
-            <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. ${escapeHtml(item.choices.D||'')}</label>
+            <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. ${escapeHtml((item.choices||{}).A||'')}</label>
+            <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. ${escapeHtml((item.choices||{}).B||'')}</label>
+            <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. ${escapeHtml((item.choices||{}).C||'')}</label>
+            <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. ${escapeHtml((item.choices||{}).D||'')}</label>
           </div>`;
         part1.appendChild(q);
       }
 
-      // TF (each item has 4 statements)
+      // TF
       for(let i=0;i<TF_COUNT;i++){
         const baseNum = MCQ_COUNT + i + 1;
         const item = selectedTFs[i] || { topic: `TF missing ${i+1}`, statements: ["","","",""] };
@@ -321,14 +382,14 @@
         table += '</tbody></table>';
         q.innerHTML = `
           <div class="q-head">
-            <div class="q-left"><div class="qnum">${baseNum}</div><div class="qtitle">Câu ${baseNum}: ${escapeHtml(item.topic)}</div></div>
+            <div class="q-left"><div class="qnum">${baseNum}</div><div class="qtitle">Câu ${baseNum}: ${escapeHtml(item.topic||'')}</div></div>
             <div><button type="button" class="flag-btn" onclick="toggleFlag(${baseNum}, this)">🚩 Gắn cờ</button></div>
           </div>
           <div style="margin-top:8px">${table}</div>`;
         part2.appendChild(q);
       }
 
-      // Short answers
+      // SHORT
       for(let i=0;i<SHORT_COUNT;i++){
         const qNum = MCQ_COUNT + TF_COUNT + i + 1;
         const item = selectedShorts[i] || { q: `Short missing ${i+1}`, answer: null };
@@ -345,18 +406,15 @@
       enableMcqToggle();
       enableFocusScrolling();
       buildFooterBubbles();
-      // after rendering, try to restore saved answers if any
       loadProgressAnswersIntoUI();
       updateAnsweredCount();
     }
 
-    /* Escape HTML to avoid accidental injection from banks */
     function escapeHtml(str){
-      if(!str) return '';
+      if(!str && str!==0) return '';
       return String(str).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]; });
     }
 
-    /* MCQ uncheck toggle */
     function enableMcqToggle(){
       const radios = document.querySelectorAll("input[type='radio'][name^='p1q']");
       radios.forEach(radio=>{
@@ -371,11 +429,10 @@
       });
     }
 
-    /* focus scroll to avoid footer covering input */
     function enableFocusScrolling(){
       const inputs = document.querySelectorAll('#quizWrapper input, #quizWrapper textarea, #quizWrapper select');
       inputs.forEach(inp=>{
-        inp.addEventListener('focus', (ev)=>{
+        inp.addEventListener('focus', ()=>{
           setTimeout(()=>{
             const footerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--footer-height')) || 120;
             const rect = inp.getBoundingClientRect();
@@ -389,7 +446,6 @@
       });
     }
 
-    /* FLAG */
     function toggleFlag(qNum, btn){
       flagged[qNum] = !flagged[qNum];
       if(btn){ btn.textContent = flagged[qNum] ? '🚩 Bỏ cờ' : '🚩 Gắn cờ'; }
@@ -398,7 +454,6 @@
     }
     window.toggleFlag = toggleFlag;
 
-    /* FOOTER & BUBBLES */
     function buildFooterBubbles(){
       const wrap = document.getElementById('bubblesWrap');
       wrap.innerHTML = '';
@@ -460,16 +515,14 @@
       if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
     }
 
-    /* SAVE / LOAD PROGRESS (answers) */
+    /* SAVE/LOAD progress (answers + selection) */
     function saveProgress(){
       const data = { mcq:{}, tf:{}, short:{}, flagged, remaining };
       for(let i=1;i<=MCQ_COUNT;i++){ data.mcq[i] = (document.querySelector(`input[name='p1q${i}']:checked`)||{}).value || null; }
       for(let i=1;i<=TF_COUNT;i++){ data.tf[i] = []; for(let j=1;j<=TF_ITEMS;j++){ data.tf[i].push((document.querySelector(`input[name='p2q${i}y${j}']:checked`)||{}).value || null); } }
       for(let i=1;i<=SHORT_COUNT;i++){ data.short[i] = (document.querySelector(`input[name='p3q${i}']`)||{}).value || ''; }
-      // also save the selected set so reload keeps same exam
-      const payload = { selectedMCQs, selectedTFs, selectedShorts };
       localStorage.setItem('quiz_saved', JSON.stringify(data));
-      localStorage.setItem('quiz_selected', JSON.stringify({ mcq: selectedMCQs, tf: selectedTFs, short: selectedShorts }));
+      saveSelectedToStorage();
       localStorage.setItem('quiz_remaining', remaining);
     }
 
@@ -483,77 +536,73 @@
         if(data.flagged) flagged = data.flagged;
         if(data.remaining) { remaining = Number(data.remaining); updateTimerDisplay(); }
       }catch(e){ console.warn('Không thể load progress', e); }
-      // update footer/answered markers according to restored answers
       for(let i=1;i<=TOTAL_Q;i++) updateFooterBubble(i);
       updateAnsweredCount();
     }
-
     document.getElementById('saveBtn').addEventListener('click', ()=>{ saveProgress(); alert('Đã lưu tạm (localStorage).'); });
     document.getElementById('clearBtn').addEventListener('click', ()=>{ if(confirm('Xóa dữ liệu local?')){ localStorage.clear(); location.reload(); } });
 
-    /* SCORING logic (unchanged) */
-function computeScore(){
-  let score = 0;
-  const breakdown = {
-    mcq: { total: MCQ_COUNT, correct:0, score:0, max: MCQ_COUNT * 0.25 },
-    tf: { total: TF_COUNT, score:0, details:[], max: TF_COUNT * 1 },
-    short: { total: SHORT_COUNT, correct:0, score:0, max: SHORT_COUNT * 0.5 }
-  };
+    /* SCORING using selected* arrays (bank contains correct/truths/answer) */
+    function computeScore(){
+      let score = 0;
+      const breakdown = {
+        mcq: { total: MCQ_COUNT, correct:0, score:0, max: MCQ_COUNT * 0.25 },
+        tf: { total: TF_COUNT, score:0, details:[], max: TF_COUNT * 1 },
+        short: { total: SHORT_COUNT, correct:0, score:0, max: SHORT_COUNT * 0.5 }
+      };
 
-  // MCQ
-  for(let i=1;i<=MCQ_COUNT;i++){
-    const user = (document.querySelector(`input[name='p1q${i}']:checked`)||{}).value || null;
-    const bankItem = selectedMCQs[i-1];
-    if(user && bankItem && bankItem.correct && user === bankItem.correct){
-      breakdown.mcq.correct++;
-      breakdown.mcq.score += 0.25;
-      score += 0.25;
-    }
-  }
-
-  // TF
-  for(let i=1;i<=TF_COUNT;i++){
-    const bankItem = selectedTFs[i-1];
-    let correctCount = 0;
-    if(bankItem && Array.isArray(bankItem.truths)){
-      for(let j=1;j<=TF_ITEMS;j++){
-        const sel = (document.querySelector(`input[name='p2q${i}y${j}']:checked`)||{}).value;
-        if(sel !== undefined && sel !== null && sel !== ''){
-          if((sel === 'true') === Boolean(bankItem.truths[j-1])) correctCount++;
+      // MCQ
+      for(let i=1;i<=MCQ_COUNT;i++){
+        const user = (document.querySelector(`input[name='p1q${i}']:checked`)||{}).value || null;
+        const bankItem = selectedMCQs[i-1];
+        if(user && bankItem && bankItem.correct && user === bankItem.correct){
+          breakdown.mcq.correct++;
+          breakdown.mcq.score += 0.25;
+          score += 0.25;
         }
       }
-    }
-    let pts = 0;
-    if(correctCount === 4) pts = 1;
-    else if(correctCount === 3) pts = 0.5;
-    else if(correctCount === 2) pts = 0.25;
-    else if(correctCount === 1) pts = 0.1;
-    breakdown.tf.details.push({ q:i, correctCount, pts });
-    breakdown.tf.score += pts;
-    score += pts;
-  }
 
-  // SHORT
-  for(let i=1;i<=SHORT_COUNT;i++){
-    const v = (document.querySelector(`input[name='p3q${i}']`)||{}).value;
-    const bankItem = selectedShorts[i-1];
-    if(bankItem && bankItem.answer !== undefined && v !== '' && !isNaN(Number(v))){
-      const expected = Number(bankItem.answer);
-      const tol = Number(bankItem.tolerance || 0);
-      const numv = Number(v);
-      if(Math.abs(numv - expected) <= tol){
-        breakdown.short.correct++;
-        breakdown.short.score += 0.5;
-        score += 0.5;
+      // TF
+      for(let i=1;i<=TF_COUNT;i++){
+        const bankItem = selectedTFs[i-1];
+        let correctCount = 0;
+        if(bankItem && Array.isArray(bankItem.truths)){
+          for(let j=1;j<=TF_ITEMS;j++){
+            const sel = (document.querySelector(`input[name='p2q${i}y${j}']:checked`)||{}).value;
+            if(sel !== undefined && sel !== null && sel !== ''){
+              if((sel === 'true') === Boolean(bankItem.truths[j-1])) correctCount++;
+            }
+          }
+        }
+        let pts = 0;
+        if(correctCount === 4) pts = 1;
+        else if(correctCount === 3) pts = 0.5;
+        else if(correctCount === 2) pts = 0.25;
+        else if(correctCount === 1) pts = 0.1;
+        breakdown.tf.details.push({ q:i, correctCount, pts });
+        breakdown.tf.score += pts;
+        score += pts;
       }
+
+      // SHORT
+      for(let i=1;i<=SHORT_COUNT;i++){
+        const v = (document.querySelector(`input[name='p3q${i}']`)||{}).value;
+        const bankItem = selectedShorts[i-1];
+        if(bankItem && bankItem.answer !== undefined && v !== '' && !isNaN(Number(v))){
+          const expected = Number(bankItem.answer);
+          const tol = Number(bankItem.tolerance || 0);
+          const numv = Number(v);
+          if(Math.abs(numv - expected) <= tol){
+            breakdown.short.correct++;
+            breakdown.short.score += 0.5;
+            score += 0.5;
+          }
+        }
+      }
+
+      return { score, breakdown };
     }
-  }
 
-  return { score, breakdown };
-}
-
-
-    /* Score banner display (same as before) */
     function showScoreBanner(result){
       const res = (result && result.score !== undefined) ? result : { score: result };
       if(!res.breakdown){
@@ -621,7 +670,7 @@ function computeScore(){
     window.addEventListener('beforeunload', function(e){ if(!submitted){ try{ remaining = 0; localStorage.setItem('quiz_remaining', 0); autoSubmit(); }catch(err){} } });
     document.addEventListener('visibilitychange', ()=>{ if(document.hidden && !submitted){ try{ remaining = 0; localStorage.setItem('quiz_remaining', 0); autoSubmit(); }catch(e){} } });
 
-    /* TIMER (same) */
+    /* TIMER */
     const TIMER_SEC = 90 * 60;
     let remaining;
     const storedRem = localStorage.getItem('quiz_remaining');
@@ -656,7 +705,7 @@ function computeScore(){
       timerHeader.textContent = txt;
     }
 
-    /* FOOTER height handling so last inputs not covered */
+    /* FOOTER height handling */
     function updateFooterHeight(){
       const footer = document.getElementById('siteFooter');
       if(!footer) return;
@@ -666,7 +715,7 @@ function computeScore(){
     window.addEventListener('resize', ()=>{ updateFooterHeight(); });
     window.addEventListener('load', ()=>{ updateFooterHeight(); setTimeout(updateFooterHeight, 300); });
 
-    /* On page load: ensure selection exists, then render questions, then load saved answers */
+    /* INIT */
     (function init(){
       ensureSelection();
       renderQuestions();
@@ -676,26 +725,17 @@ function computeScore(){
       enableMcqToggle();
     })();
 
-    /* Reshuffle button behavior - will create a new random selection and re-render (warning: will overwrite saved selection & saved answers) */
+    /* Reshuffle button (topic-plan aware) */
     document.getElementById('reshuffleBtn').addEventListener('click', ()=>{
       if(confirm('Lấy đề ngẫu nhiên mới sẽ thay thế đề hiện tại và xóa các câu trả lời đang lưu. Tiếp tục?')){
-        // clear saved answers & selection
         localStorage.removeItem('quiz_saved');
         localStorage.removeItem('quiz_selected');
         drawFromBank();
         renderQuestions();
-        saveProgress(); // persist empty answers for new selection
+        saveProgress();
         alert('Đã lấy đề mới.');
       }
     });
-
-    /* Helper: load progress into UI already implemented above (loadProgressAnswersIntoUI) */
-
-    /* Utility: if you want an example correct mapping you can define "correct" similar to previous files.
-       For automatic grading, provide a correct mapping that matches the selected questions' order or store correct answer inside bank objects.
-       e.g. for MCQ_BANK items you could add property "correct: 'A'". If you do, update computeScore to consult selectedMCQs[i].correct
-    */
-
   </script>
 </body>
 </html>
