@@ -6,6 +6,14 @@
   <title>Thi trực tuyến — Demo (fixed)</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
+.question img {
+  display: block;
+  margin: 10px auto; /* căn giữa ngang */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  max-width: 90%; /* tự co nếu ảnh lớn quá */
+}
+
     :root{
       --white:#ffffff;
       --card:#f7fbff;
@@ -98,6 +106,40 @@
       .bubble{ width:30px; height:30px; font-size:13px }
       .tf-table thead th:nth-child(1), .tf-table thead th:nth-child(3), .tf-table thead th:nth-child(4){ width:28px; }
     }
+/* ========== Short answer (phần 3) đẹp hơn ========== */
+.short-answer {
+  margin-top: 12px;
+}
+
+.short-answer input[type="text"],
+.short-answer input[type="number"],
+.short-answer textarea {
+  width: 100%;
+  max-width: 420px;
+  padding: 12px 14px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(2,6,23,0.08);
+  background: #f9fafb;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+  transition: all 0.25s ease;
+}
+
+.short-answer input:focus,
+.short-answer textarea:focus {
+  outline: none;
+  background: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(14,165,183,0.25);
+}
+
+.short-answer small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
   </style>
 </head>
 <body>
@@ -160,10 +202,10 @@
         <div class="quiz-wrapper" id="quizWrapper">
           <form id="quizForm" autocomplete="off">
             <div id="part1" class="section"><h3>Phần 1. Thí sinh chọn 1 trong 4 phương án A, B, C hoặc D</h3></div>
+
             <div id="part2" class="section"><h3>Phần 2. Thí sinh lựa chọn Đúng hoặc Sai trong mỗi ý</h3></div>
             <div id="part3" class="section"><h3>Phần 3. Trả lời ngắn</h3></div>
-          </form>
-        </div>
+
 
         <div id="quizOverlay" class="quiz-overlay hidden" aria-hidden="true"><div class="msg">Bài đã nộp — không thể chỉnh sửa nữa</div></div>
       </section>
@@ -193,7 +235,7 @@
     const correct = {
       mcq: {1:'C',2:'B',3:'A',4:'A',5:'B',6:'C',7:'D',8:'A',9:'B',10:'C',11:'A',12:'B'},
       tf: {1: [true,false,true,false],2: [true,true,false,false],3: [false,true,true,true],4: [true,false,false,true]},
-      short: {1:11,2:180,3:42,4:7,5:100,6:3}
+      short: {1:17.2,2:180,3:42,4:7,5:100,6:3}
     };
 
     /* STATE */
@@ -298,6 +340,7 @@
       const part2 = document.getElementById('part2'); part2.innerHTML = '<h3>Phần 2. Thí sinh lựa chọn Đúng hoặc Sai trong mỗi ý</h3>';
       const part3 = document.getElementById('part3'); part3.innerHTML = '<h3>Phần 3. Trả lời ngắn</h3>';
 
+/Nhap cau hoi/
       for(let i=1;i<=MCQ_COUNT;i++){
         const qNum = i;
         const q = document.createElement('div'); q.className='question'; q.dataset.qnum = qNum;
@@ -332,17 +375,45 @@
         part2.appendChild(q);
       }
 
-      for(let i=1;i<=SHORT_COUNT;i++){
-        const qNum = MCQ_COUNT + TF_COUNT + i;
-        const q = document.createElement('div'); q.className='question'; q.dataset.qnum = qNum;
-        q.innerHTML = `
-          <div class="q-head">
-            <div class="q-left"><div class="qnum">${qNum}</div><div class="qtitle">Câu ${qNum}: Trả lời (nhập số)</div></div>
-            <div><button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button></div>
-          </div>
-          <div style="margin-top:8px"><input type="number" name="p3q${i}" placeholder="Nhập đáp án dạng số"></div>`;
-        part3.appendChild(q);
-      }
+for(let i=1;i<=SHORT_COUNT;i++){
+  const qNum = MCQ_COUNT + TF_COUNT + i;
+  const q = document.createElement('div'); q.className='question'; q.dataset.qnum = qNum;
+
+  if(i === 1){
+    // Câu 17: chèn đề bài thực tế
+    q.innerHTML = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${qNum}</div>
+          <div class="qtitle">Một đơn vị sự kiện âm thanh, ánh sáng đang lắp đặt một đèn pha sân vận động. Trần của sân vận động song song với mặt đất, có treo hai móc thép chắc chắn tại hai điểm A và B. Xét trong hệ trục tọa độ <math><mn>Oxyz</math></mn>, với đơn vị trên mỗi trục tọa độ là 1 mét, trần nhà được mô phỏng bởi mặt phẳng tọa độ <math><mn>Oxy</math></mn>, tọa độ hai điểm A và B lần lượt là <math><mn>(4; 1; -4)</math></mn> và <math><mn>(7; 5; -2)</math></mn>. Kĩ thuật viên dung một sợi dây gắn đèn vào hai chiếc móc A và B sao cho khi đèn ở vị trí cân bằng thì nó cách A một khoảng 5 mét và cách B một khoảng <math>
+  <mrow>
+    <mn>2</mn>
+    <msqrt>
+      <mn>10</mn>
+    </msqrt>
+  </mrow>
+</math>
+ mét. Tọa độ của chiếc đèn pha là <math><mn>T(a; b; c)</mn></math>. Tính <math><mn>a + b − c</math></mn>.</div>
+        </div>
+        <div><button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button></div>
+      </div>
+<img src="TEXT1/C17D1.png" alt="Ảnh câu 17" width="300">
+      <div class="short-answer" style="margin-top:8px">
+        <input type="number" name="p3q${i}" placeholder="Dùng dấu . để biểu diễn số thập phân. VD: 3.25">
+      </div>`;
+  } else {
+    // các câu trả lời ngắn khác giữ nguyên bố cục cũ
+    q.innerHTML = `
+      <div class="q-head">
+        <div class="q-left"><div class="qnum">${qNum}</div><div class="qtitle">Câu ${qNum}: Trả lời (nhập số)</div></div>
+        <div><button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button></div>
+      </div>
+      <div style="margin-top:8px"><input type="number" name="p3q${i}" placeholder="Nhập đáp án dạng số"></div>`;
+  }
+
+  part3.appendChild(q);
+}
+
 
       // attach delegated event listeners for flag buttons (works even after render)
       document.querySelectorAll('.flag-btn').forEach(btn=>{
