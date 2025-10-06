@@ -235,7 +235,7 @@
     const correct = {
       mcq: {1:'C',2:'B',3:'A',4:'A',5:'B',6:'C',7:'D',8:'A',9:'B',10:'C',11:'A',12:'B'},
       tf: {1: [true,false,true,false],2: [true,true,false,false],3: [false,true,true,true],4: [true,false,false,true]},
-      short: {1:17.2,2:14894,3:0.29,4:7,5:100,6:3}
+      short: {1:17.2,2:14894,3:0.29,4:144,5:100,6:3}
     };
 
     /* STATE */
@@ -454,7 +454,7 @@ q.innerHTML = `
   <mrow>
     <mn>Ox, Oy</mn>
   </mrow>
-</math>. Hình vuông <math xmlns="http://www.w3.org/1998/Math/MathML">
+</math> (Hình vẽ). Hình vuông <math xmlns="http://www.w3.org/1998/Math/MathML">
   <mrow>
     <mn>(V)</mn>
   </mrow>
@@ -471,11 +471,27 @@ q.innerHTML = `
         </div>
         <div><button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button></div>
       </div>
-<img src="Cau19De1.png" alt="Ảnh câu 19" width="350">
+<img src="Cau19De1.png" alt="Ảnh câu 19" width="300">
       <div class="short-answer" style="margin-top:8px">
         <input type="number" name="p3q${i}" placeholder="Dùng dấu . để biểu diễn số thập phân. VD: 3.25">
       </div>`;
-  } else {
+  } 
+else if (i==4) { 
+q.innerHTML = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${qNum}</div>
+          <div class="qtitle">Một chú ong đang ở ô màu trắng bên trái như hình vẽ. Có bao nhiêu cách để chú ong di chuyển đến ô màu vàng ở bên phải, biết rằng mỗi bước di chuyển, chú ong chỉ được sang phải và có thể đi sang một trong các ô liền kề bên phải (chéo lên phải hoặc chéo xuống phải)?
+</div>
+        </div>
+        <div><button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button></div>
+      </div>
+<img src="Cau20De1.png" alt="Ảnh câu 20" width="450">
+      <div class="short-answer" style="margin-top:8px">
+        <input type="number" name="p3q${i}" placeholder="Dùng dấu . để biểu diễn số thập phân. VD: 3.25">
+      </div>`;
+}
+else {
 
 
     // các câu trả lời ngắn khác giữ nguyên bố cục cũ
