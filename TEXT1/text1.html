@@ -235,7 +235,7 @@
     const correct = {
       mcq: {1:'C',2:'B',3:'A',4:'A',5:'B',6:'C',7:'D',8:'A',9:'B',10:'C',11:'A',12:'B'},
       tf: {1: [true,false,true,false],2: [true,true,false,false],3: [false,true,true,true],4: [true,false,false,true]},
-      short: {1:17.2,2:14894,3:42,4:7,5:100,6:3}
+      short: {1:17.2,2:14894,3:0.29,4:7,5:100,6:3}
     };
 
     /* STATE */
@@ -434,6 +434,44 @@ q.innerHTML = `
         </div>
         <div><button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button></div>
       </div>
+      <div class="short-answer" style="margin-top:8px">
+        <input type="number" name="p3q${i}" placeholder="Dùng dấu . để biểu diễn số thập phân. VD: 3.25">
+      </div>`;
+  } else if (i==3) { 
+q.innerHTML = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${qNum}</div>
+          <div class="qtitle">Trên mặt phẳng tọa độ <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <mrow>
+    <mn>Oxy</mn>
+  </mrow>
+</math>, cho hình tròn <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <mrow>
+    <mn>(C)</mn>
+  </mrow>
+</math> có bán kính bằng 10 tiếp xúc với hai tia <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <mrow>
+    <mn>Ox, Oy</mn>
+  </mrow>
+</math>. Hình vuông <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <mrow>
+    <mn>(V)</mn>
+  </mrow>
+</math> nội tiếp đường tròn <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <mrow>
+    <mn>(C)</mn>
+  </mrow>
+</math>. Chọn ngẫu nhiên một điểm có tọa độ nguyên thuộc đường tròn <math xmlns="http://www.w3.org/1998/Math/MathML">
+  <mrow>
+    <mn>(C)</mn>
+  </mrow>
+</math>. Tính xác suất để điểm được chọn thuộc hình phẳng được tô màu xanh <em>(Không làm tròn kết quả của các phép tính trung gian, chỉ làm tròn kết quả cuối cùng đến hàng phần trăm)</em>
+</div>
+        </div>
+        <div><button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button></div>
+      </div>
+<img src="Cau19De1.png" alt="Ảnh câu 19" width="500">
       <div class="short-answer" style="margin-top:8px">
         <input type="number" name="p3q${i}" placeholder="Dùng dấu . để biểu diễn số thập phân. VD: 3.25">
       </div>`;
