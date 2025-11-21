@@ -258,7 +258,41 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
   margin-top: 40px;        /* khoảng cách trên nếu cần */
   margin-bottom: 20px;     /* cách dòng tiêu đề */
 }
+.tkb-cell {
+  background: none;
+  padding: 0;
+}
 
+.tkb-box {
+  background: #e0f2fe;
+  border-radius: 14px;
+  padding: 12px;
+  text-align: center;
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.tkb-time {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.tkb-campus {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tkb-room {
+  color: #4b5563;
+  font-style: italic;
+}
+
+/* Divider vàng giữa sáng và chiều */
+.divider td {
+  height: 18px;
+  background: linear-gradient(to right, #facc15, #fde047);
+}
 .banner img {
   max-width: 100%;         /* co giãn theo chiều rộng trang */
   height: auto;            /* giữ đúng tỉ lệ ảnh */
@@ -309,80 +343,87 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
 <tr>
   <td class="col-buoi" rowspan="2">Sáng</td>
   <td class="col-tiet">1</td>
-  <td colspan="1" rowspan="1" 
-    style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">6:30 - 10:00</span><br>
-    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" 
-       style="color:#2563eb; font-weight:600; text-decoration:none;">
-       Cơ sở: An Dương Vương
-    </a><br>
-    <span>Đại số tuyến tính (Lý thuyết)</span><br>
-    <span style="color:#4b5563; font-style:italic;">Phòng: B.116</span>
-  </div>
-</td>
+
+  <!-- Ô môn học sáng thứ 2 -->
+  <td class="tkb-cell">
+    <div class="tkb-box">
+      <span class="tkb-time">6:30 - 10:00</span><br>
+      <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" class="tkb-campus">
+        Cơ sở: An Dương Vương
+      </a><br>
+      <span>Đại số tuyến tính (Lý thuyết)</span><br>
+      <span class="tkb-room">Phòng: B.116</span>
+    </div>
+  </td>
+
   <td class="day"></td>
   <td class="day"></td>
   <td class="day"></td>
   <td class="day"></td>
   <td class="day"></td>
 </tr>
+
 <tr>
   <td class="col-tiet">2</td>
-<td class="day"></td>
-<td class="day"></td>
-<td class="day"></td>
-<td colspan="1" rowspan="1" 
-    style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">8:10 - 11:40</span><br>
-    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" 
-       style="color:#2563eb; font-weight:600; text-decoration:none;">
-       Cơ sở: An Dương Vương
-    </a><br>
-    <span>Giải tích hàm một biến (Học bù 18/11)</span><br>
-    <span style="color:#4b5563; font-style:italic;">Phòng: B.211</span>
-  </div>
-</td>
-<td class="day"></td>
-<td class="day"></td>
-</tr>
-<!-- Đường kẻ ngang phân cách Sáng - Chiều -->
-<tr class="divider">
-  <td colspan="8"></td>
+
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+
+  <!-- Ô môn học thứ 5 -->
+  <td class="tkb-cell">
+    <div class="tkb-box">
+      <span class="tkb-time">8:10 - 11:40</span><br>
+      <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" class="tkb-campus">
+        Cơ sở: An Dương Vương
+      </a><br>
+      <span>Giải tích hàm một biến (Học bù 18/11)</span><br>
+      <span class="tkb-room">Phòng: B.211</span>
+    </div>
+  </td>
+
+  <td class="day"></td>
+  <td class="day"></td>
 </tr>
 
-        <!-- Chiều -->
-        <tr><td class="col-buoi" rowspan="2">Chiều</td>
-          <td class="col-tiet">3</td>
-<td class="day"></td>
-    <td colspan="1" rowspan="2" 
-    style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">13:00 - 16:00</span><br>
-    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" 
-       style="color:#2563eb; font-weight:600; text-decoration:none;">
-       Cơ sở: An Dương Vương
-    </a><br>
-    <span>Đại hội chi Đoàn hội</span><br>
-    <span style="color:#4b5563; font-style:italic;">Phòng: B.210</span>
-  </div>
-</td>
-          <td class="day"></td>
-<td class="day"></td>
-<td class="day"></td>
-<td class="day"></td>
+<!-- Divider sáng - chiều -->
+<tr class="divider"><td colspan="8"></td></tr>
 
-        </tr>
+<!-- Chiều -->
+<tr>
+  <td class="col-buoi" rowspan="2">Chiều</td>
+  <td class="col-tiet">3</td>
 
-           <tr><td class="col-tiet">4</td>
-          <td class="day"></td>
-<td class="day"></td>
-<td class="day"></td>
-<td class="day"></td>
-<td class="day"></td>
+  <td class="day"></td>
 
-        </tr>
+  <!-- Ô môn học chiều thứ 3 -->
+  <td class="tkb-cell" rowspan="2">
+    <div class="tkb-box">
+      <span class="tkb-time">13:00 - 16:00</span><br>
+      <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" class="tkb-campus">
+        Cơ sở: An Dương Vương
+      </a><br>
+      <span>Đại hội chi Đoàn hội</span><br>
+      <span class="tkb-room">Phòng: B.210</span>
+    </div>
+  </td>
+
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+</tr>
+
+<tr>
+  <td class="col-tiet">4</td>
+
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+</tr>
+
 
        
       </tbody>
@@ -451,7 +492,6 @@ document.addEventListener("keydown", e => {
 
 </body>
 </html>
-
 
 
 
