@@ -67,7 +67,7 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
 }
 .sched th,.sched td{
   border:1px solid #e5e7eb;
-  padding:12px 8px;
+  padding:8px 8px;
   text-align:center;
   font-size:13.5px;
   transition:background 0.25s,box-shadow 0.25s;
@@ -294,7 +294,7 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
         <thead>
           <tr>
             <th class="col-buoi">Buổi</th>
-            <th class="col-tiet">Ca</th>
+            <th class="col-tiet">Tiết</th>
             <th class="day">Thứ 2</th>
             <th class="day">Thứ 3</th>
             <th class="day">Thứ 4</th>
@@ -307,10 +307,31 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
         <tbody>
   <!-- Sáng -->
 <tr>
-  <td class="col-buoi" rowspan="2">Sáng</td>
-  <td class="col-tiet">1</td>
+  <td class="col-buoi" rowspan="6">Sáng</td>
+<!-- Tiết 1 -->
+<td class="col-tiet">1</td>
   <td class="day"></td>
-  <td colspan="1" rowspan="2" 
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+</tr>
+<!-- Tiết 2 -->
+<tr>
+<td class="col-tiet">2</td>
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+</tr>
+<!--Tiết 3 -->
+<tr>
+  <td class="col-tiet">3</td>
+  <td class="day"></td>
+  <td colspan="1" rowspan="4" 
     style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
   <div>
     <span style="color:#dc2626; font-weight:bold;">8:10 - 11:40</span><br>
@@ -322,7 +343,7 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
     <span style="color:#4b5563; font-style:italic;">Phòng: B.213</span>
   </div>
 </td>
-  <td colspan="1" rowspan="2" 
+  <td colspan="1" rowspan="4" 
     style="background:#fff3e0; border-radius:8px; padding:10px; text-align:center;">
   <div>
     <span style="color:#dc2626; font-weight:bold;">8:10 - 11:40</span><br>
@@ -338,24 +359,40 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
    <td class="day"></td>
   <td class="day"></td>
 </tr>
+<!--Tiết 4--!>
 <tr>
-  <td class="col-tiet">2</td>
+  <td class="col-tiet">4</td>
 <td class="day"></td>
-
-
 <td class="day"></td>
 <td class="day"></td>
 <td class="day"></td>
 </tr>
+<!-- Tiết 5--!>
+<td class="col-tiet">5</td>
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+  <td class="day"></td>
+</tr>
+<!--Tiết 6 -->
+<tr>
+<td class="col-tiet">6</td>
+<td class="day"></td>
+<td class="day"></td>
+<td class="day"></td>
+<td class="day"></td>
+</tr>
+
 <!-- Đường kẻ ngang phân cách Sáng - Chiều -->
 <tr class="divider">
   <td colspan="8"></td>
 </tr>
 
         <!-- Chiều -->
-        <tr><td class="col-buoi" rowspan="2">Chiều</td>
-<td class="col-tiet">3</td>
- <td colspan="1" rowspan="2" 
+        <tr><td class="col-buoi" rowspan="6">Chiều</td>
+<!--Tiết 7--!>
+<td class="col-tiet">7</td>
+ <td colspan="1" rowspan="4" 
     style="background-color:#bbf7d0; border-radius:8px; padding:10px; text-align:center;">
   <div>
     <span style="color:#dc2626; font-weight:bold;">12:30 - 16:00</span><br>
@@ -369,7 +406,7 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
 </td>
 <td class="day"></td>
 <td class="day"></td>
-<td colspan="1" rowspan="2" 
+<td colspan="1" rowspan="4" 
     style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
   <div>
     <span style="color:#dc2626; font-weight:bold;">12:30 - 16:00</span><br>
@@ -383,19 +420,46 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
 </td>
 <td class="day"></td>
 <td class="day"></td>
-
-        </tr>
-
- <tr><td class="col-tiet">4</td>
+ </tr>
+<!--Tiết 8--!>
+ <tr><td class="col-tiet">8</td>
 <td class="day"></td> 
 <td class="day"></td>
-
 <td class="day"></td>
 <td class="day"></td>
-
-        </tr>
-
-       
+</tr>
+<!--Tiết 9--!>
+ <tr><td class="col-tiet">9</td>
+<td class="day"></td> 
+<td class="day"></td>
+<td class="day"></td>
+<td class="day"></td>
+</tr>
+<!--Tiết 10--!>
+ <tr><td class="col-tiet">10</td>
+<td class="day"></td> 
+<td class="day"></td>
+<td class="day"></td>
+<td class="day"></td>
+</tr>
+<!--Tiết 11--!>
+ <tr><td class="col-tiet">11</td>
+<td class="day"></td> 
+<td class="day"></td>
+<td class="day"></td>
+<td class="day"></td>
+<td class="day"></td>
+<td class="day"></td>
+</tr>
+<!--Tiết 12--!>
+ <tr><td class="col-tiet">12</td>
+<td class="day"></td> 
+<td class="day"></td>
+<td class="day"></td>
+<td class="day"></td>
+<td class="day"></td>
+<td class="day"></td>
+</tr>       
       </tbody>
     </table>
 
