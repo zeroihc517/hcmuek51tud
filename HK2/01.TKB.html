@@ -141,23 +141,26 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
 /* ONLINE */
 .online-box{
   position: relative;
-  margin-top:32px;
-  padding:24px;
-  border-radius:20px;
-  /* Tím pastel nhẹ */
-  background:linear-gradient(
+  margin-top: 32px;
+  padding: 24px;
+  border-radius: 20px;
+
+  background: linear-gradient(
       135deg,
-      #f8f5ff,
-      #ede9fe,
-      #f3e8ff,
-      #e9d5ff,
-      #f8f5ff
+      #fff7fa,    /* trắng hồng rất nhẹ */
+      #ffe9f0,    /* hồng nhạt pastel */
+      #ffd6e5,    /* blush pink */
+      #ffe9f0,
+      #fff7fa
   );
-  background-size:400% 400%;
-  animation: sparkleSoft 20s ease infinite; /* ✨ chuyển màu rất chậm */
-  box-shadow:0 0 12px rgba(216,180,254,0.25), 0 0 20px rgba(192,132,252,0.15);
-  border:2px solid #e9d5ff; /* viền tím pastel rất nhạt */
+  background-size: 400% 400%;
+  animation: sparkleSoft 20s ease infinite;
+
+  border: 2px solid #ffc2d1;   /* viền hồng pastel chuẩn */
+  box-shadow: 0 4px 18px rgba(255, 182, 193, 0.25),
+              0 0 25px rgba(255, 150, 170, 0.15);
 }
+
 
 /* Chuyển động gradient nhẹ nhàng */
 @keyframes sparkleSoft {
