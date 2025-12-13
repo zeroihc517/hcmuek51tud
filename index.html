@@ -55,7 +55,19 @@
     box-shadow:0 12px 30px rgba(0,0,0,0.3);
     margin-bottom:40px;
   }
+.tables-wrapper {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap; /* tự xuống dòng khi màn hình nhỏ */
+}
 
+.table-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
   th, td {
     padding:18px 12px;
     text-align:center;
@@ -132,48 +144,56 @@
 </head>
 <body>
 <h1>Trường Đại học Sư phạm TP.HCM - TUD K51</h1>
-<div class="table-title">Thời khóa biểu Học kì 1 - Năm 1</div>
-<table>
-<thead>
-<tr>
-<th>STT</th>
-<th>Liên Kết</th>
-</tr>
-</thead>
-<tbody>
-<tr><td>01</td><td><a href="HK1/01. TKB (8.9-14.9).html">TKB 8/9-14/9</a></td></tr>
-<tr><td>02</td><td><a href="HK1/02. TKB (15.9-21.9).html">TKB 15/9-21/9</a></td></tr>
-<tr><td>03</td><td><a href="HK1/03. TKB (22.9-5.10).html">TKB 22/9-05/10</a></td></tr>
-<tr><td>04</td><td><a href="HK1/04. TKB (6.10-12.10).html">TKB 06/10-12/10</a></td></tr>
-<tr><td>05</td><td><a href="HK1/05. TKB (13.10-19.10).html">TKB 13/10-19/10</a></td></tr>
-<tr><td>06</td><td><a href="HK1/06. TKB (20.10-26.10).html">TKB 20/10-26/10</a></td></tr>
-<tr><td>07</td><td><a href="HK1/07. TKB (27.10-02.11).html">TKB 27/10-02/11</a></td></tr>
-<tr><td>08</td><td><a href="HK1/08. TKB (03.11-09.11).html">TKB 03/11-09/11</a></td></tr>
-<tr><td>09</td><td><a href="HK1/09. TKB (10.11-16.11).html">TKB 10/11-16/11</a></td></tr>
-<tr><td>10</td><td><a href="HK1/10. TKB (17.11-23.11).html">TKB 17/11-23/11</a></td></tr>
-<tr><td>11</td><td><a href="HK1/11. TKB (24.11-30.11).html">TKB 24/11-30/11</a></td></tr>
-<tr><td>12</td><td><a href="HK1/12. TKB (01.12-14.12).html">TKB 01/12-14/12</a></td></tr>
-<tr><td>13</td><td><a href="HK1/13. TKB (15.12-21.12).html">TKB 15/12-21/12</a></td></tr>
-<tr><td>14</td><td><a href="HK1/14. TKB (22.12-28.12).html">TKB 22/12-28/12</a></td></tr>
-<tr><td>15</td><td><a href="HK1/15. TKB (29.12-04.01).html">TKB 29/12-04/01</a></td></tr>
-<tr><td>16</td><td><a href="HK1/16. TKB (12.01-18.01).html">TKB 12/01-18/01</a></td></tr>
-</tbody>
-</table>
+<div class="tables-wrapper">
 
-  <div class="table-title">Thời khóa biểu Học kì 2 - Năm 1</div>
-<table>
-<thead>
-<tr>
-<th>STT</th>
-<th>Liên Kết</th>
-</tr>
-</thead>
-<tbody>
-<tr><td>01</td><td><a href="HK2/01.TKB (19.1-01.02).html">TKB 19/01-01/02</a></td></tr>
-<tr><td>02</td><td><a href="HK2/02.TKB (02.02-08.03).html">TKB 02/02-08/03</a></td></tr>
-<tr><td>03</td><td><a href="HK2/03.TKB (09.03-22.03).html">TKB 09/03-22/03</a></td></tr>
-</tbody>
-</table>
+  <div class="table-block">
+    <div class="table-title">Thời khóa biểu Học kì 1 - Năm 1</div>
+    <table>
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Liên Kết</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>01</td><td><a href="HK1/01. TKB (8.9-14.9).html">TKB 8/9-14/9</a></td></tr>
+        <tr><td>02</td><td><a href="HK1/02. TKB (15.9-21.9).html">TKB 15/9-21/9</a></td></tr>
+        <tr><td>03</td><td><a href="HK1/03. TKB (22.9-5.10).html">TKB 22/9-05/10</a></td></tr>
+        <tr><td>04</td><td><a href="HK1/04. TKB (6.10-12.10).html">TKB 06/10-12/10</a></td></tr>
+        <tr><td>05</td><td><a href="HK1/05. TKB (13.10-19.10).html">TKB 13/10-19/10</a></td></tr>
+        <tr><td>06</td><td><a href="HK1/06. TKB (20.10-26.10).html">TKB 20/10-26/10</a></td></tr>
+        <tr><td>07</td><td><a href="HK1/07. TKB (27.10-02.11).html">TKB 27/10-02/11</a></td></tr>
+        <tr><td>08</td><td><a href="HK1/08. TKB (03.11-09.11).html">TKB 03/11-09/11</a></td></tr>
+        <tr><td>09</td><td><a href="HK1/09. TKB (10.11-16.11).html">TKB 10/11-16/11</a></td></tr>
+        <tr><td>10</td><td><a href="HK1/10. TKB (17.11-23.11).html">TKB 17/11-23/11</a></td></tr>
+        <tr><td>11</td><td><a href="HK1/11. TKB (24.11-30.11).html">TKB 24/11-30/11</a></td></tr>
+        <tr><td>12</td><td><a href="HK1/12. TKB (01.12-14.12).html">TKB 01/12-14/12</a></td></tr>
+        <tr><td>13</td><td><a href="HK1/13. TKB (15.12-21.12).html">TKB 15/12-21/12</a></td></tr>
+        <tr><td>14</td><td><a href="HK1/14. TKB (22.12-28.12).html">TKB 22/12-28/12</a></td></tr>
+        <tr><td>15</td><td><a href="HK1/15. TKB (29.12-04.01).html">TKB 29/12-04/01</a></td></tr>
+        <tr><td>16</td><td><a href="HK1/16. TKB (12.01-18.01).html">TKB 12/01-18/01</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="table-block">
+    <div class="table-title">Thời khóa biểu Học kì 2 - Năm 1</div>
+    <table>
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Liên Kết</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>01</td><td><a href="HK2/01.TKB (19.1-01.02).html">TKB 19/01-01/02</a></td></tr>
+        <tr><td>02</td><td><a href="HK2/02.TKB (02.02-08.03).html">TKB 02/02-08/03</a></td></tr>
+        <tr><td>03</td><td><a href="HK2/03.TKB (09.03-22.03).html">TKB 09/03-22/03</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
 
 <div class="footer">&copy; 2025-2026 TUD K51</div>
 </body>
