@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Noel Statistics</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+/* ===== NỀN ĐỔI MÀU ===== */
+body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Poppins', sans-serif;
+    background:linear-gradient(270deg,#0a2e4f,#0f4c81,#b11226,#0f4c81);
+    background-size:600% 600%;
+    animation:bgMove 18s ease infinite;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+@keyframes bgMove{
+    0%{background-position:0% 50%}
+    50%{background-position:100% 50%}
+    100%{background-position:0% 50%}
+}
+
+/* ===== TUYẾT ===== */
+.snow{
+    position:fixed;
+    top:-10px;
+    animation:snow linear infinite;
+    pointer-events:none;
+}
+@keyframes snow{
+    to{transform:translateY(110vh)}
+}
+
+/* ===== SPARKLE ===== */
+.sparkle{
+    position:absolute;
+    width:6px;
+    height:6px;
+    background:radial-gradient(circle,#fff,#ffd700);
+    border-radius:50%;
+    animation:sparkle 2s infinite ease-in-out;
+}
+@keyframes sparkle{
+    0%,100%{opacity:0; transform:scale(0)}
+    50%{opacity:1; transform:scale(1.3)}
+}
+
+/* ===== CARD ===== */
+.card{
+    position:relative;
+    max-width:920px;
+    padding:48px 52px;
+    background:rgba(255,255,255,0.92);
+    border-radius:30px;
+    box-shadow:
+      0 40px 90px rgba(0,0,0,.45),
+      0 0 60px rgba(255,215,0,.35);
+    animation:fadeUp 1.2s ease;
+    overflow:hidden;
+}
+
+/* VIỀN RGB */
+.card::before{
+    content:"";
+    position:absolute;
+    inset:-3px;
+    background:linear-gradient(60deg,#ff0000,#ffd700,#00ffea,#ff0000);
+    border-radius:32px;
+    z-index:-1;
+    animation:rgb 6s linear infinite;
+}
+@keyframes rgb{
+    to{filter:hue-rotate(360deg)}
+}
+
+/* ===== ĐÈN NOEL ===== */
+.lights{
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:18px;
+}
+.light{
+    width:16px;
+    height:16px;
+    border-radius:50%;
+    animation:blink 1.5s infinite alternate;
+}
+.light:nth-child(odd){animation-delay:.5s}
+@keyframes blink{
+    from{opacity:.3}
+    to{opacity:1}
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeUp{
+    from{opacity:0; transform:translateY(40px)}
+    to{opacity:1; transform:translateY(0)}
+}
+
+/* ===== TIÊU ĐỀ ===== */
+.header{
+    text-align:center;
+}
+.header h1{
+    font-size:36px;
+    font-weight:800;
+    color:#b11226;
+    text-shadow:
+      0 0 10px rgba(255,0,0,.4),
+      0 0 20px rgba(255,215,0,.4);
+}
+.header p{
+    color:#0f4c81;
+    font-weight:600;
+}
+
+/* ===== NỘI DUNG ===== */
+.content{
+    margin-top:25px;
+    font-size:18px;
+    line-height:1.9;
+    background:linear-gradient(135deg,#ffffff,#f2f7ff);
+    padding:30px 34px;
+    border-radius:20px;
+    border-left:8px solid #b11226;
+    box-shadow:inset 0 0 0 1px #e5edff;
+}
+
+.highlight{
+    color:#0f4c81;
+    font-weight:700;
+}
+
+/* ===== FOOTER ===== */
+.footer{
+    margin-top:30px;
+    text-align:right;
+    font-style:italic;
+    color:#0f4c81;
+}
+</style>
+</head>
+
+<body>
+
+<!-- TUYẾT -->
+<script>
+for(let i=0;i<90;i++){
+  let s=document.createElement("div");
+  s.className="snow";
+  s.innerHTML="❄️";
+  s.style.left=Math.random()*100+"vw";
+  s.style.fontSize=10+Math.random()*16+"px";
+  s.style.animationDuration=4+Math.random()*8+"s";
+  document.body.appendChild(s);
+}
+</script>
+
+<div class="card">
+
+  <!-- ĐÈN NOEL -->
+  <div class="lights">
+    <div class="light" style="background:red"></div>
+    <div class="light" style="background:gold"></div>
+    <div class="light" style="background:lime"></div>
+    <div class="light" style="background:cyan"></div>
+    <div class="light" style="background:red"></div>
+    <div class="light" style="background:gold"></div>
+    <div class="light" style="background:lime"></div>
+  </div>
+
+  <div class="header">
+    <h1>🎅 Tứ phân vị 🎄</h1>
+    <p>✨ Lập trình cơ bản ✨</p>
+  </div>
+
+  <div class="content">
+    Cho một mẫu số liệu ghép nhóm gồm <span class="highlight">𝑛</span> nhóm.
+    Nhập vào số nguyên dương <span class="highlight">𝑛</span>, sau đó lần lượt nhập
+    giá trị đầu, giá trị cuối và tần số của từng nhóm.
+    Hãy viết chương trình xác định
+    <span class="highlight">tứ phân vị thứ nhất (Q₁)</span>,
+    <span class="highlight">tứ phân vị thứ hai (Q₂)</span> và
+    <span class="highlight">tứ phân vị thứ ba (Q₃)</span>
+    của mẫu số liệu đã cho.
+  </div>
+
+  <div class="footer">
+    ❄️ Chúc bạn thi tốt & Giáng Sinh vui vẻ ❄️
+  </div>
+</div>
+<style>
+body{
+  user-select:none;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  -ms-user-select:none;
+}
+</style>
+
+<script>
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+document.addEventListener('keydown', e => {
+  if (
+    e.key === 'F12' ||
+    (e.ctrlKey && ['c','a','x','s','u'].includes(e.key.toLowerCase()))
+  ) {
+    e.preventDefault();
+  }
+});
+
+document.addEventListener('copy', e => e.preventDefault());
+</script>
+
+</body>
+</html>
