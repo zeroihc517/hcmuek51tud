@@ -45,7 +45,23 @@
     .btn-warning{ background:var(--warning); color:var(--warning-text); border:0; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
 
     /* Candidate strip (original look) */
-    .candidate-strip{ width:100%; box-sizing:border-box; background:#0f274a; color:#eaf6ff; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; gap:12px; box-shadow:var(--shadow); position:relative; z-index:10; }
+.candidate-strip{
+  width:100%;
+  box-sizing:border-box;
+  background:#0f274a;
+  color:#eaf6ff;
+  padding:12px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  box-shadow:var(--shadow);
+
+  position: sticky;   /* ⭐ QUAN TRỌNG */
+  top: 0;             /* ⭐ DÍNH TRÊN */
+  z-index: 200;       /* cao hơn nội dung */
+}
+
     .candidate-inner{ max-width:1400px; margin:0 auto; width:100%; display:flex; justify-content:space-between; align-items:center; gap:12px; }
     .candidate-info{ display:flex; gap:14px; align-items:center; font-size:13px; }
     .candidate-info .name{ font-weight:700; color:#fff; }
