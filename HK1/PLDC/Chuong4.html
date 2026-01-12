@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="contentType" content="quiz">
+    <meta name="description" content="Một bài kiểm tra tương tác dành cho học sinh lớp 1 về lòng biết ơn, dựa trên bài đồng dao 'Nhớ ơn'.">
+    <meta name="nextActions" content="Thêm các câu hỏi về từ vựng; Tạo một bài tập điền từ vào chỗ trống; Chuyển thành một trò chơi ghép hình">
+    <title>Chương 4 PLĐC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #FFC107;
+            --bg-color: #F0F8FF;
+            --text-color: #333;
+            --correct-color: #28a745;
+            --incorrect-color: #dc3545;
+            --font-family: 'Baloo 2', cursive;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&display=swap');
+
+        body {
+            font-family: var(--font-family);
+            background-image: url('https://storage.googleapis.com/azt_agents/html_content_agent/1/15f96e63-a123-4492-a86c-2ff4a322d120/background.png/0');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .quiz-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 2rem;
+            border: 5px solid var(--primary-color);
+        }
+
+        #start-screen, #result-screen {
+            text-align: center;
+        }
+
+        #start-screen h1, #result-screen h1 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .btn-start {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        #quiz-screen {
+            display: none;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px dashed var(--primary-color);
+        }
+
+        #question-counter {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        #question-text {
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .options-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background-color: #fff;
+            border: 3px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 60px;
+        }
+
+        .option:hover {
+            background-color: #E8F5E9;
+            transform: scale(1.03);
+        }
+        
+        .option.image-option {
+            padding: 10px;
+            flex-direction: column;
+        }
+
+        .option.image-option img {
+            max-height: 120px;
+            max-width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .option.correct {
+            background-color: #D4EDDA;
+            border-color: var(--correct-color);
+            color: var(--correct-color);
+            font-weight: 700;
+            animation: tada 0.8s;
+        }
+
+        .option.incorrect {
+            background-color: #F8D7DA;
+            border-color: var(--incorrect-color);
+            color: var(--incorrect-color);
+            font-weight: 700;
+            animation: shakeX 0.8s;
+        }
+        
+        .option.disabled {
+            pointer-events: none;
+        }
+        
+        #result-screen {
+            display: none;
+        }
+        
+        #result-summary {
+            font-size: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .result-details {
+            text-align: left;
+            margin: 0 auto;
+            max-width: 400px;
+        }
+        
+        .result-item {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .result-item strong {
+            color: var(--primary-color);
+        }
+
+        @media (min-width: 576px) {
+            .options-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container animate__animated animate__zoomIn">
+        
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <img src="https://storage.googleapis.com/azt_agents/html_content_agent/1/15f96e63-a123-4492-a86c-2ff4a322d120/gratitude_icon.png/1?transparent=1" alt="Biết ơn" style="max-height: 150px; margin-bottom: 20px;">
+            <h1>CHƯƠNG 4. LUẬT DÂN SỰ VÀ TỐ TỤNG DÂN SỰ</h1>
+            <p class="lead">Câu hỏi được trích từ VLE</p>
+            <button id="start-button" class="btn-start">Bắt đầu!</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen">
+            <div class="question-header">
+                <span id="question-counter">Câu 1 / 9</span>
+            </div>
+            <div id="question-text">Đây là câu hỏi...</div>
+            <div id="options-container" class="options-container">
+                <!-- Options will be inserted by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen">
+             <img src="https://storage.googleapis.com/azt_agents/html_content_agent/1/15f96e63-a123-4492-a86c-2ff4a322d120/laborer_icon.png/1?transparent=1" alt="Lao động" style="max-height: 150px; margin-bottom: 20px;">
+            <h1>Hoàn thành!</h1>
+            <div id="result-summary">Tuyệt vời! Bạn đã hoàn thành bài tập.</div>
+            <div id="result-details" class="result-details">
+                <!-- Result details will be inserted by JavaScript -->
+            </div>
+            <button id="restart-button" class="btn-start mt-4">Làm lại</button>
+        </div>
+    </div>
+
+    <audio id="correct-sound" src="https://www.myinstants.com/media/sounds/correct-answer-sound-effect-19.mp3" preload="auto"></audio>
+    <audio id="incorrect-sound" src="https://www.myinstants.com/media/sounds/answer-wrong.mp3" preload="auto"></audio>
+    <audio id="completion-sound" src="https://www.myinstants.com/media/sounds/kids_cheering.mp3" preload="auto"></audio>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const questions = [
+                {
+        objective: "Khái niệm, đối tượng điều chỉnh và phương pháp điều chỉnh của Luật dân sự",
+        question: "Phương thức nào sau đây được coi là phương thức bảo vệ quyền dân sự?",
+        options: [
+            { text: "Quyết định xử phạt hành chính.", isCorrect: false },
+            { text: "Quyết định xử phạt hình sự.", isCorrect: false },
+            { text: "Buộc chấm dứt hành vi xâm phạm.", isCorrect: false },
+            { text: "Yêu cầu cải chính, buộc chấm dứt hành vi xâm phạm, yêu cầu bồi thường thiệt hại.", isCorrect: true }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Khái niệm, đối tượng điều chỉnh và phương pháp điều chỉnh của Luật dân sự",
+        question: "Quan hệ tài sản là",
+        options: [
+            { text: "quan hệ xã hội hình thành giữa con người với con người thông qua một tài sản cụ thể.", isCorrect: true },
+            { text: "quan hệ xã hội hình thành giữa con người với con người và không nhất thiết phải gắn với một tài sản cụ thể.", isCorrect: false },
+            { text: "quan hệ giữa con người với tài sản.", isCorrect: false },
+            { text: "quan hệ giữa tài sản với tài sản.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Khái niệm, đối tượng điều chỉnh và phương pháp điều chỉnh của Luật dân sự",
+        question: "Đối tượng điều chỉnh của Luật dân sự là",
+        options: [
+            { text: "quan hệ về tài sản và quan hệ nhân thân.", isCorrect: true },
+            { text: "tất cả các quan hệ xã hội.", isCorrect: false },
+            { text: "chỉ có quan hệ nhân thân.", isCorrect: false },
+            { text: "quan hệ tài sản.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Khái niệm, đối tượng điều chỉnh và phương pháp điều chỉnh của Luật dân sự",
+        question: "Câu khẳng định nào sau đây là đúng?",
+        options: [
+            { text: "Quan hệ nhân thân là quan hệ giữa người với tài sản.", isCorrect: false },
+            { text: "Quan hệ nhân thân là quan hệ giữa những giá trị nhân thân với nhau.", isCorrect: false },
+            { text: "Quan hệ nhân thân là quan hệ giữa người với người gắn liền với một giá trị nhân thân nào đó.", isCorrect: true },
+            { text: "Quan hệ mang tính tình cảm.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Khái niệm, đối tượng điều chỉnh và phương pháp điều chỉnh của Luật dân sự",
+        question: "Quan hệ xã hội nào sau đây không thuộc phạm vi điều chỉnh của Luật dân sự?",
+        options: [
+            { text: "An nhận tiền lương tháng do doanh nghiệp chi trả.", isCorrect: true },
+            { text: "An mua xe máy của Bốn để dùng.", isCorrect: false },
+            { text: "An nhận thừa kế của Cúc.", isCorrect: false },
+            { text: "An tặng đồng hồ cho Bốn nhân ngày sinh nhật.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Việc chiếm hữu của Hoa thuộc loại nào sau đây khi Hoa mua xe máy của Hải mà không có giấy tờ xe?",
+        options: [
+            { text: "Chiếm hữu không có căn cứ pháp luật, không ngay tình.", isCorrect: true },
+            { text: "Chiếm hữu không có căn cứ pháp luật nhưng ngay tình.", isCorrect: false },
+            { text: "Chiếm hữu có căn cứ pháp luật.", isCorrect: false },
+            { text: "Chiếm hữu không có căn cứ pháp luật.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Nội dung của quyền sở hữu bao gồm:",
+        options: [
+            { text: "Quyền chiếm hữu, quyền sử dụng và quyền định đoạt.", isCorrect: true },
+            { text: "Quyền quản lý, quyền sử dụng và quyền định đoạt.", isCorrect: false },
+            { text: "Quyền chiếm hữu, quyền đòi lại tài sản và quyền định đoạt.", isCorrect: false },
+            { text: "Quyền thừa kế, quyền sử dụng và quyền định đoạt.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Việc chiếm hữu của Dũng thuộc loại nào sau đây khi Dũng mua điện thoại của Hùng mà không biết điện thoại đó là do Hùng trộm cắp của người khác?",
+        options: [
+            { text: "Chiếm hữu không có căn cứ pháp luật nhưng ngay tình.", isCorrect: true },
+            { text: "Chiếm hữu không có căn cứ pháp luật không ngay tình.", isCorrect: false },
+            { text: "Chiếm hữu có căn cứ pháp luật.", isCorrect: false },
+            { text: "Chiếm hữu không có căn cứ pháp luật.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Tài sản bao gồm những gì?",
+        options: [
+            { text: "Tiền.", isCorrect: false },
+            { text: "Vật.", isCorrect: false },
+            { text: "Giấy tờ có giá và quyền tài sản.", isCorrect: false },
+            { text: "Tiền, vật, giấy tờ có giá và quyền tài sản.", isCorrect: true }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Chiếm hữu tài sản có nghĩa là:",
+        options: [
+            { text: "sự nắm giữ, quản lý tài sản.", isCorrect: true },
+            { text: "sự khai thác công dụng, hưởng hoa lợi, lợi tức từ tài sản.", isCorrect: false },
+            { text: "sự chuyển giao quyền sở hữu tài sản.", isCorrect: false },
+            { text: "sự từ bỏ quyền sở hữu.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Trường hợp nào sau đây không làm chấm dứt quyền sở hữu của Mai đối với điện thoại?",
+        options: [
+            { text: "Mai bán điện thoại.", isCorrect: false },
+            { text: "Điện thoại của Mai bị cơ quan nhà nước có thẩm quyền tịch thu vĩnh viễn.", isCorrect: false },
+            { text: "Mai bị mất điện thoại.", isCorrect: true },
+            { text: "Điện thoại của Mai bị cháy trong vụ hỏa hoạn.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Hòa thuê nhà của Minh để ở, vậy:",
+        options: [
+            { text: "Minh chỉ chuyển giao cho Hòa quyền chiếm hữu ngôi nhà.", isCorrect: false },
+            { text: "Minh chỉ chuyển giao cho Hòa quyền sử dụng ngôi nhà.", isCorrect: false },
+            { text: "Minh đã chuyển giao cho Hòa quyền sở hữu ngôi nhà.", isCorrect: false },
+            { text: "Minh đã chuyển giao cho Hòa quyền chiếm hữu và sử dụng ngôi nhà.", isCorrect: true }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Chủ sở hữu tài sản có quyền",
+        options: [
+            { text: "chiếm hữu tài sản.", isCorrect: false },
+            { text: "sử dụng tài sản.", isCorrect: false },
+            { text: "định đoạt đối với tài sản.", isCorrect: false },
+            { text: "chiếm hữu tài sản, sử dụng tài sản, định đoạt tài sản.", isCorrect: true }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Người chiếm hữu tài sản có căn cứ pháp luật",
+        options: [
+            { text: "chủ sở hữu tài sản.", isCorrect: false },
+            { text: "người được chủ sở hữu cho phép.", isCorrect: false },
+            { text: "người được chiếm hữu theo quy định pháp luật.", isCorrect: false },
+            { text: "chủ sở hữu tài sản, người được chủ sở hữu cho phép, người được chiếm hữu theo quy định pháp luật.", isCorrect: true }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Khẳng định nào sau đây là đúng?",
+        options: [
+            { text: "Người không phải chủ sở hữu vẫn có thể có quyền chiếm hữu, sử dụng và định đoạt đối với tài sản.", isCorrect: true },
+            { text: "Người không phải chủ sở hữu thì không quyền chiếm hữu tài sản.", isCorrect: false },
+            { text: "Người không phải chủ sở hữu thì không có quyền sử dụng tài sản.", isCorrect: false },
+            { text: "Người không phải chủ sở hữu thì không có quyền định đoạt đối với tài sản.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "A làm hợp đồng tặng cho B một chiếc xe máy. Mặc dù biết rõ xe bị mất phanh nhưng A không thông báo cho B biết vì cho rằng khi đi xe B sẽ biết và tự sửa. B sau khi nhận xe thì bị tai nạn do không thắng được khi xuống dốc:",
+        options: [
+            { text: "A phải bồi thường thiệt hại cho B.", isCorrect: true },
+            { text: "A không phải bồi thường thiệt hại cho B.", isCorrect: false },
+            { text: "A phải bồi thường cho B thì B trả lại chiếc xe cho A.", isCorrect: false },
+            { text: "A chỉ phải bồi thường 1/2 chi phí điều trị cho B.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Đâu là một loại hợp đồng?",
+        options: [
+            { text: "Di chúc.", isCorrect: false },
+            { text: "Hợp đồng song vụ.", isCorrect: true },
+            { text: "Phụ lục hợp đồng.", isCorrect: false },
+            { text: "Thỏa thuận bồi thường.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Nhận định nào sau đây là đúng?",
+        options: [
+            { text: "Khi đã bị phạt vi phạm thì không phải bồi thường thiệt hại.", isCorrect: false },
+            { text: "Khi đã bị phạt vi phạm vẫn có thể vẫn phải bồi thường thiệt hại.", isCorrect: true },
+            { text: "Người phải bồi thường thì không phải nộp phạt vi phạm.", isCorrect: false },
+            { text: "Mức phạt vi phạm tối đa là 10% giá trị của hợp đồng.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Hợp đồng vô hiệu khi",
+        options: [
+            { text: "một bên ký kết hợp đồng đổi ý.", isCorrect: false },
+            { text: "một bên ký kết hợp đồng ốm.", isCorrect: false },
+            { text: "nội dung của hợp đồng không như mong muốn của các bên.", isCorrect: false },
+            { text: "mục đích của hợp đồng trái đạo đức xã hội.", isCorrect: true }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Giao dịch dân sự là",
+        options: [
+            { text: "hợp đồng.", isCorrect: false },
+            { text: "hợp đồng hoặc hành vi pháp lý đơn phương.", isCorrect: true },
+            { text: "hành vi pháp lý đơn phương.", isCorrect: false },
+            { text: "sự thỏa thuận.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "A và B là vợ chồng có hai người con C và D. C có vợ K và đứa con H. Trong một lần không may A và C gặp tai nạn qua đời cùng thời điểm. Ai là người được hưởng di sản thừa kế của A nếu A không lập di chúc?",
+        options: [
+            { text: "Bà B, D.", isCorrect: false },
+            { text: "Bà B, D, K, H.", isCorrect: false },
+            { text: "Bà B, H.", isCorrect: false },
+            { text: "Bà B, D, H.", isCorrect: true }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Năm 2003, A sống chung với C như vợ chồng, A có mua căn nhà trị giá 800 triệu đứng tên A sau đó chia tay với C. Năm 2015 A kết hôn với B, đầu năm 2016 A mua một căn biệt thự đứng tên A 10 tỷ. Năm 2018 A sống chung với C như vợ chồng và mua cho C chiếc xe ô tô đứng tên của A trị giá 1 tỷ. Năm 2020 A chết. Di sản của A là bao nhiêu?",
+        options: [
+            { text: "6,3 tỷ.", isCorrect: true },
+            { text: "11,8 tỷ.", isCorrect: false },
+            { text: "800 triệu.", isCorrect: false },
+            { text: "10,8 tỷ.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Hưng và Dương là hai bố con. Trong trường hợp này sau đây, Dương bị tước quyền thừa kế?",
+        options: [
+            { text: "Trong di chúc của Hưng nói rõ không cho Dương hưởng.", isCorrect: false },
+            { text: "Dương là con ngoài giá thú của Hưng.", isCorrect: false },
+            { text: "Dương từ chối nhận di sản thừa kế.", isCorrect: false },
+            { text: "Dương đã giả mạo di chúc của Hưng để hưởng thừa kế; Dương đánh Hưng gây thương tích và đã bị Tòa án kết án về hành vi đó.", isCorrect: true }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Ân là con của ông Bình. Trong trường hợp nào sau đây, Ân có thể bị tước quyền thừa kế di sản của ông Bình?",
+        options: [
+            { text: "Ân đã bị Tòa án kết án về tội lừa đảo chiếm đoạt tài sản mà người bị hại là ông Bình.", isCorrect: false },
+            { text: "Ân đã bị cố ý gây thương tích mà người bị hại là ông Bình nhưng vẫn được ông Bình cho hưởng di sản trong di chúc.", isCorrect: false },
+            { text: "Ân đã bị Tòa án kết án về tội cố ý gây thương tích mà người bị hại là ông Bình.", isCorrect: true },
+            { text: "Ân đã bị Tòa án kết án về tội trộm cắp tài sản của ông Bình.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Ông Hùng chết ngày 03/5/2019. Đến 07/8/2019 bà Vân (vợ ông Hùng) sinh đứa con là Vy. Vy có được hưởng di sản thừa kế ông Hùng không?",
+        options: [
+            { text: "Không được hưởng vì không phải tồn tại vào thời điểm mở thừa kế.", isCorrect: false },
+            { text: "Được hưởng vì Vy là con của ông Hùng.", isCorrect: true },
+            { text: "Không được hưởng vì không xác định được Vy là con của Hùng.", isCorrect: false },
+            { text: "Được hưởng với điều kiện Hùng có lập di chúc cho hưởng.", isCorrect: false }
+        ],
+        type: "text"
+    }, 
+    {
+        objective: "Bài tập chia thừa kế",
+        question: "Ông Tài và bà Hoa là vợ chồng. Họ có hai con là Văn (Văn có vợ là Phú và hai con chung là Cát và Tường) và Võ (12 tuổi). Năm 2018, anh Văn chết đột ngột, năm 2020, ông Tài chết do bị tai nạn. Tòa án xác định tài sản chung của Văn và Phú là 520 triệu; tài sản chung của ông Tài và bà Hoa khi chưa nhận di sản của Văn là 780 triệu. Hãy cho biết tổng tài sản mà Tường được hưởng của ông Tài là bao nhiêu?",
+        options: [
+            { text: "147,33 triệu đồng.", isCorrect: true },
+            { text: "251,33 triệu đồng.", isCorrect: false },
+            { text: "125,67 triệu đồng.", isCorrect: false },
+            { text: "199,3 triệu đồng.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Nội dung quyền sở hữu và các quy định liên quan",
+        question: "Người lập di chúc không có quyền nào trong các quyền sau?",
+        options: [
+            { text: "Để lại toàn bộ di sản dùng vào việc thờ cúng nhằm trốn tránh việc thực hiện nghĩa vụ tài sản.", isCorrect: true },
+            { text: "Di tặng.", isCorrect: false },
+            { text: "Không cho người thừa kế hưởng di sản.", isCorrect: false },
+            { text: "Để lại di sản cho người không được hưởng thừa kế theo quy định của pháp luật.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+        objective: "Bài tập chia thừa kế",
+        question: "Bảo và Ngọc là vợ chồng có tài sản chung là 480 triệu. Họ có con đẻ là Tâm và con nuôi hợp pháp là Dũng. Bảo còn có mẹ là Thoa. Năm 2019, Bảo chết không để lại di chúc. Năm 2020 Thoa chết đột ngột. Hãy xác định số tài sản mà Dũng được hưởng từ di sản của bà Thoa. Biết rằng trước khi hưởng di sản của Bảo, bà Thoa còn có khối tài sản là 840 triệu đồng.",
+        options: [
+            { text: "450 triệu đồng.", isCorrect: true },
+            { text: "300 triệu đồng.", isCorrect: false },
+            { text: "420 triệu đồng.", isCorrect: false },
+            { text: "500 triệu đồng.", isCorrect: false }
+        ],
+        type: "text"
+    },
+    {
+    objective: "Bài tập chia thừa kế",
+    question: "Thành và Hùng là anh em ruột. Hùng có con là Dung và Vân. Thành có vợ là Hương có tài sản chung là 900 triệu. Do không có con nên Thành nhận Vân làm con nuôi, tuy nhiên Hương không đồng ý. Vừa qua, Hương gặp tai nạn chết đột ngột. Hãy cho biết Vân được hưởng bao nhiêu di sản sau khi Hương chết?",
+    options: [
+        { text: "0 đồng.", isCorrect: true },
+        { text: "225 triệu đồng.", isCorrect: false },
+        { text: "150 triệu đồng.", isCorrect: false },
+        { text: "300 triệu đồng.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Nội dung quyền sở hữu và các quy định liên quan",
+    question: "Người thừa kế không phụ thuộc nội dung di chúc phải bao gồm những đối tượng nào?",
+    options: [
+        { text: "Con chưa thành niên; cha; mẹ; vợ; chồng của người chết.", isCorrect: false },
+        { text: "Con chưa thành niên; cha; mẹ; vợ; chồng; con đã thành niên mà không có khả năng lao động của người chết.", isCorrect: true },
+        { text: "Vợ; chồng; cha đẻ; mẹ đẻ; cha nuôi; mẹ nuôi; con đẻ; con nuôi của người chết.", isCorrect: false },
+        { text: "Cha; mẹ; vợ; chồng; con đã thành niên mà không có khả năng lao động của người chết.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Nội dung quyền sở hữu và các quy định liên quan",
+    question: "Do bị bệnh nặng, nên An đã để lại di chúc miệng (hợp pháp). Di chúc của An sẽ không còn hiệu lực trong trường hợp:",
+    options: [
+        { text: "Sau ba tháng kể từ ngày để lại di chúc, An vẫn sống khỏe mạnh bình thường.", isCorrect: true },
+        { text: "An chết sau một tháng, kể từ ngày để lại di chúc.", isCorrect: false },
+        { text: "An chết sau hai tháng, kể từ ngày để lại di chúc.", isCorrect: false },
+        { text: "Sau ba tháng kể từ ngày để lại di chúc, An vẫn còn sống nhưng bị mất trí.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Nội dung quyền sở hữu và các quy định liên quan",
+    question: "Di chúc vô hiệu trong trường hợp nào sau đây?",
+    options: [
+        { text: "Di chúc miệng của người đủ 15 đến dưới 18 tuổi, có sự đồng ý của người giám hộ.", isCorrect: true },
+        { text: "Di chúc bằng văn bản của người từ đủ 15 đến dưới 18 tuổi, có sự đồng ý của người giám hộ.", isCorrect: false },
+        { text: "Di chúc miệng của người có đầy đủ năng lực hành vi dân sự.", isCorrect: false },
+        { text: "Di chúc bằng văn bản của người có đầy đủ năng lực hành vi dân sự.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Nội dung quyền sở hữu và các quy định liên quan",
+    question: "Phương án nào sau đây là sai?",
+    options: [
+        { text: "Các con của người để lại di sản đều có quyền hưởng thừa kế ngang nhau mà không phụ thuộc vào nội dung di chúc.", isCorrect: true },
+        { text: "Cha, mẹ và vợ của người để lại di sản đều có quyền hưởng thừa kế không phụ thuộc vào nội dung di chúc.", isCorrect: false },
+        { text: "Con chưa thành niên của người để lại di sản có quyền hưởng thừa kế không phụ thuộc nội dung di chúc.", isCorrect: false },
+        { text: "Con đã thành niên nhưng không có khả năng lao động có quyền hưởng thừa kế của người để lại di sản mà không phụ thuộc vào nội dung di chúc.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Bài tập chia thừa kế",
+    question: "Hải và Bình là vợ chồng có tài sản chung là 180 triệu, có 02 con chung là Minh (15 tuổi) và Nam (08 tuổi). Trong một tai nạn, biết Minh không qua khỏi, trước khi chết một ngày, Hải có di chúc miệng (hợp pháp) cho Nam chiếc xe máy trị giá 45 triệu là tài sản riêng của Hải. Hãy cho biết Nam được hưởng bao nhiêu di sản sau khi Hải chết:",
+    options: [
+        { text: "15 triệu đồng và chiếc xe.", isCorrect: false },
+        { text: "20 triệu đồng và chiếc xe.", isCorrect: false },
+        { text: "30 triệu đồng và chiếc xe.", isCorrect: true },
+        { text: "50 triệu đồng và chiếc xe.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Bài tập chia thừa kế",
+    question: "Sơn và Hà là hai vợ chồng có tài sản chung là 1.8 tỉ, có hai con là Hạnh (25 tuổi) và Phúc (20 tuổi). Vừa qua Sơn và Hạnh đi xe bị tai nạn. Lúc hấp hối, Sơn có di chúc miệng (hợp pháp) là để lại toàn bộ tài sản của mình cho Hạnh và Phúc. Hạnh có di chúc (hợp pháp) là để lại toàn bộ tài sản của mình cho Phúc. Sau khi để lại di chúc, Sơn qua đời. Vài ngày sau Hạnh cũng không qua khỏi. Hãy cho biết, Hà sẽ được hưởng bao nhiêu từ di sản của hai bố con Sơn và Hạnh? Biết rằng Hạnh còn có tài sản trị giá 50 triệu do được bà ngoại tặng trước khi chết.",
+    options: [
+        { text: "200 triệu đồng.", isCorrect: false },
+        { text: "600 triệu đồng.", isCorrect: true },
+        { text: "400 triệu đồng.", isCorrect: false },
+        { text: "500 triệu đồng.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Các thủ tục tố tụng dân sự",
+    question: "Bộ luật Tố tụng dân sự năm 2015 quy định hồ sơ vụ án dân sự bao gồm những loại gì?",
+    options: [
+        { text: "Bao gồm đơn và toàn bộ tài liệu, chứng cứ của đương sự, người tham gia tố tụng khác; tài liệu, chứng cứ do Tòa án thu thập liên quan đến vụ án; văn bản tố tụng của Tòa án, Viện kiểm sát về việc giải quyết vụ án dân sự.", isCorrect: true },
+        { text: "Bao gồm toàn bộ lời khai của đương sự, người tham gia tố tụng khác; tài liệu, chứng cứ do Tòa án thu thập liên quan đến vụ án.", isCorrect: false },
+        { text: "Bao gồm đơn và toàn bộ lời khai của đương sự, người tham gia tố tụng khác; tài liệu, chứng cứ do Tòa án yêu cầu đương sự thu thập và do Tòa án tự thu thập.", isCorrect: false },
+        { text: "Chỉ cần đơn khởi kiện.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Các thủ tục tố tụng dân sự",
+    question: "Theo Bộ luật Tố tụng dân sự năm 2015 thì quy định nào sau đây là đúng?",
+    options: [
+        { text: "Viện kiểm sát nhân dân tham gia phiên tòa, phiên họp Phúc thẩm, Giám đốc thẩm, Tái thẩm.", isCorrect: true },
+        { text: "Viện kiểm sát nhân dân chỉ tham gia phiên tòa Phúc thẩm, Giám đốc thẩm, Tái thẩm.", isCorrect: false },
+        { text: "Viện kiểm sát nhân dân chỉ tham gia phiên tòa Sơ thẩm, Phúc thẩm.", isCorrect: false },
+        { text: "Viện kiểm sát nhân dân chỉ tham gia phiên tòa Sơ thẩm.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Các thủ tục tố tụng dân sự",
+    question: "Bộ luật Tố tụng dân sự năm 2015 quy định thời hạn để Chánh án Tòa án phân công Thẩm phán xem xét đơn khởi kiện là bao nhiêu ngày?",
+    options: [
+        { text: "3 ngày làm việc kể từ ngày nhận được đơn khởi kiện", isCorrect: true },
+        { text: "5 ngày làm việc kể từ ngày nhận được đơn khởi kiện", isCorrect: false },
+        { text: "7 ngày làm việc kể từ ngày nhận được đơn khởi kiện", isCorrect: false },
+        { text: "10 ngày làm việc kể từ ngày nhận được đơn khởi kiện", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Các thủ tục tố tụng dân sự",
+    question: "Theo Bộ luật Tố tụng dân sự năm 2015, có bao nhiêu phương thức gửi đơn khởi kiện cho Tòa án, đó là những phương thức nào?",
+    options: [
+        { text: "Nộp trực tiếp tại Tòa án; gửi đến Tòa án qua đường dịch vụ bưu chính", isCorrect: false },
+        { text: "Nộp trực tiếp tại Tòa án; gửi đến Tòa án theo đường dịch vụ bưu chính; gửi trực tuyến bằng hình thức điện tử qua Cổng thông tin điện tử của Tòa án", isCorrect: true },
+        { text: "Nộp trực tiếp cho Tòa án để vào sổ nhận đơn", isCorrect: false },
+        { text: "Gửi đến Tòa án theo đường dịch vụ bưu chính", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Các thủ tục tố tụng dân sự",
+    question: "Bộ luật Tố tụng dân sự năm 2015 quy định như thế nào về thời hạn kháng nghị bản án theo thủ tục phúc thẩm của Viện kiểm sát?",
+    options: [
+        { text: "Đối với bản án của Tòa án cấp sơ thẩm của Viện kiểm sát cùng cấp là 15 ngày, của Viện kiểm sát cấp trên trực tiếp là 01 tháng, kể từ ngày tuyên án. Trường hợp Kiểm sát viên không tham gia phiên tòa thì thời hạn kháng nghị tính từ ngày Viện kiểm sát cùng cấp nhận được bản án.", isCorrect: true },
+        { text: "Đối với bản án của Tòa án cấp sơ thẩm của Viện kiểm sát cùng cấp là 07 ngày, của Viện kiểm sát cấp trên trực tiếp là 15 ngày, kể từ ngày nhận được bản án.", isCorrect: false },
+        { text: "Đối với bản án của Tòa án cấp sơ thẩm của Viện kiểm sát cùng cấp là 15 ngày, của Viện kiểm sát cấp trên trực tiếp là 01 tháng, kể từ ngày nhận được bản án.", isCorrect: false },
+        { text: "Đối với bản án của Tòa án cấp sơ thẩm của Viện kiểm sát cùng cấp là 10 ngày, của Viện kiểm sát cấp trên trực tiếp là 15 ngày, kể từ ngày nhận được bản án.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Các thủ tục tố tụng dân sự",
+    question: "Bộ luật Tố tụng dân sự năm 2015 quy định người tiến hành tố tụng dân sự gồm những ai dưới đây?",
+    options: [
+        { text: "Chánh án tòa án, Thẩm phán, Hội thẩm nhân dân, Thẩm tra viên, Thư kí Tòa án, Viện trưởng viện kiểm sát, Kiểm sát viên, Kiểm tra viên.", isCorrect: true },
+        { text: "Chánh án tòa án, Thẩm phán, Hội thẩm nhân dân, Thư ký tòa án, Viện trưởng viện kiểm sát, Kiểm sát viên.", isCorrect: false },
+        { text: "Chánh án tòa án, Thẩm phán, Hội thẩm nhân dân, Thư ký tòa án, Viện trưởng viện kiểm sát, Kiểm sát viên, Điều tra viên.", isCorrect: false },
+        { text: "Thẩm phán, Thư ký Tòa án.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Các thủ tục tố tụng dân sự",
+    question: "Bộ luật Tố tụng dân sự năm 2015 quy định như thế nào về thời hạn mở phiên tòa xét xử?",
+    options: [
+        { text: "01 tháng, kể từ ngày có quyết định đưa vụ án ra xét xử, Tòa án phải mở phiên tòa", isCorrect: false },
+        { text: "01 tháng, kể từ ngày có quyết định đưa vụ án ra xét xử, Tòa án phải mở phiên tòa; trường hợp có lý do chính đáng thì thời hạn này là 02 tháng", isCorrect: true },
+        { text: "01 tháng đối với vụ án đơn giản và 02 tháng đối với vụ án phức tạp kể từ ngày có quyết định đưa vụ án ra xét xử, Tòa án phải mở phiên tòa", isCorrect: false },
+        { text: "01 tháng, kể từ ngày có quyết định đưa vụ án ra xét xử, Tòa án phải mở phiên tòa; trường hợp có lý do chính đáng thì thời hạn này là 03 tháng.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Các thủ tục tố tụng dân sự",
+    question: "Bộ luật Tố tụng dân sự năm 2015 quy định như thế nào về thành phần Hội đồng xét xử phúc thẩm vụ án dân sự?",
+    options: [
+        { text: "Hội đồng xét xử phúc thẩm vụ án dân sự gồm 3 thẩm phán.", isCorrect: false },
+        { text: "Hội đồng xét xử phúc thẩm vụ án dân sự gồm 3 Thẩm phán, trừ trường hợp xét xử vụ án dân sự theo thủ tục rút gọn.", isCorrect: true },
+        { text: "Hội đồng xét xử phúc thẩm vụ án dân sự gồm 2 Thẩm phán.", isCorrect: false },
+        { text: "Hội đồng xét xử phúc thẩm vụ án dân sự gồm 5 Thẩm phán, trừ trường hợp xét xử vụ án dân sự theo thủ tục rút gọn.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Các thủ tục tố tụng dân sự",
+    question: "Bộ luật Tố tụng dân sự năm 2015 quy định như thế nào về thời hạn thông báo thụ lý vụ án để xét xử phúc thẩm?",
+    options: [
+        { text: "Trong thời hạn 07 ngày làm việc kể từ ngày thụ lý vụ án Tòa án phải thông báo bằng văn bản cho các đương sự, cơ quan, tổ chức.", isCorrect: false },
+        { text: "Trong thời hạn 03 ngày làm việc, kể từ ngày thụ lý vụ án, Tòa án phải thông báo bằng văn bản cho các đương sự, cơ quan, tổ chức, cá nhân khởi kiện và Viện kiểm sát cùng cấp về việc Tòa án đã thụ lý vụ án và thông báo trên Cổng thông tin điện tử của Tòa án.", isCorrect: true },
+        { text: "Trong thời hạn 05 ngày làm việc kể từ ngày thụ lý vụ án Tòa án phải thông báo bằng văn bản cho các đương sự, cơ quan, tổ chức.", isCorrect: false },
+        { text: "Trong thời hạn 10 ngày làm việc, kể từ ngày thụ lý vụ án, Tòa án phải thông báo bằng văn bản cho các đương sự, cơ quan, tổ chức, cá nhân khởi kiện và Viện kiểm sát cùng cấp về việc Tòa án đã thụ lý vụ án và thông báo trên Cổng thông tin điện tử của Tòa án.", isCorrect: false }
+    ],
+    type: "text"
+},
+{
+    objective: "Các thủ tục tố tụng dân sự",
+    question: "Bộ luật Tố tụng dân sự năm 2015 quy định thời hạn để Thẩm phán xem xét đơn khởi kiện là bao nhiêu ngày?",
+    options: [
+        { text: "5 ngày làm việc kể từ ngày được phân công", isCorrect: true },
+        { text: "7 ngày làm việc kể từ ngày được phân công", isCorrect: false },
+        { text: "15 ngày làm việc kể từ ngày được phân công", isCorrect: false },
+        { text: "10 ngày làm việc kể từ ngày được phân công", isCorrect: false }
+    ],
+    type: "text"
+}
+            ];
+
+            let shuffledQuestions = [];
+            let currentQuestionIndex = 0;
+            let scores = {};
+            const objectives = [...new Set(questions.map(q => q.objective))];
+            
+            function initializeScores() {
+                scores = {};
+                objectives.forEach(obj => {
+                    scores[obj] = { correct: 0, total: 0 };
+                });
+                questions.forEach(q => {
+                    scores[q.objective].total++;
+                });
+            }
+
+            function shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            function startGame() {
+                currentQuestionIndex = 0;
+                shuffledQuestions = shuffle([...questions]);
+                initializeScores();
+                $("#start-screen").hide();
+                $("#result-screen").hide();
+                $("#quiz-screen").show();
+                displayNextQuestion();
+            }
+            
+            function displayNextQuestion() {
+                if (currentQuestionIndex < shuffledQuestions.length) {
+                    const question = shuffledQuestions[currentQuestionIndex];
+                    $('#quiz-screen').removeClass('animate__animated animate__fadeOut').addClass('animate__animated animate__fadeIn');
+                    $("#question-counter").text(`Câu ${currentQuestionIndex + 1} / ${shuffledQuestions.length}`);
+                    $("#question-text").text(question.question);
+                    
+                    const optionsContainer = $("#options-container");
+                    optionsContainer.empty();
+                    
+                    const shuffledOptions = shuffle([...question.options]);
+                    
+                    shuffledOptions.forEach(option => {
+                        let optionElement;
+                        if (question.type === "image") {
+                            optionElement = $(`<div class="option image-option" data-correct="${option.isCorrect}"><img src="${option.image}" alt="Lựa chọn"></div>`);
+                        } else {
+                            optionElement = $(`<div class="option" data-correct="${option.isCorrect}">${option.text}</div>`);
+                        }
+                        optionsContainer.append(optionElement);
+                    });
+
+                    // Adjust grid for 3 image options
+                    if (question.type === 'image' && shuffledOptions.length === 3) {
+                         optionsContainer.css('grid-template-columns', 'repeat(3, 1fr)');
+                    } else if (shuffledOptions.length === 2 || shuffledOptions.length === 4) {
+                         optionsContainer.css('grid-template-columns', 'repeat(2, 1fr)');
+                    } else {
+                         optionsContainer.css('grid-template-columns', '1fr');
+                    }
+                    
+                } else {
+                    showResults();
+                }
+            }
+            
+            $("#options-container").on("click", ".option", function() {
+                const isCorrect = $(this).data("correct") === true;
+                const question = shuffledQuestions[currentQuestionIndex];
+                
+                $(".option").addClass('disabled');
+
+                if (isCorrect) {
+                    $(this).addClass("correct");
+                    $("#correct-sound")[0].play();
+                    scores[question.objective].correct++;
+                } else {
+                    $(this).addClass("incorrect");
+                    $("#incorrect-sound")[0].play();
+                    // Also show the correct answer
+                    $('#options-container .option').each(function() {
+                        if ($(this).data('correct') === true) {
+                            $(this).addClass('correct');
+                        }
+                    });
+                }
+                
+                currentQuestionIndex++;
+                
+                setTimeout(() => {
+                    $('#quiz-screen').addClass('animate__animated animate__fadeOut');
+                    setTimeout(displayNextQuestion, 500);
+                }, 1500);
+            });
+            
+            function showResults() {
+                $("#quiz-screen").hide();
+                $("#result-screen").addClass('animate__animated animate__fadeIn').show();
+                $("#completion-sound")[0].play();
+
+                const resultDetails = $("#result-details");
+                resultDetails.empty();
+                
+                let totalCorrect = 0;
+                let totalQuestions = shuffledQuestions.length;
+
+                objectives.forEach(obj => {
+                    const score = scores[obj];
+                    totalCorrect += score.correct;
+                    const resultItem = $(`
+                        <div class="result-item">
+                            <strong>${obj}:</strong>
+                            <span>${score.correct} / ${score.total} câu đúng</span>
+                        </div>
+                    `);
+                    resultDetails.append(resultItem);
+                });
+                
+                $("#result-summary").text(`Con đã trả lời đúng ${totalCorrect} / ${totalQuestions} câu!`);
+
+                // Post results to parent
+                const mark = (totalCorrect / totalQuestions) * 10;
+                const resultJsonObject = {
+                    type: "azt-student-result",
+                    mark: parseFloat(mark.toFixed(2)),
+                    url: window.location.href,
+                    result: {
+                        rawScore: totalCorrect,
+                        totalItems: totalQuestions,
+                        details: scores
+                    },
+                    html_view: `<div>
+                        <h3>Kết quả bài làm</h3>
+                        <p>Tổng điểm: <strong>${totalCorrect} / ${totalQuestions}</strong></p>
+                        ${resultDetails.html()}
+                    </div>`
+                };
+                window.parent.postMessage(resultJsonObject, '*');
+            }
+
+            $("#start-button").on("click", startGame);
+            $("#restart-button").on("click", startGame);
+        });
+    </script>
+
+</body>
+</html>
