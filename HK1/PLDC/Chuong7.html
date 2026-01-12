@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="contentType" content="quiz">
+    <meta name="description" content="Một bài kiểm tra trắc nghiệm tương tác dành cho học sinh lớp 1 về bài thơ 'Bảy sắc cầu vồng', giúp củng cố kiến thức về từ vựng, đọc hiểu và ghi nhớ.">
+    <meta name="nextActions" content="Thêm các câu hỏi về vần khác; Tạo một trò chơi ghép từ với các màu sắc; Chuyển thành bài tập điền vào chỗ trống">
+    <title>Chương 7 PLĐC</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap');
+
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --wrong-color: #e74c3c;
+            --light-color: #ffffff;
+            --dark-color: #333333;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-image: url('https://storage.googleapis.com/azt_agents/html_content_agent/1/79729a5e-612b-476f-8a83-6996288db3ee/rainbow_background.png/0');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: var(--dark-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+            overflow-x: hidden;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        #start-container, #quiz-container, #result-container {
+            display: none;
+            animation: slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        #start-container.active, #quiz-container.active, #result-container.active {
+            display: block;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            text-align: center;
+            color: #555;
+            margin-bottom: 30px;
+        }
+        
+        .start-btn {
+            font-size: 1.5rem;
+            font-weight: 700;
+            padding: 15px 40px;
+            border-radius: 50px;
+            background: linear-gradient(45deg, var(--secondary-color), #27ae60);
+            color: var(--light-color);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4);
+        }
+        
+        #progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(45deg, var(--primary-color), #8e44ad);
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        #question-counter {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        #question-text {
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 700;
+            min-height: 100px;
+        }
+
+        .answer-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 576px) {
+            .answer-options {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-btn {
+            font-size: 1.2rem;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #ddd;
+            background-color: var(--light-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            background-color: #f0f8ff;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        .option-btn.correct {
+            background-color: var(--secondary-color);
+            border-color: #27ae60;
+            color: var(--light-color);
+            animation: pulse 0.5s;
+        }
+
+        .option-btn.wrong {
+            background-color: var(--wrong-color);
+            border-color: #c0392b;
+            color: var(--light-color);
+            animation: shake 0.5s;
+        }
+
+        .result-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #27ae60;
+            margin-bottom: 20px;
+        }
+
+        .result-summary {
+            font-size: 1.3rem;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .category-result {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+        
+        .category-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .category-score {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--secondary-color);
+        }
+
+        .restart-btn {
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 12px 30px;
+            border-radius: 50px;
+            background: linear-gradient(45deg, var(--primary-color), #2980b9);
+            color: var(--light-color);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: block;
+            margin: 20px auto 0;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes slideInUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Start Screen -->
+        <div id="start-container" class="active">
+            <h1 class="welcome-title">CHƯƠNG 7. LUẬT HÌNH SỰ VÀ TỐ TỤNG HÌNH SỰ</h1>
+            <p class="welcome-subtitle">Câu hỏi trích từ VLE</p>
+            <button id="start-btn" class="start-btn">Bắt đầu!</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-container">
+             <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+            <div id="question-counter"></div>
+            <h2 id="question-text"></h2>
+            <div id="answer-options" class="answer-options"></div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-container">
+            <h2 class="result-title">Hoàn thành!</h2>
+            <p class="result-summary" id="total-score-text"></p>
+            <div id="category-scores"></div>
+            <button id="restart-btn" class="restart-btn">Làm lại</button>
+        </div>
+    </div>
+    
+    <audio id="correct-sound" src="https://www.myinstants.com/media/sounds/correct-answer-sound-effect-19.mp3" preload="auto"></audio>
+    <audio id="wrong-sound" src="https://www.myinstants.com/media/sounds/answer-wrong.mp3" preload="auto"></audio>
+    <audio id="completion-sound" src="https://www.myinstants.com/media/sounds/kids_cheering.mp3" preload="auto"></audio>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            const quizData = [
+    {
+        category: 'tim-tieng',
+        category_name: 'Tội phạm',
+        question: 'Đâu là đặc điểm của tội phạm?',
+        options: ['Tính cá nhân', 'Tính chịu trách nhiệm pháp lý', 'Tính trái pháp luật', 'Tính có lỗi'],
+        answer: 'Tính có lỗi'
+    },
+    {
+        category: 'tim-tieng',
+        category_name: 'Tội phạm',
+        question: 'Phân loại tội phạm theo tính chất và mức độ nguy hiểm cho xã hội của hành vi phạm tội thì tội phạm có mấy loại?',
+        options: ['3', '4', '5', '6'],
+        answer: '4'
+    },
+    {
+        category: 'tim-tieng',
+        category_name: 'Tội phạm',
+        question: 'Đâu là lỗi của tội phạm?',
+        options: ['Lỗi cố ý vì quá tự tin', 'Lỗi cố ý do cẩu thả', 'Lỗi cố ý gián tiếp', 'Lỗi vô ý gián tiếp'],
+        answer: 'Lỗi cố ý gián tiếp'
+    },
+    {
+        category: 'tim-tieng',
+        category_name: 'Tội phạm',
+        question: 'Nội dung nào đúng khi nói về tội phạm?',
+        options: [
+            'Tội phạm là hành vi nguy hiểm cho xã hội được quy định trong Bộ luật hình sự và các ngành luật có liên quan',
+            'Tội phạm do người có năng lực trách nhiệm hình sự hoặc pháp nhân thực hiện',
+            'Tội phạm là hành vi có lỗi cố ý hoặc vô ý',
+            'Tội phạm là hành vi vi phạm pháp luật hành chính'
+        ],
+        answer: 'Tội phạm là hành vi có lỗi cố ý hoặc vô ý'
+    },
+    {
+        category: 'tim-tieng',
+        category_name: 'Tội phạm',
+        question: 'Đâu là một loại tội phạm?',
+        options: ['Tội phạm ít nguy hiểm', 'Tội phạm nguy hiểm nghiêm trọng', 'Tội phạm ít nghiêm trọng', 'Tội phạm nguy hiểm đặc biệt'],
+        answer: 'Tội phạm ít nghiêm trọng'
+    },
+    {
+    category: 'tim-tieng',
+    category_name: 'Cấu thành tội phạm',
+    question: 'Chỉ có cá nhân mới là chủ thể của tội phạm.',
+    options: ['Nhận định Đúng', 'Nhận định Sai'],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Cấu thành tội phạm',
+    question: 'Thực hiện một hành vi trái pháp luật hình sự là tội phạm.',
+    options: ['Nhận định Đúng', 'Nhận định Sai'],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Cấu thành tội phạm',
+    question: 'Khách thể của tội phạm là quan hệ xã hội được Luật hình sự bảo vệ và bị tội phạm xâm phạm.',
+    options: ['Nhận định Đúng', 'Nhận định Sai'],
+    answer: 'Nhận định Đúng'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Cấu thành tội phạm',
+    question: 'Người dưới 16 tuổi không phải chịu trách nhiệm hình sự khi phạm tội.',
+    options: ['Nhận định Đúng', 'Nhận định Sai'],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Cấu thành tội phạm',
+    question: 'Thực hiện một hành vi gây thiệt hại nghiêm trọng là tội phạm.',
+    options: ['Nhận định Đúng', 'Nhận định Sai'],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Cấu thành tội phạm',
+    question: 'Phạm tội với lỗi vô ý có thể phải chịu TNHS.',
+    options: ['Nhận định Đúng', 'Nhận định Sai'],
+    answer: 'Nhận định Đúng'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Cấu thành tội phạm',
+    question: 'Mặt khách quan của tội phạm là mặt bên ngoài của tội phạm, bao gồm những dấu hiệu lỗi, động cơ, mục đích phạm tội.',
+    options: ['Nhận định Đúng', 'Nhận định Sai'],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Cấu thành tội phạm',
+    question: 'Có 4 dấu hiệu để cấu thành tội phạm: chủ thể, khách thể, chủ quan và lỗi',
+    options: ['Nhận định Đúng', 'Nhận định Sai'],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Cấu thành tội phạm',
+    question: 'Lỗi là dấu hiệu bắt buộc để cấu thành tội phạm.',
+    options: ['Nhận định Đúng', 'Nhận định Sai'],
+    answer: 'Nhận định Đúng'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Cấu thành tội phạm',
+    question: 'Người mất khả năng nhận thức và điều khiển hành vi có thể chịu TNHS khi người đại diện của họ đồng ý nhận tội',
+    options: ['Nhận định Đúng', 'Nhận định Sai'],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Các chế định liên quan đến việc thực hiện tội phạm',
+    question: 'Tội phạm hoàn thành là gì?',
+    options: [
+        'Tội phạm hoàn thành là giai đoạn hành vi phạm tội đã đủ yếu tố cấu thành tội phạm',
+        'Tội phạm hoàn thành là giai đoạn người phạm tội thực hiện được mục đích',
+        'Tội phạm hoàn thành là giai đoạn hành vi phạm tội đã hoàn thành và mục đích của người phạm tội đã thực hiện',
+        'Tội phạm hoàn thành là giai đoạn hành vi phạm tội đã đủ yếu tố thành tội phạm, tuy nhiên phải xảy ra thiệt hại nghiêm trọng'
+    ],
+    answer: 'Tội phạm hoàn thành là giai đoạn hành vi phạm tội đã đủ yếu tố cấu thành tội phạm'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Các chế định liên quan đến việc thực hiện tội phạm',
+    question: 'Trường hợp nào được loại trừ trách nhiệm hình sự?',
+    options: [
+        'Sự kiện bất ngờ, tình thế cấp thiết, phạm tội chưa đạt',
+        'Sự kiện bất ngờ, tình thế cấp thiết, đồng phạm',
+        'Sự kiện bất ngờ, tình thế cấp thiết, chuẩn bị phạm tội',
+        'Sự kiện bất ngờ, tình thế cấp thiết, phòng vệ chính đáng'
+    ],
+    answer: 'Sự kiện bất ngờ, tình thế cấp thiết, phòng vệ chính đáng'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Các chế định liên quan đến việc thực hiện tội phạm',
+    question: 'Nửa chừng chấm dứt việc phạm tội là gì?',
+    options: [
+        'Nửa chừng chấm dứt việc phạm tội là không thực hiện được tội phạm đến cùng do khách quan, tuy không có gì ngăn cản.',
+        'Nửa chừng chấm dứt việc phạm tội là là tự mình không thực hiện tội phạm đến cùng, do có gì ngăn cản.',
+        'Nửa chừng chấm dứt việc phạm tội là tự mình không thực hiện tội phạm đến cùng, tuy không có gì ngăn cản. Người tự ý nửa chừng chấm dứt việc phạm tội được miễn trách nhiệm hình sự về tội định phạm.',
+        'Nửa chừng chấm dứt việc phạm tội là tự mình không thực hiện tội phạm đến cùng, tuy không có gì ngăn cản. Người tự ý nửa chừng chấm dứt việc phạm tội vẫn phải chịu trách nhiệm hình sự về tội định phạm.'
+    ],
+    answer: 'Nửa chừng chấm dứt việc phạm tội là tự mình không thực hiện tội phạm đến cùng, tuy không có gì ngăn cản. Người tự ý nửa chừng chấm dứt việc phạm tội được miễn trách nhiệm hình sự về tội định phạm.'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Các chế định liên quan đến việc thực hiện tội phạm',
+    question: 'Phạm tội chưa đạt là:',
+    options: [
+        'giai đoạn mà người phạm tội đã thực hiện hành vi phạm tội',
+        'giai đoạn mà người phạm tội có thực hiện hành vi phạm tội, nhưng không thực hiện được đến cùng do những cản trở khách quan.',
+        'giai đoạn mà người phạm tội có thực hiện hành vi phạm tội, nhưng không thực hiện được đến cùng do tự ý chấm dứt.',
+        'giai đoạn mà người phạm tội không thực hiện hành vi phạm tội và không thực hiện được đến cùng do những cản trở khách quan.'
+    ],
+    answer: 'giai đoạn mà người phạm tội có thực hiện hành vi phạm tội, nhưng không thực hiện được đến cùng do những cản trở khách quan.'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Các chế định liên quan đến việc thực hiện tội phạm',
+    question: 'Chuẩn bị phạm tội là:',
+    options: [
+        'chuẩn bị phạm tội là tìm kiếm, sửa soạn công cụ, phương tiện hoặc tạo ra những điều kiện khác để thực hiện tội phạm',
+        'chuẩn bị phạm tội: sửa soạn công cụ, phương tiện thực hiện tội phạm cho đến cùng',
+        'chuẩn bị phạm tội là nảy sinh ý tưởng phạm tội',
+        'chuẩn bị phạm tội là tìm kiếm, sửa soạn công cụ, phương tiện sau đó không phạm tội do bị ngăn cản'
+    ],
+    answer: 'chuẩn bị phạm tội là tìm kiếm, sửa soạn công cụ, phương tiện hoặc tạo ra những điều kiện khác để thực hiện tội phạm'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Các chế định liên quan đến việc thực hiện tội phạm',
+    question: 'Đâu là nhận định đúng?',
+    options: [
+        'Đồng phạm là trường hợp có hai người trở lên cố ý cùng thực hiện một tội phạm. Người đồng phạm bao gồm người tổ chức, người thực hành, người xúi giục, người giúp sức.',
+        'Đồng phạm là trường hợp có hai người trở lên cùng phạm một tội được quy định trong BLHS.',
+        'Đồng phạm là trường hợp phạm tội có tổ chức và phạm tội có tính tập thể',
+        'Đồng phạm là trường hợp có ít nhất hai người trở lên cố ý cùng thực hiện một tội phạm. Người đồng phạm phải chịu TNHS như nhau.'
+    ],
+    answer: 'Đồng phạm là trường hợp có hai người trở lên cố ý cùng thực hiện một tội phạm. Người đồng phạm bao gồm người tổ chức, người thực hành, người xúi giục, người giúp sức.'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Trách nhiệm hình sự và hình phạt + Các biện pháp miễn, giảm trách nhiệm hình sự và hình phạt',
+    question: 'Hình phạt tiền trong Luật hình sự là:',
+    options: [
+        'hình phạt bổ sung',
+        'hình phạt chính',
+        'hình phạt chính hoặc hình phạt bổ sung',
+        'biện pháp tư pháp khác'
+    ],
+    answer: 'hình phạt chính hoặc hình phạt bổ sung'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Trách nhiệm hình sự và hình phạt + Các biện pháp miễn, giảm trách nhiệm hình sự và hình phạt',
+    question: 'Nhận định nào đúng?',
+    options: [
+        'Người bị kết án tù chung thân, lần đầu được giảm xuống 25 năm tù và dù được giảm nhiều lần cũng phải bảo đảm thời hạn thực tế chấp hành hình phạt là 20 năm.',
+        'Trường hợp người bị kết án về nhiều tội trong đó có tội bị kết án phạt tù chung thân thì Tòa án chỉ xét giảm lần đầu xuống 30 năm tù sau khi đã chấp hành được 15 năm tù và dù được giảm nhiều lần nhưng vẫn phải bảo đảm thời hạn thực tế chấp hành là 25 năm.',
+        'Người bị kết án tù chung thân, lần đầu được giảm xuống 20 năm tù và dù được giảm nhiều lần cũng phải bảo đảm thời hạn thực tế chấp hành hình phạt là 15 năm.',
+        'Trường hợp người bị kết án về nhiều tội trong đó có tội bị kết án phạt tù chung thân thì Tòa án chỉ xét giảm lần đầu xuống 25 năm tù sau khi đã chấp hành được 15 năm tù và dù được giảm nhiều lần nhưng vẫn phải bảo đảm thời hạn thực tế chấp hành là 20 năm.'
+    ],
+    answer: 'Trường hợp người bị kết án về nhiều tội trong đó có tội bị kết án phạt tù chung thân thì Tòa án chỉ xét giảm lần đầu xuống 30 năm tù sau khi đã chấp hành được 15 năm tù và dù được giảm nhiều lần nhưng vẫn phải bảo đảm thời hạn thực tế chấp hành là 25 năm.'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Trách nhiệm hình sự và hình phạt + Các biện pháp miễn, giảm trách nhiệm hình sự và hình phạt',
+    question: 'Nhận định nào đúng?',
+    options: [
+        'Mức hình phạt cao nhất đối với người dưới 14 tuổi phạm tội là 12 năm tù giam',
+        'Phụ nữ đang nuôi con thì không bị áp dụng hình phạt tử hình khi phạm tội',
+        'Mức hình phạt cao nhất đối với người dưới 18 tuổi phạm tội là 18 năm tù giam',
+        'Mức hình phạt cao nhất đối với người dưới 16 tuổi phạm tội là 15 năm tù giam'
+    ],
+    answer: 'Mức hình phạt cao nhất đối với người dưới 18 tuổi phạm tội là 18 năm tù giam'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Trách nhiệm hình sự và hình phạt + Các biện pháp miễn, giảm trách nhiệm hình sự và hình phạt',
+    question: 'Đối với mỗi tội phạm, kèm theo hình phạt chính có thể tuyên:',
+    options: [
+        'một hình phạt bổ sung',
+        'nhiều hình phạt bổ sung',
+        'không áp dụng hình phạt bổ sung nào',
+        'thêm một hình phạt chính'
+    ],
+    answer: 'nhiều hình phạt bổ sung'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Trách nhiệm hình sự và hình phạt + Các biện pháp miễn, giảm trách nhiệm hình sự và hình phạt',
+    question: 'Nhận định nào đúng?',
+    options: [
+        'Mức án tối đa đối với một hành vi vi phạm tội là 20 năm tù giam',
+        'Tội phạm đặc biệt nghiêm trọng thì chịu mức hình phạt cao nhất là chung thân',
+        'Người trên 75 tuổi thì không áp dụng hình phạt chung thân hoặc tử hình',
+        'Phụ nữ đang mang thai thì không áp dụng hình phạt tử hình'
+    ],
+    answer: 'Phụ nữ đang mang thai thì không áp dụng hình phạt tử hình'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Trách nhiệm hình sự và hình phạt + Các biện pháp miễn, giảm trách nhiệm hình sự và hình phạt',
+    question: 'Hình phạt là biện pháp pháp lý mà nhà nước dự kiến áp dụng đối với:',
+    options: [
+        'cá nhân hoặc pháp nhân thương mại phạm tội',
+        'cá nhân vi phạm pháp luật dân sự',
+        'các tổ chức, cá nhân vi phạm hành chính',
+        'cán bộ, công chức, người lao động, học sinh, sinh viên vi phạm kỷ luật'
+    ],
+    answer: 'cá nhân hoặc pháp nhân thương mại phạm tội'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Trách nhiệm hình sự và hình phạt + Các biện pháp miễn, giảm trách nhiệm hình sự và hình phạt',
+    question: 'Nhận định nào đúng?',
+    options: [
+        'Thời gian đã chấp hành hình phạt để được xét giảm lần đầu là một phần ba thời hạn đối với hình phạt cải tạo không giam giữ, hình phạt tù có thời hạn, 12 năm đối với tù chung thân.',
+        'Thời gian đã chấp hành hình phạt để được xét giảm lần đầu là hai phần ba thời hạn đối với hình phạt cải tạo không giam giữ, hình phạt tù có thời hạn, 12 năm đối với tù chung thân.',
+        'Thời gian đã chấp hành hình phạt để được xét giảm lần đầu là một phần ba thời hạn đối với hình phạt cải tạo không giam giữ, hình phạt tù có thời hạn, 15 năm đối với tù chung thân.',
+        'Thời gian đã chấp hành hình phạt để được xét giảm lần đầu là một phần ba thời hạn đối với hình phạt cải tạo không giam giữ, hình phạt tù có thời hạn, 18 năm đối với tù chung thân.'
+    ],
+    answer: 'Thời gian đã chấp hành hình phạt để được xét giảm lần đầu là một phần ba thời hạn đối với hình phạt cải tạo không giam giữ, hình phạt tù có thời hạn, 12 năm đối với tù chung thân.'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Trách nhiệm hình sự và hình phạt + Các biện pháp miễn, giảm trách nhiệm hình sự và hình phạt',
+    question: 'Chế tài nào sau đây luôn là chế tài hình sự?',
+    options: [
+        'Tù có thời hạn',
+        'Phạt tiền',
+        'Cảnh cáo',
+        'Bồi thường thiệt hại'
+    ],
+    answer: 'Tù có thời hạn'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Trách nhiệm hình sự và hình phạt + Các biện pháp miễn, giảm trách nhiệm hình sự và hình phạt',
+    question: 'Chế tài hình sự được áp dụng đối với?',
+    options: [
+        'Tổ chức',
+        'Cá nhân',
+        'Cơ quan nhà nước',
+        'Trường học'
+    ],
+    answer: 'Cá nhân'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Trách nhiệm hình sự và hình phạt + Các biện pháp miễn, giảm trách nhiệm hình sự và hình phạt',
+    question: 'Cải tạo không giam giữ là:',
+    options: [
+        'biện pháp tư pháp khác',
+        'biện pháp xử phạt hành chính',
+        'hình phạt chính',
+        'hình phạt bổ sung'
+    ],
+    answer: 'hình phạt chính'
+},
+
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Hành vi tham nhũng có thể xảy ra ở đâu?',
+    options: [
+        'Trong cơ quan, tổ chức của nhà nước',
+        'Trong cơ quan, tổ chức, đơn vị khu vực nhà nước và doanh nghiệp, tổ chức khu vực ngoài nhà nước',
+        'Trong cơ quan nhà nước và doanh nghiệp nhà nước',
+        'Trong doanh nghiệp, tổ chức khu vực ngoài nhà nước'
+    ],
+    answer: 'Trong cơ quan, tổ chức, đơn vị khu vực nhà nước và doanh nghiệp, tổ chức khu vực ngoài nhà nước'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Công việc nào trong số những công việc sau đây có mục đích phòng ngừa tham nhũng?',
+    options: [
+        'Luân chuyển cán bộ',
+        'Điều động cán bộ',
+        'Chuyển đổi vị trí công tác',
+        'Biệt phái cán bộ'
+    ],
+    answer: 'Chuyển đổi vị trí công tác'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Người có chức vụ, quyền hạn không bị cấm việc nào sau đây?',
+    options: [
+        'Thành lập, tham gia quản lý, điều hành doanh nghiệp tư nhân',
+        'Mua cổ phần, góp vốn vào doanh nghiệp tư',
+        'Sử dụng trái phép thông tin của cơ quan, tổ chức, đơn vị',
+        'Nhũng nhiễu trong giải quyết công việc'
+    ],
+    answer: 'Mua cổ phần, góp vốn vào doanh nghiệp tư'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Luật Phòng, chống tham nhũng năm 2018 có hiệu lực thi hành khi nào?',
+    options: [
+        '01/7/2019',
+        '20/11/2018',
+        '04/12/2018',
+        '01/01/2019'
+    ],
+    answer: '01/7/2019'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Thời hạn chuyển đổi vị trí công tác được quy định như thế nào theo Luật Phòng chống tham nhũng?',
+    options: [
+        '02 năm',
+        '05 năm',
+        '02 đến 05 năm theo đặc thù của từng lĩnh vực',
+        '04 năm'
+    ],
+    answer: '02 đến 05 năm theo đặc thù của từng lĩnh vực'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Trong số những hành vi sau đây, hành vi nào không phải hành vi tham nhũng?',
+    options: [
+        'Giả mạo trong công tác vì vụ lợi',
+        'Công chức lừa đảo chiếm đoạt tài sản',
+        'Công chức nhũng nhiễu vì vụ lợi',
+        'Lợi dụng chức vụ, quyền hạn sử dụng trái phép tài sản công vì vụ lợi'
+    ],
+    answer: 'Lợi dụng chức vụ, quyền hạn sử dụng trái phép tài sản công vì vụ lợi'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Người đứng đầu cơ quan, tổ chức, đơn vị không bị cấm làm việc nào sau đây?',
+    options: [
+        'Tuyển dụng con, anh, chị, em ruột vào cơ quan, tổ chức, đơn vị mình',
+        'Bổ nhiệm vợ (chồng), con giữ chức vụ quản lý về tổ chức nhân sự',
+        'Bố trí vợ (chồng), con, anh, chị, em ruột làm kế toán trưởng trong cơ quan, tổ chức, đơn vị mình',
+        'Làm thủ quỹ trong cơ quan, tổ chức, đơn vị mình'
+    ],
+    answer: 'Làm thủ quỹ trong cơ quan, tổ chức, đơn vị mình'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Người được giao thực hiện nhiệm vụ công vụ nếu biết nhiệm vụ công vụ được giao có xung đột lợi ích thì cần ứng xử như thế nào?',
+    options: [
+        'Phải tạm dừng việc thực hiện nhiệm vụ, công vụ đó',
+        'Phải báo cáo người có thẩm quyền để xem xét, xử lý',
+        'Tiếp tục thực hiện nhiệm vụ công vụ và sau đó báo cáo người có thẩm quyền',
+        'Tiếp tục thực hiện nhiệm vụ công vụ và tránh các hiện tượng tham nhũng, tiêu cực'
+    ],
+    answer: 'Phải báo cáo người có thẩm quyền để xem xét, xử lý'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Người nào sau đây không phải kê khai tài sản, thu nhập?',
+    options: [
+        'Thanh tra viên',
+        'Giáo viên',
+        'Thẩm phán',
+        'Giám đốc bệnh viện công'
+    ],
+    answer: 'Giáo viên'
+},
+
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Đâu không phải là Tội phạm:',
+    options: [
+        'Sử dụng trái phép ma tuý',
+        'Vận chuyển trái phép ma tuý',
+        'Tàng trữ trái phép ma tuý',
+        'Buôn bán trái phép ma tuý'
+    ],
+    answer: 'Sử dụng trái phép ma tuý'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Trong số những hành vi sau đây, hành vi nào không phải hành vi tham nhũng?',
+    options: [
+        'Giả mạo trong công tác vì vụ lợi',
+        'Công chức lừa đảo chiếm đoạt tài sản',
+        'Công chức nhũng nhiễu vì vụ lợi',
+        'Lợi dụng chức vụ, quyền hạn sử dụng trái phép tài sản công vì vụ lợi'
+    ],
+    answer: 'Công chức lừa đảo chiếm đoạt tài sản'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Người có chức vụ, quyền hạn không được nhận quà tặng nào dưới đây của tổ chức, cá nhân có liên quan đến công việc do mình giải quyết hoặc thuộc phạm vi quản lý của mình?',
+    options: [
+        'Từ 5 trăm nghìn đồng trở lên',
+        'Từ 2 triệu đồng trở lên',
+        'Từ 10 triệu đồng trở lên',
+        'Tuyệt đối không được nhận.'
+    ],
+    answer: 'Tuyệt đối không được nhận.'
+},
+                
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Cán bộ, công chức phát hiện hành vi tham nhũng trong cơ quan, tổ chức, đơn vị mình thì phải xử lý như thế nào?',
+    options: [
+        'Đưa tiền cho cơ quan thanh tra nhà nước nhằm che giấu tội phạm',
+        'Tố cáo với cơ quan có thẩm quyền',
+        'Khuyên không nên tham nhũng nữa và giúp đồng nghiệp che giấu',
+        'Cả ba phương án trên.'
+    ],
+    answer: 'Tố cáo với cơ quan có thẩm quyền'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Đâu là nhận định Đúng?',
+    options: [
+        'Tội phạm về tham nhũng có thể được thực hiện với lỗi vô ý',
+        'Tội phạm về ma tuý luôn luôn có lỗi cố ý',
+        'Tội phạm về ma tuý và tham nhũng luôn được thực hiện với lỗi cố ý',
+        'Tội phạm về ma tuý có thể thực hiện với lỗi cố ý hoặc vô ý'
+    ],
+    answer: 'Tội phạm về ma tuý có thể thực hiện với lỗi cố ý hoặc vô ý'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Có bao nhiêu Tội phạm tham nhũng trong Bộ luật Hình sự năm 2015, sđbs năm 2017?',
+    options: [
+        '03 Tội phạm',
+        '05 Tội phạm',
+        '07 Tội phạm',
+        '12 Tội phạm'
+    ],
+    answer: '07 Tội phạm'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Tội phạm nặng nhất là:',
+    options: [
+        'Tội giết người',
+        'Tội tham nhũng',
+        'Tội phản bội Tổ quốc',
+        'Tội hiếp dâm'
+    ],
+    answer: 'Tội phản bội Tổ quốc'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Đâu là khách thể của tội phạm về tham nhũng:',
+    options: [
+        'Hoạt động đúng đắn của cơ quan, cá nhân có thẩm quyền được nhà nước giao nhiệm vụ trong thực hiện nhiệm vụ, thực thi công vụ',
+        'Hoạt động đúng đắn của cá nhân, tổ chức',
+        'Hoạt động sai trái của cơ quan, cá nhân có thẩm quyền được nhà nước giao nhiệm vụ trong thực hiện nhiệm vụ, thực thi công vụ',
+        'Hoạt động của cán bộ, công chức có thẩm quyền trong tất cả quan hệ xã hội'
+    ],
+    answer: 'Hoạt động đúng đắn của cơ quan, cá nhân có thẩm quyền được nhà nước giao nhiệm vụ trong thực hiện nhiệm vụ, thực thi công vụ'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Người có chức vụ, quyền hạn không bị cấm việc nào sau đây?',
+    options: [
+        'Nhận tiền của nhân dân để nhanh chóng giải quyết công việc cho dân',
+        'Sử dụng trái phép thông tin của cơ quan, tổ chức, đơn vị',
+        'Nhũng nhiễu trong giải quyết công việc',
+        'Hưởng lương từ ngân sách nhà nước'
+    ],
+    answer: 'Hưởng lương từ ngân sách nhà nước'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Tài sản tham nhũng không là tài sản nào sau đây?',
+    options: [
+        'Tài sản do tham ô mà có',
+        'Tài sản có được từ hành vi tham nhũng, có nguồn gốc từ hành vi tham nhũng',
+        'Tài sản do nhận hối lộ mà có',
+        'Tài sản từ thu nhập của cán bộ, công chức'
+    ],
+    answer: 'Tài sản từ thu nhập của cán bộ, công chức'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Khách thể của tội phạm về ma tuý là:',
+    options: [
+        'Tính mạng con người',
+        'Hoạt động quản lý các chất ma tuý của Nhà nước',
+        'Sự gây nghiện cho con người',
+        'Chất ma tuý'
+    ],
+    answer: 'Hoạt động quản lý các chất ma tuý của Nhà nước'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Mức hình phạt cao nhất của tội phạm về ma tuý có thể là:',
+    options: [
+        'Chung thân',
+        'Tử hình',
+        'Tù có thời hạn',
+        'Không chịu hình phạt'
+    ],
+    answer: 'Tử hình'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Hành vi tham nhũng có thể xảy ra ở đâu?',
+    options: [
+        'Trong cơ quan, tổ chức của nhà nước',
+        'Trong cơ quan, tổ chức, đơn vị khu vực nhà nước và doanh nghiệp, tổ chức khu vực ngoài nhà nước',
+        'Trong cơ quan nhà nước và doanh nghiệp nhà nước',
+        'Trong doanh nghiệp, tổ chức khu vực ngoài nhà nước'
+    ],
+    answer: 'Trong cơ quan, tổ chức, đơn vị khu vực nhà nước và doanh nghiệp, tổ chức khu vực ngoài nhà nước'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Chủ thể của tội lợi dụng chức vụ, quyền hạn có thể là ai?',
+    options: [
+        'Cán bộ, công chức',
+        'Doanh nghiệp tư nhân',
+        'Học sinh, sinh viên',
+        'Bất kỳ cá nhân, tổ chức nào'
+    ],
+    answer: 'Cán bộ, công chức'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Một số tội phạm trong BLHS 2015',
+    question: 'Hành vi người có chức vụ, quyền hạn nhận tiền, sửa điểm thi là hành vi nào trong số các hành vi sau đây?',
+    options: [
+        'Gian lận trong thi cử',
+        'Đưa hối lộ',
+        'Tiêu cực',
+        'Lợi dụng chức vụ, quyền hạn trong khi thi hành nhiệm vụ, công vụ vì vụ lợi.'
+    ],
+    answer: 'Lợi dụng chức vụ, quyền hạn trong khi thi hành nhiệm vụ, công vụ vì vụ lợi.'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Luật tố tụng hình sự',
+    question: 'Tố tụng hình sự là mô hình của Tố tụng dân sự.',
+    options: [
+        'Nhận định Đúng',
+        'Nhận định Sai'
+    ],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Luật tố tụng hình sự',
+    question: 'Viện kiểm sát là cơ quan tiến hành điều tra vụ án hình sự.',
+    options: [
+        'Nhận định Đúng',
+        'Nhận định Sai'
+    ],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Luật tố tụng hình sự',
+    question: 'Chỉ người nào phạm một tội trong TTHS mới có thể bị đưa ra xét xử.',
+    options: [
+        'Nhận định Đúng',
+        'Nhận định Sai'
+    ],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Luật tố tụng hình sự',
+    question: 'Chỉ có Quan hệ pháp luật (QHPL) tố tụng hình sự (TTHS) mới mang tính quyền lực nhà nước.',
+    options: [
+        'Nhận định Đúng',
+        'Nhận định Sai'
+    ],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Luật tố tụng hình sự',
+    question: 'Nguyên tắc “Bảo đảm quyền bào chữa của người bị tạm giữ, bị can, bị cáo” là nguyên tắc đặc thù mà chỉ Luật TTHS mới có.',
+    options: [
+        'Nhận định Đúng',
+        'Nhận định Sai'
+    ],
+    answer: 'Nhận định Đúng'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Luật tố tụng hình sự',
+    question: 'Khởi tố vụ án chỉ có trong TTHS.',
+    options: [
+        'Nhận định Đúng',
+        'Nhận định Sai'
+    ],
+    answer: 'Nhận định Đúng'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Luật tố tụng hình sự',
+    question: 'Xét xử vụ án hình sự là ra quyết định tuyên phạt người phạm tội.',
+    options: [
+        'Nhận định Đúng',
+        'Nhận định Sai'
+    ],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Luật tố tụng hình sự',
+    question: 'Thẩm quyền xét xử chỉ thuộc về Toà án.',
+    options: [
+        'Nhận định Đúng',
+        'Nhận định Sai'
+    ],
+    answer: 'Nhận định Đúng'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Luật tố tụng hình sự',
+    question: 'Thủ tục TTHS theo trình tự bao gồm: Điều tra – Khởi tố - Truy tố - Xét xử.',
+    options: [
+        'Nhận định Đúng',
+        'Nhận định Sai'
+    ],
+    answer: 'Nhận định Sai'
+},
+{
+    category: 'tim-tieng',
+    category_name: 'Luật tố tụng hình sự',
+    question: 'Xét xử vụ án hình sự gồm: xét xử sơ thẩm và Giám đốc thẩm.',
+    options: [
+        'Nhận định Đúng',
+        'Nhận định Sai'
+    ],
+    answer: 'Nhận định Sai'
+}
+            ];
+
+            let shuffledQuestions, currentQuestionIndex;
+            let scores = {};
+            let userAnswers = [];
+
+            const startContainer = $('#start-container');
+            const quizContainer = $('#quiz-container');
+            const resultContainer = $('#result-container');
+            const questionText = $('#question-text');
+            const answerOptions = $('#answer-options');
+            const progressBar = $('#progress-bar');
+            const questionCounter = $('#question-counter');
+
+            $('#start-btn').on('click', startGame);
+            $('#restart-btn').on('click', startGame);
+
+            function shuffleArray(array) {
+                return array.sort(() => Math.random() - 0.5);
+            }
+
+            function startGame() {
+                shuffledQuestions = shuffleArray([...quizData]);
+                currentQuestionIndex = 0;
+                scores = {
+                    'tim-tieng': { correct: 0, total: 0, name: 'Tìm tiếng' },
+                    'tra-loi': { correct: 0, total: 0, name: 'Trả lời câu hỏi' },
+                    'ten-mau': { correct: 0, total: 0, name: 'Nhận biết màu sắc' }
+                };
+                userAnswers = [];
+                quizData.forEach(q => scores[q.category].total++);
+                
+                startContainer.removeClass('active');
+                resultContainer.removeClass('active');
+                quizContainer.addClass('active');
+                
+                showQuestion();
+            }
+
+            function showQuestion() {
+                if (currentQuestionIndex < shuffledQuestions.length) {
+                    const currentQuestion = shuffledQuestions[currentQuestionIndex];
+                    const progress = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+                    
+                    progressBar.width(progress + '%');
+                    questionCounter.text(`Câu ${currentQuestionIndex + 1} / ${shuffledQuestions.length}`);
+                    questionText.html(currentQuestion.question);
+                    answerOptions.empty();
+
+                    const shuffledOptions = shuffleArray([...currentQuestion.options]);
+                    shuffledOptions.forEach(option => {
+                        const button = $(`<button class="option-btn">${option}</button>`);
+                        button.on('click', () => selectAnswer(button, option, currentQuestion.answer, currentQuestion.category));
+                        answerOptions.append(button);
+                    });
+                } else {
+                    showResults();
+                }
+            }
+
+            function selectAnswer(button, selectedOption, correctAnswer, category) {
+                $('.option-btn').prop('disabled', true);
+                 userAnswers.push({
+                    question: shuffledQuestions[currentQuestionIndex].question,
+                    selected: selectedOption,
+                    correct: correctAnswer,
+                    isCorrect: selectedOption === correctAnswer
+                });
+                if (selectedOption === correctAnswer) {
+                    button.addClass('correct');
+                    scores[category].correct++;
+                    $('#correct-sound')[0].play();
+                } else {
+                    button.addClass('wrong');
+                    $('#wrong-sound')[0].play();
+                    // Highlight the correct answer
+                    $('.option-btn').each(function() {
+                        if ($(this).text() === correctAnswer) {
+                            $(this).addClass('correct');
+                        }
+                    });
+                }
+                
+                const progress = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+                progressBar.width(progress + '%');
+
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    showQuestion();
+                }, 1500);
+            }
+
+            function showResults() {
+                quizContainer.removeClass('active');
+                resultContainer.addClass('active');
+                $('#completion-sound')[0].play();
+
+                let totalCorrect = 0;
+                let totalQuestions = shuffledQuestions.length;
+                
+                $('#category-scores').empty();
+
+                Object.keys(scores).forEach(categoryKey => {
+                    const category = scores[categoryKey];
+                    if (category.total > 0) {
+                         totalCorrect += category.correct;
+                        const categoryDiv = `
+                            <div class="category-result d-flex justify-content-between align-items-center">
+                                <span class="category-title">${category.name}</span>
+                                <span class="category-score">${category.correct} / ${category.total}</span>
+                            </div>
+                        `;
+                        $('#category-scores').append(categoryDiv);
+                    }
+                });
+                
+                $('#total-score-text').text(`Tổng điểm của bạn: ${totalCorrect} / ${totalQuestions}`);
+                
+                sendResultsToParent(totalCorrect, totalQuestions);
+            }
+
+            function sendResultsToParent(totalCorrect, totalQuestions) {
+                const mark = (totalCorrect / totalQuestions) * 10;
+                
+                let resultHtml = `<div><h4>Kết quả chi tiết</h4><p><strong>Tổng điểm: ${totalCorrect}/${totalQuestions}</strong></p><ul>`;
+                Object.keys(scores).forEach(key => {
+                    const cat = scores[key];
+                    if (cat.total > 0) {
+                       resultHtml += `<li>${cat.name}: ${cat.correct}/${cat.total}</li>`;
+                    }
+                });
+                resultHtml += "</ul></div>";
+
+                const resultJsonObject = {
+                    type: "azt-student-result",
+                    mark: parseFloat(mark.toFixed(2)),
+                    url: window.location.href,
+                    result: {
+                        raw_score: totalCorrect,
+                        total_items: totalQuestions,
+                        categories: scores,
+                        answers: userAnswers
+                    },
+                    html_view: resultHtml
+                };
+
+                window.parent.postMessage(resultJsonObject, '*');
+                console.log("Results sent to parent:", resultJsonObject);
+            }
+        });
+    </script>
+</body>
+</html>
