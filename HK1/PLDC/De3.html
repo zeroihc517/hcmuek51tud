@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bảo trì hệ thống</title>
+
+<style>
+:root{
+  --bg:#7f1d1d;
+  --card:#991b1b;
+  --text:#fff7ed;
+  --muted:#fde68a;
+  --accent:#facc15;
+}
+
+/* ===== RESET ===== */
+*{box-sizing:border-box}
+html,body{height:100%}
+
+/* ===== BODY ===== */
+body{
+  margin:0;
+  background:
+    radial-gradient(900px 600px at 50% -10%, rgba(250,204,21,.35), transparent 60%),
+    linear-gradient(180deg, #b91c1c, #7f1d1d 70%);
+  color:var(--text);
+  font-family:system-ui,Segoe UI,Roboto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+
+/* ===== CÂU ĐỐI ===== */
+.cau-doi{
+  position:fixed;
+  top:50%;
+  transform:translateY(-50%);
+  width:60px;
+  height:70%;
+  background:linear-gradient(180deg,#dc2626,#991b1b);
+  border:3px solid var(--accent);
+  color:#fde047;
+  writing-mode:vertical-rl;
+  text-orientation:mixed;
+  font-size:22px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 0 20px rgba(250,204,21,.5);
+}
+.cau-doi.left{left:16px}
+.cau-doi.right{right:16px}
+
+/* ===== CARD ===== */
+.card{
+  position:relative;
+  z-index:5;
+  background:linear-gradient(180deg,#991b1b,#7f1d1d);
+  border:4px solid var(--accent);
+  border-radius:24px;
+  padding:32px;
+  width:100%;
+  max-width:620px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(250,204,21,.4);
+}
+
+/* ===== ICON ===== */
+.icon{
+  width:90px;
+  margin:0 auto 16px;
+  filter:drop-shadow(0 0 16px gold);
+}
+.gear{
+  transform-origin:50% 50%;
+  animation:spin 10s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== TEXT ===== */
+h1{
+  margin:0 0 8px;
+  color:#fde047;
+}
+p{
+  color:var(--muted);
+  line-height:1.6;
+}
+.btn{
+  margin-top:16px;
+  display:inline-block;
+  padding:12px 20px;
+  background:linear-gradient(180deg,#fde047,#f59e0b);
+  color:#7c2d12;
+  font-weight:700;
+  border-radius:14px;
+  text-decoration:none;
+}
+
+/* ===== HOA MAI ===== */
+.mai{
+  position:absolute;
+  top:-10%;
+  font-size:22px;
+  animation:maiFall linear infinite;
+  pointer-events:none;
+}
+@keyframes maiFall{
+  0%{transform:translateX(0) translateY(0) rotate(0)}
+  100%{transform:translateX(120px) translateY(120vh) rotate(360deg)}
+}
+
+/* ===== PHÁO GIẤY ===== */
+.confetti{
+  position:absolute;
+  top:-10px;
+  width:8px;
+  height:14px;
+  background:red;
+  animation:confettiFall linear infinite;
+}
+@keyframes confettiFall{
+  to{
+    transform:translateY(110vh) rotate(360deg);
+  }
+}
+.card{
+  animation: cardIn 1.2s ease-out forwards;
+  opacity:0;
+  transform:scale(.7) translateY(80px);
+}
+
+@keyframes cardIn{
+  0%{
+    opacity:0;
+    transform:scale(.7) translateY(80px);
+  }
+  60%{
+    opacity:1;
+    transform:scale(1.05) translateY(-10px);
+  }
+  100%{
+    opacity:1;
+    transform:scale(1) translateY(0);
+  }
+}
+.icon{
+  animation: glow 2.5s ease-in-out infinite;
+}
+
+@keyframes glow{
+  0%,100%{filter:drop-shadow(0 0 12px gold)}
+  50%{filter:drop-shadow(0 0 28px #fde047)}
+}
+body{
+  animation:bgPulse 6s ease-in-out infinite;
+}
+
+@keyframes bgPulse{
+  0%,100%{filter:brightness(1)}
+  50%{filter:brightness(1.08)}
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HOA MAI -->
+<script>
+for(let i=0;i<25;i++){
+  let m=document.createElement("div");
+  m.className="mai";
+  m.innerText="🌼";
+  m.style.left=Math.random()*100+"vw";
+  m.style.animationDuration=8+Math.random()*6+"s";
+  document.body.appendChild(m);
+}
+</script>
+
+<!-- PHÁO GIẤY -->
+<script>
+const colors=["#fde047","#dc2626","#f59e0b"];
+setInterval(()=>{
+  let c=document.createElement("div");
+  c.className="confetti";
+  c.style.left=Math.random()*100+"vw";
+  c.style.background=colors[Math.floor(Math.random()*colors.length)];
+  c.style.animationDuration=4+Math.random()*4+"s";
+  document.body.appendChild(c);
+  setTimeout(()=>c.remove(),8000);
+},150);
+</script>
+
+<!-- CARD -->
+<main class="card">
+  <svg class="icon" viewBox="0 0 128 128">
+    <circle cx="64" cy="64" r="48" fill="rgba(250,204,21,.2)" stroke="gold" stroke-width="3"/>
+    <g class="gear" fill="none" stroke="gold" stroke-width="4">
+      <circle cx="64" cy="64" r="16"/>
+      <path d="M64 34v-10M64 104v10M34 64h-10M104 64h10"/>
+    </g>
+    <path d="M28 90c-2 2-2 5 0 7l3 3c2 2 5 2 7 0l30-30"
+          fill="#fde047"/>
+  </svg>
+
+  <h1>Hệ thống đang cập nhật đề thi</h1>
+  <p>
+    Mời bạn quay lại vào <b>05:01 PM - 05/01/2026</b><br>
+    Chúng tôi đang cập nhật để phục vụ bạn tốt hơn.
+  </p>
+
+  <a class="btn" href="" onclick="location.reload();return false;">↻ Thử tải lại</a>
+</main>
+
+</body>
+</html>
