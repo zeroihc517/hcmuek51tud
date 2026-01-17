@@ -1,105 +1,202 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Thời Khóa Biểu (19/01-01/02)</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thời khóa biểu</title>
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-
-:root {
-  --accent:#1f7ed1;
-  --muted:#6b7280;
-  --bg:#f6f8fb;
-  --text:#0f172a;
-  --radius:14px;
+:root{
+  --blue:#0f4c81;
+  --blue-dark:#0b3b64;
+  --line:#e5e7eb;
 }
 
-*{box-sizing:border-box;margin:0;padding:0;}
+*{box-sizing:border-box;margin:0;padding:0}
 body{
-  font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,Arial;
-   -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  color:var(--text);
-  line-height:1.6;
+  font-family:Inter,system-ui;
+  background:#f6f8fb;
+  color:#111827;
 }
-.wrap{max-width:1200px;margin:0 auto;padding:24px;}
 
-header{text-align:center;margin-bottom:20px;}
-header h1{
-  margin-bottom:6px;
-  font-size:26px;
+/* ===== TOP BAR ===== */
+.topbar{
+  background:var(--blue);
+  color:#fff;
+  height:56px;
+  display:flex;
+  align-items:center;
+  padding:0 24px;
+  font-weight:600;
+}
+.topbar span{
+  letter-spacing:.4px;
+}
+
+/* ===== WRAP ===== */
+.container{
+  max-width:1400px;
+  margin:24px auto;
+  padding:0 24px;
+}
+
+/* ===== TITLE ===== */
+.page-title{
+  text-align:center;
+  font-size:32px;
   font-weight:800;
-  color:#c62828;
-  letter-spacing:0.5px;
+  color:#0b3b64;
+  margin-bottom:28px;
+  letter-spacing:.6px;
+  text-transform:uppercase;
 }
-header p{font-size:15px;color:var(--accent);font-weight:600;}
 
-/* BẢNG */
-.table-container{
-  overflow-x:auto;
-  border-radius:var(--radius);
-  background:white;
-  box-shadow:0 8px 28px rgba(0,0,0,0.06);
+.page-title .subtitle{
+  display:block;
+  margin-top:8px;
+  font-size:16px;        /* phụ nhưng vẫn rõ */
+  font-weight:500;
+  color:#6b7280;
+}
+
+
+/* ===== TABS ===== */
+.tabs{
+  display:flex;
+  gap:28px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:18px;
+}
+.tab{
+  padding:12px 0;
+  font-weight:600;
+  color:#6b7280;
+  position:relative;
+}
+.tab.active{
+  color:#0f4c81;
+}
+.tab.active::after{
+  content:"";
+  position:absolute;
+  left:0;right:0;bottom:-1px;
+  height:3px;
+  background:#ec4899;
+  border-radius:3px;
+}
+
+/* ===== FILTER ===== */
+.filters{
+  display:flex;
+  gap:16px;
+  margin-bottom:18px;
+}
+.select{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:10px 16px;
+  font-weight:500;
+  min-width:160px;
+}
+
+/* ===== TABLE ===== */
+.table-box{
+  background:#fff;
+  border-radius:14px;
+  overflow:auto;
+  box-shadow:0 6px 24px rgba(0,0,0,.05);
 }
 .sched{
   width:100%;
-  border-collapse:separate;
-  border-spacing:0;
-  min-width:900px;
+  min-width:1000px;
+  border-collapse:collapse;
+  table-layout:fixed; /* 👈 QUAN TRỌNG */
 }
-.sched thead th{
-  position:sticky;
-  top:0;
-  background:linear-gradient(180deg,#3b82f6,#2563eb);
+.sched th{
+  background:var(--blue);
   color:#fff;
-  font-weight:700;
-  padding:14px 6px;
+  padding:14px 8px;
   font-size:14px;
-  text-align:center;
-  border-bottom:2px solid #dbeafe;
-  z-index:2;
+  border-right:1px solid rgba(255,255,255,.15);
 }
-.sched th,.sched td{
-  border:1px solid #e5e7eb;
-  padding:8px 8px;
-  text-align:center;
-  font-size:13.5px;
-  transition:background 0.25s,box-shadow 0.25s;
-}
-.sched tbody tr:nth-child(even){background:#fafafa;}
-.sched tbody tr:hover td{background:#f0f9ff;}
-.sched th.day,.sched td.day{
-  width: calc(100% / 6);
+/* Cột Buổi */
+.sched th:nth-child(1),
+.sched td:nth-child(1){
+  width:60px;
 }
 
-/* Cột đặc biệt */
-.col-buoi{width:70px;font-weight:700;background:#f3f4f6;}
-.col-tiet{width:60px;background:#f3f4f6;}
-.col-time{width:110px;background:#f3f4f6;color:var(--muted);font-weight:600;}
-
-/* BLOCK môn học */
-.block{
-  border-radius:12px;
-  padding:10px;
-  font-size:13px;
-  line-height:1.55;
-  background:#e0f2fe;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,0.05);
+/* Cột Tiết */
+.sched th:nth-child(2),
+.sched td:nth-child(2){
+  width:50px;
 }
-.block .time{color:#dc2626;font-weight:700;}
-.block .room{color:#4b5563;font-style:italic;}
-.block a{
-  color:#2563eb;
+
+/* Các cột Thứ 2 → Thứ 7 đều nhau */
+.sched th:nth-child(n+3),
+.sched td:nth-child(n+3){
+  width:calc((100% - 150px) / 6);
+}
+.sched td{
+  border:1px solid var(--line);
+  padding:8x 8x;  
+  text-align:center;
+  height:50px;   
+  font-size:15px;
+}
+.sched td[rowspan]{
+  background:#ffffff;  /* trắng */
+  width:80px;
+}
+
+/* Cột TIẾT luôn trắng */
+.col-tiet{
+  background:#ffffff;
   font-weight:600;
-  text-decoration:none;
 }
-.block a:hover{text-decoration:underline;}
+/* Ô môn học gộp – xanh phủ toàn bộ từ tiết 3 → tiết 6 */
+.td-subject{
+  background:#e0f2fe;        /* 👈 xanh phủ kín */
+  padding:12px;
+
+  text-align:center;        /* căn giữa ngang */
+  vertical-align:middle;    /* 👈 căn giữa dọc chuẩn table */
+
+  border-radius:10px;       /* bo nhẹ (tùy thích) */
+}
+
+/* Nội dung bên trong */
+.td-subject .subject{
+  background:transparent;   /* KHÔNG đè màu */
+   padding: 6px;
+  line-height:1.4;
+}
+
+
+
+/* ===== MÔN HỌC ===== */
+.subject{
+  background:#e0f2fe;
+  border-radius:10px;
+  padding:10px;
+  line-height:1.5;
+}
+.subject .time{
+  color:#dc2626;
+  font-weight:700;
+}
+.subject .room{
+  font-style:italic;
+  color:#4b5563;
+}
+/* Chuyển động gradient nhẹ nhàng */
+@keyframes sparkleSoft {
+  0%   {background-position:0% 50%;}
+  50%  {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
+}
 
 /* NOTE */
 .note-box{
@@ -277,236 +374,219 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
-}
 </style>
-
 </head>
-<body>
-  
-<div class="banner">
-  <img src="anhnen.png" alt="Banner HCMUE">
-</div>
-  <div class="wrap">
-    <header>
-      <h1>THỜI KHÓA BIỂU HỌC KÌ II - Năm 1 (2025 - 2026)</h1>
-      <p>(Thực hiện từ ngày 19/01/2026 — 01/02/2026)</p>
-    </header>
 
-    <div class="table-container">
-      <table class="sched">
-        <thead>
-          <tr>
-            <th class="col-buoi">Buổi</th>
-            <th class="col-tiet">Tiết</th>
-            <th class="day">Thứ 2</th>
-            <th class="day">Thứ 3</th>
-            <th class="day">Thứ 4</th>
-            <th class="day">Thứ 5</th>
-            <th class="day">Thứ 6</th>
-            <th class="day">Thứ 7</th>
-         
-          </tr>
-        </thead>
-        <tbody>
-  <!-- Sáng -->
-<tr>
-  <td class="col-buoi" rowspan="6">Sáng</td>
-<!-- Tiết 1 -->
-<td class="col-tiet">1</td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-</tr>
-<!-- Tiết 2 -->
-<tr>
-<td class="col-tiet">2</td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-</tr>
-<!--Tiết 3 -->
-<tr>
-  <td class="col-tiet">3</td>
-  <td class="day"></td>
-  <td colspan="1" rowspan="4" 
-    style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">8:10 - 11:40</span><br>
-    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" 
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <span>TRƯỜNG ĐẠI HỌC SƯ PHẠM THÀNH PHỐ HỒ CHÍ MINH</span>
+</div>
+
+<div class="container">
+
+  <!-- TITLE -->
+<div class="page-title">
+  Thời khóa biểu học kỳ 2 - Năm học: 2025-2026 <span class="subtitle"> (Áp dụng từ 19/01 đến 01/02)</span>
+</div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab active">Tuần 1,2 </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-box">
+   
+    <table class="sched">
+      <thead>
+        <tr>
+          <th>Buổi</th>
+          <th>Tiết</th>
+          <th>Thứ 2</th>
+          <th>Thứ 3</th>
+          <th>Thứ 4</th>
+          <th>Thứ 5</th>
+          <th>Thứ 6</th>
+          <th>Thứ 7</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="6">Sáng</td>
+          <td>1</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+        <td>2</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>3</td>
+        <td></td>
+       <td rowspan="4" class="td-subject" style="background:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
+  <div class="subject">
+    <div class="time">8:10 - 11:40</div>
+    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank"
        style="color:#2563eb; font-weight:600; text-decoration:none;">
        Cơ sở: An Dương Vương
     </a><br>
-    <span>Không gian tuyến tính</span><br>
-    <span style="color:#4b5563; font-style:italic;">Phòng: B.213</span>
+    Không gian tuyến tính<br>
+    <span class="room">Phòng: B.213</span>
   </div>
 </td>
-  <td colspan="1" rowspan="4" 
-    style="background:#fff3e0; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">8:10 - 11:40</span><br>
-    <a href="https://maps.app.goo.gl/oV1mXHYDuW44cGbN6" target="_blank" 
+ <td rowspan="4" class="td-subject" style="background: #fff3e0; border-radius:8px; padding:10px; text-align:center;">
+  <div class="subject">
+    <div class="time">8:10 - 11:40</div>
+    <a href="https://maps.app.goo.gl/oV1mXHYDuW44cGbN6" target="_blank"
        style="color:#2563eb; font-weight:600; text-decoration:none;">
        Cơ sở: Lạc Long Quân
     </a><br>
-    <span>Hình học cao cấp hai chiều và ba chiều</span><br>
-    <span style="color:#4b5563; font-style:italic;">Phòng: LLQ.D.207</span>
+   Hình học cao cấp hai chiều và ba chiều<br>
+     <span class="room">Phòng: LLQ.D.207</span>
   </div>
 </td>
-  <td class="day"></td>
-   <td class="day"></td>
-  <td class="day"></td>
-</tr>
-<!-- Tiết 4 -->
-<tr>
-  <td class="col-tiet">4</td>
-<td colspan="1" rowspan="3" 
-    style="background-color:#bbf7d0; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">9:10 - 11:40</span><br>
-    <a href="https://maps.app.goo.gl/HAtnuDydmu1oGRGz6" target="_blank" 
+        <td></td>
+        <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>4</td>
+        <td rowspan="3" class="td-subject" style="background: #ecfdf3; border-radius:8px; padding:10px; text-align:center;">
+  <div class="subject">
+    <div class="time">9:10 - 11:40</div>
+    <a href="https://maps.app.goo.gl/HAtnuDydmu1oGRGz6" target="_blank"
        style="color:#2563eb; font-weight:600; text-decoration:none;">
        Cơ sở: Lê Văn Sỹ
     </a><br>
-    <span>Kinh tế chính trị học Mác-Lênin</span><br>
-    <span style="color:#4b5563; font-style:italic;">Phòng: LVS.GD.A</span>
+    Kinh tế chính trị học Mác-Lênin<br>
+    <span class="room">Phòng: LVS.GD.A</span>
   </div>
 </td>
-
-<td colspan="1" rowspan="2" 
-    style="background-color:#fef9c3; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">9:10 - 11:00</span><br>
-    <a href="https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA" target="_blank" 
+        <td rowspan="3" class="td-subject" style="background: #fef9c3; border-radius:8px; padding:10px; text-align:center;">
+  <div class="subject">
+    <div class="time">9:10 - 11:40</div>
+    <a href="https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA" target="_blank"
        style="color:#2563eb; font-weight:600; text-decoration:none;">
-       Công viên Lê Thị Riêng
+       Cơ sở: Công viên Lê Thị Riêng
     </a><br>
-    <span>Giáo dục thể chất 2 (Cầu Lông cơ bản)</span><br>
+   Giáo dục thể chất 2 <br>(Cầu Lông Cơ bản)<br>
   </div>
-</td> 
-<td class="day"></td>
-<td class="day"></td>
-</tr>
-<!-- Tiết 5-->
-<td class="col-tiet">5</td>
-  <td class="day"></td>
-  <td class="day"></td>
-		
-</tr>
-<!--Tiết 6 -->
-<tr>
-<td class="col-tiet">6</td>
-<td class="day"></td>
-<td class="day"></td>
-<td class="day"></td>
-</tr>
-
-<!-- Đường kẻ ngang phân cách Sáng - Chiều -->
-<tr class="divider">
-  <td colspan="8"></td>
-</tr>
-
-        <!-- Chiều -->
-        <tr><td class="col-buoi" rowspan="6">Chiều</td>
-<!--Tiết 7-->
-<td class="col-tiet">7</td>
- <td colspan="1" rowspan="4" 
-    style="background-color:#bbf7d0; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">12:30 - 16:00</span><br>
-    <a href="https://maps.app.goo.gl/HAtnuDydmu1oGRGz6" target="_blank" 
+</td>
+        <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>5</td>
+        <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>6</td>
+        <td></td>
+        <td></td>
+        </tr>
+        <tr>
+          <td rowspan="6">Chiều</td>
+          <td>7</td>
+          <td rowspan="4" class="td-subject" style="background: #ecfdf3; border-radius:8px; padding:10px; text-align:center;">
+  <div class="subject">
+    <div class="time">12:30 - 16:00</div>
+    <a href="https://maps.app.goo.gl/HAtnuDydmu1oGRGz6" target="_blank"
        style="color:#2563eb; font-weight:600; text-decoration:none;">
        Cơ sở: Lê Văn Sỹ
     </a><br>
-    <span>Giải tích hàm nhiều biến</span><br>
-    <span style="color:#4b5563; font-style:italic;">Phòng: LVS.D.106</span>
+    Giải tích hàm nhiều biến<br>
+    <span class="room">Phòng: LVS.D.106</span>
   </div>
 </td>
-<td class="day"></td>
-<td class="day"></td>
-<td colspan="1" rowspan="4" 
-    style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">12:30 - 16:00</span><br>
-    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" 
+          <td></td>
+          <td></td>
+           <td rowspan="4" class="td-subject" style="background:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
+  <div class="subject">
+    <div class="time">12:30 - 16:00</div>
+    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank"
        style="color:#2563eb; font-weight:600; text-decoration:none;">
        Cơ sở: An Dương Vương
     </a><br>
-    <span>Lập trình nâng cao</span><br>
-    <span style="color:#4b5563; font-style:italic;">Phòng: I.102</span>
+    Lập trình nâng cao<br>
+    <span class="room">Phòng: I.102</span>
   </div>
 </td>
- <td colspan="1" rowspan="3" 
-    style="background-color:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">12:30 - 15:00</span><br>
-    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank" 
+              <td rowspan="3" class="td-subject" style="background:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
+  <div class="subject">
+    <div class="time">12:30 - 15:00</div>
+    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank"
        style="color:#2563eb; font-weight:600; text-decoration:none;">
        Cơ sở: An Dương Vương
     </a><br>
-    <span>Phương pháp học tập hiệu quả</span><br>
-    <span style="color:#4b5563; font-style:italic;">Phòng: B.117</span>
+    Phương pháp học tập hiệu quả<br>
+    <span class="room">Phòng: B.117</span>
   </div>
 </td>
-<td class="day"></td>
- </tr>
-<!--Tiết 8-->
- <tr><td class="col-tiet">8</td>
-<td class="day"></td> 
-<td class="day"></td>
-<td class="day"></td>
-</tr>
-<!--Tiết 9-->
- <tr><td class="col-tiet">9</td>
-<td class="day"></td> 
-<td class="day"></td>
-<td class="day"></td>
-</tr>
-<!--Tiết 10-->
- <tr><td class="col-tiet">10</td>
- <td colspan="1" rowspan="4" 
-    style="background-color:#bbf7d0; border-radius:8px; padding:10px; text-align:center;">
-  <div>
-    <span style="color:#dc2626; font-weight:bold;">15:10 - 17:40</span><br>
-    <a href="https://maps.app.goo.gl/HAtnuDydmu1oGRGz6" target="_blank" 
+          <td></td>
+        </tr>
+        <tr>
+        <td>8</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>9</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>10</td>
+        <td rowspan="3" class="td-subject" style="background: #ecfdf3; border-radius:8px; padding:10px; text-align:center;">
+  <div class="subject">
+    <div class="time">15:10 - 17:40</div>
+    <a href="https://maps.app.goo.gl/HAtnuDydmu1oGRGz6" target="_blank"
        style="color:#2563eb; font-weight:600; text-decoration:none;">
        Cơ sở: Lê Văn Sỹ
     </a><br>
-    <span>Chủ nghĩa xã hội khoa học</span><br>
-    <span style="color:#4b5563; font-style:italic;">Phòng: LVS.GD.18</span>
+   Chủ nghĩa xã hội khoa học<br>
+    <span class="room">Phòng: LVS.GD.18</span>
   </div>
 </td>
-<td class="day"></td>
-  <td class="day"></td>
-  <td class="day"></td>
-</tr>
-<!--Tiết 11-->
- <tr><td class="col-tiet">11</td>
-<td class="day"></td> 
-<td class="day"></td>
-<td class="day"></td>
-<td class="day"></td>
-<td class="day"></td>
-</tr>
-<!--Tiết 12-->
- <tr><td class="col-tiet">12</td>
-<td class="day"></td> 
-<td class="day"></td>
-<td class="day"></td>
-<td class="day"></td>
-<td class="day"></td>
-</tr>       
+        <td></td>
+        <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>11</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>12</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        </tr>
       </tbody>
     </table>
-
-    </div> <!-- đóng .table-container -->
-
-  <!-- ONLINE SINH HOẠT -->
+  </div>
+</div>
+<!-- ONLINE SINH HOẠT -->
 <div class="online-box">
  <h2 class="online-title">📌 HỌC ONLINE</h2>
  <div class="online-grid">
@@ -525,7 +605,7 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
       <span class="tag">VLE</span>
     </div>
 
-	<div class="online-card">
+<div class="online-card">
       <div class="icon-circle fire">📖</div>
       <h3>Từ 19/01/2026 đến 01/02/2026</h3>
       <p class="desc">Chủ nghĩa xã hội khoa học</p>
@@ -540,22 +620,22 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
     <div class="note-box">
       <h2>Ghi chú:</h2>
       <ul>
-        <li><span class="square" style="background:#e0f2fe;"></span> 
+        <li><span class="square" style="background:#e0f2fe;"></span>
           <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank">
             Cơ sở 1: An Dương Vương (280 An Dương Vương, phường Chợ Quán, TP.HCM)
           </a>
         </li>
-        <li><span class="square" style="background:#bbf7d0;"></span> 
+        <li><span class="square" style="background:#e6f9ef;"></span>
           <a href="https://maps.app.goo.gl/HAtnuDydmu1oGRGz6" target="_blank">
             Cơ sở 2: Lê Văn Sỹ (222 Lê Văn Sỹ, phường Nhiêu Lộc, TP.HCM)
           </a>
         </li>
-        <li><span class="square" style="background:#fff3e0;"></span> 
+        <li><span class="square" style="background:#fff3e0;"></span>
           <a href="https://maps.app.goo.gl/oV1mXHYDuW44cGbN6" target="_blank">
             Cơ sở KTX: Lạc Long Quân (351A Lạc Long Quân, phường Hòa Bình, TP.HCM)
           </a>
         </li>
-        <li><span class="square" style="background:#fef9c3;"></span> 
+        <li><span class="square" style="background:#fef9c3;"></span>
           <a href="https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA" target="_blank">
             Công viên Lê Thị Riêng (875 Cách Mạng Tháng Tám, phường Hòa Hưng, TP.HCM)
           </a>
@@ -565,28 +645,5 @@ header p{font-size:15px;color:var(--accent);font-weight:600;}
     </div>
 
   </div> <!-- đóng .wrap -->
-  <script>
-// Chặn chuột phải
-document.addEventListener("contextmenu", e => e.preventDefault());
-
-// Chặn copy
-document.addEventListener("copy", e => {
-  e.preventDefault();
-  alert("🚫 Không được copy nội dung này!");
-});
-
-// Chặn cut & paste
-document.addEventListener("cut", e => e.preventDefault());
-document.addEventListener("paste", e => e.preventDefault());
-
-// Chặn Ctrl + C
-document.addEventListener("keydown", e => {
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "c") {
-    e.preventDefault();
-    alert("🚫 Copy bị khóa!");
-  }
-});
-</script>
-
 </body>
 </html>
