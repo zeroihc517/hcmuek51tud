@@ -20,10 +20,9 @@
 body{
   font-family:Inter,system-ui;
   background:var(--bg);
-  color:#111827;
 }
 
-/* ===== TOP BAR ===== */
+/* TOP BAR */
 .topbar{
   height:56px;
   background:var(--blue);
@@ -34,13 +33,13 @@ body{
   font-weight:700;
 }
 
-/* ===== LAYOUT ===== */
+/* LAYOUT */
 .layout{
   display:flex;
   min-height:calc(100vh - 56px);
 }
 
-/* ===== SIDEBAR ===== */
+/* SIDEBAR */
 .sidebar{
   width:240px;
   background:#fff;
@@ -58,10 +57,9 @@ body{
 .sidebar a{
   display:block;
   padding:12px 20px;
-  color:#1f2937;
   font-weight:600;
-  border-left:3px solid transparent;
   cursor:pointer;
+  border-left:3px solid transparent;
 }
 
 .sidebar a.active,
@@ -71,18 +69,19 @@ body{
   color:var(--blue);
 }
 
-/* ===== MAIN ===== */
+/* MAIN */
 .main{
   flex:1;
   padding:24px;
 }
 
-/* ===== CARD ===== */
+/* CARD */
 .card{
   background:#fff;
   border-radius:12px;
   box-shadow:0 4px 12px rgba(0,0,0,.05);
   overflow:hidden;
+  max-width:900px;
 }
 
 .card-header{
@@ -92,42 +91,32 @@ body{
   font-weight:700;
 }
 
-.card-body{
-  padding:16px;
-}
-
-/* ===== TABLE ===== */
-table{
-  width:100%;
-  border-collapse:collapse;
-}
-
-th,td{
-  padding:12px 14px;
+/* FORM */
+.form-row{
+  padding:18px;
   border-bottom:1px solid var(--line);
 }
 
-th{
-  background:#f1f5f9;
-  font-weight:700;
+label{
+  font-weight:600;
+  display:block;
+  margin-bottom:6px;
 }
 
-tr{
-  cursor:pointer;
-}
-
-tr:hover td{
-  background:#f9fafb;
-}
-
-/* ===== IFRAME ===== */
-.iframe-box{
-  margin-top:20px;
-  height:600px;
+select{
+  width:100%;
+  padding:10px 12px;
+  font-size:15px;
   border:1px solid var(--line);
-  border-radius:10px;
-  overflow:hidden;
+  border-radius:6px;
+  background:#fff;
+}
+
+/* IFRAME */
+.iframe-box{
   display:none;
+  height:600px;
+  border-top:1px solid var(--line);
 }
 
 .iframe-box iframe{
@@ -136,7 +125,7 @@ tr:hover td{
   border:none;
 }
 
-/* ===== TAB ===== */
+/* TAB */
 .content{display:none;}
 .content.active{display:block;}
 </style>
@@ -164,26 +153,19 @@ tr:hover td{
     <div id="hk2" class="content active">
       <div class="card">
         <div class="card-header">Học kỳ 2 – Năm 1</div>
-        <div class="card-body">
 
-          <table>
-            <tr><th>STT</th><th>Tuần học</th></tr>
-            <tr onclick="openTKB('iframeHK2','HK2/01.TKB (19.01-25.01).html')">
-              <td>01</td><td>19/01 – 25/01</td>
-            </tr>
-            <tr onclick="openTKB('iframeHK2','HK2/02.TKB (26.01-01.02).html')">
-              <td>02</td><td>26/01 – 01/02</td>
-            </tr>
-            <tr onclick="openTKB('iframeHK2','HK2/03.TKB (02.02-08.03).html')">
-              <td>03</td><td>02/02 – 08/03</td>
-            </tr>
-          </table>
+        <div class="form-row">
+          <label>Chọn tuần học</label>
+          <select onchange="loadTKB(this,'iframeHK2','boxHK2')">
+            <option value="">-- Chọn tuần --</option>
+            <option value="HK2/01.TKB (19.01-25.01).html">Tuần 01 (19/01 – 25/01)</option>
+            <option value="HK2/02.TKB (26.01-01.02).html">Tuần 02 (26/01 – 01/02)</option>
+            <option value="HK2/03.TKB (02.02-08.03).html">Tuần 03 (02/02 – 08/03)</option>
+          </select>
+        </div>
 
-          <!-- IFRAME HK2 -->
-          <div id="boxHK2" class="iframe-box">
-            <iframe id="iframeHK2"></iframe>
-          </div>
-
+        <div id="boxHK2" class="iframe-box">
+          <iframe id="iframeHK2"></iframe>
         </div>
       </div>
     </div>
@@ -192,26 +174,19 @@ tr:hover td{
     <div id="hk1" class="content">
       <div class="card">
         <div class="card-header">Học kỳ 1 – Năm 1</div>
-        <div class="card-body">
 
-          <table>
-            <tr><th>STT</th><th>Tuần học</th></tr>
-            <tr onclick="openTKB('iframeHK1','HK1/01. TKB (8.9-14.9).html')">
-              <td>01</td><td>08/09 – 14/09</td>
-            </tr>
-            <tr onclick="openTKB('iframeHK1','HK1/02. TKB (15.9-21.9).html')">
-              <td>02</td><td>15/09 – 21/09</td>
-            </tr>
-            <tr onclick="openTKB('iframeHK1','HK1/03. TKB (22.9-5.10).html')">
-              <td>03</td><td>22/09 – 05/10</td>
-            </tr>
-          </table>
+        <div class="form-row">
+          <label>Chọn tuần học</label>
+          <select onchange="loadTKB(this,'iframeHK1','boxHK1')">
+            <option value="">-- Chọn tuần --</option>
+            <option value="HK1/01. TKB (8.9-14.9).html">Tuần 01 (08/09 – 14/09)</option>
+            <option value="HK1/02. TKB (15.9-21.9).html">Tuần 02 (15/09 – 21/09)</option>
+            <option value="HK1/03. TKB (22.9-5.10).html">Tuần 03 (22/09 – 05/10)</option>
+          </select>
+        </div>
 
-          <!-- IFRAME HK1 -->
-          <div id="boxHK1" class="iframe-box">
-            <iframe id="iframeHK1"></iframe>
-          </div>
-
+        <div id="boxHK1" class="iframe-box">
+          <iframe id="iframeHK1"></iframe>
         </div>
       </div>
     </div>
@@ -228,10 +203,18 @@ function showTab(id, el){
   el.classList.add('active');
 }
 
-function openTKB(iframeId, link){
+function loadTKB(select, iframeId, boxId){
   const iframe = document.getElementById(iframeId);
-  iframe.src = link;
-  iframe.parentElement.style.display = 'block';
+  const box = document.getElementById(boxId);
+
+  if(select.value){
+    iframe.src = select.value;
+    box.style.display = 'block';
+    box.scrollIntoView({behavior:'smooth'});
+  }else{
+    box.style.display = 'none';
+    iframe.src = '';
+  }
 }
 </script>
 
