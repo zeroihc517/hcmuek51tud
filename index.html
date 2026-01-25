@@ -126,6 +126,39 @@ select{
   height:100%;
   border:none;
 }
+/* ===== BẢNG DỮ LIỆU GIỐNG WEB GỐC ===== */
+#dulieu table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13.5px;
+  background:#fff;
+}
+
+/* Header */
+#dulieu thead th{
+  background:#0b4a78;   /* xanh đậm đúng ảnh */
+  color:#ffffff;
+  font-weight:600;
+  padding:8px 6px;
+  border:1px solid #0b4a78;
+  white-space:nowrap;
+  text-align:center;
+}
+
+/* Body */
+#dulieu tbody td{
+  border:1px solid #8c8c8c;  /* viền xám giống ảnh */
+  padding:7px 6px;
+  text-align:center;
+  vertical-align:middle;
+  color:#0f172a;
+}
+
+
+/* Hover nhẹ */
+#dulieu tbody tr:hover{
+  background:#f4f8fc;
+}
 
 /* TAB */
 .content{display:none;}
@@ -146,6 +179,7 @@ select{
     <h3>Thời khóa biểu</h3>
     <a class="active" onclick="showTab('hk2',this)">TKB Học kỳ 2 - Năm 1</a>
     <a onclick="showTab('hk1',this)">TKB Học kỳ 1 - Năm 1</a>
+    <a onclick="showTab('dulieu',this)">Dữ liệu</a>
   </div>
 
   <!-- MAIN -->
@@ -206,6 +240,36 @@ select{
       </div>
     </div>
 
+<!----DuLieu---->
+<div id="dulieu" class="content">
+  <table style="width:100%; border-collapse:collapse; font-size:14px;">
+    <thead style="background:#0b3b64; color:#fff;">
+      <tr>
+        <th>Học kì</th>
+        <th>Mã LHP</th>
+        <th>Tên HP</th>
+        <th>STC</th>
+        <th>Giảng viên</th>
+        <th>Liên hệ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Đang cập nhật</td>
+        <td>Đang cập nhật</td>
+        <td></td>
+        <td>Đang cập nhật</td>
+        <td>Đang cập nhật</td>
+      </tr>
+	 <tr>
+
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+    
   </div>
 </div>
 
