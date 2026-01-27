@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TKB (18/05-24/05)</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --blue:#0f4c81;
+  --blue-dark:#0b3b64;
+  --line:#e5e7eb;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:Inter,system-ui;
+  background:#f6f8fb;
+  color:#111827;
+}
+
+
+/* ===== WRAP ===== */
+.container{
+  max-width:1600px;
+  margin:24px auto;
+  padding:0 0px;
+}
+
+/* ===== TITLE ===== */
+.page-title{
+  text-align:center;
+  font-size:32px;
+  font-weight:800;
+  color:#0b3b64;
+  margin-bottom:28px;
+  letter-spacing:.6px;
+  text-transform:uppercase;
+}
+
+.page-title .subtitle{
+  display:block;
+  margin-top:8px;
+  font-size:16px;        /* phụ nhưng vẫn rõ */
+  font-weight:500;
+  color:#6b7280;
+}
+
+/* ===== FILTER ===== */
+.filters{
+  display:flex;
+  gap:16px;
+  margin-bottom:18px;
+}
+.select{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:10px 16px;
+  font-weight:500;
+  min-width:160px;
+}
+
+/* ===== TABLE ===== */
+.table-box{
+  background:#fff;
+  border-radius:14px;
+  overflow:auto;
+  box-shadow:0 6px 24px rgba(0,0,0,.05);
+}
+.sched{
+  width:100%;
+  min-width:1000px;
+  border-collapse:collapse;
+  table-layout:fixed; /* 👈 QUAN TRỌNG */
+}
+.sched th{
+  background:var(--blue);
+  color:#fff;
+  padding:14px 8px;
+  font-size:14px;
+  border-right:1px solid rgba(255,255,255,.15);
+}
+/* Cột Buổi */
+.sched th:nth-child(1),
+.sched td:nth-child(1){
+  width:60px;
+}
+
+/* Cột Tiết */
+.sched th:nth-child(2),
+.sched td:nth-child(2){
+  width:50px;
+}
+
+/* Các cột Thứ 2 → Thứ 7 đều nhau */
+.sched th:nth-child(n+3),
+.sched td:nth-child(n+3){
+  width:calc((100% - 150px) / 6);
+}
+.sched td{
+  border:2.4px solid var(--line);
+  padding:8px 8px;  
+  text-align:center;
+  height:50px;   
+  font-size:16px;
+}
+
+.sched td[rowspan]{
+  background:#ffffff;  /* trắng */
+  width:80px;
+}
+
+/* Cột TIẾT luôn trắng */
+.col-tiet{
+  background:#ffffff;
+  font-weight:600;
+}
+.td-subject{
+  background:#e0f2fe;        /* 👈 xanh phủ kín */
+  padding:12px;
+
+  text-align:center;        /* căn giữa ngang */
+  vertical-align:middle;    /* 👈 căn giữa dọc chuẩn table */
+
+  border-radius:10px;       /* bo nhẹ (tùy thích) */
+}
+
+/* Nội dung bên trong */
+.td-subject .subject{
+  background:transparent;   /* KHÔNG đè màu */
+   padding: 6px;
+  line-height:1.4;
+}
+
+
+
+/* ===== MÔN HỌC ===== */
+.subject{
+  background:#e0f2fe;
+  border-radius:10px;
+  padding:10px;
+  line-height:1.5;
+}
+.subject .time{
+  color:#dc2626;
+  font-weight:700;
+}
+.subject .room{
+  font-style:italic;
+  color:#4b5563;
+}
+/* Chuyển động gradient nhẹ nhàng */
+@keyframes sparkleSoft {
+  0%   {background-position:0% 50%;}
+  50%  {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
+}
+
+/* NOTE */
+.note-box{
+  margin-top:24px;
+  background:#fff;
+  border-radius:var(--radius);
+  padding:20px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.05);
+}
+.note-box h2{
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:12px;
+  color:#374151;
+  border-left:4px solid var(--accent);
+  padding-left:10px;
+}
+.note-box ul{list-style:none;}
+.note-box li{
+  font-size:14px;
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+}
+.note-box li span.square{
+  width:16px;height:16px;
+  margin-right:10px;
+  border-radius:4px;
+  flex-shrink:0;
+  box-shadow:0 1px 2px rgba(0,0,0,0.1) inset;
+}
+.note-box a{
+  color:#1f2937;
+  text-decoration:none;
+  font-weight:500;
+}
+.note-box a:hover{color:#1d4ed8;text-decoration:underline;}
+
+/* ONLINE */
+.online-box{
+  position: relative;
+  margin-top: 32px;
+  padding: 24px;
+  border-radius: 20px;
+
+  background: linear-gradient(
+      135deg,
+      #fff7fa,    /* trắng hồng rất nhẹ */
+      #ffe9f0,    /* hồng nhạt pastel */
+      #ffd6e5,    /* blush pink */
+      #ffe9f0,
+      #fff7fa
+  );
+  background-size: 400% 400%;
+  animation: sparkleSoft 20s ease infinite;
+
+  border: 2px solid #ffc2d1;   /* viền hồng pastel chuẩn */
+  box-shadow: 0 4px 18px rgba(255, 182, 193, 0.25),
+              0 0 25px rgba(255, 150, 170, 0.15);
+}
+
+
+/* Chuyển động gradient nhẹ nhàng */
+@keyframes sparkleSoft {
+  0%   {background-position:0% 50%;}
+  50%  {background-position:100% 50%;}
+  100% {background-position:0% 50%;}
+}
+
+/* Các đốm sáng mờ, nhẹ */
+.online-box::after{
+  content:"";
+  position:absolute;
+  top:0; left:0;
+  width:100%; height:100%;
+  border-radius:20px;
+  background-image:
+     radial-gradient(circle at 20% 30%, rgba(255,255,255,0.12) 1px, transparent 1px),
+     radial-gradient(circle at 80% 60%, rgba(255,255,255,0.1) 1px, transparent 1px),
+     radial-gradient(circle at 40% 80%, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 180px 180px;
+  pointer-events:none;
+}
+
+.online-title{
+  font-size:22px;
+  font-weight:800;
+  color:#b91c1c;
+  text-align:center;
+  margin-bottom:20px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+.online-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+}
+.online-card{
+  background:white;
+  border-radius:16px;
+  padding:20px;
+  text-align:center;
+  box-shadow:0 3px 8px rgba(0,0,0,0.05);
+  transition:transform 0.25s ease,box-shadow 0.25s ease;
+}
+.online-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 6px 14px rgba(0,0,0,0.08);
+}
+.online-card h3{
+  font-size:16px;
+  font-weight:700;
+  color:#111827;
+  margin:10px 0 6px;
+}
+.online-card .desc{
+  font-size:14px;
+  color:#374151;
+  margin-bottom:10px;
+}
+.tag{
+  display:inline-block;
+  padding:4px 12px;
+  background:#dbeafe;
+  color:#1e40af;
+  font-weight:600;
+  border-radius:999px;
+  font-size:13px;
+}
+
+.icon-circle{
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  margin:0 auto 10px;
+}
+.icon-circle.fire{background:#fee2e2;color:#b91c1c;}
+.icon-circle.alert{background:#fef9c3;color:#92400e;}
+.icon-circle.success {
+  background-color: #86efac; /* xanh lá */
+}
+  .icon-circle.info{ background:#38bdf8; }      /* xanh dương nhạt */
+.icon-circle.primary{ background:#2563eb; }   /* xanh dương đậm */
+.icon-circle.secondary{ background:#a855f7; } /* tím */
+.icon-circle.error{ background:#dc2626; }     /* đỏ đậm */
+.icon-circle.soft-green{ background:#bbf7d0; }
+.icon-circle.soft-blue{ background:#bfdbfe; }
+.icon-circle.soft-yellow{ background:#fef9c3; }
+.icon-circle.soft-purple{ background:#e9d5ff; }
+.icon-circle.soft-pink{ background:#fbcfe8; }
+
+/* ===== TRẠNG THÁI ===== */
+.icon-circle.pending{ background:#fb923c; }   /* đang xử lý */
+.icon-circle.processing{ background:#0ea5e9; }
+.icon-circle.disabled{ background:#9ca3af; }
+.icon-circle.done{ background:#16a34a; }
+
+/* ===== TRUNG TÍNH ===== */
+.icon-circle.light{ background:#f3f4f6; }
+.icon-circle.gray{ background:#6b7280; }
+.icon-circle.dark{ background:#374151; }
+.icon-circle.black{ background:#111827; }
+/* Responsive nhỏ */
+@media (max-width:768px){
+  header h1{font-size:20px;}
+  header p{font-size:13px;}
+  .sched th,.sched td{font-size:12px;padding:6px;}
+}
+/* Giữ ô có nội dung nền cũ, nhưng ô trống luôn trắng */
+.sched td.day:empty {
+  background: #ffffff !important;
+}
+.banner {
+  text-align: center;      /* canh giữa banner */
+  margin-top: 40px;        /* khoảng cách trên nếu cần */
+  margin-bottom: 20px;     /* cách dòng tiêu đề */
+}
+
+.banner img {
+  max-width: 100%;         /* co giãn theo chiều rộng trang */
+  height: auto;            /* giữ đúng tỉ lệ ảnh */
+}
+/* Đường kẻ phân cách Sáng - Chiều */
+.sched tr.divider td {
+    background-image: linear-gradient(90deg, #60a5fa, #2563eb, #60a5fa);
+  background-size: 50% 50%;
+  animation: sparkleLine 4s linear infinite;
+}
+/* Animation chạy gradient */
+@keyframes sparkleLine {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- TITLE -->
+<div class="page-title">
+  Thời khóa biểu học kỳ 2 - Năm học: 2025-2026 <span class="subtitle"> (Áp dụng từ ngày 18/05/2026 đến 24/05/2026)</span>
+</div>
+
+  <!-- TABLE -->
+  <div class="table-box">
+   
+    <table class="sched">
+      <thead>
+        <tr>
+          <th>Buổi</th>
+          <th>Tiết</th>
+          <th>Thứ 2</th>
+          <th>Thứ 3</th>
+          <th>Thứ 4</th>
+          <th>Thứ 5</th>
+          <th>Thứ 6</th>
+          <th>Thứ 7</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td rowspan="6">Sáng</td>
+          <td>1</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+        <td>2</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>3</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>4</td>
+        <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td></td>
+         </tr>
+        <tr>
+        <td>5</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+          <td></td>
+           <td></td>
+        </tr>
+        <tr>
+        <td>6</td>
+        <td></td>
+        <td></td>
+        <td></td>
+          <td></td> 
+          <td></td>
+           <td></td>
+        </tr>
+        <tr>
+          <td rowspan="6">Chiều</td>
+          <td>7</td>
+          <td rowspan="4" class="td-subject" style="background: #ecfdf3; border-radius:8px; padding:10px; text-align:center;">
+  <div class="subject">
+    <div class="time">13:00 - 16:00</div>
+    <a href="https://maps.app.goo.gl/HAtnuDydmu1oGRGz6" target="_blank"
+       style="color:#2563eb; font-weight:600; text-decoration:none;">
+       Cơ sở: Lê Văn Sỹ
+    </a><br>
+    Giải tích hàm nhiều biến<br>
+    <span class="room">Phòng: LVS.D.106</span>
+  </div>
+</td>
+          <td></td>
+           <td></td>
+           <td rowspan="4" class="td-subject" style="background:#e0f2fe; border-radius:8px; padding:10px; text-align:center;">
+  <div class="subject">
+    <div class="time">12:30 - 16:00</div>
+    <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank"
+       style="color:#2563eb; font-weight:600; text-decoration:none;">
+       Cơ sở: An Dương Vương
+    </a><br>
+    Lập trình nâng cao<br>
+    <span class="room">Phòng: I.102</span>
+  </div>
+</td>
+              <td></td>
+          <td></td>
+        </tr>
+        <tr>
+        <td>8</td>
+        <td></td>
+         <td></td>
+          <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>9</td>
+        <td></td>
+         <td></td>
+        <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>10</td>
+          <td></td>
+        <td></td>
+         <td></td>
+        <td></td>
+        </tr>
+        <tr>
+        <td>11</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+            <td></td>
+        </tr>
+        <tr>
+        <td>12</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+            <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ONLINE SINH HOẠT -->
+<div class="online-box">
+ <h2 class="online-title">📌 DEADLINE</h2>
+ <div class="online-grid">
+
+
+  </div>
+  <div class="online-grid">
+
+
+    <!-- Ghi chú -->
+    <div class="note-box">
+      <h2>Ghi chú:</h2>
+      <ul>
+        <li><span class="square" style="background:#e0f2fe;"></span>
+          <a href="https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" target="_blank">
+            Cơ sở 1: An Dương Vương (280 An Dương Vương, phường Chợ Quán, TP.HCM)
+          </a>
+        </li>
+        <li><span class="square" style="background:#e6f9ef;"></span>
+          <a href="https://maps.app.goo.gl/HAtnuDydmu1oGRGz6" target="_blank">
+            Cơ sở 2: Lê Văn Sỹ (222 Lê Văn Sỹ, phường Nhiêu Lộc, TP.HCM)
+          </a>
+        </li>
+        <li><span class="square" style="background:#fff3e0;"></span>
+          <a href="https://maps.app.goo.gl/oV1mXHYDuW44cGbN6" target="_blank">
+            Cơ sở KTX: Lạc Long Quân (351A Lạc Long Quân, phường Hòa Bình, TP.HCM)
+          </a>
+        </li>
+        <li><span class="square" style="background:#fef9c3;"></span>
+          <a href="https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA" target="_blank">
+            Công viên Lê Thị Riêng (875 Cách Mạng Tháng Tám, phường Hòa Hưng, TP.HCM)
+          </a>
+        </li>
+        <li><span class="square" style="background:#f3e8ff;"></span>Học online (Hệ thống VLE; Phòng học ảo TEAM, Google Meet)</li>
+      </ul>
+    </div>
+
+  </div>
+ </div>
+</body>
+</html>
