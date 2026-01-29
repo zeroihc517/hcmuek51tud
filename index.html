@@ -233,19 +233,84 @@ select{
 
   <!-- SIDEBAR -->
   <div class="sidebar">
+      <h3>Dữ liệu</h3>
+<a class="active" onclick="showTab('nentang',this)">Nền tảng</a>
     <h3>Thời khóa biểu</h3>
-    <a class="active" onclick="showTab('hk2',this)">TKB Học kỳ 2 - Năm 1</a>
+    <a onclick="showTab('hk2',this)">TKB Học kỳ 2 - Năm 1</a>
     <a onclick="showTab('hk1',this)">TKB Học kỳ 1 - Năm 1</a>
-    <h3>Dữ liệu</h3>
-    <a onclick="showTab('dulieu',this)">Dữ liệu</a>
-    <a onclick="showTab('nentang',this)">Nền tảng</a>
   </div>
 
   <!-- MAIN -->
   <div class="main">
 
+<div id="nentang" class="content active">
+  <div class="platform-grid">
+
+    <a href="https://online.hcmue.edu.vn/" target="_blank" class="platform-card">
+      <div class="icon">🎓</div>
+      <h4>Trang Online</h4>
+    </a>
+
+    <a href="https://vle.hcmue.edu.vn/users/users/login" target="_blank" class="platform-card">
+      <div class="icon">🗂️</div>
+      <h4>Hệ thống VLE</h4>
+    </a>
+
+    <a href="https://outlook.office.com/mail/?login_hint=5101108008%40student.hcmue.edu.vn" target="_blank" class="platform-card">
+      <div class="icon">📝</div>
+      <h4>Outlook</h4>
+    </a>
+
+    <a href="https://teams.microsoft.com/v2/" target="_blank" class="platform-card">
+      <div class="icon">🎯</div>
+      <h4>Microsoft Teams</h4>
+    </a>
+
+    <a href="https://dkhp.hcmue.edu.vn/Student/RegistScheduleUnitPlan" target="_blank" class="platform-card">
+      <div class="icon">📊</div>
+      <h4>Web đăng ký học phần</h4>
+    </a>
+
+    <a href="https://upcoder.xyz" target="_blank" class="platform-card">
+      <div class="icon">📌</div>
+      <h4>UpCoder</h4>
+    </a>
+    <a href="https://test.upcoder.xyz" target="_blank" class="platform-card">
+      <div class="icon">📌</div>
+      <h4>UpCoder (Dự phòng)</h4>
+    </a>
+  </div>
+</div>
+<!----DuLieu---->
+<div id="dulieu" class="content">
+  <table style="width:100%; border-collapse:collapse; font-size:14px;">
+    <thead style="background:#0b3b64; color:#fff;">
+      <tr>
+        <th>Học kì</th>
+        <th>Mã LHP</th>
+        <th>Tên HP</th>
+        <th>STC</th>
+        <th>Giảng viên</th>
+        <th>Liên hệ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Đang cập nhật</td>
+        <td>Đang cập nhật</td>
+        <td></td>
+        <td>Đang cập nhật</td>
+        <td>Đang cập nhật</td>
+      </tr>
+	 <tr>
+
+      </tr>
+    </tbody>
+  </table>
+</div> 
     <!-- HK2 -->
-    <div id="hk2" class="content active">
+    <div id="hk2" class="content">
       <div class="card">
         <div class="card-header">Học kỳ 2 – Năm 1</div>
 
@@ -309,74 +374,6 @@ select{
         </div>
       </div>
     </div>
-
-<!----DuLieu---->
-<div id="dulieu" class="content">
-  <table style="width:100%; border-collapse:collapse; font-size:14px;">
-    <thead style="background:#0b3b64; color:#fff;">
-      <tr>
-        <th>Học kì</th>
-        <th>Mã LHP</th>
-        <th>Tên HP</th>
-        <th>STC</th>
-        <th>Giảng viên</th>
-        <th>Liên hệ</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>1</td>
-        <td>Đang cập nhật</td>
-        <td>Đang cập nhật</td>
-        <td></td>
-        <td>Đang cập nhật</td>
-        <td>Đang cập nhật</td>
-      </tr>
-	 <tr>
-
-      </tr>
-    </tbody>
-  </table>
-</div> 
-<div>
-<div id="nentang" class="content">
-  <div class="platform-grid">
-
-    <a href="https://online.hcmue.edu.vn/" target="_blank" class="platform-card">
-      <div class="icon">🎓</div>
-      <h4>Trang Online</h4>
-    </a>
-
-    <a href="https://vle.hcmue.edu.vn/users/users/login" target="_blank" class="platform-card">
-      <div class="icon">🗂️</div>
-      <h4>Hệ thống VLE</h4>
-    </a>
-
-    <a href="https://outlook.office.com/mail/?login_hint=5101108008%40student.hcmue.edu.vn" target="_blank" class="platform-card">
-      <div class="icon">📝</div>
-      <h4>Outlook</h4>
-    </a>
-
-    <a href="https://teams.microsoft.com/v2/" target="_blank" class="platform-card">
-      <div class="icon">🎯</div>
-      <h4>Microsoft Teams</h4>
-    </a>
-
-    <a href="https://dkhp.hcmue.edu.vn/Student/RegistScheduleUnitPlan" target="_blank" class="platform-card">
-      <div class="icon">📊</div>
-      <h4>Web đăng ký học phần</h4>
-    </a>
-
-    <a href="https://upcoder.xyz" target="_blank" class="platform-card">
-      <div class="icon">📌</div>
-      <h4>UpCoder</h4>
-    </a>
-    <a href="https://test.upcoder.xyz" target="_blank" class="platform-card">
-      <div class="icon">📌</div>
-      <h4>UpCoder (Dự phòng)</h4>
-    </a>
-  </div>
-</div>
 
    
 
