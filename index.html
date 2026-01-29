@@ -163,6 +163,63 @@ select{
 /* TAB */
 .content{display:none;}
 .content.active{display:block;}
+/* ===== NỀN TẢNG ===== */
+.platform-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:22px;
+}
+
+.platform-card{
+  background:#fff;
+  border-radius:16px;
+  padding:36px 20px;
+  text-align:center;
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+  position:relative;
+  cursor:pointer;
+  transition:.25s;
+  overflow:hidden;
+}
+
+/* nền chấm góc giống ảnh */
+.platform-card::before{
+  content:"";
+  position:absolute;
+  width:120px;
+  height:120px;
+  background:radial-gradient(#cddff1 1px, transparent 1px);
+  background-size:8px 8px;
+  bottom:-20px;
+  left:-20px;
+  opacity:.7;
+}
+
+.platform-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 12px 28px rgba(0,0,0,.12);
+}
+
+.platform-card .icon{
+  font-size:48px;
+  margin-bottom:18px;
+}
+
+.platform-card h4{
+  color:#0f4c81;
+  font-size:16px;
+  font-weight:700;
+  line-height:1.4;
+}
+
+/* responsive */
+@media(max-width:1000px){
+  .platform-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:600px){
+  .platform-grid{grid-template-columns:1fr;}
+}
+
 </style>
 </head>
 
@@ -181,6 +238,7 @@ select{
     <a onclick="showTab('hk1',this)">TKB Học kỳ 1 - Năm 1</a>
     <h3>Dữ liệu</h3>
     <a onclick="showTab('dulieu',this)">Dữ liệu</a>
+    <a onclick="showTab('nentang',this)">Nền tảng</a>
   </div>
 
   <!-- MAIN -->
@@ -279,11 +337,48 @@ select{
       </tr>
     </tbody>
   </table>
-</div>
+</div> 
+<div>
+<div id="nentang" class="content">
+  <div class="platform-grid">
 
-    
+    <a href="https://online.hcmue.edu.vn/" target="_blank" class="platform-card">
+      <div class="icon">🎓</div>
+      <h4>Trang Online</h4>
+    </a>
+
+    <a href="https://vle.hcmue.edu.vn/users/users/login" target="_blank" class="platform-card">
+      <div class="icon">🗂️</div>
+      <h4>Hệ thống VLE</h4>
+    </a>
+
+    <a href="https://outlook.office.com/mail/?login_hint=5101108008%40student.hcmue.edu.vn" target="_blank" class="platform-card">
+      <div class="icon">📝</div>
+      <h4>Outlook</h4>
+    </a>
+
+    <a href="https://teams.microsoft.com/v2/" target="_blank" class="platform-card">
+      <div class="icon">🎯</div>
+      <h4>Microsoft Teams</h4>
+    </a>
+
+    <a href="https://dkhp.hcmue.edu.vn/Student/RegistScheduleUnitPlan" target="_blank" class="platform-card">
+      <div class="icon">📊</div>
+      <h4>Web đăng ký học phần</h4>
+    </a>
+
+    <a href="https://upcoder.xyz" target="_blank" class="platform-card">
+      <div class="icon">📌</div>
+      <h4>UpCoder</h4>
+    </a>
+    <a href="https://test.upcoder.xyz" target="_blank" class="platform-card">
+      <div class="icon">📌</div>
+      <h4>UpCoder (Dự phòng)</h4>
+    </a>
   </div>
 </div>
+
+   
 
 <script>
 function showTab(id, el){
