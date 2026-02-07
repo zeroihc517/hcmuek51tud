@@ -211,6 +211,12 @@ select{
   font-weight:700;
   line-height:1.4;
 }
+.menu-btn{
+  font-size:22px;
+  margin-right:16px;
+  cursor:pointer;
+  display:none;
+}
 
 /* responsive */
 @media(max-width:1000px){
@@ -219,6 +225,37 @@ select{
 @media(max-width:600px){
   .platform-grid{grid-template-columns:1fr;}
 }
+/* ===== SIDEBAR MOBILE ===== */
+@media (max-width: 768px){
+
+  .menu-btn{
+    display:block;
+  }
+
+  .layout{
+    flex-direction:column;
+  }
+
+  .sidebar{
+    position:fixed;
+    top:56px;
+    left:-220px;
+    width:200px;
+    height:calc(100vh - 56px);
+    background:#fff;
+    z-index:1000;
+    transition:0.3s ease;
+    box-shadow:4px 0 12px rgba(0,0,0,.15);
+  }
+
+  .sidebar.show{
+    left:0;
+  }
+
+  .main{
+    padding:16px;
+  }
+}
 
 </style>
 </head>
@@ -226,8 +263,10 @@ select{
 <body>
 
 <div class="topbar">
+  <span class="menu-btn" onclick="toggleSidebar()">☰</span>
   TRƯỜNG ĐẠI HỌC SƯ PHẠM THÀNH PHỐ HỒ CHÍ MINH
 </div>
+
 
 <div class="layout">
 
@@ -450,6 +489,20 @@ function loadTKB(select, iframeId, boxId){
     iframe.src = '';
   }
 }
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('show');
+}
+function showTab(id, el){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+
+  // đóng sidebar trên mobile
+  document.querySelector('.sidebar').classList.remove('show');
+}
+
 </script>
 
 </body>
