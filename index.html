@@ -502,6 +502,76 @@ function showTab(id, el){
   // đóng sidebar trên mobile
   document.querySelector('.sidebar').classList.remove('show');
 }
+/* ===== TAB + GHI NHỚ ===== */
+function showTab(id, el){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+
+  localStorage.setItem('activeTab', id);
+
+  // đóng sidebar mobile
+  document.querySelector('.sidebar').classList.remove('show');
+}
+
+/* ===== LOAD TKB + GHI NHỚ ===== */
+function loadTKB(select, iframeId, boxId){
+  const iframe = document.getElementById(iframeId);
+  const box = document.getElementById(boxId);
+
+  if(select.value){
+    iframe.src = select.value;
+    box.style.display = 'block';
+    box.scrollIntoView({behavior:'smooth'});
+
+    localStorage.setItem(iframeId, select.value);
+  }else{
+    box.style.display = 'none';
+    iframe.src = '';
+  }
+}
+
+/* ===== SIDEBAR MOBILE ===== */
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('show');
+}
+
+/* ===== SEARCH NỀN TẢNG ===== */
+function filterPlatform(){
+  const keyword = document.getElementById('searchPlatform').value.toLowerCase();
+  document.querySelectorAll('.platform-card').forEach(card=>{
+    const text = card.innerText.toLowerCase();
+    card.style.display = text.includes(keyword) ? 'block' : 'none';
+  });
+}
+
+/* ===== KHÔI PHỤC TRẠNG THÁI ===== */
+window.onload = () => {
+
+  /* tab */
+  const savedTab = localStorage.getItem('activeTab');
+  if(savedTab){
+    const link = [...document.querySelectorAll('.sidebar a')]
+      .find(a=>a.getAttribute('onclick')?.includes(savedTab));
+    if(link) showTab(savedTab, link);
+  }
+
+  /* hk1 */
+  const hk1 = localStorage.getItem('iframeHK1');
+  if(hk1){
+    document.querySelector('#hk1 select').value = hk1;
+    loadTKB(document.querySelector('#hk1 select'),'iframeHK1','boxHK1');
+  }
+
+  /* hk2 */
+  const hk2 = localStorage.getItem('iframeHK2');
+  if(hk2){
+    document.querySelector('#hk2 select').value = hk2;
+    loadTKB(document.querySelector('#hk2 select'),'iframeHK2','boxHK2');
+  }
+};
 
 </script>
 
