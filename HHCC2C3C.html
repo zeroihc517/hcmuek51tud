@@ -814,6 +814,91 @@ window.addEventListener("load",function(){
 tinhTrungBinhTatCa();
 tinhTongKet();
 });
+/* ===== CHO PHÉP SỬA ĐIỂM ===== */
+
+function enableEdit(){
+
+  document.querySelectorAll("tbody td").forEach(cell=>{
+
+    if(cell.cellIndex >= 2){ // bỏ STT + tên
+      cell.contentEditable = true;
+
+      cell.addEventListener("input", ()=>{
+        saveTableData();
+        tinhTrungBinhTatCa();
+        tinhTongKet();
+      });
+
+    }
+
+  });
+
+}
+/* ===== LƯU DỮ LIỆU ===== */
+
+function saveTableData(){
+
+  const tables = document.querySelectorAll(".main table");
+
+  tables.forEach((table, tIndex)=>{
+
+    const rows = table.querySelectorAll("tbody tr");
+
+    rows.forEach((row, rIndex)=>{
+
+      const cells = row.querySelectorAll("td");
+
+      cells.forEach((cell, cIndex)=>{
+
+        const key = `table_${tIndex}_${rIndex}_${cIndex}`;
+        localStorage.setItem(key, cell.innerText);
+
+      });
+
+    });
+
+  });
+
+}
+/* ===== LOAD DỮ LIỆU ===== */
+
+function loadTableData(){
+
+  const tables = document.querySelectorAll(".main table");
+
+  tables.forEach((table, tIndex)=>{
+
+    const rows = table.querySelectorAll("tbody tr");
+
+    rows.forEach((row, rIndex)=>{
+
+      const cells = row.querySelectorAll("td");
+
+      cells.forEach((cell, cIndex)=>{
+
+        const key = `table_${tIndex}_${rIndex}_${cIndex}`;
+        const val = localStorage.getItem(key);
+
+        if(val !== null){
+          cell.innerText = val;
+        }
+
+      });
+
+    });
+
+  });
+
+}
+window.addEventListener("load",function(){
+
+  loadTableData();   // load điểm đã lưu
+  enableEdit();      // cho phép sửa
+
+  tinhTrungBinhTatCa();
+  tinhTongKet();
+
+});
 </script>
 </body>
 </html>
