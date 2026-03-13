@@ -126,8 +126,9 @@ select{
   height:100%;
   border:none;
 }
-/* ===== BẢNG ĐIỂM ĐẸP ===== */
-#bangdiem table{
+/* ===== BẢNG CHUNG CHO TẤT CẢ ===== */
+
+.main table{
   width:100%;
   border-collapse:separate;
   border-spacing:0;
@@ -138,7 +139,7 @@ select{
   box-shadow:0 6px 16px rgba(0,0,0,.08);
 }
 
-#bangdiem thead th{
+.main thead th{
   background:linear-gradient(135deg,#0f4c81,#0b3b64);
   color:#fff;
   padding:12px 10px;
@@ -146,26 +147,26 @@ select{
   text-align:center;
 }
 
-#bangdiem tbody td{
+.main tbody td{
   padding:10px 8px;
   border-bottom:1px solid #e5e7eb;
   text-align:center;
 }
 
-#bangdiem tbody td:nth-child(2){
+.main tbody td:nth-child(2){
   text-align:left;
   font-weight:600;
 }
 
-#bangdiem tbody tr:nth-child(even){
+.main tbody tr:nth-child(even){
   background:#f8fafc;
 }
 
-#bangdiem tbody tr:hover{
+.main tbody tr:hover{
   background:#eaf3fb;
 }
 
-#bangdiem tbody td:last-child{
+.main tbody td:last-child{
   font-weight:700;
   color:#0f4c81;
 }
@@ -283,14 +284,15 @@ select{
   <!-- SIDEBAR -->
   <div class="sidebar">
       <h3>Nền tảng</h3>
-<a class="active" onclick="showTab('bangdiem',this)">Điểm nhóm</a>
-
+<a class="active" onclick="showTab('chuyencan',this)">Điểm chuyên cần</a>
+<a  onclick="showTab('canhan',this)">Sản phẩm cá nhân</a>
+<a  onclick="showTab('hoatdongnhom',this)">Hoạt động nhóm</a>
   </div>
 
   <!-- MAIN -->
   <div class="main">
 
-<div id="bangdiem" class="content active">
+<div id="chuyencan" class="content active">
   <table style="width:100%; border-collapse:collapse; font-size:14px;">
     <thead style="background:#0b3b64; color:#fff;">
       <tr>
@@ -413,6 +415,131 @@ select{
   </table>
 </div> 
 
+<div id="canhan" class="content">
+  <table style="width:100%; border-collapse:collapse; font-size:14px;">
+    <thead style="background:#0b3b64; color:#fff;">
+      <tr>
+        <th>STT</th>
+        <th>Họ và tên</th>
+        <th>Bài 1,2</th>
+        <th>Bài 3</th>
+        <th>Trung bính</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Nguyễn Phạm Lê Vy</td>
+        <td>10</td>
+        <td>10</td>
+       <td></td>
+      </tr>
+	 <tr>
+      <tr>
+        <td>2</td>
+        <td>Trương Bảo Chí</td>
+        <td>10</td>
+        <td>10</td>
+         <td></td>
+      </tr>
+	 <tr>
+      <tr>
+        <td>3</td>
+        <td>Dương Nguyên Khoa</td>
+        <td>9.5</td>
+        <td>10</td>
+         <td></td>
+      </tr>
+	 <tr>
+      <tr>
+        <td>4</td>
+        <td>Nguyễn Thị Thanh Thảo</td>
+        <td>10</td>
+        <td>10</td>
+         <td></td>
+      </tr>
+	 <tr>
+      <tr>
+        <td>5</td>
+        <td>Nguyễn Huỳnh Trúc Thy</td>
+        <td>9.5</td>
+        <td>10</td>
+         <td></td>
+      </tr>
+	 <tr>
+      <tr>
+        <td>6</td>
+        <td>Nguyễn Ngọc Thủy Tiên</td>
+        <td>9.5</td>
+        <td>10</td>
+         <td></td>
+      </tr>
+	 <tr>
+
+     
+      </tr>
+    </tbody>
+  </table>
+</div> 
+<div id="hoatdongnhom" class="content">
+  <table style="width:100%; border-collapse:collapse; font-size:14px;">
+    <thead style="background:#0b3b64; color:#fff;">
+      <tr>
+        <th>STT</th>
+        <th>Họ và tên</th>
+        <th>Bài tập Tết</th>
+        <th>Trung bính</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Nguyễn Phạm Lê Vy</td>
+        <td>10</td>
+        <td></td>
+      </tr>
+	 <tr>
+      <tr>
+        <td>2</td>
+        <td>Trương Bảo Chí</td>
+        <td>10</td>
+        <td></td>
+      </tr>
+	 <tr>
+      <tr>
+        <td>3</td>
+        <td>Dương Nguyên Khoa</td>
+        <td>10</td>
+        <td></td>
+      </tr>
+	 <tr>
+      <tr>
+        <td>4</td>
+        <td>Nguyễn Thị Thanh Thảo</td>
+        <td>10</td>
+        <td></td>
+      </tr>
+	 <tr>
+      <tr>
+        <td>5</td>
+        <td>Nguyễn Huỳnh Trúc Thy</td>
+        <td>10</td>
+        <td></td>
+      </tr>
+	 <tr>
+      <tr>
+        <td>6</td>
+        <td>Nguyễn Ngọc Thủy Tiên</td>
+        <td>10</td>
+        <td></td>
+      </tr>
+	 <tr>
+
+     
+      </tr>
+    </tbody>
+  </table>
+</div> 
 
 
    
@@ -496,40 +623,49 @@ function filterPlatform(){
 
 </script>
 <script>
-/* ===== TÍNH TRUNG BÌNH CỘT CUỐI (TỰ ĐỘNG) ===== */
-function tinhTrungBinh(){
 
-  const rows = document.querySelectorAll("#bangdiem tbody tr");
+/* ===== TÍNH TRUNG BÌNH CHO TẤT CẢ BẢNG ===== */
 
-  rows.forEach(row => {
+function tinhTrungBinhTatCa(){
 
-    const cells = row.querySelectorAll("td");
+  const tables = document.querySelectorAll(".main table");
 
-    let tong = 0;
-    let dem = 0;
+  tables.forEach(table => {
 
-    /* duyệt từ cột 3 đến trước cột cuối */
-    for(let i = 2; i < cells.length - 1; i++){
+    const rows = table.querySelectorAll("tbody tr");
 
-      let val = cells[i].innerText.trim();
+    rows.forEach(row => {
 
-      if(val !== "" && !isNaN(val)){
-        tong += parseFloat(val);
-        dem++;
+      const cells = row.querySelectorAll("td");
+
+      if(cells.length < 3) return;
+
+      let tong = 0;
+      let dem = 0;
+
+      for(let i=2;i<cells.length-1;i++){
+
+        let val = cells[i].innerText.trim();
+
+        if(val !== "" && !isNaN(val)){
+          tong += parseFloat(val);
+          dem++;
+        }
+
       }
 
-    }
+      if(dem>0){
+        cells[cells.length-1].innerText=(tong/dem).toFixed(2);
+      }
 
-    /* ghi kết quả vào cột cuối */
-    if(dem > 0){
-      cells[cells.length - 1].innerText = (tong/dem).toFixed(2);
-    }
+    });
 
   });
 
 }
 
-window.onload = tinhTrungBinh;
+window.addEventListener("load", tinhTrungBinhTatCa);
+
 </script>
 
 </body>
