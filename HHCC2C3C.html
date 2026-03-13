@@ -283,16 +283,87 @@ select{
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-      <h3>Nền tảng</h3>
-<a class="active" onclick="showTab('chuyencan',this)">Điểm chuyên cần</a>
+      <h3>Điểm nhóm</h3>
+<a class="active" onclick="showTab('tongket',this)">Điểm tổng kết</a>
+<a  onclick="showTab('chuyencan',this)">Điểm chuyên cần</a>
 <a  onclick="showTab('canhan',this)">Sản phẩm cá nhân</a>
 <a  onclick="showTab('hoatdongnhom',this)">Hoạt động nhóm</a>
   </div>
 
   <!-- MAIN -->
   <div class="main">
+<div id="tongket" class="content active">
+  <table style="width:100%; border-collapse:collapse; font-size:14px;">
+    <thead style="background:#0b3b64; color:#fff;">
+      <tr>
+        <th>STT</th>
+<th>Họ và tên</th>
+<th>Chuyên cần (10%)</th>
+<th>Cá nhân (40%)</th>
+<th>Hoạt động nhóm (50%)</th>
+<th>Tổng kết</th>
+      </tr>
+    </thead>
+    <tbody>
+     <tr>
+<td>1</td>
+<td>Nguyễn Phạm Lê Vy</td>
+<td class="cc"></td>
+<td class="cn"></td>
+<td class="nhom"></td>
+<td class="tk"></td>
+</tr>
 
-<div id="chuyencan" class="content active">
+<tr>
+<td>2</td>
+<td>Trương Bảo Chí</td>
+<td class="cc"></td>
+<td class="cn"></td>
+<td class="nhom"></td>
+<td class="tk"></td>
+</tr>
+
+<tr>
+<td>3</td>
+<td>Dương Nguyên Khoa</td>
+<td class="cc"></td>
+<td class="cn"></td>
+<td class="nhom"></td>
+<td class="tk"></td>
+</tr>
+
+<tr>
+<td>4</td>
+<td>Nguyễn Thị Thanh Thảo</td>
+<td class="cc"></td>
+<td class="cn"></td>
+<td class="nhom"></td>
+<td class="tk"></td>
+</tr>
+
+<tr>
+<td>5</td>
+<td>Nguyễn Huỳnh Trúc Thy</td>
+<td class="cc"></td>
+<td class="cn"></td>
+<td class="nhom"></td>
+<td class="tk"></td>
+</tr>
+
+<tr>
+<td>6</td>
+<td>Nguyễn Ngọc Thủy Tiên</td>
+<td class="cc"></td>
+<td class="cn"></td>
+<td class="nhom"></td>
+<td class="tk"></td>
+</tr>
+
+    </tbody>
+  </table>
+</div> 
+
+<div id="chuyencan" class="content">
   <table style="width:100%; border-collapse:collapse; font-size:14px;">
     <thead style="background:#0b3b64; color:#fff;">
       <tr>
@@ -667,6 +738,40 @@ function tinhTrungBinhTatCa(){
 window.addEventListener("load", tinhTrungBinhTatCa);
 
 </script>
+<script>
+function tinhTongKet(){
 
+const cc = document.querySelectorAll("#chuyencan tbody tr td:last-child");
+const cn = document.querySelectorAll("#canhan tbody tr td:last-child");
+const nhom = document.querySelectorAll("#hoatdongnhom tbody tr td:last-child");
+
+const ccTK = document.querySelectorAll("#tongket .cc");
+const cnTK = document.querySelectorAll("#tongket .cn");
+const nhomTK = document.querySelectorAll("#tongket .nhom");
+const tong = document.querySelectorAll("#tongket .tk");
+
+for(let i=0;i<cc.length;i++){
+
+let diemCC = parseFloat(cc[i].innerText) || 0;
+let diemCN = parseFloat(cn[i].innerText) || 0;
+let diemNH = parseFloat(nhom[i].innerText) || 0;
+
+ccTK[i].innerText = diemCC.toFixed(2);
+cnTK[i].innerText = diemCN.toFixed(2);
+nhomTK[i].innerText = diemNH.toFixed(2);
+
+let tk = diemCC*0.1 + diemCN*0.4 + diemNH*0.5;
+
+tong[i].innerText = tk.toFixed(2);
+
+}
+
+}
+
+window.addEventListener("load",function(){
+tinhTrungBinhTatCa();
+tinhTongKet();
+});
+</script>
 </body>
 </html>
