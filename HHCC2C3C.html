@@ -823,12 +823,18 @@ function enableEdit(){
     if(cell.cellIndex >= 2){ // bỏ STT + tên
       cell.contentEditable = true;
 
-      cell.addEventListener("input", ()=>{
-        saveTableData();
-        tinhTrungBinhTatCa();
-        tinhTongKet();
-      });
+cell.addEventListener("input", ()=>{
 
+  // tính lại bảng hiện tại
+  tinhTrungBinhTatCa();
+
+  // cập nhật tổng kết ngay
+  tinhTongKet();
+
+  // lưu dữ liệu
+  saveTableData();
+
+});
     }
 
   });
