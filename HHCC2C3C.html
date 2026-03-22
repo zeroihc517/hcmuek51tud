@@ -387,6 +387,77 @@ select{
   color:#0f4c81;
   letter-spacing:1px;
 }
+
+.topbar{
+  height:60px;
+  background:linear-gradient(135deg,#0f4c81,#0b3b64);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+}
+
+.title{
+  font-weight:700;
+  margin-left:10px;
+}
+
+/* ===== DATETIME PRO ===== */
+.topbar{
+  height:60px;
+  background:linear-gradient(135deg,#0f4c81,#0b3b64);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+}
+
+.title{
+  margin-left:10px;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* ===== DATETIME 1 HÀNG ===== */
+.datetime-inline{
+  margin-left:auto;
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:0.4px;
+
+  padding:6px 16px;
+
+  color:#eaf3ff;
+
+  background:linear-gradient(135deg,rgba(255,255,255,0.18),rgba(255,255,255,0.05));
+  border:1px solid rgba(255,255,255,0.25);
+
+  border-radius:999px;
+
+  backdrop-filter:blur(8px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    0 4px 12px rgba(0,0,0,0.25);
+
+  transition:all 0.25s ease;
+}
+
+/* hover nhẹ cho cảm giác xịn */
+.datetime-inline:hover{
+  background:linear-gradient(135deg,rgba(255,255,255,0.25),rgba(255,255,255,0.08));
+  transform:translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 6px 16px rgba(0,0,0,0.3);
+}
 </style>
 </head>
 
@@ -394,8 +465,12 @@ select{
 
 <div class="topbar">
   <span class="menu-btn" onclick="toggleSidebar()">☰</span>
-  NHÓM 6 - 51.01.TUD - HÌNH HỌC CAO CẤP HAI CHIỀU VÀ BA CHIỀU
 
+  <div class="title">
+    NHÓM 6 - 51.01.TUD - HÌNH HỌC CAO CẤP HAI CHIỀU VÀ BA CHIỀU
+  </div>
+
+  <div class="datetime-inline" id="datetime"></div>
 </div>
 
 
@@ -1155,6 +1230,26 @@ seconds + " giây";
 
 setInterval(updateCountdown,1000);
 updateCountdown();
+function updateDateTime(){
+  const now = new Date();
+
+  const days = ["Chủ Nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
+
+  const day = days[now.getDay()];
+  const d = now.getDate().toString().padStart(2,'0');
+  const m = (now.getMonth()+1).toString().padStart(2,'0');
+  const y = now.getFullYear();
+
+  const h = now.getHours().toString().padStart(2,'0');
+  const min = now.getMinutes().toString().padStart(2,'0');
+
+  document.getElementById("datetime").innerHTML =
+    `🕒 ${day} • ${d}/${m}/${y} • ${h}:${min}`;
+}
+
+/* cập nhật mỗi 30s là đủ mượt */
+setInterval(updateDateTime,30000);
+updateDateTime();
 </script>
 </body>
 </html>
