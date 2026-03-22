@@ -362,7 +362,31 @@ select{
   background:#9ca3af;
   color:#fff;
 }
+/* ===== COUNTDOWN ===== */
+.countdown-box{
+  margin-top:16px;
+  background:#fff3f0;
+  border-left:6px solid #ef4444;
+  border-radius:10px;
+  padding:16px 20px;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+}
 
+.countdown-title{
+  font-weight:700;
+  color:#b91c1c;
+}
+
+.countdown-time{
+  font-size:22px;
+  font-weight:700;
+  color:#0f4c81;
+  letter-spacing:1px;
+}
 </style>
 </head>
 
@@ -399,7 +423,15 @@ select{
 <div class="notice-card new">
 
 <div class="notice-header">
-<span class="badge new">NEW</span>
+<span class="badge new">New</span>
+<div class="countdown-box">
+  <div class="countdown-title">
+⏳ Thời gian còn lại:
+  </div>
+  <div class="countdown-time" id="countdown">
+Đang tải...
+  </div>
+</div>
 <div class="notice-deadline">
 ⏰Thời hạn: 17h59’ – Ngày 24/03/2026
 </div>
@@ -698,7 +730,7 @@ Chứng minh rằng bộ ba \((\mathbb{A},\varphi,V)\) là một không gian Aff
 <div class="note-box">
 <strong>📌 Ghi chú:</strong>
 <ul>
-<li>Điểm từ <b>Buổi 2 → Buổi 11</b> là cột điểm danh.  
+<li>Điểm từ <b>Buổi 1 → Buổi 10</b> là cột điểm danh.  
 Sinh viên có mặt được <b>10 điểm</b>; vắng có phép được <b>3–8 điểm</b> tùy theo lý do; vắng không phép được <b>0 điểm</b>.</li>
 
 <li>Cột <b>Replies</b> thể hiện số lần tương tác <b><i>trong nhóm</i></b> (1 lần tương tác online = 0,2 điểm; 1 lần tương tác trực tiếp = 0,4 điểm).  
@@ -1096,7 +1128,33 @@ function dongBoTen(){
 }
 
 window.addEventListener("load", dongBoTen);
+function updateCountdown(){
 
+const deadline = new Date("March 24, 2026 17:59:00").getTime();
+const now = new Date().getTime();
+
+const diff = deadline - now;
+
+if(diff <= 0){
+document.getElementById("countdown").innerHTML = "ĐÃ HẾT HẠN";
+return;
+}
+
+const days = Math.floor(diff / (1000*60*60*24));
+const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+const minutes = Math.floor((diff % (1000*60*60)) / (1000*60));
+const seconds = Math.floor((diff % (1000*60)) / 1000);
+
+document.getElementById("countdown").innerHTML =
+days + " ngày " +
+hours + " giờ " +
+minutes + " phút " +
+seconds + " giây";
+
+}
+
+setInterval(updateCountdown,1000);
+updateCountdown();
 </script>
 </body>
 </html>
