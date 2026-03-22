@@ -6,6 +6,7 @@
 <title>Nhóm 6 - 51.01.TUD - HHCC2C3C</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
 :root{
   --blue:#0f4c81;
@@ -293,6 +294,75 @@ select{
 .main table{
   font-family:"Times New Roman", Times, serif;
 }
+/* ===== NOTICE CARD ===== */
+
+.notice-list{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.notice-card{
+  background:#fff;
+  border-radius:12px;
+  padding:22px 24px;
+  box-shadow:0 6px 16px rgba(0,0,0,.08);
+  border-left:6px solid #d1d5db;
+  transition:.2s;
+}
+
+.notice-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 10px 22px rgba(0,0,0,.12);
+}
+
+.notice-card.new{
+  border-left-color:#f97316;
+  background:#fffaf5;
+}
+
+.notice-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.notice-title{
+  font-size:18px;
+  font-weight:700;
+  color:#b91c1c;
+}
+
+.notice-body{
+  line-height:1.7;
+  color:#374151;
+  font-size:16px;
+}
+
+.notice-deadline{
+  font-weight:700;
+  color:#0f4c81;
+  font-size:15px;
+}
+
+.badge{
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.badge.new{
+  background:#ef4444;
+  color:#fff;
+}
+
+.badge.end{
+  background:#9ca3af;
+  color:#fff;
+}
+
 </style>
 </head>
 
@@ -309,16 +379,122 @@ select{
 
   <!-- SIDEBAR -->
   <div class="sidebar">
+      <h3>Thông báo</h3>
+<a class="active" onclick="showTab('thongbao',this)">Thông báo</a>
       <h3>Điểm nhóm</h3>
-<a class="active" onclick="showTab('tongket',this)">Điểm tổng kết</a>
+<a  onclick="showTab('tongket',this)">Điểm tổng kết</a>
 <a  onclick="showTab('chuyencan',this)">Điểm chuyên cần</a>
 <a  onclick="showTab('canhan',this)">Sản phẩm cá nhân</a>
 <a  onclick="showTab('hoatdongnhom',this)">Hoạt động nhóm</a>
+
   </div>
+
 
   <!-- MAIN -->
   <div class="main">
-<div id="tongket" class="content active">
+<div id="thongbao" class="content active">
+
+<div class="notice-list">
+
+<div class="notice-card new">
+
+<div class="notice-header">
+<span class="badge new">NEW</span>
+<div class="notice-deadline">
+⏰Thời hạn: 17h59’ – Ngày 24/03/2026
+</div>
+</div>
+
+<div class="notice-title">
+📌 Bài tập Đợt 3 – Chương 1 (Bài 4,5,6)
+</div>
+
+<div class="notice-body">
+
+<p><b>Bài tập 10:</b> Trong không gian affine \(\mathbb{A}^n\) cho công thức đổi mục tiêu: 
+\[
+\begin{cases}
+x_1 = y_1 + y_2 + y_3 + \cdots + y_n + 1 \\
+x_2 = \qquad y_2 + y_3 + \cdots + y_n + 2 \\
+x_3 = \qquad\qquad y_3 + \cdots + y_n + 3 \\
+\cdots \\
+x_n = \qquad\qquad\qquad\qquad y_n + n
+\end{cases}
+\]
+trong đó \((x_1,x_2,...,x_n)\) tọa độ của một điểm \(X\) thuộc \(\mathbb{A}^n\) đối với mục tiêu thứ nhất và \((y_1,y_2,...,y_n)\) là tọa độ của điểm \(X\) đối với mục tiêu thứ hai. Lập phương trình phép biến đổi affine đối với mục tiêu thứ nhất và biến mục tiêu thứ nhất thành mục tiêu thứ hai. Tìm tọa độ các đỉnh của mục tiêu thứ hai đối với mục tiêu thứ nhất.
+</p>
+<br>
+
+<b>Yêu cầu phụ (Nếu làm được):</b>
+
+<ul>
+<li>
+Có thể trình bày thêm phương pháp giải,
+định hướng tiếp cận và kiến thức sử dụng.
+</li>
+
+<li>
+Suy nghĩ <b>1 slogan cho nhóm</b> và gửi lên group Zalo.  
+Ví dụ: <i>Tri thức là đôi cánh, tự do là bầu trời.</i>
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+
+<div class="notice-card">
+
+<div class="notice-header">
+<span class="badge end">END</span>
+<div class="notice-deadline">
+📅Thời hạn: 17h59’ – Ngày 03/03/2026 <br>
+📅Gia hạn: 23h59’ – Ngày 03/03/2026
+</div>
+</div>
+
+<div class="notice-title">
+📌 Bài tập Đợt 1 (Bài 1,2: Không gian Affine và Hình học Affine. Tọa độ Affine và mục tiêu Affine)
+</div>
+
+<div class="notice-body">
+
+<p><b>Bài tập 2:</b> Cho hai không gian affine \((\mathbb{A}_{\nVdash}, \varphi_1, V_1)\),
+\((\mathbb{A}_{\nvDash}, \varphi_2, V_2)\) trên cùng một trường \(\mathbb{K}\).
+Đặt
+\(
+\mathbb{A} = \mathbb{A}_{\nVdash} \times \mathbb{A}_{\nvDash}, \text{ }
+V = V_1 \times V_2
+\)
+và \( \varphi: \mathbb{A} \times \mathbb{A} \to V \) là ánh xạ cho bởi:
+\[
+\varphi\big((M_1, M_2), (N_1, N_2)\big)
+:= \big(\varphi_1(M_1, N_1), \varphi_2(M_2, N_2)\big).
+\]
+Chứng minh rằng bộ ba \((\mathbb{A},\varphi,V)\) là một không gian Affine.</p>
+
+<br>
+<div class="notice-title">
+📌 Bài tập Đợt 2 (Bài 3: Các phẳng trong không gian Affine)
+</div>
+<p><b>Bài tập 6:</b> Trong không gian affine \(\mathbb{A}^3\), cho mục tiêu affine 
+\(\{O; \overrightarrow e_1, \overrightarrow e_2, \overrightarrow e_3\}\) và các điểm \(P_i\) với 
+\(\overrightarrow{OP_i} = a_i \overrightarrow e_i\), \(a_i \ne 0\), \(i = 1,2,3\). Chứng minh rằng ba điểm \(P_1, P_2, P_3\) độc lập và phương trình siêu phẳng 
+đi qua ba điểm ấy có thể viết dưới dạng:
+\[
+\frac{x_1}{a_1} + \frac{x_2}{a_2} + \frac{x_3}{a_3} = 1.
+\]  </p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+<div id="tongket" class="content">
   <table style="width:100%; border-collapse:collapse; font-size:18px;">
     <thead style="background:#0b3b64; color:#fff;">
       <tr>
