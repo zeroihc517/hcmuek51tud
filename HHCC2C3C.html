@@ -1230,26 +1230,34 @@ seconds + " giây";
 
 setInterval(updateCountdown,1000);
 updateCountdown();
-function updateDateTime(){
+
+function updateClock(){
   const now = new Date();
-
   const days = ["Chủ Nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
-
   const day = days[now.getDay()];
-  const d = now.getDate().toString().padStart(2,'0');
-  const m = (now.getMonth()+1).toString().padStart(2,'0');
+  const d = String(now.getDate()).padStart(2,'0');
+  const m = String(now.getMonth()+1).padStart(2,'0');
   const y = now.getFullYear();
 
-  const h = now.getHours().toString().padStart(2,'0');
-  const min = now.getMinutes().toString().padStart(2,'0');
+  const h = String(now.getHours()).padStart(2,'0');
+  const min = String(now.getMinutes()).padStart(2,'0');
 
-  document.getElementById("datetime").innerHTML =
-    `🕒 ${day} • ${d}/${m}/${y} • ${h}:${min}`;
+  const newText = `🕒 ${day} • ${d}/${m}/${y} • ${h}:${min}`;
+  const el = document.getElementById("datetime");
+
+  // chỉ update khi nội dung thay đổi → tránh giật
+  if(el.innerText !== newText){
+    el.innerText = newText;
+  }
 }
 
-/* cập nhật mỗi 30s là đủ mượt */
-setInterval(updateDateTime,30000);
-updateDateTime();
+/* chạy mượt theo frame */
+function loop(){
+  updateClock();
+  requestAnimationFrame(loop);
+}
+
+loop();
 </script>
 </body>
 </html>
