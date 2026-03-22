@@ -458,6 +458,15 @@ select{
     inset 0 1px 0 rgba(255,255,255,0.3),
     0 6px 16px rgba(0,0,0,0.3);
 }
+.sidebar a{
+  display:block;
+  padding:12px 20px;
+  font-weight:600;
+  cursor:pointer;
+  border-left:3px solid transparent;
+  color:#111827; /* thêm dòng này */
+  text-decoration:none; /* thêm dòng này */
+}
 </style>
 </head>
 
@@ -478,8 +487,14 @@ select{
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-      <h3>Thông báo</h3>
-<a class="active" onclick="showTab('thongbao',this)">Thông báo</a>
+      <h3>Thông tin</h3>
+<a class="active" onclick="showTab('thongbao',this)">Deadline</a>
+<a class="menu-link"
+   href="https://www.canva.com/design/DAHCZKdp1_E/tNPOAX4uAgODx1CIjP0E1g/edit"
+   target="_blank">
+  Chỉnh sửa bài tập
+</a>
+<a onclick="showTab('latex',this)">LaTeX</a>
       <h3>Điểm nhóm</h3>
 <a  onclick="showTab('tongket',this)">Điểm tổng kết</a>
 <a  onclick="showTab('chuyencan',this)">Điểm chuyên cần</a>
@@ -599,6 +614,15 @@ Chứng minh rằng bộ ba \((\mathbb{A},\varphi,V)\) là một không gian Aff
 </div>
 
 </div>
+</div>
+
+<div id="latex" class="content">
+  <div class="card">
+    <div class="card-header">LaTeX</div>
+    <div style="padding:30px; text-align:center; font-size:18px; color:#6b7280;">
+      🚧 Đang cập nhật...
+    </div>
+  </div>
 </div>
 
 <div id="tongket" class="content">
