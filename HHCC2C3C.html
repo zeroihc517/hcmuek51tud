@@ -523,7 +523,8 @@ select{
   </div>
 </div>
 <div class="notice-deadline">
-⏰Thời hạn: 17h59’ – Ngày 24/03/2026
+⏰Thời hạn: 17h59’ – Ngày 24/03/2026 <br>
+⏰Gia hạn: 17h59' - Ngày 31/03/2026
 </div>
 </div>
 
@@ -532,7 +533,14 @@ select{
 </div>
 
 <div class="notice-body">
-
+<p style="
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #ff6a00, #ee0979);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;">
+  Thy thuyết trình
+</p>
 <p><b>Bài tập 10:</b> Trong không gian affine \(\mathbb{A}^n\) cho công thức đổi mục tiêu: 
 \[
 \begin{cases}
@@ -582,7 +590,14 @@ Ví dụ: <i>Tri thức là đôi cánh, tự do là bầu trời.</i>
 </div>
 
 <div class="notice-body">
-
+<p style="
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #ff6a00, #ee0979);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;">
+  Khoa thuyết trình
+</p>
 <p><b>Bài tập 2:</b> Cho hai không gian affine \((\mathbb{A}_{\nVdash}, \varphi_1, V_1)\),
 \((\mathbb{A}_{\nvDash}, \varphi_2, V_2)\) trên cùng một trường \(\mathbb{K}\).
 Đặt
@@ -601,6 +616,14 @@ Chứng minh rằng bộ ba \((\mathbb{A},\varphi,V)\) là một không gian Aff
 <div class="notice-title">
 📌 Bài tập Đợt 2 (Bài 3: Các phẳng trong không gian Affine)
 </div>
+<p style="
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #ff6a00, #ee0979);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;">
+  Vy thuyết trình
+</p>
 <p><b>Bài tập 6:</b> Trong không gian affine \(\mathbb{A}^3\), cho mục tiêu affine 
 \(\{O; \overrightarrow e_1, \overrightarrow e_2, \overrightarrow e_3\}\) và các điểm \(P_i\) với 
 \(\overrightarrow{OP_i} = a_i \overrightarrow e_i\), \(a_i \ne 0\), \(i = 1,2,3\). Chứng minh rằng ba điểm \(P_1, P_2, P_3\) độc lập và phương trình siêu phẳng 
@@ -1229,7 +1252,7 @@ function dongBoTen(){
 window.addEventListener("load", dongBoTen);
 function updateCountdown(){
 
-const deadline = new Date("March 24, 2026 17:59:00").getTime();
+const deadline = new Date("March 31, 2026 18:00:00").getTime();
 const now = new Date().getTime();
 
 const diff = deadline - now;
