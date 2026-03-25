@@ -502,17 +502,8 @@ select{
   <div class="sidebar">
       <h3>Thông tin</h3>
 <a class="active" onclick="showTab('thongbao',this)">Deadline</a>
-<a class="menu-link"
-   href="https://drive.google.com/drive/folders/1UQxedDmGRIFpl2XP_mA-1uWo7T4fwsn-?usp=drive_link"
-   target="_blank">
-  Drive
-</a>
-<a class="menu-link"
-   href="https://www.canva.com/design/DAHCZKdp1_E/tNPOAX4uAgODx1CIjP0E1g/edit"
-   target="_blank">
-  Chỉnh sửa bài tập
-</a>
-<a onclick="showTab('latex',this)">LaTeX</a>
+
+<a onclick="showTab('linktruycap',this)">Link truy cập</a>
       <h3>Điểm nhóm</h3>
 <a  onclick="showTab('tongket',this)">Điểm tổng kết</a>
 <a  onclick="showTab('chuyencan',this)">Điểm chuyên cần</a>
@@ -663,14 +654,25 @@ Chứng minh rằng bộ ba \((\mathbb{A},\varphi,V)\) là một không gian Aff
 </div>
 </div>
 
-<div id="latex" class="content">
-  <div class="card">
-    <div class="card-header">LaTeX</div>
-    <div style="padding:30px; text-align:center; font-size:18px; color:#6b7280;">
-      🚧 Đang cập nhật...
-    </div>
+<div id="linktruycap" class="content">
+<div class="platform-grid">
+
+    <a href="https://drive.google.com/drive/folders/1UQxedDmGRIFpl2XP_mA-1uWo7T4fwsn-?usp=drive_link" target="_blank" class="platform-card">
+      <div class="icon">🗂️</div>
+      <h4>Drive</h4>
+    </a>
+    <a href="https://www.canva.com/design/DAHCZKdp1_E/tNPOAX4uAgODx1CIjP0E1g/edit" target="_blank" class="platform-card">
+      <div class="icon">🎓</div>
+      <h4>Chỉnh sửa bài tập</h4>
+    </a>
+    <a href="LaTeX" target="_blank" class="platform-card">
+      <div class="icon">📝</div>
+      <h4>LaTeX</h4>
+    </a>
   </div>
 </div>
+
+
 
 <div id="tongket" class="content">
   <table style="width:100%; border-collapse:collapse; font-size:18px;">
