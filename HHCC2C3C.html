@@ -1388,11 +1388,6 @@ document.addEventListener("keydown", function(e){
   if(e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key)) e.preventDefault();
 });
 </script>
-setInterval(function(){
-  if(window.outerWidth - window.innerWidth > 160){
-    document.body.innerHTML = "<h1>🔒 Không được mở DevTools</h1>";
-  }
-}, 1000);
 
 </body>
 </html>
