@@ -480,6 +480,65 @@ select{
   color:#6b7280;
   font-style:italic;
 }
+/* ===== MODAL ===== */
+.modal{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-box{
+  background:#fff;
+  padding:28px 24px;
+  border-radius:14px;
+  width:320px;
+  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  animation:fadeIn 0.25s ease;
+}
+
+.modal-title{
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:10px;
+  color:#b91c1c;
+}
+
+.modal-body{
+  font-size:15px;
+  margin-bottom:18px;
+  color:#374151;
+}
+
+.modal-box button{
+  padding:8px 16px;
+  border:none;
+  background:#0f4c81;
+  color:#fff;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.modal-box button:hover{
+  background:#0b3b64;
+}
+
+@keyframes fadeIn{
+  from{transform:scale(0.9);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
 </style>
 </head>
 
@@ -665,7 +724,7 @@ Chứng minh rằng bộ ba \((\mathbb{A},\varphi,V)\) là một không gian Aff
       <div class="icon">🎓</div>
       <h4>Chỉnh sửa bài tập</h4>
     </a>
-   <a href="https://www.overleaf.com/9257777868gjpdnnkkbnqv#95fdc7"
+<a href="https://www.overleaf.com/9257777868gjpdnnkkbnqv#95fdc7"
    class="platform-card"
    onclick="return checkLatexAccess(event)">
   <div class="icon">📝</div>
@@ -1051,7 +1110,15 @@ Mỗi lần tương tác online được tính theo số tin nhắn hoặc biể
 </div>
 </div> 
 
-
+<div id="latexModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-title">🔒 Thông báo</div>
+    <div class="modal-body">
+      Tạm thời chưa truy cập được
+    </div>
+    <button onclick="closeModal()">Đã hiểu</button>
+  </div>
+</div>
    
 
 <script>
@@ -1301,12 +1368,16 @@ function checkLatexAccess(e){
   const now = new Date().getTime();
 
   if(now < openDate){
-    e.preventDefault(); // chặn mở link
-    alert("Tạm thời chưa truy cập được");
+    e.preventDefault();
+    document.getElementById("latexModal").classList.add("show");
     return false;
   }
 
-  return true; // cho truy cập sau ngày 15/04
+  return true;
+}
+
+function closeModal(){
+  document.getElementById("latexModal").classList.remove("show");
 }
 
 </script>
