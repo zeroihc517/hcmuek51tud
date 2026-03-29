@@ -665,10 +665,12 @@ Chứng minh rằng bộ ba \((\mathbb{A},\varphi,V)\) là một không gian Aff
       <div class="icon">🎓</div>
       <h4>Chỉnh sửa bài tập</h4>
     </a>
-    <a href="https://www.overleaf.com/9257777868gjpdnnkkbnqv#95fdc7" target="_blank" class="platform-card">
-      <div class="icon">📝</div>
-      <h4>LaTeX</h4>
-    </a>
+   <a href="https://www.overleaf.com/9257777868gjpdnnkkbnqv#95fdc7"
+   class="platform-card"
+   onclick="return checkLatexAccess(event)">
+  <div class="icon">📝</div>
+  <h4>LaTeX</h4>
+</a>
   </div>
 </div>
 
@@ -1293,6 +1295,20 @@ function loop(){
 }
 
 loop();
+function checkLatexAccess(e){
+
+  const openDate = new Date("April 15, 2026 00:00:00").getTime();
+  const now = new Date().getTime();
+
+  if(now < openDate){
+    e.preventDefault(); // chặn mở link
+    alert("Tạm thời chưa truy cập được");
+    return false;
+  }
+
+  return true; // cho truy cập sau ngày 15/04
+}
+
 </script>
 </body>
 </html>
