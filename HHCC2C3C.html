@@ -1379,7 +1379,20 @@ function checkLatexAccess(e){
 function closeModal(){
   document.getElementById("latexModal").classList.remove("show");
 }
+document.addEventListener("contextmenu", e => e.preventDefault());
 
+document.addEventListener("keydown", function(e){
+  if(e.key === "F12") e.preventDefault();
+
+  if(e.ctrlKey && e.key === "u") e.preventDefault();
+  if(e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key)) e.preventDefault();
+});
 </script>
+setInterval(function(){
+  if(window.outerWidth - window.innerWidth > 160){
+    document.body.innerHTML = "<h1>🔒 Không được mở DevTools</h1>";
+  }
+}, 1000);
+
 </body>
 </html>
