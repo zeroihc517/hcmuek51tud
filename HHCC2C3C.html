@@ -578,10 +578,10 @@ select{
 
 <div class="notice-list">
 
-<div class="notice-card new">
+<div class="notice-card end">
 
 <div class="notice-header">
-<span class="badge new">New</span>
+<span class="badge end">End</span>
 <div class="countdown-box">
   <div class="countdown-title">
 ⏳ Thời gian còn lại:
@@ -1313,7 +1313,7 @@ function dongBoTen(){
 window.addEventListener("load", dongBoTen);
 function updateCountdown(){
 
-const deadline = new Date("March 31, 2026 18:00:00").getTime();
+const deadline = new Date("March 31, 2026 06:00:00").getTime();
 const now = new Date().getTime();
 
 const diff = deadline - now;
