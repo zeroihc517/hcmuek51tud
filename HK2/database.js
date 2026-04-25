@@ -473,7 +473,7 @@ var DATA_DEADLINES = [
     {
         title: "Lập trình nâng cao (Giao 22/01)",
         duration: "Từ 22/01/2026 đến 25/01/2026",
-        tag: "Bài tập trêm TEAMS",
+        tag: "Bài tập trên TEAMS",
         icon: "alert",
         emoji: "📣",
         weeks: [1]
@@ -481,7 +481,7 @@ var DATA_DEADLINES = [
  {
         title: "Lập trình nâng cao (Giao 29/01)",
         duration: "Từ 29/01/2026 đến 01/02/2026",
-        tag: "Bài tập trêm TEAMS",
+        tag: "Bài tập trên TEAMS",
         icon: "alert",
         emoji: "📣",
         weeks: [2]
