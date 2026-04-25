@@ -424,7 +424,7 @@ var DATA_DEADLINES = [
     {
         title: "Lập trình nâng cao (Giao 22/01)",
         duration: "Từ 22/01/2026 đến 25/01/2026",
-        tag: "Bài tập trêm TEAMS",
+        tag: "Bài tập trên TEAMS",
         icon: "alert",
         emoji: "📣",
         weeks: [1]
@@ -432,7 +432,7 @@ var DATA_DEADLINES = [
  {
         title: "Lập trình nâng cao (Giao 29/01)",
         duration: "Từ 29/01/2026 đến 01/02/2026",
-        tag: "Bài tập trêm TEAMS",
+        tag: "Bài tập trên TEAMS",
         icon: "alert",
         emoji: "📣",
         weeks: [2]
@@ -452,7 +452,16 @@ var DATA_DEADLINES = [
         icon: "fire",
         emoji: "📣",
         weeks: [5, 6]
-    }, {
+    }, 
+	{
+        title: "Đánh giá điểm rèn luyện Đoàn viên HK1",
+        duration: "23/04/2026",
+        tag: "quanlydoanvien.doanthanhnien.vn",
+        icon: "fire",
+        emoji: "📣",
+        weeks: [11]
+    },
+	{
         title: "Sinh hoạt thời sự - Quý I - Năm 2026",
         duration: "Từ 08/04/2026 đến 09/04/2026",
         tag: "VLE",
