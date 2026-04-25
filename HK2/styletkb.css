@@ -241,10 +241,25 @@ body{
   text-transform:uppercase;
   letter-spacing:1px;
 }
-.online-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:20px;
+/* Tìm đến class .online-grid và sửa lại như sau */
+.online-grid {
+  display: grid;
+  /* Chia chính xác 3 cột bằng nhau */
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 20px;
+}
+
+/* Thêm đoạn này để trên điện thoại nó vẫn hiển thị đẹp (không bị quá nhỏ) */
+@media (max-width: 1024px) {
+  .online-grid {
+    grid-template-columns: repeat(2, 1fr); /* Màn hình vừa hiện 2 ô */
+  }
+}
+
+@media (max-width: 600px) {
+  .online-grid {
+    grid-template-columns: 1fr; /* Màn hình điện thoại hiện 1 ô */
+  }
 }
 .online-card{
   background:white;
@@ -346,3 +361,4 @@ body{
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
+
