@@ -185,7 +185,18 @@ var DATA_COURSES = [
         start: 7,
         length: 3,
         color: "#e0f2fe",
-        weeks: [1, 2, 5, 6, 7, 8, 13, 14]
+        weeks: [1, 2, 5, 6, 8, 13, 14]
+    },
+		{
+        name: "Kiểm tra Giữa học phần Phương pháp học tập hiệu quả",
+        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+        room: "B.117",
+        time: "12:30 - 15:00",
+        day: 6,
+        start: 7,
+        length: 3,
+        color: "#e0f2fe",
+        weeks: [7]
     },
 {
         name: "Phương pháp học tập hiệu quả",
