@@ -74,7 +74,7 @@ function renderAll() {
                 // Xử lý màu sắc tự động
                 let autoColor = course.color;
                 const loc = course.location.toUpperCase();
-                if (loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV")) || loc.includes("Long An")) || || loc.includes("PHLA")) autoColor = "#e0f2fe";
+                if (loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV") || loc.includes("Long An") || loc.includes("PHLA")) autoColor = "#e0f2fe";
                 else if (loc.includes("LÊ VĂN SỸ") || loc.includes("LVS")) autoColor = "#e6f9ef";
                 else if (loc.includes("LẠC LONG QUÂN") || loc.includes("LLQ")) autoColor = "#fff3e0";
                 else if (loc.includes("LÊ THỊ RIÊNG") || loc.includes("CVLTR")) autoColor = "#fef9c3";
