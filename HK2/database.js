@@ -4,17 +4,20 @@ var DATA_COURSES = [
         name: "Kinh tế chính trị học Mác-Lênin",
         location: "Cơ sở: Lê Văn Sỹ",
        room: "LVS.GD.A", link: "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5",
+	teacher: "Trần Thị Hoài Thương",
         time: "9:10-11:30",
         day: 2, 
         start: 4,
         length: 3,
         color: "#ecfdf3",
         weeks: [1, 2, 5, 6]
+	
     },
     {
         name: "Kinh tế chính trị học Mác-Lênin",
         location: "Học online",
        room: "MS Teams", link: "https://teams.microsoft.com/v2/",
+	teacher: "Trần Thị Hoài Thương",
         time: "9:10-11:30",
         day: 2, 
         start: 4,
@@ -26,6 +29,7 @@ var DATA_COURSES = [
         name: "Chủ nghĩa xã hội khoa học",
         location: "Cơ sở: Lê Văn Sỹ",
        room: "LVS.GD.19", link: "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5",
+	teacher: "Trịnh Bá Phương",
         time: "15:10 - 17:40",
         day: 3, 
         start: 10,
@@ -37,6 +41,7 @@ var DATA_COURSES = [
         name: "<b>Kiểm tra Giữa học phần</b><br> Chủ nghĩa xã hội khoa học",
         location: "Cơ sở: Lê Văn Sỹ",
        room: "LVS.GD.19", link: "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5",
+	teacher: "Trịnh Bá Phương",
         time: "15:10 - 17:40",
         day: 3, 
         start: 10,
@@ -48,6 +53,7 @@ var DATA_COURSES = [
         name: "Chủ nghĩa xã hội khoa học",
         location: "Học online",
        room: "MS Teams", link: "https://teams.microsoft.com/v2/",
+	teacher: "Trịnh Bá Phương",
         time: "15:10 - 17:40",
         day: 3, 
         start: 10,
@@ -59,6 +65,7 @@ var DATA_COURSES = [
         name: "Giải tích hàm nhiều biến",
         location: "Cơ sở: Lê Văn Sỹ",
        room: "LVS.D.106", link: "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5",
+	teacher: "Huỳnh Cao Trường",
         time: "13:00 - 16:00",
         day: 2, 
         start: 7,
@@ -67,9 +74,10 @@ var DATA_COURSES = [
         weeks: [1, 2, 7, 8, 9, 10, 11, 13, 14, 15]
     },
 {
-        name: "<b>Kiểm tra Giữa học phần</b><br> Giải tích hàm nhiều biến",
+        name: "Kiểm tra Giữa học phần Giải tích hàm nhiều biến",
         location: "Cơ sở: Lê Văn Sỹ",
        room: "LVS.D.106", link: "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5",
+	teacher: "Huỳnh Cao Trường",
         time: "13:00 - 16:30",
         day: 2, 
         start: 7,
@@ -81,6 +89,7 @@ var DATA_COURSES = [
         name: "Giải tích hàm nhiều biến",
         location: "Học online",
        room: "MS TEAMS", link: "https://teams.microsoft.com/meet/41233279344497?p=lp16UPNJUvuL2DzJas",
+	teacher: "Huỳnh Cao Trường",
         time: "13:00 - 16:00",
         day: 2, 
         start: 7,
@@ -91,6 +100,7 @@ var DATA_COURSES = [
     {
         name: "Không gian tuyến tính",
         location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+	teacher: "Mỵ Vinh Quang",
         room: "B.213",
         time: "8:10 - 11:25",
         day: 3,
@@ -102,6 +112,7 @@ var DATA_COURSES = [
     {
         name: "Không gian tuyến tính (Thực hành)",
         location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+	teacher: "Lê Quang Trường",
         room: "B.213",
         time: "8:10 - 11:25",
         day: 3,
@@ -111,8 +122,9 @@ var DATA_COURSES = [
         weeks: [9]
     },
     {
-        name: "<b>Kiểm tra Giữa học phần</b><br> Không gian tuyến tính (Thực hành)",
+        name: "Kiểm tra Giữa học phần Không gian tuyến tính (Thực hành)",
         location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+	teacher: "Lê Quang Trường",
         room: "B.213",
         time: "8:10 - 9:10",
         day: 3,
@@ -124,6 +136,7 @@ var DATA_COURSES = [
     {
         name: "Không gian tuyến tính",
         location: "Học online", link: "https://teams.microsoft.com/meet/42377682011947?p=ah80iBVjJGK3inEvdV",
+	teacher: "Mỵ Vinh Quang",
         room: "MS TEAMS",
         time: "8:10 - 11:25",
         day: 3,
@@ -135,6 +148,7 @@ var DATA_COURSES = [
 	{
         name: "Hình học cao cấp hai chiều và ba chiều",
         location: "Học online", link: "https://meet.google.com/fqx-muqh-ams",
+	teacher: "Phan Ngọc Yến",
         room: "Google Meet",
         time: "9:00 - 10:30",
         day: 4,
@@ -146,6 +160,7 @@ var DATA_COURSES = [
 {
         name: "Hình học cao cấp hai chiều và ba chiều",
         location: "Học online", link: "https://teams.microsoft.com/meet/46385152983395?p=htDoJWFlqgr7URxXtu",
+	teacher: "Phan Ngọc Yến",
         room: "MS Teams",
         time: "12:30 - 15:30",
         day: 4,
@@ -157,6 +172,7 @@ var DATA_COURSES = [
 	{
         name: "Hình học cao cấp hai chiều và ba chiều",
         location: "Cơ sở: Lạc Long Quân", link: "https://maps.app.goo.gl/oV1mXHYDuW44cGbN6",
+	teacher: "Phan Ngọc Yến",
         room: "LLQ.D.205",
         time: "12:30 - 15:30",
         day: 4,
@@ -168,6 +184,7 @@ var DATA_COURSES = [
 	{
         name: "Hình học cao cấp hai chiều và ba chiều",
         location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+	teacher: "Phan Ngọc Yến",
         room: "B.315",
         time: "12:30 - 16:00",
         day: 4,
@@ -179,6 +196,7 @@ var DATA_COURSES = [
 	{
         name: "Phương pháp học tập hiệu quả",
         location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+	teacher: "Nguyễn Đức Danh",
         room: "B.117",
         time: "12:30 - 15:00",
         day: 6,
@@ -188,8 +206,9 @@ var DATA_COURSES = [
         weeks: [1, 2, 5, 6, 8, 13, 14]
     },
 		{
-        name: "<b>Kiểm tra Giữa học phần</b><br> Phương pháp học tập hiệu quả",
+        name: "Kiểm tra Giữa học phần Phương pháp học tập hiệu quả",
         location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+	teacher: "Nguyễn Đức Danh",
         room: "B.117",
         time: "12:30 - 15:00",
         day: 6,
@@ -201,6 +220,7 @@ var DATA_COURSES = [
 {
         name: "Phương pháp học tập hiệu quả",
         location: "Học online", link: "https://us02web.zoom.us/j/3241803562?pwd=R1lkanAzbzRGL2Q4ZFdwQUNNNHlGdz09&omn=89093111246",
+	teacher: "Nguyễn Đức Danh",
         room: "Zoom",
         time: "12:30 - 15:00",
         day: 6,
@@ -212,6 +232,7 @@ var DATA_COURSES = [
 {
         name: "Giáo dục thể chất 2 (Cầu lông cơ bản)",
         location: "Công viên Lê Thị Riêng", link: "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA",
+	teacher: "Nguyễn Minh Hùng",
         room: "Cổng chính",
         time: "9:00 - 10:10",
         day: 5,
@@ -221,8 +242,9 @@ var DATA_COURSES = [
         weeks: [1, 2, 5, 7, 8, 9]
     },
 {
-        name: "<b>Kiểm tra Giữa học phần</b><br> Giáo dục thể chất 2 (Cầu lông cơ bản)",
+        name: "Kiểm tra Giữa học phần Giáo dục thể chất 2 (Cầu lông cơ bản)",
         location: "Công viên Lê Thị Riêng", link: "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA",
+	teacher: "Nguyễn Minh Hùng",
         room: "Cổng chính",
         time: "9:00 - 10:10",
         day: 5,
@@ -232,8 +254,9 @@ var DATA_COURSES = [
         weeks: [6]
     },
 {
-        name: "<b>Kiểm tra Kết thúc học phần</b><br> Giáo dục thể chất 2 (Cầu lông cơ bản)",
+        name: "Kiểm tra Kết thúc học phần Giáo dục thể chất 2 (Cầu lông cơ bản)",
         location: "Công viên Lê Thị Riêng", link: "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA",
+	teacher: "Nguyễn Minh Hùng",
         room: "Cổng chính",
         time: "9:00 - 10:10",
         day: 5,
@@ -245,6 +268,7 @@ var DATA_COURSES = [
 {
         name: "Giáo dục thể chất 2 (Cầu lông cơ bản)",
         location: "Học online", link: "https://teams.microsoft.com/v2/",
+	teacher: "Nguyễn Minh Hùng",
         room: "MS Teams",
         time: "9:00 - 10:10",
         day: 5,
@@ -256,6 +280,7 @@ var DATA_COURSES = [
     {
         name: "Lập trình nâng cao",
         location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+	teacher: "Âu Bửu Long",
         room: "I.102",
         time: "12:30 - 16:00",
         day: 5,
@@ -265,8 +290,9 @@ var DATA_COURSES = [
         weeks: [1, 5, 6, 8, 10, 11, 13, 14, 15]
     },
     {
-        name: "<b>Kiểm tra Giữa học phần</b><br> Lập trình nâng cao",
+        name: "Kiểm tra Giữa học phần Lập trình nâng cao",
         location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+	teacher: "Âu Bửu Long",
         room: "I.102",
         time: "12:30 - 15:30",
         day: 5,
@@ -278,6 +304,7 @@ var DATA_COURSES = [
     {
         name: "Lập trình nâng cao",
         location: "Học online", link: "https://teams.microsoft.com/v2/",
+	teacher: "Âu Bửu Long",
         room: "MS TEAMS",
         time: "12:30 - 16:00",
         day: 5,
@@ -289,6 +316,7 @@ var DATA_COURSES = [
     {
         name: "Lập trình nâng cao (Bủ 30/04)",
         location: "Học online", link: "https://teams.microsoft.com/v2/",
+	teacher: "Âu Bửu Long",
         room: "MS TEAMS",
         time: "17:50 - 21:05",
         day: 7,
@@ -300,6 +328,7 @@ var DATA_COURSES = [
     {
         name: "Cuộc họp chấm điểm rèn luyện",
         location: "Họp online", link: "https://meet.google.com/jci-jjch-rus",
+	teacher: "Ngô Minh Đức",
         room: "Google Meet",
         time: "12:00 - 13:00",
         day: 2,
@@ -424,7 +453,7 @@ var DATA_DEADLINES = [
     {
         title: "Lập trình nâng cao (Giao 22/01)",
         duration: "Từ 22/01/2026 đến 25/01/2026",
-        tag: "Bài tập trên TEAMS",
+        tag: "Bài tập trêm TEAMS",
         icon: "alert",
         emoji: "📣",
         weeks: [1]
@@ -432,7 +461,7 @@ var DATA_DEADLINES = [
  {
         title: "Lập trình nâng cao (Giao 29/01)",
         duration: "Từ 29/01/2026 đến 01/02/2026",
-        tag: "Bài tập trên TEAMS",
+        tag: "Bài tập trêm TEAMS",
         icon: "alert",
         emoji: "📣",
         weeks: [2]
@@ -452,16 +481,7 @@ var DATA_DEADLINES = [
         icon: "fire",
         emoji: "📣",
         weeks: [5, 6]
-    }, 
-	{
-        title: "Đánh giá điểm rèn luyện Đoàn viên HK1",
-        duration: "23/04/2026",
-        tag: "quanlydoanvien.doanthanhnien.vn",
-        icon: "fire",
-        emoji: "📣",
-        weeks: [11]
-    },
-	{
+    }, {
         title: "Sinh hoạt thời sự - Quý I - Năm 2026",
         duration: "Từ 08/04/2026 đến 09/04/2026",
         tag: "VLE",
