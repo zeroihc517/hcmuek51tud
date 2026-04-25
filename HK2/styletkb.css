@@ -261,6 +261,15 @@ body{
     grid-template-columns: 1fr; /* Màn hình điện thoại hiện 1 ô */
   }
 }
+.subject .teacher {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4b5563;
+  border-top: 1px dashed rgba(0,0,0,0.1);
+  padding-top: 2px;
+}
 .online-card{
   background:white;
   border-radius:16px;
