@@ -316,7 +316,7 @@ name: `
             <div style="font-size: 1em; color: #374151;">Điền thông tin và in phiếu dự thi</div>
         </div>
         <div>
-            <a href="https://maps.app.goo.gl/dfXbr9EYwXyvqjPy9" target="_blank" style="color:#2563eb; font-weight:700; text-decoration:none;">2. UBND phường Chợ Quán</a>
+            <a href="https://maps.app.goo.gl/Gx95anspDSYyXC8o9" target="_blank" style="color:#2563eb; font-weight:700; text-decoration:none;">2. Công an phường Chợ Quán</a>
             <div style="font-size: 1em; color: #374151;">Giáp lai phiếu dự thi</div>
         </div>
         <div>
