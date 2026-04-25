@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng Tổng Hợp Thời Khóa Biểu</title>
+    <link rel="stylesheet" href="styletkb.css">
+    <style>
+        /* Tùy chỉnh CSS riêng để bảng trông "xịn" hơn */
+        .summary-wrapper {
+            margin-top: 30px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .modern-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .modern-table thead th {
+            background: var(--blue-dark);
+            color: #fff;
+            padding: 18px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: left;
+        }
+        .modern-table tbody td {
+            padding: 20px;
+            border-bottom: 1px solid var(--line);
+            vertical-align: top;
+        }
+        .modern-table tbody tr:last-child td { border-bottom: none; }
+
+        /* Cột môn học */
+        .subject-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .subject-name-main {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--blue-dark);
+            line-height: 1.3;
+        }
+
+        /* Thẻ buổi học (Session Cards) */
+        .session-card {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 12px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .session-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .session-card::before {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 6px;
+            background: var(--blue);
+        }
+        /* Style cho buổi kiểm tra */
+        .session-card.is-exam {
+            background: #fff5f5;
+            border-color: #fecdd3;
+        }
+        .session-card.is-exam::before { background: #ef4444; }
+
+        .session-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .day-label { color: #111827; font-size: 15px; }
+        .time-label { color: #dc2626; }
+        
+        .session-body {
+            font-size: 14px;
+            color: #4b5563;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .badge-week {
+            display: inline-block;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .exam-note {
+            margin-top: 8px;
+            font-weight: 800;
+            color: #b91c1c;
+            text-transform: uppercase;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="banner">
+         <h1 class="page-title">Hệ Thống Tổng Hợp Học Phần</h1>
+         <span class="subtitle">Danh sách học tập chi tiết năm học 2025 - 2026</span>
+    </div>
+
+    <div class="summary-wrapper">
+        <table class="modern-table">
+            <thead>
+                <tr>
+                    <th style="width: 60px; text-align: center;">STT</th>
+                    <th style="width: 30%;">Học Phần</th>
+                    <th>Chi Tiết Lịch Trình (Học & Kiểm Tra)</th>
+                </tr>
+            </thead>
+            <tbody id="summary-body">
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="database.js"></script>
+<script src="dulieu.js"></script>
+
+<script>
+    // Hàm chuẩn hóa tên để gộp môn
+    function normalizeName(name) {
+        let n = name.toLowerCase();
+        if (n.includes("không gian tuyến tính"))  return "Không gian tuyến tính";
+        if (n.includes("lập trình nâng cao")) return "Lập trình nâng cao";
+        if (n.includes("giải tích hàm nhiều biến")) return "Giải tích hàm nhiều biến";
+        if (n.includes("hình học cao cấp")) return "Hình học cao cấp hai chiều và ba chiều";
+        if (n.includes("chủ nghĩa xã hội khoa học")) return "Chủ nghĩa xã hội khoa học";
+        if (n.includes("kinh tế chính trị")) return "Kinh tế chính trị học Mác-Lênin";
+        if (n.includes("phương pháp học tập")) return "Phương pháp học tập hiệu quả";
+        if (n.includes("giáo dục thể chất 2")) return "Giáo dục thể chất 2 (Cầu lông cơ bản)";
+	if (n.includes("cuộc họp")) return "Cuộc họp";
+        return name;
+    }
+
+    function getExactDate(week, dayOfWeek) {
+        let totalDaysOffset = (week - 1) * 7;
+        let totalGapWeeks = 0;
+        if (typeof GAPS !== 'undefined') {
+            GAPS.forEach(item => { if (week > item.afterWeek) totalGapWeeks += item.gap; });
+        }
+        totalDaysOffset += (totalGapWeeks * 7);
+        const d = new Date(START_DATE_WEEK_1);
+        d.setDate(d.getDate() + totalDaysOffset + (dayOfWeek - 2));
+        return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    function renderSummary() {
+        const tbody = document.getElementById('summary-body');
+        
+        // 1. Lọc dữ liệu: Bỏ qua cuộc họp và các mục linh tinh
+        const filteredData = DATA_COURSES.filter(c => 
+            !c.name.toLowerCase().includes("cuộc họp") && 
+            !c.name.toLowerCase().includes("đánh giá điểm") &&
+            !c.name.toLowerCase().includes("sinh hoạt") &&
+            !c.name.toLowerCase().includes("web")
+        );
+
+        // 2. Nhóm môn
+        const groups = filteredData.reduce((acc, curr) => {
+            const mainName = normalizeName(curr.name);
+            if (!curr.name.toLowerCase().includes("kiểm tra")) {
+                if (!acc[mainName]) acc[mainName] = { sessions: [], exams: [] };
+                acc[mainName].sessions.push(curr);
+            } else {
+                // Đây là buổi kiểm tra, tìm môn chính để bỏ vào
+                if (!acc[mainName]) acc[mainName] = { sessions: [], exams: [] };
+                acc[mainName].exams.push(curr);
+            }
+            return acc;
+        }, {});
+
+        let html = "";
+        let index = 1;
+
+        for (const subjectName in groups) {
+            const { sessions, exams } = groups[subjectName];
+            const allActivities = [...sessions, ...exams];
+            allActivities.sort((a, b) => Math.min(...a.weeks) - Math.min(...b.weeks));
+
+            let cardsHtml = "";
+            allActivities.forEach(act => {
+                const isExam = act.name.toLowerCase().includes("kiểm tra");
+                const thuText = act.day === 8 ? "Chủ Nhật" : `Thứ ${act.day}`;
+                const startDate = getExactDate(Math.min(...act.weeks), act.day);
+                const endDate = getExactDate(Math.max(...act.weeks), act.day);
+                const dateRange = (act.weeks.length === 1) ? startDate : `${startDate} → ${endDate}`;
+
+                cardsHtml += `
+                    <div class="session-card ${isExam ? 'is-exam' : ''}" style="--blue: ${act.color === '#ffffff' ? '#0f4c81' : act.color}">
+                        <div class="session-header">
+                            <span class="day-label">${thuText} | ${act.time}</span>
+                            <span class="time-label">${dateRange}</span>
+                        </div>
+                        <div class="session-body">
+                            <span>📍 ${act.location}</span>
+                            <span>🚪 Phòng: <strong>${act.room}</strong></span>
+                            <span class="badge-week">Tuần: ${act.weeks.join(", ")}</span>
+                        </div>
+                        ${isExam ? `<div class="exam-note">⚠️ ${act.name}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            html += `
+                <tr>
+                    <td style="text-align: center; font-weight: bold; color: #9ca3af;">${index++}</td>
+                    <td><div class="subject-name-main">${subjectName}</div></td>
+                    <td>${cardsHtml}</td>
+                </tr>
+            `;
+        }
+        tbody.innerHTML = html;
+    }
+
+    window.onload = renderSummary;
+</script>
+
+</body>
+</html>
