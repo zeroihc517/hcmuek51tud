@@ -9,7 +9,6 @@ var DATA_COURSES = [
         day: 2, 
         start: 4,
         length: 3,
-        color: "#ecfdf3",
         weeks: [1, 2, 5, 6]
 	
     },
@@ -22,7 +21,6 @@ var DATA_COURSES = [
         day: 2, 
         start: 4,
         length: 3,
-        color: "#f3e8ff",
         weeks: [3,4]
     },
     {
@@ -34,7 +32,6 @@ var DATA_COURSES = [
         day: 3, 
         start: 10,
         length: 3,
-        color: "#ecfdf3",
         weeks: [1, 2, 6]
     },
     {
@@ -46,7 +43,6 @@ var DATA_COURSES = [
         day: 3, 
         start: 10,
         length: 3,
-        color: "#ecfdf3",
         weeks: [5]
     },
     {
@@ -58,7 +54,6 @@ var DATA_COURSES = [
         day: 3, 
         start: 10,
         length: 3,
-        color: "#f3e8ff",
         weeks: [3,4]
     },
     {
@@ -70,7 +65,6 @@ var DATA_COURSES = [
         day: 2, 
         start: 7,
         length: 4,
-        color: "#ecfdf3",
         weeks: [1, 2, 7, 8, 9, 10, 11, 13, 14, 15]
     },
 {
@@ -82,7 +76,6 @@ var DATA_COURSES = [
         day: 2, 
         start: 7,
         length: 5,
-        color: "#ecfdf3",
         weeks: [5]
     },
     {
@@ -94,7 +87,6 @@ var DATA_COURSES = [
         day: 2, 
         start: 7,
         length: 4,
-        color: "#f3e8ff",
         weeks: [3,4,12]
     },
     {
@@ -106,7 +98,6 @@ var DATA_COURSES = [
         day: 3,
         start: 3,
         length: 4,
-        color: "#e0f2fe",
         weeks: [1, 2, 5, 6, 7, 8]
     },
     {
@@ -118,7 +109,6 @@ var DATA_COURSES = [
         day: 3,
         start: 3,
         length: 4,
-        color: "#e0f2fe",
         weeks: [9]
     },
     {
@@ -130,7 +120,6 @@ var DATA_COURSES = [
         day: 3,
         start: 3,
         length: 2,
-        color: "#e0f2fe",
         weeks: [10]
     },
     {
@@ -142,7 +131,6 @@ var DATA_COURSES = [
         day: 3,
         start: 3,
         length: 4,
-        color: "#f3e8ff",
         weeks: [3, 4]
     },
 	{
@@ -154,7 +142,6 @@ var DATA_COURSES = [
         day: 4,
         start: 4,
         length: 2,
-        color: "#f3e8ff",
         weeks: [1]
     },
 {
@@ -166,7 +153,6 @@ var DATA_COURSES = [
         day: 4,
         start: 7,
         length: 4,
-        color: "#f3e8ff",
         weeks: [3,4,7]
     },
 	{
@@ -178,7 +164,6 @@ var DATA_COURSES = [
         day: 4,
         start: 7,
         length: 4,
-        color: "#fff3e0",
         weeks: [2]
     },
 	{
@@ -190,7 +175,6 @@ var DATA_COURSES = [
         day: 4,
         start: 7,
         length: 4,
-        color: "#e0f2fe",
         weeks: [5, 6, 8, 9, 10, 11]
     },
 	{
@@ -202,7 +186,6 @@ var DATA_COURSES = [
         day: 6,
         start: 7,
         length: 3,
-        color: "#e0f2fe",
         weeks: [1, 2, 5, 6, 8, 13, 14]
     },
 		{
@@ -214,7 +197,6 @@ var DATA_COURSES = [
         day: 6,
         start: 7,
         length: 3,
-        color: "#e0f2fe",
         weeks: [7]
     },
 {
@@ -226,7 +208,6 @@ var DATA_COURSES = [
         day: 6,
         start: 7,
         length: 3,
-        color: "#f3e8ff",
         weeks: [4]
     },
 {
@@ -238,7 +219,6 @@ var DATA_COURSES = [
         day: 5,
         start: 4,
         length: 2,
-        color: "#fef9c3",
         weeks: [1, 2, 5, 7, 8, 9]
     },
 {
@@ -250,7 +230,6 @@ var DATA_COURSES = [
         day: 5,
         start: 4,
         length: 2,
-        color: "#fef9c3",
         weeks: [6]
     },
 {
@@ -262,7 +241,6 @@ var DATA_COURSES = [
         day: 5,
         start: 4,
         length: 2,
-        color: "#fef9c3",
         weeks: [10]
     },
 {
@@ -274,7 +252,6 @@ var DATA_COURSES = [
         day: 5,
         start: 4,
         length: 2,
-        color: "#f3e8ff",
         weeks: [3,4]
     },
     {
@@ -286,7 +263,6 @@ var DATA_COURSES = [
         day: 5,
         start: 7,
         length: 4,
-        color: "#e0f2fe",
         weeks: [1, 5, 6, 8, 10, 11, 13, 14, 15]
     },
     {
@@ -298,7 +274,6 @@ var DATA_COURSES = [
         day: 5,
         start: 7,
         length: 4,
-        color: "#e0f2fe",
         weeks: [9]
     },
     {
@@ -310,7 +285,6 @@ var DATA_COURSES = [
         day: 5,
         start: 7,
         length: 4,
-        color: "#f3e8ff",
         weeks: [2, 3, 4]
     },
     {
@@ -322,7 +296,6 @@ var DATA_COURSES = [
         day: 7,
         start: 13,
         length: 4,
-        color: "#f3e8ff",
         weeks: [9]
     },
     {
@@ -334,7 +307,6 @@ var DATA_COURSES = [
         day: 2,
         start: 7,
         length: 1,
-        color: "#f3e8ff",
         weeks: [6]
     },
     {
@@ -345,7 +317,6 @@ var DATA_COURSES = [
         day: 6,
         start: 16,
         length: 1,
-        color: "#f3e8ff",
         weeks: [6]
     },
     {
