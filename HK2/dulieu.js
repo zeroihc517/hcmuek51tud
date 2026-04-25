@@ -72,7 +72,18 @@ function renderAll() {
             
             if (course) {
                 for (let i = 0; i < course.length; i++) { if (tiet + i <= 16) occupied[tiet + i][thu] = true; }
-                tableHtml += `<td rowspan="${course.length}" class="td-subject" style="background:${course.color}"><div class="subject"><div class="time">${course.time}</div><div style="font-weight:600;"><a href="${course.link}" target="_blank" style="color:#2563eb; text-decoration:none;">${course.location}</a></div>${course.name}<br><span class="room">Phòng: ${course.room}</span></div></td>`;
+                tableHtml += `
+    <td rowspan="${course.length}" class="td-subject" style="background:${course.color}">
+        <div class="subject">
+            <div class="time">${course.time}</div>
+            <div style="font-weight:600;">
+                <a href="${course.link}" target="_blank" style="color:#2563eb; text-decoration:none;">${course.location}</a>
+            </div>
+            ${course.name}<br>
+            <span class="room">Phòng: ${course.room}</span><br>
+            <span class="teacher">GV: ${course.teacher || 'N/A'}</span>
+        </div>
+    </td>`;
             } else { 
                 tableHtml += `<td></td>`; 
             }
