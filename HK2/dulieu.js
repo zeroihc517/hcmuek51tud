@@ -42,7 +42,7 @@ function renderAll() {
     // Cập nhật tiêu đề
     document.title = `TKB (${formatShortYear(mondayDate)}-${formatShortYear(sundayDate)})`; 
     document.getElementById('week-title').innerText = "Tuần " + CURRENT_WEEK;
-    document.querySelector('.subtitle').innerText = `(Học từ ngày ${formatFull(mondayDate)} đến ${formatFull(sundayDate)})`;
+    document.querySelector('.subtitle').innerText = `(Áp dụng từ ngày ${formatFull(mondayDate)} đến ${formatFull(sundayDate)})`;
 
     // 2. Cập nhật ngày vào Header Table
     const thElements = document.querySelectorAll('#header-row th[data-thu]');
