@@ -74,7 +74,7 @@ var DATA_COURSES = [
         weeks: [1, 2, 7, 8, 9, 10, 11, 13, 14, 15]
     },
 {
-        name: "Kiểm tra Giữa học phần Giải tích hàm nhiều biến",
+        name: "<b>Kiểm tra Giữa học phần</b><br> Giải tích hàm nhiều biến",
         location: "Cơ sở: Lê Văn Sỹ",
        room: "LVS.D.106", link: "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5",
 	teacher: "Huỳnh Cao Trường",
@@ -122,7 +122,7 @@ var DATA_COURSES = [
         weeks: [9]
     },
     {
-        name: "Kiểm tra Giữa học phần Không gian tuyến tính (Thực hành)",
+        name: "<b>Kiểm tra Giữa học phần</b><br> Không gian tuyến tính (Thực hành)",
         location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
 	teacher: "Lê Quang Trường",
         room: "B.213",
@@ -206,7 +206,7 @@ var DATA_COURSES = [
         weeks: [1, 2, 5, 6, 8, 13, 14]
     },
 		{
-        name: "Kiểm tra Giữa học phần Phương pháp học tập hiệu quả",
+        name: "<b>Kiểm tra Giữa học phần</b><br> Phương pháp học tập hiệu quả",
         location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
 	teacher: "Nguyễn Đức Danh",
         room: "B.117",
@@ -242,7 +242,7 @@ var DATA_COURSES = [
         weeks: [1, 2, 5, 7, 8, 9]
     },
 {
-        name: "Kiểm tra Giữa học phần Giáo dục thể chất 2 (Cầu lông cơ bản)",
+        name: "<b>Kiểm tra Giữa học phần</b><br> Giáo dục thể chất 2 (Cầu lông cơ bản)",
         location: "Công viên Lê Thị Riêng", link: "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA",
 	teacher: "Nguyễn Minh Hùng",
         room: "Cổng chính",
@@ -254,7 +254,7 @@ var DATA_COURSES = [
         weeks: [6]
     },
 {
-        name: "Kiểm tra Kết thúc học phần Giáo dục thể chất 2 (Cầu lông cơ bản)",
+        name: "<b>Kiểm tra Kết thúc học phần</b><br> Giáo dục thể chất 2 (Cầu lông cơ bản)",
         location: "Công viên Lê Thị Riêng", link: "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA",
 	teacher: "Nguyễn Minh Hùng",
         room: "Cổng chính",
@@ -290,7 +290,7 @@ var DATA_COURSES = [
         weeks: [1, 5, 6, 8, 10, 11, 13, 14, 15]
     },
     {
-        name: "Kiểm tra Giữa học phần Lập trình nâng cao",
+        name: "<b>Kiểm tra Giữa học phần</b><br> Lập trình nâng cao",
         location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
 	teacher: "Âu Bửu Long",
         room: "I.102",
