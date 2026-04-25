@@ -364,7 +364,7 @@ name: `
 },
     // Ví dụ: Thi môn Giải tích vào Ca 1 (Sáng) Thứ 2 tuần 18
 {
-    name: "Lập trình nâng cao", // Nhập thẳng tên môn
+    name: "<b>Kiểm tra Kết thúc học phần</b><br>Lập trình nâng cao", // Nhập thẳng tên môn
     location: "Cơ sở: An Dương Vương",
     room: "Đang cập nhật", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
     time: "9:30 - 11:30",
