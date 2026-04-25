@@ -267,7 +267,7 @@ var DATA_COURSES = [
     },
     {
         name: "<b>Kiểm tra Giữa học phần</b><br> Lập trình nâng cao",
-        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
 	teacher: "Âu Bửu Long",
         room: "I.102",
         time: "12:30 - 15:30",
@@ -361,7 +361,56 @@ name: `
     length: 9,
     color: "#fbcfe8",
     weeks: [11]
+},
+    // Ví dụ: Thi môn Giải tích vào Ca 1 (Sáng) Thứ 2 tuần 18
+{
+    name: "Lập trình nâng cao", // Nhập thẳng tên môn
+    location: "Cơ sở: An Dương Vương",
+    room: "Đang cập nhật", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+    time: "9:30 - 11:30",
+    day: 7, 
+    start: 2, // Ca 1 sáng
+    weeks: [17]
+},
+{
+    name: "Thủ tục dự thi", // Nhập thẳng tên môn
+    location: "Cơ sở: Đang cập nhật",
+    room: "Đang cập nhật", link: "Đang cập nhật",
+    time: "14:00 - 15:30",
+    day: 4, 
+    start: 3, 
+    length: 2,
+    weeks: [18]
+},
+{
+    name: "Toán THPT 2026", // Nhập thẳng tên môn
+    location: "Cơ sở: Đang cập nhật",
+    room: "Đang cập nhật", link: "Đang cập nhật",
+    time: "14:00 - 16:10",
+    day: 5, 
+    start: 3, 
+    length: 2,
+    weeks: [18]
+},
+{
+    name: "Tự chọn 1 THPT 2026", // Nhập thẳng tên môn
+    location: "Cơ sở: Đang cập nhật",
+    room: "Đang cập nhật", link: "Đang cập nhật",
+    time: "7:00 - 8:30",
+    day: 6, 
+    start: 1, 
+    weeks: [18]
+},
+{
+    name: "Tự chọn 2 THPT 2026", // Nhập thẳng tên môn
+    location: "Cơ sở: Đang cập nhật",
+    room: "Đang cập nhật", link: "Đang cập nhật",
+    time: "8:35 - 9:30",
+    day: 6, 
+    start: 2, 
+    weeks: [18]
 }
+
 ];
 
 var DATA_DEADLINES = [
