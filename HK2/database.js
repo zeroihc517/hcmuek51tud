@@ -481,7 +481,16 @@ var DATA_DEADLINES = [
         icon: "fire",
         emoji: "📣",
         weeks: [5, 6]
-    }, {
+    },
+	{
+        title: "Đánh giá điểm rèn luyện Đoàn viên HK1",
+        duration: "23/04/2026",
+        tag: "quanlydoanvien.doanthanhnien.vn",
+        icon: "fire",
+        emoji: "📣",
+        weeks: [11]
+    },
+	{
         title: "Sinh hoạt thời sự - Quý I - Năm 2026",
         duration: "Từ 08/04/2026 đến 09/04/2026",
         tag: "VLE",
