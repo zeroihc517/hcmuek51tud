@@ -244,7 +244,7 @@ var DATA_COURSES = [
     },
     {
         name: "Lập trình nâng cao",
-        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
         room: "I.102",
         time: "12:30 - 16:00",
         day: 5,
