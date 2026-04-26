@@ -170,9 +170,10 @@
         // 1. Lọc dữ liệu: Bỏ qua cuộc họp và các mục linh tinh
         const filteredData = DATA_COURSES.filter(c => 
             !c.name.toLowerCase().includes("cuộc họp") && 
-            !c.name.toLowerCase().includes("đánh giá điểm") &&
+            !c.name.toLowerCase().includes("thủ tục") &&
             !c.name.toLowerCase().includes("sinh hoạt") &&
-            !c.name.toLowerCase().includes("web")
+            !c.name.toLowerCase().includes("web")  &&
+            !c.name.toLowerCase().includes("thpt")
         );
 
         // 2. Nhóm môn
