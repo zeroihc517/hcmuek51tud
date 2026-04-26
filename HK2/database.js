@@ -3,7 +3,7 @@ var DATA_COURSES = [
     {
         name: "Kinh tế chính trị học Mác-Lênin",
         location: "Cơ sở: Lê Văn Sỹ",
-       room: "LVS.GD.A", link: "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5",
+       room: "LVS.GD.A", link: "",
 	teacher: "Trần Thị Hoài Thương",
         time: "9:10-11:30",
         day: 2, 
@@ -26,7 +26,7 @@ var DATA_COURSES = [
     {
         name: "Chủ nghĩa xã hội khoa học",
         location: "Cơ sở: Lê Văn Sỹ",
-       room: "LVS.GD.19", link: "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5",
+       room: "LVS.GD.19", link: "",
 	teacher: "Trịnh Bá Phương",
         time: "15:10 - 17:40",
         day: 3, 
@@ -37,7 +37,7 @@ var DATA_COURSES = [
     {
         name: "<b>Kiểm tra Giữa học phần</b><br> Chủ nghĩa xã hội khoa học",
         location: "Cơ sở: Lê Văn Sỹ",
-       room: "LVS.GD.19", link: "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5",
+       room: "LVS.GD.19", link: "",
 	teacher: "Trịnh Bá Phương",
         time: "15:10 - 17:40",
         day: 3, 
@@ -59,7 +59,7 @@ var DATA_COURSES = [
     {
         name: "Giải tích hàm nhiều biến",
         location: "Cơ sở: Lê Văn Sỹ",
-       room: "LVS.D.106", link: "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5",
+       room: "LVS.D.106", link: "",
 	teacher: "Huỳnh Cao Trường",
         time: "13:00 - 16:00",
         day: 2, 
@@ -70,7 +70,7 @@ var DATA_COURSES = [
 {
         name: "<b>Kiểm tra Giữa học phần</b><br> Giải tích hàm nhiều biến",
         location: "Cơ sở: Lê Văn Sỹ",
-       room: "LVS.D.106", link: "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5",
+       room: "LVS.D.106", link: "",
 	teacher: "Huỳnh Cao Trường",
         time: "13:00 - 16:30",
         day: 2, 
@@ -91,7 +91,7 @@ var DATA_COURSES = [
     },
     {
         name: "Không gian tuyến tính",
-        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+        location: "Cơ sở: An Dương Vương", link: "",
 	teacher: "Mỵ Vinh Quang",
         room: "B.213",
         time: "8:10 - 11:25",
@@ -102,7 +102,7 @@ var DATA_COURSES = [
     },
     {
         name: "Không gian tuyến tính (Thực hành)",
-        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+        location: "Cơ sở: An Dương Vương", link: "",
 	teacher: "Lê Quang Trường",
         room: "B.213",
         time: "8:10 - 11:25",
@@ -113,7 +113,7 @@ var DATA_COURSES = [
     },
     {
         name: "<b>Kiểm tra Giữa học phần</b><br> Không gian tuyến tính (Thực hành)",
-        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+        location: "Cơ sở: An Dương Vương", link: "",
 	teacher: "Lê Quang Trường",
         room: "B.213",
         time: "8:10 - 9:10",
@@ -157,7 +157,7 @@ var DATA_COURSES = [
     },
 	{
         name: "Hình học cao cấp hai chiều và ba chiều",
-        location: "Cơ sở: Lạc Long Quân", link: "https://maps.app.goo.gl/oV1mXHYDuW44cGbN6",
+        location: "Cơ sở: Lạc Long Quân", link: "",
 	teacher: "Phan Ngọc Yến",
         room: "LLQ.D.205",
         time: "12:30 - 15:30",
@@ -168,7 +168,7 @@ var DATA_COURSES = [
     },
 	{
         name: "Hình học cao cấp hai chiều và ba chiều",
-        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+        location: "Cơ sở: An Dương Vương", link: "",
 	teacher: "Phan Ngọc Yến",
         room: "B.315",
         time: "12:30 - 16:00",
@@ -179,7 +179,7 @@ var DATA_COURSES = [
     },
 	{
         name: "Phương pháp học tập hiệu quả",
-        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+        location: "Cơ sở: An Dương Vương", link: "",
 	teacher: "Nguyễn Đức Danh",
         room: "B.117",
         time: "12:30 - 15:00",
@@ -190,7 +190,7 @@ var DATA_COURSES = [
     },
 		{
         name: "<b>Kiểm tra Giữa học phần</b><br> Phương pháp học tập hiệu quả",
-        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/2a1zfaiuAVXXmHfS9",
+        location: "Cơ sở: An Dương Vương", link: "",
 	teacher: "Nguyễn Đức Danh",
         room: "B.117",
         time: "12:30 - 15:00",
@@ -212,7 +212,7 @@ var DATA_COURSES = [
     },
 {
         name: "Giáo dục thể chất 2 (Cầu lông cơ bản)",
-        location: "Công viên Lê Thị Riêng", link: "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA",
+        location: "Công viên Lê Thị Riêng", link: "",
 	teacher: "Nguyễn Minh Hùng",
         room: "Cổng chính",
         time: "9:00 - 10:10",
@@ -223,7 +223,7 @@ var DATA_COURSES = [
     },
 {
         name: "<b>Kiểm tra Giữa học phần</b><br> Giáo dục thể chất 2 (Cầu lông cơ bản)",
-        location: "Công viên Lê Thị Riêng", link: "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA",
+        location: "Công viên Lê Thị Riêng", link: "",
 	teacher: "Nguyễn Minh Hùng",
         room: "Cổng chính",
         time: "9:00 - 10:10",
@@ -234,7 +234,7 @@ var DATA_COURSES = [
     },
 {
         name: "<b>Kiểm tra Kết thúc học phần</b><br> Giáo dục thể chất 2 (Cầu lông cơ bản)",
-        location: "Công viên Lê Thị Riêng", link: "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA",
+        location: "Công viên Lê Thị Riêng", link: "",
 	teacher: "Nguyễn Minh Hùng",
         room: "Cổng chính",
         time: "9:00 - 10:10",
