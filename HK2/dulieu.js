@@ -1,16 +1,27 @@
-// dulieu.js - Phiên bản tối ưu cho cả Học và Thi
-// ==========================================
-// CẤU HÌNH TẠI ĐÂY
-// ==========================================
-const START_DATE_WEEK_1 = new Date("2026-01-19"); // Ngày Thứ 2 của Tuần 1
+// dulieu.js
+const START_DATE_WEEK_1 = new Date("2026-01-19");
+const GAPS = [{ afterWeek: 3, gap: 3 }];
 
-const GAPS = [
-    { afterWeek: 3, gap: 3 } 
-];
-// ==========================================
+// Hàm bổ trợ để lấy link tự động dựa trên tên địa điểm
+function getAutoLink(locationName, manualLink) {
+    if (!locationName) return "#";
+    const loc = locationName.toUpperCase();
+    
+    // Nếu có link thủ công (khác # và không trống) thì ưu tiên dùng link thủ công
+    if (manualLink && manualLink !== "#" && manualLink !== "") return manualLink;
+
+    // Nếu không có link thủ công, tra cứu theo từ khóa
+    if (loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV")) return "https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5";
+    if (loc.includes("LÊ VĂN SỸ") || loc.includes("LVS")) return "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5";
+    if (loc.includes("LẠC LONG QUÂN") || loc.includes("LLQ")) return "https://maps.app.goo.gl/oV1mXHYDuW44cGbN6";
+    if (loc.includes("LÊ THỊ RIÊNG") || loc.includes("CVLTR")) return "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA";
+    if (loc.includes("ONLINE") || loc.includes("HỌP")) return "#";
+    
+    return manualLink || "#";
+}
 
 function renderAll() {
-    // 1. Tính toán ngày (Giữ nguyên logic cũ)
+    // --- 1. Tính toán ngày tháng ---
     let totalDaysOffset = (CURRENT_WEEK - 1) * 7;
     let totalGapWeeks = 0;
     GAPS.forEach(item => { if (CURRENT_WEEK > item.afterWeek) totalGapWeeks += item.gap; });
@@ -21,79 +32,13 @@ function renderAll() {
     const sundayDate = new Date(mondayDate);
     sundayDate.setDate(sundayDate.getDate() + 6);
 
-    const formatFull = (date) => `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
-    const formatShortYear = (date) => `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getFullYear()).slice(-2)}`;
-    const formatShort = (date) => `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}`;
+    const formatFull = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+    const formatShort = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
 
-    document.title = `TKB (${formatShortYear(mondayDate)}-${formatShortYear(sundayDate)})`; 
     document.getElementById('week-title').innerText = "Tuần " + CURRENT_WEEK;
     document.querySelector('.subtitle').innerText = `(Áp dụng từ ngày ${formatFull(mondayDate)} đến ${formatFull(sundayDate)})`;
-function renderLocationNotes() {
-    const noteList = document.getElementById('location-notes');
-    if (!noteList || typeof DATA_COURSES === 'undefined') return;
 
-    // 1. Lấy danh sách địa điểm duy nhất (Unique)
-    const locations = [];
-    const seen = new Set();
-
-    DATA_COURSES.forEach(course => {
-        // Chuẩn hóa tên địa điểm để tránh trùng lặp do viết hoa/thường
-        const locName = course.location;
-        if (!seen.has(locName)) {
-            seen.add(locName);
-            
-            // Lấy màu sắc dựa trên logic giống như lúc vẽ bảng TKB
-            let color = course.color;
-            const upperLoc = locName.toUpperCase();
-            if (upperLoc.includes("AN DƯƠNG VƯƠNG") || upperLoc.includes("ADV")) color = "#e0f2fe";
-            else if (upperLoc.includes("LÊ VĂN SỸ") || upperLoc.includes("LVS")) color = "#e6f9ef";
-            else if (upperLoc.includes("LẠC LONG QUÂN") || upperLoc.includes("LLQ")) color = "#fff3e0";
-            else if (upperLoc.includes("LÊ THỊ RIÊNG") || upperLoc.includes("CVLTR")) color = "#fef9c3";
-            else if (upperLoc.includes("ONLINE") || upperLoc.includes("HỌP")) color = "#f3e8ff";
-            
-            locations.push({
-                name: locName,
-                link: course.link,
-                color: color || "#eee" // Màu mặc định nếu không khớp
-            });
-        }
-    });
-
-    // 2. Tạo HTML cho danh sách ghi chú
-    let html = "";
-    locations.forEach(loc => {
-        html += `
-            <li>
-                <span class="square" style="background:${loc.color}; border: 1px solid #ddd;"></span>
-                <a href="${loc.link}" target="_blank">${loc.name}</a>
-            </li>`;
-    });
-
-    noteList.innerHTML = html;
-}
-
-// Cập nhật lại hàm renderAll hiện tại của bạn để gọi hàm này
-const originalRenderAll = renderAll;
-renderAll = function() {
-    originalRenderAll();
-    renderLocationNotes();
-};
-// 5. Vẽ Ghi chú địa điểm tự động
-    const noteContainer = document.getElementById('location-notes');
-    if (noteContainer && typeof DATA_LOCATIONS !== 'undefined') {
-        let noteHtml = "";
-        DATA_LOCATIONS.forEach(loc => {
-            noteHtml += `
-                <li>
-                    <span class="square" style="background:${loc.color};"></span>
-                    ${loc.link !== "#" 
-                        ? `<a href="${loc.link}" target="_blank">${loc.name}</a>` 
-                        : loc.name}
-                </li>`;
-        });
-        noteContainer.innerHTML = noteHtml;
-    }
-    // 2. Cập nhật ngày vào Header
+    // --- 2. Cập nhật Header ngày tháng ---
     document.querySelectorAll('#header-row th[data-thu]').forEach(th => {
         const thu = parseInt(th.getAttribute('data-thu'));
         const currentDay = new Date(mondayDate);
@@ -101,89 +46,73 @@ renderAll = function() {
         th.innerHTML = `Thứ ${thu} <span style="font-size: 13px; font-weight: 400; margin-left: 4px; opacity: 0.9;">(${formatShort(currentDay)})</span>`;
     });
 
-    // 3. Vẽ bảng TKB (LOGIC MỚI GỘP CHUNG)
+    // --- 3. Vẽ bảng TKB ---
     const tbody = document.getElementById('tkb-body');
-    if (!tbody) return;
-
-    // KIỂM TRA CHẾ ĐỘ: Thi (4 ca) hay Học (16 tiết)
-    const isExam = (typeof IS_EXAM_PAGE !== 'undefined' && IS_EXAM_PAGE === true);
-    const totalRows = isExam ? 4 : 16;
     const occupied = Array.from({ length: 20 }, () => Array(8).fill(false));
     let tableHtml = "";
 
-    for (let i = 1; i <= totalRows; i++) {
+    for (let i = 1; i <= 16; i++) {
         tableHtml += `<tr>`;
-        
-        // --- A. Vẽ cột Nhãn Buổi (Sáng/Chiều/Tối) ---
-        if (isExam) {
-            if (i === 1) tableHtml += `<td rowspan="2" class="session-label">Sáng</td>`;
-            if (i === 3) tableHtml += `<td rowspan="2" class="session-label">Chiều</td>`;
-        } else {
-            if (i === 1) tableHtml += `<td rowspan="6" class="session-label">Sáng</td>`;
-            if (i === 7) tableHtml += `<td rowspan="6" class="session-label">Chiều</td>`;
-            if (i === 13) tableHtml += `<td rowspan="4" class="session-label">Tối</td>`;
-        }
-
-        // --- B. Vẽ cột Số Ca/Tiết ---
+        if (i === 1) tableHtml += `<td rowspan="6" class="session-label">Sáng</td>`;
+        if (i === 7) tableHtml += `<td rowspan="6" class="session-label">Chiều</td>`;
+        if (i === 13) tableHtml += `<td rowspan="4" class="session-label">Tối</td>`;
         tableHtml += `<td class="col-tiet">${i}</td>`;
 
-        // --- C. Vẽ các ô nội dung Thứ ---
         for (let thu = 2; thu <= 7; thu++) {
             if (occupied[i][thu]) continue;
-
-            const course = typeof DATA_COURSES !== 'undefined' ? 
-                DATA_COURSES.find(c => c.day === thu && c.start === i && c.weeks.includes(CURRENT_WEEK)) : null;
+            const course = DATA_COURSES.find(c => c.day === thu && c.start === i && c.weeks.includes(CURRENT_WEEK));
             
             if (course) {
-                // Xử lý màu sắc tự động
-                let autoColor = course.color;
-                const loc = course.location.toUpperCase();
-                if (loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV")) autoColor = "#e0f2fe";
-                else if (loc.includes("LONG AN") || loc.includes("PHLA")) autoColor = "#e0f2fe";
-                else if (loc.includes("LÊ VĂN SỸ") || loc.includes("LVS")) autoColor = "#e6f9ef";
-                else if (loc.includes("LẠC LONG QUÂN") || loc.includes("LLQ")) autoColor = "#fff3e0";
-                else if (loc.includes("LÊ THỊ RIÊNG") || loc.includes("CVLTR")) autoColor = "#fef9c3";
-                else if (loc.includes("ONLINE") || loc.includes("HỌP")) autoColor = "#f3e8ff";
-                if (!autoColor && isExam) autoColor = "#fee2e2"; // Màu mặc định cho thi
-
-                // Đánh dấu ô bị chiếm (rowspan)
                 const len = course.length || 1;
-                for (let r = 0; r < len; r++) { 
-                    if (i + r <= totalRows) occupied[i + r][thu] = true; 
-                }
-                
-           tableHtml += `
-<td rowspan="${len}" class="td-subject" style="background:${autoColor}">
-    <div class="subject" style="background:transparent;">
-        <div class="time">${course.time}</div>
-        <div style="font-weight:600;">
-            <a href="${course.link}" target="_blank" style="color:#2563eb; text-decoration:none;">${course.location}</a>
-        </div>
-        
-        <div style="${isExam ? 'font-weight:700; margin: 4px 0;' : 'font-weight:400;'}">${course.name}</div>
-        
-        <span class="room">Phòng: ${course.room}</span><br>
-        
-        ${isExam ? '' : `<span class="teacher">GV: ${course.teacher || 'N/A'}</span>`}
-    </div>
-</td>`;
-            } else { 
-                tableHtml += `<td></td>`; 
+                for (let r = 0; r < len; r++) { if (i + r <= 16) occupied[i + r][thu] = true; }
+
+                // TỰ ĐỘNG LẤY LINK VÀ MÀU
+                const finalLink = getAutoLink(course.location, course.link);
+                let autoColor = course.color;
+                const locU = course.location.toUpperCase();
+                if (locU.includes("AN DƯƠNG VƯƠNG") || locU.includes("ADV")) autoColor = "#e0f2fe";
+                else if (locU.includes("LÊ VĂN SỸ") || locU.includes("LVS")) autoColor = "#e6f9ef";
+                else if (locU.includes("LẠC LONG QUÂN") || locU.includes("LLQ")) autoColor = "#fff3e0";
+                else if (locU.includes("LÊ THỊ RIÊNG") || locU.includes("CVLTR")) autoColor = "#fef9c3";
+                else if (locU.includes("ONLINE") || locU.includes("HỌP")) autoColor = "#f3e8ff";
+
+                tableHtml += `
+                <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'}">
+                    <div class="subject">
+                        <div class="time">${course.time}</div>
+                        <div style="font-weight:600;">
+                            <a href="${finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">${course.location}</a>
+                        </div>
+                        <div style="margin: 4px 0;">${course.name}</div>
+                        <span class="room">Phòng: ${course.room}</span><br>
+                        <span class="teacher">GV: ${course.teacher || 'N/A'}</span>
+                    </div>
+                </td>`;
+            } else {
+                tableHtml += `<td></td>`;
             }
         }
         tableHtml += `</tr>`;
     }
     tbody.innerHTML = tableHtml;
 
-    // 4. Vẽ Deadline (Giữ nguyên logic cũ)
+    // --- 4. Vẽ Deadline ---
     const deadlineContainer = document.getElementById('deadline-container');
-    if (typeof DATA_DEADLINES !== 'undefined') {
-        const filteredDeadlines = DATA_DEADLINES.filter(d => d.weeks.includes(CURRENT_WEEK));
-        let deadlineHtml = "";
-        filteredDeadlines.forEach(item => {
-            deadlineHtml += `<div class="online-card"><div class="icon-circle ${item.icon}">${item.emoji}</div><h3>${item.duration}</h3><p class="desc">${item.title}</p><span class="tag">${item.tag}</span></div>`;
+    const filteredDeadlines = DATA_DEADLINES.filter(d => d.weeks.includes(CURRENT_WEEK));
+    let deadlineHtml = "";
+    filteredDeadlines.forEach(item => {
+        deadlineHtml += `<div class="online-card"><div class="icon-circle ${item.icon}">${item.emoji}</div><h3>${item.duration}</h3><p class="desc">${item.title}</p><span class="tag">${item.tag}</span></div>`;
+    });
+    deadlineContainer.innerHTML = deadlineHtml || "<p>Tuần này không có deadline.</p>";
+
+    // --- 5. Vẽ Ghi chú địa điểm ---
+    const noteContainer = document.getElementById('location-notes');
+    if (noteContainer) {
+        let noteHtml = "";
+        DATA_LOCATIONS.forEach(loc => {
+            noteHtml += `<li><span class="square" style="background:${loc.color};"></span><a href="${loc.link}" target="_blank">${loc.name}</a></li>`;
         });
-        deadlineContainer.innerHTML = deadlineHtml || "<p style='text-align:center; width:100%; color:#666;'>Tuần này không có deadline nào.</p>";
+        noteContainer.innerHTML = noteHtml;
     }
 }
 
