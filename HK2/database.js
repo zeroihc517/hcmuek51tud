@@ -380,6 +380,7 @@ name: `
     day: 4, 
     start: 3, 
     length: 2,
+	color: "#fbcfe8",
     weeks: [18]
 },
 {
@@ -390,6 +391,7 @@ name: `
     day: 5, 
     start: 3, 
     length: 2,
+	color: "#fbcfe8",
     weeks: [18]
 },
 {
@@ -399,6 +401,7 @@ name: `
     time: "7:00 - 8:30",
     day: 6, 
     start: 1, 
+	color: "#fbcfe8",
     weeks: [18]
 },
 {
@@ -408,6 +411,7 @@ name: `
     time: "8:35 - 9:30",
     day: 6, 
     start: 2, 
+	color: "#fbcfe8",
     weeks: [18]
 }
 
