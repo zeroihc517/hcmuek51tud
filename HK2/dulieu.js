@@ -28,7 +28,71 @@ function renderAll() {
     document.title = `TKB (${formatShortYear(mondayDate)}-${formatShortYear(sundayDate)})`; 
     document.getElementById('week-title').innerText = "Tuần " + CURRENT_WEEK;
     document.querySelector('.subtitle').innerText = `(Áp dụng từ ngày ${formatFull(mondayDate)} đến ${formatFull(sundayDate)})`;
+function renderLocationNotes() {
+    const noteList = document.getElementById('location-notes');
+    if (!noteList || typeof DATA_COURSES === 'undefined') return;
 
+    // 1. Lấy danh sách địa điểm duy nhất (Unique)
+    const locations = [];
+    const seen = new Set();
+
+    DATA_COURSES.forEach(course => {
+        // Chuẩn hóa tên địa điểm để tránh trùng lặp do viết hoa/thường
+        const locName = course.location;
+        if (!seen.has(locName)) {
+            seen.add(locName);
+            
+            // Lấy màu sắc dựa trên logic giống như lúc vẽ bảng TKB
+            let color = course.color;
+            const upperLoc = locName.toUpperCase();
+            if (upperLoc.includes("AN DƯƠNG VƯƠNG") || upperLoc.includes("ADV")) color = "#e0f2fe";
+            else if (upperLoc.includes("LÊ VĂN SỸ") || upperLoc.includes("LVS")) color = "#e6f9ef";
+            else if (upperLoc.includes("LẠC LONG QUÂN") || upperLoc.includes("LLQ")) color = "#fff3e0";
+            else if (upperLoc.includes("LÊ THỊ RIÊNG") || upperLoc.includes("CVLTR")) color = "#fef9c3";
+            else if (upperLoc.includes("ONLINE") || upperLoc.includes("HỌP")) color = "#f3e8ff";
+            
+            locations.push({
+                name: locName,
+                link: course.link,
+                color: color || "#eee" // Màu mặc định nếu không khớp
+            });
+        }
+    });
+
+    // 2. Tạo HTML cho danh sách ghi chú
+    let html = "";
+    locations.forEach(loc => {
+        html += `
+            <li>
+                <span class="square" style="background:${loc.color}; border: 1px solid #ddd;"></span>
+                <a href="${loc.link}" target="_blank">${loc.name}</a>
+            </li>`;
+    });
+
+    noteList.innerHTML = html;
+}
+
+// Cập nhật lại hàm renderAll hiện tại của bạn để gọi hàm này
+const originalRenderAll = renderAll;
+renderAll = function() {
+    originalRenderAll();
+    renderLocationNotes();
+};
+// 5. Vẽ Ghi chú địa điểm tự động
+    const noteContainer = document.getElementById('location-notes');
+    if (noteContainer && typeof DATA_LOCATIONS !== 'undefined') {
+        let noteHtml = "";
+        DATA_LOCATIONS.forEach(loc => {
+            noteHtml += `
+                <li>
+                    <span class="square" style="background:${loc.color};"></span>
+                    ${loc.link !== "#" 
+                        ? `<a href="${loc.link}" target="_blank">${loc.name}</a>` 
+                        : loc.name}
+                </li>`;
+        });
+        noteContainer.innerHTML = noteHtml;
+    }
     // 2. Cập nhật ngày vào Header
     document.querySelectorAll('#header-row th[data-thu]').forEach(th => {
         const thu = parseInt(th.getAttribute('data-thu'));
@@ -74,7 +138,8 @@ function renderAll() {
                 // Xử lý màu sắc tự động
                 let autoColor = course.color;
                 const loc = course.location.toUpperCase();
-                if (loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV") || loc.includes("LONG AN") || loc.includes("PHLA")) autoColor = "#e0f2fe";
+                if (loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV")) autoColor = "#e0f2fe";
+                else if (loc.includes("LONG AN") || loc.includes("PHLA")) autoColor = "#e0f2fe";
                 else if (loc.includes("LÊ VĂN SỸ") || loc.includes("LVS")) autoColor = "#e6f9ef";
                 else if (loc.includes("LẠC LONG QUÂN") || loc.includes("LLQ")) autoColor = "#fff3e0";
                 else if (loc.includes("LÊ THỊ RIÊNG") || loc.includes("CVLTR")) autoColor = "#fef9c3";
