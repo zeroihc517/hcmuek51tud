@@ -87,7 +87,7 @@ var DATA_COURSES = [
         day: 2, 
         start: 7,
         length: 4,
-        weeks: [3,4,12]
+        weeks: [3,4]
     },
     {
         name: "Không gian tuyến tính",
