@@ -396,7 +396,7 @@ name: `
     name: "Chủ nghĩa xã hội khoa học", // Nhập thẳng tên môn
     location: "Cơ sở: An Dương Vương",
     room: "B.112", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
-    time: "9:30 - 10:30",
+    time: "9:30 - 10:45",
     day: 4, 
     start: 2, // Ca 1 sáng
     weeks: [16]
@@ -405,7 +405,7 @@ name: `
     name: "Kinh tế chính trị học Mác-Lênin", // Nhập thẳng tên môn
     location: "Cơ sở: An Dương Vương",
     room: "B.111", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
-    time: "7:00 - 08:00",
+    time: "7:00 - 08:15",
     day: 5, 
     start: 1, // Ca 1 sáng
     weeks: [16]
