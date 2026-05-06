@@ -384,6 +384,51 @@ name: `
     weeks: [17]
 },
 {
+    name: "<b>Kiểm tra Kết thúc học phần</b><br>Giải tích hàm nhiều biến", // Nhập thẳng tên môn
+    location: "Cơ sở: An Dương Vương",
+    room: "B.211", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+    time: "13:00 - 14:30",
+    day: 3, 
+    start: 3, // Ca 1 sáng
+    weeks: [16]
+},
+	{
+    name: "<b>Kiểm tra Kết thúc học phần</b><br>Chủ nghĩa xã hội khoa học", // Nhập thẳng tên môn
+    location: "Cơ sở: An Dương Vương",
+    room: "B.112", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+    time: "9:30 - 10:30",
+    day: 4, 
+    start: 2, // Ca 1 sáng
+    weeks: [16]
+},
+		{
+    name: "<b>Kiểm tra Kết thúc học phần</b><br>Kinh tế chính trị học Mác-Lênin", // Nhập thẳng tên môn
+    location: "Cơ sở: An Dương Vương",
+    room: "B.111", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+    time: "7:00 - 08:00",
+    day: 5, 
+    start: 1, // Ca 1 sáng
+    weeks: [16]
+},
+		{
+    name: "<b>Kiểm tra Kết thúc học phần</b><br>Hình học cao cấp hai chiều và ba chiều", // Nhập thẳng tên môn
+    location: "Cơ sở: An Dương Vương",
+    room: "B.117", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+    time: "7:00 - 08:30",
+    day: 4, 
+    start: 1, // Ca 1 sáng
+    weeks: [18]
+},
+			{
+    name: "<b>Kiểm tra Kết thúc học phần</b><br>Không gian tuyến tính", // Nhập thẳng tên môn
+    location: "Cơ sở: An Dương Vương",
+    room: "B.117", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+    time: "7:00 - 08:30",
+    day: 5, 
+    start: 1, // Ca 1 sáng
+    weeks: [18]
+},
+{
     name: "Thủ tục dự thi", // Nhập thẳng tên môn
     location: "Cơ sở: Đang cập nhật",
     room: "Đang cập nhật", link: "Đang cập nhật",
