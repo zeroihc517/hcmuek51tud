@@ -98,7 +98,7 @@ function renderAll() {
                         <div style="font-weight:600;">
                             <a href="${finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">${course.location}</a>
                         </div>
-                        <div style="${isExam ? 'font-weight:700;' : ''}">${course.name}</div>
+                        <div style="${isExam ? 'font-weight:000;' : ''}">${course.name}</div>
                         <span class="room">Phòng: ${course.room}</span><br>
                         ${!isExam ? `<span class="teacher">GV: ${course.teacher || 'N/A'}</span>` : ''}
                     </div>
