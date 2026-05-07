@@ -386,7 +386,7 @@ name: `
 {
     name: "Giải tích hàm nhiều biến", // Nhập thẳng tên môn
     location: "Cơ sở: An Dương Vương",
-    room: "B.211", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+    room: "B.211", link: "",
     time: "13:00 - 14:30",
     day: 3, 
     start: 3, // Ca 1 sáng
@@ -395,7 +395,7 @@ name: `
 	{
     name: "Chủ nghĩa xã hội khoa học", // Nhập thẳng tên môn
     location: "Cơ sở: An Dương Vương",
-    room: "B.112", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+    room: "B.112", link: "",
     time: "9:30 - 10:45",
     day: 4, 
     start: 2, // Ca 1 sáng
@@ -404,7 +404,7 @@ name: `
 		{
     name: "Kinh tế chính trị học Mác-Lênin", // Nhập thẳng tên môn
     location: "Cơ sở: An Dương Vương",
-    room: "B.111", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+    room: "B.111", link: "",
     time: "7:00 - 08:15",
     day: 5, 
     start: 1, // Ca 1 sáng
@@ -413,7 +413,7 @@ name: `
 		{
     name: "Hình học cao cấp hai chiều và ba chiều", // Nhập thẳng tên môn
     location: "Cơ sở: An Dương Vương",
-    room: "B.117", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+    room: "B.117", link: "",
     time: "7:00 - 08:30",
     day: 4, 
     start: 1, // Ca 1 sáng
@@ -422,7 +422,7 @@ name: `
 			{
     name: "Không gian tuyến tính", // Nhập thẳng tên môn
     location: "Cơ sở: An Dương Vương",
-    room: "B.117", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+    room: "B.117", link: "",
     time: "7:00 - 08:30",
     day: 5, 
     start: 1, // Ca 1 sáng
