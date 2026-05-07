@@ -274,7 +274,7 @@ var DATA_COURSES = [
         day: 5,
         start: 7,
         length: 4,
-        weeks: [1, 5, 6, 8, 10, 11, 13, 14, 15]
+        weeks: [1, 5, 6, 8, 10, 11, 14, 15]
     },
     {
         name: "<b>Kiểm tra Giữa học phần</b><br> Lập trình nâng cao",
@@ -296,7 +296,7 @@ var DATA_COURSES = [
         day: 5,
         start: 7,
         length: 4,
-        weeks: [2, 3, 4]
+        weeks: [2, 3, 4, 13]
     },
     {
         name: "Lập trình nâng cao (Bủ 30/04)",
