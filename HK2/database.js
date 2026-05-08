@@ -524,11 +524,11 @@ var DATA_DEADLINES = [
     },
 {
         title: "Phương pháp học tập hiệu quả",
-        duration: "Từ 20/04/2026 đến 03/05/2026",
+        duration: "Từ 20/04/2026 đến 03/05/2026 & 08/05/2026 đến 09/05/2026",
         tag: "Bài Tiểu luận Giữa học phần",
         icon: "soft-blue",
         emoji: "📣",
-        weeks: [11, 12]
+        weeks: [11, 12, 13]
     },
 	{
         title: "Phương pháp học tập hiệu quả",
