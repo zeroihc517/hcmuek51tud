@@ -530,6 +530,14 @@ var DATA_DEADLINES = [
         emoji: "📣",
         weeks: [11, 12]
     },
+	{
+        title: "Phương pháp học tập hiệu quả",
+        duration: "Từ 08/05/2026 đến 07/06/2026",
+        tag: "Bài Tiểu luận Kết thúc học phần",
+        icon: "soft-blue",
+        emoji: "📣",
+        weeks: [13, 14, 15, 16, 17]
+    },
     {
         title: "Lập trình nâng cao (Giao 22/01)",
         duration: "Từ 22/01/2026 đến 25/01/2026",
