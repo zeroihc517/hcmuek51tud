@@ -80,7 +80,7 @@ var DATA_COURSES = [
     },
 		    {
         name: "Giải tích hàm nhiều biến (Bù 27/04)",
-        location: "Học onlune",
+        location: "Học online",
        room: "MS TEAMS", link: "",
 	teacher: "Huỳnh Cao Trường",
         time: "8:00 - 11:30",
