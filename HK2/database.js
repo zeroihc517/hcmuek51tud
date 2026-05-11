@@ -78,6 +78,17 @@ var DATA_COURSES = [
         length: 4,
         weeks: [13, 14, 15]
     },
+		    {
+        name: "Giải tích hàm nhiều biến (Bù 27/04)",
+        location: "Học onlune",
+       room: "MS TEAMS", link: "",
+	teacher: "Huỳnh Cao Trường",
+        time: "8:00 - 11:30",
+        day: 6, 
+        start: 3,
+        length: 4,
+        weeks: [14]
+    },
 {
         name: "<b>Kiểm tra Giữa học phần</b><br> Giải tích hàm nhiều biến",
         location: "Cơ sở: Lê Văn Sỹ",
