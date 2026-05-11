@@ -65,18 +65,18 @@ var DATA_COURSES = [
         day: 2, 
         start: 7,
         length: 4,
-        weeks: [1, 2, 7, 8, 9, 10, 11, 14, 15]
+        weeks: [1, 2, 7, 8, 9, 10, 11]
     },
 	    {
         name: "Giải tích hàm nhiều biến",
         location: "Cơ sở: Lê Văn Sỹ",
-       room: "LVS.D.107", link: "",
+       room: "LVS.D.101", link: "",
 	teacher: "Huỳnh Cao Trường",
         time: "13:00 - 16:00",
         day: 2, 
         start: 7,
         length: 4,
-        weeks: [13]
+        weeks: [13, 14, 15]
     },
 {
         name: "<b>Kiểm tra Giữa học phần</b><br> Giải tích hàm nhiều biến",
