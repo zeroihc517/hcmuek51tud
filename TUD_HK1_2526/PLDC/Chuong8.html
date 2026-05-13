@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Chương 8 PLĐC</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --accent:#0ea5b7;
+  --success:#10b981;
+  --danger:#ef4444;
+  --bg:#f7fbff;
+  --card:#ffffff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui;
+  background:var(--bg);
+}
+
+/* ===== TOP STRIP ===== */
+.candidate-strip{
+  position:fixed;
+  top:0; left:0; right:0;
+  background:#0f274a;
+  color:#fff;
+  padding:12px 20px;
+  z-index:100;
+}
+.candidate-inner{
+  max-width:1200px;
+  margin:auto;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.timer-bubble{
+  background:rgba(255,255,255,.15);
+  padding:6px 12px;
+  border-radius:20px;
+  font-weight:700;
+}
+
+/* ===== MAIN ===== */
+.page-wrap{
+  max-width:1100px;
+  margin:90px auto 160px;
+  padding:16px;
+}
+.question{
+  background:#fff;
+  border-radius:10px;
+  padding:14px;
+  margin-bottom:14px;
+  box-shadow:0 8px 24px rgba(0,0,0,.05);
+}
+.q-head{
+  display:flex;
+  gap:10px;
+}
+.qnum{
+  width:34px;
+  height:34px;
+  border-radius:8px;
+  background:#e2e8f0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+}
+.qtitle{font-weight:600}
+.options{
+  margin-top:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.option{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #e5e7eb;
+  cursor:pointer;
+  transition:.2s;
+}
+.option:hover{background:#f1f5f9}
+
+/* ===== FEEDBACK ===== */
+.option.correct{
+  border:2px solid var(--success);
+  background:#ecfdf5;
+}
+.option.wrong{
+  border:2px solid var(--danger);
+  background:#fef2f2;
+}
+.answer-hint{
+  margin-top:8px;
+  font-weight:700;
+}
+.answer-hint.correct{color:#065f46}
+.answer-hint.wrong{color:#7f1d1d}
+
+/* ===== FOOTER ===== */
+.site-footer{
+  position:fixed;
+  bottom:0; left:0; right:0;
+  background:#083a8c;
+  padding:10px;
+}
+.bubbles-wrap{
+  display:flex;
+  gap:6px;
+  justify-content:center;
+  flex-wrap:wrap;
+}
+.bubble{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,.3);
+  background:rgba(255,255,255,.2);
+  color:#fff;
+  font-weight:700;
+}
+.bubble.done{
+  background:linear-gradient(#22c55e,#10b981);
+  color:#052e1a;
+}
+</style>
+</head>
+
+<body>
+
+<!-- TOP -->
+<div class="candidate-strip">
+  <div class="candidate-inner">
+    <strong>PHÁP LUẬT ĐẠI CƯƠNG – Chương 8 - Nhấn F5 để làm lại bài</strong>
+    <div class="timer-bubble" id="timer">15:00</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="page-wrap">
+  <div id="quiz"></div>
+</main>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="bubbles-wrap" id="bubbles"></div>
+</footer>
+
+<script>
+/* ===== CONFIG ===== */const QUESTIONS = [
+  {
+    q: "Cơ quan hành chính nhà nước cao nhất trong bộ máy Nhà nước Cộng hòa Xã hội chủ nghĩa Việt Nam là:",
+    a: ["Tòa án nhân dân tối cao.", "Viện Kiểm sát nhân dân tối cao.", "Chính phủ.", "Quốc hội."],
+    c: "C"
+  },
+  {
+    q: "Luật Hành chính là ngành luật trong hệ thống pháp luật Việt Nam, gồm tổng thể các quy phạm pháp luật được nhà nước ban hành để điều chỉnh các quan hệ xã hội phát sinh trong lĩnh vực...",
+    a: ["quản lý hành chính nhà nước.", "tổ chức quyền lực nhà nước.", "quan hệ lao động giữa người lao động với người sử dụng lao động.", "hôn nhân và gia đình."],
+    c: "A"
+  },
+  {
+    q: "Chính phủ thực hiện quyền:",
+    a: ["Lập pháp.", "Hành pháp.", "Tư pháp.", "Công tố."],
+    c: "B"
+  },
+  {
+    q: "Hoạt động công vụ của cán bộ, công chức là:",
+    a: [
+      "Việc thực hiện nhiệm vụ, quyền hạn của cán bộ, công chức theo quy định của Luật Cán bộ, công chức và các quy định khác có liên quan.",
+      "Việc thực hiện nhiệm vụ, trách nhiệm của cán bộ, công chức theo quy định của Luật Cán bộ, công chức và các quy định khác có liên quan.",
+      "Việc thực hiện nhiệm vụ, chức năng của cán bộ, công chức theo quy định của Luật Cán bộ, công chức và các quy định khác có liên quan.",
+      "Việc thực hiện chức năng, quyền hạn của cán bộ, công chức theo quy định của Luật Cán bộ, công chức và các quy định khác có liên quan."
+    ],
+    c: "A"
+  },
+  {
+    q: "Cán bộ là:",
+    a: [
+      "Công dân Việt Nam, được bầu cử, phê chuẩn, bổ nhiệm giữ chức vụ, chức danh theo nhiệm kỳ.",
+      "Công dân Việt Nam, được bầu cử, bổ nhiệm giữ chức vụ, chức danh theo nhiệm kỳ.",
+      "Công dân được bầu cử, phê chuẩn, bổ nhiệm giữ chức vụ, chức danh theo nhiệm kỳ.",
+      "Công dân Việt Nam, người nước ngoài được bầu cử, phê chuẩn, bổ nhiệm giữ chức vụ, chức danh theo nhiệm kỳ."
+    ],
+    c: "A"
+  },
+  {
+    q: "Cưỡng chế hành chính là những biện pháp tác động mang tính bắt buộc được Luật Hành chính quy định, mà cơ quan nhà nước, cá nhân có thẩm quyền của cơ quan nhà nước áp dụng để xử lý:",
+    a: ["Cá nhân, tổ chức vi phạm hành chính.", "Tổ chức vi phạm hành chính.", "Cá nhân, tổ chức vi phạm kỷ luật.", "Tổ chức vi phạm kỷ luật."],
+    c: "A"
+  },
+  {
+    q: "Cơ quan nào có thẩm quyền giải quyết vụ án hành chính?",
+    a: ["Viện kiểm sát nhân dân.", "Hội đồng nhân dân.", "Ủy ban nhân dân.", "Tòa án nhân dân."],
+    c: "D"
+  },
+  {
+    q: "Cơ quan nào sau đây là cơ quan hành chính của nước Cộng hòa xã hội chủ nghĩa Việt Nam:",
+    a: ["Viện kiểm sát nhân dân.", "Ủy ban nhân dân.", "Tòa án nhân dân.", "Hội đồng nhân dân."],
+    c: "B"
+  },
+  {
+    q: "Công chức là:",
+    a: [
+      "Công dân Việt Nam, người nước ngoài được tuyển dụng, bổ nhiệm vào ngạch, chức vụ, chức danh tương ứng với vị trí việc làm.",
+      "Công dân Việt Nam, người nước ngoài được tuyển dụng vào ngạch, chức vụ, chức danh tương ứng với vị trí việc làm.",
+      "Công dân Việt Nam, được tuyển dụng vào ngạch, chức vụ, chức danh tương ứng với vị trí việc làm.",
+      "Công dân Việt Nam, được tuyển dụng, bổ nhiệm vào ngạch, chức vụ, chức danh tương ứng với vị trí việc làm."
+    ],
+    c: "D"
+  },
+  {
+    q: "Ủy ban nhân dân do chủ thể nào bầu ra?",
+    a: ["Chính phủ.", "Quốc hội.", "Hội đồng nhân dân cùng cấp.", "Cử tri cả nước."],
+    c: "C"
+  },
+  {
+    q: "Luật Tố tụng hành chính là một ngành luật trong hệ thống pháp luật Việt Nam, bao gồm tổng thể các quy phạm pháp luật điều chỉnh các quan hệ xã hội phát sinh trong quá trình giải quyết...",
+    a: ["Vụ án hành chính.", "Vụ án hình sự.", "Tranh chấp dân sự.", "Tranh chấp lao động."],
+    c: "A"
+  },
+  {
+    q: "Đâu không phải là đặc điểm của công chức?",
+    a: ["Là công dân Việt Nam.", "Được bầu cử, bổ nhiệm.", "Trong biên chế.", "Hưởng lương từ ngân sách nhà nước."],
+    c: "B"
+  },
+  {
+    q: "Viên chức là:",
+    a: [
+      "Công dân Việt Nam được tuyển dụng theo vị trí việc làm, làm việc tại đơn vị sự nghiệp công lập theo chế độ hợp đồng lao động.",
+      "Công dân Việt Nam được tuyển dụng theo vị trí việc làm, làm việc tại đơn vị sự nghiệp công lập theo chế độ hợp đồng làm việc.",
+      "Công dân Việt Nam, người không quốc tịch được tuyển dụng theo vị trí việc làm, làm việc tại đơn vị sự nghiệp công lập theo chế độ hợp đồng làm việc.",
+      "Công dân Việt Nam, người không quốc tịch được tuyển dụng theo vị trí việc làm, làm việc tại đơn vị sự nghiệp công lập theo chế độ hợp đồng lao động."
+    ],
+    c: "B"
+  },
+  {
+    q: "Đâu là nhận định không đúng về quản lý hành chính nhà nước?",
+    a: [
+      "Được thực hiện bởi cơ quan hành chính nhà nước.",
+      "Nhằm tổ chức thi hành pháp luật.",
+      "Nhằm chỉ đạo, điều hành việc thực hiện các chức năng, nhiệm vụ của nhà nước.",
+      "Do mọi chủ thể tiến hành để thực hiện việc quản lý nhà nước trên các lĩnh vực."
+    ],
+    c: "D"
+  },
+  {
+    q: "Ủy ban nhân dân có chức năng",
+    a: [
+      "quyết định các vấn đề của địa phương do luật định.",
+      "tổ chức thực hiện nghị quyết của hội đồng nhân dân.",
+      "giám sát việc tuân theo hiến pháp và pháp luật ở địa phương.",
+      "giám sát việc thực hiện nghị quyết của hội đồng nhân dân."
+    ],
+    c: "B"
+  }
+];
+let time = 15 * 60;
+let answered = {};
+let order = [...QUESTIONS.keys()].sort(() => Math.random() - 0.5);
+
+/* ===== TIMER ===== */
+setInterval(() => {
+  if (time <= 0) return;
+  time--;
+  const m = Math.floor(time / 60);
+  const s = time % 60;
+  document.getElementById("timer").textContent =
+    String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+}, 1000);
+
+/* ===== RENDER ===== */
+const quiz = document.getElementById("quiz");
+const bubbles = document.getElementById("bubbles");
+
+order.forEach((idx, i) => {
+  const q = QUESTIONS[idx];
+
+  quiz.insertAdjacentHTML("beforeend", `
+    <div class="question" data-q="${idx}">
+      <div class="q-head">
+        <div class="qnum">${i+1}</div>
+        <div class="qtitle">${q.q}</div>
+      </div>
+      <div class="options">
+        ${q.a.map((text, j) => {
+          const letter = String.fromCharCode(65 + j);
+          return `
+            <label class="option">
+              <input type="radio" name="q${idx}" value="${letter}">
+              ${letter}. ${text}
+            </label>`;
+        }).join("")}
+      </div>
+    </div>
+  `);
+
+  const b = document.createElement("button");
+  b.className = "bubble";
+  b.textContent = i + 1;
+  bubbles.appendChild(b);
+});
+
+/* ===== CHECK ANSWER ===== */
+document.addEventListener("change", e => {
+  if (!e.target.matches("input[type=radio]")) return;
+
+  const qIdx = Number(e.target.name.replace("q",""));
+  if (answered[qIdx]) return;
+  answered[qIdx] = true;
+
+  const box = e.target.closest(".question");
+  const correct = QUESTIONS[qIdx].c;
+  const user = e.target.value;
+
+  box.querySelectorAll("input").forEach(i => i.disabled = true);
+
+  if (user === correct) {
+    e.target.closest(".option").classList.add("correct");
+    box.insertAdjacentHTML("beforeend",
+      `<div class="answer-hint correct">🎉 Chính xác!</div>`);
+  } else {
+    e.target.closest(".option").classList.add("wrong");
+    box.querySelector(`input[value="${correct}"]`)
+      .closest(".option").classList.add("correct");
+    box.insertAdjacentHTML("beforeend",
+      `<div class="answer-hint wrong">❌ Sai! Đáp án đúng: ${correct}</div>`);
+  }
+
+  bubbles.children[order.indexOf(qIdx)].classList.add("done");
+});
+</script>
+
+</body>
+</html>

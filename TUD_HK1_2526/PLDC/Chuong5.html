@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="contentType" content="quiz">
+    <meta name="description" content="Một bài kiểm tra trắc nghiệm tương tác dành cho học sinh lớp 1 về bài học 'Buổi trưa hè', giúp các em ôn tập về nhận biết vần, đọc hiểu và từ vựng.">
+    <meta name="nextActions" content="Thêm các câu hỏi về chính tả; Tạo một bài tập điền từ vào chỗ trống; Chuyển thành bài tập nối từ với tranh minh họa">
+    <title>Chương 5 PLĐC</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-image: url('https://media.istockphoto.com/id/1411630763/vi/anh/th%E1%BA%A9m-ph%C3%A1n-m%C3%A0u-n%C3%A2u-b%E1%BA%B1ng-g%E1%BB%97-gavel-tr%C3%AAn-b%C3%A0n-sao-ch%C3%A9p-kh%C3%B4ng-gian-n%E1%BB%81n-bi%E1%BB%83u-ng%E1%BB%AF.jpg?s=612x612&w=0&k=20&c=tNiGrXroKyRkJyOVilo9UOQGP7lCztvec3ztM3ZgILQ=');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .quiz-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 800px;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        #start-screen, #result-screen {
+            text-align: center;
+        }
+
+        #result-screen h2 {
+             color: #2c7e4b;
+        }
+
+        .question-header {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0056b3;
+        }
+
+        .answer-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .btn-answer {
+            font-size: 1.2rem;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #ddd;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            animation: slideInUp 0.5s ease-out;
+        }
+        
+        .btn-answer:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .btn-answer.correct {
+            background-color: #28a745 !important;
+            color: white !important;
+            border-color: #218838 !important;
+            animation: pulse 0.5s;
+        }
+
+        .btn-answer.wrong {
+            background-color: #dc3545 !important;
+            color: white !important;
+            border-color: #c82333 !important;
+            animation: shake 0.5s;
+        }
+        
+        #progress-bar-container {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            height: 10px;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #17a2b8;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+        }
+        
+        .btn-start, .btn-restart {
+            font-size: 1.5rem;
+            padding: 15px 40px;
+            border-radius: 50px;
+            background-color: #ff7e06;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-start:hover, .btn-restart:hover {
+            background-color: #e06e05;
+            transform: scale(1.05);
+        }
+
+        @media (min-width: 576px) {
+            .answer-options {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="quiz-container" id="quiz">
+        
+        <div id="start-screen">
+            <h1 class="mb-4" style="color: #0056b3;">CHƯƠNG 5. LUẬT HÔN NHÂN VÀ GIA ĐÌNH</h1>
+            <p class="lead mb-4">Câu hỏi được trích trên VLE</p>
+            <button class="btn-start" id="start-btn">Bắt đầu</button>
+        </div>
+
+        <div id="quiz-screen" class="d-none">
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+            <div id="question-container">
+                <div class="question-header" id="question-text"></div>
+                <div class="answer-options" id="answer-buttons"></div>
+            </div>
+        </div>
+
+        <div id="result-screen" class="d-none">
+            <h2 class="mb-4">Hoàn thành!</h2>
+            <div id="result-details"></div>
+            <button class="btn-restart mt-4" id="restart-btn">Làm lại</button>
+        </div>
+
+    </div>
+
+    <audio id="correct-sound" src="https://storage.googleapis.com/azt_agents/html_content_agent/1/0546691a-61bd-47e9-ae19-a96181451b4d/correct_answer_vi.mp3/0" preload="auto"></audio>
+    <audio id="wrong-sound" src="https://storage.googleapis.com/azt_agents/html_content_agent/1/0546691a-61bd-47e9-ae19-a96181451b4d/wrong_answer_vi.mp3/0" preload="auto"></audio>
+    <audio id="cheer-sound" src="https://www.myinstants.com/media/sounds/kids_cheering.mp3" preload="auto"></audio>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const questions = [
+                {
+                    category: 'Khái niệm Luật Hôn nhân và gia đình',
+                    question: 'Đâu không phải là nguyên tắc cơ bản của Luật Hôn nhân và gia đình? (chọn 1 phương án)',
+                    answers: [
+                        { text: 'Hôn nhân tự nguyện, tiến bộ, một vợ một chồng, vợ chồng bình đẳng.', correct: false },
+                        { text: 'Hôn nhân giữa công dân Việt Nam thuộc các dân tộc, tôn giáo, giữa người theo tôn giáo với người không theo tôn giáo, giữa người có tín ngưỡng với người không có tín ngưỡng, giữa công dân Việt Nam với người nước ngoài được tôn trọng và được pháp luật bảo vệ.', correct: false },
+                        { text: 'Xây dựng gia đình ấm no, tiến bộ, hạnh phúc; các thành viên gia đình có nghĩa vụ tôn trọng, quan tâm, chăm sóc, giúp đỡ nhau; không phân biệt đối xử giữa các con.', correct: false },
+                        { text: 'Nhà nước bắt buộc công dân đăng ký kết hôn khi đủ tuổi.', correct: true },
+                        { text: 'Nhà nước, xã hội và gia đình có trách nhiệm bảo vệ, hỗ trợ trẻ em, người cao tuổi, người khuyết tật thực hiện các quyền về hôn nhân và gia đình; giúp đỡ các bà mẹ thực hiện tốt chức năng cao quý của người mẹ; thực hiện kế hoạch hóa gia đình. Kế thừa, phát huy truyền thống văn hóa, đạo đức tốt đẹp của dân tộc Việt Nam về hôn nhân và gia đình.', correct: false }
+                    ]
+                },
+                {
+                    category: 'Khái niệm Luật Hôn nhân và gia đình',
+                    question: 'Luật Hôn nhân và gia đình là ngành luật trong hệ thống pháp luật Việt Nam, bao gồm các ....... (a) điều chỉnh những quan hệ xã hội phát sinh giữa các thành viên trong.... (b), về quan hệ .... (c) và quan hệ...... (d).',
+                    answers: [
+                        { text: 'a. quy phạm pháp luật; b. gia đình; c. nhân thân; d. tài sản', correct: true },
+                        { text: 'a. gia đình; b. quy phạm pháp luật; c. nhân thân; d. tài sản', correct: false },
+                        { text: 'a. tài sản; b. quy phạm pháp luật; c. nhân thân; d. gia đình', correct: false }
+                    ]
+                },
+                {
+                    category: 'Khái niệm Luật Hôn nhân và gia đình',
+                    question: 'Đối tượng điều chỉnh của Luật Hôn nhân và gia đình là:',
+                    answers: [
+                        { text: 'Quan hệ nhân thân và quan hệ tài sản giữa vợ và chồng.', correct: false },
+                        { text: 'Quan hệ nhân thân và quan hệ tài sản giữa cha mẹ và con cái, giữa các thành viên khác trong gia đình.', correct: false },
+                        { text: 'Quan hệ nhân thân và quan hệ tài sản giữa vợ và chồng, giữa cha mẹ và con cái, giữa các thành viên khác trong gia đình.', correct: true }
+                    ]
+                },
+                {
+                    category: 'Khái niệm Luật Hôn nhân và gia đình',
+                    question: 'Phương pháp điều chỉnh chủ yếu của Luật Hôn nhân và gia đình gồm:',
+                    answers: [
+                        { text: 'Phương pháp bình đẳng và phương pháp tự nguyện.', correct: true },
+                        { text: 'Phương pháp bình đẳng và phương pháp mệnh lệnh.', correct: false },
+                        { text: 'Phương pháp bình đẳng và phương pháp cho phép.', correct: false },
+                        { text: 'Phương pháp bình đẳng và phương pháp cấm đoán.', correct: false }
+                    ]
+                },
+                {
+                    category: 'Kết hôn',
+                    question: 'Pháp luật cấm kết hôn trong trường hợp nào sau đây:',
+                    answers: [
+                        { text: 'Giữa người đang có vợ và đang có chồng.', correct: true },
+                        { text: 'Người mất năng lực hành vi dân sự.', correct: false },
+                        { text: 'Giữa những người có quan hệ họ hàng.', correct: false },
+                        { text: 'Người bị hạn chế năng lực hành vi dân sự.', correct: false }
+                    ]
+                },
+                {
+                    category: 'Kết hôn',
+                    question: 'Kết hôn là:',
+                    answers: [
+                        { text: 'Việc các cá nhân xác lập quan hệ vợ chồng với nhau theo quy định của pháp luật về điều kiện kết hôn và đăng ký kết hôn', correct: false },
+                        { text: 'Việc nam và nữ xác lập quan hệ vợ chồng với nhau theo quy định của pháp luật về đăng ký kết hôn', correct: false },
+                        { text: 'Việc nam và nữ tổ chức lễ cưới dưới sự chứng kiến của gia đình và khi có đủ điều kiện kết hôn', correct: false },
+                        { text: 'Việc nam và nữ xác lập quan hệ vợ chồng với nhau theo quy định của pháp luật về điều kiện kết hôn và đăng ký kết hôn', correct: true }
+                    ]
+                },
+                {
+                    category: 'Kết hôn',
+                    question: 'Pháp luật quy định nam, nữ được kết hôn khi đạt độ tuổi nào?',
+                    answers: [
+                        { text: 'Nam từ đủ 19 tuổi, nữ từ đủ 17 tuổi.', correct: false },
+                        { text: 'Nam từ 20 tuổi, nữ từ 18 tuổi.', correct: false },
+                        { text: 'Nam từ đủ 20 tuổi trở lên, nữ từ đủ 18 tuổi trở lên.', correct: true },
+                        { text: 'Nam từ đủ 21 tuổi, nữ từ đủ 19 tuổi.', correct: false }
+                    ]
+                },
+                {
+                    category: 'Kết hôn',
+                    question: 'Nam và nữ được đăng ký kết hôn khi:',
+                    answers: [
+                        { text: 'đủ độ tuổi luật định', correct: false },
+                        { text: 'không mất năng lực hành vi dân sự', correct: false },
+                        { text: 'hai bên hoàn toàn tự nguyện', correct: false },
+                        { text: 'có đủ điều kiện kết hôn', correct: true }
+                    ]
+                },
+                {
+                    category: 'Kết hôn',
+                    question: 'Đâu không phải là điều kiện kết hôn?',
+                    answers: [
+                        { text: 'Nam từ đủ 20 tuổi trở lên, nữ từ đủ 18 tuổi trở lên', correct: false },
+                        { text: 'Việc kết hôn do nam và nữ tự nguyện quyết định', correct: false },
+                        { text: 'Không bị mất khả năng nhận thức', correct: true },
+                        { text: 'Không thuộc một trong các trường hợp cấm kết hôn', correct: false }
+                    ]
+                },
+                {
+                    category: 'Kết hôn',
+                    question: 'Anh T. và chị H. là hai anh em họ, ông ngoại của anh T. là anh ruột của bà nội chị H. Sau nhiều lần gặp gỡ thấy “tâm đầu ý hợp”, hai anh chị quyết định “kết nghĩa vuông tròn”. Gia đình hai bên phản đối kịch liệt vì cho rằng anh T., chị H. có quan hệ họ hàng. Hỏi anh T. và chị H. có kết hôn với nhau được không?',
+                    answers: [
+                        { text: 'Anh T. và chị H. không kết hôn với nhau được vì có quan hệ họ hàng', correct: false },
+                        { text: 'Anh T. và chị H. không kết hôn với nhau được vì có họ trong phạm vi ba đời', correct: false },
+                        { text: 'Anh T. và chị H. được quyền kết hôn với nhau vì không có họ trong phạm vi ba đời', correct: true }
+                    ]
+                },
+                {
+                    category: 'Kết hôn',
+                    question: 'Anh A hiện đang cư trú tại xã Đ, huyện T, tỉnh T muốn kết hôn với chị B hiện đang cư trú tại xã K, huyện P, tỉnh Q. Hỏi anh A và chị B có thể đăng ký kết hôn tại cơ quan nào?',
+                    answers: [
+                        { text: 'Uỷ ban nhân dân xã Đ, huyện T, tỉnh T', correct: false },
+                        { text: 'Uỷ ban nhân dân xã K, huyện P, tỉnh Q', correct: false },
+                        { text: 'Uỷ ban nhân dân xã Đ, huyện T, tỉnh T hoặc Uỷ ban nhân dân xã K, huyện P, tỉnh Q', correct: true },
+                        { text: 'Uỷ ban nhân dân huyện T, tỉnh T hoặc Uỷ ban nhân dân huyện P, tỉnh Q', correct: false }
+                    ]
+                },
+                {
+                    category: 'Kết hôn',
+                    question: 'Khi tổ chức đăng ký kết hôn, hai bên nam nữ bắt buộc phải có mặt không?',
+                    answers: [
+                        { text: 'Bắt buộc hai bên nam nữ phải có mặt.', correct: true },
+                        { text: 'Chỉ cần một trong hai bên có mặt là được.', correct: false },
+                        { text: 'Cả hai bên vắng mặt cũng được nhưng phải ủy quyền cho người khác.', correct: false },
+                        { text: 'Tùy từng trường hợp có thể đến, có thể không.', correct: false }
+                    ]
+                },
+                {
+                    category: 'Kết hôn',
+                    question: 'Cơ quan nào có không có thẩm quyền đăng ký kết hôn?',
+                    answers: [
+                        { text: 'Tòa án nhân dân', correct: true },
+                        { text: 'Ủy ban nhân dân cấp xã', correct: false },
+                        { text: 'Ủy ban nhân dân cấp huyện', correct: false },
+                        { text: 'Cơ quan đại diện ngoại giao', correct: false }
+                    ]
+                },
+                {
+                    category: 'Kết hôn',
+                    question: 'Vợ chồng đã ly hôn nay muốn kết hôn lại có cần phải đăng ký kết hôn không?',
+                    answers: [
+                        { text: 'Không cần đăng ký.', correct: false },
+                        { text: 'Phải đăng ký.', correct: true },
+                        { text: 'Không đăng ký nhưng phải báo cáo Ủy ban nhân dân cấp xã.', correct: false },
+                        { text: 'Không đăng ký nhưng phải báo cáo thôn, khối phố.', correct: false }
+                    ]
+                },
+               {
+        category: 'Ly hôn',
+        question: 'Ly hôn là:',
+        answers: [
+            { text: 'Việc chấm dứt quan hệ vợ chồng theo bản án, quyết định có hiệu lực pháp luật của Tòa án.', correct: true },
+            { text: 'Việc chấm dứt quan hệ vợ chồng theo bản án có hiệu lực pháp luật của Tòa án.', correct: false },
+            { text: 'Việc chấm dứt quan hệ vợ chồng theo quyết định có hiệu lực pháp luật của Tòa án.', correct: false },
+            { text: 'Việc vợ chồng chấm dứt việc chung sống với nhau.', correct: false }
+        ]
+    },
+    {
+        category: 'Ly hôn',
+        question: 'Đâu là hậu quả pháp lý của ly hôn?',
+        answers: [
+            { text: 'Hậu quả pháp lý về quan hệ nhân thân, quan hệ tài sản', correct: false },
+            { text: 'Hậu quả pháp lý về quan hệ nhân thân, con chung', correct: false },
+            { text: 'Hậu quả pháp lý về quan hệ tài sản, con chung', correct: false },
+            { text: 'Hậu quả pháp lý về quan hệ nhân thân, quan hệ tài sản và con chung', correct: true }
+        ]
+    },
+    {
+        category: 'Ly hôn',
+        question: 'Đâu không phải là điều kiện thuận tình ly hôn?',
+        answers: [
+            { text: 'Việc yêu cầu ly hôn là ý chí tự nguyện của cả hai bên vợ chồng.', correct: false },
+            { text: 'Vợ chồng đã thỏa thuận được về việc chia tài sản, việc trông nom, nuôi dưỡng, chăm sóc, giáo dục con.', correct: false },
+            { text: 'Việc yêu cầu ly hôn xuất phát từ một bên vợ hoặc chồng', correct: true },
+            { text: 'Thỏa thuận về việc chia tài sản, việc trông nom, nuôi dưỡng, chăm sóc, giáo dục con trên cơ sở bảo đảm quyền lợi chính đáng của vợ và con.', correct: false }
+        ]
+    },
+    {
+        category: 'Ly hôn',
+        question: 'Đâu không phải là căn cứ để ly hôn theo yêu cầu của một bên vợ hoặc chồng?',
+        answers: [
+            { text: 'Vợ, chồng có hành vi bạo lực gia đình', correct: false },
+            { text: 'Vợ, chồng vi phạm nghiêm trọng quyền, nghĩa vụ của vợ, chồng', correct: false },
+            { text: 'Vợ, chồng có hành vi bạo lực gia đình hoặc vi phạm nghiêm trọng quyền, nghĩa vụ của vợ, chồng làm cho hôn nhân lâm vào tình trạng trầm trọng, đời sống chung không thể kéo dài, mục đích của hôn nhân không đạt được.', correct: true }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của vợ chồng',
+        question: 'Vợ chồng có nghĩa vụ cấp dưỡng cho nhau khi nào?',
+        answers: [
+            { text: 'Khi vợ chồng đang còn chung sống mà khó khăn, túng thiếu có yêu cầu cấp dưỡng mà có lý do chính đáng', correct: false },
+            { text: 'Khi vợ chồng ly thân mà một bên gặp khó khăn, túng thiếu có yêu cầu cấp dưỡng mà có lý do chính đáng', correct: false },
+            { text: 'Khi vợ chồng ly hôn mà một bên gặp khó khăn, túng thiếu có yêu cầu cấp dưỡng mà có lý do chính đáng', correct: true }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của vợ chồng',
+        question: 'Việc lựa chọn nơi cư trú của vợ chồng do ai quyết định?',
+        answers: [
+            { text: 'Người chồng', correct: false },
+            { text: 'Người vợ', correct: false },
+            { text: 'Vợ chồng thỏa thuận', correct: true },
+            { text: 'Bố mẹ hai bên', correct: false }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của vợ chồng',
+        question: 'Đâu không phải là các nghĩa vụ chung về tài sản của vợ chồng?',
+        answers: [
+            { text: 'Nghĩa vụ phát sinh từ giao dịch do vợ hoặc chồng xác lập', correct: true },
+            { text: 'Nghĩa vụ bồi thường thiệt hại mà theo quy định của pháp luật vợ chồng cùng phải chịu trách nhiệm;', correct: false },
+            { text: 'Nghĩa vụ do vợ hoặc chồng thực hiện nhằm đáp ứng nhu cầu thiết yếu của gia đình;', correct: false },
+            { text: 'Nghĩa vụ phát sinh từ việc chiếm hữu, sử dụng, định đoạt tài sản chung', correct: false }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của vợ chồng',
+        question: 'Vợ, chồng có nghĩa vụ và quyền đối với nhau như thế nào?',
+        answers: [
+            { text: 'Vợ chồng bình đẳng, có nghĩa vụ và quyền ngang nhau về mọi mặt trong gia đình.', correct: true },
+            { text: 'Vợ chồng bình đẳng, có nghĩa vụ và quyền ngang nhau về một số mặt trong gia đình.', correct: false },
+            { text: 'Có nghĩa vụ và quyền khác nhau.', correct: false },
+            { text: 'Người chồng có nghĩa vụ và quyền cao hơn người vợ về mọi mặt trong gia đình.', correct: false }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của vợ chồng',
+        question: 'Chọn nhận định sai',
+        answers: [
+            { text: 'Vợ chồng có quyền thừa kế tài sản của nhau khi một bên chết', correct: false },
+            { text: 'Vợ chồng thuộc hàng thừa kế thứ nhất của nhau theo pháp luật', correct: false },
+            { text: 'Vợ chồng có thể thừa kế di sản của nhau với phương thức thừa kế theo pháp luật', correct: false },
+            { text: 'Nếu theo di chúc của người chồng ghi rõ là không cho vợ hưởng di sản thừa kế thì người vợ hoàn toàn không được thừa hưởng di sản thừa kế từ người chồng đó', correct: true }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của vợ chồng',
+        question: 'Đâu là tài sản chung của vợ chồng?',
+        answers: [
+            { text: 'Tài sản mà mỗi người có trước khi kết hôn', correct: false },
+            { text: 'Tài sản mà vợ chồng được thừa kế, được tặng cho chung trong thời kỳ hôn nhân', correct: true },
+            { text: 'Tài sản được chia riêng cho vợ, chồng theo quy định của pháp luật', correct: false },
+            { text: 'Tài sản được hình thành từ tài sản riêng của vợ, chồng', correct: false }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của vợ chồng',
+        question: 'Đâu là tài sản riêng của vợ chồng?',
+        answers: [
+            { text: 'Tài sản do vợ, chồng tạo ra trong thời kỳ hôn nhân', correct: false },
+            { text: 'Thu nhập do lao động, hoạt động sản xuất, kinh doanh trong thời kỳ hôn nhân', correct: false },
+            { text: 'Hoa lợi, lợi tức phát sinh từ tài sản riêng trong thời kỳ hôn nhân', correct: false },
+            { text: 'Tài sản mà vợ hoặc chồng có được do tặng cho, thừa kế', correct: true }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của vợ chồng',
+        question: 'Chọn nhận định sai',
+        answers: [
+            { text: 'Tài sản chung của vợ chồng thuộc sở hữu chung hợp nhất', correct: false },
+            { text: 'Trong tài sản chung của vợ chồng có sự phân biệt giữa lao động trong gia đình và lao động có thu nhập', correct: true },
+            { text: 'Vợ, chồng bình đẳng với nhau về quyền, nghĩa vụ trong việc tạo lập, chiếm hữu, sử dụng, định đoạt tài sản chung', correct: false },
+            { text: 'Tài sản chung của vợ chồng được dùng để bảo đảm nhu cầu của gia đình, thực hiện nghĩa vụ chung của vợ chồng', correct: false }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của vợ chồng',
+        question: 'Chọn nhận định đúng',
+        answers: [
+            { text: 'Vợ chồng có quyền lựa chọn áp dụng chế độ tài sản theo luật định hoặc chế độ tài sản theo thỏa thuận', correct: true },
+            { text: 'Vợ chồng bắt buộc phải chọn chế độ tài sản theo luật định', correct: false },
+            { text: 'Vợ chồng bắt buộc phải chọn hoặc chế độ tài sản theo thỏa thuận', correct: false }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của vợ chồng',
+        question: 'Chọn nhận định sai:',
+        answers: [
+            { text: 'Trong trường hợp hai bên kết hôn lựa chọn chế độ tài sản theo thỏa thuận thì thỏa thuận này phải được lập trước khi kết hôn', correct: false },
+            { text: 'Thỏa thuận tài sản của hai bên kết hôn phải được lập bằng hình thức văn bản có công chứng hoặc chứng thực.', correct: false },
+            { text: 'Thỏa thuận tài sản của hai bên kết hôn không được vi phạm các nguyên tắc chung đối với chế độ tài sản của vợ chồng.', correct: false },
+            { text: 'Chế độ tài sản của vợ chồng theo thỏa thuận được xác lập kể từ ngày chung sống như vợ chồng.', correct: true }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của cha mẹ và con',
+        question: 'Đâu không phải là nghĩa vụ của con đối với cha mẹ?',
+        answers: [
+            { text: 'Yêu quý, kính trọng, biết ơn, hiếu thảo, phụng dưỡng cha mẹ', correct: false },
+            { text: 'Khi sống cùng với cha mẹ, con tham gia công việc gia đình, lao động, sản xuất, tạo thu nhập nhằm bảo đảm đời sống chung của gia đình', correct: false },
+            { text: 'Được cha mẹ thương yêu, tôn trọng, thực hiện các quyền, lợi ích hợp pháp về nhân thân và tài sản theo quy định của pháp luật', correct: true },
+            { text: 'Chăm sóc, nuôi dưỡng cha mẹ, đặc biệt khi cha mẹ mất năng lực hành vi dân sự, ốm đau, già yếu, khuyết tật', correct: false }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của cha mẹ và con',
+        question: 'Chọn nhận định sai',
+        answers: [
+            { text: 'Con có quyền có tài sản riêng.', correct: false },
+            { text: 'Tài sản riêng của con bao gồm tài sản được thừa kế riêng, được tặng cho riêng.', correct: false },
+            { text: 'Con từ đủ 15 tuổi trở lên sống chung với cha mẹ phải có nghĩa vụ chăm lo đời sống chung của gia đình.', correct: false },
+            { text: 'Tài sản được hình thành từ tài sản riêng của con được xem là tài sản chung của gia đình.', correct: true }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của cha mẹ và con',
+        question: 'Chọn nhận định đúng',
+        answers: [
+            { text: 'Cha mẹ phải bồi thường thiệt hại do con gây ra trong mọi trường hợp', correct: false },
+            { text: 'Cha mẹ phải bồi thường thiệt hại do con gây ra không phân biệt con đã thành niên hay chưa thành niên', correct: false },
+            { text: 'Cha mẹ phải bồi thường thiệt hại do con đã thành niên mất năng lực hành vi dân sự gây ra', correct: true },
+            { text: 'Cha mẹ phải bồi thường thiệt hại do con đã thành niên gây ra trong mọi trường hợp', correct: false }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của cha mẹ và con',
+        question: 'Đâu là quyền và nghĩa vụ tài sản của cha mẹ đối với con?',
+        answers: [
+            { text: 'Trông nom, nuôi dưỡng, chăm sóc con', correct: false },
+            { text: 'Bảo vệ quyền, lợi ích hợp pháp của con', correct: false },
+            { text: 'Không phân biệt đối xử với con', correct: false },
+            { text: 'Bồi thường thiệt hại do con gây ra', correct: true }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của cha mẹ và con',
+        question: 'Đâu là sự kiện nuôi dưỡng làm phát sinh quan hệ cha mẹ con',
+        answers: [
+            { text: 'Con sinh ra trong thời kỳ hôn nhân', correct: false },
+            { text: 'Con sinh ra giữa cha mẹ không tồn tại quan hệ hôn nhân', correct: false },
+            { text: 'Con sinh ra theo phương pháp khoa học', correct: false },
+            { text: 'Nuôi con nuôi', correct: true }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của cha mẹ và con',
+        question: 'Trường hợp nào sau đây không làm phát sinh quan hệ giữa cha mẹ và con?',
+        answers: [
+            { text: 'Con sinh ra trong thời kỳ hôn nhân', correct: false },
+            { text: 'Con do người vợ có thai trong thời kỳ hôn nhân', correct: false },
+            { text: 'Con được sinh ra trong thời hạn 350 ngày kể từ thời điểm chấm dứt hôn nhân', correct: true },
+            { text: 'Con được sinh ra trong thời hạn 300 ngày kể từ thời điểm chấm dứt hôn nhân', correct: false }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của cha mẹ và con',
+        question: 'Đâu là quyền và nghĩa vụ nhân thân của cha mẹ đối với con?',
+        answers: [
+            { text: 'Quyền quản lý tài sản của con', correct: false },
+            { text: 'Quyền định đoạt tài sản của con', correct: false },
+            { text: 'Nghĩa vụ cấp dưỡng cho con', correct: false },
+            { text: 'Yêu thương, chăm sóc, nuôi dưỡng con', correct: true }
+        ]
+    },
+    {
+        category: 'Quyền và nghĩa vụ của cha mẹ và con',
+        question: 'Khi nào con được tự mình quản lý tài sản riêng?',
+        answers: [
+            { text: 'Từ đủ 6 tuổi trở lên', correct: false },
+            { text: 'Từ đủ 15 tuổi trở lên', correct: true },
+            { text: 'Từ đủ 16 tuổi trở lên', correct: false },
+            { text: 'Từ đủ 18 tuổi trở lên', correct: false }
+        ]
+    }
+            ];
+
+            let shuffledQuestions, currentQuestionIndex;
+            let scores = {};
+
+            const startBtn = $('#start-btn');
+            const restartBtn = $('#restart-btn');
+            const startScreen = $('#start-screen');
+            const quizScreen = $('#quiz-screen');
+            const resultScreen = $('#result-screen');
+            const questionTextEl = $('#question-text');
+            const answerButtonsEl = $('#answer-buttons');
+            const progressBar = $('#progress-bar');
+            
+            const correctSound = $('#correct-sound')[0];
+            const wrongSound = $('#wrong-sound')[0];
+            const cheerSound = $('#cheer-sound')[0];
+
+            function shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            }
+
+            function startGame() {
+                startScreen.addClass('d-none');
+                resultScreen.addClass('d-none');
+                quizScreen.removeClass('d-none');
+                
+                shuffledQuestions = shuffleArray([...questions]);
+                shuffledQuestions.forEach(q => shuffleArray(q.answers));
+                
+                currentQuestionIndex = 0;
+                scores = {};
+                questions.forEach(q => {
+                    if(!scores[q.category]) {
+                        scores[q.category] = { correct: 0, total: 0 };
+                    }
+                    scores[q.category].total++;
+                });
+
+                setNextQuestion();
+            }
+
+            function setNextQuestion() {
+                resetState();
+                if (currentQuestionIndex < shuffledQuestions.length) {
+                    showQuestion(shuffledQuestions[currentQuestionIndex]);
+                    updateProgressBar();
+                } else {
+                    showResults();
+                }
+            }
+
+            function showQuestion(questionData) {
+                questionTextEl.text(questionData.question);
+                questionData.answers.forEach(answer => {
+                    const button = $('<button></button>');
+                    button.text(answer.text);
+                    button.addClass('btn btn-answer');
+                    if (answer.correct) {
+                        button.data('correct', true);
+                    }
+                    button.on('click', selectAnswer);
+                    answerButtonsEl.append(button);
+                });
+            }
+            
+            function updateProgressBar() {
+                const progress = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+                progressBar.css('width', progress + '%');
+            }
+
+            function resetState() {
+                answerButtonsEl.empty();
+            }
+
+            function selectAnswer(e) {
+                const selectedBtn = $(e.target);
+                const isCorrect = selectedBtn.data('correct') === true;
+                
+                const category = shuffledQuestions[currentQuestionIndex].category;
+                if (isCorrect) {
+                    scores[category].correct++;
+                    selectedBtn.addClass('correct');
+                    correctSound.play();
+                } else {
+                    selectedBtn.addClass('wrong');
+                    wrongSound.play();
+                }
+
+                // Show correct answer
+                $('#answer-buttons .btn-answer').each(function() {
+                    if ($(this).data('correct')) {
+                        $(this).addClass('correct');
+                    }
+                    $(this).off('click'); // Disable all buttons
+                });
+
+                setTimeout(() => {
+                    currentQuestionIndex++;
+                    setNextQuestion();
+                }, 1500);
+            }
+
+            function showResults() {
+                quizScreen.addClass('d-none');
+                resultScreen.removeClass('d-none');
+                cheerSound.play();
+                updateProgressBar(); // final update to 100%
+                progressBar.css('width', '100%');
+
+
+                let totalCorrect = 0;
+                let resultDetailsHtml = '<div class="list-group">';
+                
+                for(const category in scores) {
+                    const score = scores[category];
+                    totalCorrect += score.correct;
+                    resultDetailsHtml += `
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            ${category}
+                            <span class="badge badge-primary badge-pill" style="font-size: 1rem;">${score.correct} / ${score.total}</span>
+                        </div>
+                    `;
+                }
+                resultDetailsHtml += '</div>';
+
+                const totalQuestions = shuffledQuestions.length;
+                const finalMark = (totalCorrect / totalQuestions) * 10;
+                
+                resultDetailsHtml += `<h4 class="mt-4">Tổng điểm: ${totalCorrect} / ${totalQuestions}</h4>`;
+                $('#result-details').html(resultDetailsHtml);
+
+                // Post results to parent
+                const resultJsonObject = {
+                    type: "azt-student-result",
+                    mark: parseFloat(finalMark.toFixed(2)),
+                    url: window.location.href,
+                    result: {
+                        rawScore: totalCorrect,
+                        totalQuestions: totalQuestions,
+                        categoryScores: scores
+                    },
+                    html_view: `<div>
+                                <h3>Kết quả bài tập "Buổi trưa hè"</h3>
+                                <p><strong>Tổng điểm: ${totalCorrect}/${totalQuestions}</strong></p>
+                                ${Object.entries(scores).map(([cat, scr]) => `<p>${cat}: ${scr.correct}/${scr.total}</p>`).join('')}
+                               </div>`
+                };
+                
+                try {
+                    window.parent.postMessage(resultJsonObject, '*');
+                } catch(e) {
+                    console.error("Could not post message to parent window:", e);
+                }
+            }
+
+            startBtn.on('click', startGame);
+            restartBtn.on('click', startGame);
+        });
+    </script>
+</body>
+</html>

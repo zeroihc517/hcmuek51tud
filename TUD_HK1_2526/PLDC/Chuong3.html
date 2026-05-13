@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="contentType" content="quiz">
+    <meta name="description" content="Một bài kiểm tra tương tác cho học sinh lớp 1 về bài thơ 'Hoa Phượng', bao gồm các câu hỏi về nhận biết vần, đọc hiểu và ghi nhớ nội dung.">
+    <meta name="nextActions" content="Thêm câu hỏi về từ vựng; Tạo một hoạt động ghép từ; Chuyển thành bài tập điền từ">
+    <title>Chương 3 PLĐC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #f0f8ff;
+            background-image: url('https://storage.googleapis.com/azt_agents/html_content_agent/1/41dd7fb4-9150-4124-855e-ad914cfe3752/hoa_phuong_background.png/0');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+            padding: 15px;
+        }
+
+        .quiz-wrapper {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+            border: 2px solid #fff;
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .quiz-header h1 {
+            font-size: 2.5rem;
+            color: #d9534f;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #start-screen p {
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        .btn-start, .btn-next, .btn-restart {
+            font-size: 1.5rem;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .btn-start {
+            background-color: #5cb85c;
+            color: white;
+        }
+
+        .btn-start:hover {
+            background-color: #4a934a;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        #question-text {
+            font-size: 1.6rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #0275d8;
+        }
+
+        #options-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        @media (min-width: 768px) {
+             #options-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.2rem;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            background-color: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            background-color: #fdf2e9;
+            border-color: #f5b041;
+            transform: translateX(5px);
+        }
+        
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .option-btn.correct {
+            background-color: #d4edda;
+            border-color: #5cb85c;
+            color: #155724;
+            animation: pulse 0.5s;
+        }
+
+        .option-btn.incorrect {
+            background-color: #f8d7da;
+            border-color: #d9534f;
+            color: #721c24;
+            animation: shake 0.5s;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .quiz-footer {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        #progress-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .btn-next {
+            font-size: 1.2rem;
+            padding: 10px 30px;
+            background-color: #0275d8;
+            color: white;
+            visibility: hidden;
+        }
+        
+        .btn-next.visible {
+            visibility: visible;
+        }
+
+        .btn-next:hover {
+            background-color: #025aa5;
+        }
+
+        #results-screen h2 {
+            text-align: center;
+            color: #d9534f;
+            margin-bottom: 20px;
+        }
+
+        .results-summary {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .result-item {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .result-item .score {
+            font-weight: 700;
+            color: #0275d8;
+        }
+
+        .btn-restart {
+             background-color: #f0ad4e;
+             color: white;
+             margin-top: 30px;
+        }
+
+        .btn-restart:hover {
+            background-color: #ec971f;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-wrapper">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen active">
+            <div class="quiz-header">
+                <h1>CHƯƠNG 3. LUẬT HIẾN PHÁP</h1>
+            </div>
+            <p>Câu hỏi được trích xuất trên VLE</p>
+            <button id="start-btn" class="btn-start">Bắt đầu!</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="screen">
+             <div id="question-text">Đây là câu hỏi?</div>
+             <div id="options-container"></div>
+             <div class="quiz-footer">
+                <div id="progress-text">Câu 1 / 9</div>
+                <button id="next-btn" class="btn-next">Câu tiếp theo</button>
+             </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="screen">
+            <h2>Hoàn thành!</h2>
+            <div id="results-summary" class="results-summary">Đây là kết quả của bạn:</div>
+            <div id="detailed-results"></div>
+             <button id="restart-btn" class="btn-restart">Làm lại</button>
+        </div>
+    </div>
+    
+    <audio id="correct-sound" src="https://www.myinstants.com/media/sounds/correct-answer-sound-effect-19.mp3" preload="auto"></audio>
+    <audio id="wrong-sound" src="https://www.myinstants.com/media/sounds/answer-wrong.mp3" preload="auto"></audio>
+    <audio id="completion-sound" src="https://www.myinstants.com/media/sounds/kids_cheering.mp3" preload="auto"></audio>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const questions = [
+                {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Theo Hiến pháp năm 2013, Quốc hội là",
+        options: [
+            "tổ chức quyền lực nhà nước cao nhất của nước Cộng hòa xã hội chủ nghĩa Việt Nam.",
+            "cơ quan đại biểu cao nhất của Dân tộc Việt Nam.",
+            "cơ quan hành chính nhà nước cao nhất của nước Cộng hòa xã hội chủ nghĩa Việt Nam.",
+            "cơ quan quyền lực nhà nước cao nhất của nước Cộng hòa xã hội chủ nghĩa Việt Nam."
+        ],
+        correctAnswer: "cơ quan quyền lực nhà nước cao nhất của nước Cộng hòa xã hội chủ nghĩa Việt Nam."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Theo Hiến pháp năm 2013, thành phần kinh tế nào giữ vai trò chủ đạo?",
+        options: ["Nhà nước.", "Tư nhân.", "Xã hội chủ nghĩa.", "Dân doanh."],
+        correctAnswer: "Nhà nước."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Ở nước Cộng hòa xã hội chủ nghĩa Việt Nam, các quyền con người, quyền công dân về chính trị, dân sự, kinh tế, văn hóa, xã hội được",
+        options: [
+            "công nhận, tôn trọng, bảo vệ, bảo đảm theo Hiến pháp và pháp luật.",
+            "công nhận, tôn trọng, bảo vệ, bảo đảm theo pháp luật.",
+            "công nhận, tôn trọng, bảo vệ, phát huy theo Hiến pháp và pháp luật.",
+            "công nhận, tôn vinh, bảo vệ, bảo đảm theo Hiến pháp và pháp luật."
+        ],
+        correctAnswer: "công nhận, tôn trọng, bảo vệ, bảo đảm theo Hiến pháp và pháp luật."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Quyền lực nhà nước là",
+        options: [
+            "thống nhất, có sự phân chia, phối hợp, kiểm soát giữa các cơ quan nhà nước trong việc thực hiện các quyền lập pháp, hành pháp, tư pháp.",
+            "thống nhất, có sự phân công, hợp tác, kiểm soát giữa các cơ quan nhà nước trong việc thực hiện các quyền lập pháp, hành pháp, tư pháp.",
+            "thống nhất, có sự phân công, phối hợp, kiểm soát giữa các cơ quan nhà nước trong việc thực hiện các quyền lập pháp, hành pháp, tư pháp.",
+            "thống nhất, độc lập, có sự phân công, phối hợp, kiểm soát giữa các cơ quan nhà nước trong việc thực hiện các quyền lập pháp, hành pháp, tư pháp."
+        ],
+        correctAnswer: "thống nhất, có sự phân công, phối hợp, kiểm soát giữa các cơ quan nhà nước trong việc thực hiện các quyền lập pháp, hành pháp, tư pháp."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Quốc huy nước Cộng hòa xã hội chủ nghĩa Việt Nam ở dưới có",
+        options: ["nửa bánh xe răng.", "bánh xe răng.", "hai nửa bánh xe răng.", "1/4 bánh xe răng."],
+        correctAnswer: "nửa bánh xe răng."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Nhiệm kỳ của Chính phủ",
+        options: ["theo nhiệm kỳ của Quốc hội.", "05 năm", "theo nhiệm kỳ của Chủ tịch nước.", "06 năm."],
+        correctAnswer: "theo nhiệm kỳ của Quốc hội."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Nhà nước Cộng hòa xã hội chủ nghĩa Việt Nam là",
+        options: [
+            "Nhà nước xã hội chủ nghĩa của Nhân dân, do Nhân dân, vì Nhân dân.",
+            "Nhà nước pháp quyền xã hội chủ nghĩa của Nhân dân, do Nhân dân.",
+            "Nhà nước pháp quyền của Nhân dân, do Nhân dân, vì Nhân dân.",
+            "Nhà nước pháp quyền xã hội chủ nghĩa của Nhân dân, do Nhân dân, vì Nhân dân."
+        ],
+        correctAnswer: "Nhà nước pháp quyền xã hội chủ nghĩa của Nhân dân, do Nhân dân, vì Nhân dân."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Theo Hiến pháp năm 2013, Quốc hội có những nhiệm vụ và quyền hạn sau đây?",
+        options: [
+            "Quyết định mục tiêu, chỉ tiêu, chính sách, nhiệm vụ cơ bản phát triển kinh tế - xã hội của đất nước.",
+            "Đình chỉ việc thi hành văn bản của Chính phủ, Thủ tướng Chính phủ, Tòa án nhân dân tối cao, Viện kiểm sát nhân dân tối cao trái với Hiến pháp, luật.",
+            "Quyết định thành lập, giải thể, nhập, chia, điều chỉnh địa giới đơn vị hành chính dưới tỉnh, thành phố trực thuộc trung ương.",
+            "Quyết định tổng động viên hoặc động viên cục bộ; ban bố, bãi bỏ tình trạng khẩn cấp trong cả nước hoặc ở từng địa phương."
+        ],
+        correctAnswer: "Quyết định mục tiêu, chỉ tiêu, chính sách, nhiệm vụ cơ bản phát triển kinh tế - xã hội của đất nước."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Theo Hiến pháp năm 2013, Chính phủ gồm:",
+        options: [
+            "Thủ tướng Chính phủ, Phó Thủ tướng Chính phủ, các Bộ trưởng",
+            "Thủ tướng Chính phủ, Phó Thủ tướng Chính phủ, Bộ trưởng và Thủ trưởng cơ quan ngang bộ.",
+            "Thủ tướng Chính phủ, các Phó Thủ tướng Chính phủ, các Bộ trưởng và Thủ trưởng cơ quan ngang bộ.",
+            "Thủ tướng Chính phủ, Phó Thủ tướng Chính phủ, Bộ trưởng và Thủ trưởng cơ quan ngang bộ."
+        ],
+        correctAnswer: "Thủ tướng Chính phủ, các Phó Thủ tướng Chính phủ, các Bộ trưởng và Thủ trưởng cơ quan ngang bộ."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Quyền con người, quyền công dân",
+        options: [
+            "không bị pháp luật bị hạn chế trong mọi trường hợp vì Hiến pháp và pháp luật tôn trọng quyền con người, quyền công dân.",
+            "chỉ có thể bị hạn chế theo trong trường hợp cần thiết vì lý do quốc phòng, an ninh quốc gia, trật tự, an toàn xã hội, đạo đức xã hội, sức khỏe của cộng đồng.",
+            "chỉ có thể bị hạn chế theo quy định của luật trong trường hợp cần thiết vì lý do quốc phòng, an ninh quốc gia, trật tự, an toàn xã hội, đạo đức xã hội, sức khỏe của cộng đồng.",
+            "chỉ có thể bị hạn chế theo quy định của luật trong trường hợp cần thiết vì lý do chính đáng hoặc trong tình thế cấp thiết."
+        ],
+        correctAnswer: "chỉ có thể bị hạn chế theo quy định của luật trong trường hợp cần thiết vì lý do quốc phòng, an ninh quốc gia, trật tự, an toàn xã hội, đạo đức xã hội, sức khỏe của cộng đồng."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Tất cả quyền lực nhà nước thuộc về ai?",
+        options: ["Nhà nước.", "Đảng Cộng sản Việt Nam.", "Quốc hội.", "Nhân dân."],
+        correctAnswer: "Nhân dân."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Nhà nước, xã hội chăm lo xây dựng và phát triển nền văn hóa Việt Nam",
+        options: [
+            "phát triển, đậm đà bản sắc dân tộc, tiếp thu tinh hoa văn hóa nhân loại.",
+            "phát triển, phát huy bản sắc dân tộc, tiếp thu tinh hoa văn hóa nhân loại.",
+            "tiên tiến, phát huy bản sắc dân tộc, tiếp thu tinh hoa văn hóa nhân loại.",
+            "tiên tiến, đậm đà bản sắc dân tộc, tiếp thu tinh hoa văn hóa nhân loại."
+        ],
+        correctAnswer: "tiên tiến, đậm đà bản sắc dân tộc, tiếp thu tinh hoa văn hóa nhân loại."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Chọn nhận định đúng",
+        options: [
+            "Công dân có quyền thực hiện nghĩa vụ đối với Nhà nước và xã hội.",
+            "Công dân có nghĩa vụ thực hiện nghĩa vụ đối với Nhà nước và xã hội.",
+            "Công dân có trách nhiệm thực hiện nghĩa vụ đối với Nhà nước và xã hội.",
+            "Công dân có ý thức thực hiện nghĩa vụ đối với Nhà nước và xã hội."
+        ],
+        correctAnswer: "Công dân có trách nhiệm thực hiện nghĩa vụ đối với Nhà nước và xã hội."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Theo Hiến pháp 2013, nền kinh tế Việt Nam là nền kinh tế",
+        options: [
+            "thị trường với nhiều hình thức sở hữu, nhiều thành phần kinh tế.",
+            "thị trường định hướng xã hội chủ nghĩa với nhiều hình thức sở hữu, nhiều thành phần kinh tế.",
+            "định hướng xã hội chủ nghĩa với nhiều hình thức sở hữu, nhiều thành phần kinh tế.",
+            "thị trường định hướng xã hội chủ nghĩa với một hình thức sở hữu, nhiều thành phần kinh tế."
+        ],
+        correctAnswer: "thị trường định hướng xã hội chủ nghĩa với nhiều hình thức sở hữu, nhiều thành phần kinh tế."
+    },
+    {
+        objectiveId: 1,
+        objectiveName: "Hiến pháp 2013",
+        question: "Công dân bao nhiêu tuổi trở lên có quyền ứng cử vào Quốc hội, Hội đồng nhân dân?",
+        options: ["Đủ 21 tuổi.", "Từ đủ 21 tuổi.", "Từ 21 tuổi.", "Trên 21 tuổi."],
+        correctAnswer: "Đủ 21 tuổi."
+    }               
+            ];
+
+            let shuffledQuestions = [];
+            let currentQuestionIndex = 0;
+            let scores = { 1: 0, 2: 0, 3: 0 };
+            let userAnswers = [];
+
+            const correctSound = document.getElementById('correct-sound');
+            const wrongSound = document.getElementById('wrong-sound');
+            const completionSound = document.getElementById('completion-sound');
+
+            function shuffleArray(array) {
+                return array.sort(() => Math.random() - 0.5);
+            }
+
+            function startQuiz() {
+                shuffledQuestions = shuffleArray([...questions]);
+                currentQuestionIndex = 0;
+                scores = { 1: 0, 2: 0, 3: 0 };
+                userAnswers = [];
+                $('#start-screen').removeClass('active');
+                $('#results-screen').removeClass('active');
+                $('#quiz-screen').addClass('active');
+                showQuestion();
+            }
+
+            function showQuestion() {
+                $('#next-btn').removeClass('visible');
+                const question = shuffledQuestions[currentQuestionIndex];
+                $('#question-text').text(question.question);
+                $('#progress-text').text(`Câu ${currentQuestionIndex + 1} / ${shuffledQuestions.length}`);
+                
+                const optionsContainer = $('#options-container');
+                optionsContainer.empty();
+                const shuffledOptions = shuffleArray([...question.options]);
+                
+                shuffledOptions.forEach(option => {
+                    const button = $(`<button class="option-btn">${option}</button>`);
+                    button.on('click', () => selectAnswer(option, button));
+                    optionsContainer.append(button);
+                });
+            }
+            
+            function selectAnswer(selectedOption, button) {
+                $('.option-btn').prop('disabled', true);
+                const question = shuffledQuestions[currentQuestionIndex];
+                const isCorrect = selectedOption === question.correctAnswer;
+                
+                userAnswers.push({
+                    question: question.question,
+                    selected: selectedOption,
+                    correct: question.correctAnswer,
+                    isCorrect: isCorrect
+                });
+
+                if (isCorrect) {
+                    button.addClass('correct');
+                    scores[question.objectiveId]++;
+                    correctSound.play();
+                } else {
+                    button.addClass('incorrect');
+                    wrongSound.play();
+                    // Highlight the correct answer
+                    $('.option-btn').each(function() {
+                        if ($(this).text() === question.correctAnswer) {
+                            $(this).addClass('correct');
+                        }
+                    });
+                }
+                
+                $('#next-btn').addClass('visible');
+            }
+
+            function nextQuestion() {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < shuffledQuestions.length) {
+                    showQuestion();
+                } else {
+                    showResults();
+                }
+            }
+            
+            function showResults() {
+                $('#quiz-screen').removeClass('active');
+                $('#results-screen').addClass('active');
+                completionSound.play();
+
+                const totalCorrect = Object.values(scores).reduce((a, b) => a + b, 0);
+                const totalQuestions = shuffledQuestions.length;
+                
+                let resultsHtml = '';
+                const objectives = {};
+                questions.forEach(q => {
+                    if (!objectives[q.objectiveId]) {
+                        objectives[q.objectiveId] = { name: q.objectiveName, total: 0 };
+                    }
+                    objectives[q.objectiveId].total++;
+                });
+
+                for (const id in objectives) {
+                    resultsHtml += `
+                        <div class="result-item">
+                            <span>${objectives[id].name}:</span>
+                            <span class="score">${scores[id]} / ${objectives[id].total}</span>
+                        </div>`;
+                }
+                
+                $('#detailed-results').html(resultsHtml);
+                $('#results-summary').text(`Tổng điểm: ${totalCorrect} / ${totalQuestions}`);
+
+                // Post results to parent
+                const mark = (totalCorrect / totalQuestions) * 10;
+                const resultJsonObject = {
+                    type: "azt-student-result",
+                    mark: parseFloat(mark.toFixed(2)),
+                    url: window.location.href,
+                    result: {
+                        rawScore: totalCorrect,
+                        totalItems: totalQuestions,
+                        scoresByObjective: [
+                            { name: objectives[1].name, score: scores[1], total: objectives[1].total },
+                            { name: objectives[2].name, score: scores[2], total: objectives[2].total },
+                            { name: objectives[3].name, score: scores[3], total: objectives[3].total }
+                        ],
+                        answers: userAnswers
+                    },
+                    html_view: `<div>
+                        <h4>Kết quả bài làm</h4>
+                        <p><strong>Tổng điểm: ${totalCorrect} / ${totalQuestions}</strong></p>
+                        ${resultsHtml}
+                    </div>`
+                };
+                window.parent.postMessage(resultJsonObject, '*');
+            }
+
+
+            $('#start-btn').on('click', startQuiz);
+            $('#next-btn').on('click', nextQuestion);
+            $('#restart-btn').on('click', startQuiz);
+        });
+    </script>
+</body>
+</html>

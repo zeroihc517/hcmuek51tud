@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HCMUE K51</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+
+/* ===== BODY ===== */
+body{
+  margin:0;
+  font-family:'Poppins',sans-serif;
+  background:
+    radial-gradient(circle at top,rgba(255,215,0,.25),transparent 40%),
+    linear-gradient(180deg,#7a0000,#2b0000);
+  color:#fff;
+  min-height:100vh;
+  overflow-x:hidden;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+/* ===== PHÁO HOA CANVAS ===== */
+canvas{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+}
+
+/* ===== HEADER ===== */
+.header{
+  margin-top:30px;
+  text-align:center;
+  z-index:2;
+}
+
+.badge{
+  display:inline-block;
+  padding:10px 34px;
+  border-radius:999px;
+  background:linear-gradient(90deg,#ffd700,#ff9f1c);
+  color:#7a0000;
+  font-weight:800;
+  letter-spacing:2px;
+  box-shadow:0 0 25px rgba(255,215,0,.9);
+  animation:glow 2s infinite alternate;
+}
+
+@keyframes glow{
+  from{box-shadow:0 0 12px rgba(255,215,0,.6)}
+  to{box-shadow:0 0 35px rgba(255,215,0,1)}
+}
+
+h1{
+  margin:25px 15px 40px;
+  font-size:3rem;
+  font-weight:800;
+  text-shadow:
+    0 0 15px rgba(255,215,0,.6),
+    0 8px 30px rgba(0,0,0,.7);
+}
+
+h1 span{
+  display:block;
+  font-size:1.2rem;
+  font-weight:600;
+  opacity:.9;
+}
+
+/* ===== TABLES ===== */
+.tables-wrapper{
+  width:100%;
+  max-width:1200px;
+  display:flex;
+  gap:45px;
+  padding:0 22px;
+  justify-content:center;
+  flex-wrap:wrap;
+  z-index:2;
+}
+
+.table-block{
+  flex:1 1 420px;
+  max-width:520px;
+}
+
+/* ===== TABLE TITLE ===== */
+.table-title{
+  text-align:center;
+  font-size:1.9rem;
+  font-weight:700;
+  margin-bottom:14px;
+  padding:14px 30px;
+  border-radius:18px;
+  background:linear-gradient(180deg,#ffcc00,#ff9f1c);
+  color:#7a0000;
+  box-shadow:0 10px 30px rgba(0,0,0,.5);
+}
+
+/* ===== TABLE ===== */
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  background:rgba(255,255,255,.95);
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 20px 45px rgba(0,0,0,.6);
+}
+
+th{
+  padding:18px 14px;
+  background:linear-gradient(90deg,#b30000,#ff3b3b);
+  color:#fff;
+  font-size:1.2rem;
+  letter-spacing:1px;
+}
+
+td{
+  padding:18px 14px;
+  font-size:1.1rem;
+  color:#111;
+  text-align:center;
+  transition:.35s;
+}
+
+tr:hover td{
+  background:#fff3cd;
+  transform:scale(1.02);
+}
+
+/* ===== LINK ===== */
+a{
+  color:#b30000;
+  font-weight:600;
+  text-decoration:none;
+}
+
+a:hover{
+  color:#ff0000;
+  text-shadow:0 0 6px rgba(255,0,0,.5);
+}
+
+/* ===== FOOTER ===== */
+.footer{
+  margin:45px 0 25px;
+  font-size:1rem;
+  opacity:.9;
+  z-index:2;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:768px){
+  h1{font-size:2.3rem}
+}
+@media(max-width:480px){
+  h1{font-size:1.9rem}
+  th,td{font-size:.95rem}
+}
+/* ===== HIỆU ỨNG TẾT: BAY LÊN + TỎA SÁNG ===== */
+.reveal-up{
+  opacity:0;
+  transform:translateY(60px) scale(.96);
+  filter:blur(4px);
+  animation:riseUp 1.25s cubic-bezier(.25,.8,.25,1) forwards;
+}
+
+.delay-1{animation-delay:.2s}
+.delay-2{animation-delay:.45s}
+.delay-3{animation-delay:.7s}
+.delay-4{animation-delay:.95s}
+
+@keyframes riseUp{
+  to{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    filter:blur(0);
+  }
+}
+
+/* Lắc nhẹ ngày Tết khi hover */
+.table-title:hover{
+  animation:tetShake .6s;
+}
+
+@keyframes tetShake{
+  0%{transform:rotate(0)}
+  25%{transform:rotate(1.2deg)}
+  50%{transform:rotate(-1.2deg)}
+  75%{transform:rotate(.8deg)}
+  100%{transform:rotate(0)}
+}
+/* ===== ÁNH SÁNG QUÉT NỀN ===== */
+body::after{
+  content:"";
+  position:fixed;
+  inset:-50%;
+  background:
+    linear-gradient(
+      120deg,
+      transparent 30%,
+      rgba(255,215,0,.12) 40%,
+      transparent 55%
+    );
+  animation:lightSweep 8s linear infinite;
+  pointer-events:none;
+  z-index:1;
+}
+
+@keyframes lightSweep{
+  from{transform:translateX(-30%)}
+  to{transform:translateX(30%)}
+}
+
+/* ===== SPARKLE THEO CHUỘT ===== */
+.sparkle{
+  position:fixed;
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:radial-gradient(circle,#fff,#ffd700);
+  pointer-events:none;
+  animation:sparkFade .9s forwards;
+  z-index:3;
+}
+
+@keyframes sparkFade{
+  to{
+    transform:translateY(-25px) scale(0);
+    opacity:0;
+  }
+}
+/* ===== CHẶN COPY – BÔI ĐEN ===== */
+body{
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+</style>
+</head>
+
+<body>
+
+<canvas id="petals"></canvas>
+
+<div class="header reveal-up delay-1">
+  <div class="badge">🎆 HAPPY NEW YEAR 2026 🎆</div>
+  <h1>
+    Trường Đại học Sư phạm TP.HCM
+    <span>TOÁN K51</span>
+  </h1>
+</div>
+
+
+<div class="tables-wrapper">
+
+<!-- ===== BẢNG 1 ===== -->
+<div class="table-block reveal-up delay-2">
+
+  <div class="table-title">Pháp luật đại cương</div>
+  <table>
+    <thead><tr><th>STT</th><th>Liên kết</th></tr></thead>
+    <tbody>
+		<tr><td>01</td><td><a href="https://drive.google.com/drive/folders/1NIq5qtQZZuLIErMtx0vFMSnmSc31F7-w?usp=sharing">CÂU HỎI TRÊN VLE</a></td></tr>
+      <tr><td>02</td><td><a href="PLDC/Chuong1.html">CHƯƠNG 1. LÝ LUẬN CHUNG VỀ NHÀ NƯỚC</a></td></tr>
+        <tr><td>03</td><td><a href="PLDC/Chuong2.html">CHƯƠNG 2. LÝ LUẬN CHUNG VỀ PHÁP LUẬT</a></td></tr>
+        <tr><td>04</td><td><a href="PLDC/Chuong3.html">CHƯƠNG 3. LUẬT HIẾN PHÁP</a></td></tr>
+        <tr><td>05</td><td><a href="PLDC/Chuong4.html">CHƯƠNG 4. LUẬT DÂN SỰ VÀ TỐ TỤNG DÂN SỰ</a></td></tr>
+        <tr><td>06</td><td><a href="PLDC/Chuong5.html">CHƯƠNG 5. LUẬT HÔN NHÂN VÀ GIA ĐÌNH</a></td></tr>
+        <tr><td>07</td><td><a href="PLDC/Chuong6.html">CHƯƠNG 6. LUẬT LAO ĐỘNG</a></td></tr>
+        <tr><td>08</td><td><a href="PLDC/Chuong7.html">CHƯƠNG 7. LUẬT HÌNH SỰ VÀ TỐ TỤNG HÌNH SỰ</a></td></tr>
+        <tr><td>09</td><td><a href="PLDC/Chuong8.html">CHƯƠNG 8. LUẬT HÀNH CHÍNH VÀ TỐ TỤNG HÀNH CHÍNH</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ===== BẢNG 2 ===== -->
+<div class="table-block reveal-up delay-3">
+  <div class="table-title">ĐỀ ÔN TẬP</div>
+  <table>
+    <thead><tr><th>STT</th><th>Liên kết</th></tr></thead>
+    <tbody>
+     <tr><td>01</td><td><a href="https://drive.google.com/file/d/1Gt2iDD-hLaY_c1nsT2Ob5EXIJr69j6A-/view?usp=sharing">Giáo trình PLĐC</a></td></tr>
+		  <tr><td>02</td><td><a href="https://docs.google.com/document/d/1CQsctqr2MSM1B7RPMjT3jCZ8i23lJbyuT77JG3wRPso/edit?usp=sharingl">TAKE NOTE PLĐC</a></td></tr>
+		   <tr><td>03</td><td><a href="https://baitaptracnghiem.com/danh-sach-bai-tap/phap-luat-dai-cuong-dai-hoc">https://baitaptracnghiem</a></td></tr>
+		  <tr><td>04</td><td><a href="https://drive.google.com/file/d/1CIUtaoZ_zi9thtR8YUT4o1JvRAD9On3-/view?usp=sharing">450 câu hỏi trắc nghiệm</a></td></tr>
+		<tr><td>05</td><td><a href="https://drive.google.com/file/d/1ik1n9-vnzq6ENe_4Lj3jIyW0DUl7qT_1/view?usp=sharing">200 câu hỏi trắc nghiệm</a></td></tr>   
+		<tr><td>06</td><td><a href="https://drive.google.com/file/d/1morvWwTzRYuh2fk6YS0Xno_2LMwW7Dc9/view">200 câu hỏi trắc nghiệm (Phần 2)</a></td></tr>
+		   <tr><td>07</td><td><a href="https://drive.google.com/file/d/1VWle3962nOnxOzuEDHP-1sTyB-Exb28f/view">Bộ trắc nghiệm PLĐC</a></td></tr>
+		  <tr><td>08</td><td><a href="PLDC/De1.html">ĐỀ Cuối khóa K50</a></td></tr>
+        <tr><td>09</td><td><a href="PLDC/De2.html">ĐỀ Cuối khóa K51</a></td></tr>
+	      <tr><td>10</td><td><a href="https://extendedforms.io/form/a0bb6b12-cf08-47f4-9676-a0420d5ea386/login">ĐỀ thi thử</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+<div class="footer">© 2025–2026 • Toán K51 • Xuân An Khang 🎇</div>
+
+<!-- ===== PHÁO HOA JS ===== -->
+<script>
+const canvas=document.getElementById("fireworks");
+const ctx=canvas.getContext("2d");
+let w,h;
+function resize(){
+  w=canvas.width=window.innerWidth;
+  h=canvas.height=window.innerHeight;
+}
+resize();
+window.onresize=resize;
+
+function rand(min,max){return Math.random()*(max-min)+min}
+
+class Firework{
+  constructor(){
+    this.x=rand(100,w-100);
+    this.y=rand(80,h/2);
+    this.particles=[];
+    const colors=["#ffd700","#ff3b3b","#ff9f1c","#ffffff"];
+    for(let i=0;i<80;i++){
+      this.particles.push({
+        x:this.x,y:this.y,
+        vx:Math.cos(i)*rand(1,4),
+        vy:Math.sin(i)*rand(1,4),
+        life:rand(40,80),
+        color:colors[Math.floor(Math.random()*colors.length)]
+      })
+    }
+  }
+  draw(){
+    this.particles.forEach(p=>{
+      if(p.life>0){
+        ctx.fillStyle=p.color;
+        ctx.fillRect(p.x,p.y,2,2);
+        p.x+=p.vx;
+        p.y+=p.vy;
+        p.vy+=0.02;
+        p.life--;
+      }
+    })
+  }
+}
+
+let fireworks=[];
+setInterval(()=>fireworks.push(new Firework()),900);
+
+function animate(){
+  ctx.clearRect(0,0,w,h);
+  fireworks.forEach(f=>f.draw());
+  fireworks=fireworks.filter(f=>f.particles.some(p=>p.life>0));
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+<script>
+/* ===== PETALS (HOA MAI / ĐÀO) ===== */
+const petalCanvas=document.getElementById("petals");
+const pctx=petalCanvas.getContext("2d");
+
+function resizePetal(){
+  petalCanvas.width=innerWidth;
+  petalCanvas.height=innerHeight;
+}
+resizePetal();
+addEventListener("resize",resizePetal);
+
+class Petal{
+  constructor(){
+    this.reset();
+  }
+  reset(){
+    this.x=Math.random()*petalCanvas.width;
+    this.y=-20;
+    this.size=rand(8,14);
+    this.speed=rand(0.6,1.6);
+    this.rot=rand(0,Math.PI*2);
+    this.spin=rand(-0.02,0.02);
+  }
+  draw(){
+    pctx.save();
+    pctx.translate(this.x,this.y);
+    pctx.rotate(this.rot);
+    pctx.fillStyle="rgba(255,200,0,.9)";
+    pctx.beginPath();
+    pctx.ellipse(0,0,this.size*.6,this.size,0,0,Math.PI*2);
+    pctx.fill();
+    pctx.restore();
+
+    this.y+=this.speed;
+    this.rot+=this.spin;
+    this.x+=Math.sin(this.rot)*0.6;
+
+    if(this.y>petalCanvas.height+30) this.reset();
+  }
+}
+
+let petals=[];
+for(let i=0;i<40;i++) petals.push(new Petal());
+
+function animatePetals(){
+  pctx.clearRect(0,0,petalCanvas.width,petalCanvas.height);
+  petals.forEach(p=>p.draw());
+  requestAnimationFrame(animatePetals);
+}
+animatePetals();
+
+/* ===== SPARKLE THEO CHUỘT ===== */
+document.addEventListener("mousemove",e=>{
+  const s=document.createElement("div");
+  s.className="sparkle";
+  s.style.left=e.clientX+"px";
+  s.style.top=e.clientY+"px";
+  document.body.appendChild(s);
+  setTimeout(()=>s.remove(),900);
+});
+
+/* ===== FIREWORK NÂNG CẤP GLOW ===== */
+const oldDraw=Firework.prototype.draw;
+Firework.prototype.draw=function(){
+  this.particles.forEach(p=>{
+    if(p.life>0){
+      ctx.shadowBlur=15;
+      ctx.shadowColor=p.color;
+      ctx.fillStyle=p.color;
+      ctx.fillRect(p.x,p.y,2.5,2.5);
+      p.x+=p.vx;
+      p.y+=p.vy;
+      p.vy+=0.015;
+      p.life--;
+    }
+  });
+  ctx.shadowBlur=0;
+};
+</script>
+<script>
+/* ===== CHẶN COPY / CHUỘT PHẢI / PHÍM TẮT ===== */
+
+// Chặn chuột phải
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+// Chặn kéo thả
+document.addEventListener("dragstart", e => e.preventDefault());
+
+// Chặn chọn văn bản
+document.addEventListener("selectstart", e => e.preventDefault());
+
+// Chặn phím tắt phổ biến
+document.addEventListener("keydown", function(e){
+  // Ctrl + C / U / S / A / P
+  if (e.ctrlKey && ["c","u","s","a","p"].includes(e.key.toLowerCase())) {
+    e.preventDefault();
+  }
+
+  // F12 (DevTools)
+  if (e.key === "F12") {
+    e.preventDefault();
+  }
+
+  // Ctrl + Shift + I / J
+  if (e.ctrlKey && e.shiftKey && ["i","j"].includes(e.key.toLowerCase())) {
+    e.preventDefault();
+  }
+});
+</script>
+
+</body>
+</html>

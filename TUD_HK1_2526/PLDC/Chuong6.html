@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chương 6 PLĐC</title>
+
+  <!-- Font & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Bootstrap (layout only) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --secondary: #6366f1;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1f2937;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #eef2ff, #f8fafc);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text);
+    }
+
+    .quiz-app {
+      width: 100%;
+      max-width: 820px;
+      background: var(--card);
+      border-radius: 22px;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+      overflow: hidden;
+      animation: appFade 0.6s ease;
+    }
+
+    @keyframes appFade {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== Header ===== */
+    .quiz-header {
+      padding: 24px 32px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: #fff;
+    }
+
+    .quiz-header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .quiz-header p {
+      margin: 6px 0 0;
+      opacity: 0.9;
+      font-size: 0.95rem;
+    }
+
+    /* ===== Body ===== */
+    .quiz-body {
+      padding: 32px;
+    }
+
+    /* Start screen */
+    .start-screen {
+      text-align: center;
+      animation: fadeIn 0.5s ease;
+    }
+
+    .start-screen h2 {
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .start-screen p {
+      max-width: 600px;
+      margin: 0 auto 24px;
+      color: #4b5563;
+    }
+
+    .btn-main {
+      padding: 14px 34px;
+      border-radius: 999px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: #fff;
+      transition: all 0.25s ease;
+    }
+
+    .btn-main:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(79,70,229,0.35);
+    }
+
+    /* Quiz screen */
+    .quiz-screen { display: none; }
+
+    .quiz-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .progress-info {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .progress {
+      height: 8px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      transition: width 0.4s ease;
+    }
+
+    .question-card {
+      margin-top: 24px;
+      animation: slideIn 0.45s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(40px) scale(0.98); }
+      to { opacity: 1; transform: translateX(0) scale(1); }
+    }
+
+    .question-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: #111827;
+    }
+
+    .options button {
+      width: 100%;
+      padding: 14px 18px;
+      margin-bottom: 14px;
+      border-radius: 14px;
+      border: 2px solid #e5e7eb;
+      background: #f9fafb;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .options button:hover {
+      background: #eef2ff;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .options button.correct {
+      background: #dcfce7;
+      border-color: var(--success);
+      color: #166534;
+    }
+
+    .options button.wrong {
+      background: #fee2e2;
+      border-color: var(--danger);
+      color: #7f1d1d;
+    }
+
+    .options button.correct i,
+    .options button.wrong i {
+      font-size: 1.1rem;
+    }
+
+    .options button.disabled {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .next-btn {
+      margin-top: 16px;
+      float: right;
+      display: none;
+    }
+
+    /* Result screen */
+    .result-screen {
+      display: none;
+      text-align: center;
+      animation: fadeIn 0.6s ease;
+    }
+
+    .result-screen h2 {
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .score {
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 20px;
+    }
+
+    .category-box {
+      max-width: 420px;
+      margin: 0 auto 24px;
+      text-align: left;
+      background: #f1f5f9;
+      padding: 20px;
+      border-radius: 14px;
+    }
+
+    .category-box p {
+      margin: 8px 0;
+      font-weight: 500;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @media (max-width: 576px) {
+      .quiz-body { padding: 24px 18px; }
+      .question-text { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="quiz-app">
+  <div class="quiz-header">
+    <h1>CHƯƠNG 6: LUẬT LAO ĐỘNG</h1>
+  </div>
+
+  <div class="quiz-body">
+
+    <!-- Start -->
+    <div class="start-screen" id="startScreen">
+      <h2>Chào mừng!</h2>
+      <p>Bài tập được trích trên VLE. Hãy đọc kỹ và chọn đáp án đúng.</p>
+      <button class="btn-main" id="startBtn">Bắt đầu làm bài</button>
+    </div>
+
+    <!-- Quiz -->
+    <div class="quiz-screen" id="quizScreen">
+      <div class="quiz-top">
+        <div class="progress-info">Câu <span id="current">1</span> / <span id="total">0</span></div>
+      </div>
+      <div class="progress mb-3">
+        <div class="progress-bar" id="progressBar" style="width:0%"></div>
+      </div>
+
+      <div class="question-card" id="questionCard">
+        <div class="question-text" id="questionText"></div>
+        <div class="options" id="options"></div>
+        <button class="btn-main next-btn" id="nextBtn">Câu tiếp theo</button>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="result-screen" id="resultScreen">
+      <h2>Hoàn thành bài quiz 🎉</h2>
+      <div class="score" id="finalScore"></div>
+      <div class="category-box" id="categoryResult"></div>
+      <button class="btn-main" id="restartBtn">Làm lại</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const quizData = [
+    { 
+    category: 'Những vấn đề chung', 
+    question: 'Nội dung nào không được điều chỉnh bởi Luật lao động?', 
+    options: ['Quan hệ lao động', 'Kỷ luật', 'Bảo hiểm xã hội', 'Tiền lương'], 
+    answer: 'Kỷ luật' 
+  },
+  { 
+    category: 'Những vấn đề chung', 
+    question: 'Đâu không là nguyên tắc của Luật lao động?', 
+    options: [
+      'Nguyên tắc bảo vệ người sử dụng lao động', 
+      'Nguyên tắc bảo vệ các quyền và lợi ích hợp pháp cho người sử dụng lao động', 
+      'Nguyên tắc kết hợp hài hòa giữa chính sách kinh tế và chính sách xã hội', 
+      'Nguyên tắc pháp chế xã hội chủ nghĩa'
+    ], 
+    answer: 'Nguyên tắc bảo vệ người sử dụng lao động' 
+  },
+  { 
+    category: 'Những vấn đề chung', 
+    question: 'Đâu là nội dung được quy định trong Luật lao động?', 
+    options: ['Hợp đồng', 'Hợp đồng lao động', 'Tội ngược đãi, hành hạ người lao động', 'Biểu tình'], 
+    answer: 'Hợp đồng lao động' 
+  },
+{ 
+    category: 'Học nghề, đào tạo, bồi dưỡng nâng cao trình độ kỹ năng nghề', 
+    question: 'Chi phí đào tạo nghề cho NLĐ tự chi trả.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Học nghề, đào tạo, bồi dưỡng nâng cao trình độ kỹ năng nghề', 
+    question: 'Hợp đồng đào tạo nghề luôn phải được lập thành văn bản.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Đúng' 
+},
+{ 
+    category: 'Học nghề, đào tạo, bồi dưỡng nâng cao trình độ kỹ năng nghề', 
+    question: 'Hợp đồng đào tạo nghề phải có nội dung về thời gian đào tạo.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Đúng' 
+},
+{ 
+    category: 'Học nghề, đào tạo, bồi dưỡng nâng cao trình độ kỹ năng nghề', 
+    question: 'Trong thời gian đào tạo nghề, NLĐ không được hưởng lương.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Học nghề, đào tạo, bồi dưỡng nâng cao trình độ kỹ năng nghề', 
+    question: 'Hợp đồng đào tạo nghề được ký kết giữa những NLĐ với nhau.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Hợp đồng lao động', 
+    question: 'Viện kiểm sát là cơ quan tiến hành điều tra vụ án hình sự.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+  },
+  { 
+    category: 'Hợp đồng lao động', 
+    question: 'Thủ tục TTHS theo trình tự bao gồm: Điều tra – Khởi tố - Truy tố - Xét xử.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+  },
+  { 
+    category: 'Hợp đồng lao động', 
+    question: 'Chỉ người nào phạm một tội trong TTHS mới có thể bị đưa ra xét xử.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+  },
+  { 
+    category: 'Hợp đồng lao động', 
+    question: 'Xét xử vụ án hình sự gồm: xét xử sơ thẩm và Giám đốc thẩm.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+  },
+  { 
+    category: 'Hợp đồng lao động', 
+    question: 'Chỉ có Quan hệ pháp luật (QHPL) tố tụng hình sự (TTHS) mới mang tính quyền lực nhà nước.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+  },
+  { 
+    category: 'Hợp đồng lao động', 
+    question: 'Thẩm quyền xét xử chỉ thuộc về Toà án.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Đúng' 
+  },
+  { 
+    category: 'Hợp đồng lao động', 
+    question: 'Khởi tố vụ án chỉ có trong TTHS.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Đúng' 
+  },
+  { 
+    category: 'Hợp đồng lao động', 
+    question: 'Tố tụng hình sự là mô hình của Tố tụng dân sự.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+  },
+  { 
+    category: 'Hợp đồng lao động', 
+    question: 'Xét xử vụ án hình sự là ra quyết định tuyên phạt người phạm tội.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+  },
+  { 
+    category: 'Hợp đồng lao động', 
+    question: 'Nguyên tắc “Bảo đảm quyền bào chữa của người bị tạm giữ, bị can, bị cáo” là nguyên tắc đặc thù mà chỉ Luật TTHS mới có.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Đúng' 
+  },
+  { 
+    category: 'Đối thoại tại nơi làm việc, thương lượng tập thể và thoả ước lao động tập thể', 
+    question: 'Thoả ước lao động tập thể là một văn bản:', 
+    options: [
+      'ký kết giữa tập thể người lao động với người sử dụng lao động về các quyền và nghĩa vụ qua lại giữa hai bên về các quan hệ lao động.', 
+      'ký kết trên cơ sở tự nguyện, bình đẳng giữa công đoàn với người sử dụng lao động về việc thực hiện các quyền và nghĩa vụ trong quan hệ lao động.', 
+      'ký kết giữa hai bên về các điều kiện lao động và các quyền, nghĩa vụ qua lại.', 
+      'thoả thuận trên cơ sở tự nguyện, bình đẳng giữa tập thể người lao động với người sử dụng lao động về các điều kiện lao động, quyền lợi và nghĩa vụ hai bên trong quan hệ lao động.'
+    ], 
+    answer: 'thoả thuận trên cơ sở tự nguyện, bình đẳng giữa tập thể người lao động với người sử dụng lao động về các điều kiện lao động, quyền lợi và nghĩa vụ hai bên trong quan hệ lao động.' 
+  },
+  { 
+    category: 'Đối thoại tại nơi làm việc, thương lượng tập thể và thoả ước lao động tập thể', 
+    question: 'Đối thoại tại nơi làm việc là:', 
+    options: [
+      'đối thoại tại nơi làm việc là việc trao đổi trực tiếp giữa người sử dụng lao động với nhau hoặc đại diện tập thể lao động với người sử dụng lao động nhằm chia sẻ thông tin, tăng cường sự hiểu biết giữa người sử dụng lao động và người lao động để bảo đảm việc thực hiện quy chế dân chủ ở cơ sở tại nơi làm việc.', 
+      'đối thoại tại nơi làm việc là việc trao đổi gián tiếp giữa người sử dụng lao động với người lao động hoặc đại diện tập thể lao động với người sử dụng lao động nhằm chia sẻ thông tin, tăng cường sự hiểu biết giữa người sử dụng lao động và người lao động để bảo đảm việc thực hiện quy chế dân chủ ở cơ sở tại nơi làm việc.', 
+      'đối thoại tại nơi làm việc là việc trao đổi trực tiếp giữa người sử dụng lao động với người lao động hoặc đại diện tập thể lao động với người sử dụng lao động nhằm chia sẻ thông tin, tăng cường sự hiểu biết giữa người sử dụng lao động và người lao động để bảo đảm việc thực hiện quy chế dân chủ ở cơ sở tại nơi làm việc.', 
+      'đối thoại tại nơi làm việc là việc trao đổi trực tiếp giữa người sử dụng lao động với người lao động hoặc đại diện tập thể lao động với người lao động nhằm chia sẻ thông tin, tăng cường sự hiểu biết giữa người sử dụng lao động và người lao động để bảo đảm việc thực hiện quy chế dân chủ ở cơ sở tại nơi làm việc.'
+    ], 
+    answer: 'đối thoại tại nơi làm việc là việc trao đổi trực tiếp giữa người sử dụng lao động với người lao động hoặc đại diện tập thể lao động với người sử dụng lao động nhằm chia sẻ thông tin, tăng cường sự hiểu biết giữa người sử dụng lao động và người lao động để bảo đảm việc thực hiện quy chế dân chủ ở cơ sở tại nơi làm việc.' 
+  },
+  { 
+    category: 'Đối thoại tại nơi làm việc, thương lượng tập thể và thoả ước lao động tập thể', 
+    question: 'Nội dung chủ yếu của một bản thoả ước lao động tập thể?', 
+    options: [
+      'Việc làm, thời gian làm việc, nghỉ ngơi, tiền lương, tiền thưởng, phụ cấp, định mức lao động, bảo hiểm xã hội, an toàn, vệ sinh lao động.', 
+      'Việc làm, phúc lợi tập thể, ăn giữa ca, tiền lương, thời giờ làm việc, bảo hiểm xã hội, giải quyết tranh chấp lao động.', 
+      'Việc làm, thời giờ làm việc, tiền lương, tiền thưởng, bảo hiểm, ăn giữa ca, phúc lợi tập thể, nghỉ ngơi.', 
+      'Việc làm, thời giờ làm việc, thời gian nghỉ ngơi, tiền lương, tiền thưởng, bảo hiểm, phúc lợi tập thể.'
+    ], 
+    answer: 'Việc làm, thời gian làm việc, nghỉ ngơi, tiền lương, tiền thưởng, phụ cấp, định mức lao động, bảo hiểm xã hội, an toàn, vệ sinh lao động.' 
+  },
+  { 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Thời giờ làm việc bình thường?', 
+    options: [
+        'Không quá 08 giờ trong 01 ngày và không quá 48 giờ trong 01 tuần.', 
+        'Không quá 08 giờ trong 01 ngày và không quá 40 giờ trong 01 tuần.',
+        'Không quá 07 giờ trong 01 ngày và không quá 48 giờ trong 01 tuần.',
+        'Không quá 07 giờ trong 01 ngày và không quá 40 giờ trong 01 tuần.'
+    ], 
+    answer: 'Không quá 08 giờ trong 01 ngày và không quá 48 giờ trong 01 tuần.' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Người lao động làm việc trong điều kiện bình thường đủ 12 tháng cho một người sử dụng lao động thì được nghỉ hằng năm, hưởng nguyên lương theo hợp đồng lao động với thời gian nghỉ là:', 
+    options: ['10 ngày làm việc.', '11 ngày làm việc.', '12 ngày làm việc.', '13 ngày làm việc.'], 
+    answer: '12 ngày làm việc.' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Nếu ngày nghỉ hằng tuần trùng với ngày nghỉ lễ, tết quy định tại khoản 1 Điều 112 của Bộ luật Lao động năm 2019 thì:', 
+    options: [
+        'người lao động không được nghỉ bù ngày nghỉ hằng tuần', 
+        'người lao động phải tiếp tục đi làm vào ngày làm việc kế tiếp.',
+        'người lao động được nghỉ bù ngày nghỉ hằng tuần vào ngày làm việc kế tiếp.',
+        'người lao động được nghỉ bù ngày nghỉ hằng tuần vào ngày làm việc kế tiếp nhưng phải được người sử dụng lao động đồng ý.'
+    ], 
+    answer: 'người lao động được nghỉ bù ngày nghỉ hằng tuần vào ngày làm việc kế tiếp.' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Người lao động làm việc theo ca được nghỉ ít nhất:', 
+    options: [
+        '06 giờ trước khi chuyển sang ca làm việc khác.', 
+        '12 giờ trước khi chuyển sang ca làm việc khác.',
+        '18 giờ trước khi chuyển sang ca làm việc khác.',
+        '24 giờ trước khi chuyển sang ca làm việc khác.'
+    ], 
+    answer: '12 giờ trước khi chuyển sang ca làm việc khác.' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Mỗi tuần, người lao động được nghỉ:', 
+    options: ['ít nhất 12 giờ liên tục', 'ít nhất 18 giờ liên tục', 'ít nhất 24 giờ liên tục', 'ít nhất 30 giờ liên tục'], 
+    answer: 'ít nhất 24 giờ liên tục' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Người lao động được nghỉ làm việc, hưởng nguyên lương trong ngày Tết Âm lịch:', 
+    options: ['04 ngày.', '05 ngày.', '06 ngày.', '07 ngày.'], 
+    answer: '05 ngày.' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Đâu là nhận định không đúng khi nói về trường hợp người sử dụng lao động được sử dụng người lao động làm thêm giờ?', 
+    options: [
+        'Phải được sự đồng ý của người lao động', 
+        'Bảo đảm số giờ làm thêm của người lao động không quá 50% số giờ làm việc bình thường trong 01 ngày',
+        'Bảo đảm số giờ làm thêm của người lao động không quá 200 giờ trong 01 năm',
+        'Người sử dụng lao động không được sử dụng người lao động làm thêm không quá 200 giờ trong 01 năm'
+    ], 
+    answer: 'Người sử dụng lao động không được sử dụng người lao động làm thêm không quá 200 giờ trong 01 năm' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Người sử dụng lao động có quyền quyết định sắp xếp ngày nghỉ hằng tuần:', 
+    options: [
+        'bắt buộc phải vào ngày Chủ nhật', 
+        'có thể vào ngày Chủ nhật',
+        'vào ngày đầu tuần hoặc ngày xác định khác',
+        'vào ngày Chủ nhật hoặc ngày xác định khác'
+    ], 
+    answer: 'vào ngày Chủ nhật hoặc ngày xác định khác' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Giờ làm việc ban đêm?', 
+    options: [
+        'Được tính từ 22 giờ đến 06 giờ sáng ngày hôm sau.', 
+        'Được tính từ 22 giờ đến 05 giờ sáng ngày hôm sau.',
+        'Được tính từ 23 giờ đến 06 giờ sáng ngày hôm sau.',
+        'Được tính từ 23 giờ đến 05 giờ sáng ngày hôm sau.'
+    ], 
+    answer: 'Được tính từ 22 giờ đến 06 giờ sáng ngày hôm sau.' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Người làm việc ban đêm thì được nghỉ giữa giờ:', 
+    options: ['ít nhất 60 phút liên tục.', 'ít nhất 45 phút liên tục.', 'ít nhất 30 phút liên tục.'], 
+    answer: 'ít nhất 45 phút liên tục.' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Tiền lương là số tiền mà người sử dụng lao động trả cho người lao động theo hợp đồng lao động và theo chất lượng công việc.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Người lao động được nghỉ làm việc, không hưởng lương 5 ngày trong Tết Âm lịch.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'NLĐ làm thêm giờ được trả lương tính theo đơn giá tiền lương hoặc tiền lương theo CV đang làm vào ngày nghỉ hằng tuần, ít nhất bằng 200%.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Đúng' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Thời giờ làm việc bình thường không quá 08 giờ trong 01 ngày và không quá 48 giờ trong 01 tuần.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Đúng' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Mức lương theo công việc không được thấp hơn 1tr490 ngàn đồng.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'NLĐ là công dân VN thì tiền lương phải trả bằng đồng VN.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Giờ làm việc ban đêm được tính từ 20h giờ đến 06 giờ sáng ngày hôm sau.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'Người lao động làm việc theo ca được nghỉ ít nhất 24 giờ trước khi chuyển sang ca làm việc khác.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'NLĐ được thỏa thuận với NSDLĐ về việc tạm ứng tiền lương và lãi suất lương tạm ứng.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Đúng' 
+},
+{ 
+    category: 'Tiền lương, tiền thưởng + Thời gian làm việc, thời gian nghỉ ngơi', 
+    question: 'NSDLĐ trả lương chậm cho NLĐ từ 5 ngày trở lên thì NSDLĐ phải trả lãi cho NLĐ.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Kỷ luật lao động, trách nhiệm vật chất', 
+    question: 'Đâu là hình thức xử lý kỷ luật lao động?', 
+    options: ['Cảnh cáo', 'Kéo dài thời hạn nâng lương không quá 12 tháng', 'Giáng chức', 'Sa thải'], 
+    answer: 'Sa thải' 
+},
+{ 
+    category: 'Kỷ luật lao động, trách nhiệm vật chất', 
+    question: 'Đâu là nhận định đúng?', 
+    options: [
+        'Người lao động có hành vi trộm cắp, tham ô, đánh bạc, cố ý gây thương tích, sử dụng ma túy tại nơi làm việc thì bị kỷ luật cách chức', 
+        'Người lao động có hành vi trộm cắp, tham ô, đánh bạc, cố ý gây thương tích, sử dụng ma túy tại nơi làm việc thì bị kỷ luật sa thải', 
+        'Người lao động có hành vi trộm cắp, tham ô, đánh bạc, cố ý gây thương tích, sử dụng ma túy tại nơi làm việc thì bị kỷ luật cảnh cáo', 
+        'Người lao động có hành vi trộm cắp, tham ô, đánh bạc, cố ý gây thương tích, sử dụng ma túy tại nơi làm việc thì bị kỷ luật phạt tiền'
+    ], 
+    answer: 'Người lao động có hành vi trộm cắp, tham ô, đánh bạc, cố ý gây thương tích, sử dụng ma túy tại nơi làm việc thì bị kỷ luật sa thải' 
+},
+{ 
+    category: 'Kỷ luật lao động, trách nhiệm vật chất', 
+    question: 'Có bao nhiêu hình thức xử lý kỷ luật lao động?', 
+    options: ['Hai hình thức', 'Ba hình thức', 'Bốn hình thức', 'Không có xử lý kỷ luật lao động'], 
+    answer: 'Bốn hình thức' 
+},
+{ 
+    category: 'Tranh chấp và giải quyết tranh chấp lao động', 
+    question: 'Toà án có thẩm quyền giải quyết tranh chấp lao động.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Đúng' 
+},
+{ 
+    category: 'Tranh chấp và giải quyết tranh chấp lao động', 
+    question: 'Đình công là hình thức của biểu tình của NLĐ.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Tranh chấp và giải quyết tranh chấp lao động', 
+    question: 'Tranh chấp lao động là tranh chấp hành chính.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Tranh chấp và giải quyết tranh chấp lao động', 
+    question: 'Có 5 loại tranh chấp lao động.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Sai' 
+},
+{ 
+    category: 'Tranh chấp và giải quyết tranh chấp lao động', 
+    question: 'Đình công không phải là hình thức kỷ luật lao động.', 
+    options: ['Nhận định Đúng', 'Nhận định Sai'], 
+    answer: 'Nhận định Đúng' 
+}
+  ];
+
+  let currentIndex = 0;
+  let score = 0;
+  let categoryScore = {};
+
+  const startScreen = document.getElementById('startScreen');
+  const quizScreen = document.getElementById('quizScreen');
+  const resultScreen = document.getElementById('resultScreen');
+
+  const questionText = document.getElementById('questionText');
+  const optionsEl = document.getElementById('options');
+  const currentEl = document.getElementById('current');
+  const totalEl = document.getElementById('total');
+  const progressBar = document.getElementById('progressBar');
+  const nextBtn = document.getElementById('nextBtn');
+
+  const finalScore = document.getElementById('finalScore');
+  const categoryResult = document.getElementById('categoryResult');
+
+  totalEl.textContent = quizData.length;
+
+  document.getElementById('startBtn').onclick = startQuiz;
+  document.getElementById('restartBtn').onclick = startQuiz;
+  nextBtn.onclick = nextQuestion;
+
+  function startQuiz() {
+    currentIndex = 0;
+    score = 0;
+    categoryScore = {};
+    startScreen.style.display = 'none';
+    resultScreen.style.display = 'none';
+    quizScreen.style.display = 'block';
+    loadQuestion();
+  }
+
+  function loadQuestion() {
+    const q = quizData[currentIndex];
+    questionText.textContent = q.question;
+    optionsEl.innerHTML = '';
+    currentEl.textContent = currentIndex + 1;
+    progressBar.style.width = ((currentIndex) / quizData.length) * 100 + '%';
+
+    q.options.forEach(opt => {
+      const btn = document.createElement('button');
+      btn.innerHTML = `<span>${opt}</span>`;
+      btn.onclick = () => selectAnswer(btn, opt, q.answer, q.category);
+      optionsEl.appendChild(btn);
+    });
+
+    nextBtn.style.display = 'none';
+  }
+
+  function selectAnswer(btn, selected, correct, category) {
+    document.querySelectorAll('.options button').forEach(b => b.classList.add('disabled'));
+
+    if (selected === correct) {
+      btn.classList.add('correct');
+      btn.innerHTML += ' <i class="fa-solid fa-check"></i>';
+      score++;
+      categoryScore[category] = (categoryScore[category] || 0) + 1;
+    } else {
+      btn.classList.add('wrong');
+      btn.innerHTML += ' <i class="fa-solid fa-xmark"></i>';
+      document.querySelectorAll('.options button').forEach(b => {
+        if (b.textContent.trim() === correct) {
+          b.classList.add('correct');
+          b.innerHTML += ' <i class="fa-solid fa-check"></i>';
+        }
+      });
+    }
+
+    nextBtn.style.display = 'inline-block';
+  }
+
+  function nextQuestion() {
+    currentIndex++;
+    if (currentIndex < quizData.length) {
+      loadQuestion();
+    } else {
+      showResult();
+    }
+  }
+
+  function showResult() {
+    quizScreen.style.display = 'none';
+    resultScreen.style.display = 'block';
+    progressBar.style.width = '100%';
+
+    finalScore.textContent = `${score} / ${quizData.length}`;
+    categoryResult.innerHTML = '';
+
+    for (const cat in categoryScore) {
+      categoryResult.innerHTML += `<p><strong>${cat}:</strong> ${categoryScore[cat]} câu đúng</p>`;
+    }
+  }
+</script>
+
+<script>let lastHeight = 0; let sentOnce = false; function sendSizeToParent() { const height = Math.max( document.body.scrollHeight, document.documentElement.scrollHeight, document.body.offsetHeight, document.documentElement.offsetHeight, document.body.clientHeight, document.documentElement.clientHeight ); if (!sentOnce) { lastHeight = height; sentOnce = true; window.parent.postMessage({ url: window.location.href, type: 'window-size', w: document.body.offsetWidth, h: height }, '*'); } else if (Math.abs(height - lastHeight) >= 100) { lastHeight = height; window.parent.postMessage({ url: window.location.href, type: 'window-size', w: document.body.offsetWidth, h: height }, '*'); } } window.addEventListener('load', function() { setTimeout(sendSizeToParent, 0); }); </script> </body>
+</html>

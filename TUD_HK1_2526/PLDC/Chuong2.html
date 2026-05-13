@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="contentType" content="quiz">
+    <meta name="description" content="Một bài kiểm tra trắc nghiệm tương tác dành cho học sinh lớp 1 về các nghề nghiệp, tìm vần và đọc hiểu dựa trên tài liệu học Tiếng Việt.">
+    <meta name="nextActions" content="Thêm câu hỏi về các nghề nghiệp khác; Tạo một bài tập điền vào chỗ trống; Chuyển đổi thành một trò chơi kéo và thả">
+    <title>Chương 2 PLDC</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap');
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .quiz-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .quiz-header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .quiz-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        .quiz-body {
+            padding: 30px;
+        }
+        #start-screen {
+            text-align: center;
+        }
+        #start-screen h2 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        #start-button {
+            background-color: #50c878;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        #start-button:hover {
+            background-color: #45b36b;
+            transform: translateY(-2px);
+        }
+        #quiz-screen {
+            display: none;
+        }
+        #question-container {
+            text-align: center;
+        }
+        #progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        #progress-bar {
+            height: 10px;
+            width: 0%;
+            background-color: #50c878;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        #question-text {
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            min-height: 50px;
+        }
+        #question-image {
+            max-width: 100%;
+            height: auto;
+            max-height: 200px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .answer-options {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .answer-btn {
+            background-color: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 15px;
+            padding: 15px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            position: relative;
+            padding-left: 50px;
+        }
+        .answer-btn .option-letter {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 25px;
+            height: 25px;
+            background-color: #4a90e2;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+        .answer-btn:hover {
+            background-color: #e0e0e0;
+            border-color: #4a90e2;
+        }
+        .answer-btn.correct {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+            animation: pulse 0.5s;
+        }
+        .answer-btn.incorrect {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+            animation: shake 0.5s;
+        }
+        #feedback {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 20px;
+            min-height: 30px;
+        }
+        #result-screen {
+            display: none;
+            text-align: center;
+        }
+        #result-screen h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #4a90e2;
+        }
+        #score-details {
+            text-align: left;
+            margin: 20px auto;
+            max-width: 300px;
+            font-size: 1.1rem;
+        }
+        #restart-button {
+            background-color: #ffc107;
+            color: #333;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        #restart-button:hover {
+            background-color: #e0a800;
+            transform: translateY(-2px);
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>CHƯƠNG 2. LÝ LUẬN CHUNG VỀ PHÁP LUẬT</h1>
+        </div>
+        <div class="quiz-body">
+            <div id="start-screen">
+                <h2>Câu hỏi được trích xuất từ VLE</h2>
+                <button id="start-button">Bắt đầu!</button>
+            </div>
+            <div id="quiz-screen">
+                <div id="progress-bar-container">
+                    <div id="progress-bar"></div>
+                </div>
+                <div id="question-container">
+                    <p id="question-text"></p>
+                    <img id="question-image" src="" alt="Hình ảnh câu hỏi" style="display: none;">
+                    <ul id="answer-options" class="answer-options"></ul>
+                </div>
+                <div id="feedback"></div>
+            </div>
+            <div id="result-screen">
+                <h2>Chúc mừng bạn đã hoàn thành!</h2>
+                <p id="final-score"></p>
+                <div id="score-details"></div>
+                <button id="restart-button">Làm lại</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="correct-sound" src="https://www.myinstants.com/media/sounds/correct-answer-sound-effect-19.mp3" preload="auto"></audio>
+    <audio id="wrong-sound" src="https://www.myinstants.com/media/sounds/answer-wrong.mp3" preload="auto"></audio>
+    <audio id="completion-sound" src="https://www.myinstants.com/media/sounds/kids_cheering.mp3" preload="auto"></audio>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        const questions = [
+            {
+                category: 'Khái niệm, thuộc tính, hình thức pháp luật',
+                question: 'Pháp luật là',
+                answers: [
+                    { text: 'hệ thống quy tắc xử sự chung do Nhà nước ban hành và đảm bảo thực hiện.', correct: true },
+                    { text: 'ý chí của giai cấp thống trị.', correct: false },
+                    { text: 'ý chí của Nhà nước.', correct: false },
+                    { text: 'ý chí của Nhà nước và ý chí của xã hội.', correct: false }
+                ]
+            },
+            {
+                category: 'Khái niệm, thuộc tính, hình thức pháp luật',
+                question: 'Nguồn gốc ra đời của pháp luật là',
+                answers: [
+                    { text: 'sự xuất hiện chế độ tư hữu và sự đấu tranh giai cấp.', correct: true },
+                    { text: 'nhà nước.', correct: false },
+                    { text: 'sự thỏa thuận về ý chí của mọi giai cấp trong xã hội.', correct: false },
+                    { text: 'nhân dân.', correct: false }
+                ]
+            },
+            {
+                category: 'Khái niệm, thuộc tính, hình thức pháp luật',
+                question: 'Hình thức pháp luật nào được áp dụng chủ yếu tại Việt Nam?',
+                answers: [
+                    { text: 'Tập quán pháp.', correct: false },
+                    { text: 'Tiền lệ pháp.', correct: false },
+                    { text: 'Văn bản quy phạm Pháp luật.', correct: true },
+                    { text: 'Học lý.', correct: false }
+                ]
+            },
+            {
+                category: 'Khái niệm, thuộc tính, hình thức pháp luật',
+                question: 'Pháp luật là hệ thống quy tắc xử sự mang tính... do... ban hành và đảm bảo thực hiện, thể hiện... của giai cấp thống trị và phụ thuộc vào điều kiện..., là nhân tố điều chỉnh các quan hệ xã hội',
+                answers: [
+                    { text: 'bắt buộc chung - Nhà nước - ý chí - kinh tế xã hội.', correct: true },
+                    { text: 'bắt buộc chung- Nhà nước - lý tưởng - chính trị.', correct: false },
+                    { text: 'bắt buộc – Quốc hội - ý chí - kinh tế xã hội.', correct: false },
+                    { text: 'bắt buộc chung - Quốc hội - ý chí - kinh tế xã hội.', correct: false }
+                ]
+            },
+            {
+                category: 'Khái niệm, thuộc tính, hình thức pháp luật',
+                question: 'Pháp luật phát sinh và tồn tại trong xã hội',
+                answers: [
+                    { text: 'có Nhà nước.', correct: true },
+                    { text: 'không có giai cấp.', correct: false },
+                    { text: 'không có Nhà nước.', correct: false },
+                    { text: 'có loài người xuất hiện.', correct: false }
+                ]
+            },
+            {
+                category: 'Khái niệm, thuộc tính, hình thức pháp luật',
+                question: 'Các con đường hình thành nên pháp luật bao gồm:',
+                answers: [
+                    { text: 'Tập quán pháp.', correct: false },
+                    { text: 'Tiền lệ pháp.', correct: false },
+                    { text: 'Văn bản quy phạm pháp luật.', correct: false },
+                    { text: 'Tập quán pháp, tiền lệ pháp, văn bản quy phạm pháp luật.', correct: true }
+                ]
+            },
+            {
+                category: 'Khái niệm, thuộc tính, hình thức pháp luật',
+                question: 'Khẳng định nào sau đây là sai?',
+                answers: [
+                    { text: 'Nhà nước bảo đảm thực hiện đối với văn bản quy phạm pháp luật.', correct: false },
+                    { text: 'Nhà nước bảo đảm thực hiện đối với các mệnh lệnh của người có thẩm quyền.', correct: false },
+                    { text: 'Nhà nước chỉ bảo đảm thực hiện đối với văn bản quy phạm pháp luật.', correct: true },
+                    { text: 'Nhà nước bảo đảm thực hiện đối với văn bản áp dụng pháp luật.', correct: false }
+                ]
+            },
+            {
+                category: 'Khái niệm, thuộc tính, hình thức pháp luật',
+                question: 'Trong lịch sử loài người có các hình thức pháp luật phổ biến nào?',
+                answers: [
+                    { text: 'Tập quán pháp, tiền lệ pháp và văn bản quy phạm pháp luật.', correct: true },
+                    { text: 'Tập quán pháp và văn bản quy phạm pháp luật.', correct: false },
+                    { text: 'Tập quán pháp và tiền lệ pháp.', correct: false },
+                    { text: 'Tiền lệ pháp và văn bản quy phạm pháp luật.', correct: false }
+                ]
+            },
+            {
+                category: 'Khái niệm, thuộc tính, hình thức pháp luật',
+                question: 'Tính quy phạm phổ biến là đặc tính của',
+                answers: [
+                    { text: 'pháp luật.', correct: true },
+                    { text: 'quy tắc đạo đức.', correct: false },
+                    { text: 'tôn giáo.', correct: false },
+                    { text: 'tổ chức xã hội.', correct: false }
+                ]
+            },
+    {
+        category: 'Quy phạm pháp luật và Văn bản quy phạm pháp luật',
+        question: 'Quy phạm pháp luật là những quy tắc xử sự mang tính... do... ban hành và đảm bảo thực hiện, thể hiện ý chí và bảo vệ lợi ích của giai cấp thống trị để điều chỉnh các...',
+        answers: [
+            { text: 'bắt buộc - Nhà nước - quan hệ xã hội.', correct: false },
+            { text: 'bắt buộc chung - Nhà nước - quan hệ pháp luật.', correct: false },
+            { text: 'bắt buộc chung - Quốc hội - quan hệ xã hội.', correct: false },
+            { text: 'bắt buộc chung - Nhà nước - quan hệ xã hội.', correct: true }
+        ]
+    },
+    {
+        category: 'Quy phạm pháp luật và Văn bản quy phạm pháp luật',
+        question: 'Quy phạm pháp luật được thể hiện bằng hình thức nào?',
+        answers: [
+            { text: 'Lời nói.', correct: false },
+            { text: 'Văn bản.', correct: true },
+            { text: 'Hành vi cụ thể.', correct: false },
+            { text: 'Văn bản và hành vi cụ thể.', correct: false }
+        ]
+    },
+    {
+        category: 'Quy phạm pháp luật và Văn bản quy phạm pháp luật',
+        question: 'Mỗi một điều luật',
+        answers: [
+            { text: 'có thể có đầy đủ cả ba yếu tố cấu thành quy phạm pháp luật hoặc chỉ có hai yếu tố.', correct: true },
+            { text: 'chỉ có hai yếu tố cấu thành quy phạm pháp luật.', correct: false },
+            { text: 'bắt buộc có ba bộ phận.', correct: false },
+            { text: 'có thể chỉ có một bộ phận cấu thành quy phạm pháp luật.', correct: false }
+        ]
+    },
+    {
+        category: 'Quy phạm pháp luật và Văn bản quy phạm pháp luật',
+        question: 'Khẳng định nào sau đây là SAI?',
+        answers: [
+            { text: 'Quy phạm pháp luật là một loại quy phạm xã hội.', correct: false },
+            { text: 'Quy phạm pháp luật là loại quy phạm do Nhà nước ban hành.', correct: false },
+            { text: 'Quy phạm pháp luật là loại quy phạm điều chỉnh tất cả các quan hệ xã hội.', correct: true },
+            { text: 'Quy phạm pháp luật là loại quy phạm mang tính giai cấp.', correct: false }
+        ]
+    },
+    {
+        category: 'Quy phạm pháp luật và Văn bản quy phạm pháp luật',
+        question: 'Khẳng định nào sau đây là đúng?',
+        answers: [
+            { text: 'Chế tài là hình phạt.', correct: false },
+            { text: 'Hình phạt là một loại chế tài.', correct: true },
+            { text: 'Chế tài là các biện pháp xử phạt hành chính.', correct: false },
+            { text: 'Chế tài là biểu hiện tính tích cực.', correct: false }
+        ]
+    },
+    {
+        category: 'Quy phạm pháp luật và Văn bản quy phạm pháp luật',
+        question: 'Chế tài của quy phạm pháp luật bao gồm:',
+        answers: [
+            { text: 'Chế tài hình sự, dân sự, hành chính, kỷ luật.', correct: true },
+            { text: 'Chế tài hình sự, dân sự, tài chính, kỉ luật.', correct: false },
+            { text: 'Chế tài hình sự, kỉ luật.', correct: false },
+            { text: 'Chế tài hình sự, dân sự.', correct: false }
+        ]
+    },
+    {
+        category: 'Quy phạm pháp luật và Văn bản quy phạm pháp luật',
+        question: 'Loại chế tài nào đã được áp dụng khi cơ quan có thẩm quyền buộc tiêu hủy số gia cầm bị bệnh mà ông A vận chuyển?',
+        answers: [
+            { text: 'Dân sự.', correct: false },
+            { text: 'Hình sự.', correct: false },
+            { text: 'Kỷ luật.', correct: false },
+            { text: 'Hành chính.', correct: true }
+        ]
+    },
+    {
+        category: 'Quy phạm pháp luật và Văn bản quy phạm pháp luật',
+        question: 'Phương án nào sau đây là đặc điểm riêng của quy phạm pháp luật?',
+        answers: [
+            { text: 'Được Nhà nước đảm bảo thực hiện.', correct: false },
+            { text: 'Tính quy phạm.', correct: false },
+            { text: 'Tính phổ biến.', correct: false },
+            { text: 'Tính bắt buộc.', correct: true }
+        ]
+    },
+    {
+        category: 'Quy phạm pháp luật và Văn bản quy phạm pháp luật',
+        question: 'Chế tài kỷ luật là',
+        answers: [
+            { text: 'biện pháp cưỡng chế của Nhà nước áp dụng cho những chủ thể vi phạm pháp luật.', correct: true },
+            { text: 'sự trừng phạt của Nhà nước dành cho mọi chủ thể vi phạm pháp luật.', correct: false },
+            { text: 'sự trừng phạt dành cho các cơ quan Nhà nước làm sai mệnh lệnh hành chính.', correct: false },
+            { text: 'biện pháp cưỡng chế có tính nghiêm khắc áp dụng cho một tổ chức vi phạm pháp luật.', correct: false }
+        ]
+    },
+    {
+        category: 'Quy phạm pháp luật và Văn bản quy phạm pháp luật',
+        question: 'Bộ phận nào của quy phạm pháp luật nêu lên cách thức xử sự cho chủ thể được làm, không được làm, phải làm?',
+        answers: [
+            { text: 'Giả định', correct: false },
+            { text: 'Quy định', correct: true },
+            { text: 'Chế tài', correct: false },
+            { text: 'Quy định và chế tài.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Đứa trẻ mới được sinh ra được Nhà nước công nhận là chủ thể có năng lực',
+        answers: [
+            { text: 'pháp luật.', correct: true },
+            { text: 'chủ thể.', correct: false },
+            { text: 'hành vi.', correct: false },
+            { text: 'chưa có năng lực gì.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Xét về độ tuổi, người không có năng lực hành vi dân sự là người...',
+        answers: [
+            { text: 'dưới 6 tuổi.', correct: true },
+            { text: 'dưới 14 tuổi.', correct: false },
+            { text: 'dưới 16 tuổi.', correct: false },
+            { text: 'dưới 18 tuổi.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Cơ quan nào có thẩm quyền ra quyết định hạn chế năng lực hành vi của công dân?',
+        answers: [
+            { text: 'Viện kiểm sát nhân dân.', correct: false },
+            { text: 'Tòa án nhân dân.', correct: true },
+            { text: 'Hội đồng nhân dân; UBND.', correct: false },
+            { text: 'Quốc hội.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Căn cứ làm phát sinh, thay đổi, chấm dứt quan hệ pháp luật',
+        answers: [
+            { text: 'quy phạm pháp luật.', correct: false },
+            { text: 'năng lực chủ thể.', correct: false },
+            { text: 'sự kiện pháp lý.', correct: false },
+            { text: 'quy phạm pháp luật, năng lực chủ thể, sự kiện pháp lý.', correct: true }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Sự biến pháp lý là...',
+        answers: [
+            { text: 'những hiện tượng của đời sống khách quan xảy ra không phụ thuộc vào ý chí con người được nhà làm luật dự kiến trong quy phạm pháp luật gắn liền với việc hình thành, thay đổi hay chấm dứt các quan hệ pháp luật cụ thể.', correct: true },
+            { text: 'những sự kiện xảy ra phụ thuộc trực tiếp vào ý chí con người.', correct: false },
+            { text: 'những sự kiện xảy ra có thể phụ thuộc trực tiếp vào ý chí con người hay không phụ thuộc vào ý chí con người, tùy theo từng trường hợp cụ thể.', correct: false },
+            { text: 'những sự kiện được quy định trong pháp luật.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Cá nhân có năng lực hành vi dân sự đầy đủ khi nào?',
+        answers: [
+            { text: 'Từ đủ 15 tuổi trở lên.', correct: false },
+            { text: 'Từ đủ 16 tuổi trở lên.', correct: false },
+            { text: 'Từ đủ 18 tuổi trở lên.', correct: true },
+            { text: 'Từ lúc sinh ra.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Thời điểm năng lực pháp luật và năng lực hành vi của pháp nhân được Nhà nước công nhận khi nào?',
+        answers: [
+            { text: 'Cùng một thời điểm.', correct: true },
+            { text: 'Năng lực pháp luật được công nhận trước năng lực hành vi.', correct: false },
+            { text: 'Năng lực hành vi được công nhận trước năng lực pháp luật.', correct: false },
+            { text: 'Tùy từng trường hợp.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Những sự kiện mà sự xuất hiện hay mất đi của chúng được pháp luật gắn liền với việc hình thành, thay đổi hoặc chấm dứt quan hệ pháp luật được gọi là',
+        answers: [
+            { text: 'sự kiện pháp lý.', correct: true },
+            { text: 'sự kiện thực tế.', correct: false },
+            { text: 'sự biến.', correct: false },
+            { text: 'hành vi.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Nội dung của quan hệ pháp luật là...',
+        answers: [
+            { text: 'các bên tham gia vào quan hệ pháp luật.', correct: false },
+            { text: 'những giá trị mà các chủ thể quan hệ pháp luật muốn đạt được.', correct: false },
+            { text: 'quyền và nghĩa vụ của các chủ thể trong quan hệ pháp luật.', correct: true },
+            { text: 'đối tượng mà các chủ thể quan tâm khi tham gia vào quan hệ pháp luật.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Năng lực hành vi của chủ thể được đánh giá qua những yếu tố nào?',
+        answers: [
+            { text: 'Tuổi và trí tuệ của chủ thể.', correct: true },
+            { text: 'Sự tự do ý chí.', correct: false },
+            { text: 'Tuổi của chủ thể.', correct: false },
+            { text: 'Trí tuệ của chủ thể.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Độ tuổi được quy định là sẽ có năng lực hành vi dân sự là',
+        answers: [
+            { text: 'Từ đủ 6 tuổi.', correct: true },
+            { text: 'Từ trên 6 tuổi.', correct: false },
+            { text: 'Từ 18 tuổi.', correct: false },
+            { text: 'Đủ 16 tuổi.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Khẳng định nào sau đây là sai?',
+        answers: [
+            { text: 'Người có năng lực trách nhiệm pháp lý thực hiện hành vi vi phạm pháp luật trong tình trạng say rượu không phải chịu trách nhiệm pháp lý.', correct: true },
+            { text: 'Người có năng lực trách nhiệm hình sự thực hiện hành vi vi phạm tội trong tình trạng say rượu vẫn phải chịu trách nhiệm hình sự.', correct: false },
+            { text: 'Người có năng lực trách nhiệm hành chính thực hiện hành vi vi phạm hành chính trong tình trạng say rượu vẫn phải chịu trách nhiệm hành chính.', correct: false },
+            { text: 'Người có năng lực trách nhiệm dân sự thực hiện hành vi vi phạm dân sự trong tình trạng say rượu vẫn phải chịu trách nhiệm dân sự.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Trong quan hệ mua bán, khách thể là',
+        answers: [
+            { text: 'quyền sở hữu căn nhà của người mua.', correct: false },
+            { text: 'quyền sở hữu số tiền của người bán.', correct: false },
+            { text: 'số tiền, căn nhà.', correct: false },
+            { text: 'quyền sở hữu căn nhà của người mua và số tiền bán căn nhà của người bán.', correct: true }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Năng lực chủ thể của quan hệ pháp luật bao gồm những năng lực nào?',
+        answers: [
+            { text: 'Năng lực pháp luật, năng lực hành vi và năng lực nhận thức.', correct: false },
+            { text: 'Năng lực pháp luật và năng lực hành vi.', correct: true },
+            { text: 'Năng lực hành vi và năng lực nhận thức.', correct: false },
+            { text: 'Năng lực pháp luật và năng lực nhận thức.', correct: false }
+        ]
+    },
+    {
+        category: 'Quan hệ pháp luật',
+        question: 'Cấu thành của quan hệ pháp luật bao gồm:',
+        answers: [
+            { text: 'Chủ thể, khách thể và nội dung.', correct: true },
+            { text: 'Chủ thể, khách thể, mặt khách quan và mặt chủ quan.', correct: false },
+            { text: 'Chủ thể, khách thể, quyền và nghĩa vụ của chủ thể.', correct: false },
+            { text: 'Chủ thể, khách thể, mặt khách quan, mặt chủ quan, quyền và nghĩa vụ của chủ thể.', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Sử dụng pháp luật là:',
+        answers: [
+            { text: 'chủ thể pháp luật buộc thực hiện những nghĩa vụ mà pháp luật yêu cầu', correct: false },
+            { text: 'chủ thể pháp luật chủ động thực hiện quyền của mình theo quy định của pháp luật', correct: true },
+            { text: 'chủ thể pháp luật kiềm chế không thực hiện những gì mà pháp luật ngăn cấm', correct: false },
+            { text: 'cơ quan Nhà nước sử dụng pháp luật để giải quyết các quan hệ pháp luật phát sinh trong xã hội', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Hành vi tuân thủ pháp luật:',
+        answers: [
+            { text: 'cướp tài sản', correct: false },
+            { text: 'từ chối nhận tiền hối lộ', correct: true },
+            { text: 'mua nhà', correct: false },
+            { text: 'đóng thuế', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Thi hành pháp luật là:',
+        answers: [
+            { text: 'chủ thể pháp luật buộc thực hiện những nghĩa vụ mà pháp luật yêu cầu bằng hành động cụ thể.', correct: true },
+            { text: 'chủ thể pháp luật kiềm chế không thực hiện những gì mà pháp luật ngăn cấm', correct: false },
+            { text: 'chủ thể pháp luật thực hiện quyền mà pháp luật cho phép', correct: false },
+            { text: 'cơ quan Nhà nước áp dụng pháp luật để giải quyết các quan hệ pháp luật phát sinh trong xã hội.', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Tuân thủ pháp luật là:',
+        answers: [
+            { text: 'chủ thể pháp luật kiềm chế không thực hiện những gì mà pháp luật ngăn cấm.', correct: true },
+            { text: 'chủ thể pháp luật buộc thực hiện những nghĩa vụ mà pháp luật yêu cầu.', correct: false },
+            { text: 'chủ thể pháp luật thực hiện quyền mà pháp luật cho phép.', correct: false },
+            { text: 'cơ quan Nhà nước sử dụng pháp luật để giải quyết những công việc cụ thể phát sinh trong xã hội.', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Hành vi nào sau đây chắc chắn là vi phạm pháp luật?',
+        answers: [
+            { text: 'Nam là người có hành vi đầy đủ, do không chú ý nên đã đi vào đường ngược chiều.', correct: true },
+            { text: 'Bắc vô cớ dùng dao đâm chết Bình.', correct: false },
+            { text: 'Hùng là người có trí tuệ bình thường, gây thương tích cho B.', correct: false },
+            { text: 'Hằng không phải người đi bộ khi lái ô tô trên cao tốc.', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Tùng là bác sỹ bệnh viện. Trong ca trực của Tùng, vào lúc 8 giờ có bệnh nhân bị tai nạn xe máy cần phải phẫu thuật ngay. Mặc dù đã nắm được tình hình nhưng do có mâu thuẫn từ trước với bệnh nhân nên Tùng từ chối hành phẫu thuật, hậu quả là bệnh nhân bị chết do không được cấp cứu kịp thời. Xác định hình thức lỗi của Tùng:',
+        answers: [
+            { text: 'Lỗi vô ý vì quá tự tin.', correct: false },
+            { text: 'Lỗi cố ý trực tiếp.', correct: false },
+            { text: 'Lỗi vô ý vì cẩu thả.', correct: false },
+            { text: 'Lỗi cố ý gián tiếp.', correct: true }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'A vì ghen tuông giết B. Lỗi của A:',
+        answers: [
+            { text: 'vô ý do tự tin.', correct: false },
+            { text: 'vô ý do cẩu thả.', correct: false },
+            { text: 'cố ý trực tiếp.', correct: true },
+            { text: 'cố ý gián tiếp.', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Hành vi tổ chức đánh bạc của công chức, viên chức Nhà nước bị công an bắt quả tang được xác định là hành vi:',
+        answers: [
+            { text: 'vi phạm dân sự.', correct: false },
+            { text: 'vi phạm công vụ.', correct: false },
+            { text: 'vi phạm hành chính.', correct: false },
+            { text: 'vi phạm hình sự.', correct: true }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Hành vi gây thiệt hại được thực hiện bởi một người mắc bệnh tâm thần không phải là vi phạm pháp luật, vì:',
+        answers: [
+            { text: 'Hành vi đó không trái pháp luật', correct: false },
+            { text: 'Hành vi đó không nguy hiểm cho xã hội', correct: false },
+            { text: 'Người thực hiện hành vi không có lỗi', correct: true },
+            { text: 'Vì người giám hộ của người đó mới là chủ thể vi phạm pháp luật.', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Hành vi nào kể dưới đây là hành vi vi phạm pháp luật?',
+        answers: [
+            { text: 'Hành vi trốn thuế.', correct: true },
+            { text: 'Hành vi làm thiệt hại đến xã hội của người tâm thần.', correct: false },
+            { text: 'Ý định cướp tài sản của người khác.', correct: false },
+            { text: 'Hành vi cư xử không lịch sự.', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Hành vi gây thiệt hại trong phòng vệ chính đáng không phải là vi phạm pháp luật, vì',
+        answers: [
+            { text: 'Người thực hiện hành vi không có lỗi vô ý.', correct: true },
+            { text: 'Mức độ thiệt hại nhỏ hơn thiệt hại cần ngăn ngừa.', correct: false },
+            { text: 'Hành vi đó không nguy hiểm cho xã hội.', correct: false },
+            { text: 'Hành vi đó không trái pháp luật.', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Điểm khác biệt giữa vi phạm hành chính và tội phạm là:',
+        answers: [
+            { text: 'tính chất và mức độ nguy hiểm cho xã hội.', correct: false },
+            { text: 'thẩm quyền xử lý vi phạm.', correct: false },
+            { text: 'thủ tục xử lý vi phạm.', correct: false },
+            { text: 'tính chất và mức độ nguy hiểm cho xã hội, thẩm quyền xử lý vi phạm, thủ tục xử lý vi phạm.', correct: true }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Yếu tố nào sau đây thuộc mặt chủ quan của vi phạm pháp luật?',
+        answers: [
+            { text: 'Hành vi trái pháp luật', correct: false },
+            { text: 'Động cơ', correct: true },
+            { text: 'Hậu quả', correct: false },
+            { text: 'Quan hệ pháp luật bị xâm hại', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Dấu hiệu nào không có trong mặt khách quan của vi phạm pháp luật?',
+        answers: [
+            { text: 'Lỗi.', correct: true },
+            { text: 'Hành vi trái pháp luật.', correct: false },
+            { text: 'Hậu quả.', correct: false },
+            { text: 'Mối quan hệ nhân-quả.', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Khẳng định nào sau đây là sai?',
+        answers: [
+            { text: 'Một người chỉ phải chịu một loại trách nhiệm pháp lý đối với một hành vi nguy hiểm cho xã hội mà họ đã thực hiện', correct: true },
+            { text: 'Một người có thể phải chịu trách nhiệm hành chính và trách nhiệm kỷ luật đối với một hành vi nguy hiểm cho xã hội mà họ thực hiện', correct: false },
+            { text: 'Một người có thể phải chịu trách nhiệm hình sự và trách nhiệm kỷ luật đối với một hành vi nguy hiểm cho xã hội mà họ đã thực hiện', correct: false },
+            { text: 'Một người có thể phải chịu trách nhiệm hình sự và trách nhiệm kỷ luật và trách nhiệm dân sự đối với một hành vi nguy hiểm cho xã hội mà họ đã thực hiện.', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Khẳng định nào sau đây là đúng?',
+        answers: [
+            { text: 'Chủ thể thực hiện hành vi nguy hiểm cho xã hội trong trạng thái không nhận thức, không điều khiển được hành vi của mình vẫn phải chịu trách nhiệm pháp lý.', correct: false },
+            { text: 'Biện pháp cưỡng chế chỉ được sử dụng khi truy cứu trách nhiệm pháp lý.', correct: false },
+            { text: 'Trách nhiệm pháp lý chỉ phát sinh khi có vi phạm pháp luật.', correct: true },
+            { text: 'Trách nhiệm pháp lý là chế tài của một quy phạm pháp luật.', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Thực hiện hành vi giết người, phải chịu ít nhất những loại trách nhiệm pháp lý nào?',
+        answers: [
+            { text: 'Trách nhiệm hình sự và trách nhiệm hành chính.', correct: false },
+            { text: 'Trách nhiệm hình sự và trách nhiệm dân sự.', correct: true },
+            { text: 'Trách nhiệm hình sự và trách nhiệm kỷ luật.', correct: false },
+            { text: 'Chỉ chịu duy nhất trách nhiệm hình sự.', correct: false }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: 'Cơ sở truy cứu trách nhiệm pháp lý là:',
+        answers: [
+            { text: 'nhân chứng.', correct: false },
+            { text: 'vật chứng.', correct: false },
+            { text: 'vi phạm pháp luật.', correct: false },
+            { text: 'hành vi vi phạm pháp luật và văn bản quy phạm pháp luật.', correct: true }
+        ]
+    },
+    {
+        category: 'Thực hiện pháp luật, vi phạm pháp luật và trách nhiệm pháp luật',
+        question: ' Khẳng định nào sau đây là sai?',
+        answers: [
+            { text: 'Người có năng lực trách nhiệm pháp lý thực hiện hành vi vi phạm pháp luật trong tình trạng say rượu không phải chịu trách nhiệm pháp lý.', correct: true },
+            { text: 'Người có năng lực trách nhiệm hình sự thực hiện hành vi phạm tội trong tình trạng say rượu vẫn phải chịu trách nhiệm hình sự.', correct: false },
+            { text: 'Người có năng lực trách nhiệm hành chính thực hiện hành vi vi phạm hành chính trong tình trạng say rượu vẫn phải chịu trách nhiệm hành chính.', correct: false },
+            { text: 'Người có năng lực trách nhiệm dân sự thực hiện hành vi vi phạm dân sự trong tình trạng say rượu vẫn phải chịu trách nhiệm dân sự.', correct: false }
+        ]
+    }
+        ];
+
+        let shuffledQuestions, currentQuestionIndex;
+        let scores = {};
+        const categories = [...new Set(questions.map(q => q.category))];
+        let userAnswers = [];
+
+        function initializeScores() {
+            categories.forEach(category => {
+                scores[category] = { correct: 0, total: 0 };
+            });
+            questions.forEach(q => {
+                scores[q.category].total++;
+            });
+        }
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function startGame() {
+            shuffledQuestions = shuffle([...questions]);
+            currentQuestionIndex = 0;
+            initializeScores();
+            userAnswers = [];
+            $('#start-screen').hide();
+            $('#result-screen').hide();
+            $('#quiz-screen').show();
+            $('#feedback').text('');
+            setNextQuestion();
+        }
+
+        function setNextQuestion() {
+            resetState();
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                updateProgressBar();
+                showQuestion(shuffledQuestions[currentQuestionIndex]);
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex) / shuffledQuestions.length) * 100;
+            $('#progress-bar').css('width', progress + '%');
+        }
+
+        function showQuestion(question) {
+            $('#question-text').text(question.question);
+            if (question.image && question.image !== '') {
+                $('#question-image').attr('src', question.image).show();
+            } else {
+                $('#question-image').hide();
+            }
+            const answerOptions = $('#answer-options');
+            answerOptions.empty();
+            const shuffledAnswers = shuffle([...question.answers]);
+            shuffledAnswers.forEach((answer, index) => {
+                const optionLetter = String.fromCharCode(65 + index);
+                const button = $(`
+                    <li class="answer-btn">
+                        <span class="option-letter">${optionLetter}</span>
+                        ${answer.text}
+                    </li>
+                `);
+                button.data('correct', answer.correct);
+                button.on('click', selectAnswer);
+                answerOptions.append(button);
+            });
+        }
+
+        function resetState() {
+            $('#feedback').text('');
+            $('#answer-options .answer-btn').removeClass('correct incorrect').off('click');
+        }
+
+        function selectAnswer(e) {
+            const selectedBtn = $(e.currentTarget);
+            const isCorrect = selectedBtn.data('correct');
+            const question = shuffledQuestions[currentQuestionIndex];
+
+            userAnswers.push({
+                question: question.question,
+                selected: selectedBtn.text().trim().substring(3),
+                correct_answer: question.answers.find(a => a.correct).text,
+                is_correct: isCorrect
+            });
+
+            if (isCorrect) {
+                selectedBtn.addClass('correct');
+                $('#feedback').text('Chính xác!').css('color', 'green');
+                $('#correct-sound')[0].play();
+                scores[question.category].correct++;
+            } else {
+                selectedBtn.addClass('incorrect');
+                $('#feedback').text('Chưa đúng rồi!').css('color', 'red');
+                $('#wrong-sound')[0].play();
+            }
+
+            // Show correct answer
+            $('#answer-options .answer-btn').each(function() {
+                if ($(this).data('correct')) {
+                    $(this).addClass('correct');
+                }
+                $(this).off('click'); // Disable buttons
+            });
+
+            currentQuestionIndex++;
+            setTimeout(setNextQuestion, 1500);
+        }
+
+        function showResults() {
+            updateProgressBar(); // To show 100%
+            setTimeout(() => {
+                $('#quiz-screen').hide();
+                $('#result-screen').show();
+                $('#completion-sound')[0].play();
+
+                let totalCorrect = 0;
+                let totalQuestions = questions.length;
+                let scoreDetailsHtml = '';
+
+                categories.forEach(category => {
+                    const categoryScore = scores[category];
+                    totalCorrect += categoryScore.correct;
+                    scoreDetailsHtml += `
+                        <p>
+                            <strong>${category}:</strong>
+                            ${categoryScore.correct} / ${categoryScore.total}
+                        </p>`;
+                });
+
+                $('#final-score').text(`Tổng điểm: ${totalCorrect} / ${totalQuestions}`);
+                $('#score-details').html(scoreDetailsHtml);
+
+                // Post results to parent
+                const mark = (totalCorrect / totalQuestions) * 10;
+                const resultJsonObject = {
+                    type: "azt-student-result",
+                    mark: parseFloat(mark.toFixed(2)),
+                    url: window.location.href,
+                    result: {
+                        raw_score: totalCorrect,
+                        total_items: totalQuestions,
+                        scores_by_category: scores,
+                        answers: userAnswers
+                    },
+                    html_view: `<div>
+                                    <h3>Kết quả của bạn</h3>
+                                    <p>Tổng điểm: <b>${totalCorrect} / ${totalQuestions}</b></p>
+                                    ${scoreDetailsHtml}
+                               </div>`
+                };
+                window.parent.postMessage(resultJsonObject, '*');
+
+            }, 500);
+        }
+
+        $('#start-button').on('click', startGame);
+        $('#restart-button').on('click', startGame);
+    });
+    </script>
+</body>
+</html>

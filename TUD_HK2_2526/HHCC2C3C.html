@@ -1,0 +1,1494 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nhóm 6 - 51.01.TUD - HHCC2C3C</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+:root{
+  --blue:#0f4c81;
+  --blue-dark:#0b3b64;
+  --bg:#f5f7fb;
+  --line:#e5e7eb;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:Inter,system-ui;
+  background:var(--bg);
+}
+
+/* TOP BAR */
+.topbar{
+  height:56px;
+  background:var(--blue);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  padding:0 24px;
+  font-weight:700;
+}
+
+/* LAYOUT */
+.layout{
+  display:flex;
+  min-height:calc(100vh - 56px);
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:180px; /* từ 240px → 180px */
+  background:#fff;
+  border-right:1px solid var(--line);
+  padding-top:16px;
+}
+
+
+.sidebar h3{
+  padding:10px 20px;
+  font-size:13px;
+  color:#6b7280;
+  text-transform:uppercase;
+}
+
+.sidebar a{
+  display:block;
+  padding:12px 20px;
+  font-weight:600;
+  cursor:pointer;
+  border-left:3px solid transparent;
+}
+
+.sidebar a.active,
+.sidebar a:hover{
+  background:#f0f4f8;
+  border-left-color:var(--blue);
+  color:var(--blue);
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  padding:24px;
+}
+
+.card{
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.05);
+  overflow:hidden;
+  width:100%;
+}
+
+
+
+.card-header{
+  background:var(--blue-dark);
+  color:#fff;
+  padding:14px 18px;
+  font-weight:700;
+}
+
+/* FORM */
+.form-row{
+  padding:18px;
+  border-bottom:1px solid var(--line);
+}
+
+label{
+  font-weight:600;
+  display:block;
+  margin-bottom:6px;
+}
+
+select{
+  width:100%;
+  padding:10px 12px;
+  font-size:15px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:#fff;
+}
+
+/* IFRAME */
+.iframe-box{
+  display:none;
+  height:1500px;
+  border-top:1px solid var(--line);
+}
+
+.iframe-box iframe{
+  width:100%;
+  height:100%;
+  border:none;
+}
+/* ===== BẢNG CHUNG CHO TẤT CẢ ===== */
+
+.main table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  font-size:18px;
+  background:#fff;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 6px 16px rgba(0,0,0,.08);
+}
+
+.main thead th{
+  background:linear-gradient(135deg,#0f4c81,#0b3b64);
+  color:#fff;
+  padding:16px 14px;
+  font-weight:600;
+  text-align:center;
+}
+
+.main tbody td{
+  padding:20px 18px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:center;
+}
+
+.main tbody td:nth-child(2){
+  text-align:left;
+  font-weight:600;
+}
+
+.main tbody tr:nth-child(even){
+  background:#f8fafc;
+}
+
+.main tbody tr:hover{
+  background:#eaf3fb;
+}
+
+.main tbody td:last-child{
+  font-weight:700;
+  color:#0f4c81;
+}
+
+/* TAB */
+.content{display:none;}
+.content.active{display:block;}
+/* ===== NỀN TẢNG ===== */
+.platform-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:22px;
+}
+
+.platform-card{
+  background:#fff;
+  border-radius:16px;
+  padding:36px 20px;
+  text-align:center;
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+  position:relative;
+  cursor:pointer;
+  transition:.25s;
+  overflow:hidden;
+}
+
+/* nền chấm góc giống ảnh */
+.platform-card::before{
+  content:"";
+  position:absolute;
+  width:120px;
+  height:120px;
+  background:radial-gradient(#cddff1 1px, transparent 1px);
+  background-size:8px 8px;
+  bottom:-20px;
+  left:-20px;
+  opacity:.7;
+}
+
+.platform-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 12px 28px rgba(0,0,0,.12);
+}
+
+.platform-card .icon{
+  font-size:48px;
+  margin-bottom:18px;
+}
+
+.platform-card h4{
+  color:#0f4c81;
+  font-size:16px;
+  font-weight:700;
+  line-height:1.4;
+}
+.menu-btn{
+  font-size:22px;
+  margin-right:16px;
+  cursor:pointer;
+  display:none;
+}
+
+/* responsive */
+@media(max-width:1000px){
+  .platform-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:600px){
+  .platform-grid{grid-template-columns:1fr;}
+}
+/* ===== SIDEBAR MOBILE ===== */
+@media (max-width: 768px){
+
+  .menu-btn{
+    display:block;
+  }
+
+  .layout{
+    flex-direction:column;
+  }
+
+  .sidebar{
+    position:fixed;
+    top:56px;
+    left:-220px;
+    width:200px;
+    height:calc(100vh - 56px);
+    background:#fff;
+    z-index:1000;
+    transition:0.3s ease;
+    box-shadow:4px 0 12px rgba(0,0,0,.15);
+  }
+
+  .sidebar.show{
+    left:0;
+  }
+
+  .main{
+    padding:16px;
+  }
+}
+/* ===== GHI CHÚ ===== */
+.note-box{
+  margin-top:20px;
+  background:#f0f6ff;
+  border-left:5px solid #0f4c81;
+  padding:16px 20px;
+  border-radius:8px;
+  font-size:16px;
+  line-height:1.6;
+  color:#374151;
+}
+
+.note-box strong{
+  color:#0f4c81;
+}
+
+.note-box ul{
+  margin-top:8px;
+  padding-left:18px;
+}
+
+.note-box li{
+  margin-bottom:6px;
+}
+.main table{
+  font-family:"Times New Roman", Times, serif;
+}
+/* ===== NOTICE CARD ===== */
+
+.notice-list{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.notice-card{
+  background:#fff;
+  border-radius:12px;
+  padding:22px 24px;
+  box-shadow:0 6px 16px rgba(0,0,0,.08);
+  border-left:6px solid #d1d5db;
+  transition:.2s;
+}
+
+.notice-card:hover{
+  transform:translateY(-3px);
+  box-shadow:0 10px 22px rgba(0,0,0,.12);
+}
+
+.notice-card.new{
+  border-left-color:#f97316;
+  background:#fffaf5;
+}
+
+.notice-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+
+.notice-title{
+  font-size:18px;
+  font-weight:700;
+  color:#b91c1c;
+}
+
+.notice-body{
+  line-height:1.7;
+  color:#374151;
+  font-size:16px;
+}
+
+.notice-deadline{
+  font-weight:700;
+  color:#0f4c81;
+  font-size:15px;
+}
+
+.badge{
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:700;
+}
+
+.badge.new{
+  background:#ef4444;
+  color:#fff;
+}
+
+.badge.end{
+  background:#9ca3af;
+  color:#fff;
+}
+/* ===== COUNTDOWN ===== */
+.countdown-box{
+  margin-top:16px;
+  background:#fff3f0;
+  border-left:6px solid #ef4444;
+  border-radius:10px;
+  padding:16px 20px;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+}
+
+.countdown-title{
+  font-weight:700;
+  color:#b91c1c;
+}
+
+.countdown-time{
+  font-size:22px;
+  font-weight:700;
+  color:#0f4c81;
+  letter-spacing:1px;
+}
+
+.topbar{
+  height:60px;
+  background:linear-gradient(135deg,#0f4c81,#0b3b64);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+}
+
+.title{
+  font-weight:700;
+  margin-left:10px;
+}
+
+/* ===== DATETIME PRO ===== */
+.topbar{
+  height:60px;
+  background:linear-gradient(135deg,#0f4c81,#0b3b64);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  padding:0 20px;
+}
+
+.title{
+  margin-left:10px;
+  font-weight:700;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* ===== DATETIME 1 HÀNG ===== */
+.datetime-inline{
+  margin-left:auto;
+
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  font-size:14px;
+  font-weight:600;
+  letter-spacing:0.4px;
+
+  padding:6px 16px;
+
+  color:#eaf3ff;
+
+  background:linear-gradient(135deg,rgba(255,255,255,0.18),rgba(255,255,255,0.05));
+  border:1px solid rgba(255,255,255,0.25);
+
+  border-radius:999px;
+
+  backdrop-filter:blur(8px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.25),
+    0 4px 12px rgba(0,0,0,0.25);
+
+  transition:all 0.25s ease;
+}
+
+/* hover nhẹ cho cảm giác xịn */
+.datetime-inline:hover{
+  background:linear-gradient(135deg,rgba(255,255,255,0.25),rgba(255,255,255,0.08));
+  transform:translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.3),
+    0 6px 16px rgba(0,0,0,0.3);
+}
+.sidebar a{
+  display:block;
+  padding:12px 20px;
+  font-weight:600;
+  cursor:pointer;
+  border-left:3px solid transparent;
+  color:#111827; /* thêm dòng này */
+  text-decoration:none; /* thêm dòng này */
+}
+/* ===== NOTICE FOOTER (ngày đăng / cập nhật) ===== */
+.notice-footer{
+  margin-top:14px;
+  padding-top:10px;
+  border-top:1px dashed #e5e7eb;
+
+  display:flex;
+  justify-content:space-between;
+
+  font-size:13px;
+  color:#6b7280;
+  font-style:italic;
+}
+/* ===== MODAL ===== */
+.modal{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-box{
+  background:#fff;
+  padding:28px 24px;
+  border-radius:14px;
+  width:320px;
+  text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  animation:fadeIn 0.25s ease;
+}
+
+.modal-title{
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:10px;
+  color:#b91c1c;
+}
+
+.modal-body{
+  font-size:15px;
+  margin-bottom:18px;
+  color:#374151;
+}
+
+.modal-box button{
+  padding:8px 16px;
+  border:none;
+  background:#0f4c81;
+  color:#fff;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.modal-box button:hover{
+  background:#0b3b64;
+}
+
+@keyframes fadeIn{
+  from{transform:scale(0.9);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <span class="menu-btn" onclick="toggleSidebar()">☰</span>
+
+  <div class="title">
+    NHÓM 6 - 51.01.TUD - HÌNH HỌC CAO CẤP HAI CHIỀU VÀ BA CHIỀU
+  </div>
+
+  <div class="datetime-inline" id="datetime"></div>
+</div>
+
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+      <h3>Thông tin</h3>
+<a class="active" onclick="showTab('thongbao',this)">Deadline</a>
+
+<a onclick="showTab('linktruycap',this)">Link truy cập</a>
+      <h3>Điểm nhóm</h3>
+<a  onclick="showTab('tongket',this)">Điểm tổng kết</a>
+<a  onclick="showTab('chuyencan',this)">Điểm chuyên cần</a>
+<a  onclick="showTab('canhan',this)">Sản phẩm cá nhân</a>
+<a  onclick="showTab('hoatdongnhom',this)">Hoạt động nhóm</a>
+
+  </div>
+
+
+  <!-- MAIN -->
+  <div class="main">
+<div id="thongbao" class="content active">
+<div class="notice-list">
+
+<div class="notice-card new">
+
+
+<div class="notice-header">
+<span class="badge new">New</span>
+<div class="countdown-box">
+  <div class="countdown-title">
+⏳ Thời gian còn lại (Bài Đợt 4):
+  </div>
+  <div class="countdown-time" id="countdown">
+Đang tải...
+  </div>
+</div>
+<div class="notice-deadline">
+⏰Thời hạn nộp bài Đợt 4: 17h59’ – Ngày 21/04/2026
+</div>
+</div>
+
+<div class="notice-title">
+📌 Bài tập Đợt 4 – Chương 1 (Bài 8)
+</div>
+
+<div class="notice-body">
+<p style="
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #ff6a00, #ee0979);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;">
+  Thảo thuyết trình (Chí, Tiên hỗ trợ)
+</p>
+Trong \(\mathbb{A}^2\) thực cho đường bậc hai \(S_1\) có phương trình đối với mục tiêu \((O,\vec{e_1}, \vec{e_2})\) là: \[
+S_1: 4x_1^2+x_2^2+4x_1x_2+2x_2=0
+\]
+a) Tìm phương trình chính tắc và mục tiêu chính tắc tương ứng của các đường bậc hai đã cho <br>
+b) Tìm tâm, phương tiệm cận, đường tiệm cận (nếu có) của các đường bậc hai
+
+<div class="notice-title">
+📌 Nội dung ôn tập cuối kì (Bạn đọc muốn tóm tắt lý thuyết thì làm r gửi lên nhóm cho các bạn ôn tập)
+</div>
+<table border="1">
+<tr>
+<th>Bài</th>
+<th>Dự đoán các dạng bài tập</th>
+</tr>
+<tr>
+<td>Không gian Affine, Euclide</td>
+<td>- Cho không gian vectơ X. Kiểm tra X có phải là một không gian Affine hay không? Vì sao? <br> 
+- Chứng minh hệ điểm độc lập Affine <br>
+- Cho không gian vectơ Y. Kiểm tra Y có phải là một không gian Euclide hay không?</td>
+</tr>
+<tr>
+<td>Phương trình m-phẳng trong Affine</td>
+<td>- Viết phương trình 2-phẳng hoặc 3-phẳng dạng tham số / tổng quát biết: <ul>
+<li>Đi qua các điểm cho trước</li>
+<li>Song song với mặt phẳng (P) và đi qua một số điểm cho trước</li>
+<li>Đi qua một điểm cho trước và biết phương của phẳng chứa các vectơ...</li>
+<li>Siêu phẳng có số chiều nhỏ bé nhất chứa hai, ba... đường thẳng </li>
+<li>Đi qua một điểm, có cùng số chiều với phẳng (P) và song song với phẳng (Q)
+<li>Đi qua một điểm cho trước và chứa mặt phẳng (P)</li>
+<li>...</li>
+</ul>
+- Xét vị trí tương đối giữa hai / ba phẳng <br>
+- Tìm tọa độ giao điểm giữa hai đường thẳng, giữa đường thẳng với siêu phẳng... <br>
+- Xác định phương và số chiều của siêu phẳng, tìm phẳng giao, phẳng tổng <br>
+
+</td>
+</tr>
+<tr>
+<td>Đổi mục tiêu Affine</td>
+<td>- Tìm công thức đổi mục tiêu khi biết mục tiêu cũ và mới <br>
+- Áp dụng công thức đổi mục tiêu để tìm tọa độ mới <br>
+- Tìm công thức đổi tọa độ từ mục tiêu này sang mục tiêu khác...</td>
+</tr>
+<tr>
+<td>Phép biến đổi Affine</td>
+<td>- Viết phương trình phép biến đổi Affine sao cho f(A <sub>i</sub>)=A<sub>i</sub> đối với mục tiêu đã chọn <br>
+- Viết phương trình phép biến đổi Affine đối với mục tiêu đã chọn, mục tiêu mới <br>
+- Tìm ảnh và tạo ảnh của một điểm, đường thẳng <br>
+- Tìm điểm kép, phương bất biến <br>
+- Tìm phép affine f<sup>-1</sup>
+</td>
+</tr>
+<tr>
+<td>Phép biến đổi đẳng cự</td>
+<td>- Xét tính chất của phép biến đổi của phương trình đối với mục tiêu trực chuẩn trong không gian Euclide <br>
+- Viết phương trình các phép đẳng cự (phép dời hình) của E^2 biến hình (H) thành chính nó...<br>
+- Xác định phép biến đổi tuyến tính φ sao cho φ(a<sub>i</sub>)=a<sub>i</sub></td>
+</tr>
+<tr>
+<td>Siêu mặt bậc hai trong không gian Affine, Euclide</td>
+<td>- Đường bậc hai: Đưa về dạng chính tắc, tìm tâm, bài toán tương giao, phương tiệm cận và đường tiệm cận, đường kính liên hợp, phương trình tiếp tuyến, điểm kì dị,  phân loại đường bậc hai trong không gian Affine hoặc Euclide<br>
+- Siêu mặt bậc hai: Đưa về dạng chính tắc, tìm tâm, bài toán tương giao, phương tiệm cận và đường tiệm cận, nón tiệm cận, mặt kính và đường kính liên hợp, đường sinh, phương trình tiếp tuyến và tiếp diện, điểm kì dị, phương chính, phép quay tâm O quanh trục Oz, phép co rút và mặt tròn xoay, phân loại mặt bậc hai trong không gian Affine hoặc Euclide</td>
+</tr>
+<tr><td>Tâm tỉ cự</td><td>Định lí về tâm tỉ cự của hệ điểm trong không gian Affine (2 chiều và 3 chiều)</td></tr>
+</table>
+
+<div class="notice-footer">
+<span>📅 Ngày đăng: 08/04/2026</span>
+<span>📅 Ngày cập nhật: 22/04/2026</span>
+</div>
+</div>
+</div>
+</div>
+<br>
+<div class="notice-card end">
+
+<div class="notice-header">
+<span class="badge end">End</span>
+
+<div class="notice-deadline">
+⏰Thời hạn nộp: 17h59’ – Ngày 24/03/2026 <br>
+⏰Gia hạn chỉnh sửa: 17h59' - Ngày 31/03/2026
+</div>
+</div>
+
+<div class="notice-title">
+📌 Bài tập Đợt 3 – Chương 1 (Bài 4,5,6)
+</div>
+
+<div class="notice-body">
+<p style="
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #ff6a00, #ee0979);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;">
+  Thy thuyết trình
+</p>
+<p><b>Bài tập 10:</b> Trong không gian affine \(\mathbb{A}^n\) cho công thức đổi mục tiêu: 
+\[
+\begin{cases}
+x_1 = y_1 + y_2 + y_3 + \cdots + y_n + 1 \\
+x_2 = \qquad y_2 + y_3 + \cdots + y_n + 2 \\
+x_3 = \qquad\qquad y_3 + \cdots + y_n + 3 \\
+\cdots \\
+x_n = \qquad\qquad\qquad\qquad y_n + n
+\end{cases}
+\]
+trong đó \((x_1,x_2,...,x_n)\) tọa độ của một điểm \(X\) thuộc \(\mathbb{A}^n\) đối với mục tiêu thứ nhất và \((y_1,y_2,...,y_n)\) là tọa độ của điểm \(X\) đối với mục tiêu thứ hai. Lập phương trình phép biến đổi affine đối với mục tiêu thứ nhất và biến mục tiêu thứ nhất thành mục tiêu thứ hai. Tìm tọa độ các đỉnh của mục tiêu thứ hai đối với mục tiêu thứ nhất.
+</p>
+<br>
+
+<b>Yêu cầu phụ (Nếu làm được):</b>
+
+<ul>
+<li>
+Có thể trình bày thêm phương pháp giải,
+định hướng tiếp cận và kiến thức sử dụng.
+</li>
+
+<li>
+Suy nghĩ <b>1 slogan cho nhóm</b> và gửi lên group Zalo.  
+Ví dụ: <i>Tri thức là đôi cánh, tự do là bầu trời.</i>
+</li>
+
+</ul>
+<div class="notice-footer">
+<span>📅 Ngày đăng: 15/03/2026</span>
+<span>🔄 Ngày cập nhật: 24/03/2026</span>
+</div>
+</div>
+
+</div>
+<br>
+
+<div class="notice-card">
+
+<div class="notice-header">
+<span class="badge end">END</span>
+<div class="notice-deadline">
+📅Thời hạn: 17h59’ – Ngày 03/03/2026 <br>
+📅Gia hạn: 23h59’ – Ngày 03/03/2026
+</div>
+</div>
+
+<div class="notice-title">
+📌 Bài tập Đợt 1 (Bài 1,2: Không gian Affine và Hình học Affine. Tọa độ Affine và mục tiêu Affine)
+</div>
+
+<div class="notice-body">
+<p style="
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #ff6a00, #ee0979);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;">
+  Khoa thuyết trình
+</p>
+<p><b>Bài tập 2:</b> Cho hai không gian affine \((\mathbb{A}_{\nVdash}, \varphi_1, V_1)\),
+\((\mathbb{A}_{\nvDash}, \varphi_2, V_2)\) trên cùng một trường \(\mathbb{K}\).
+Đặt
+\(
+\mathbb{A} = \mathbb{A}_{\nVdash} \times \mathbb{A}_{\nvDash}, \text{ }
+V = V_1 \times V_2
+\)
+và \( \varphi: \mathbb{A} \times \mathbb{A} \to V \) là ánh xạ cho bởi:
+\[
+\varphi\big((M_1, M_2), (N_1, N_2)\big)
+:= \big(\varphi_1(M_1, N_1), \varphi_2(M_2, N_2)\big).
+\]
+Chứng minh rằng bộ ba \((\mathbb{A},\varphi,V)\) là một không gian Affine.</p>
+
+<br>
+<div class="notice-title">
+📌 Bài tập Đợt 2 (Bài 3: Các phẳng trong không gian Affine)
+</div>
+<p style="
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(90deg, #ff6a00, #ee0979);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;">
+  Vy thuyết trình
+</p>
+<p><b>Bài tập 6:</b> Trong không gian affine \(\mathbb{A}^3\), cho mục tiêu affine 
+\(\{O; \overrightarrow e_1, \overrightarrow e_2, \overrightarrow e_3\}\) và các điểm \(P_i\) với 
+\(\overrightarrow{OP_i} = a_i \overrightarrow e_i\), \(a_i \ne 0\), \(i = 1,2,3\). Chứng minh rằng ba điểm \(P_1, P_2, P_3\) độc lập và phương trình siêu phẳng 
+đi qua ba điểm ấy có thể viết dưới dạng:
+\[
+\frac{x_1}{a_1} + \frac{x_2}{a_2} + \frac{x_3}{a_3} = 1.
+\]  </p>
+
+</div>
+<div class="notice-footer">
+<span>📅 Ngày đăng: 04/02/2026</span>
+<span>🔄 Ngày cập nhật: 03/03/2026</span>
+</div>
+</div>
+</div>
+
+
+<div id="linktruycap" class="content">
+<div class="platform-grid">
+
+    <a href="https://drive.google.com/drive/folders/1UQxedDmGRIFpl2XP_mA-1uWo7T4fwsn-?usp=drive_link" target="_blank" class="platform-card">
+      <div class="icon">🗂️</div>
+      <h4>Drive</h4>
+    </a>
+    <a href="https://www.canva.com/design/DAHCZKdp1_E/tNPOAX4uAgODx1CIjP0E1g/edit" target="_blank" class="platform-card">
+      <div class="icon">🎓</div>
+      <h4>Chỉnh sửa bài tập</h4>
+    </a>
+	<a href="https://www.overleaf.com/5357579487fdbspwxfxqbz#ff567a" target="_blank" class="platform-card">
+      <div class="icon">📝</div>
+      <h4>LaTeX (Bâi tập nhóm)</h4>
+    </a>
+  </div>
+</div>
+
+
+
+<div id="tongket" class="content">
+  <table style="width:100%; border-collapse:collapse; font-size:18px;">
+    <thead style="background:#0b3b64; color:#fff;">
+      <tr>
+        <th>MSSV</th>
+<th>Họ và tên</th>
+<th>Chuyên cần (20%)</th>
+<th>Cá nhân (30%)</th>
+<th>Hoạt động nhóm (50%)</th>
+<th>Tổng kết</th>
+      </tr>
+    </thead>
+    <tbody>
+     <tr>
+<td>51.01.108.052</td>
+<td class="name">Nguyễn Phạm Lê Vy</td>
+<td class="cc"></td>
+<td class="cn"></td>
+<td class="nhom"></td>
+<td class="tk"></td>
+</tr>
+
+<tr>
+<td>51.01.108.008</td>
+<td class="name">Trương Bảo Chí</td>
+<td class="cc"></td>
+<td class="cn"></td>
+<td class="nhom"></td>
+<td class="tk"></td>
+</tr>
+
+<tr>
+<td>51.01.108.023</td>
+<td class="name">Dương Nguyên Khoa</td>
+<td class="cc"></td>
+<td class="cn"></td>
+<td class="nhom"></td>
+<td class="tk"></td>
+</tr>
+
+<tr>
+<td>51.01.108.039</td>
+<td class="name">Nguyễn Thị Thanh Thảo</td>
+<td class="cc"></td>
+<td class="cn"></td>
+<td class="nhom"></td>
+<td class="tk"></td>
+</tr>
+
+<tr>
+<td>51.01.108.044</td>
+<td class="name">Nguyễn Huỳnh Trúc Thy</td>
+<td class="cc"></td>
+<td class="cn"></td>
+<td class="nhom"></td>
+<td class="tk"></td>
+</tr>
+
+<tr>
+<td>51.01.108.046</td>
+<td class="name">Nguyễn Ngọc Thủy Tiên</td>
+<td class="cc"></td>
+<td class="cn"></td>
+<td class="nhom"></td>
+<td class="tk"></td>
+</tr>
+
+    </tbody>
+  </table>
+</div> 
+
+<div id="chuyencan" class="content">
+  <table style="width:100%; border-collapse:collapse; font-size:18px;">
+    <thead style="background:#0b3b64; color:#fff;">
+      <tr>
+        <th>STT</th>
+        <th>Họ và tên</th>
+        <th>Buổi 1</th>
+        <th>Buổi 2</th>
+        <th>Buổi 3</th>
+        <th>Buổi 4</th>
+        <th>Buổi 5</th>
+        <th>Buổi 6</th>
+        <th>Buổi 7</th>
+        <th>Buổi 8</th>
+        <th>Buổi 9</th>
+        <th>Buổi 10</th>
+		<th>Tương tác</th>
+        <th>Trung bính</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td></td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+		<td>20</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td></td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+		<td>20</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td></td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+		<td>20</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td></td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>7.6</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>6.5</td>
+        <td>10</td>
+        <td>10</td>
+		<td>20</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td></td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>7.6</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+		<td>20</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td></td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>10</td>
+        <td>7.6</td>
+        <td>10</td>
+        <td>10</td>
+        <td>6.5</td>
+        <td>10</td>
+        <td>10</td>
+		<td>20</td>
+        <td></td>
+      </tr>
+	 <tr>
+
+     
+      </tr>
+    </tbody>
+  </table>
+<div class="note-box">
+<strong>📌 Ghi chú:</strong>
+<ul>
+<li>Điểm từ <b>Buổi 1 → Buổi 10</b> là cột điểm danh.  
+Sinh viên có mặt được <b>10 điểm</b>; vắng thì đạt từ <b>0–8 điểm</b> tùy theo lý do</li>
+
+<li>Cột <b>Tương tác</b> (nếu có): Là cột <b>điểm cộng</b>, dùng để đánh giá mức độ tham gia thảo luận, đặt câu hỏi chất lượng và đóng góp ý kiến cho các nhóm khác. (Điểm tối thiểu là 10đ, điểm tối đa là 100đ)</li>
+</ul>
+</div>
+</div> 
+
+<div id="canhan" class="content">
+  <table style="width:100%; border-collapse:collapse; font-size:18px;">
+    <thead style="background:#0b3b64; color:#fff;">
+      <tr>
+        <th>STT</th>
+        <th>Họ và tên</th>
+        <th>Bài Đợt 1</th>
+        <th>Bài Đợt 2</th>
+		<th>Bài Đợt 3</th>
+        <th>Bài Đợt 4</th>
+        <th>LaTeX</th>
+        <th>Trung bính</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td></td>
+        <td>10</td>
+        <td>10</td>
+		<td>10</td>
+        <td>10</td>
+        <td>20</td>
+       <td></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td></td>
+        <td>10</td>
+        <td>10</td>
+		<td>10</td>
+        <td>10</td>
+        <td>20</td>
+         <td></td>
+      </tr>
+	 <tr>
+        <td>3</td>
+        <td></td>
+        <td>10</td>
+        <td>10</td>
+		<td>10</td>
+        <td></td>
+        <td>20</td>
+         <td></td>
+      </tr>
+	 <tr>
+        <td>4</td>
+        <td></td>
+        <td>10</td>
+        <td>10</td>
+		<td>10</td>
+        <td>9</td>
+        <td>20</td>
+         <td></td>
+      </tr>
+	 <tr>
+        <td>5</td>
+        <td></td>
+        <td>10</td>
+        <td>10</td>
+		<td>10</td>
+        <td></td>
+        <td>10</td>
+         <td></td>
+      </tr>
+	 <tr>
+        <td>6</td>
+        <td></td>
+        <td>10</td>
+        <td>10</td>
+		<td>10</td>
+        <td>9</td>
+        <td>20</td>
+         <td></td>
+      </tr>
+	 <tr>
+
+     
+      </tr>
+    </tbody>
+  </table>
+<div class="note-box">
+<strong>📌 Ghi chú:</strong>
+<ul>
+<li>Cột "bài tập": Thể hiện thời hạn nộp bài (deadline). Nếu nộp đúng hạn sẽ được 5 điểm; nộp trễ (sau thời gian gia hạn) sẽ bị trừ điểm. Đồng thời là cột điểm đánh giá (5đ còn lại), được chấm như một bài kiểm tra kết thúc học phần, nhằm đánh giá mức độ hiểu bài và kỹ năng trình bày của người thực hiện.</li>
+<li>Cột LaTeX (nếu có): Đây là cột điểm cộng - Đánh giá điểm hình thức trình bày LaTeX ổn, mới mẻ, sáng tạo, độc lạ,... với thang điểm từ 10 đến 100 điểm. (Ngoài ra, còn tính thêm các hoạt động: Quay video giải bài tập, dùng Maple, Matlab...)</li>
+</ul>
+</div>
+</div> 
+<div id="hoatdongnhom" class="content">
+  <table style="width:100%; border-collapse:collapse; font-size:18px;">
+    <thead style="background:#0b3b64; color:#fff;">
+      <tr>
+        <th>STT</th>
+        <th>Họ và tên</th>
+        <th>Replies</th>
+        <th>Thuyết trình/LaTeX</th>
+        <th>Làm việc nhóm</th>
+        <th>Đóng góp</th>
+        <th>Trung bính</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td></td>
+        <td>10</td>
+        <td>8.2</td>
+        <td>10</td>
+		<td>30</td>
+         <td></td>
+      </tr>
+	 <tr>
+        <td>2</td>
+        <td></td>
+        <td>10</td>
+        <td>8.2</td>
+        <td>10</td>
+        <td>30</td>
+         <td></td>
+      </tr>
+	 <tr>
+        <td>3</td>
+        <td></td>
+        <td>10</td>
+        <td>8</td>
+		<td>10</td>
+        <td>13</td>
+         <td></td>
+      </tr>
+	 <tr>
+        <td>4</td>
+        <td></td>
+        <td>9</td>
+        <td>8</td>
+        <td>10</td>
+		<td>13</td>
+         <td></td>
+      </tr>
+	 <tr>
+        <td>5</td>
+        <td></td>
+        <td>9</td>
+        <td>8</td>
+        <td>10</td>
+        <td>13</td>
+         <td></td>
+      </tr>
+	 <tr>
+        <td>6</td>
+        <td></td>
+        <td>10</td>
+        <td>8</td>
+        <td>10</td>
+        <td>13</td>
+         <td></td>
+      </tr>
+	 <tr>
+
+     
+      </tr>
+    </tbody>
+  </table>
+<div class="note-box">
+<strong>📌 Ghi chú:</strong>
+<ul>
+
+<li>Cột “Thuyết trình” (dự kiến 1 lần/bạn): Dùng để đánh giá kỹ năng trình bày và thuyết trình của người thực hiện bài tập. Nếu chưa có cơ hội lên thuyết trình thì sẽ lấy điểm LaTeX+hoạt động nhóm thay thế</li>
+
+<li>Cột <b>Replies</b> thể hiện số lần tương tác <b><i>trong nhóm</i></b> (1 lần tương tác online = 0,2 điểm; 1 lần tương tác trực tiếp = 0,4 điểm).  
+Mỗi lần tương tác online được tính theo số tin nhắn hoặc biểu tượng cảm xúc hợp lệ; một tin nhắn dù chứa nhiều biểu tượng cảm xúc vẫn chỉ được tính là <b>1 lần</b>.</li>
+	
+<li>Cột “Đóng góp” (Điểm cộng): Ghi nhận các hoạt động hỗ trợ và đóng góp cho nhóm, bao gồm chia sẻ tài liệu, đóng góp ý kiến, tham gia thảo luận, chia sẻ kinh nghiệm hoặc các hình thức hỗ trợ học tập khác. (Nếu có đóng góp thì điểm tối thiểu là 10đ, điểm tối đa là 100đ)</li>
+</ul>
+</div>
+</div> 
+
+<div id="latexModal" class="modal">
+  <div class="modal-box">
+    <div class="modal-title">🔒 Thông báo</div>
+    <div class="modal-body">
+      Tạm thời chưa truy cập được
+    </div>
+    <button onclick="closeModal()">Đã hiểu</button>
+  </div>
+</div>
+   
+
+<script>
+function showTab(id, el){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function loadTKB(select, iframeId, boxId){
+  const iframe = document.getElementById(iframeId);
+  const box = document.getElementById(boxId);
+
+  if(select.value){
+    iframe.src = select.value;
+    box.style.display = 'block';
+    box.scrollIntoView({behavior:'smooth'});
+  }else{
+    box.style.display = 'none';
+    iframe.src = '';
+  }
+}
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('show');
+}
+function showTab(id, el){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+
+  // đóng sidebar trên mobile
+  document.querySelector('.sidebar').classList.remove('show');
+}
+/* ===== TAB + GHI NHỚ ===== */
+function showTab(id, el){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+
+  localStorage.setItem('activeTab', id);
+
+  // đóng sidebar mobile
+  document.querySelector('.sidebar').classList.remove('show');
+}
+
+/* ===== TAB + GHI NHỚ ===== */
+function showTab(id, el){
+  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+
+  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+
+  localStorage.setItem('activeTab', id); // ❌ XOÁ DÒNG NÀY
+
+  document.querySelector('.sidebar').classList.remove('show');
+}
+
+
+/* ===== SIDEBAR MOBILE ===== */
+function toggleSidebar(){
+  document.querySelector('.sidebar').classList.toggle('show');
+}
+
+/* ===== SEARCH NỀN TẢNG ===== */
+function filterPlatform(){
+  const keyword = document.getElementById('searchPlatform').value.toLowerCase();
+  document.querySelectorAll('.platform-card').forEach(card=>{
+    const text = card.innerText.toLowerCase();
+    card.style.display = text.includes(keyword) ? 'block' : 'none';
+  });
+}
+
+</script>
+<script>
+
+/* ===== TÍNH TRUNG BÌNH CHO TẤT CẢ BẢNG ===== */
+
+function tinhTrungBinhTatCa(){
+
+  const tables = document.querySelectorAll(".main table");
+
+  tables.forEach(table => {
+
+    const rows = table.querySelectorAll("tbody tr");
+
+    rows.forEach(row => {
+
+      const cells = row.querySelectorAll("td");
+
+      if(cells.length < 3) return;
+
+      let tong = 0;
+      let dem = 0;
+
+      for(let i=2;i<cells.length-1;i++){
+
+        let val = cells[i].innerText.trim();
+
+        if(val !== "" && !isNaN(val)){
+          tong += parseFloat(val);
+          dem++;
+        }
+
+      }
+
+if(dem>0){
+  let tb = tong/dem;
+
+  if(tb > 10) tb = 10; // giới hạn tối đa 10
+
+  cells[cells.length-1].innerText = tb.toFixed(2);
+}
+
+    });
+
+  });
+
+}
+
+window.addEventListener("load", tinhTrungBinhTatCa);
+
+</script>
+<script>
+function tinhTongKet(){
+
+const cc = document.querySelectorAll("#chuyencan tbody tr td:last-child");
+const cn = document.querySelectorAll("#canhan tbody tr td:last-child");
+const nhom = document.querySelectorAll("#hoatdongnhom tbody tr td:last-child");
+
+const ccTK = document.querySelectorAll("#tongket .cc");
+const cnTK = document.querySelectorAll("#tongket .cn");
+const nhomTK = document.querySelectorAll("#tongket .nhom");
+const tong = document.querySelectorAll("#tongket .tk");
+
+for(let i=0;i<cc.length;i++){
+
+let diemCC = parseFloat(cc[i].innerText) || 0;
+let diemCN = parseFloat(cn[i].innerText) || 0;
+let diemNH = parseFloat(nhom[i].innerText) || 0;
+
+ccTK[i].innerText = diemCC.toFixed(2);
+cnTK[i].innerText = diemCN.toFixed(2);
+nhomTK[i].innerText = diemNH.toFixed(2);
+
+let tk = diemCC*0.2 + diemCN*0.3 + diemNH*0.5;
+
+tong[i].innerText = tk.toFixed(2);
+
+}
+
+}
+
+window.addEventListener("load",function(){
+tinhTrungBinhTatCa();
+tinhTongKet();
+});
+function dongBoTen(){
+
+  const names = document.querySelectorAll("#tongket .name");
+
+  const tables = [
+    "#chuyencan tbody tr",
+    "#canhan tbody tr",
+    "#hoatdongnhom tbody tr"
+  ];
+
+  tables.forEach(tableID => {
+
+    const rows = document.querySelectorAll(tableID);
+
+    rows.forEach((row,i)=>{
+      if(names[i]){
+        row.children[1].innerText = names[i].innerText;
+      }
+    });
+
+  });
+
+}
+
+window.addEventListener("load", dongBoTen);
+function updateCountdown(){
+
+const deadline = new Date("April 21, 2026 17:59:00").getTime();
+const now = new Date().getTime();
+
+const diff = deadline - now;
+
+if(diff <= 0){
+document.getElementById("countdown").innerHTML = "ĐÃ HẾT HẠN";
+return;
+}
+
+const days = Math.floor(diff / (1000*60*60*24));
+const hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+const minutes = Math.floor((diff % (1000*60*60)) / (1000*60));
+const seconds = Math.floor((diff % (1000*60)) / 1000);
+
+document.getElementById("countdown").innerHTML =
+days + " ngày " +
+hours + " giờ " +
+minutes + " phút " +
+seconds + " giây";
+
+}
+
+setInterval(updateCountdown,1000);
+updateCountdown();
+
+function updateClock(){
+  const now = new Date();
+  const days = ["Chủ Nhật","Thứ 2","Thứ 3","Thứ 4","Thứ 5","Thứ 6","Thứ 7"];
+  const day = days[now.getDay()];
+  const d = String(now.getDate()).padStart(2,'0');
+  const m = String(now.getMonth()+1).padStart(2,'0');
+  const y = now.getFullYear();
+
+  const h = String(now.getHours()).padStart(2,'0');
+  const min = String(now.getMinutes()).padStart(2,'0');
+
+  const newText = `🕒 ${day} • ${d}/${m}/${y} • ${h}:${min}`;
+  const el = document.getElementById("datetime");
+
+  // chỉ update khi nội dung thay đổi → tránh giật
+  if(el.innerText !== newText){
+    el.innerText = newText;
+  }
+}
+
+/* chạy mượt theo frame */
+function loop(){
+  updateClock();
+  requestAnimationFrame(loop);
+}
+
+loop();
+function checkLatexAccess(e){
+
+  const openDate = new Date("April 15, 2026 00:00:00").getTime();
+  const now = new Date().getTime();
+
+  if(now < openDate){
+    e.preventDefault();
+    document.getElementById("latexModal").classList.add("show");
+    return false;
+  }
+
+  return true;
+}
+
+function closeModal(){
+  document.getElementById("latexModal").classList.remove("show");
+}
+document.addEventListener("contextmenu", e => e.preventDefault());
+
+document.addEventListener("keydown", function(e){
+  if(e.key === "F12") e.preventDefault();
+
+  if(e.ctrlKey && e.key === "u") e.preventDefault();
+  if(e.ctrlKey && e.shiftKey && ["I","J","C"].includes(e.key)) e.preventDefault();
+});
+</script>
+
+</body>
+</html>

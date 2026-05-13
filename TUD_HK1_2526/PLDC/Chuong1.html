@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="contentType" content="quiz">
+    <meta name="description" content="Một bài trắc nghiệm tương tác dành cho học sinh lớp 1 về du lịch biển Việt Nam, dựa trên tài liệu tham khảo.">
+    <meta name="nextActions" content="Thêm câu hỏi về các loài sinh vật biển; Tạo một phiên bản bài tập in ra giấy; Thêm hiệu ứng âm thanh cho mỗi câu trả lời">
+    <title>Chương 1 PLĐC</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-image: url('https://storage.googleapis.com/azt_agents/html_content_agent/1/fd3baf32-53f2-401c-9501-a5328ace3e99/beach_background.png/0');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .quiz-container {
+            width: 100%;
+            max-width: 800px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 30px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        h1, h2 {
+            color: #0077b6;
+            font-weight: 700;
+        }
+
+        #start-screen h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        #result-screen h2 {
+            font-size: 2rem;
+            margin-bottom: 25px;
+        }
+
+        .start-btn {
+            background-color: #fca311;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 700;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        #question-header {
+            font-size: 1.2rem;
+            color: #0096c7;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        #question-text {
+            font-size: 1.5rem;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+        
+        .answer-options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .answer-options {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .answer-btn {
+            background-color: #ade8f4;
+            color: #023e8a;
+            border: 2px solid #48cae4;
+            padding: 15px;
+            font-size: 1.2rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 100%;
+        }
+        
+        .answer-btn img {
+            max-width: 100px;
+            max-height: 100px;
+            margin: 0 10px;
+        }
+
+        .answer-btn:hover:not([disabled]) {
+            background-color: #48cae4;
+            color: white;
+            transform: scale(1.03);
+        }
+        
+        .answer-btn.correct {
+            background-color: #52b788 !important;
+            color: white !important;
+            border-color: #2d6a4f !important;
+            animation: bounce 0.5s;
+        }
+
+        .answer-btn.wrong {
+            background-color: #ef476f !important;
+            color: white !important;
+            border-color: #d00000 !important;
+            animation: shake 0.5s;
+        }
+        
+        .answer-btn.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .result-category {
+            background-color: #f1faff;
+            border: 1px solid #caf0f8;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: left;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        .result-category h3 {
+            font-size: 1.3rem;
+            color: #03045e;
+            margin-bottom: 10px;
+        }
+        
+        .result-category p {
+            font-size: 1.1rem;
+            color: #0077b6;
+            font-weight: 700;
+            margin: 0;
+        }
+        
+        #total-score {
+             font-size: 1.5rem;
+             font-weight: 700;
+             color: #003049;
+             margin-top: 20px;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-20px);}
+            60% {transform: translateY(-10px);}
+        }
+
+        @keyframes shake {
+            0%, 100% {transform: translateX(0);}
+            10%, 30%, 50%, 70%, 90% {transform: translateX(-10px);}
+            20%, 40%, 60%, 80% {transform: translateX(10px);}
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+        <!-- Start Screen -->
+        <div id="start-screen">
+            <h1>Lý luận chung về nhà nước</h1>
+            <p class="fs-5 mb-4">Câu hỏi trích từ VLE, câu nào sai thì bạn nhắn cho mình biết nha!</p>
+            <button id="start-btn" class="start-btn">Bắt đầu!</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden">
+            <div id="question-header">Câu hỏi 1/9</div>
+            <div id="question-text">Câu hỏi sẽ xuất hiện ở đây.</div>
+            <div id="answer-options" class="answer-options">
+                <!-- Answer buttons will be generated here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden">
+            <h2>Kết quả của bạn</h2>
+            <div id="results-by-category">
+                <!-- Results by category will be generated here -->
+            </div>
+            <p id="total-score">Tổng điểm: 0/9</p>
+            <p class="mt-4">Làm lại bài để đạt điểm cao hơn nhé!</p>
+            <button onclick="location.reload()" class="start-btn mt-3">Làm lại</button>
+        </div>
+    </div>
+    
+    <audio id="correct-sound" src="https://www.myinstants.com/media/sounds/correct-answer-sound-effect-19.mp3" preload="auto"></audio>
+    <audio id="wrong-sound" src="https://www.myinstants.com/media/sounds/answer-wrong.mp3" preload="auto"></audio>
+    <audio id="completion-sound" src="https://www.myinstants.com/media/sounds/kids_cheering.mp3" preload="auto"></audio>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        const questions = [
+    
+            {
+                category: "Khái niệm và đặc trưng của nhà nước",
+                question: "Nguồn gốc ra đời của nhà nước là",
+                answers: [
+                    { text: "sự xuất hiện chế độ tư hữu và phân hóa giai cấp", correct: true },
+                    { text: "ý chí của giai cấp thống trị", correct: false },
+                    { text: "sự thỏa thuận của mọi giai cấp trong xã hội", correct: false },
+                    { text: "sự xuất hiện chế độ tư hữu", correct: false }
+                ]
+            },
+           {
+                category: "Khái niệm và đặc trưng của nhà nước",
+                question: "Các quan điểm, học thuyết về nhà nước nhằm",
+                answers: [
+                    { text: "giải thích về sự tồn tại và phát triển của nhà nước", correct: true },
+                    { text: "che đậy bản chất giai cấp của nhà nước", correct: false },
+                    { text: "lý giải một cách thiếu căn cứ khoa học về nhà nước", correct: false },
+                    { text: "bảo vệ nhà nước của giai cấp thống trị", correct: false }
+                ]
+            },
+            {
+                category: "Khái niệm và đặc trưng của nhà nước",
+                question: "Nội dung nào sau đây không phải đặc điểm của Nhà nước",
+                answers: [
+                    { text: "Nhà nước ban hành pháp luật", correct: false },
+                    { text: "Nhà nước quy định và thực hiện việc thu các loại thuế", correct: false },
+                    { text: "Nhà nước có chủ quyền quốc gia", correct: false },
+                    { text: "Nhà nước là tổ chức được hình thành trên cơ sở tự nguyện của cán bộ, công chức", correct: true },
+                ]
+            },
+            {
+                category: "Khái niệm và đặc trưng của nhà nước",
+                question: "Lựa chọn quá trình nào đúng nhất về sự ra đời của nhà nước?",
+                answers: [
+                    { text: "Sản xuất phát triển, tư hữu hình thành, phân hóa giai cấp, xuất hiện nhà nước", correct: true },
+                    { text: "Ba lần phân công lao động, phân hóa giai cấp, tư hữu xuất hiện, xuất hiện nhà nước", correct: false },
+                    { text: "Sản xuất phát triển, tư hữu xuất hiện, đấu tranh giai cấp, xuất hiện nhà nước", correct: false },
+                    { text: "Ba lần phân công lao động, xuất hiện tư hữu, mâu thuẫn giai cấp, xuất hiện nhà nước", correct: false },
+                ]
+            },
+            {
+                category: "Khái niệm và đặc trưng của nhà nước",
+                question: "Quan điểm nào cho rằng nhà nước ra đời bởi sự thỏa thuận của cộng đồng?",
+                answers: [
+                    { text: "Học thuyết thần quyền", correct: false },
+                    { text: "Học thuyết gia trưởng", correct: false },
+                    { text: "Học thuyết Mác–Lênin", correct: false },
+                    { text: "Học thuyết khế ước xã hội", correct: true },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Chọn nhận định đúng nhất thể hiện nhà nước trong mối quan hệ với pháp luật",
+                answers: [
+                    { text: "Nhà nước xây dựng và thực hiện pháp luật nên nó có thể không quản lý bằng luật", correct: false },
+                    { text: "Pháp luật là phương tiện quản lý của nhà nước bởi vì nó do nhà nước đặt ra", correct: false },
+                    { text: "Pháp luật do nhà nước ban hành nên nó là phương tiện để nhà nước quản lý dân cư", correct: false },
+                    { text: "Nhà nước ban hành và quản lý bằng pháp luật nhưng bị ràng buộc bởi pháp luật", correct: true },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Bản chất giai cấp của các nhà nước nào sau đây không giống với các nhà nước còn lại",
+                answers: [
+                    { text: "Nhà nước Chiếm hữu nô lệ", correct: false },
+                    { text: "Nhà nước Xã hội chủ nghĩa", correct: true },
+                    { text: "Nhà nước phong kiến", correct: false },
+                    { text: "Nhà nước tư sản", correct: false },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Vì sao các nhà nước phải tôn trọng và không can thiệp lẫn nhau?",
+                answers: [
+                    { text: "Nhà nước có quyền lực công cộng đặc biệt", correct: false },
+                    { text: "Nhà nước có chủ quyền", correct: true },
+                    { text: "Mỗi nhà nước có hệ thống pháp luật riêng", correct: false },
+                    { text: "Nhà nước phân chia và quản lý cư dân của mình theo đơn vị hành chính – lãnh thổ", correct: false },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Nội dung nào KHÔNG đúng với việc hình thành nguyên thủ quốc gia?",
+                answers: [
+                    { text: "Do nhân dân bầu ra", correct: false },
+                    { text: "Cha truyền con nối", correct: false },
+                    { text: "Được chọn từ người đương nhiệm", correct: true },
+                    { text: "Do quốc hội bầu ra", correct: false },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Quyền lực công cộng đặc biệt của nhà nước được hiểu là",
+                answers: [
+                    { text: "Khả năng sử dụng sức mạnh vũ lực.", correct: false },
+                    { text: "Khả năng sử dụng biện pháp thuyết phục, giáo dục.", correct: false },
+                    { text: "Có thể sử dụng quyền lực kinh tế, chính trị hoặc tư tưởng.", correct: false },
+                    { text: "Việc sử dụng sức mạnh cưỡng chế là độc quyền.", correct: true },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Phương án nào sau đây thể hiện đầy đủ tính giai cấp của nhà nước?",
+                answers: [
+                    { text: "Nhà nước là một bộ máy có tính giai cấp", correct: false },
+                    { text: "Nhà nước là một bộ máy duy trì sự thống trị của giai cấp này với những giai cấp khác.", correct: false },
+                    { text: "Nhà nước ra đời là một sản phẩm của xã hội có giai cấp.", correct: false },
+                    { text: "Nhà nước ra đời là một sản phẩm của xã hội có giai cấp; là một bộ máy có tính giai cấp, duy trì sự thống trị của giai cấp này với những giai cấp khác.", correct: true },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Nhà nước là",
+                answers: [
+                    { text: "Một tổ chức chính trị, một bộ máy có chức năng cưỡng chế và quản lý xã hội.", correct: false },
+                    { text: "Một tổ chức đặc biệt của quyền lực chính trị, một bộ máy có chức năng cưỡng chế.", correct: false },
+                    { text: "Một tổ chức đặc biệt của quyền lực chính trị, một bộ máy có chức năng quản lý xã hội.", correct: false },
+                    { text: "Một tổ chức đặc biệt của quyền lực chính trị, một bộ máy có chức năng cưỡng chế và quản lý xã hội.", correct: true },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Vì sao nhà nước có bản chất xã hội?",
+                answers: [
+                    { text: "Nhà nước xuất hiện bởi nhu cầu quản lý xã hội.", correct: true },
+                    { text: "Nhu cầu trấn áp giai cấp để giữ trật tự xã hội.", correct: false },
+                    { text: "Nhà nước bảo vệ lợi ích chung của xã hội khi nó trùng với lợi ích giai cấp thống trị.", correct: false },
+                    { text: "Nhà nước chính là một hiện tượng xã hội.", correct: false },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Nhà nước thu thuế để",
+                answers: [
+                    { text: "Bảo đảm lợi ích vật chất của giai cấp bóc lột.", correct: false },
+                    { text: "Đảm bảo sự công bằng trong xã hội.", correct: false },
+                    { text: "Đảm bảo nguồn lực cho sự tồn tại của nhà nước.", correct: true },
+                    { text: "Bảo vệ lợi ích cho người nghèo", correct: false },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Chức năng của nhà nước là",
+                answers: [
+                    { text: "Những mặt hoạt động của nhà nước nhằm thực hiện công việc của nhân dân.", correct: false },
+                    { text: "Những công việc và mục đích mà nhà nước cần giải quyết và đạt tới.", correct: false },
+                    { text: "Những loại hoạt động cơ bản của nhà nước.", correct: false },
+                    { text: "Những mặt hoạt động cơ bản nhằm thực hiện nhiệm vụ của nhà nước.", correct: true },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Việc phân chia cư dân theo các đơn vị hành chính lãnh thổ dựa trên",
+                answers: [
+                    { text: "Hình thức của việc thực hiện chức năng của nhà nước.", correct: false },
+                    { text: "Những đặc thù của từng đơn vị hành chính, lãnh thổ.", correct: true },
+                    { text: "Đặc thù của cách thức tổ chức bộ máy nhà nước.", correct: false },
+                    { text: "Phương thức thực hiện chức năng của nhà nước.", correct: false },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Nhận định nào thể hiện không phải là chủ quyền quốc gia?",
+                answers: [
+                    { text: "Quyền độc lập tự quyết của quốc gia trong lĩnh vực đối nội.", correct: false },
+                    { text: "Quyền độc lập tự quyết của quốc gia trong lĩnh vực đối ngoại.", correct: false },
+                    { text: "Quyền độc lập tự quyết của quốc gia trong vùng lãnh thổ quốc gia.", correct: false },
+                    { text: "Độc lập một mình không giao lưu với bất kỳ quốc gia nào.", correct: true },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Khẳng định nào sau đây là đúng?",
+                answers: [
+                    { text: "Tỉnh chia thành huyện, thành phố trực thuộc tỉnh và thị xã.", correct: true },
+                    { text: "Thành phố trực thuộc trung ương chia thành quận, huyện.", correct: false },
+                    { text: "Quận chi thành phường và xã.", correct: false },
+                    { text: "Huyện chia thành xã.", correct: false },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Chủ quyền quốc gia thể hiện",
+                answers: [
+                    { text: "Khả năng ảnh hưởng của nhà nước lên các mối quan hệ quốc tế.", correct: false },
+                    { text: "Khả năng quyết định của nhà nước lên công dân và lãnh thổ, đối ngoại.", correct: true },
+                    { text: "Vai trò của nhà nước trên trường quốc tế.", correct: false },
+                    { text: "Sự độc lập của quốc gia trong các quan hệ đối nội.", correct: false },
+                ]
+            },
+            {
+                category: "Khái niệm, bản chất và chức năng cơ bản của nhà nước",
+                question: "Nhận định nào đúng?",
+                answers: [
+                    { text: "Nhà nước mang đặc trưng của một xã hội có giai cấp.", correct: false },
+                    { text: "Chỉ có Nhà nước và các tổ chức chính trị cầm quyền mới có quyền ban hành pháp luật.", correct: false },
+                    { text: "Chỉ có nhà nước mới được quy định và thu các loại thuế.", correct: true },
+                    { text: "Chỉ có nhà nước mới được quy định luật, lệ xã hội.", correct: false },
+                ]
+            },
+            {
+        category: "Hình thức và bộ máy nhà nước",
+        question: "Hình thức chính thể của nhà nước bao gồm:",
+        answers: [
+            { text: "hình thức cấu trúc và chế độ chính trị.", correct: false },
+            { text: "chính thể quân chủ và chính thể cộng hòa.", correct: true },
+            { text: "chính thể quân chủ và chế độ chính trị.", correct: false },
+            { text: "chính thể quân chủ và chính thể cộng hòa dân chủ.", correct: false },
+        ]
+    },
+    {
+        category: "Hình thức và bộ máy nhà nước",
+        question: "Nhận định nào sau đây phù hợp với chế độ cộng hòa lưỡng tính?",
+        answers: [
+            { text: "Tổng thống do dân bầu và có thể giải tán Nghị viện.", correct: true },
+            { text: "Nguyên thủ quốc gia không thể giải tán Nghị viện.", correct: false },
+            { text: "Tổng thống không đứng đầu hành pháp.", correct: false },
+            { text: "Nguyên thủ quốc gia do Quốc hội bầu và không thể giải tán Chính phủ.", correct: false },
+        ]
+    },
+    {
+        category: "Hình thức và bộ máy nhà nước",
+        question: "Nguyên tắc tập quyền trong tổ chức và hoạt động của bộ máy nhà nước nhằm",
+        answers: [
+            { text: "Ngăn ngừa và hạn chế sự lạm dụng quyền lực nhà nước.", correct: false },
+            { text: "Tạo sự thống nhất, tập trung và nâng cao hiệu quả quản lý.", correct: true },
+            { text: "Thực hiện quyền lực của nhân dân một cách dân chủ.", correct: false },
+            { text: "Đảm bảo quyền lực của nhân dân được tập trung.", correct: false },
+        ]
+    },
+    {
+        category: "Hình thức và bộ máy nhà nước",
+        question: "Hình thức chính thể của nhà nước XHCN là",
+        answers: [
+            { text: "chính thể cộng hòa dân chủ.", correct: true },
+            { text: "chính thể quân chủ tuyệt đối.", correct: false },
+            { text: "chính thể cộng hòa quý tộc.", correct: false },
+            { text: "chính thể quân chủ hạn chế.", correct: false },
+        ]
+    },
+    {
+        category: "Hình thức và bộ máy nhà nước",
+        question: "Quyền lực nhà nước trong hình thức chính thể quân chủ",
+        answers: [
+            { text: "Một người làm chủ tuyệt đối.", correct: false },
+            { text: "Một người làm chủ tuyệt đối hoặc tương đối.", correct: true },
+            { text: "Quốc hội.", correct: false },
+            { text: "Tổng thống.", correct: false },
+        ]
+    },
+    {
+        category: "Hình thức và bộ máy nhà nước",
+        question: "Tổng thống, Chủ tịch nước, Nhà vua, Nữ hoàng đều phù hợp với trường hợp nào sau đây?",
+        answers: [
+            { text: "Do cơ quan lập pháp bầu ra.", correct: false },
+            { text: "Đứng đầu cơ quan Hành pháp.", correct: false },
+            { text: "Đứng đầu cơ quan Tư pháp.", correct: false },
+            { text: "Nguyên thủ quốc gia.", correct: true },
+        ]
+    },
+    {
+        category: "Hình thức và bộ máy nhà nước",
+        question: "Nhận định nào sau đây phù hợp với chính thể cộng hòa tổng thống?",
+        answers: [
+            { text: "Dân bầu Nguyên thủ quốc gia.", correct: true },
+            { text: "Quốc hội bầu nguyên thủ quốc gia.", correct: false },
+            { text: "Cha truyền con nối vị trí nguyên thủ quốc gia.", correct: false },
+            { text: "Nguyên thủ quốc gia thành lập kết hợp giữa bầu và bổ nhiệm.", correct: false },
+        ]
+    },
+    {
+        category: "Hình thức và bộ máy nhà nước",
+        question: "Hình thức chính thể nào sau đây không tồn tại chức danh Thủ tướng?",
+        answers: [
+            { text: "Cộng hòa đại nghị.", correct: false },
+            { text: "Quân chủ lập hiến.", correct: false },
+            { text: "Cộng hòa Tổng thống.", correct: true },
+            { text: "Cộng hòa lưỡng tính.", correct: false },
+        ]
+    },
+    {
+        category: "Hình thức và bộ máy nhà nước",
+        question: "Cách thức thành lập các cơ quan nhà nước KHÔNG được thực hiện trong chế độ quân chủ đại diện.",
+        answers: [
+            { text: "Bổ nhiệm các Bộ trưởng.", correct: false },
+            { text: "Bầu cử Tổng thống.", correct: true },
+            { text: "Bầu cử Nghị viện.", correct: false },
+            { text: "Cha truyền, con nối.", correct: false },
+        ]
+    },
+    {
+        category: "Hình thức và bộ máy nhà nước",
+        question: "Nội dung nào sau đây KHÔNG phù hợp với chế độ đại nghị?",
+        answers: [
+            { text: "Nghị viện có thể giải tán Chính phủ.", correct: false },
+            { text: "Chính phủ chịu trách nhiệm trước Nghị viện.", correct: false },
+            { text: "Là nghị sỹ vẫn có thể làm bộ trưởng.", correct: false },
+            { text: "Người đứng đầu Chính phủ do dân bầu trực tiếp.", correct: true },
+        ]
+    },
+    {
+        category: "Nhà nước Cộng hoà xã hội chủ nghĩa Việt Nam",
+        question: "Cơ quan nào sau đây là cơ quan tư pháp?",
+        answers: [
+            { text: "Thanh tra Chính phủ.", correct: false },
+            { text: "Bộ Công an.", correct: false },
+            { text: "Bộ Tư pháp.", correct: false },
+            { text: "Viện kiểm sát nhân dân.", correct: true },
+        ]
+    },
+    {
+        category: "Nhà nước Cộng hoà xã hội chủ nghĩa Việt Nam",
+        question: "Cơ quan nào sau đây có thẩm quyền quyết định chia tách đơn vị hành chính cấp tỉnh:",
+        answers: [
+            { text: "Quốc hội.", correct: true },
+            { text: "Chính phủ.", correct: false },
+            { text: "Chủ tịch nước.", correct: false },
+            { text: "Bộ Chính trị.", correct: false },
+        ]
+    },
+    {
+        category: "Nhà nước Cộng hoà xã hội chủ nghĩa Việt Nam",
+        question: "Cơ cấu bộ máy hành chính nhà nước được chia theo",
+        answers: [
+            { text: "Cơ cấu tổ chức theo kinh tế.", correct: false },
+            { text: "Cơ cấu tổ chức theo chức năng.", correct: true },
+            { text: "Cơ cấu tổ chức theo nhiệm vụ.", correct: false },
+            { text: "Cơ cấu tổ chức theo xã hội.", correct: false },
+        ]
+    },
+    {
+        category: "Nhà nước Cộng hoà xã hội chủ nghĩa Việt Nam",
+        question: "Bộ máy hành chính nhà nước đứng đầu là:",
+        answers: [
+            { text: "Thủ tướng Chính phủ.", correct: false },
+            { text: "Chính phủ.", correct: true },
+            { text: "Quốc hội.", correct: false },
+            { text: "Chủ tịch nước.", correct: false },
+        ]
+    },
+    {
+        category: "Nhà nước Cộng hoà xã hội chủ nghĩa Việt Nam",
+        question: "Cơ quan thường trực của Quốc hội:",
+        answers: [
+            { text: "Chính phủ.", correct: false },
+            { text: "Ủy ban thường vụ Quốc hội.", correct: true },
+            { text: "Hội đồng nhân dân các cấp.", correct: false },
+            { text: "Ủy ban nhân dân cấp tỉnh.", correct: false },
+        ]
+    },
+    {
+        category: "Nhà nước Cộng hoà xã hội chủ nghĩa Việt Nam",
+        question: "Cơ quan nào không thuộc phạm trù của bộ máy hành chính nhà nước?",
+        answers: [
+            { text: "Chính phủ.", correct: false },
+            { text: "Ủy ban nhân dân cấp xã.", correct: false },
+            { text: "Hội đồng nhân dân.", correct: true },
+            { text: "Ủy ban nhân dân cấp huyện.", correct: false },
+        ]
+    },
+    {
+        category: "Nhà nước Cộng hoà xã hội chủ nghĩa Việt Nam",
+        question: "Bộ máy hành chính của tỉnh được chia thành?",
+        answers: [
+            { text: "Các Sở, Ban, Phòng, Hội.", correct: false },
+            { text: "Các Sở.", correct: true },
+            { text: "Các Phòng.", correct: false },
+            { text: "Các Ban.", correct: false },
+        ]
+    },
+    {
+        category: "Nhà nước Cộng hoà xã hội chủ nghĩa Việt Nam",
+        question: "Cơ quan quyền lực nhà nước là",
+        answers: [
+            { text: "Quốc hội.", correct: false },
+            { text: "Hội đồng nhân dân.", correct: false },
+            { text: "Tòa án.", correct: false },
+            { text: "Quốc hội và Hội đồng nhân dân.", correct: true },
+        ]
+    },
+    {
+        category: "Nhà nước Cộng hoà xã hội chủ nghĩa Việt Nam",
+        question: "Bộ máy hành chính nhà nước thực hiện quyền",
+        answers: [
+            { text: "Tư pháp", correct: false },
+            { text: "Kiểm soát.", correct: false },
+            { text: "Lập pháp.", correct: false },
+            { text: "Hành pháp", correct: true },
+        ]
+    },
+    {
+        category: "Nhà nước Cộng hoà xã hội chủ nghĩa Việt Nam",
+        question: "Cơ quan quản lý Nhà nước cấp trung ương là",
+        answers: [
+            { text: "Bộ và cơ quan ngang bộ.", correct: true },
+            { text: "Ủy ban thường vụ Quốc hội.", correct: false },
+            { text: "Tòa án nhân dân tối cao.", correct: false },
+            { text: "Viện kiểm sát nhân dân tối cao.", correct: false },
+        ]
+    },
+        ];
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let scoreByCategory = {};
+        
+        const startBtn = document.getElementById('start-btn');
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const questionHeader = document.getElementById('question-header');
+        const questionText = document.getElementById('question-text');
+        const answerOptions = document.getElementById('answer-options');
+
+        startBtn.addEventListener('click', startQuiz);
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            // Initialize scores
+            questions.forEach(q => {
+                if (!scoreByCategory[q.category]) {
+                    scoreByCategory[q.category] = { correct: 0, total: 0, questions: [] };
+                }
+                scoreByCategory[q.category].total++;
+            });
+
+            shuffledQuestions = shuffle([...questions]);
+            currentQuestionIndex = 0;
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            answerOptions.innerHTML = '';
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                const currentQuestion = shuffledQuestions[currentQuestionIndex];
+                questionHeader.textContent = `Câu hỏi ${currentQuestionIndex + 1}/${shuffledQuestions.length}`;
+                questionText.textContent = currentQuestion.question;
+                
+                const shuffledAnswers = shuffle([...currentQuestion.answers]);
+
+                shuffledAnswers.forEach(answer => {
+                    const button = document.createElement('button');
+                    button.classList.add('answer-btn');
+                    
+                    let buttonContent = `<span>${answer.text}</span>`;
+                    if (answer.image) {
+                       buttonContent = `<img src="${answer.image}" alt="${answer.text}">${buttonContent}`;
+                    }
+                    button.innerHTML = buttonContent;
+
+                    button.addEventListener('click', () => selectAnswer(button, answer.correct, currentQuestion.category));
+                    answerOptions.appendChild(button);
+                });
+            } else {
+                showResults();
+            }
+        }
+
+        function selectAnswer(button, isCorrect, category) {
+            const buttons = answerOptions.querySelectorAll('.answer-btn');
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('disabled');
+            });
+
+            if (isCorrect) {
+                button.classList.add('correct');
+                scoreByCategory[category].correct++;
+                document.getElementById('correct-sound').play();
+            } else {
+                button.classList.add('wrong');
+                document.getElementById('wrong-sound').play();
+                // Highlight the correct answer
+                const correctButton = Array.from(buttons).find(btn => {
+                   const answerText = btn.querySelector('span').textContent;
+                   const originalAnswer = shuffledQuestions[currentQuestionIndex].answers.find(a => a.text === answerText);
+                   return originalAnswer.correct;
+                });
+                if(correctButton) correctButton.classList.add('correct');
+            }
+            
+            // Record the answer
+            const answeredQuestion = {
+                question: shuffledQuestions[currentQuestionIndex].question,
+                selected: button.querySelector('span').textContent,
+                isCorrect: isCorrect
+            };
+            scoreByCategory[category].questions.push(answeredQuestion);
+
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                displayQuestion();
+            }, 2000);
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            document.getElementById('completion-sound').play();
+
+            const resultsByCategoryDiv = document.getElementById('results-by-category');
+            resultsByCategoryDiv.innerHTML = '';
+            let totalCorrect = 0;
+            
+            let htmlView = `<div><h4>Kết quả bài làm:</h4><ul>`;
+
+            for (const category in scoreByCategory) {
+                const result = scoreByCategory[category];
+                totalCorrect += result.correct;
+                
+                const categoryDiv = document.createElement('div');
+                categoryDiv.classList.add('result-category');
+                categoryDiv.innerHTML = `<h3>${category}</h3><p>Số câu đúng: ${result.correct}/${result.total}</p>`;
+                resultsByCategoryDiv.appendChild(categoryDiv);
+                
+                htmlView += `<li><strong>${category}:</strong> ${result.correct}/${result.total} câu đúng</li>`;
+            }
+            
+            htmlView += `</ul><p><strong>Tổng điểm:</strong> ${totalCorrect}/${questions.length}</p></div>`;
+
+            document.getElementById('total-score').textContent = `Tổng điểm: ${totalCorrect}/${questions.length}`;
+            
+            // Post result message
+            const finalMark = (totalCorrect / questions.length) * 10;
+            const resultJsonObject = {
+                type: "azt-student-result",
+                mark: parseFloat(finalMark.toFixed(2)),
+                url: window.location.href,
+                result: {
+                    rawScore: totalCorrect,
+                    totalItems: questions.length,
+                    details: scoreByCategory
+                },
+                html_view: htmlView
+            };
+            
+            window.parent.postMessage(resultJsonObject, '*');
+        }
+    </script>
+</body>
+</html>

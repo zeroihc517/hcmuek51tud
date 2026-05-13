@@ -1,0 +1,1326 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Đề 1 - K50</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+.question img {
+  display: block;
+  margin: 10px auto; /* căn giữa ngang */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  max-width: 90%; /* tự co nếu ảnh lớn quá */
+}
+
+    :root{
+      --white:#ffffff;
+      --card:#f7fbff;
+      --accent:#0ea5b7;
+      --muted:#64748b;
+      --success:#10b981;
+      --warning:#f59e0b;
+      --warning-text:#2b1700;
+      --shadow: 0 10px 30px rgba(2,6,23,0.08);
+      --footer-blue-start: #0b2e6b;
+      --footer-blue-end: #062969;
+      --footer-height: 120px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%; margin:0; font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial; background:var(--white); color:#0b1220}
+
+    /* LOGIN + SCORE overlays */
+    .overlay-screen{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background: linear-gradient(180deg,#07336a,#0b2340); z-index:600; padding:20px; }
+    .card{ width:520px; max-width:98%; background:#fff; border-radius:12px; padding:26px; box-shadow:var(--shadow); text-align:center; }
+    .card.large { width:720px; max-width:98%; }
+
+    .field{ text-align:left; margin:14px 0; }
+    .field label{ display:block; font-size:14px; color:var(--muted); margin-bottom:8px; }
+    .field input{ width:100%; padding:12px 14px; border:1px solid rgba(2,6,23,0.08); border-radius:10px; font-size:16px; }
+
+    .btn{ padding:10px 16px; border-radius:10px; border:0; cursor:pointer; font-weight:700; font-size:15px; }
+    .btn-primary{ background:var(--accent); color:#042024; }
+    .btn-ghost{ background:transparent; border:1px solid rgba(2,6,23,0.06); color:#042024; }
+    .btn-warning{ background:var(--warning); color:var(--warning-text); border:0; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+
+    /* Candidate strip (original look) */
+.candidate-strip{
+  width:100%;
+  box-sizing:border-box;
+  background:#0f274a;
+  color:#eaf6ff;
+  padding:12px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  box-shadow:var(--shadow);
+
+  position: fixed;   /* ✅ CỐ ĐỊNH */
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;      /* cao hơn nội dung */
+}
+
+    .candidate-inner{ max-width:1400px; margin:0 auto; width:100%; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .candidate-info{ display:flex; gap:14px; align-items:center; font-size:13px; }
+    .candidate-info .name{ font-weight:700; color:#fff; }
+    .candidate-controls{ display:flex; gap:8px; align-items:center; }
+    .btn-primary{ background:var(--accent); color:#042024; border:0; padding:8px 12px; border-radius:8px; font-weight:700; cursor:pointer; }
+    .btn-ghost{ background:transparent; border:1px solid rgba(255,255,255,0.12); padding:8px 10px; border-radius:8px; color:#eaf6ff; cursor:pointer; }
+    .timer-bubble{ background: rgba(255,255,255,0.08); padding:6px 10px; border-radius:20px; font-weight:700; color:#fff; }
+
+    /* page content: full width layout (original) */
+    .page-wrap{ max-width: none; width: calc(100% - 36px); margin:18px auto 0; padding:18px; background:var(--card); border-radius:10px; box-shadow:var(--shadow); padding-bottom: calc(var(--footer-height) + 20px); }
+
+    .content h1{ margin:0 0 14px 0; text-align:center; font-size:18px; color:#08263b; }
+
+    .score-panel{ display:none; background:#fff; border-radius:10px; padding:14px; box-shadow: 0 14px 40px rgba(2,6,23,0.08); border:1px solid rgba(2,6,23,0.04); margin-bottom:12px; }
+    .score-title{ font-weight:800; font-size:18px; color:#09324a; }
+    .score-sub{ color:#334155; font-weight:600 }
+
+    .quiz-area{ position:relative; }
+    .quiz-wrapper{ padding:8px 2px; max-width:1400px; margin:0 auto; }
+    .question{ background:#fff; border-radius:8px; padding:12px; margin-bottom:12px; border:1px solid rgba(2,6,23,0.04); display:block; box-shadow: 0 6px 20px rgba(2,6,23,0.03); }
+    .q-head{ display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .q-left{ display:flex; gap:10px; align-items:center; }
+    .qnum{ width:36px; height:36px; border-radius:8px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-weight:700; color:#0b1220; }
+    .qtitle{ font-weight:600; color:#0b1220; }
+    .flag-btn{ background:transparent; border:1px solid rgba(2,6,23,0.05); padding:6px 8px; border-radius:8px; cursor:pointer; }
+    .options{ margin-top:10px; display:flex; flex-direction:column; gap:8px; }
+    label.option{ display:flex; align-items:center; gap:8px; padding:10px; border-radius:8px; border:1px solid rgba(2,6,23,0.04); cursor:pointer; background:#fff; }
+    input[type="number"]{ padding:8px; border-radius:6px; border:1px solid rgba(2,6,23,0.06); width:160px; }
+
+    .tf-table{ width:100%; border-collapse:collapse; table-layout:fixed; margin-top:8px; }
+    .tf-table th, .tf-table td{ padding:8px; border:1px solid rgba(2,6,23,0.06); vertical-align:middle; }
+    .tf-table thead th:nth-child(1){ width:34px; max-width:34px; text-align:center; }
+    .tf-table thead th:nth-child(2){ width:auto; }
+    .tf-table thead th:nth-child(3), .tf-table thead th:nth-child(4){ width:60px; max-width:60px; text-align:center; }
+    .tf-table td:nth-child(2){ white-space:normal; word-wrap:break-word; }
+
+   .quiz-overlay{
+  position:absolute;
+  inset:0;
+  background:transparent;   /* ❌ bỏ nền đen */
+  z-index:40;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;      /* không chặn nhìn */
+}
+
+    .quiz-overlay.hidden{ display:none; }
+   .quiz-overlay .msg{
+  background:#f1f5f9;
+  color:#0b1220;
+  padding:12px 18px;
+  border-radius:10px;
+  font-weight:700;
+  box-shadow:0 8px 24px rgba(0,0,0,0.12);
+}
+
+
+    .site-footer{ position: fixed; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, var(--footer-blue-start), var(--footer-blue-end)); padding: 14px 0; display: flex; justify-content: center; z-index: 80; box-shadow: 0 -8px 30px rgba(0,0,0,0.25); }
+    .footer-inner{ width: 100%; max-width: 1400px; padding: 1px 4px; display: flex; justify-content: space-between; align-items: center; border-radius: 20px; background: linear-gradient(180deg, #0d47a1, #083a8c); box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+    .bubbles-wrap{ display: flex; gap: 8px; align-items: center; flex-wrap:wrap;}
+    .bubble{ width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; cursor: pointer; background: rgba(255,255,255,0.15); color: #fff; border: 2px solid rgba(255,255,255,0.1); }
+    .bubble.done{ background: linear-gradient(180deg,#22c55e,#10b981); color: #07211a; border-color: rgba(0,0,0,0.09); }
+    .bubble.flagged{ background: linear-gradient(180deg,#f59e0b,#f97316); color: #2b1700; border-color: rgba(0,0,0,0.09); }
+
+    .footer-note{ color: #fff; font-size: 13px; margin-left: 12px; opacity: 0.95; }
+
+    .controls{ display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-bottom:12px; }
+    .primary{ background:var(--accent); color:#042024; padding:8px 12px; border-radius:8px; border:0; cursor:pointer; font-weight:700; }
+    .ghost{ background:transparent; border:1px solid rgba(2,6,23,0.06); padding:8px 12px; border-radius:8px; cursor:pointer; }
+
+    @media (max-width:900px){
+      .candidate-inner{ flex-direction:column; align-items:flex-start; gap:8px; }
+      .page-wrap{ width: calc(100% - 20px); margin:12px; padding:12px; }
+      .footer-inner{ padding:6px }
+      .bubble{ width:30px; height:30px; font-size:13px }
+      .tf-table thead th:nth-child(1), .tf-table thead th:nth-child(3), .tf-table thead th:nth-child(4){ width:28px; }
+    }
+/* ========== Short answer (phần 3) đẹp hơn ========== */
+.short-answer {
+  margin-top: 12px;
+}
+
+.short-answer input[type="text"],
+.short-answer input[type="number"],
+.short-answer textarea {
+  width: 100%;
+  max-width: 420px;
+  padding: 12px 14px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(2,6,23,0.08);
+  background: #f9fafb;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
+  transition: all 0.25s ease;
+}
+
+.short-answer input:focus,
+.short-answer textarea:focus {
+  outline: none;
+  background: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(14,165,183,0.25);
+}
+
+.short-answer small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.answer-result {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.answer-correct {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.answer-wrong {
+  background: #fef2f2;
+  color: #7f1d1d;
+  border: 1px solid #ef4444;
+}
+
+  </style>
+</head>
+<body>
+  <!-- LOGIN OVERLAY (initial) -->
+  <div id="loginScreen" class="overlay-screen" style="display:none;" aria-hidden="true">
+    <div class="card" role="dialog" aria-modal="true" aria-label="Đăng nhập làm bài">
+      <div style="font-weight:800;color:#0b2e6b;margin-bottom:10px;font-size:18px">ĐĂNG NHẬP LÀM BÀI</div>
+      <div class="field"><label for="loginName">Họ và tên</label><input id="loginName" type="text" placeholder="Nguyễn Văn A"></div>
+      <div class="field"><label for="loginSBD">Số báo danh (SBD)</label><input id="loginSBD" type="text" placeholder="00000001"></div>
+      <div style="margin-top:12px; display:flex; gap:10px; justify-content:center">
+        <button id="loginBtn" class="btn btn-primary">Vào làm bài</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCORE OVERLAY (separate form like login) -->
+  <div id="scoreScreen" class="overlay-screen" style="display:none;" aria-hidden="true">
+    <div class="card large" role="dialog" aria-modal="true" aria-label="Kết quả thi">
+      <div id="scoreCardContent" style="font-size:15px;"></div>
+      <div style="margin-top:18px; display:flex; gap:10px; justify-content:center">
+        <button id="scoreBackBtn" class="btn btn-warning">Quay lại</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Candidate strip (original top strip) -->
+  <div class="candidate-strip" role="region" aria-label="Thông tin thí sinh">
+    <div class="candidate-inner">
+      <div class="candidate-info">
+        <div class="name" id="candName">Nguyễn Văn A</div>
+        <div>SBD: <strong id="candSBD">00000001</strong></div>
+        <div>Môn thi: <strong id="candSub">PHÁP LUẬT ĐẠI CƯƠNG</strong></div>
+        <div>Ngày thi: <strong id="candDate">--/--/----</strong></div>
+        <div>Ca thi: <strong id="candShift">2</strong></div>
+      </div>
+
+      <div class="candidate-controls">
+        <div class="timer-bubble" id="timerHeader">90:00</div>
+        <button class="btn-ghost" id="connStatus">🔌 Đang kết nối</button>
+        <button class="btn-primary" id="submitTopBtn">NỘP BÀI</button>
+        <button class="btn-ghost" title="Toàn màn hình" id="fullscreenBtn">⤢</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content (original exam UI) -->
+  <main class="page-wrap" id="pageWrap">
+    <div class="content panel" id="contentPanel">
+      <h1><br><br>ĐỀ 1 - CUỐI KHÓA PLĐC - K50</h1>
+
+      <section id="scoreBanner" class="score-panel" aria-live="polite"></section>
+
+      <div class="controls">
+        <div style="color:var(--muted); align-self:center">Đã làm: <strong id="totalQ">0/...</strong></div>
+        <button class="ghost" id="saveBtn">Lưu tạm</button>
+        <button class="ghost" id="clearBtn">Xóa dữ liệu</button>
+      </div>
+
+      <section class="quiz-area">
+        <div class="quiz-wrapper" id="quizWrapper">
+          <form id="quizForm" autocomplete="off">
+            <div id="part1" class="section"><h3>Thí sinh chọn 1 trong 4 phương án A, B, C hoặc D</h3></div>
+
+            <div id="part2" class="section"><h3></h3></div>
+            <div id="part3" class="section"><h3></h3></div>
+
+
+        <div id="quizOverlay" class="quiz-overlay hidden" aria-hidden="true"><div class="msg"></div></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer (original) -->
+  <footer class="site-footer" role="contentinfo" id="siteFooter">
+    <div class="footer-inner" id="footerBubbles">
+      <div class="bubbles-wrap" id="bubblesWrap"></div>
+      <div class="footer-note" id="footerNote">Đã làm: <span id="footerTotal">0/...</span></div>
+    </div>
+  </footer>
+
+  <script>
+
+    /* ===== CONFIG (fixed) ===== */
+    const DEV_SKIP_LOGIN = false; // bật true để phát triển/test: bỏ qua màn đăng nhập
+    const MCQ_COUNT = 20;
+    const TF_COUNT = 0;
+    const TF_ITEMS = 0;
+    const SHORT_COUNT = 0;
+    const TOTAL_Q = MCQ_COUNT + TF_COUNT + SHORT_COUNT;
+    const TIMER_MIN = 20; // phút
+    const TIMER_SEC = TIMER_MIN * 60;
+
+    /* Answer key (for grading only) */
+    const correct = {
+      mcq: {1:'B',2:'D',3:'B',4:'C',5:'D',6:'A',7:'A',8:'A',9:'B',10:'A',11:'B',12:'A',13:'D',14:'C',15:'C', 16:'A', 17:'C',18:'B',19:'C',20:'D'},
+    };
+
+    /* STATE */
+let displayToQnum = {}; // displayNum -> qNum
+let qnumToDisplay = {}; // qNum -> displayNum
+
+    let flagged = {};
+    let submitted = false;
+    let interval = null;
+    let remaining = TIMER_SEC;
+
+    /* ELEMENT REFS */
+    const loginScreen = document.getElementById('loginScreen');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginName = document.getElementById('loginName');
+    const loginSBD = document.getElementById('loginSBD');
+
+    const scoreScreen = document.getElementById('scoreScreen');
+    const scoreCardContent = document.getElementById('scoreCardContent');
+    const scoreBackBtn = document.getElementById('scoreBackBtn');
+
+    const candNameEl = document.getElementById('candName');
+    const candSbdEl = document.getElementById('candSBD');
+    const timerHeader = document.getElementById('timerHeader');
+    const submitTopBtn = document.getElementById('submitTopBtn');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+    /* Helpers */
+    function escapeHtml(s){ if(s===null||s===undefined) return ''; return String(s).replace(/[&<>\"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+
+    function applyCandidateInfo(){
+      const name = localStorage.getItem('exam_cand_name') || '—';
+      const sbd = localStorage.getItem('exam_cand_sbd') || '—';
+      candNameEl.textContent = name;
+      candSbdEl.textContent = sbd;
+    }
+
+    function isLoggedIn(){ return !!localStorage.getItem('exam_cand_name') && !!localStorage.getItem('exam_cand_sbd'); }
+
+    /* LOGIN flow */
+    loginBtn.addEventListener('click', ()=>{
+      const name = loginName.value.trim();
+      const sbd = loginSBD.value.trim();
+      if(!name || !sbd){ alert('Vui lòng nhập họ tên và số báo danh.'); return; }
+      localStorage.setItem('exam_cand_name', name);
+      localStorage.setItem('exam_cand_sbd', sbd);
+      applyCandidateInfo();
+      loginScreen.style.display = 'none';
+      loginScreen.setAttribute('aria-hidden','true');
+
+      // load saved remaining or set default
+      const storedRem = localStorage.getItem('quiz_remaining');
+      if(storedRem === null) remaining = TIMER_SEC;
+      else { remaining = parseInt(storedRem, 10); if(isNaN(remaining) || remaining < 0) remaining = TIMER_SEC; }
+
+      // load saved answers (if any)
+      // kiểm tra nếu có dữ liệu đã lưu: hỏi thí sinh có muốn tiếp tục hay bắt đầu mới
+      const rawSaved = localStorage.getItem('quiz_saved');
+      let useSaved = false;
+      if(rawSaved){
+        useSaved = confirm('Phát hiện dữ liệu bài làm đã lưu. Chọn OK để tiếp tục với dữ liệu lưu, hoặc Hủy để bắt đầu làm mới (xóa dữ liệu cũ).');
+        if(useSaved){
+          loadProgressAnswersIntoUI();
+        } else {
+          // xóa dữ liệu cũ để bắt đầu phiên mới
+          ['quiz_saved','quiz_result','quiz_remaining'].forEach(k=>localStorage.removeItem(k));
+          // đảm bảo UI sạch
+          document.querySelectorAll('#quizWrapper input').forEach(el=>{ try{ if(el.type === 'radio') el.checked = false; if(el.type === 'number') el.value = ''; }catch(e){} });
+          flagged = {};
+          buildFooterBubbles();
+          updateAnsweredCount();
+        }
+      } else {
+        // không có dữ liệu đã lưu
+        // nothing to do here
+      }
+
+      startTimer();
+    });
+
+    /* Show login if not logged (or allow dev skip) */
+    function showLoginIfNeeded(){
+      applyCandidateInfo();
+      if(DEV_SKIP_LOGIN){
+        // dev/test shortcut
+        localStorage.setItem('exam_cand_name','Thí sinh Test');
+        localStorage.setItem('exam_cand_sbd','00000000');
+        applyCandidateInfo();
+        loginScreen.style.display = 'none';
+        loginScreen.setAttribute('aria-hidden','true');
+        return;
+      }
+      if(!isLoggedIn()){
+        loginScreen.style.display = 'flex';
+        loginScreen.setAttribute('aria-hidden','false');
+      } else {
+        loginScreen.style.display = 'none';
+        loginScreen.setAttribute('aria-hidden','true');
+      }
+    }
+
+    /* Build questions (same as original) */
+    function renderQuestions(){
+      const part1 = document.getElementById('part1'); part1.innerHTML = '<h3>Thí sinh chọn 1 trong 4 phương án A, B, C hoặc D</h3>';
+      const part2 = document.getElementById('part2'); part2.innerHTML = '<h3></h3>';
+      const part3 = document.getElementById('part3'); part3.innerHTML = '<h3></h3>';
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+// Tạo mảng số câu [1,2,3,...]
+let order = [];
+for (let i = 1; i <= MCQ_COUNT; i++) {
+  order.push(i);
+}
+
+// Đảo thứ tự câu hỏi
+shuffle(order);
+
+// Nhập câu hỏi
+for (let idx = 0; idx < order.length; idx++) {
+  const qNum = order[idx];
+const displayNum = idx + 1;
+
+displayToQnum[displayNum] = qNum;
+qnumToDisplay[qNum] = displayNum;
+
+
+  const q = document.createElement('div');
+  q.className = 'question';
+  q.dataset.qnum = qNum;
+
+  let html = '';
+
+  if (qNum === 1) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Cơ quan nào sau đây là cơ quan hành chính của nước Cộng hòa xã hội chủ nghĩa Việt Nam?</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. Viện kiểm sát nhân dân</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. Ủy ban nhân dân</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. Tòa án nhân dân
+</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. Hội đồng nhân dân</label>
+      </div>
+    `;
+  }
+else if (qNum === 2) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Quyền lực công cộng đặc biệt của nhà nước được hiểu là</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. khả năng sử dụng sức mạnh vũ lực.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. khả năng sử dụng biện pháp thuyết phục, giáo dục.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. có thể sử dụng quyền lực kinh tế, chính trị hoặc tư tưởng.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. việc sử dụng sức mạnh cưỡng chế là độc quyền.</label>
+      </div>
+    `;
+}
+else if (qNum === 3) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Sử dụng pháp luật là</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. chủ thể pháp luật buộc thực hiện những nghĩa vụ mà pháp luật yêu cầu.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. chủ thể pháp luật chủ động thực hiện quyền của mình theo quy định của pháp luật.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. chủ thể pháp luật kiềm chế không thực hiện những gì mà pháp luật ngăn cấm.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. cơ quan nhà nước sử dụng pháp luật để giải quyết các quan hệ pháp luật phát sinh trong xã hội.</label>
+      </div>
+    `;
+}
+else if (qNum === 4) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Nhận định nào đúng?</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. Nhà nước chủ nô là kiểu nhà nước phong kiến.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. Nhà nước liên bang là nhà nước với nhiều hình thức chính thể.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. Nhà nước quân chủ luôn có hoàng gia.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. Nhà nước nào cũng có Vua.</label>
+      </div>
+    `;
+}
+else if (qNum === 5) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Căn cứ làm phát sinh, thay đổi, chấm dứt quan hệ pháp luật là</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. quy phạm pháp luật.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. năng lực chủ thể.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. sự kiện pháp lý.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. quy phạm pháp luật, năng lực chủ thể và sự kiện pháp lý.</label>
+      </div>
+    `;
+}
+else if (qNum === 6) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Cấu thành của quan hệ pháp luật bao gồm:</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. chủ thể, khách thể và nội dung.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. chủ thể, khách thể, mặt khách quan và mặt chủ quan.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. chủ thể, khách thể, quyền và nghĩa vụ của chủ thể.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. chủ thể, khách thể, mặt khách quan, mặt chủ quan, quyền và nghĩa vụ của chủ thể.</label>
+      </div>
+    `;
+}
+else if (qNum === 7) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Có các loại chế tài của quy phạm pháp luật sau đây:</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. chế tài hình sự, chế tài dân sự, chế tài hành chính, chế tài kỷ luật.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. chế tài hình sự, chế tài dân sự, chế tài tài chính, chế tài hành chính.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. chế tài hình sự, chế tài dân sự, chế tài tài chính, chế tài kỷ luật.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. chế tài hình sự, chế tài dân sự, chế tài thương mại, chế tài kỷ luật.</label>
+      </div>
+    `;
+}
+else if (qNum === 8) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Nguồn gốc ra đời của nhà nước là:</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. sự xuất hiện chế độ tư hữu và phân hóa giai cấp.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. ý chí của giai cấp thống trị.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. sự thỏa thuận của mọi giai cấp trong xã hội.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. sự xuất hiện chế độ tư hữu.</label>
+      </div>
+    `;
+}
+else if (qNum === 9) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Năng lực chủ thể của quan hệ pháp luật bao gồm:</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. năng lực pháp luật, năng lực hành vi và năng lực nhận thức.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. năng lực pháp luật và năng lực hành vi.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. năng lực hành vi và năng lực nhận thức.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. năng lực pháp luật và năng lực nhận thức.</label>
+      </div>
+    `;
+}
+else if (qNum === 10) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Đảng Cộng sản Việt Nam là thiết chế thuộc hệ thống nào sau đây?</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. Hệ thống chính trị.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. Hệ thống cơ quan, quyền lực nhà nước.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. Hệ thống cơ quan quản lý nhà nước.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. Thuộc Nhà nước.</label>
+      </div>
+    `;
+}
+else if (qNum === 11) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Vai trò của Chính phủ là</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. hoạt động lập pháp.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. thi hành pháp luật.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. bổ nhiệm thẩm phán của tòa án.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. đóng vai trò nguyên thủ quốc gia.</label>
+      </div>
+    `;
+}
+else if (qNum === 12) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Cơ quan nhà nước nào sau đây đóng vai trò xây dựng pháp luật?</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. Quốc hội.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. Chính phủ.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. Nguyên thủ quốc gia.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. Tòa án.</label>
+      </div>
+    `;
+}
+else if (qNum === 13) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Tổng thống, Chủ tịch nước, Nhà vua, Nữ hoàng đều phù hợp với trường hợp nào sau đây?</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. Do cơ quan lập pháp bầu ra.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. Đứng đầu cơ quan Hành pháp.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. Đứng đầu cơ quan Tư pháp.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. Nguyên thủ quốc gia.</label>
+      </div>
+    `;
+}
+else if (qNum === 14) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Cấu thành của quy phạm pháp luật bao gồm:</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. mặt chủ quan, mặt khách quan.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. chủ thể, khách thể.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. giả định, quy định, chế tài.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. mặt khách thể và mặt chủ quan.</label>
+      </div>
+    `;
+}
+else if (qNum === 15) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Hình thức chính thể của nhà nước XHCN là:</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. chức năng đối ngoại.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. phát triển kinh tế và ổn định trật tự xã hội.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. những phương diện hoạt động cơ bản của nhà nước.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. chức năng đối nội.</label>
+      </div>
+    `;
+}
+else if (qNum === 16) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Chấp hành pháp luật là</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. chủ thể pháp luật buộc thực hiện những nghĩa vụ mà pháp luật yêu cầu bằng hành động cụ thể.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. chủ thể pháp luật kiềm chế không thực hiện những gì mà pháp luật ngăn cấm.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. chủ thể pháp luật thực hiện quyền mà pháp luật cho phép.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. cơ quan nhà nước áp dụng pháp luật để giải quyết các quan hệ pháp luật phát sinh trong xã hội.</label>
+      </div>
+    `;
+}
+else if (qNum === 17) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Việc Ủy ban nhân dân cấp xã chứng thực sơ yếu lý lịch tự thuật là hình thức thực hiện pháp luật nào?</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. Tuân thủ pháp luật.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. Thi hành pháp luật.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. Áp dụng pháp luật.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. Sử dụng pháp luật.</label>
+      </div>
+    `;
+}
+else if (qNum === 18) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Trong chính thể cộng hòa dân chủ:</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. quyền lực tối cao của nhà nước tập trung một phần trong tay người đứng đầu nhà nước.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. mọi công dân đủ điều kiện pháp luật quy định có quyền bầu cử để lập ra cơ quan quyền lực nhà nước cao nhất.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. người đứng đầu nhà nước có quyền lực vô hạn.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. chỉ tầng lớp quý tộc mới có quyền bầu cử để lập ra cơ quan quyền lực nhà nước cao nhất.</label>
+      </div>
+    `;
+}
+else if (qNum === 19) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Cấu thành của vi phạm pháp luật bao gồm:</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. Chủ thể, khách thể.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. Mặt chủ quan, mặt khách quan.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. Mặt khách quan, mặt chủ quan, chủ thể, khách thể.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. Giả định, quy định, chế tài.</label>
+      </div>
+    `;
+}
+else if (qNum === 20) {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Cấu trúc của hệ thống pháp luật gồm:</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. quy phạm pháp luật và chế định pháp luật.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. giả định, quy định, chế tài, chế định, pháp luật, ngành luật.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. chế định pháp luật và ngành luật.</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. quy phạm pháp luật, chế định pháp luật, ngành luật.</label>
+      </div>
+    `;
+}
+ 
+ else {
+    html = `
+      <div class="q-head">
+        <div class="q-left">
+          <div class="qnum">${displayNum}</div>
+          <div class="qtitle">Nội dung câu ${qNum}</div>
+        </div>
+        <button type="button" class="flag-btn" data-qnum="${qNum}">🚩 Gắn cờ</button>
+      </div>
+      <div class="options">
+        <label class="option"><input type="radio" name="p1q${qNum}" value="A"> A. Đáp án A</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="B"> B. Đáp án B</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="C"> C. Đáp án C</label>
+        <label class="option"><input type="radio" name="p1q${qNum}" value="D"> D. Đáp án D</label>
+      </div>
+    `;
+  }
+
+  q.innerHTML = html;
+  part1.appendChild(q);
+}
+
+
+  
+
+
+      // attach delegated event listeners for flag buttons (works even after render)
+      document.querySelectorAll('.flag-btn').forEach(btn=>{
+        btn.removeEventListener('click', flagBtnHandler);
+        btn.addEventListener('click', flagBtnHandler);
+      });
+
+      enableMcqToggle();
+      enableFocusScrolling();
+      buildFooterBubbles();
+      loadProgressAnswersIntoUI();
+      updateAnsweredCount();
+    }
+
+    function flagBtnHandler(e){
+      const qNum = Number(this.dataset.qnum || e.currentTarget.dataset.qnum);
+      toggleFlag(qNum, this);
+    }
+
+    renderQuestions();
+
+    /* MCQ toggle (click selected to unselect) */
+    function enableMcqToggle(){
+      const radios = document.querySelectorAll("input[type='radio'][name^='p1q']");
+      radios.forEach(radio=>{
+        radio.addEventListener('mousedown', function(){ this._wasChecked = this.checked; });
+        radio.addEventListener('click', function(e){
+          if(this._wasChecked){
+            this.checked = false;
+            this.dispatchEvent(new Event('change', { bubbles: true }));
+            e.preventDefault();
+          }
+        });
+      });
+    }
+
+    function enableFocusScrolling(){
+      // attach focus handler to dynamically created inputs (delegation not necessary here)
+      const inputs = document.querySelectorAll('#quizWrapper input, #quizWrapper textarea, #quizWrapper select');
+      inputs.forEach(inp=>{
+        inp.removeEventListener('focus', focusScrollHandler);
+        inp.addEventListener('focus', focusScrollHandler, {passive:true});
+      });
+    }
+    function focusScrollHandler(evt){
+      setTimeout(()=>{
+        const footerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--footer-height')) || 120;
+        const rect = evt.target.getBoundingClientRect();
+        const viewportAvailable = window.innerHeight - footerH - 24;
+        if(rect.bottom > viewportAvailable){
+          const delta = rect.bottom - viewportAvailable + 12;
+          window.scrollBy({ top: delta, behavior: 'smooth' });
+        }
+      }, 80);
+    }
+
+    /* FLAG */
+    function toggleFlag(qNum, btn){
+      flagged[qNum] = !flagged[qNum];
+      if(btn){ btn.textContent = flagged[qNum] ? '🚩 Bỏ cờ' : '🚩 Gắn cờ'; }
+      updateFooterBubble(qNum);
+      updateAnsweredCount();
+    }
+    window.toggleFlag = toggleFlag;
+
+    /* Footer bubble logic */
+function buildFooterBubbles(){
+  const wrap = document.getElementById('bubblesWrap');
+  wrap.innerHTML = '';
+
+  for(let displayNum = 1; displayNum <= TOTAL_Q; displayNum++){
+    const qNum = displayToQnum[displayNum];
+
+    const b = document.createElement('button');
+    b.className = 'bubble';
+    b.textContent = displayNum;
+    b.dataset.display = displayNum;
+    b.dataset.qnum = qNum;
+
+    b.title = 'Câu ' + displayNum;
+    b.addEventListener('click', ()=>{ scrollToQuestion(qNum); });
+
+    wrap.appendChild(b);
+  }
+
+  for(let i=1;i<=TOTAL_Q;i++) updateFooterBubble(i);
+}
+
+
+    function isAnswered(qNum){
+      if(qNum <= MCQ_COUNT) return !!document.querySelector(`input[name='p1q${qNum}']:checked`);
+      else if(qNum <= MCQ_COUNT + TF_COUNT){
+        const idx = qNum - MCQ_COUNT;
+        for(let j=1;j<=TF_ITEMS;j++) if(document.querySelector(`input[name='p2q${idx}y${j}']:checked`)) return true;
+        return false;
+      } else {
+        const idx = qNum - MCQ_COUNT - TF_COUNT;
+        const el = document.querySelector(`input[name='p3q${idx}']`);
+        return el && el.value !== '';
+      }
+    }
+
+function updateFooterBubble(qNum){
+  const displayNum = qnumToDisplay[qNum];
+  const btn = document.querySelector(`.bubble[data-display='${displayNum}']`);
+  if(!btn) return;
+
+  btn.classList.remove('done','flagged');
+  if(flagged[qNum]) btn.classList.add('flagged');
+  else if(isAnswered(qNum)) btn.classList.add('done');
+}
+
+    function updateAnsweredCount(){
+      let done = 0;
+      for(let i=1;i<=TOTAL_Q;i++) if(isAnswered(i)) done++;
+      const txt = `${done}/${TOTAL_Q}`;
+      const dom = document.getElementById('totalQ');
+      const foot = document.getElementById('footerTotal');
+      if(dom) dom.textContent = txt;
+      if(foot) foot.textContent = txt;
+    }
+
+    document.addEventListener('change', (e)=>{
+      const name = e.target.name;
+      if(!name) return;
+      let qNum = null;
+      if(name.startsWith('p1q')) qNum = Number(name.replace('p1q',''));
+      else if(name.startsWith('p2q')){ const m = name.match(/p2q(\d+)y(\d+)/); if(m) qNum = MCQ_COUNT + Number(m[1]); }
+      else if(name.startsWith('p3q')) qNum = MCQ_COUNT + TF_COUNT + Number(name.replace('p3q',''));
+      if(qNum) updateFooterBubble(qNum);
+      updateAnsweredCount();
+    });
+
+    function scrollToQuestion(qNum){
+      const el = document.querySelector(`[data-qnum='${qNum}']`);
+      if(el) el.scrollIntoView({behavior:'smooth', block:'center'});
+    }
+
+    /* FOOTER height handling */
+    function updateFooterHeight(){
+      const footer = document.getElementById('siteFooter');
+      if(!footer) return;
+      const h = footer.offsetHeight || 120;
+      document.documentElement.style.setProperty('--footer-height', h + 'px');
+    }
+    window.addEventListener('resize', ()=>{ updateFooterHeight(); });
+    window.addEventListener('load', ()=>{ updateFooterHeight(); setTimeout(updateFooterHeight, 300); });
+
+    /* TIMER behavior */
+    (function initRemaining(){
+      const storedRem = localStorage.getItem('quiz_remaining');
+      if(storedRem === null) remaining = TIMER_SEC;
+      else { remaining = parseInt(storedRem, 10); if(isNaN(remaining) || remaining < 0) remaining = TIMER_SEC; }
+    })();
+
+    function updateTimerDisplay(){
+      const m = Math.floor(remaining / 60);
+      const s = remaining % 60;
+      const txt = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+      const th = document.getElementById('timerHeader');
+      if(th) th.textContent = txt;
+    }
+
+    function startTimer(){
+      if(interval) clearInterval(interval);
+      updateTimerDisplay();
+      if(submitted) return;
+      interval = setInterval(()=>{
+        if(remaining <= 0){ clearInterval(interval); autoSubmit(); return; }
+        remaining--;
+        localStorage.setItem('quiz_remaining', remaining);
+        updateTimerDisplay();
+      }, 1000);
+    }
+
+    /* SAVE / LOAD progress */
+    document.getElementById('saveBtn').addEventListener('click', ()=>{ saveProgress(); alert('Đã lưu tạm (localStorage).'); });
+    document.getElementById('clearBtn').addEventListener('click', ()=>{ if(confirm('Xóa dữ liệu local?')){ localStorage.clear(); location.reload(); } });
+
+    function saveProgress(){
+      const data = { mcq:{}, tf:{}, short:{}, flagged, remaining };
+      for(let i=1;i<=MCQ_COUNT;i++){ data.mcq[i] = (document.querySelector(`input[name='p1q${i}']:checked`)||{}).value || null; }
+      for(let i=1;i<=TF_COUNT;i++){ data.tf[i] = []; for(let j=1;j<=TF_ITEMS;j++){ data.tf[i].push((document.querySelector(`input[name='p2q${i}y${j}']:checked`)||{}).value || null); } }
+      for(let i=1;i<=SHORT_COUNT;i++){ data.short[i] = (document.querySelector(`input[name='p3q${i}']`)||{}).value || ''; }
+      try{
+        localStorage.setItem('quiz_saved', JSON.stringify(data));
+        localStorage.setItem('quiz_remaining', remaining);
+      }catch(e){ console.warn('Lưu không thành công', e); }
+    }
+
+    function loadProgressAnswersIntoUI(){
+      const raw = localStorage.getItem('quiz_saved'); if(!raw) return false;
+      try{
+        const data = JSON.parse(raw);
+        if(data.mcq) for(let i=1;i<=MCQ_COUNT;i++){ const v = data.mcq[i]; if(v){ const el = document.querySelector(`input[name='p1q${i}'][value='${v}']`); if(el) el.checked = true; } }
+        if(data.tf) for(let i=1;i<=TF_COUNT;i++){ for(let j=1;j<=TF_ITEMS;j++){ const v = data.tf[i] && data.tf[i][j-1]; if(v){ const el = document.querySelector(`input[name='p2q${i}y${j}'][value='${v}']`); if(el) el.checked = true; } } }
+        if(data.short) for(let i=1;i<=SHORT_COUNT;i++){ const v = data.short[i]; if(v !== ''){ const el = document.querySelector(`input[name='p3q${i}']`); if(el) el.value = v; } }
+        if(data.flagged) flagged = data.flagged;
+        // remaining priority: stored remaining key else data.remaining inside quiz_saved
+        if(data.remaining) { remaining = Number(data.remaining); }
+        else { const lr = localStorage.getItem('quiz_remaining'); if(lr !== null) remaining = Number(lr); }
+        updateTimerDisplay();
+        return true;
+      }catch(e){ console.warn('Không thể load progress', e); return false; }
+    }
+
+    /* SCORING */
+    function computeScore(){
+      let score = 0;
+      const breakdown = {
+        mcq: { total: MCQ_COUNT, correct:0, score:0, max: MCQ_COUNT * 1 },
+        tf: { total: TF_COUNT, score:0, details:[], max: TF_COUNT * 0 },
+        short: { total: SHORT_COUNT, correct:0, score:0, max: SHORT_COUNT * 0.0 }
+      };
+
+      for(let i=1;i<=MCQ_COUNT;i++){
+        const user = (document.querySelector(`input[name='p1q${i}']:checked`)||{}).value || null;
+        if(user && user === correct.mcq[i]){ breakdown.mcq.correct++; breakdown.mcq.score += 1; score += 1; }
+      }
+
+      for(let i=1;i<=TF_COUNT;i++){
+        let correctCount = 0;
+        for(let j=1;j<=TF_ITEMS;j++){
+          const sel = (document.querySelector(`input[name='p2q${i}y${j}']:checked`)||{}).value;
+          if(sel !== undefined && sel !== null && sel !== ''){
+            if((sel === 'true') === correct.tf[i][j-1]) correctCount++;
+          }
+        }
+        let pts = 0;
+        if(correctCount === 4) pts = 1;
+        else if(correctCount === 3) pts = 0.5;
+        else if(correctCount === 2) pts = 0.25;
+        else if(correctCount === 1) pts = 0.1;
+        breakdown.tf.details.push({ q:i, correctCount, pts });
+        breakdown.tf.score += pts; score += pts;
+      }
+
+      for(let i=1;i<=SHORT_COUNT;i++){
+        const v = (document.querySelector(`input[name='p3q${i}']`)||{}).value;
+        if(v !== '' && !isNaN(Number(v)) && Number(v) === correct.short[i]){ breakdown.short.correct++; breakdown.short.score += 0.5; score += 0.5; }
+      }
+
+      return { score, breakdown };
+    }
+
+    function showScoreBanner(result){
+      const res = (result && result.score !== undefined) ? result : { score: result };
+      if(!res.breakdown){
+        const comp = computeScore(); res.score = comp.score; res.breakdown = comp.breakdown;
+      }
+      const maxScore = res.breakdown.mcq.max + res.breakdown.tf.max + res.breakdown.short.max;
+      const pct = Math.round((res.score / maxScore) * 10000) / 100;
+      const sb = document.getElementById('scoreBanner');
+      sb.style.display = 'block';
+      sb.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:10px;align-items:center">
+          <div class="score-title">Điểm tổng: <strong style="font-size:20px">${res.score}/${maxScore}</strong> — <span class="score-sub">${pct}%</span></div>
+Ấn nút xóa dữ liệu để làm lại
+            <tbody>
+      
+     
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    /* SUBMIT & LOCK (fixed behavior) */
+    submitTopBtn.addEventListener('click', ()=>{ if(confirm('Bạn chắc muốn nộp bài?')) doSubmit(); });
+
+    function lockUI(){
+      document.getElementById('quizOverlay').classList.remove('hidden');
+      document.getElementById('quizOverlay').setAttribute('aria-hidden','false');
+      // chỉ disable các input/textarea/select — giữ nguyên các nút điều hướng nếu cần
+      document.querySelectorAll('#quizWrapper input, #quizWrapper textarea, #quizWrapper select').forEach(el=>{
+        try{ el.disabled = true; el.setAttribute('aria-disabled','true'); }catch(e){}
+      });
+      try{ document.getElementById('submitTopBtn').disabled = true; }catch(e){}
+    }
+
+    function doSubmit(isAuto=false){
+  
+if(submitted) return;
+  submitted = true;
+
+  if(interval) clearInterval(interval);
+  remaining = 0;
+  localStorage.setItem('quiz_remaining', 0);
+
+  saveProgress();
+
+  const res = computeScore();
+  showScoreBanner(res);      // ✅ bảng điểm đầu trang
+  lockUI();
+  showCorrectWrongPerQuestion(); // ✅ hiện đúng / sai từng câu
+
+  localStorage.setItem('quiz_result', JSON.stringify({
+    score: res.score,
+    breakdown: res.breakdown,
+    submittedAt: new Date().toISOString()
+  }));
+
+  document.getElementById('scoreBanner')
+    .scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  updateAnsweredCount();
+}
+
+
+    function autoSubmit(){ if(!submitted) doSubmit(true); }
+
+    // IMPORTANT: thay vì auto-submit khi unload/visibility change — chúng ta chỉ lưu tiến trình để tránh khóa không mong muốn
+    window.addEventListener('beforeunload', function(e){
+      if(!submitted){ try{ saveProgress(); e.returnValue = 'Bạn chưa nộp bài. Trang sẽ lưu tạm bài làm.'; }catch(err){} }
+    });
+
+    document.addEventListener('visibilitychange', ()=>{
+      if(document.hidden && !submitted){ try{ saveProgress(); }catch(e){} }
+    });
+
+    /* Score overlay content + Quay lại button (clears data and goes to login) */
+    function showScorePage(result){
+      const res = result && result.breakdown ? result : computeScore();
+      const maxScore = res.breakdown.mcq.max + res.breakdown.tf.max + res.breakdown.short.max;
+      const pct = Math.round((res.score / maxScore) * 10000) / 100;
+      scoreCardContent.innerHTML = `
+        <div style="text-align:center">
+          <div style="font-weight:800;font-size:18px;margin-bottom:6px">KẾT QUẢ BÀI THI</div>
+          <div style="margin-bottom:10px">Thí sinh: <strong>${escapeHtml(localStorage.getItem('exam_cand_name')||'—')}</strong> | SBD: <strong>${escapeHtml(localStorage.getItem('exam_cand_sbd')||'—')}</strong></div>
+          <div style="font-size:20px;margin-bottom:8px">Điểm tổng: <strong>${res.score}/${maxScore}</strong> — ${pct}%</div>
+          <table style="width:100%; border-collapse:collapse; margin-top:8px; font-size:15px">
+            <thead><tr><th style="border:1px solid #ddd;padding:10px">Phần</th><th style="border:1px solid #ddd;padding:10px">Số câu</th><th style="border:1px solid #ddd;padding:10px">Đúng</th><th style="border:1px solid #ddd;padding:10px">Điểm</th></tr></thead>
+            <tbody>
+              <tr><td style="border:1px solid #ddd;padding:10px">Trắc nghiệm</td><td style="border:1px solid #ddd;padding:10px">${res.breakdown.mcq.total}</td><td style="border:1px solid #ddd;padding:10px">${res.breakdown.mcq.correct}</td><td style="border:1px solid #ddd;padding:10px">${res.breakdown.mcq.score}</td></tr>
+                         </tbody>
+          </table>
+        </div>
+      `;
+      scoreScreen.style.display = 'flex';
+      scoreScreen.setAttribute('aria-hidden','false');
+    }
+
+    /* RESET / QUAY LẠI: clear all exam data and return to login */
+    function resetExamStateAndGoToLogin(){
+      // clear all keys related to exam & candidate
+      const keysToRemove = ['quiz_saved','quiz_remaining','quiz_result','quiz_selected','exam_cand_name','exam_cand_sbd'];
+      keysToRemove.forEach(k=>localStorage.removeItem(k));
+
+      // stop timer
+      if(interval){ clearInterval(interval); interval = null; }
+
+      // reset state variables
+      submitted = false;
+      flagged = {};
+      remaining = TIMER_SEC;
+
+      // hide overlays
+      scoreScreen.style.display = 'none';
+      scoreScreen.setAttribute('aria-hidden','true');
+      document.getElementById('scoreBanner').style.display = 'none';
+      document.getElementById('scoreBanner').innerHTML = '';
+
+      // unlock inputs and clear answers
+      document.querySelectorAll('#quizWrapper input').forEach(el=>{
+        try{
+          el.disabled = false;
+          el.removeAttribute('aria-disabled');
+          if(el.type === 'radio') el.checked = false;
+          if(el.type === 'number') el.value = '';
+        }catch(e){}
+      });
+
+      // enable submit button
+      const sb = document.getElementById('submitTopBtn');
+      if(sb){ sb.disabled = false; }
+
+      // reset candidate strip display to placeholders
+      document.getElementById('candName').textContent = '—';
+      document.getElementById('candSBD').textContent = '—';
+
+      // rebuild footer bubbles/ UI
+      buildFooterBubbles();
+      updateAnsweredCount();
+
+      // show login screen
+      loginScreen.style.display = 'flex';
+      loginScreen.setAttribute('aria-hidden','false');
+
+      // reset login form fields for fresh input
+      loginName.value = '';
+      loginSBD.value = '';
+    }
+
+    scoreBackBtn.addEventListener('click', ()=>{
+      if(!confirm('Quay lại sẽ xóa dữ liệu đã lưu (bài, thời gian, kết quả) và đăng xuất. Bạn có chắc muốn quay lại?')) return;
+      resetExamStateAndGoToLogin();
+    });
+
+    /* Init */
+    (function init(){
+      // render questions first
+      renderQuestions();
+function updateExamDateRealtime() {
+  const d = new Date();
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  document.getElementById('candDate').textContent = `${day}/${month}/${year}`;
+}
+
+// gọi khi trang load
+updateExamDateRealtime();
+
+      // show login if not logged
+      showLoginIfNeeded();
+
+      // check if previous result exists
+      const prevResultRaw = localStorage.getItem('quiz_result');
+      if(prevResultRaw){
+        try{
+          const prev = JSON.parse(prevResultRaw);
+          submitted = true;
+          lockUI();
+          remaining = 0;
+          updateTimerDisplay();
+          showScoreBanner(prev);
+
+        }catch(e){}
+      } else {
+        const storedRem = localStorage.getItem('quiz_remaining');
+        if(storedRem === null) remaining = TIMER_SEC;
+        else { remaining = parseInt(storedRem, 10); if(isNaN(remaining) || remaining < 0) remaining = TIMER_SEC; }
+      }
+
+      if(isLoggedIn() && !submitted){
+        loadProgressAnswersIntoUI();
+        startTimer();
+      }
+
+      for(let i=1;i<=TOTAL_Q;i++) updateFooterBubble(i);
+      updateAnsweredCount();
+      enableMcqToggle();
+      updateFooterHeight();
+      setTimeout(updateFooterHeight, 300);
+      applyCandidateInfo();
+
+      // fullscreen button
+      fullscreenBtn.addEventListener('click', ()=>{ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); });
+
+    })();
+function showCorrectWrongPerQuestion() {
+  for (let i = 1; i <= MCQ_COUNT; i++) {
+    const q = document.querySelector(`.question[data-qnum='${i}']`);
+    if (!q) continue;
+
+    const user = (document.querySelector(`input[name='p1q${i}']:checked`) || {}).value || '—';
+    const right = correct.mcq[i];
+
+    const box = document.createElement('div');
+    box.className = 'answer-result ' + (user === right ? 'answer-correct' : 'answer-wrong');
+
+    if (user === right) {
+      box.innerHTML = `✅ <strong>Đúng</strong> — Bạn chọn <strong>${user}</strong>`;
+    } else {
+      box.innerHTML = `❌ <strong>Sai</strong> — Bạn chọn <strong>${user}</strong>, đáp án đúng: <strong>${right}</strong>`;
+    }
+
+    q.appendChild(box);
+  }
+}
+/* ===== ANTI COPY / ANTI CHEAT ===== */
+(function antiCopy(){
+  // 1. Chặn menu chuột phải
+  document.addEventListener('contextmenu', function(e){
+    e.preventDefault();
+  });
+
+  // 2. Chặn bôi đen + copy
+  document.addEventListener('copy', e => e.preventDefault());
+  document.addEventListener('cut', e => e.preventDefault());
+  document.addEventListener('paste', e => e.preventDefault());
+  document.addEventListener('selectstart', e => e.preventDefault());
+
+  // 3. Chặn phím tắt nguy hiểm
+  document.addEventListener('keydown', function(e){
+    const k = e.key.toLowerCase();
+
+    // Ctrl + ...
+    if (e.ctrlKey && (
+      k === 'c' || // copy
+      k === 'x' || // cut
+      k === 'v' || // paste
+      k === 'a' || // select all
+      k === 'p' || // print
+      k === 's'    // save
+    )) {
+      e.preventDefault();
+      return false;
+    }
+
+    // F12, Ctrl+Shift+I/J/C (DevTools)
+    if (
+      k === 'f12' ||
+      (e.ctrlKey && e.shiftKey && (k === 'i' || k === 'j' || k === 'c'))
+    ) {
+      e.preventDefault();
+      return false;
+    }
+  });
+
+  // 4. Chặn kéo thả
+  document.addEventListener('dragstart', e => e.preventDefault());
+
+  // 5. CSS chống bôi đen (fallback)
+  const style = document.createElement('style');
+  style.innerHTML = `
+    body {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    input, textarea {
+      user-select: auto; /* vẫn cho nhập */
+    }
+  `;
+  document.head.appendChild(style);
+})();
+
+  </script>
+</body>
+</html>
