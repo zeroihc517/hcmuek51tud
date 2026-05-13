@@ -256,7 +256,144 @@ select{
     padding:16px;
   }
 }
+/* CSS NÂNG CẤP GIAO DIỆN CHỌN TKB */
+.form-row-custom {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  padding: 30px 20px;
+  align-items: flex-end;
+}
 
+.input-group {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+}
+
+/* Nhãn nằm trên đường viền */
+.input-group label {
+  position: absolute;
+  top: -10px;
+  left: 15px;
+  background: #fff;
+  padding: 0 5px;
+  font-size: 13px;
+  color: #6b7280;
+  z-index: 1;
+  margin-bottom: 0;
+}
+
+.input-group select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 25px; /* Bo tròn sâu như ảnh */
+  appearance: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") no-repeat right 15px center;
+  background-size: 18px;
+}
+
+.input-group select:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+
+/* Nhóm nút bấm bên phải */
+.button-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-blue {
+  background: #2b4877; /* Màu xanh đậm như ảnh */
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-blue:hover {
+  background: #1e355b;
+}
+
+.nav-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.btn-nav {
+  background: #2b4877;
+  color: #fff;
+  border: none;
+  width: 45px;
+  height: 30px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+/* CSS CHO MODAL TỔNG HỢP */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #fff;
+   width: 95%; /* Tăng từ 90% lên 95% để tận dụng chiều ngang */
+    max-width: 1400px; /* Tăng giới hạn chiều rộng tối đa */
+    height: 90vh; /* Tăng chiều cao lên 90% chiều cao màn hình */
+    border-radius: 12px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    padding: 15px 20px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    color: var(--blue-dark);
+}
+
+.close-modal {
+    cursor: pointer;
+    font-size: 24px;
+    color: #999;
+}
+
+.modal-body {
+    flex: 1;
+    padding: 10px;
+    background: #f9f9f9;
+}
+
+.modal-body iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 4px;
+}
 </style>
 </head>
 
@@ -421,39 +558,73 @@ select{
 </div>
 <!-- TAB THỜI KHÓA BIỂU (Đã sửa lỗi hiển thị đè) -->
         <div id="hk2" class="content">
-            <div class="card">
-                <div class="card-header">Thời khóa biểu TUD K51</div>
-                <div class="form-row" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 150px;">
-                        <label>Năm học</label>
-                        <select id="selectNamHoc" onchange="updateHocKy()">
-                            <option value="">-- Chọn năm học --</option>
-                            <option value="2025-2026">2025 - 2026</option>
-                        </select>
-                    </div>
-                    <div style="flex: 1; min-width: 150px;">
-                        <label>Học kỳ</label>
-                        <select id="selectHocKy" onchange="updateTuan()" disabled>
-                            <option value="">-- Chọn học kỳ --</option>
-                            <option value="HK1">Học kỳ 1</option>
-                            <option value="HK2">Học kỳ 2</option>
-                        </select>
-                    </div>
-                    <div style="flex: 2; min-width: 200px;">
-                        <label>Tuần học</label>
-                        <select id="selectTuan" onchange="displayIframe()" disabled>
-                            <option value="">-- Chọn tuần --</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="boxTKB" class="iframe-box">
-                    <iframe id="iframeTKB"></iframe>
-                </div>
+<div class="card">
+    <div class="card-header">Thời khóa biểu TUD K51</div>
+    
+    <div class="form-row-custom">
+        <div class="input-group">
+            <label>Năm học</label>
+            <select id="selectNamHoc" onchange="updateHocKy()">
+                <option value="2025-2026">2025 - 2026</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label>Học kỳ</label>
+            <select id="selectHocKy" onchange="updateTuan()">
+                <option value="" selected>-- Chọn học kỳ --</option>
+                <option value="HK1">Học kỳ 1</option>
+                <option value="HK2">Học kỳ 2</option>
+            </select>
+        </div>
+
+        <div class="input-group" style="flex: 1.5;">
+            <label>Tuần</label>
+            <select id="selectTuan" onchange="displayIframe()">
+                <option value="">-- Chọn tuần --</option>
+            </select>
+        </div>
+
+        <div class="button-group">
+            <div class="nav-btns">
+                <button class="btn-nav" onclick="navTuan(-1)">⏮</button>
+                <button class="btn-nav" onclick="navTuan(1)">⏭</button>
+
             </div>
+            
+            <button class="btn-blue" onclick="goToday()">
+    <span>📅</span> Hiện tại
+</button>
+<button class="btn-blue" onclick="viewFullTKB()">
+            <span>👁</span> TKB Tổng hợp
+        </button>
+        </div>
+    </div>
+
+
+    <div id="boxTKB" class="iframe-box">
+        <iframe id="iframeTKB"></iframe>
+    </div>
+</div>
         </div>
     </div>
 </div>
-
+<div id="modalTongHop" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span>XEM THỜI KHÓA BIỂU TỔNG HỢP</span>
+            <span class="close-modal" onclick="closeModal()">×</span>
+        </div>
+        <div class="modal-body">
+            <iframe id="iframeTongHop" src=""></iframe>
+        </div>
+        <div style="padding: 10px 20px; border-top: 1px solid #eee; text-align: right;">
+            <button class="btn-blue" style="padding: 8px 15px; font-size: 13px;" onclick="closeModal()">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
 <script>
 // Hàm chuyển đổi Tab duy nhất
 function showTab(id, el){
@@ -463,7 +634,43 @@ function showTab(id, el){
     el.classList.add('active');
     document.querySelector('.sidebar').classList.remove('show');
 }
+function updateHocKy() {
+    const hockySelect = document.getElementById('selectHocKy');
+    const tuanSelect = document.getElementById('selectTuan');
+    hockySelect.disabled = false;
+    tuanSelect.disabled = true;
+    tuanSelect.innerHTML = '<option value="">-- Chọn tuần --</option>';
+}
+function updateTuan() {
+    const namHoc = document.getElementById('selectNamHoc').value;
+    const hocKy = document.getElementById('selectHocKy').value;
+    const tuanSelect = document.getElementById('selectTuan');
+    tuanSelect.innerHTML = '<option value="">-- Chọn tuần --</option>';
+    if (namHoc && hocKy && dataConfig[namHoc][hocKy]) {
+        tuanSelect.disabled = false;
+        dataConfig[namHoc][hocKy].forEach(item => {
+            let opt = document.createElement('option');
+            opt.value = item.value || item.val;
+            opt.innerHTML = item.text;
+            tuanSelect.appendChild(opt);
+        });
+    }
+}
+function displayIframe() {
+    const val = document.getElementById('selectTuan').value;
+    const iframe = document.getElementById('iframeTKB');
+    const box = document.getElementById('boxTKB');
+    if (val) { iframe.src = val; box.style.display = 'block'; }
+    else { box.style.display = 'none'; }
+}
 
+function navTuan(step) {
+    const select = document.getElementById('selectTuan');
+    if (select.selectedIndex + step > 0 && select.selectedIndex + step < select.options.length) {
+        select.selectedIndex += step;
+        displayIframe();
+    }
+}
 function toggleSidebar(){
     document.querySelector('.sidebar').classList.toggle('show');
 }
@@ -471,7 +678,6 @@ function toggleSidebar(){
 const dataConfig = {
     "2025-2026": {
         "HK1": [
-            { val: "TUD_HK1_2526/tonghop.html", text: "Tổng hợp TKB Tuần 1 - 15" },
             { val: "TUD_HK1_2526/01.TUẦN 01.html", text: "Tuần 01 Sinh hoạt (08/09/2025 - 14/09/2025)" },
             { val: "TUD_HK1_2526/02.TUẦN 02.html", text: "Tuần 02 (15/09/2025 - 21/09/2025)" },
             { val: "TUD_HK1_2526/03.TUẦN 03.html", text: "Tuần 03 (22/09/2025 - 28/09/2025)" },
@@ -492,8 +698,7 @@ const dataConfig = {
             { val: "TUD_HK1_2526/18.TUẦN THI SỐ 03.html", text: "Tuần thi số 04 (12/01/2026 - 18/01/2026)" }
         ],
         "HK2": [
-            { val: "TUD_HK2_2526/tonghop.html", text: "Tổng hợp TKB Tuần 1 - 15" },
-            { val: "TUD_HK2_2526/01.TUẦN 01.html", text: "Tuần 01 (19/01/2026 - 25/01/2026)" },
+           { val: "TUD_HK2_2526/01.TUẦN 01.html", text: "Tuần 01 (19/01/2026 - 25/01/2026)" },
             { val: "TUD_HK2_2526/02.TUẦN 02.html", text: "Tuần 02 (26/01/2026 - 01/02/2026)" },
             { val: "TUD_HK2_2526/03.TUẦN 03.html", text: "Tuần 03 online (02/02/2026 - 08/02/2026)" },
             { val: "TUD_HK2_2526/04.TUẦN 04.html", text: "Tuần 04 online (02/03/2026 - 08/03/2026)" },
@@ -514,45 +719,119 @@ const dataConfig = {
         ]
     }
 };
+function showTab(id, el){
+    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+}
+
+function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('show'); }
 
 function updateHocKy() {
-    const namHoc = document.getElementById('selectNamHoc').value;
-    const hockySelect = document.getElementById('selectHocKy');
-    const tuanSelect = document.getElementById('selectTuan');
-    hockySelect.disabled = !namHoc;
-    tuanSelect.disabled = true;
-    tuanSelect.innerHTML = '<option value="">-- Chọn tuần --</option>';
+    const hk = document.getElementById('selectHocKy');
+    const t = document.getElementById('selectTuan');
+    hk.value = "";
+    t.innerHTML = '<option value="">-- Chọn tuần --</option>';
+    t.disabled = true;
 }
 
 function updateTuan() {
-    const namHoc = document.getElementById('selectNamHoc').value;
-    const hocKy = document.getElementById('selectHocKy').value;
-    const tuanSelect = document.getElementById('selectTuan');
-    tuanSelect.innerHTML = '<option value="">-- Chọn tuần --</option>';
-    if (namHoc && hocKy && dataConfig[namHoc][hocKy]) {
-        tuanSelect.disabled = false;
-        dataConfig[namHoc][hocKy].forEach(item => {
+    const nam = document.getElementById('selectNamHoc').value;
+    const hk = document.getElementById('selectHocKy').value;
+    const tSel = document.getElementById('selectTuan');
+    tSel.innerHTML = '<option value="">-- Chọn tuần --</option>';
+    if (nam && hk && dataConfig[nam][hk]) {
+        tSel.disabled = false;
+        dataConfig[nam][hk].forEach(item => {
             let opt = document.createElement('option');
             opt.value = item.val;
             opt.innerHTML = item.text;
-            tuanSelect.appendChild(opt);
+            tSel.appendChild(opt);
         });
-    } else {
-        tuanSelect.disabled = true;
-    }
+    } else { tSel.disabled = true; }
 }
 
 function displayIframe() {
     const val = document.getElementById('selectTuan').value;
     const iframe = document.getElementById('iframeTKB');
     const box = document.getElementById('boxTKB');
-    if (val) {
-        iframe.src = val;
-        box.style.display = 'block';
-    } else {
-        box.style.display = 'none';
-        iframe.src = '';
+    if (val) { iframe.src = val; box.style.display = 'block'; }
+    else { box.style.display = 'none'; }
+}
+
+function navTuan(step) {
+    const s = document.getElementById('selectTuan');
+    if (s.selectedIndex + step > 0 && s.selectedIndex + step < s.options.length) {
+        s.selectedIndex += step;
+        displayIframe();
     }
+}
+
+// Hàm mở Modal và hiện TKB tổng hợp trực tiếp
+function viewFullTKB() {
+    const namHoc = document.getElementById('selectNamHoc').value;
+    const hocKy = document.getElementById('selectHocKy').value;
+
+    if (!hocKy) {
+        alert("Vui lòng chọn học kỳ để xem TKB tổng hợp!");
+        return;
+    }
+
+    // Chuyển "2025-2026" thành "2526"
+    const namRutGon = namHoc.replace(/-/g, '').substring(2, 4) + namHoc.slice(-2);
+    
+    // Đường dẫn ví dụ: TUD_HK2_2526/tonghop.html
+    const path = `TUD_${hocKy}_${namRutGon}/tonghop.html`;
+
+    // Hiện Modal và nạp link
+    document.getElementById('iframeTongHop').src = path;
+    document.getElementById('modalTongHop').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('modalTongHop').style.display = 'none';
+    document.getElementById('iframeTongHop').src = '';
+}
+// Hàm đóng Modal
+function closeModal() {
+    document.getElementById('modalTongHop').style.display = 'none';
+    document.getElementById('iframeTongHop').src = ''; // Xóa src để giải phóng bộ nhớ
+}
+
+// Đóng modal khi nhấn ra ngoài vùng trắng
+window.onclick = function(event) {
+    const modal = document.getElementById('modalTongHop');
+    if (event.target == modal) {
+        closeModal();
+    }
+}
+function goToday() {
+    const today = new Date();
+    let fNam = "", fHK = "", fVal = "";
+
+    for (const nam in dataConfig) {
+        for (const hk in dataConfig[nam]) {
+            for (const t of dataConfig[nam][hk]) {
+                const m = t.text.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+                if (m) {
+                    const start = new Date(m[3], m[2]-1, m[1]);
+                    const end = new Date(start); end.setDate(start.getDate() + 7);
+                    if (today >= start && today < end) { fNam=nam; fHK=hk; fVal=t.val; break; }
+                }
+            }
+            if(fNam) break;
+        }
+        if(fNam) break;
+    }
+
+    if (fNam) {
+        document.getElementById('selectNamHoc').value = fNam;
+        document.getElementById('selectHocKy').value = fHK;
+        updateTuan();
+        document.getElementById('selectTuan').value = fVal;
+        displayIframe();
+    } else { alert("Không tìm thấy tuần hiện tại!"); }
 }
 </script>
 </body>
