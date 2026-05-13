@@ -565,7 +565,8 @@ select{
         <div class="input-group">
             <label>Năm học</label>
             <select id="selectNamHoc" onchange="updateHocKy()">
-                <option value="2025-2026">2025 - 2026</option>
+                 <option value="">-- Chọn năm học --</option>
+		<option value="2025-2026">2025 - 2026</option>
             </select>
         </div>
 
@@ -627,11 +628,27 @@ select{
 </div>
 <script>
 // Hàm chuyển đổi Tab duy nhất
-function showTab(id, el){
+function showTab(id, el) {
+    // 1. Lưu ID tab vào bộ nhớ trình duyệt
+    localStorage.setItem('activeTab', id);
+
+    // 2. Chuyển đổi nội dung Tab
     document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
     document.getElementById(id).classList.add('active');
+
+    // 3. Đồng bộ hiệu ứng Sidebar
     document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-    el.classList.add('active');
+    
+    // Nếu có 'el' (do nhấn chuột), dùng luôn. Nếu không (do load trang), đi tìm thẻ a có id đó.
+    if (el) {
+        el.classList.add('active');
+    } else {
+        const targetBtn = Array.from(document.querySelectorAll('.sidebar a'))
+                               .find(a => a.getAttribute('onclick').includes(`'${id}'`));
+        if (targetBtn) targetBtn.classList.add('active');
+    }
+
+    // Đóng sidebar nếu đang ở mobile
     document.querySelector('.sidebar').classList.remove('show');
 }
 function updateHocKy() {
@@ -719,12 +736,7 @@ const dataConfig = {
         ]
     }
 };
-function showTab(id, el){
-    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-    el.classList.add('active');
-}
+
 
 function toggleSidebar() { document.querySelector('.sidebar').classList.toggle('show'); }
 
@@ -833,6 +845,31 @@ function goToday() {
         displayIframe();
     } else { alert("Không tìm thấy tuần hiện tại!"); }
 }
+window.onload = function() {
+    // Lấy ID tab đã lưu, nếu chưa có thì mặc định là 'nentang'
+    const savedTab = localStorage.getItem('activeTab') || 'nentang';
+    
+    // Gọi hàm hiển thị tab đó
+    showTab(savedTab, null);
+    
+    // Tự động nhấn "Hiện tại" nếu bạn đang ở tab TKB để load dữ liệu mới nhất
+    if (savedTab === 'hk2') {
+        goToday();
+    }
+};
+// Sự kiện chạy ngay khi trang web tải xong
+window.addEventListener('DOMContentLoaded', () => {
+    // Lấy tab đã lưu, nếu chưa có (lần đầu vào) thì mặc định là 'nentang'
+    const savedTab = localStorage.getItem('activeTab') || 'nentang';
+    
+    // Gọi hàm hiển thị tab và đồng bộ sidebar
+    showTab(savedTab, null);
+
+    // Nếu là tab thời khóa biểu (hk2), tự động nhảy đến tuần hiện tại
+    if (savedTab === 'hk2') {
+        setTimeout(goToday, 100); // Delay một chút để dữ liệu kịp load
+    }
+});
 </script>
 </body>
 </html>
