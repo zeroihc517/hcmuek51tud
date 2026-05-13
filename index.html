@@ -276,8 +276,7 @@ select{
 <a class="active" onclick="showTab('nentang',this)">HCMUE</a>
 <a onclick="showTab('ungdung',this)">Cá nhân</a>
     <h3>Thời khóa biểu</h3>
-    <a onclick="showTab('hk2',this)">TKB Học kỳ 2 - Năm 1</a>
-    <a onclick="showTab('hk1',this)">TKB Học kỳ 1 - Năm 1</a>
+    <a onclick="showTab('hk2',this)">TUD K51</a>
   </div>
 
   <!-- MAIN -->
@@ -420,188 +419,141 @@ select{
     </a>
 </div>
 </div>
-<!----DuLieu---->
-<div id="dulieu" class="content">
-  <table style="width:100%; border-collapse:collapse; font-size:14px;">
-    <thead style="background:#0b3b64; color:#fff;">
-      <tr>
-        <th>Học kì</th>
-        <th>Mã LHP</th>
-        <th>Tên HP</th>
-        <th>STC</th>
-        <th>Giảng viên</th>
-        <th>Liên hệ</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>1</td>
-        <td>Đang cập nhật</td>
-        <td>Đang cập nhật</td>
-        <td></td>
-        <td>Đang cập nhật</td>
-        <td>Đang cập nhật</td>
-      </tr>
-	 <tr>
-
-      </tr>
-    </tbody>
-  </table>
-</div> 
-    <!-- HK2 -->
-    <div id="hk2" class="content">
-      <div class="card">
-        <div class="card-header">Học kỳ 2 – Năm 1</div>
-
-        <div class="form-row">
-          <label>Chọn tuần học</label>
-          <select onchange="loadTKB(this,'iframeHK2','boxHK2')">
-            <option value="">-- Chọn tuần --</option>
-			<option value="HK2/tonghop.html">Tổng hợp TKB Tuần 1 - 15</option>
-            <option value="HK2/01.TUẦN 01.html">Tuần 01 (19/01/2026 - 25/01/2026)</option>
-            <option value="HK2/02.TUẦN 02.html">Tuần 02 (26/01/2026 - 01/02/2026)</option>
-            <option value="HK2/03.TUẦN 03.html">Tuần 03 online (02/02/2026 - 08/02/2026)</option>
-			<option value="HK2/04.TUẦN 04.html">Tuần 04 online (02/03/2026 - 08/03/2026)</option>
-			<option value="HK2/05.TUẦN 05.html">Tuần 05 (09/03/2026 - 15/03/2026)</option>
-			<option value="HK2/06.TUẦN 06.html">Tuần 06 (16/03/2026 - 22/03/2026)</option>
-			<option value="HK2/07.TUẦN 07.html">Tuần 07 (23/03/2026 - 29/03/2026)</option>
-			<option value="HK2/08.TUẦN 08.html">Tuần 08 (30/03/2026 - 05/04/2026)</option>
-			<option value="HK2/09.TUẦN 09.html">Tuần 09 (06/04/2026 - 12/04/2026)</option>
-			<option value="HK2/10.TUẦN 10.html">Tuần 10 (13/04/2026 - 19/04/2026)</option>
-			<option value="HK2/11.TUẦN 11.html">Tuần 11 (20/04/2026 - 26/04/2026)</option>
-			<option value="HK2/12.TUẦN 12.html">Tuần 12 (27/04/2026 - 03/05/2026)</option>
-			<option value="HK2/13.TUẦN 13.html">Tuần 13 (04/05/2026 - 10/05/2026)</option>
-			<option value="HK2/14.TUẦN 14.html">Tuần 14 (11/05/2026 - 17/05/2026)</option>
-			<option value="HK2/15.TUẦN 15.html">Tuần 15 (18/05/2026 - 24/05/2026)</option>
-			<option value="HK2/16.TUẦN THI SỐ 01.html">Tuần thi số 01 (25/05/2026 - 31/05/2026)</option>
-			<option value="HK2/17.TUẦN THI SỐ 02.html">Tuần thi số 02 (01/06/2026 - 07/06/2026)</option>
-			<option value="HK2/18.TUẦN THI SỐ 03.html">Tuần thi số 03 (08/06/2026 - 14/06/2026)</option>
-          </select>
+<!-- TAB THỜI KHÓA BIỂU (Đã sửa lỗi hiển thị đè) -->
+        <div id="hk2" class="content">
+            <div class="card">
+                <div class="card-header">Thời khóa biểu TUD K51</div>
+                <div class="form-row" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 150px;">
+                        <label>Năm học</label>
+                        <select id="selectNamHoc" onchange="updateHocKy()">
+                            <option value="">-- Chọn năm học --</option>
+                            <option value="2025-2026">2025 - 2026</option>
+                        </select>
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <label>Học kỳ</label>
+                        <select id="selectHocKy" onchange="updateTuan()" disabled>
+                            <option value="">-- Chọn học kỳ --</option>
+                            <option value="HK1">Học kỳ 1</option>
+                            <option value="HK2">Học kỳ 2</option>
+                        </select>
+                    </div>
+                    <div style="flex: 2; min-width: 200px;">
+                        <label>Tuần học</label>
+                        <select id="selectTuan" onchange="displayIframe()" disabled>
+                            <option value="">-- Chọn tuần --</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="boxTKB" class="iframe-box">
+                    <iframe id="iframeTKB"></iframe>
+                </div>
+            </div>
         </div>
-
-        <div id="boxHK2" class="iframe-box">
-          <iframe id="iframeHK2"></iframe>
-        </div>
-      </div>
     </div>
-
-    <!-- HK1 -->
-    <div id="hk1" class="content">
-      <div class="card">
-        <div class="card-header">Học kỳ 1 – Năm 1</div>
-
-        <div class="form-row">
-          <label>Chọn tuần học</label>
-          <select onchange="loadTKB(this,'iframeHK1','boxHK1')">
-            <option value="">-- Chọn tuần --</option>
-			  <option value="HK1/tonghop.html">Tổng hợp TKB Tuần 1 - 15</option>
-           	 <option value="HK1/01.TUẦN 01.html">Tuần 01 Sinh hoạt (08/09/2025 - 14/09/2025)</option>
-           	 <option value="HK1/02.TUẦN 02.html">Tuần 02 (15/09/2025 - 21/09/2025)</option>
-           	 <option value="HK1/03.TUẦN 03.html">Tuần 03 (22/09/2025 - 28/09/2025)</option>
-			  <option value="HK1/04.TUẦN 04.html">Tuần 04 (29/09/2025 - 05/10/2025)</option>
-			  <option value="HK1/05.TUẦN 05.html">Tuần 05 (06/10/2025 - 12/10/2025)</option>
-			  <option value="HK1/06.TUẦN 06.html">Tuần 06 (13/10/2025 - 19/10/2025)</option>
-			  <option value="HK1/07.TUẦN 07.html">Tuần 07 (20/10/2025 - 26/10/2025)</option>
-			  <option value="HK1/08.TUẦN 08.html">Tuần 08 (27/10/2025 - 02/11/2025)</option>
-			  <option value="HK1/09.TUẦN 09.html">Tuần 09 (03/11/2025 - 09/11/2025)</option>
-			  <option value="HK1/10.TUẦN 10.html">Tuần 10 (10/11/2025 - 16/11/2025)</option>
-			  <option value="HK1/11.TUẦN 11.html">Tuần 11 (17/11/2025 - 23/11/2025)</option>
-			  <option value="HK1/12.TUẦN 12.html">Tuần 12 (24/11/2025 - 30/11/2025)</option>
-			  <option value="HK1/13.TUẦN 13.html">Tuần 13 (01/12/2025 - 07/12/2025)</option>
-			  <option value="HK1/14.TUẦN 14.html">Tuần 14 (08/12/2025 - 14/12/2025)</option>
-			  <option value="HK1/15.TUẦN 15.html">Tuần 15 (15/12/2025 - 21/12/2025)</option>
-			  <option value="HK1/16.TUẦN THI SỐ 01.html">Tuần thi số 01 (22/12/2025 - 28/12/2025)</option>
-			  <option value="HK1/17.TUẦN THI SỐ 02.html">Tuần thi số 02 (29/12/2025 - 04/01/2026)</option>
-			  <option value="HK1/18.TUẦN THI SỐ 03.html">Tuần thi số 04 (12/01/2026 - 18/01/2026)</option>
-          </select>
-        </div>
-
-        <div id="boxHK1" class="iframe-box">
-          <iframe id="iframeHK1"></iframe>
-        </div>
-      </div>
-    </div>
-
-   
+</div>
 
 <script>
+// Hàm chuyển đổi Tab duy nhất
 function showTab(id, el){
-  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-
-  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
-  el.classList.add('active');
+    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelector('.sidebar').classList.remove('show');
 }
 
-function loadTKB(select, iframeId, boxId){
-  const iframe = document.getElementById(iframeId);
-  const box = document.getElementById(boxId);
-
-  if(select.value){
-    iframe.src = select.value;
-    box.style.display = 'block';
-    box.scrollIntoView({behavior:'smooth'});
-  }else{
-    box.style.display = 'none';
-    iframe.src = '';
-  }
-}
 function toggleSidebar(){
-  document.querySelector('.sidebar').classList.toggle('show');
-}
-function showTab(id, el){
-  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-
-  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
-  el.classList.add('active');
-
-  // đóng sidebar trên mobile
-  document.querySelector('.sidebar').classList.remove('show');
-}
-/* ===== TAB + GHI NHỚ ===== */
-function showTab(id, el){
-  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-
-  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
-  el.classList.add('active');
-
-  localStorage.setItem('activeTab', id);
-
-  // đóng sidebar mobile
-  document.querySelector('.sidebar').classList.remove('show');
+    document.querySelector('.sidebar').classList.toggle('show');
 }
 
-/* ===== TAB + GHI NHỚ ===== */
-function showTab(id, el){
-  document.querySelectorAll('.content').forEach(c=>c.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+const dataConfig = {
+    "2025-2026": {
+        "HK1": [
+            { val: "HK1/tonghop.html", text: "Tổng hợp TKB Tuần 1 - 15" },
+            { val: "HK1/01.TUẦN 01.html", text: "Tuần 01 Sinh hoạt (08/09/2025 - 14/09/2025)" },
+            { val: "HK1/02.TUẦN 02.html", text: "Tuần 02 (15/09/2025 - 21/09/2025)" },
+            { val: "HK1/03.TUẦN 03.html", text: "Tuần 03 (22/09/2025 - 28/09/2025)" },
+            { val: "HK1/04.TUẦN 04.html", text: "Tuần 04 (29/09/2025 - 05/10/2025)" },
+            { val: "HK1/05.TUẦN 05.html", text: "Tuần 05 (06/10/2025 - 12/10/2025)" },
+            { val: "HK1/06.TUẦN 06.html", text: "Tuần 06 (13/10/2025 - 19/10/2025)" },
+            { val: "HK1/07.TUẦN 07.html", text: "Tuần 07 (20/10/2025 - 26/10/2025)" },
+            { val: "HK1/08.TUẦN 08.html", text: "Tuần 08 (27/10/2025 - 02/11/2025)" },
+            { val: "HK1/09.TUẦN 09.html", text: "Tuần 09 (03/11/2025 - 09/11/2025)" },
+            { val: "HK1/10.TUẦN 10.html", text: "Tuần 10 (10/11/2025 - 16/11/2025)" },
+            { val: "HK1/11.TUẦN 11.html", text: "Tuần 11 (17/11/2025 - 23/11/2025)" },
+            { val: "HK1/12.TUẦN 12.html", text: "Tuần 12 (24/11/2025 - 30/11/2025)" },
+            { val: "HK1/13.TUẦN 13.html", text: "Tuần 13 (01/12/2025 - 07/12/2025)" },
+            { val: "HK1/14.TUẦN 14.html", text: "Tuần 14 (08/12/2025 - 14/12/2025)" },
+            { val: "HK1/15.TUẦN 15.html", text: "Tuần 15 (15/12/2025 - 21/12/2025)" },
+            { val: "HK1/16.TUẦN THI SỐ 01.html", text: "Tuần thi số 01 (22/12/2025 - 28/12/2025)" },
+            { val: "HK1/17.TUẦN THI SỐ 02.html", text: "Tuần thi số 02 (29/12/2025 - 04/01/2026)" },
+            { val: "HK1/18.TUẦN THI SỐ 03.html", text: "Tuần thi số 04 (12/01/2026 - 18/01/2026)" }
+        ],
+        "HK2": [
+            { val: "HK2/tonghop.html", text: "Tổng hợp TKB Tuần 1 - 15" },
+            { val: "HK2/01.TUẦN 01.html", text: "Tuần 01 (19/01/2026 - 25/01/2026)" },
+            { val: "HK2/02.TUẦN 02.html", text: "Tuần 02 (26/01/2026 - 01/02/2026)" },
+            { val: "HK2/03.TUẦN 03.html", text: "Tuần 03 online (02/02/2026 - 08/02/2026)" },
+            { val: "HK2/04.TUẦN 04.html", text: "Tuần 04 online (02/03/2026 - 08/03/2026)" },
+            { val: "HK2/05.TUẦN 05.html", text: "Tuần 05 (09/03/2026 - 15/03/2026)" },
+            { val: "HK2/06.TUẦN 06.html", text: "Tuần 06 (16/03/2026 - 22/03/2026)" },
+            { val: "HK2/07.TUẦN 07.html", text: "Tuần 07 (23/03/2026 - 29/03/2026)" },
+            { val: "HK2/08.TUẦN 08.html", text: "Tuần 08 (30/03/2026 - 05/04/2026)" },
+            { val: "HK2/09.TUẦN 09.html", text: "Tuần 09 (06/04/2026 - 12/04/2026)" },
+            { val: "HK2/10.TUẦN 10.html", text: "Tuần 10 (13/04/2026 - 19/04/2026)" },
+            { val: "HK2/11.TUẦN 11.html", text: "Tuần 11 (20/04/2026 - 26/04/2026)" },
+            { val: "HK2/12.TUẦN 12.html", text: "Tuần 12 (27/04/2026 - 03/05/2026)" },
+            { val: "HK2/13.TUẦN 13.html", text: "Tuần 13 (04/05/2026 - 10/05/2026)" },
+            { val: "HK2/14.TUẦN 14.html", text: "Tuần 14 (11/05/2026 - 17/05/2026)" },
+            { val: "HK2/15.TUẦN 15.html", text: "Tuần 15 (18/05/2026 - 24/05/2026)" },
+            { val: "HK2/16.TUẦN THI SỐ 01.html", text: "Tuần thi số 01 (25/05 - 31/05)" },
+            { val: "HK2/17.TUẦN THI SỐ 02.html", text: "Tuần thi số 02 (01/06 - 07/06)" },
+            { val: "HK2/18.TUẦN THI SỐ 03.html", text: "Tuần thi số 03 (08/06 - 14/06)" }
+        ]
+    }
+};
 
-  document.querySelectorAll('.sidebar a').forEach(a=>a.classList.remove('active'));
-  el.classList.add('active');
-
-  localStorage.setItem('activeTab', id); // ❌ XOÁ DÒNG NÀY
-
-  document.querySelector('.sidebar').classList.remove('show');
+function updateHocKy() {
+    const namHoc = document.getElementById('selectNamHoc').value;
+    const hockySelect = document.getElementById('selectHocKy');
+    const tuanSelect = document.getElementById('selectTuan');
+    hockySelect.disabled = !namHoc;
+    tuanSelect.disabled = true;
+    tuanSelect.innerHTML = '<option value="">-- Chọn tuần --</option>';
 }
 
-
-/* ===== SIDEBAR MOBILE ===== */
-function toggleSidebar(){
-  document.querySelector('.sidebar').classList.toggle('show');
+function updateTuan() {
+    const namHoc = document.getElementById('selectNamHoc').value;
+    const hocKy = document.getElementById('selectHocKy').value;
+    const tuanSelect = document.getElementById('selectTuan');
+    tuanSelect.innerHTML = '<option value="">-- Chọn tuần --</option>';
+    if (namHoc && hocKy && dataConfig[namHoc][hocKy]) {
+        tuanSelect.disabled = false;
+        dataConfig[namHoc][hocKy].forEach(item => {
+            let opt = document.createElement('option');
+            opt.value = item.val;
+            opt.innerHTML = item.text;
+            tuanSelect.appendChild(opt);
+        });
+    } else {
+        tuanSelect.disabled = true;
+    }
 }
 
-/* ===== SEARCH NỀN TẢNG ===== */
-function filterPlatform(){
-  const keyword = document.getElementById('searchPlatform').value.toLowerCase();
-  document.querySelectorAll('.platform-card').forEach(card=>{
-    const text = card.innerText.toLowerCase();
-    card.style.display = text.includes(keyword) ? 'block' : 'none';
-  });
+function displayIframe() {
+    const val = document.getElementById('selectTuan').value;
+    const iframe = document.getElementById('iframeTKB');
+    const box = document.getElementById('boxTKB');
+    if (val) {
+        iframe.src = val;
+        box.style.display = 'block';
+    } else {
+        box.style.display = 'none';
+        iframe.src = '';
+    }
 }
-
 </script>
-
 </body>
 </html>
