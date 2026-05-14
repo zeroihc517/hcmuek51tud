@@ -83,10 +83,10 @@ var DATA_COURSES = [
         location: "Học online",
        room: "MS TEAMS", link: "",
 	teacher: "Huỳnh Cao Trường",
-        time: "8:00 - 11:30",
+        time: "9:00 - 11:30",
         day: 6, 
-        start: 3,
-        length: 4,
+        start: 4,
+        length: 3,
         weeks: [14]
     },
 {
