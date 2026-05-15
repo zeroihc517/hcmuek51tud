@@ -1,0 +1,22 @@
+const nentangData = [
+    { href: "https://online.hcmue.edu.vn/", icon: "🎓", title: "Trang Online" },
+    { href: "https://vle.hcmue.edu.vn/users/users/login", icon: "🗂️", title: "Hệ thống VLE" },
+    { href: "https://outlook.office.com/mail/?login", icon: "📝", title: "Outlook (Công việc)" },
+    { href: "https://outlook.live.com/mail/", icon: "📝", title: "Outlook (Cá nhân)" },
+    { href: "https://teams.microsoft.com/v2/", icon: "🎯", title: "Microsoft Teams" },
+    { href: "https://dkhp.hcmue.edu.vn/Student/RegistScheduleUnitPlan", icon: "📊", title: "Web đăng ký học phần" },
+    { href: "https://lib.hcmue.edu.vn/", icon: "🗂", title: "Thư viện HCMUE online" },
+    { href: "https://script.google.com/macros/s/AKfycbw_bZeUGGYYfQY6x0KLCDu4MH1tofdDq6JMocP0fWAYMDidr4su5ZB_YTEio-AZC-5TDg/exec", icon: "📢", title: "[ĐÀO TẠO] Hệ thống hỗ trợ" },
+    { href: "https://hotrotaikhoan.hcmue.edu.vn/", icon: "🆘", title: "Hỗ trợ Tài khoản" },
+    { href: "https://nxbdsh.vn/ebook-free/12173/0/1", icon: "📝", title: "Sổ tay sinh viên K51" },
+    { href: "https://www.overleaf.com/login?", icon: "📱", title: "LaTeX (Overleaf)" },
+    { href: "https://drive.google.com/drive/u/0/", icon: "📀", title: "Drive" },
+    { href: "https://mail.google.com/mail/u/0/?ogbl", icon: "💾", title: "Email" },
+    { href: "https://calendar.google.com/calendar/u/0/r", icon: "📅", title: "Google Lịch" },
+    { href: "https://zoom.us/myhome", icon: "☎", title: "Zoom" },
+    { href: "https://www.canva.com/", icon: "🔎", title: "Canva" },
+    { href: "https://upcoder.xyz", icon: "📌", title: "UpCoder" },
+    { href: "https://test.upcoder.xyz", icon: "🔒", title: "UpCoder (Dự phòng)" },
+    { href: "https://onecompiler.com/cpp/443fgw6yp", icon: "💻", title: "OneCompiler" },
+    { href: "https://matrixcalc.org/vi/", icon: "📙", title: "Tính toán ma trận" }
+];

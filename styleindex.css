@@ -1,0 +1,386 @@
+:root{
+  --blue:#0f4c81;
+  --blue-dark:#0b3b64;
+  --bg:#f5f7fb;
+  --line:#e5e7eb;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  font-family:Inter,system-ui;
+  background:var(--bg);
+}
+
+/* TOP BAR */
+.topbar{
+  height:56px;
+  background:var(--blue);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  padding:0 24px;
+  font-weight:700;
+}
+
+/* LAYOUT */
+.layout{
+  display:flex;
+  min-height:calc(100vh - 56px);
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:180px; /* từ 240px → 180px */
+  background:#fff;
+  border-right:1px solid var(--line);
+  padding-top:16px;
+}
+
+
+.sidebar h3{
+  padding:10px 20px;
+  font-size:13px;
+  color:#6b7280;
+  text-transform:uppercase;
+}
+
+.sidebar a{
+  display:block;
+  padding:12px 20px;
+  font-weight:600;
+  cursor:pointer;
+  border-left:3px solid transparent;
+}
+
+.sidebar a.active,
+.sidebar a:hover{
+  background:#f0f4f8;
+  border-left-color:var(--blue);
+  color:var(--blue);
+}
+
+/* MAIN */
+.main{
+  flex:1;
+  padding:24px;
+}
+
+.card{
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,.05);
+  overflow:hidden;
+  width:100%;
+}
+
+
+
+.card-header{
+  background:var(--blue-dark);
+  color:#fff;
+  padding:14px 18px;
+  font-weight:700;
+}
+
+/* FORM */
+.form-row{
+  padding:18px;
+  border-bottom:1px solid var(--line);
+}
+
+label{
+  font-weight:600;
+  display:block;
+  margin-bottom:6px;
+}
+
+select{
+  width:100%;
+  padding:10px 12px;
+  font-size:15px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:#fff;
+}
+
+/* IFRAME */
+.iframe-box{
+  display:none;
+  height:1350pt;
+  border-top:1px solid var(--line);
+}
+
+.iframe-box iframe{
+  width:100%;
+  height:100%;
+  border:none;
+}
+/* ===== BẢNG DỮ LIỆU GIỐNG WEB GỐC ===== */
+#dulieu table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:13.5px;
+  background:#fff;
+}
+
+/* Header */
+#dulieu thead th{
+  background:#0b4a78;   /* xanh đậm đúng ảnh */
+  color:#ffffff;
+  font-weight:600;
+  padding:8px 6px;
+  border:1px solid #0b4a78;
+  white-space:nowrap;
+  text-align:center;
+}
+
+/* Body */
+#dulieu tbody td{
+  border:1px solid #8c8c8c;  /* viền xám giống ảnh */
+  padding:7px 6px;
+  text-align:center;
+  vertical-align:middle;
+  color:#0f172a;
+}
+
+
+/* Hover nhẹ */
+#dulieu tbody tr:hover{
+  background:#f4f8fc;
+}
+
+/* TAB */
+.content{display:none;}
+.content.active{display:block;}
+/* ===== NỀN TẢNG ===== */
+.platform-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:22px;
+}
+
+.platform-card{
+  background:#fff;
+  border-radius:16px;
+  padding:36px 20px;
+  text-align:center;
+  box-shadow:0 6px 18px rgba(0,0,0,.08);
+  position:relative;
+  cursor:pointer;
+  transition:.25s;
+  overflow:hidden;
+}
+
+/* nền chấm góc giống ảnh */
+.platform-card::before{
+  content:"";
+  position:absolute;
+  width:120px;
+  height:120px;
+  background:radial-gradient(#cddff1 1px, transparent 1px);
+  background-size:8px 8px;
+  bottom:-20px;
+  left:-20px;
+  opacity:.7;
+}
+
+.platform-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 12px 28px rgba(0,0,0,.12);
+}
+
+.platform-card .icon{
+  font-size:48px;
+  margin-bottom:18px;
+}
+
+.platform-card h4{
+  color:#0f4c81;
+  font-size:16px;
+  font-weight:700;
+  line-height:1.4;
+}
+.menu-btn{
+  font-size:22px;
+  margin-right:16px;
+  cursor:pointer;
+  display:none;
+}
+
+/* responsive */
+@media(max-width:1000px){
+  .platform-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:600px){
+  .platform-grid{grid-template-columns:1fr;}
+}
+/* ===== SIDEBAR MOBILE ===== */
+@media (max-width: 768px){
+
+  .menu-btn{
+    display:block;
+  }
+
+  .layout{
+    flex-direction:column;
+  }
+
+  .sidebar{
+    position:fixed;
+    top:56px;
+    left:-220px;
+    width:200px;
+    height:calc(100vh - 56px);
+    background:#fff;
+    z-index:1000;
+    transition:0.3s ease;
+    box-shadow:4px 0 12px rgba(0,0,0,.15);
+  }
+
+  .sidebar.show{
+    left:0;
+  }
+
+  .main{
+    padding:16px;
+  }
+}
+/* CSS NÂNG CẤP GIAO DIỆN CHỌN TKB */
+.form-row-custom {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  padding: 30px 20px;
+  align-items: flex-end;
+}
+
+.input-group {
+  position: relative;
+  flex: 1;
+  min-width: 180px;
+}
+
+/* Nhãn nằm trên đường viền */
+.input-group label {
+  position: absolute;
+  top: -10px;
+  left: 15px;
+  background: #fff;
+  padding: 0 5px;
+  font-size: 13px;
+  color: #6b7280;
+  z-index: 1;
+  margin-bottom: 0;
+}
+
+.input-group select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 25px; /* Bo tròn sâu như ảnh */
+  appearance: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") no-repeat right 15px center;
+  background-size: 18px;
+}
+
+.input-group select:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+
+/* Nhóm nút bấm bên phải */
+.button-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-blue {
+  background: #2b4877; /* Màu xanh đậm như ảnh */
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-blue:hover {
+  background: #1e355b;
+}
+
+.nav-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.btn-nav {
+  background: #2b4877;
+  color: #fff;
+  border: none;
+  width: 45px;
+  height: 30px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+/* CSS CHO MODAL TỔNG HỢP */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: #fff;
+   width: 95%; /* Tăng từ 90% lên 95% để tận dụng chiều ngang */
+    max-width: 1400px; /* Tăng giới hạn chiều rộng tối đa */
+    height: 90vh; /* Tăng chiều cao lên 90% chiều cao màn hình */
+    border-radius: 12px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    padding: 15px 20px;
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    color: var(--blue-dark);
+}
+
+.close-modal {
+    cursor: pointer;
+    font-size: 24px;
+    color: #999;
+}
+
+.modal-body {
+    flex: 1;
+    padding: 10px;
+    background: #f9f9f9;
+}
+
+.modal-body iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 4px;
+}
