@@ -30,6 +30,9 @@ function generateWeeks(hkKey, folderName, totalWeeks, specialNames = {}) {
         // --- LOGIC XỬ LÝ NHẢY NGÀY (GAP) ---
         let offsetWeeks = i;
         
+        if (hkKey === "Nam1HK1TUD" && weekNum >= 18) {
+            offsetWeeks += 1; // Nhảy thêm 1 tuần trống để Tuần 18 bắt đầu đúng lịch
+        }
         // HK2 có khoảng nghỉ 4 tuần từ sau Tuần 03 (Nghỉ Tết/Chuyên đề)
         if (hkKey === "Nam1HK2TUD" && weekNum >= 4) {
             offsetWeeks += 3; // Nhảy thêm 3 tuần trống để Tuần 04 bắt đầu đúng 02/03
