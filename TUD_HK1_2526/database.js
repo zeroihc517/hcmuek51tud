@@ -570,7 +570,7 @@ var DATA_DEADLINES = [
         title: "Bài tập nhóm Giải tích vectơ",
         duration: "22/10/2025-18/11/2025",
         tag: "Bài tập nhóm",
-        icon: "soft-blue",
+        icon: "fire",
         emoji: "📣",
         weeks: [7, 8, 9, 10, 11]
     },
@@ -578,7 +578,7 @@ var DATA_DEADLINES = [
         title: "Tiểu luận kết thúc học phần Giải tích vectơ",
         duration: "19/11/2025-03/12/2025",
         tag: "Google Form",
-        icon: "soft-blue",
+        icon: "fire",
         emoji: "📣",
         weeks: [11, 12, 13]
     },
@@ -586,7 +586,7 @@ var DATA_DEADLINES = [
         title: "Bài tập nhóm Giải tích hàm một biến",
         duration: "09/11/2025-26/11/2025",
         tag: "Bài tập nhóm",
-        icon: "soft-blue",
+        icon: "success",
         emoji: "📣",
         weeks: [9, 10, 11, 12]
     },
@@ -594,7 +594,7 @@ var DATA_DEADLINES = [
         title: "Bài tập nhóm Giải tích hàm một biến (LaTeX)",
         duration: "27/11/2025-14/12/2025",
         tag: "Overleaf",
-        icon: "soft-blue",
+        icon: "success",
         emoji: "📣",
         weeks: [12, 13, 14]
     },
