@@ -528,10 +528,58 @@ var DATA_DEADLINES = [
 {
         title: "Phương pháp học tập hiệu quả",
         duration: "Từ 22/01/2026 đến 29/01/2026",
-        tag: "Bài tập nhóm Tuần 01",
+        tag: "Bài tập nhóm Đợt 1",
         icon: "soft-blue",
         emoji: "📣",
         weeks: [1, 2]
+    },
+		{
+        title: "Phương pháp học tập hiệu quả",
+        duration: "Từ 02/03/2026 đến 05/03/2026",
+        tag: "Bài tập nhóm Đợt 2",
+        icon: "soft-blue",
+        emoji: "📣",
+        weeks: [4]
+    },
+{
+        title: "Phương pháp học tập hiệu quả",
+        duration: "Ngày 06/03/2026",
+        tag: "Bài tập nhóm Đợt 3",
+        icon: "soft-blue",
+        emoji: "📣",
+        weeks: [4]
+    },
+{
+        title: "Phương pháp học tập hiệu quả",
+        duration: "Từ 13/03/2026 đến 19/03/2026",
+        tag: "Bài tập nhóm Đợt 4",
+        icon: "soft-blue",
+        emoji: "📣",
+        weeks: [5, 6]
+    },
+	{
+        title: "Phương pháp học tập hiệu quả",
+        duration: "Từ 20/03/2026 đến 26/03/2026",
+        tag: "Bài tập nhóm Đợt 5",
+        icon: "soft-blue",
+        emoji: "📣",
+        weeks: [6, 7]
+    },
+	{
+        title: "Phương pháp học tập hiệu quả",
+        duration: "Ngày 03/04/2026",
+        tag: "Bài tập nhóm Đợt 6",
+        icon: "soft-blue",
+        emoji: "📣",
+        weeks: [8]
+    },
+	{
+        title: "Phương pháp học tập hiệu quả",
+        duration: "Từ 04/05/2026 đến 07/05/2026",
+        tag: "Bài tập nhóm Đợt 7",
+        icon: "soft-blue",
+        emoji: "📣",
+        weeks: [13]
     },
 {
         title: "Phương pháp học tập hiệu quả",
