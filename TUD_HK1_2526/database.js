@@ -571,7 +571,7 @@ var DATA_DEADLINES = [
         duration: "22/10/2025-18/11/2025",
         tag: "Bài tập nhóm",
         icon: "soft-blue",
-        emoji: "📖",
+        emoji: "📣",
         weeks: [7, 8, 9, 10, 11]
     },
 		{
@@ -579,8 +579,24 @@ var DATA_DEADLINES = [
         duration: "19/11/2025-03/12/2025",
         tag: "Google Form",
         icon: "soft-blue",
-        emoji: "📖",
+        emoji: "📣",
         weeks: [11, 12, 13]
+    },
+		{
+        title: "Bài tập nhóm Giải tích hàm một biến",
+        duration: "09/11/2025-26/11/2025",
+        tag: "Bài tập nhóm",
+        icon: "soft-blue",
+        emoji: "📣",
+        weeks: [9, 10, 11, 12]
+    },
+		{
+        title: "Bài tập nhóm Giải tích hàm một biến (LaTeX)",
+        duration: "27/11/2025-14/12/2025",
+        tag: "Overleaf",
+        icon: "soft-blue",
+        emoji: "📣",
+        weeks: [12, 13, 14]
     },
 ];
 var DATA_LOCATIONS = [
