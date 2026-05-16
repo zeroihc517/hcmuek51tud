@@ -568,8 +568,8 @@ var DATA_DEADLINES = [
     },
 	{
         title: "Bài tập nhóm Giải tích vectơ",
-        duration: "22/11/2025-18/11/2025",
-        tag: "Outlook",
+        duration: "22/10/2025-18/11/2025",
+        tag: "Bài tập nhóm",
         icon: "soft-blue",
         emoji: "📖",
         weeks: [7, 8, 9, 10, 11]
