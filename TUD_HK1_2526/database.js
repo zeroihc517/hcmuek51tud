@@ -544,7 +544,7 @@ var DATA_DEADLINES = [
     },
 	{
         title: "Hỗ trợ ôn tập: GIải tích hàm một biến",
-        duration: "26/12/2026",
+        duration: "26/12/2025",
         tag: "ADV.A.113 (17:50 - 20:00)",
         icon: "soft-blue",
         emoji: "📖",
@@ -558,7 +558,14 @@ var DATA_DEADLINES = [
         emoji: "📣",
         weeks: [16]
     },
-
+	{
+        title: "Tiểu luận kết thúc học phần Giải tích vectơ",
+        duration: "19/11/2025-03/12/2025",
+        tag: "Google Drive",
+        icon: "soft-blue",
+        emoji: "📖",
+        weeks: [11, 12, 13]
+    },
 
 ];
 var DATA_LOCATIONS = [
