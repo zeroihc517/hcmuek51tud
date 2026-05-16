@@ -561,12 +561,27 @@ var DATA_DEADLINES = [
 	{
         title: "Tiểu luận kết thúc học phần Giải tích vectơ",
         duration: "19/11/2025-03/12/2025",
-        tag: "Google Drive",
+        tag: "Google Form",
         icon: "soft-blue",
         emoji: "📖",
         weeks: [11, 12, 13]
     },
-
+	{
+        title: "Bài tập nhóm Giải tích vectơ",
+        duration: "22/11/2025-18/11/2025",
+        tag: "Outlook",
+        icon: "soft-blue",
+        emoji: "📖",
+        weeks: [7, 8, 9, 10, 11]
+    },
+		{
+        title: "Tiểu luận kết thúc học phần Giải tích vectơ",
+        duration: "19/11/2025-03/12/2025",
+        tag: "Google Form",
+        icon: "soft-blue",
+        emoji: "📖",
+        weeks: [11, 12, 13]
+    },
 ];
 var DATA_LOCATIONS = [
     { name: "Cơ sở 1: An Dương Vương (280 An Dương Vương, phường Chợ Quán, TP.HCM)", color: "#e0f2fe", link: "https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" },
