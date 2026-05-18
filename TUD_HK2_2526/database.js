@@ -81,7 +81,7 @@ var DATA_COURSES = [
 		    {
         name: "Giải tích hàm nhiều biến (Bù 27/04)",
         location: "Học online",
-       room: "MS TEAMS", link: "https://meet.google.com/hkt-vpwd-nhe?fbclid=IwY2xjawRzXVRleHRuA2FlbQIxMABicmlkETFqMWtMQUhPbFFjQmhKaXM3c3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHorBZ9bP4YFHHCwKjuMDAocJH_vTwckqdE7QzslI_JIWzM8y4ZJKNi4zPybp_aem_CpKlFUkKuMm6xYjFwme01A",
+       room: "Google Meet", link: "https://meet.google.com/hkt-vpwd-nhe?fbclid=IwY2xjawRzXVRleHRuA2FlbQIxMABicmlkETFqMWtMQUhPbFFjQmhKaXM3c3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHorBZ9bP4YFHHCwKjuMDAocJH_vTwckqdE7QzslI_JIWzM8y4ZJKNi4zPybp_aem_CpKlFUkKuMm6xYjFwme01A",
 	teacher: "Huỳnh Cao Trường",
         time: "9:00 - 11:00",
         day: 6, 
