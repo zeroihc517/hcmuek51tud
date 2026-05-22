@@ -389,7 +389,7 @@ name: `
     name: "Lập trình nâng cao", // Nhập thẳng tên môn
     location: "Cơ sở: An Dương Vương",
     room: "Đang cập nhật", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
-    time: "9:15 - 11:30",
+    time: "9:45 - 11:30",
     day: 7, 
     start: 2, // Ca 1 sáng
     weeks: [17]
