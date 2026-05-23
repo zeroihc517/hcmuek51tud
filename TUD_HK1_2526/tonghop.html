@@ -167,26 +167,22 @@
     function renderSummary() {
         const tbody = document.getElementById('summary-body');
         
-        // 1. Lọc dữ liệu: Bỏ qua cuộc họp và các mục linh tinh
+        // 1. Lọc dữ liệu ô nhiễm
         const filteredData = DATA_COURSES.filter(c => 
-            !c.name.toLowerCase().includes("tham quan") && 
-            !c.name.toLowerCase().includes("lễ") &&
+            !c.name.toLowerCase().includes("trạm kết nối") && 
             !c.name.toLowerCase().includes("sinh hoạt") &&
-            !c.name.toLowerCase().includes("trạm")  &&
-            !c.name.toLowerCase().includes("đại hội")
+            !c.name.toLowerCase().includes("tham quan") &&
+            !c.name.toLowerCase().includes("lễ chào đón")  &&
+            !c.name.toLowerCase().includes("đại hội") &&
+	    !c.name.toLowerCase().includes("lễ kết")
         );
 
-        // 2. Nhóm môn
+        // 2. Nhóm môn thuần túy theo tên gốc môn học
         const groups = filteredData.reduce((acc, curr) => {
             const mainName = normalizeName(curr.name);
-            if (!curr.name.toLowerCase().includes("kiểm tra")) {
-                if (!acc[mainName]) acc[mainName] = { sessions: [], exams: [] };
-                acc[mainName].sessions.push(curr);
-            } else {
-                // Đây là buổi kiểm tra, tìm môn chính để bỏ vào
-                if (!acc[mainName]) acc[mainName] = { sessions: [], exams: [] };
-                acc[mainName].exams.push(curr);
-            }
+            if (!acc[mainName]) acc[acc[mainName] = []] = []; // Khởi tạo nếu chưa có
+            if (!acc[mainName]) acc[mainName] = [];
+            acc[mainName].push(curr);
             return acc;
         }, {});
 
@@ -194,20 +190,36 @@
         let index = 1;
 
         for (const subjectName in groups) {
-            const { sessions, exams } = groups[subjectName];
-            const allActivities = [...sessions, ...exams];
-            allActivities.sort((a, b) => Math.min(...a.weeks) - Math.min(...b.weeks));
+            const activities = groups[subjectName];
+            activities.sort((a, b) => Math.min(...a.weeks) - Math.min(...b.weeks));
 
             let cardsHtml = "";
-            allActivities.forEach(act => {
-                const isExam = act.name.toLowerCase().includes("kiểm tra");
+            activities.forEach(act => {
+                const actNameLower = act.name.toLowerCase();
+                const hasExamWord = actNameLower.includes("kiểm tra") || actNameLower.includes("thi");
+                const hasExamWeek = act.weeks.some(w => w === 16 || w === 17 || w === 18);
+                const isExam = hasExamWord || hasExamWeek;
+                
                 const thuText = act.day === 8 ? "Chủ Nhật" : `Thứ ${act.day}`;
                 const startDate = getExactDate(Math.min(...act.weeks), act.day);
                 const endDate = getExactDate(Math.max(...act.weeks), act.day);
                 const dateRange = (act.weeks.length === 1) ? startDate : `${startDate} → ${endDate}`;
 
+                let inlineStyle = "";
+                if (!isExam) {
+                    inlineStyle = `style="--blue: ${act.color === '#ffffff' ? '#0f4c81' : act.color}"`;
+                }
+
+                // ĐÃ SỬA: Phân loại nhãn thông minh và KHÔNG ghi tên môn ở dưới nữa
+                let displayNote = "";
+                if (hasExamWeek) {
+                    displayNote = "⚠️ KIỂM TRA KẾT THÚC HỌC PHẦN";
+                } else if (hasExamWord) {
+                    displayNote = "⚠️ KIỂM TRA GIỮA HỌC PHẦN";
+                }
+
                 cardsHtml += `
-                    <div class="session-card ${isExam ? 'is-exam' : ''}" style="--blue: ${act.color === '#ffffff' ? '#0f4c81' : act.color}">
+                    <div class="session-card ${isExam ? 'is-exam' : ''}" ${inlineStyle}>
                         <div class="session-header">
                             <span class="day-label">${thuText} | ${act.time}</span>
                             <span class="time-label">${dateRange}</span>
@@ -217,18 +229,20 @@
                             <span>🚪 Phòng: <strong>${act.room}</strong></span>
                             <span class="badge-week">Tuần: ${act.weeks.join(", ")}</span>
                         </div>
-                        ${isExam ? `<div class="exam-note">⚠️ ${act.name}</div>` : ''}
+                        ${isExam ? `<div class="exam-note">${displayNote}</div>` : ''}
                     </div>
                 `;
             });
 
-            html += `
-                <tr>
-                    <td style="text-align: center; font-weight: bold; color: #9ca3af;">${index++}</td>
-                    <td><div class="subject-name-main">${subjectName}</div></td>
-                    <td>${cardsHtml}</td>
-                </tr>
-            `;
+            if (activities.length > 0) {
+                html += `
+                    <tr>
+                        <td style="text-align: center; font-weight: bold; color: #9ca3af;">${index++}</td>
+                        <td><div class="subject-name-main">${subjectName}</div></td>
+                        <td>${cardsHtml}</td>
+                    </tr>
+                `;
+            }
         }
         tbody.innerHTML = html;
     }
