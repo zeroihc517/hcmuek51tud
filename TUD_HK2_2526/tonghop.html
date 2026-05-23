@@ -67,14 +67,21 @@
             position: absolute;
             left: 0; top: 0; bottom: 0;
             width: 6px;
-            background: var(--blue);
+            background: var(--blue, #0f4c81);
         }
-        /* Style cho buổi kiểm tra */
+        
+        /* Ép đè màu nền đỏ hồng và viền đỏ nhạt cho các tuần thi */
         .session-card.is-exam {
-            background: #fff5f5;
-            border-color: #fecdd3;
+            background-color: #fff5f5 !important;
+            border-color: #fecdd3 !important;
+            background: #fff5f5 !important;
         }
-        .session-card.is-exam::before { background: #ef4444; }
+        .session-card.is-exam::before { 
+            background: #ef4444 !important; 
+        }
+        .session-card.is-exam .exam-note {
+            color: #b91c1c !important;
+        }
 
         .session-header {
             display: flex;
@@ -137,7 +144,7 @@
 <script src="dulieu.js"></script>
 
 <script>
-    // Hàm chuẩn hóa tên để gộp môn (Đã tối ưu từ khóa để gom lịch thi/kiểm tra vào đúng môn)
+    // Hàm chuẩn hóa tên để gộp môn
     function normalizeName(name) {
         let n = name.toLowerCase();
         if (n.includes("tuyến tính")) return "Không gian tuyến tính";
@@ -167,7 +174,7 @@
     function renderSummary() {
         const tbody = document.getElementById('summary-body');
         
-        // 1. Lọc dữ liệu: Bỏ qua cuộc họp và các mục linh tinh
+        // 1. Lọc dữ liệu ô nhiễm
         const filteredData = DATA_COURSES.filter(c => 
             !c.name.toLowerCase().includes("cuộc họp") && 
             !c.name.toLowerCase().includes("thủ tục") &&
@@ -176,18 +183,12 @@
             !c.name.toLowerCase().includes("thpt")
         );
 
-        // 2. Nhóm môn
+        // 2. Nhóm môn thuần túy theo tên gốc môn học
         const groups = filteredData.reduce((acc, curr) => {
             const mainName = normalizeName(curr.name);
-            const isExamOrTest = curr.name.toLowerCase().includes("kiểm tra") || curr.name.toLowerCase().includes("thi");
-            
-            if (!acc[mainName]) acc[mainName] = { sessions: [], exams: [] };
-
-            if (!isExamOrTest) {
-                acc[mainName].sessions.push(curr);
-            } else {
-                acc[mainName].exams.push(curr);
-            }
+            if (!acc[mainName]) acc[acc[mainName] = []] = []; // Khởi tạo nếu chưa có
+            if (!acc[mainName]) acc[mainName] = [];
+            acc[mainName].push(curr);
             return acc;
         }, {});
 
@@ -195,21 +196,36 @@
         let index = 1;
 
         for (const subjectName in groups) {
-            const { sessions, exams } = groups[subjectName];
-            const allActivities = [...sessions, ...exams];
-            allActivities.sort((a, b) => Math.min(...a.weeks) - Math.min(...b.weeks));
+            const activities = groups[subjectName];
+            activities.sort((a, b) => Math.min(...a.weeks) - Math.min(...b.weeks));
 
             let cardsHtml = "";
-            allActivities.forEach(act => {
-                const isExam = act.name.toLowerCase().includes("kiểm tra") || act.name.toLowerCase().includes("thi");
+            activities.forEach(act => {
+                const actNameLower = act.name.toLowerCase();
+                const hasExamWord = actNameLower.includes("kiểm tra") || actNameLower.includes("thi");
+                const hasExamWeek = act.weeks.some(w => w === 16 || w === 17 || w === 18);
+                const isExam = hasExamWord || hasExamWeek;
                 
                 const thuText = act.day === 8 ? "Chủ Nhật" : `Thứ ${act.day}`;
                 const startDate = getExactDate(Math.min(...act.weeks), act.day);
                 const endDate = getExactDate(Math.max(...act.weeks), act.day);
                 const dateRange = (act.weeks.length === 1) ? startDate : `${startDate} → ${endDate}`;
 
+                let inlineStyle = "";
+                if (!isExam) {
+                    inlineStyle = `style="--blue: ${act.color === '#ffffff' ? '#0f4c81' : act.color}"`;
+                }
+
+                // ĐÃ SỬA: Phân loại nhãn thông minh và KHÔNG ghi tên môn ở dưới nữa
+                let displayNote = "";
+                if (hasExamWeek) {
+                    displayNote = "⚠️ KIỂM TRA KẾT THÚC HỌC PHẦN";
+                } else if (hasExamWord) {
+                    displayNote = "⚠️ KIỂM TRA GIỮA HỌC PHẦN";
+                }
+
                 cardsHtml += `
-                    <div class="session-card ${isExam ? 'is-exam' : ''}" style="--blue: ${act.color === '#ffffff' ? '#0f4c81' : act.color}">
+                    <div class="session-card ${isExam ? 'is-exam' : ''}" ${inlineStyle}>
                         <div class="session-header">
                             <span class="day-label">${thuText} | ${act.time}</span>
                             <span class="time-label">${dateRange}</span>
@@ -219,13 +235,12 @@
                             <span>🚪 Phòng: <strong>${act.room}</strong></span>
                             <span class="badge-week">Tuần: ${act.weeks.join(", ")}</span>
                         </div>
-                        ${isExam ? `<div class="exam-note">⚠️ ${act.name}</div>` : ''}
+                        ${isExam ? `<div class="exam-note">${displayNote}</div>` : ''}
                     </div>
                 `;
             });
 
-            // Chỉ render những hàng môn học thực sự có lịch (tránh hàng trống)
-            if (allActivities.length > 0) {
+            if (activities.length > 0) {
                 html += `
                     <tr>
                         <td style="text-align: center; font-weight: bold; color: #9ca3af;">${index++}</td>
