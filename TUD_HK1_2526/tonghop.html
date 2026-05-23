@@ -180,7 +180,6 @@
         // 2. Nhóm môn thuần túy theo tên gốc môn học
         const groups = filteredData.reduce((acc, curr) => {
             const mainName = normalizeName(curr.name);
-            if (!acc[mainName]) acc[acc[mainName] = []] = []; // Khởi tạo nếu chưa có
             if (!acc[mainName]) acc[mainName] = [];
             acc[mainName].push(curr);
             return acc;
@@ -210,12 +209,22 @@
                     inlineStyle = `style="--blue: ${act.color === '#ffffff' ? '#0f4c81' : act.color}"`;
                 }
 
-                // ĐÃ SỬA: Phân loại nhãn thông minh và KHÔNG ghi tên môn ở dưới nữa
+                // CẢI TIẾN MỚI: Tự động tách chữ thông minh, lọc chuẩn xác từng loại kiểm tra/thi
                 let displayNote = "";
-                if (hasExamWeek) {
-                    displayNote = "⚠️ KIỂM TRA KẾT THÚC HỌC PHẦN";
-                } else if (hasExamWord) {
-                    displayNote = "⚠️ KIỂM TRA GIỮA HỌC PHẦN";
+                if (isExam) {
+                    // Loại bỏ các thẻ HTML để đọc text thuần túy
+                    let cleanName = act.name.replace(/<\/?[^>]+(>|$)/g, " ").replace(/\s+/g, " ").trim();
+                    let cleanNameLower = cleanName.toLowerCase();
+
+                    if (cleanNameLower.includes("kết thúc học phần") || hasExamWeek) {
+                        displayNote = "⚠️ KIỂM TRA KẾT THÚC HỌC PHẦN";
+                    } else if (cleanNameLower.includes("giữa học phần")) {
+                        displayNote = "⚠️ KIỂM TRA GIỮA HỌC PHẦN";
+                    } else if (cleanNameLower.includes("quá trình")) {
+                        displayNote = "⚠️ KIỂM TRA QUÁ TRÌNH";
+                    } else {
+                        displayNote = "⚠️ LỊCH KIỂM TRA / THI";
+                    }
                 }
 
                 cardsHtml += `
