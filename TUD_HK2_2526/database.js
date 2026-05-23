@@ -1,62 +1,6 @@
 // database.js
 var DATA_COURSES = [
     {
-        name: "Kinh tế chính trị học Mác-Lênin",
-        location: "Cơ sở: Lê Văn Sỹ",
-       room: "LVS.GD.A", link: "",
-	teacher: "Trần Thị Hoài Thương",
-        time: "9:10-11:30",
-        day: 2, 
-        start: 4,
-        length: 3,
-        weeks: [1, 2, 5, 6]
-	
-    },
-    {
-        name: "Kinh tế chính trị học Mác-Lênin",
-        location: "Học online",
-       room: "MS TEAMS", link: "https://teams.microsoft.com/v2/",
-	teacher: "Trần Thị Hoài Thương",
-        time: "9:10-11:30",
-        day: 2, 
-        start: 4,
-        length: 3,
-        weeks: [3,4]
-    },
-    {
-        name: "Chủ nghĩa xã hội khoa học",
-        location: "Cơ sở: Lê Văn Sỹ",
-       room: "LVS.GD.19", link: "",
-	teacher: "Trịnh Bá Phương",
-        time: "15:10 - 17:40",
-        day: 3, 
-        start: 10,
-        length: 3,
-        weeks: [1, 2, 6]
-    },
-    {
-        name: "<b>Kiểm tra Giữa học phần</b><br> Chủ nghĩa xã hội khoa học",
-        location: "Cơ sở: Lê Văn Sỹ",
-       room: "LVS.GD.19", link: "",
-	teacher: "Trịnh Bá Phương",
-        time: "15:10 - 17:40",
-        day: 3, 
-        start: 10,
-        length: 3,
-        weeks: [5]
-    },
-    {
-        name: "Chủ nghĩa xã hội khoa học",
-        location: "Học online",
-       room: "MS TEAMS", link: "https://teams.microsoft.com/v2/",
-	teacher: "Trịnh Bá Phương",
-        time: "15:10 - 17:40",
-        day: 3, 
-        start: 10,
-        length: 3,
-        weeks: [3,4]
-    },
-    {
         name: "Giải tích hàm nhiều biến",
         location: "Cơ sở: Lê Văn Sỹ",
        room: "LVS.D.106", link: "",
@@ -199,6 +143,50 @@ var DATA_COURSES = [
         length: 4,
         weeks: [5, 6, 8, 9, 10, 11]
     },
+ {
+        name: "Lập trình nâng cao",
+        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+	teacher: "Âu Bửu Long",
+        room: "I.102",
+        time: "12:30 - 16:00",
+        day: 5,
+        start: 7,
+        length: 4,
+        weeks: [1, 5, 6, 8, 10, 11, 14, 15]
+    },
+    {
+        name: "<b>Kiểm tra Giữa học phần</b><br> Lập trình nâng cao",
+        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+	teacher: "Âu Bửu Long",
+        room: "I.102",
+        time: "12:30 - 15:30",
+        day: 5,
+        start: 7,
+        length: 4,
+        weeks: [9]
+    },
+    {
+        name: "Lập trình nâng cao",
+        location: "Học online", link: "https://teams.microsoft.com/v2/",
+	teacher: "Âu Bửu Long",
+        room: "MS TEAMS",
+        time: "12:30 - 16:00",
+        day: 5,
+        start: 7,
+        length: 4,
+        weeks: [2, 3, 4, 13]
+    },
+    {
+        name: "Lập trình nâng cao (Bủ 30/04)",
+        location: "Học online", link: "https://teams.microsoft.com/v2/",
+	teacher: "Âu Bửu Long",
+        room: "MS TEAMS",
+        time: "17:50 - 21:05",
+        day: 7,
+        start: 13,
+        length: 4,
+        weeks: [9]
+    },
 	{
         name: "Phương pháp học tập hiệu quả",
         location: "Cơ sở: An Dương Vương", link: "",
@@ -220,6 +208,62 @@ var DATA_COURSES = [
         start: 7,
         length: 3,
         weeks: [7]
+    },
+    {
+        name: "Kinh tế chính trị học Mác-Lênin",
+        location: "Cơ sở: Lê Văn Sỹ",
+       room: "LVS.GD.A", link: "",
+	teacher: "Trần Thị Hoài Thương",
+        time: "9:10-11:30",
+        day: 2, 
+        start: 4,
+        length: 3,
+        weeks: [1, 2, 5, 6]
+	
+    },
+    {
+        name: "Kinh tế chính trị học Mác-Lênin",
+        location: "Học online",
+       room: "MS TEAMS", link: "https://teams.microsoft.com/v2/",
+	teacher: "Trần Thị Hoài Thương",
+        time: "9:10-11:30",
+        day: 2, 
+        start: 4,
+        length: 3,
+        weeks: [3,4]
+    },
+    {
+        name: "Chủ nghĩa xã hội khoa học",
+        location: "Cơ sở: Lê Văn Sỹ",
+       room: "LVS.GD.19", link: "",
+	teacher: "Trịnh Bá Phương",
+        time: "15:10 - 17:40",
+        day: 3, 
+        start: 10,
+        length: 3,
+        weeks: [1, 2, 6]
+    },
+    {
+        name: "<b>Kiểm tra Giữa học phần</b><br> Chủ nghĩa xã hội khoa học",
+        location: "Cơ sở: Lê Văn Sỹ",
+       room: "LVS.GD.19", link: "",
+	teacher: "Trịnh Bá Phương",
+        time: "15:10 - 17:40",
+        day: 3, 
+        start: 10,
+        length: 3,
+        weeks: [5]
+    },
+    {
+        name: "Chủ nghĩa xã hội khoa học",
+        location: "Học online",
+       room: "MS TEAMS", link: "https://teams.microsoft.com/v2/",
+	teacher: "Trịnh Bá Phương",
+        time: "15:10 - 17:40",
+        day: 3, 
+        start: 10,
+        length: 3,
+        weeks: [3,4]
     },
 {
         name: "Phương pháp học tập hiệu quả",
@@ -275,50 +319,6 @@ var DATA_COURSES = [
         start: 4,
         length: 2,
         weeks: [3,4]
-    },
-    {
-        name: "Lập trình nâng cao",
-        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
-	teacher: "Âu Bửu Long",
-        room: "I.102",
-        time: "12:30 - 16:00",
-        day: 5,
-        start: 7,
-        length: 4,
-        weeks: [1, 5, 6, 8, 10, 11, 14, 15]
-    },
-    {
-        name: "<b>Kiểm tra Giữa học phần</b><br> Lập trình nâng cao",
-        location: "Cơ sở: An Dương Vương", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
-	teacher: "Âu Bửu Long",
-        room: "I.102",
-        time: "12:30 - 15:30",
-        day: 5,
-        start: 7,
-        length: 4,
-        weeks: [9]
-    },
-    {
-        name: "Lập trình nâng cao",
-        location: "Học online", link: "https://teams.microsoft.com/v2/",
-	teacher: "Âu Bửu Long",
-        room: "MS TEAMS",
-        time: "12:30 - 16:00",
-        day: 5,
-        start: 7,
-        length: 4,
-        weeks: [2, 3, 4, 13]
-    },
-    {
-        name: "Lập trình nâng cao (Bủ 30/04)",
-        location: "Học online", link: "https://teams.microsoft.com/v2/",
-	teacher: "Âu Bửu Long",
-        room: "MS TEAMS",
-        time: "17:50 - 21:05",
-        day: 7,
-        start: 13,
-        length: 4,
-        weeks: [9]
     },
     {
         name: "Cuộc họp chấm điểm rèn luyện",
