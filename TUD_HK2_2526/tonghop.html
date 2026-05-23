@@ -177,13 +177,15 @@
         );
 
         // 2. Nhóm môn
-        const groups = filteredData.reduce((acc, curr) => {
+       const groups = filteredData.reduce((acc, curr) => {
             const mainName = normalizeName(curr.name);
-            if (!curr.name.toLowerCase().includes("kiểm tra")) {
+            // Cập nhật điều kiện nhóm: nếu tên chứa "kiểm tra" hoặc "thi" thì đẩy vào mảng exams
+            const isExamOrTest = curr.name.toLowerCase().includes("kiểm tra") || curr.name.toLowerCase().includes("thi");
+            
+            if (!isExamOrTest) {
                 if (!acc[mainName]) acc[mainName] = { sessions: [], exams: [] };
                 acc[mainName].sessions.push(curr);
             } else {
-                // Đây là buổi kiểm tra, tìm môn chính để bỏ vào
                 if (!acc[mainName]) acc[mainName] = { sessions: [], exams: [] };
                 acc[mainName].exams.push(curr);
             }
@@ -198,9 +200,11 @@
             const allActivities = [...sessions, ...exams];
             allActivities.sort((a, b) => Math.min(...a.weeks) - Math.min(...b.weeks));
 
-            let cardsHtml = "";
+           let cardsHtml = "";
             allActivities.forEach(act => {
-                const isExam = act.name.toLowerCase().includes("kiểm tra");
+                // ĐOẠN THAY ĐỔI: Kiểm tra xem tên có chứa chữ "kiểm tra" HOẶC chữ "thi" không
+                const isExam = act.name.toLowerCase().includes("kiểm tra") || act.name.toLowerCase().includes("thi");
+                
                 const thuText = act.day === 8 ? "Chủ Nhật" : `Thứ ${act.day}`;
                 const startDate = getExactDate(Math.min(...act.weeks), act.day);
                 const endDate = getExactDate(Math.max(...act.weeks), act.day);
