@@ -574,14 +574,7 @@ var DATA_DEADLINES = [
         emoji: "📣",
         weeks: [7, 8, 9, 10, 11]
     },
-		{
-        title: "Tiểu luận kết thúc học phần Giải tích vectơ",
-        duration: "19/11/2025-03/12/2025",
-        tag: "Google Form",
-        icon: "fire",
-        emoji: "📣",
-        weeks: [11, 12, 13]
-    },
+
 		{
         title: "Bài tập nhóm Giải tích hàm một biến",
         duration: "09/11/2025-26/11/2025",

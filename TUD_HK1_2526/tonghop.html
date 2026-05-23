@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảng Tổng Hợp Thời Khóa Biểu</title>
+    <title>Bảng Tổng Hợp Thời Khóa Biểu & Deadline</title>
     <link rel="stylesheet" href="styletkb.css">
     <style>
         /* Tùy chỉnh CSS riêng để bảng trông "xịn" hơn */
@@ -67,14 +67,29 @@
             position: absolute;
             left: 0; top: 0; bottom: 0;
             width: 6px;
-            background: var(--blue);
+            background: var(--blue, #0f4c81);
         }
-        /* Style cho buổi kiểm tra */
+        
+        /* Màu nền đỏ hồng và viền đỏ nhạt cho các tuần thi / tuần kiểm tra tập trung / tiểu luận */
         .session-card.is-exam {
-            background: #fff5f5;
-            border-color: #fecdd3;
+            background-color: #fff5f5 !important;
+            border-color: #fecdd3 !important;
         }
-        .session-card.is-exam::before { background: #ef4444; }
+        .session-card.is-exam::before { 
+            background: #ef4444 !important; 
+        }
+        .session-card.is-exam .exam-note {
+            color: #b91c1c !important;
+        }
+
+        /* STYLE RIÊNG CHO CÁC MỤC HỌC VLE (Màu xanh lá) */
+        .session-card.is-vle {
+            background-color: #f0fdf4 !important;
+            border-color: #bbf7d0 !important;
+        }
+        .session-card.is-vle::before {
+            background: #16a34a !important;
+        }
 
         .session-header {
             display: flex;
@@ -94,8 +109,8 @@
         }
         .badge-week {
             display: inline-block;
-            background: #e0f2fe;
-            color: #0369a1;
+            background: #e0f2fe !important;
+            color: #0369a1 !important;
             padding: 2px 8px;
             border-radius: 6px;
             font-size: 12px;
@@ -104,7 +119,6 @@
         .exam-note {
             margin-top: 8px;
             font-weight: 800;
-            color: #b91c1c;
             text-transform: uppercase;
             font-size: 12px;
         }
@@ -124,11 +138,11 @@
                 <tr>
                     <th style="width: 60px; text-align: center;">STT</th>
                     <th style="width: 30%;">Học Phần</th>
-                    <th>Chi Tiết Lịch Trình (Học & Kiểm Tra)</th>
+                    <th>Chi Tiết Lịch Trình (Học, Thi & Nhiệm Vụ)</th>
                 </tr>
             </thead>
             <tbody id="summary-body">
-                </tbody>
+            </tbody>
         </table>
     </div>
 </div>
@@ -137,18 +151,18 @@
 <script src="dulieu.js"></script>
 
 <script>
-    // Hàm chuẩn hóa tên để gộp môn
+    // Hàm chuẩn hóa tên để gộp môn học và dò tìm deadline chính xác
     function normalizeName(name) {
         let n = name.toLowerCase();
-        if (n.includes("đại số tuyến tính"))  return "Đại số tuyến tính";
+        if (n.includes("đại số tuyến tính") || n.includes("tuyến tính")) return "Đại số tuyến tính";
         if (n.includes("lập trình cơ bản")) return "Lập trình cơ bản";
         if (n.includes("giải tích hàm một biến")) return "Giải tích hàm một biến";
         if (n.includes("giải tích vectơ")) return "Giải tích vectơ";
         if (n.includes("triết học mác-lênin")) return "Triết học Mác-Lênin";
         if (n.includes("giáo dục thể chất 1")) return "Giáo dục thể chất 1 (Điền kinh+Bài tập thể dục)";
-		if (n.includes("tâm lý học đại cương")) return "Tâm lý học đại cương";
-		if (n.includes("pháp luật đại cương")) return "Pháp luật đại cương";
-	if (n.includes("cuộc họp")) return "Cuộc họp";
+        if (n.includes("tâm lý học đại cương")) return "Tâm lý học đại cương";
+        if (n.includes("pháp luật đại cương")) return "Pháp luật đại cương";
+        if (n.includes("cuộc họp")) return "Cuộc họp";
         return name;
     }
 
@@ -174,7 +188,7 @@
             !c.name.toLowerCase().includes("tham quan") &&
             !c.name.toLowerCase().includes("lễ chào đón")  &&
             !c.name.toLowerCase().includes("đại hội") &&
-	    !c.name.toLowerCase().includes("lễ kết")
+            !c.name.toLowerCase().includes("lễ kết")
         );
 
         // 2. Nhóm môn thuần túy theo tên gốc môn học
@@ -192,7 +206,20 @@
             const activities = groups[subjectName];
             activities.sort((a, b) => Math.min(...a.weeks) - Math.min(...b.weeks));
 
+            // --- LỌC NGHIÊM NGẶT: Chỉ lấy Deadline có chữ "VLE" hoặc "Tiểu luận" ---
+            let subjectDeadlines = [];
+            if (typeof DATA_DEADLINES !== 'undefined') {
+                subjectDeadlines = DATA_DEADLINES.filter(d => {
+                    const matchSubject = normalizeName(d.title) === subjectName;
+                    const textToSearch = (d.tag + " " + d.title).toLowerCase();
+                    const isVleOrEssay = textToSearch.includes("vle") || textToSearch.includes("tiểu luận");
+                    return matchSubject && isVleOrEssay;
+                });
+            }
+
             let cardsHtml = "";
+            
+            // Render danh sách lịch học/thi lên trước
             activities.forEach(act => {
                 const actNameLower = act.name.toLowerCase();
                 const hasExamWord = actNameLower.includes("kiểm tra") || actNameLower.includes("thi");
@@ -209,10 +236,8 @@
                     inlineStyle = `style="--blue: ${act.color === '#ffffff' ? '#0f4c81' : act.color}"`;
                 }
 
-                // CẢI TIẾN MỚI: Tự động tách chữ thông minh, lọc chuẩn xác từng loại kiểm tra/thi
                 let displayNote = "";
                 if (isExam) {
-                    // Loại bỏ các thẻ HTML để đọc text thuần túy
                     let cleanName = act.name.replace(/<\/?[^>]+(>|$)/g, " ").replace(/\s+/g, " ").trim();
                     let cleanNameLower = cleanName.toLowerCase();
 
@@ -243,7 +268,30 @@
                 `;
             });
 
-            if (activities.length > 0) {
+            // Gộp dữ liệu VLE hoặc Tiểu luận dưới dạng Card tối giản đồng bộ 100% thời gian và màu ô tuần
+            if (subjectDeadlines.length > 0) {
+                subjectDeadlines.forEach(dl => {
+                    const dlTextLower = (dl.tag + " " + dl.title).toLowerCase();
+                    const isVle = dlTextLower.includes("vle");
+                    
+                    // Phân loại card cha: VLE màu xanh lá, Tiểu luận màu đỏ hồng của Kiểm tra
+                    let cardClass = isVle ? "is-vle" : "is-exam";
+
+                    cardsHtml += `
+                        <div class="session-card ${cardClass}">
+                            <div class="session-header">
+                                <span class="day-label">[${dl.tag}] ${dl.title}</span>
+                                <span class="time-label">${dl.duration}</span>
+                            </div>
+                            <div class="session-body">
+                                <span class="badge-week">Tuần: ${dl.weeks.join(", ")}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (activities.length > 0 || subjectDeadlines.length > 0) {
                 html += `
                     <tr>
                         <td style="text-align: center; font-weight: bold; color: #9ca3af;">${index++}</td>
