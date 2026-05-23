@@ -128,7 +128,7 @@
                 </tr>
             </thead>
             <tbody id="summary-body">
-                </tbody>
+            </tbody>
         </table>
     </div>
 </div>
@@ -137,18 +137,18 @@
 <script src="dulieu.js"></script>
 
 <script>
-    // Hàm chuẩn hóa tên để gộp môn
+    // Hàm chuẩn hóa tên để gộp môn (Đã tối ưu từ khóa để gom lịch thi/kiểm tra vào đúng môn)
     function normalizeName(name) {
         let n = name.toLowerCase();
-        if (n.includes("không gian tuyến tính"))  return "Không gian tuyến tính";
+        if (n.includes("tuyến tính")) return "Không gian tuyến tính";
         if (n.includes("lập trình nâng cao")) return "Lập trình nâng cao";
-        if (n.includes("giải tích hàm nhiều biến")) return "Giải tích hàm nhiều biến";
+        if (n.includes("nhiều biến")) return "Giải tích hàm nhiều biến";
         if (n.includes("hình học cao cấp")) return "Hình học cao cấp hai chiều và ba chiều";
-        if (n.includes("chủ nghĩa xã hội khoa học")) return "Chủ nghĩa xã hội khoa học";
+        if (n.includes("xã hội khoa học")) return "Chủ nghĩa xã hội khoa học";
         if (n.includes("kinh tế chính trị")) return "Kinh tế chính trị học Mác-Lênin";
         if (n.includes("phương pháp học tập")) return "Phương pháp học tập hiệu quả";
-        if (n.includes("giáo dục thể chất 2")) return "Giáo dục thể chất 2 (Cầu lông cơ bản)";
-	if (n.includes("cuộc họp")) return "Cuộc họp";
+        if (n.includes("thể chất 2") || n.includes("cầu lông")) return "Giáo dục thể chất 2 (Cầu lông cơ bản)";
+        if (n.includes("cuộc họp")) return "Cuộc họp";
         return name;
     }
 
@@ -177,16 +177,15 @@
         );
 
         // 2. Nhóm môn
-       const groups = filteredData.reduce((acc, curr) => {
+        const groups = filteredData.reduce((acc, curr) => {
             const mainName = normalizeName(curr.name);
-            // Cập nhật điều kiện nhóm: nếu tên chứa "kiểm tra" hoặc "thi" thì đẩy vào mảng exams
             const isExamOrTest = curr.name.toLowerCase().includes("kiểm tra") || curr.name.toLowerCase().includes("thi");
             
+            if (!acc[mainName]) acc[mainName] = { sessions: [], exams: [] };
+
             if (!isExamOrTest) {
-                if (!acc[mainName]) acc[mainName] = { sessions: [], exams: [] };
                 acc[mainName].sessions.push(curr);
             } else {
-                if (!acc[mainName]) acc[mainName] = { sessions: [], exams: [] };
                 acc[mainName].exams.push(curr);
             }
             return acc;
@@ -200,9 +199,8 @@
             const allActivities = [...sessions, ...exams];
             allActivities.sort((a, b) => Math.min(...a.weeks) - Math.min(...b.weeks));
 
-           let cardsHtml = "";
+            let cardsHtml = "";
             allActivities.forEach(act => {
-                // ĐOẠN THAY ĐỔI: Kiểm tra xem tên có chứa chữ "kiểm tra" HOẶC chữ "thi" không
                 const isExam = act.name.toLowerCase().includes("kiểm tra") || act.name.toLowerCase().includes("thi");
                 
                 const thuText = act.day === 8 ? "Chủ Nhật" : `Thứ ${act.day}`;
@@ -226,13 +224,16 @@
                 `;
             });
 
-            html += `
-                <tr>
-                    <td style="text-align: center; font-weight: bold; color: #9ca3af;">${index++}</td>
-                    <td><div class="subject-name-main">${subjectName}</div></td>
-                    <td>${cardsHtml}</td>
-                </tr>
-            `;
+            // Chỉ render những hàng môn học thực sự có lịch (tránh hàng trống)
+            if (allActivities.length > 0) {
+                html += `
+                    <tr>
+                        <td style="text-align: center; font-weight: bold; color: #9ca3af;">${index++}</td>
+                        <td><div class="subject-name-main">${subjectName}</div></td>
+                        <td>${cardsHtml}</td>
+                    </tr>
+                `;
+            }
         }
         tbody.innerHTML = html;
     }
