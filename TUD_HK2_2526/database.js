@@ -645,7 +645,22 @@ var DATA_DEADLINES = [
         emoji: "📣",
         weeks: [9]
     },
-
+		{
+        title: "Sinh hoạt Chi Đoàn",
+        duration: "30/05/2026",
+        tag: "Google Meet",
+        icon: "fire",
+        emoji: "📣",
+        weeks: [16]
+    },
+			{
+        title: "Nhận giấy báo dự thi THPTQG 2026",
+        duration: "04/06/2026-06/06/2026",
+        tag: "TT GDNN-GDTX Quận 10",
+        icon: "fire",
+        emoji: "📣",
+        weeks: [17]
+    },
 ];
 var DATA_LOCATIONS = [
     { name: "Cơ sở 1: An Dương Vương (280 An Dương Vương, phường Chợ Quán, TP.HCM)", color: "#e0f2fe", link: "https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" },
