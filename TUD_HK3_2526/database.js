@@ -9,7 +9,14 @@ var DATA_COURSES = [
 ];
 
 var DATA_DEADLINES = [
-   
+   	{
+        title: "Sinh hoạt thời sự - Quý II - Năm 2026",
+        duration: "Từ 09/07/2026 đến 10/07/2026",
+        tag: "VLE",
+        icon: "fire",
+        emoji: "📣",
+        weeks: [4]
+    },
 ];
 var DATA_LOCATIONS = [
     { name: "Cơ sở 1: An Dương Vương (280 An Dương Vương, phường Chợ Quán, TP.HCM)", color: "#e0f2fe", link: "https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5" },
