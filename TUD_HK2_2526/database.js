@@ -388,7 +388,7 @@ name: `
 {
     name: "Lập trình nâng cao", // Nhập thẳng tên môn
     location: "Cơ sở: An Dương Vương",
-    room: "I.201", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
+    room: "I.203", link: "https://maps.app.goo.gl/c9JKtuZmpjoGx24M9",
     time: "9:45 - 11:30",
     day: 7, 
     start: 2, // Ca 1 sáng
