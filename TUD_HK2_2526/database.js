@@ -443,7 +443,7 @@ name: `
     name: "Thủ tục dự thi", // Nhập thẳng tên môn
     location: "Cơ sở: THCS Hậu Giang",
     room: "2755 - Đường 08 Lò Siêu, Phường Minh Phụng, TP.HCM", link: "https://maps.app.goo.gl/ErL6JeuMCGf86GfF8",
-    time: "14:00 - 15:30",
+    time: "14:00 - 15:00",
     day: 4, 
     start: 3, 
     length: 2,
@@ -452,9 +452,9 @@ name: `
 },
 {
     name: "Toán THPT 2026", // Nhập thẳng tên môn
-    location: "Cơ sở: THCS Hậu Giang",
+    location: "Cơ sở: THCS Hậu Giang (13h15)",
     room: "2755 - Đường 08 Lò Siêu, Phường Minh Phụng, TP.HCM", link: "https://maps.app.goo.gl/ErL6JeuMCGf86GfF8",
-    time: "14:00 - 16:10",
+    time: "14:20 - 16:10",
     day: 5, 
     start: 3, 
     length: 2,
@@ -463,9 +463,9 @@ name: `
 },
 {
     name: "Vật lí THPT 2026", // Nhập thẳng tên môn
-    location: "Cơ sở: THCS Hậu Giang",
+    location: "Cơ sở: THCS Hậu Giang (6h15)",
     room: "2755 - Đường 08 Lò Siêu, Phường Minh Phụng, TP.HCM", link: "https://maps.app.goo.gl/ErL6JeuMCGf86GfF8",
-    time: "7:00 - 8:30",
+    time: "7:30 - 8:30",
     day: 6, 
     start: 1, 
 	color: "#fbcfe8",
