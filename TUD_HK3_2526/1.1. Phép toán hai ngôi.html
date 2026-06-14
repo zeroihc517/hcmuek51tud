@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chương 1: Lý thuyết nhóm - Phép toán hai ngôi</title>
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #334155;
+            --accent-color: #3b82f6;
+            --bg-color: #f1f5f9;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --border-radius: 12px;
+            
+            /* Box colors */
+            --def-bg: #f0fdf4;
+            --def-border: #22c55e;
+            --theo-bg: #eff6ff;
+            --theo-border: #3b82f6;
+            --note-bg: #fffbeb;
+            --note-border: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 840px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            padding: 50px 60px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 30px 20px; margin: 10px auto; }
+        }
+
+        header {
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 25px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .chapter {
+            text-transform: uppercase;
+            font-size: 0.95rem;
+            color: var(--accent-color);
+            letter-spacing: 3px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0;
+            font-size: 2.4rem;
+            font-weight: 800;
+            letter-spacing: -0.025em;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin-top: 45px;
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        h2::before {
+            content: "";
+            display: inline-block;
+            width: 5px;
+            height: 1.6rem;
+            background-color: var(--accent-color);
+            margin-right: 12px;
+            border-radius: 4px;
+        }
+
+        h3 {
+            color: var(--secondary-color);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 35px;
+            margin-bottom: 15px;
+        }
+
+        p {
+            text-align: justify;
+            margin-bottom: 18px;
+        }
+
+        /* Styling các khối hộp định nghĩa, định lý */
+        .definition, .theorem, .proposition, .note {
+            padding: 20px 24px;
+            margin: 25px 0;
+            border-radius: 8px;
+            border-left: 5px solid;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        }
+
+        .definition {
+            background-color: var(--def-bg);
+            border-left-color: var(--def-border);
+        }
+        .definition strong { color: #15803d; }
+
+        .theorem, .proposition {
+            background-color: var(--theo-bg);
+            border-left-color: var(--theo-border);
+        }
+        .theorem strong, .proposition strong { color: #1d4ed8; }
+
+        .note {
+            background-color: var(--note-bg);
+            border-left-color: var(--note-border);
+            font-size: 0.95rem;
+        }
+        .note strong { color: #b45309; }
+
+        .proof {
+            font-style: italic;
+            background-color: #f8fafc;
+            border-left: 4px solid #94a3b8;
+            padding: 15px 24px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .proof strong {
+            font-style: normal;
+            color: #475569;
+        }
+        
+        .proof::after {
+            content: " ◼";
+            float: right;
+            color: var(--accent-color);
+            font-style: normal;
+            font-weight: bold;
+        }
+
+        ul, ol {
+            padding-left: 25px;
+            margin-bottom: 22px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        /* Giao diện Bảng cải tiến */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 30px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            text-align: center;
+            border-bottom: 1px solid #e2e8f0;
+            border-right: 1px solid #e2e8f0;
+        }
+        
+        th:last-child, td:last-child {
+            border-right: none;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        th {
+            background-color: #f8fafc;
+            color: var(--secondary-color);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Riêng dòng đầu tiêu đề của bảng thứ 2 hoặc cột tiêu đề */
+        thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom: 2px solid #1e3a8a;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f5f9;
+            transition: background-color 0.2s ease;
+        }
+
+        /* Khối tiểu sử tác giả ở chân trang */
+        .biography {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+            margin-top: 50px;
+            line-height: 1.6;
+        }
+        
+        .biography strong {
+            color: var(--secondary-color);
+        }
+
+        /* Responsive container cho MathJax công thức dài */
+        .math-overflow {
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 10px 0;
+            margin-bottom: 15px;
+        }
+    </style>
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js">
+    </script>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="chapter">Chương 1</div>
+            <h1>LÝ THUYẾT NHÓM</h1>
+        </header>
+
+        <p>Một cấu trúc đại số có thể được xem là một tập hợp khác rỗng cùng với một số lượng hữu hạn các phép toán hai ngôi thỏa mãn một số các tiên đề cho trước. Trong chương này ta tìm hiểu cấu trúc đại số trong đó chỉ có một phép toán hai ngôi là Nhóm.</p>
+
+        <h2>§1 PHÉP TOÁN HAI NGÔI</h2>
+        <p>Trong Toán học, “phép toán” luôn là một trong những yếu tố đầu tiên cần biết khi làm việc với các đối tượng toán học, dù là số, ma trận, ánh xạ hay vectơ. Trong bài đầu tiên này, ta sẽ định nghĩa thế nào là một phép toán trên một tập hợp và một số tính chất cơ bản mà các phép toán trong các cấu trúc đại số quan trọng thường có.</p>
+
+        <h3>1.1 Khái niệm và ví dụ phép toán hai ngôi</h3>
+        
+        <div class="definition">
+            <strong>Định nghĩa 1.1.</strong> Cho $X$ là một tập hợp khác rỗng.<br>
+            Một phép toán hai ngôi trên tập hợp $X$ là một ánh xạ $*: X \times X \rightarrow X$. Tập hợp $X$ cùng phép toán hai ngôi $*$ được ký hiệu là $(X, *)$.
+        </div>
+
+        <p>Thay vì ghi $*(a,b)$, ảnh của cặp phần tử $(a, b)$ qua phép toán hai ngôi $*$ thường được ký hiệu đơn giản là $a*b$ và được gọi là kết quả phép toán $*$ giữa $a$ và $b$.</p>
+
+        <p><strong>Ví dụ 1.2.</strong></p>
+        <ol>
+            <li>Phép cộng và phép nhân số là các phép toán hai ngôi trên tập hợp số tự nhiên $\mathbb{N}$. Tuy nhiên phép trừ số sẽ không là phép toán hai ngôi trên $\mathbb{N}$ vì $2-3 \notin \mathbb{N}$. Phép chia số hữu tỉ là một phép toán hai ngôi trên tập hợp $\mathbb{Q}^* = \mathbb{Q} \setminus \{0\}$ nhưng không là phép toán hai ngôi trên $\mathbb{Q}$ vì không có thương của $1$ (hay bất cứ một số hữu tỉ nào khác) cho $0$.</li>
+            <li>Phép cộng ma trận là một phép toán hai ngôi trên tập hợp $\mathcal{M}_{n \times k}(\mathbb{R})$ các ma trận thực cấp $n \times k$.</li>
+            <li>Phép cộng và nhân ma trận là các phép toán hai ngôi trên tập hợp $\mathcal{M}_{n}(\mathbb{R})$ các ma trận thực vuông cấp $n$.</li>
+            <li>Phép nhân ma trận trên tập hợp $GL_n(\mathbb{R})$ các ma trận thực vuông cấp $n$ không suy biến là một phép toán hai ngôi vì tích của hai ma trận vuông cấp $n$ không suy biến cũng là một ma trận vuông cấp $n$ không suy biến.</li>
+            <li>Cho tập hợp $M$ khác rỗng và $\mathcal{F}(M) = \{f : M \rightarrow M\}$ là tập hợp tất cả các ánh xạ từ $M$ vào $M$. Trên $\mathcal{F}(M)$ ta có phép hợp thành ánh xạ
+                <div style="text-align: center; margin: 15px 0;">$(fg)(x) = f(g(x))$</div>
+là một phép toán hai ngôi
+            </li>
+            <li>Trên tập hợp $S_n$ các phép thế bậc $n$, phép hợp thành ánh xạ là một phép toán hai ngôi.</li>
+        </ol>
+
+        <div class="note">
+            <strong>Ghi chú 1.3.</strong>
+            <ol>
+                <li>Từ “hai ngôi” trong “phép toán hai ngôi” mang ý nghĩa phép toán được thực hiện trên hai phần tử. Thực tế thì ta có phép toán $n$ ngôi với $n$ là số lượng tùy ý, được định nghĩa là ánh xạ cho tương ứng mỗi bộ $n$ phần tử (có thứ tự) với một phần tử của tập hợp. Phép lấy tích $(\vec{u} \cdot \vec{v})\vec{w}$ cho ta phép toán ba ngôi trên tập hợp các vectơ trong mặt phẳng. Phép lấy số đối $-x$ cho ta phép toán một ngôi trên tập hợp các số nguyên. Còn phép toán không ngôi? Là phép lấy một phần tử cố định trong tập hợp. Ở đây ta chỉ xét các phép toán hai ngôi nên để đơn giản, đôi khi ta sẽ dùng từ “phép toán” thay vì “phép toán hai ngôi”.</li>
+                <li>Một phép toán hai ngôi $*$ trên một tập hợp hữu hạn $X$ có thể được xác định bằng bảng Cayley như sau: Với mỗi cặp phần tử $(x, y)$ của $X$, kết quả $x*y$ là phần tử được ghi ở dòng ứng với $x$ và cột ứng với $y$.</li>
+            </ol>
+          
+        </div>
+<table style="border-collapse: collapse; font-family: 'Times New Roman', Times, serif; font-size: 18px; text-align: center; border: 1px solid #000; margin: 20px auto;">
+  <tr style="border-bottom: 1px solid #000;">
+    <td style="border-right: 1px solid #000; padding: 8px 20px; font-style: italic;">*</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px; font-style: italic;">y</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+  </tr>
+  <tr style="border-bottom: 1px solid #000;">
+    <td style="border-right: 1px solid #000; padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+  </tr>
+  <tr style="border-bottom: 1px solid #000;">
+    <td style="border-right: 1px solid #000; padding: 8px 20px; font-style: italic;">x</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px; font-style: italic;">x * y</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+  </tr>
+  <tr>
+    <td style="border-right: 1px solid #000; padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+    <td style="padding: 8px 20px;">...</td>
+  </tr>
+</table>
+        <p><strong>Ví dụ 1.4.</strong> Tập hợp $S_3$ gồm có 6 phép thế bậc 3:</p>
+        <div class="math-overflow" style="text-align: center;">
+            $$id = \begin{pmatrix}1&2&3\\ 1&2&3\end{pmatrix}, \quad \tau_1 = \begin{pmatrix}1&2&3\\ 2&1&3\end{pmatrix}, \quad \tau_2 = \begin{pmatrix}1&2&3\\ 1&3&2\end{pmatrix}$$
+            $$\tau_3 = \begin{pmatrix}1&2&3\\ 3&2&1\end{pmatrix}, \quad \tau_4 = \begin{pmatrix}1&2&3\\ 2&3&1\end{pmatrix}, \quad \tau_5 = \begin{pmatrix}1&2&3\\ 3&1&2\end{pmatrix}$$
+        </div>
+
+        <p>Ta có bảng Cayley của phép hợp thành ánh xạ . trên tập hợp $S_3$ như sau:</p>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>$*$</th>
+                        <th>$id$</th>
+                        <th>$\tau_1$</th>
+                        <th>$\tau_2$</th>
+                        <th>$\tau_3$</th>
+                        <th>$\tau_4$</th>
+                        <th>$\tau_5$</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th>$id$</th>
+                        <td>$id$</td>
+                        <td>$\tau_1$</td>
+                        <td>$\tau_2$</td>
+                        <td>$\tau_3$</td>
+                        <td>$\tau_4$</td>
+                        <td>$\tau_5$</td>
+                    </tr>
+                    <tr>
+                        <th>$\tau_1$</th>
+                        <td>$\tau_1$</td>
+                        <td>$id$</td>
+                        <td>$\tau_4$</td>
+                        <td>$\tau_5$</td>
+                        <td>$\tau_2$</td>
+                        <td>$\tau_3$</td>
+                    </tr>
+                    <tr>
+                        <th>$\tau_2$</th>
+                        <td>$\tau_2$</td>
+                        <td>$\tau_5$</td>
+                        <td>$id$</td>
+                        <td>$\tau_4$</td>
+                        <td>$\tau_3$</td>
+                        <td>$\tau_1$</td>
+                    </tr>
+                    <tr>
+                        <th>$\tau_3$</th>
+                        <td>$\tau_3$</td>
+                        <td>$\tau_4$</td>
+                        <td>$\tau_5$</td>
+                        <td>$id$</td>
+                        <td>$\tau_1$</td>
+                        <td>$\tau_2$</td>
+                    </tr>
+                    <tr>
+                        <th>$\tau_4$</th>
+                        <td>$\tau_4$</td>
+                        <td>$\tau_3$</td>
+                        <td>$\tau_1$</td>
+                        <td>$\tau_2$</td>
+                        <td>$\tau_5$</td>
+                        <td>$id$</td>
+                    </tr>
+                    <tr>
+                        <th>$\tau_5$</th>
+                        <td>$\tau_5$</td>
+                        <td>$\tau_2$</td>
+                        <td>$\tau_3$</td>
+                        <td>$\tau_1$</td>
+                        <td>$id$</td>
+                        <td>$\tau_4$</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>1.2 Các dạng phép toán hai ngôi</h3>
+        
+        <div class="definition">
+            <strong>Định nghĩa 1.5.</strong> Phép toán $*$ trên tập hợp $X$ được gọi là có tính chất:
+            <ul>
+                <li><strong>kết hợp</strong>, nếu $(x*y)*z = x*(y*z)$ với mọi $x, y, z \in X$.</li>
+                <li><strong>giao hoán</strong>, nếu $x*y = y*x$ với mọi $x, y \in X$.</li>
+            </ul>
+        </div>
+
+        <p>Bằng quy nạp, ta dễ dàng chứng minh được là nếu phép toán $*$ có tính kết hợp thì kết quả của phép toán $*$ lên $n$ phần tử $x_1, x_2, ..., x_n$ theo đúng thứ tự đó không phụ thuộc vào cách nhóm các phần tử với nhau. Khi đó kết quả này được ký hiệu đơn giản là $$x_1 * x_2 * ... * x_n$$ Hơn nữa, nếu phép toán $*$ có thêm tính chất giao hoán, kết quả này sẽ không phụ thuộc vào thứ tự của các phần tử.</p>
+
+        <div class="definition">
+            <strong>Định nghĩa 1.6.</strong> Cho tập hợp $X$ cùng phép toán hai ngôi $*$.<br>
+            Phần tử $e \in X$ được gọi là <strong>phần tử trung hòa trái (phải)</strong> của $(X, *)$ nếu $e*x = x$ với mọi $x \in X$ ($x*e = x$ với mọi $x \in X$).<br>
+            Phần tử $e$ được gọi là <strong>phần tử trung hòa</strong> đối với phép toán $*$ nếu $e$ vừa là phần tử trung hòa trái, vừa là phần tử trung hòa phải.
+        </div>
+
+        <p><strong>Ví dụ 1.7.</strong></p>
+        <ol>
+            <li>$0$ là phần tử trung hòa trong $(\mathbb{N}, +)$.</li>
+            <li>$1$ là phần tử trung hòa trong $(\mathbb{Z}, \cdot)$.</li>
+            <li>Ma trận đơn vị $I_n$ là phần tử trung hòa trong $(\mathcal{M}_n(\mathbb{R}), \cdot)$.</li>
+            <li>Ánh xạ đồng nhất $id$ là phần tử trung hòa trong $(S_n, \cdot)$.</li>
+            <li>Tập hợp $M = \left\{\left. \begin{pmatrix}a&b\\ 0&0\end{pmatrix} \,\right|\, a,b \in \mathbb{R}\right\}$ cùng phép toán nhân có vô số các phần tử trung hòa trái là các ma trận dạng $\begin{pmatrix}1&m\\ 0&0\end{pmatrix}$ với $m \in \mathbb{R}$, nhưng không có phần tử trung hòa phải và phần tử trung hòa.</li>
+            <li>Tập hợp $\mathbb{N}^*$ không có phần tử trung hòa trái, trung hòa phải nên cũng không có phần tử trung hòa với phép toán cộng.</li>
+        </ol>
+
+        <div class="proposition">
+            <strong>Mệnh đề 1.8.</strong> Cho tập hợp $X$ cùng phép toán hai ngôi $*$.
+            <ol>
+                <li>Nếu $(X, *)$ có phần tử trung hòa trái $e_t$ và phần tử trung hòa phải $e_p$ thì $e_t = e_p$.</li>
+                <li>Phần tử trung hòa của $(X, *)$, nếu có, là duy nhất.</li>
+            </ol>
+        </div>
+
+        <div class="proof">
+            <strong>Chứng minh.</strong><br>
+            1) Vì $e_t$ là phần tử trung hòa trái nên $e_t * e_p = e_p$. Mặt khác, vì $e_p$ là phần tử trung hòa phải nên $e_t * e_p = e_t$. Vậy $e_t = e_p$.<br>
+            2) Giả sử $e$ và $e'$ cùng là phần tử trung hòa của $X$, khi đó $e$ đồng thời cũng là phần tử trung hòa trái và $e'$ là phần tử trung hòa phải của $X$, nên theo lập luận trên ta có $e = e'$. Do đó phần tử trung hòa của $X$ là duy nhất.
+        </div>
+
+        <div class="definition">
+            <strong>Định nghĩa 1.9.</strong> Cho tập hợp $X$ cùng phép toán hai ngôi $*$ có phần tử trung hòa là $e$.<br>
+            Phần tử $x \in X$ được gọi là <strong>khả đối xứng</strong> trong $X$ nếu tồn tại $x' \in X$ sao cho:
+            <div style="text-align: center; margin: 15px 0;">$x*x' = x'*x = e$</div>
+            Khi đó $x'$ được gọi là <strong>phần tử đối xứng</strong> của $x$ trong $X$.
+        </div>
+
+        <div class="theorem">
+            <strong>Định lý 1.10.</strong> Trong tập hợp $X$, cho phép toán $*$ có tính chất kết hợp và $e$ là phần tử trung hòa của $X$. Khi đó, nếu phần tử $x \in X$ khả đối xứng thì phần tử đối xứng của $x$ là duy nhất.
+        </div>
+
+        <div class="proof">
+            <strong>Chứng minh.</strong> Giả sử $x'$ và $x''$ đều là phần tử đối xứng của $x$, thì:
+            <div style="text-align: center; margin: 5px 0;">$x' * x = x * x' = e$</div>
+            <div style="text-align: center; margin: 5px 0;">$x'' * x = x * x'' = e$</div>
+            Khi đó $x' = x' * e = x' * (x * x'') = (x' * x) * x'' = e * x'' = x''$.
+        </div>
+
+        <h3>1.3 Ký hiệu cộng và ký hiệu nhân</h3>
+        <p>Hai ký hiệu thường được sử dụng để ghi các phép toán hai ngôi là ký hiệu cộng và ký hiệu nhân. Tương ứng với từng trường hợp, ta sẽ thay đổi cách gọi tên phép toán, cũng như cách gọi tên và ký hiệu các phần tử phù hợp với cách gọi thông thường, cụ thể như sau:</p>
+
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Ký hiệu cộng</th>
+                        <th>Ký hiệu nhân</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Kết quả phép toán</strong></td>
+                        <td>Tổng <br> $a + b$</td>
+                        <td>Tích <br> $ab$ hoặc $a \cdot b$</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phần tử trung hòa</strong></td>
+                        <td>Phần tử Không <br> $0$</td>
+                        <td>Phần tử Đơn vị <br> $1$ hoặc $e$</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phần tử đối xứng của $x$</strong></td>
+                        <td>Phần tử đối của $x$ <br> $-x$</td>
+                        <td>Phần tử nghịch đảo của $x$ <br> $x^{-1}$</td>
+                    </tr>
+                    <tr>
+                        <td><strong>$x$ khả đối xứng</strong></td>
+                        <td>$x$ khả đối</td>
+                        <td>$x$ khả nghịch</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="biography">
+            <strong>Arthur Cayley (1821-1895)</strong> là nhà toán học Anh. Ông là người đầu tiên sử dụng thuật ngữ “nhóm” theo ý nghĩa mà toán học hiện nay đang sử dụng, trước đó từ “nhóm” chỉ được dùng để chỉ các “nhóm đối xứng”.
+        </div>
+    </div>
+
+</body>
+</html>
