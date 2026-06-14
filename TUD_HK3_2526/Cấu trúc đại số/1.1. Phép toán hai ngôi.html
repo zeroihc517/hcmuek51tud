@@ -27,7 +27,8 @@
 
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            line-height: 1.7;
+            font-size: 1.15rem; /* Tăng cỡ chữ tổng thể của trang */
+            line-height: 1.8;   /* Tăng khoảng cách dòng để dễ đọc hơn */
             color: var(--text-color);
             background-color: var(--bg-color);
             margin: 0;
@@ -35,7 +36,7 @@
         }
 
         .container {
-            max-width: 840px;
+            max-width: 900px; /* Mở rộng nhẹ chiều rộng để phù hợp chữ to */
             margin: 40px auto;
             background: var(--card-bg);
             padding: 50px 60px;
@@ -44,7 +45,7 @@
         }
 
         @media (max-width: 768px) {
-            body { padding: 10px; }
+            body { padding: 10px; font-size: 1.05rem; }
             .container { padding: 30px 20px; margin: 10px auto; }
         }
 
@@ -57,7 +58,7 @@
 
         .chapter {
             text-transform: uppercase;
-            font-size: 0.95rem;
+            font-size: 1.1rem; /* Tăng từ 0.95rem */
             color: var(--accent-color);
             letter-spacing: 3px;
             font-weight: 700;
@@ -67,7 +68,7 @@
         h1 {
             color: var(--primary-color);
             margin: 0;
-            font-size: 2.4rem;
+            font-size: 2.8rem; /* Tăng từ 2.4rem */
             font-weight: 800;
             letter-spacing: -0.025em;
         }
@@ -76,7 +77,7 @@
             color: var(--primary-color);
             margin-top: 45px;
             margin-bottom: 20px;
-            font-size: 1.6rem;
+            font-size: 2rem; /* Tăng từ 1.6rem */
             font-weight: 700;
             display: flex;
             align-items: center;
@@ -85,8 +86,8 @@
         h2::before {
             content: "";
             display: inline-block;
-            width: 5px;
-            height: 1.6rem;
+            width: 6px;
+            height: 2rem;
             background-color: var(--accent-color);
             margin-right: 12px;
             border-radius: 4px;
@@ -94,7 +95,7 @@
 
         h3 {
             color: var(--secondary-color);
-            font-size: 1.25rem;
+            font-size: 1.5rem; /* Tăng từ 1.25rem */
             font-weight: 600;
             margin-top: 35px;
             margin-bottom: 15px;
@@ -107,11 +108,12 @@
 
         /* Styling các khối hộp định nghĩa, định lý */
         .definition, .theorem, .proposition, .note {
-            padding: 20px 24px;
+            padding: 24px 28px; /* Tăng padding tỷ lệ thuận với chữ */
             margin: 25px 0;
             border-radius: 8px;
-            border-left: 5px solid;
+            border-left: 6px solid;
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+            font-size: 1.15rem; /* Đồng bộ font lớn cho khối nội dung chính */
         }
 
         .definition {
@@ -129,7 +131,7 @@
         .note {
             background-color: var(--note-bg);
             border-left-color: var(--note-border);
-            font-size: 0.95rem;
+            font-size: 1.1rem; /* Tăng từ 0.95rem */
         }
         .note strong { color: #b45309; }
 
@@ -137,9 +139,10 @@
             font-style: italic;
             background-color: #f8fafc;
             border-left: 4px solid #94a3b8;
-            padding: 15px 24px;
+            padding: 18px 24px;
             margin: 20px 0;
             border-radius: 0 8px 8px 0;
+            font-size: 1.1rem;
         }
         
         .proof strong {
@@ -161,7 +164,7 @@
         }
 
         li {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         /* Giao diện Bảng cải tiến */
@@ -173,10 +176,11 @@
             border-radius: 8px;
             overflow: hidden;
             border: 1px solid #e2e8f0;
+            font-size: 1.1rem; /* Tăng kích thước chữ trong bảng */
         }
 
         th, td {
-            padding: 14px 16px;
+            padding: 16px 18px; /* Tăng khoảng cách ô */
             text-align: center;
             border-bottom: 1px solid #e2e8f0;
             border-right: 1px solid #e2e8f0;
@@ -194,7 +198,6 @@
             background-color: #f8fafc;
             color: var(--secondary-color);
             font-weight: 600;
-            font-size: 0.95rem;
         }
 
         /* Riêng dòng đầu tiêu đề của bảng thứ 2 hoặc cột tiêu đề */
@@ -215,12 +218,12 @@
 
         /* Khối tiểu sử tác giả ở chân trang */
         .biography {
-            font-size: 0.88rem;
+            font-size: 1rem; /* Tăng từ 0.88rem */
             color: var(--text-muted);
             border-top: 1px solid #e2e8f0;
             padding-top: 20px;
             margin-top: 50px;
-            line-height: 1.6;
+            line-height: 1.7;
         }
         
         .biography strong {
@@ -233,6 +236,7 @@
             overflow-y: hidden;
             padding: 10px 0;
             margin-bottom: 15px;
+            font-size: 1.2rem; /* Tăng kích thước hiển thị công thức toán riêng lẻ */
         }
     </style>
     
