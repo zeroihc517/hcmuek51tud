@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>TKB Tuần Tự Động</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styletkb.css">
+</head>
+<body>
+
+<div class="container">
+    <div class="page-title">
+        Thời khóa biểu - HỌC KÌ 1 - NĂM HỌC: 2025-2026 (<span id="week-title">Tuần ...</span>) <br>
+        <span class="subtitle"> Đang tính toán ngày... </span>
+    </div>
+
+    <div class="table-box">
+        <table class="sched">
+            <thead>
+                <tr id="header-row">
+                    <th>Buổi</th>
+                    <th>Tiết</th>
+                    <th data-thu="2">Thứ 2</th>
+                    <th data-thu="3">Thứ 3</th>
+                    <th data-thu="4">Thứ 4</th>
+                    <th data-thu="5">Thứ 5</th>
+                    <th data-thu="6">Thứ 6</th>
+                    <th data-thu="7">Thứ 7</th>
+                </tr>
+            </thead>
+            <tbody id="tkb-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<div class="online-box">
+    <h2 class="online-title">📌 DEADLINE</h2>
+    <div class="online-grid" id="deadline-container"></div>
+
+<div class="note-container">
+    <div class="note-box">
+        <h2>Ghi chú:</h2>
+        <ul id="location-notes">
+            </ul>
+    </div>
+</div>
+
+<script src="database.js"></script>
+<script>
+    // ==========================================
+    // CHỈ CHỈNH SỬA TẠI ĐÂY
+    // ==========================================
+    const CURRENT_WEEK = 1;               
+    // ==========================================
+</script>
+
+<script src="dulieu.js"></script>
+</body>
+</html>
