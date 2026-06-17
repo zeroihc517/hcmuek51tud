@@ -198,6 +198,25 @@ function renderPlatforms() {
         `).join('');
     }
 }
+// Thêm vào cuối file scriptindex.js
+function printTKB() {
+    const iframe = document.getElementById('iframeTKB');
+    
+    // Kiểm tra xem iframe có đang hiển thị dữ liệu tuần nào không
+    if (!iframe || !iframe.src || iframe.src === "about:blank" || document.getElementById('boxTKB').style.display === 'none') {
+        alert("Vui lòng chọn một Tuần cụ thể trước khi in!");
+        return;
+    }
 
+    try {
+        // Thực hiện lệnh in trực tiếp nội dung bên trong iframe tuần học
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+    } catch (e) {
+        // Phòng trường hợp lỗi bảo mật cross-origin nếu cấu hình sai host
+        alert("Không thể in trực tiếp. Bạn hãy click chuột phải vào bảng thời khóa biểu và chọn 'In' (Print).");
+        console.error(e);
+    }
+}
 // Gọi hàm khi trang tải xong
 window.addEventListener('DOMContentLoaded', renderPlatforms);
