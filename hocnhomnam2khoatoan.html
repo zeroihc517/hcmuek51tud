@@ -863,7 +863,91 @@
                 alert(response); loadQAData(); 
             }, function() { alert("Lỗi khi gửi trả lời."); btn.html('<i class="fa-solid fa-reply"></i> Đăng câu trả lời').prop('disabled', false); });
         }
+// ==========================================
+// HÀM TIỆN ÍCH XỬ LÝ NGÀY THÁNG
+// ==========================================
 
+// 1. Chuyển đổi chuỗi DD/MM/YYYY thành Date object
+function parseDateString(dateStr) {
+    if (!dateStr || dateStr.trim() === "") return null;
+    let parts = dateStr.split('/');
+    if (parts.length === 3) {
+        // new Date(Năm, Tháng (0-11), Ngày)
+        return new Date(parts[2], parts[1] - 1, parts[0]); 
+    }
+    return null; // Trả về null nếu định dạng không đúng
+}
+
+// 2. Lấy ngày tháng chính xác của một "Thứ" trong tuần hiện tại
+function getDateOfSpecificWeekday(thu) {
+    let today = new Date();
+    today.setHours(0, 0, 0, 0); // Đưa về 0h để so sánh chuẩn xác
+    
+    let currentDay = today.getDay(); // 0: Chủ nhật, 1: Thứ 2, ..., 6: Thứ 7
+    // Đưa quy ước getDay() về quy ước Thứ 2 -> 8 (Chủ nhật) của bạn
+    let mappedCurrentDay = currentDay === 0 ? 8 : currentDay + 1; 
+    
+    // Tính khoảng cách ngày từ hôm nay đến cái "Thứ" cần tìm
+    let diff = thu - mappedCurrentDay;
+    let targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + diff);
+    
+    return targetDate;
+}
+
+// ==========================================
+// KHỐI LOGIC THỜI GIAN BIỂU (TKB) - ĐÃ CẬP NHẬT LỌC THEO NGÀY
+// ==========================================
+function loadThoiGianBieu() {
+    $('#tkb-body').html('<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải thời gian biểu...</td></tr>');
+    
+    $.ajax({
+        url: SCRIPT_URL + "?action=getTKB",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            let courseData = data.map(row => ({
+                thu: parseInt(row[0]) || 0,
+                tietBd: parseInt(row[1]) || 0,
+                soTiet: parseInt(row[2]) || 1,
+                thoiGian: row[3] || "",  // Cột D: Thời gian
+                hinhThuc: row[4] || "",  // Cột E: Hình thức học
+                mon: row[5] || "",       // Cột F: Môn học
+                phong: row[6] || "",     // Cột G: Phòng
+                gv: row[7] || "",        // Cột H: Giảng viên
+                color: row[8] || "#e0f2fe", // Cột I: Màu nền
+                ngayBatDau: row[9] || "",   // Cột J: Ngày bắt đầu (DD/MM/YYYY)
+                ngayKetThuc: row[10] || ""  // Cột K: Ngày kết thúc (DD/MM/YYYY)
+            })).filter(c => {
+                // Điều kiện 1: Phải có thứ và tiết hợp lệ
+                if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
+
+                // Điều kiện 2: Kiểm tra môn học có nằm trong thời gian của tuần này không
+                if (c.ngayBatDau && c.ngayKetThuc) {
+                    let startDate = parseDateString(c.ngayBatDau);
+                    let endDate = parseDateString(c.ngayKetThuc);
+                    
+                    if (startDate && endDate) {
+                        // Tính xem cái "Thứ" của môn học này trong tuần này là ngày bao nhiêu
+                        let classDateInThisWeek = getDateOfSpecificWeekday(c.thu);
+                        
+                        // Nếu ngày học của tuần này nằm ngoài khoảng thời gian bắt đầu - kết thúc thì loại bỏ
+                        if (classDateInThisWeek < startDate || classDateInThisWeek > endDate) {
+                            return false; 
+                        }
+                    }
+                }
+                
+                return true; // Giữ lại môn học nếu thỏa mãn mọi điều kiện (hoặc nếu không setup ngày tháng)
+            });
+
+            renderTKBTable(courseData);
+        },
+        error: function() {
+            $('#tkb-body').html('<tr><td colspan="9" style="color: red; padding: 20px; text-align:center;">Lỗi kết nối dữ liệu Thời gian biểu!</td></tr>');
+        }
+    });
+}
         // ==========================================
         // TÍNH NĂNG CHỐNG XEM MÃ NGUỒN
         // ==========================================
