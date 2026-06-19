@@ -587,29 +587,47 @@ function loadThoiGianBieu() {
 }
 
 function filterAndRenderTKB() {
-    let filteredData = globalTkbData.filter(c => {
-        if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
+    let filteredData = globalTkbData
+        .filter(c => {
+            if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
 
-        // BỔ SUNG TÍNH NĂNG ADMIN: Nếu môn yêu cầu admin mà chưa đăng nhập thì ẩn đi
-        if (c.yeuCauAdmin && !isAdmin) return false;
+            if (c.ngayBatDau && c.ngayKetThuc) {
+                let startDate = parseDateString(c.ngayBatDau);
+                let endDate = parseDateString(c.ngayKetThuc);
 
-        if (c.ngayBatDau && c.ngayKetThuc) {
-            let startDate = parseDateString(c.ngayBatDau);
-            let endDate = parseDateString(c.ngayKetThuc);
-            
-            if (startDate && endDate) {
-                let classDateInThisWeek = getDateOfSpecificWeekday(c.thu);
-                if (classDateInThisWeek < startDate || classDateInThisWeek > endDate) {
-                    return false; 
+                if (startDate && endDate) {
+                    let classDateInThisWeek = getDateOfSpecificWeekday(c.thu);
+
+                    if (
+                        classDateInThisWeek < startDate ||
+                        classDateInThisWeek > endDate
+                    ) {
+                        return false;
+                    }
                 }
             }
-        }
-        return true; 
-    });
+
+            return true;
+        })
+        .map(c => {
+            // Nếu là môn Admin và người dùng chưa đăng nhập Admin
+            if (c.yeuCauAdmin && !isAdmin) {
+                return {
+                    ...c,
+                    mon: "🔒 ADMIN BẬN",
+                    phong: "",
+                    gv: "",
+                    thoiGian: "",
+                    hinhThuc: "",
+                    color: "#f3f4f6"
+                };
+            }
+
+            return c;
+        });
 
     renderTKBTable(filteredData);
 }
-
 function renderTKBTable(courses) {
     const tbody = document.getElementById('tkb-body');
     if (!tbody) return;
