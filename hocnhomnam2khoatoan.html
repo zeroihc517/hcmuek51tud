@@ -299,7 +299,7 @@
                             <span class="text-muted small px-2">Đang tải danh sách học phần...</span>
 <button class="btn-course d-none mt-4" id="btnNavAdminTKB" onclick="loadAdminTKBView()" style="border-color: var(--accent-red); color: var(--accent-red);">
     <i class="fa-solid fa-user-tie"></i> TKB Quản trị
-</button>5:43 PM 6/19/2026
+</button>
                         </div>
                     </div>
                 </div>
@@ -547,131 +547,82 @@
         // ==========================================
         // KHỐI LOGIC THỜI GIAN BIỂU (TKB) - ĐÃ CẬP NHẬT 9 CỘT THEO MÀU
         // ==========================================
-       
+        function loadThoiGianBieu() {
+            $('#tkb-body').html('<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải thời gian biểu...</td></tr>');
+            
+            $.ajax({
+                url: SCRIPT_URL + "?action=getTKB",
+                method: "GET",
+                dataType: "json",
+                success: function(data) {
+                    let courseData = data.map(row => ({
+                        thu: parseInt(row[0]) || 0,
+                        tietBd: parseInt(row[1]) || 0,
+                        soTiet: parseInt(row[2]) || 1,
+                        thoiGian: row[3] || "",  // Cột D: Thời gian
+                        hinhThuc: row[4] || "",  // Cột E: Hình thức học
+                        mon: row[5] || "",       // Cột F: Môn học
+                        phong: row[6] || "",     // Cột G: Phòng
+                        gv: row[7] || "",        // Cột H: Giảng viên
+                        color: row[8] || "#e0f2fe" // Cột I: Màu nền
+                    })).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
 
-// ==========================================
-// KHỐI LOGIC THỜI GIAN BIỂU (TKB) CHÍNH
-// ==========================================
-function loadThoiGianBieu() {
-    currentWeekOffset = 0;
-    populateWeekDropdown(); // Khởi tạo Dropdown
-
-    $('#tkb-body').html('<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải thời gian biểu...</td></tr>');
-    
-    $.ajax({
-        url: SCRIPT_URL + "?action=getTKB",
-        method: "GET",
-        dataType: "json",
-        success: function(data) {
-           globalTkbData = data.map(row => ({
-                thu: parseInt(row[0]) || 0,
-                tietBd: parseInt(row[1]) || 0,
-                soTiet: parseInt(row[2]) || 1,
-                thoiGian: row[3] || "",  
-                hinhThuc: row[4] || "",  
-                mon: row[5] || "",       
-                phong: row[6] || "",     
-                gv: row[7] || "",        
-                color: row[8] || "#e0f2fe",
-                ngayBatDau: row[9] || "",   
-                ngayKetThuc: row[10] || "",
-                yeuCauAdmin: (row[11] && String(row[11]).toLowerCase().trim() === 'admin') || false
-            }));
-
-            filterAndRenderTKB();
-        },
-        error: function() {
-            $('#tkb-body').html('<tr><td colspan="9" style="color: red; padding: 20px; text-align:center;">Lỗi kết nối dữ liệu Thời gian biểu!</td></tr>');
+                    renderTKBTable(courseData);
+                },
+                error: function() {
+                    $('#tkb-body').html('<tr><td colspan="9" style="color: red; padding: 20px; text-align:center;">Lỗi kết nối dữ liệu Thời gian biểu!</td></tr>');
+                }
+            });
         }
-    });
-}
 
-function filterAndRenderTKB() {
-    let filteredData = globalTkbData
-        .filter(c => {
-            if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
+        function renderTKBTable(courses) {
+            const tbody = document.getElementById('tkb-body');
+            if (!tbody) return;
 
-            if (c.ngayBatDau && c.ngayKetThuc) {
-                let startDate = parseDateString(c.ngayBatDau);
-                let endDate = parseDateString(c.ngayKetThuc);
+            const totalRows = 15; 
+            const occupied = Array.from({ length: totalRows + 1 }, () => Array(9).fill(false));
+            let tableHtml = "";
 
-                if (startDate && endDate) {
-                    let classDateInThisWeek = getDateOfSpecificWeekday(c.thu);
+            for (let i = 1; i <= totalRows; i++) {
+                tableHtml += `<tr>`;
+                
+                if (i === 1) tableHtml += `<td rowspan="6" class="session-label">Sáng</td>`;
+                if (i === 7) tableHtml += `<td rowspan="6" class="session-label">Chiều</td>`;
+                if (i === 13) tableHtml += `<td rowspan="3" class="session-label">Tối</td>`;
+                
+                tableHtml += `<td class="col-tiet">${i}</td>`;
 
-                    if (
-                        classDateInThisWeek < startDate ||
-                        classDateInThisWeek > endDate
-                    ) {
-                        return false;
+                for (let thu = 2; thu <= 8; thu++) {
+                    if (occupied[i][thu]) continue; 
+
+                    const course = courses.find(c => c.thu === thu && c.tietBd === i);
+                    
+                    if (course) {
+                        const len = course.soTiet;
+                        for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
+
+                        tableHtml += `
+                        <td rowspan="${len}" class="td-subject" style="background:${course.color}; border: 2.4px solid var(--border-color);">
+                            <div class="subject">
+                                ${course.thoiGian ? `<div style="font-weight:700; color: #dc2626; margin-bottom: 2px; font-size: 13.5px;"><i class="fa-regular fa-clock me-1"></i>${course.thoiGian}</div>` : ''}
+                                
+                                ${course.hinhThuc ? `<div style="font-weight:700; color: #1e3a8a; margin-bottom: 6px; font-size: 13.5px;"><i class="fa-solid fa-laptop-house me-1"></i>${course.hinhThuc}</div>` : ''}
+                                
+                                <div style="font-weight:700; color: #000000; font-size: 15px; line-height: 1.3; margin-bottom: 4px;">${course.mon}</div>
+                                
+                                ${course.phong ? `<div style="font-size: 13.5px; color: #000000; font-weight: 500; margin-bottom: 2px;"><i class="fa-solid fa-location-dot me-1"></i>${course.phong}</div>` : ''}
+                                
+                                ${course.gv ? `<div style="margin-top:6px; font-size:13px; color: #000000; font-weight: 500; border-top:1px dashed rgba(0,0,0,0.3); padding-top:6px;"><i class="fa-solid fa-chalkboard-user me-1"></i>${course.gv}</div>` : ''}
+                            </div>
+                        </td>`;
+                    } else { 
+                        tableHtml += `<td style="background: #ffffff; border: 2.4px solid var(--border-color);"></td>`; 
                     }
                 }
+                tableHtml += `</tr>`;
             }
-
-            return true;
-        })
-        .map(c => {
-            // Nếu là môn Admin và người dùng chưa đăng nhập Admin
-            if (c.yeuCauAdmin && !isAdmin) {
-                return {
-                    ...c,
-                    mon: "🔒 ADMIN BẬN",
-                    phong: "",
-                    gv: "",
-                    thoiGian: "",
-                    hinhThuc: "",
-                    color: "#f3f4f6"
-                };
-            }
-
-            return c;
-        });
-
-    renderTKBTable(filteredData);
-}
-function renderTKBTable(courses) {
-    const tbody = document.getElementById('tkb-body');
-    if (!tbody) return;
-
-    const totalRows = 15; 
-    const occupied = Array.from({ length: totalRows + 1 }, () => Array(9).fill(false));
-    let tableHtml = "";
-
-    for (let i = 1; i <= totalRows; i++) {
-        tableHtml += `<tr>`;
-        
-        if (i === 1) tableHtml += `<td rowspan="6" class="session-label">Sáng</td>`;
-        if (i === 7) tableHtml += `<td rowspan="6" class="session-label">Chiều</td>`;
-        if (i === 13) tableHtml += `<td rowspan="3" class="session-label">Tối</td>`;
-        
-        tableHtml += `<td class="col-tiet">${i}</td>`;
-
-        for (let thu = 2; thu <= 8; thu++) {
-            if (occupied[i][thu]) continue; 
-
-            const course = courses.find(c => c.thu === thu && c.tietBd === i);
-            
-            if (course) {
-                const len = course.soTiet;
-                for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
-
-                tableHtml += `
-                <td rowspan="${len}" class="td-subject" style="background:${course.color}; border: 2.4px solid var(--border-color);">
-                    <div class="subject">
-                        ${course.thoiGian ? `<div style="font-weight:700; color: #dc2626; margin-bottom: 2px; font-size: 13.5px;"><i class="fa-regular fa-clock me-1"></i>${course.thoiGian}</div>` : ''}
-                        ${course.hinhThuc ? `<div style="font-weight:700; color: #1e3a8a; margin-bottom: 6px; font-size: 13.5px;"><i class="fa-solid fa-laptop-house me-1"></i>${course.hinhThuc}</div>` : ''}
-                        <div style="font-weight:700; color: #000000; font-size: 15px; line-height: 1.3; margin-bottom: 4px;">${course.mon}</div>
-                        ${course.phong ? `<div style="font-size: 13.5px; color: #000000; font-weight: 500; margin-bottom: 2px;"><i class="fa-solid fa-location-dot me-1"></i>${course.phong}</div>` : ''}
-                        ${course.gv ? `<div style="margin-top:6px; font-size:13px; color: #000000; font-weight: 500; border-top:1px dashed rgba(0,0,0,0.3); padding-top:6px;"><i class="fa-solid fa-chalkboard-user me-1"></i>${course.gv}</div>` : ''}
-                    </div>
-                </td>`;
-            } else { 
-                tableHtml += `<td style="background: #ffffff; border: 2.4px solid var(--border-color);"></td>`; 
-            }
+            tbody.innerHTML = tableHtml;
         }
-        tableHtml += `</tr>`;
-    }
-    tbody.innerHTML = tableHtml;
-}
 
         // ==========================================
         // KHỐI XỬ LÝ GIAO DIỆN CHÍNH (HỌC PHẦN)
@@ -968,16 +919,9 @@ function renderTKBTable(courses) {
                 if (confirm("Bạn có muốn đăng xuất quyền Admin?")) {
                     isAdmin = false;
                     $('#btnAdminLoginToggle').html('<i class="fa-solid fa-lock"></i> Dành cho Ban quản trị').css('color', 'var(--text-muted)');
-                    
-                    if (!$('#qaSection').hasClass('d-none')) { loadQAData(); }
-                    // Tự động ẩn các môn Admin khỏi TKB sau khi đăng xuất
-                    if (!$('#tkbSection').hasClass('d-none')) { filterAndRenderTKB(); } 
+                    loadQAData(); 
                 }
-            } else { 
-                $('#adminLoginError').addClass('d-none'); 
-                $('#txtAdminPass').val(''); 
-                $('#adminLoginModal').modal('show'); 
-            }
+            } else { $('#adminLoginError').addClass('d-none'); $('#txtAdminPass').val(''); $('#adminLoginModal').modal('show'); }
         }
 
         function verifyAdmin() {
@@ -1101,7 +1045,7 @@ function loadThoiGianBieu() {
         method: "GET",
         dataType: "json",
         success: function(data) {
-           globalTkbData = data.map(row => ({
+            globalTkbData = data.map(row => ({
                 thu: parseInt(row[0]) || 0,
                 tietBd: parseInt(row[1]) || 0,
                 soTiet: parseInt(row[2]) || 1,
@@ -1112,9 +1056,7 @@ function loadThoiGianBieu() {
                 gv: row[7] || "",        
                 color: row[8] || "#e0f2fe",
                 ngayBatDau: row[9] || "",   
-                ngayKetThuc: row[10] || "",
-                // Thêm dòng này: Đọc cột L (index 11) xem có chữ "admin" không
-                yeuCauAdmin: (row[11] && String(row[11]).toLowerCase().trim() === 'admin') || false
+                ngayKetThuc: row[10] || ""  
             }));
 
             filterAndRenderTKB();
@@ -1125,21 +1067,27 @@ function loadThoiGianBieu() {
     });
 }
 
-globalTkbData = data.map(row => ({
-                thu: parseInt(row[0]) || 0,
-                tietBd: parseInt(row[1]) || 0,
-                soTiet: parseInt(row[2]) || 1,
-                thoiGian: row[3] || "",  
-                hinhThuc: row[4] || "",  
-                mon: row[5] || "",       
-                phong: row[6] || "",     
-                gv: row[7] || "",        
-                color: row[8] || "#e0f2fe",
-                ngayBatDau: row[9] || "",   
-                ngayKetThuc: row[10] || "",
-                // Thêm dòng này: Đọc cột L (index 11) xem có chữ "admin" không
-                yeuCauAdmin: (row[11] && String(row[11]).toLowerCase().trim() === 'admin') || false
-            }));
+function filterAndRenderTKB() {
+    let filteredData = globalTkbData.filter(c => {
+        if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
+
+        if (c.ngayBatDau && c.ngayKetThuc) {
+            let startDate = parseDateString(c.ngayBatDau);
+            let endDate = parseDateString(c.ngayKetThuc);
+            
+            if (startDate && endDate) {
+                let classDateInThisWeek = getDateOfSpecificWeekday(c.thu);
+                if (classDateInThisWeek < startDate || classDateInThisWeek > endDate) {
+                    return false; 
+                }
+            }
+        }
+        return true; 
+    });
+
+    renderTKBTable(filteredData);
+}
+
 function renderTKBTable(courses) {
     const tbody = document.getElementById('tkb-body');
     if (!tbody) return;
