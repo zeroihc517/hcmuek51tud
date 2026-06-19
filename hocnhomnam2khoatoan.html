@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học nhóm Năm 2 Khoa Toán</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sidebar-width: 320px;
+            --primary-color: #154c79; 
+            --primary-hover: #0f395c;
+            --primary-light: #e8f1f8;
+            --accent-red: #e61d4a; 
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+            --bg-global: #eff0f2; 
+            --card-bg: #ffffff;
+            --card-border-radius: 8px; 
+            --border-color: #d1d5db;
+            
+            --topic-bg: #eff6ff; 
+            --topic-border: #bfdbfe;
+            --lesson-bg: #f3fdf6;
+            --lesson-border: #bbf7d0;
+            --exam-bg: #fff5f6;
+            --exam-border: #fecdd3;
+
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+        }
+
+        body { 
+            background-color: var(--bg-global); 
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            font-size: 16px; 
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-color); }
+
+        .app-container { display: flex; min-height: 100vh; }
+
+        .mobile-header {
+            display: none; background: var(--primary-color); padding: 16px 20px;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 99; box-shadow: var(--shadow-sm);
+        }
+
+        .menu-toggle {
+            background: none; border: none; color: #ffffff; font-size: 26px; cursor: pointer; padding: 0;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width); background: var(--card-bg); border-right: 1px solid var(--border-color);
+            display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0;
+            z-index: 100; transition: transform 0.3s ease; box-shadow: var(--shadow-sm);
+        }
+        
+        .sidebar-brand {
+            padding: 30px 24px; background: var(--primary-color); color: #ffffff;
+            display: flex; align-items: center; gap: 16px;
+        }
+        
+        .sidebar-brand .brand-icon {
+            background: #ffffff; color: var(--primary-color); width: 50px; height: 50px;
+            display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 24px;
+        }
+        
+        .sidebar-brand h6 { font-size: 22px; font-weight: 700; margin: 0; }
+        .sidebar-brand small { font-size: 15px; opacity: 0.9; }
+
+        .sidebar-content { padding: 24px; flex: 1; overflow-y: auto; }
+
+        .portal-filter-box { margin-bottom: 24px; }
+        .portal-label {
+            font-size: 14px; text-transform: uppercase; font-weight: 700; color: var(--primary-color);
+            margin-bottom: 12px; display: block;
+        }
+
+        .course-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .btn-course {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 6px;
+            text-align: left;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .btn-course:hover {
+            background: var(--bg-global);
+            border-color: #9ca3af;
+        }
+        
+        .btn-course.active {
+            background: var(--primary-light);
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 1px var(--primary-color);
+        }
+
+        .btn-qa-menu {
+            background: var(--topic-bg); border: 1px dashed var(--primary-color); color: var(--primary-color);
+            padding: 14px; border-radius: 8px; width: 100%; text-align: left;
+            font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; gap: 10px; margin-top: 10px;
+        }
+        .btn-qa-menu:hover { background: var(--primary-light); transform: translateY(-2px); }
+        .btn-qa-menu.active { background: var(--primary-color); color: #fff; border-style: solid; }
+
+        .msg-admin { background: #f3fdf6; border-left: 4px solid #166534; color: #166534; padding: 12px 16px; border-radius: 6px; margin-top: 10px; font-size: 15px; font-weight: 500; white-space: pre-wrap; word-break: break-word; }
+        .msg-sv { background: #eff6ff; border-left: 4px solid #1e40af; color: #1e40af; padding: 12px 16px; border-radius: 6px; margin-top: 10px; margin-left: 20px; font-size: 15px; font-weight: 500; white-space: pre-wrap; word-break: break-word; }
+
+        .vote-action-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid #e5e7eb; }
+        .vote-group { display: flex; gap: 8px; }
+        .btn-vote { background: #f3f4f6; border: none; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #4b5563; cursor: pointer; transition: 0.2s; }
+        .btn-vote:hover { background: #e5e7eb; }
+        .btn-vote.up:hover { color: #16a34a; background: #dcfce7; }
+        .btn-vote.down:hover { color: #dc2626; background: #fee2e2; }
+
+        .btn-reply-toggle { font-size: 13px; font-weight: 600; color: var(--primary-color); background: none; border: none; padding: 0; margin-top: 10px; transition: 0.2s; text-decoration: underline transparent; }
+        .btn-reply-toggle:hover { color: var(--accent-red); text-decoration-color: var(--accent-red); }
+        .reply-box { background: #f9fafb; border: 1px dashed var(--border-color); border-radius: 6px; padding: 12px; margin-top: 12px; }
+        
+        .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 40px; transition: all 0.3s ease; }
+
+        .top-header {
+            background: var(--card-bg); border-radius: var(--card-border-radius); padding: 24px 32px;
+            margin-bottom: 32px; box-shadow: var(--shadow-md); display: flex;
+            justify-content: space-between; align-items: center; border-top: 4px solid var(--accent-red); 
+        }
+        
+        .page-title { font-size: 24px; font-weight: 700; color: var(--primary-color); margin: 0; display: flex; align-items: center; }
+        .page-title i { font-size: 26px; margin-right: 14px; }
+        .student-badge { font-size: 15px; font-weight: 600; padding: 8px 16px; }
+
+        .instructor-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 6px solid var(--primary-color); border-radius: var(--card-border-radius); padding: 24px 32px; margin-bottom: 32px; box-shadow: var(--shadow-md); }
+        .instructor-card h6 { font-size: 20px; font-weight: 700; color: var(--primary-color); }
+        .instructor-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; color: var(--text-main); font-size: 17px; font-weight: 500; }
+        .instructor-item i { color: var(--primary-color); margin-top: 4px; font-size: 18px; }
+
+        .data-card { background: var(--card-bg); border-radius: var(--card-border-radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); overflow: hidden; }
+        .custom-portal-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .custom-portal-table th { background: var(--primary-color); color: #ffffff; font-weight: 600; font-size: 16px; text-transform: uppercase; padding: 18px 24px; border-right: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10; }
+        .custom-portal-table td { padding: 20px 24px; border-bottom: 1px solid #e5e7eb; font-size: 16px; font-weight: 500; vertical-align: middle; color: var(--text-main); white-space: pre-wrap; word-break: break-word; }
+
+        .grid-row:hover td { background-color: var(--bg-global); }
+        .grid-row.row-topic td { background-color: var(--topic-bg); color: #1e40af; font-weight: 600; border-bottom-color: var(--topic-border); }
+        .grid-row.row-lesson td { background-color: var(--lesson-bg); color: #166534; font-weight: 600; border-bottom-color: var(--lesson-border); }
+        .grid-row.row-exam td { background-color: var(--exam-bg); color: #be123c; font-weight: 600; border-bottom-color: var(--exam-border); }
+        .grid-row.row-new td { background-color: #fff1f2; color: #9f1239; font-weight: 600; border-bottom-color: #fecdd3; }
+        .grid-row.row-new td:first-child { border-left: 4px solid var(--accent-red); }
+        .grid-row.row-white td { background-color: #ffffff; color: var(--text-main); font-weight: 500; border-bottom-color: #e5e7eb; }
+        .badge-new { background-color: var(--accent-red); color: #ffffff; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin-right: 8px; text-transform: uppercase; display: inline-block; vertical-align: middle; }
+
+        .btn-portal-action { background: var(--primary-light); color: var(--primary-color) !important; padding: 10px 18px; border-radius: 6px; font-size: 15px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; border: 1px solid transparent; }
+        .btn-portal-action:hover { background: var(--accent-red); color: #ffffff !important; transform: translateY(-2px); }
+
+        .pulse-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 0; }
+        .spinner-modern { width: 50px; height: 50px; border: 4px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 99; display: none; opacity: 0; transition: opacity 0.3s; }
+
+        .qa-item { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+        .qa-question { font-size: 17px; font-weight: 600; color: var(--primary-color); margin-bottom: 8px; white-space: pre-wrap; word-break: break-word; }
+        .qa-time { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+        .qa-answer { background: var(--lesson-bg); border-left: 4px solid #166534; padding: 14px 18px; border-radius: 6px; color: #166534; font-size: 15px; font-weight: 500; margin-top: 10px; white-space: pre-wrap; word-break: break-word; }
+        .qa-no-answer { background: #f3f4f6; border-left: 4px solid #9ca3af; padding: 10px 14px; border-radius: 6px; color: #4b5563; font-size: 14px; font-style: italic; margin-top: 10px; }
+
+        .link-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        .link-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+        .link-card .icon-box {
+            width: 50px; height: 50px;
+            background: var(--primary-light);
+            color: var(--primary-color);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+        .link-card h5 { margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: var(--primary-color); }
+        .link-card p { margin: 0; font-size: 14px; color: var(--text-muted); }
+
+        /* =====================================
+           CSS DÀNH CHO THỜI GIAN BIỂU (TKB) 
+           ===================================== */
+        .tkb-wrapper { width: 100%; overflow-x: auto; background: #fff; border-radius: var(--card-border-radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); }
+        .sched { width: 100%; min-width: 1000px; border-collapse: collapse; table-layout: fixed; }
+        .sched th { background: var(--primary-color); color: #fff; padding: 14px 8px; font-size: 15px; border: 1px solid rgba(255,255,255,0.15); text-align: center; }
+        .sched th:nth-child(1), .sched td:nth-child(1) { width: 60px; }
+        .sched th:nth-child(2), .sched td:nth-child(2) { width: 50px; }
+        .sched th:nth-child(n+3), .sched td:nth-child(n+3) { width: calc((100% - 110px) / 7); }
+        .sched td { border: 2.4px solid var(--border-color); padding: 8px; text-align: center; height: 50px; font-size: 15px; }
+        .sched td[rowspan] { background: #ffffff; }
+        .col-tiet { background: #f9fafb; font-weight: 600; }
+        .td-subject { padding: 12px; border-radius: 8px; vertical-align: middle; }
+        .td-subject .subject { background: transparent; line-height: 1.4; }
+        .session-label { font-weight: bold; background: #fff; text-transform: uppercase; color: var(--primary-color); }
+
+        @media (max-width: 991.98px) {
+            .mobile-header { display: flex; align-items: center; justify-content: space-between; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .sidebar-overlay.show { display: block; opacity: 1; }
+            .main-content { margin-left: 0; padding: 100px 16px 24px 16px; }
+            .top-header { padding: 20px; }
+            .page-title { font-size: 20px; }
+            .custom-portal-table th, .custom-portal-table td { padding: 16px; font-size: 15px; }
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="mobile-header">
+        <h6 class="m-0 fw-bold text-white d-flex align-items-center gap-2" style="font-size: 20px;">
+            <i class="fa-solid fa-layer-group"></i> Học nhóm
+        </h6>
+        <button class="menu-toggle" id="btnToggleMenu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container">
+        <aside class="sidebar" id="sidebarMenu">
+            <div class="sidebar-brand">
+                <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div><h6>HCMUE</h6><small>Khoa Toán - Tin học</small></div>
+            </div>
+            
+            <div class="sidebar-content">
+                <div class="portal-filter-box">
+                    <label class="portal-label">Danh mục truy cập</label>
+                    <div class="course-list" id="mainNavigationList">
+                        <button class="btn-course active" id="btnNavTongHop" onclick="loadTongHopView()">
+                            <i class="fa-solid fa-link" style="color: var(--accent-red);"></i> Tổng hợp Link
+                        </button>
+                        
+                        <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
+                            <i class="fa-regular fa-calendar-days" style="color: #0ea5e9;"></i> Thời gian biểu
+                        </button>
+                        
+                        <div id="dynamicCourseList" class="course-list mt-2">
+                            <span class="text-muted small px-2">Đang tải danh sách học phần...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" style="border-color: var(--border-color);">
+                
+                <button class="btn-qa-menu" id="btnNavQA" onclick="openQASection()">
+                    <i class="fa-regular fa-comments fa-lg"></i> Giải đáp thắc mắc
+                </button>
+                <button class="btn mt-3 w-100 text-start" id="btnAdminLoginToggle" onclick="openAdminModal()" style="color: var(--text-muted); font-size: 14px; font-weight: 500;">
+                    <i class="fa-solid fa-lock"></i> Dành cho Ban quản trị
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            
+            <div id="tongHopSection">
+                <header class="top-header">
+                    <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
+                    <div class="text-muted student-badge d-none d-md-flex align-items-center gap-2 bg-light rounded-pill">
+                        <i class="fa-regular fa-clock text-primary"></i> Khóa K51
+                    </div>
+                </header>
+
+                <div class="row g-4" id="webLinksContainer">
+                    <div class="col-12 text-center text-muted py-5">
+                        <i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải danh sách liên kết...
+                    </div>
+                </div>
+            </div>
+
+            <div id="tkbSection" class="d-none">
+                <header class="top-header">
+                    <div class="page-title"><i class="fa-regular fa-calendar-days"></i> Thời gian biểu trực tuyến</div>
+                    <div class="text-muted student-badge d-none d-md-flex align-items-center gap-2 bg-light rounded-pill">
+                        <i class="fa-solid fa-rotate text-primary"></i> Cập nhật tự động
+                    </div>
+                </header>
+                
+                <div class="tkb-wrapper">
+                    <table class="sched">
+                        <thead>
+                            <tr id="header-row">
+                                <th>Buổi</th>
+                                <th>Tiết</th>
+                                <th>Thứ 2</th>
+                                <th>Thứ 3</th>
+                                <th>Thứ 4</th>
+                                <th>Thứ 5</th>
+                                <th>Thứ 6</th>
+                                <th>Thứ 7</th>
+                                <th>Chủ nhật</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tkb-body">
+                            <tr>
+                                <td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;">
+                                    <i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải thời gian biểu...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="courseSection" class="d-none">
+                <header class="top-header">
+                    <div class="page-title"><i class="fa-solid fa-book-open"></i> Học nhóm - Năm 2 - Khoa Toán-Tin học</div>
+                    <div class="text-muted student-badge d-none d-md-flex align-items-center gap-2 bg-light rounded-pill">
+                        <i class="fa-regular fa-clock text-primary"></i> Năm học: 2026 - 2027
+                    </div>
+                </header>
+
+                <div id="instructorArea" class="d-none"></div>
+
+                <div class="data-card" id="mainDataCard">
+                    <div id="loadingStatus" class="pulse-loader">
+                        <div class="spinner-modern"></div>
+                        <span class="text-muted fw-bold" style="font-size: 16px;">Đang tải dữ liệu học phần...</span>
+                    </div>
+
+                    <div id="tableWrapper" class="table-responsive d-none border-0">
+                        <table class="custom-portal-table">
+                            <thead><tr id="sheetTableHead"></tr></thead>
+                            <tbody id="sheetTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="qaSection" class="d-none">
+                <header class="top-header">
+                    <div class="page-title"><i class="fa-regular fa-comments"></i> Hỗ trợ & Giải đáp thắc mắc</div>
+                </header>
+
+                <div class="instructor-card border-start-0" style="border-top: 4px solid var(--primary-color);">
+                    <h6 class="mb-3">Đặt câu hỏi cho Admin</h6>
+                    <div class="row mb-3">
+                        <div class="col-12 col-md-4">
+                            <input type="text" id="txtMSSV" class="form-control p-2.5 fw-bold" placeholder="Nhập mã số sinh viên hoặc email liên hệ" maxlength="65">
+                        </div>
+                    </div>
+                    <textarea id="txtQuestion" class="form-control mb-3 p-3" rows="3" placeholder="Nhập câu hỏi hoặc vướng mắc của bạn tại đây..."></textarea>
+                    <button class="btn btn-primary fw-bold px-4 py-2" onclick="sendQuestion()" id="btnSubmitQ" style="background: var(--primary-color); border:none;">
+                        <i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi
+                    </button>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold m-0 text-primary">Các câu hỏi gần đây</h5>
+                    <button class="btn btn-sm btn-light border" onclick="loadQAData()"><i class="fa-solid fa-rotate-right"></i> Làm mới</button>
+                </div>
+                
+                <div id="qaLoadingStatus" class="pulse-loader d-none">
+                    <div class="spinner-modern" style="width: 30px; height: 30px; border-width: 3px;"></div>
+                </div>
+                
+                <div id="qaListArea"></div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-user-shield me-2"></i>Xác thực Quản trị viên</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <label class="form-label fw-bold">Mật khẩu truy cập</label>
+                    <input type="password" id="txtAdminPass" class="form-control" placeholder="Nhập mật khẩu Admin...">
+                    <small class="text-danger d-none mt-2 fw-bold" id="adminLoginError">Mật khẩu không chính xác!</small>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-primary px-4 fw-bold" onclick="verifyAdmin()">Đăng nhập</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        // ==========================================
+        // CẤU HÌNH API URL
+        // ==========================================
+        // DÁN URL WEB APP CỦA GOOGLE APPS SCRIPT VÀO ĐÂY
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwxeiLi11V8xHvoix1nbsYkH4oSpTYzoN6i_du2f2sW918TORcwf47ktK_P8v27D3c/exec'; 
+
+        // Hàm hỗ trợ gửi dữ liệu POST an toàn (tránh lỗi CORS)
+        function postToGAS(payload, onSuccess, onError) {
+            $.ajax({
+                url: SCRIPT_URL,
+                method: "POST",
+                data: JSON.stringify(payload),
+                contentType: "text/plain;charset=utf-8",
+                success: onSuccess,
+                error: onError
+            });
+        }
+
+        // Xử lý Mobile Sidebar
+        const sidebar = document.getElementById('sidebarMenu');
+        const overlay = document.getElementById('sidebarOverlay');
+        const btnToggle = document.getElementById('btnToggleMenu');
+
+        function toggleMenu() {
+            sidebar.classList.toggle('show');
+            overlay.classList.toggle('show');
+        }
+
+        btnToggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // Reset trạng thái các nút menu bên Sidebar và ẩn toàn bộ Section
+        function resetNavActive() {
+            $('.btn-course').removeClass('active');
+            $('#btnNavQA').removeClass('active');
+            $('#btnNavTKB').removeClass('active');
+            
+            $('#tongHopSection').addClass('d-none');
+            $('#courseSection').addClass('d-none');
+            $('#qaSection').addClass('d-none');
+            $('#tkbSection').addClass('d-none');
+        }
+
+        // CHUYỂN TRANG: TỔNG HỢP LINK
+        function loadTongHopView() {
+            resetNavActive();
+            $('#btnNavTongHop').addClass('active');
+            $('#tongHopSection').removeClass('d-none');
+
+            if(window.innerWidth < 992) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+        }
+
+        // CHUYỂN TRANG: THỜI GIAN BIỂU
+        function loadTKBView() {
+            resetNavActive();
+            $('#btnNavTKB').addClass('active');
+            $('#tkbSection').removeClass('d-none');
+
+            if(window.innerWidth < 992) { 
+                sidebar.classList.remove('show'); 
+                overlay.classList.remove('show'); 
+            }
+            
+            loadThoiGianBieu();
+        }
+
+        $(document).ready(function() {
+            // Mặc định load trang Tổng hợp lúc mới vào web
+            loadTongHopView();
+            loadWebLinks();
+            
+            // Load danh sách học phần thành các button qua API
+            $.ajax({
+                url: SCRIPT_URL + "?action=getHocPhanList",
+                method: "GET",
+                dataType: "json",
+                success: function(list) {
+                    let optionsHtml = '';
+                    list.forEach((name) => {
+                        optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)">
+                                            <i class="fa-solid fa-folder-closed"></i> ${name}
+                                        </button>`;
+                    });
+                    $('#dynamicCourseList').html(optionsHtml);
+                },
+                error: function(err) {
+                    $('#dynamicCourseList').html('<span class="text-danger small px-2">Lỗi tải danh sách môn học.</span>');
+                }
+            });
+        });
+
+        // ==========================================
+        // KHỐI LOGIC THỜI GIAN BIỂU (TKB)
+        // ==========================================
+        function loadThoiGianBieu() {
+            $('#tkb-body').html('<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải thời gian biểu...</td></tr>');
+            
+            $.ajax({
+                url: SCRIPT_URL + "?action=getTKB",
+                method: "GET",
+                dataType: "json",
+                success: function(data) {
+                    let courseData = data.map(row => ({
+                        thu: parseInt(row[0]) || 0,
+                        tietBd: parseInt(row[1]) || 0,
+                        soTiet: parseInt(row[2]) || 1,
+                        mon: row[3] || "",
+                        phong: row[4] || "",
+                        gv: row[5] || "",
+                        color: row[6] || "#e0f2fe"
+                    })).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
+
+                    renderTKBTable(courseData);
+                },
+                error: function() {
+                    $('#tkb-body').html('<tr><td colspan="9" style="color: red; padding: 20px; text-align:center;">Lỗi kết nối dữ liệu Thời gian biểu!</td></tr>');
+                }
+            });
+        }
+
+        function renderTKBTable(courses) {
+            const tbody = document.getElementById('tkb-body');
+            if (!tbody) return;
+
+            const totalRows = 15; 
+            const occupied = Array.from({ length: totalRows + 1 }, () => Array(9).fill(false));
+            let tableHtml = "";
+
+            for (let i = 1; i <= totalRows; i++) {
+                tableHtml += `<tr>`;
+                
+                if (i === 1) tableHtml += `<td rowspan="6" class="session-label">Sáng</td>`;
+                if (i === 7) tableHtml += `<td rowspan="6" class="session-label">Chiều</td>`;
+                if (i === 13) tableHtml += `<td rowspan="3" class="session-label">Tối</td>`;
+                
+                tableHtml += `<td class="col-tiet">${i}</td>`;
+
+                for (let thu = 2; thu <= 8; thu++) {
+                    if (occupied[i][thu]) continue; 
+
+                    const course = courses.find(c => c.thu === thu && c.tietBd === i);
+                    
+                    if (course) {
+                        const len = course.soTiet;
+                        for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
+
+                        tableHtml += `
+                        <td rowspan="${len}" class="td-subject" style="background:${course.color}; border: 2.4px solid var(--border-color);">
+                            <div class="subject">
+                                <div style="font-weight:700; color: #dc2626; margin-bottom: 4px;">${course.phong}</div>
+                                <div style="font-weight:600; font-size: 15px;">${course.mon}</div>
+                                ${course.gv ? `<span style="display:block; margin-top:6px; font-size:13px; color:#4b5563; border-top:1px dashed rgba(0,0,0,0.1); padding-top:4px;">GV: ${course.gv}</span>` : ''}
+                            </div>
+                        </td>`;
+                    } else { 
+                        tableHtml += `<td style="background: #ffffff; border: 2.4px solid var(--border-color);"></td>`; 
+                    }
+                }
+                tableHtml += `</tr>`;
+            }
+            tbody.innerHTML = tableHtml;
+        }
+
+        // ==========================================
+        // KHỐI XỬ LÝ GIAO DIỆN CHÍNH (HỌC PHẦN)
+        // ==========================================
+        function checkAndExtractUrl(text) {
+            let urlRegex = /(https?:\/\/[^\s]+)/g;
+            let match = text.match(urlRegex);
+            return match ? match[0] : null;
+        }
+
+        function loadDataByHocPhan(sheetName, element) {
+            if(!sheetName) return;
+            
+            resetNavActive();
+            if(element) {
+                $(element).addClass('active');
+            }
+
+            $('#courseSection').removeClass('d-none');
+            
+            $('#tableWrapper').addClass('d-none');
+            $('#instructorArea').addClass('d-none').html('');
+            $('#loadingStatus').removeClass('d-none');
+
+            if(window.innerWidth < 992) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+
+            $.ajax({
+                url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
+                method: "GET",
+                dataType: "json",
+                success: function(data) {
+                    if (!data || data.length === 0) {
+                        $('#sheetTableBody').html('<tr><td colspan="4" class="text-center py-5 text-muted"><i class="fa-regular fa-folder-open fs-1 mb-3 d-block"></i>Chưa có dữ liệu.</td></tr>');
+                        $('#loadingStatus').addClass('d-none');
+                        $('#tableWrapper').removeClass('d-none');
+                        return;
+                    }
+
+                    let bodyHtml = ''; let headHtml = ''; let instructorInfos = [];
+
+                    data.forEach((row, rowIndex) => {
+                        let fullRowText = row.join(" ").toLowerCase().replace(/\s+/g, '');
+                        let firstCellTextRaw = String(row[0]).trim();
+                        let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
+
+                        if (rowIndex === 0) {
+                            headHtml += `<th>${String(row[0] || 'STT')}</th>`;
+                            headHtml += `<th>${String(row[1] || 'Nội dung')}</th>`;
+                            headHtml += `<th>${String(row[2] || 'Hình thức')}</th>`;
+                            headHtml += `<th>${String(row[4] || row[3] || 'Tài liệu học tập')}</th>`;
+                            return;
+                        }
+
+                        if (/mãhp|họcphần|gv\d|giảngviên|email|facebook|sốtínchỉ/.test(fullRowText)) {
+                            let info = row.filter(cell => String(cell).trim() !== "").join(" <span class='mx-2 text-black-50'>|</span> ");
+                            if(info) instructorInfos.push(info);
+                            return;
+                        }
+
+                        let isNewRow = /^new$/i.test(firstCellTextRaw) || firstCellTextRaw.toLowerCase().includes('new');
+                        let rowClass = 'grid-row'; let iconPrefix = '';
+
+                        if (isNewRow) { 
+                            rowClass += ' row-new'; 
+                        }
+                        else if (/ngânhàng/.test(fullRowText)) { 
+                            rowClass += ' row-white'; 
+                            iconPrefix = '<i class="fa-solid fa-box-archive me-2 text-secondary"></i>'; 
+                        }
+                        else if (/bàithi|kiểmtra|thi/.test(fullRowText)) { 
+                            rowClass += ' row-exam'; 
+                            iconPrefix = '<i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>'; 
+                        }
+                        else if (/chủđề|chương/.test(firstCellText)) { 
+                            rowClass += ' row-topic'; 
+                        }
+                        else if (/bài/.test(firstCellText)) { 
+                            rowClass += ' row-lesson'; 
+                            iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; 
+                        }
+
+                        bodyHtml += `<tr class="${rowClass}">`;
+                        row.forEach((cell, cellIndex) => {
+                            if (cellIndex > 3) return; 
+                            let cellText = String(cell).trim();
+                            if (cellIndex === 0 && isNewRow) cellText = cellText.replace(/new/i, '<span class="badge-new">Mới</span>');
+
+                            let extractedUrl = checkAndExtractUrl(cellText);
+                            if (extractedUrl) {
+                                let label = cellText.replace(extractedUrl, '').trim() || "Truy cập";
+                                bodyHtml += `<td><a href="${extractedUrl}" target="_blank" class="btn-portal-action"><i class="fa-solid fa-cloud-arrow-down"></i> ${label}</a></td>`;
+                            } else {
+                                if (cellText === "") bodyHtml += `<td></td>`;
+                                else bodyHtml += `<td>${cellIndex === 0 && !isNewRow ? iconPrefix + cellText : cellText}</td>`;
+                            }
+                        });
+                        bodyHtml += '</tr>';
+                    });
+
+                    if (instructorInfos.length > 0) {
+                        let cardContent = `<div class="instructor-card"><h6 class="mb-4"><i class="fa-solid fa-chalkboard-user me-2"></i>Thông tin lớp học & Giảng viên phụ trách</h6><div class="row">`;
+                        instructorInfos.forEach(info => { cardContent += `<div class="col-12 col-md-6 instructor-item"><i class="fa-solid fa-check"></i> <span>${info}</span></div>`; });
+                        cardContent += `</div></div>`;
+                        $('#instructorArea').html(cardContent).removeClass('d-none');
+                    }
+
+                    $('#sheetTableHead').html(headHtml);
+                    $('#sheetTableBody').html(bodyHtml);
+                    $('#loadingStatus').addClass('d-none');
+                    $('#tableWrapper').removeClass('d-none');
+                },
+                error: function() {
+                    $('#loadingStatus').html('<span class="text-danger fw-bold">Có lỗi xảy ra khi tải dữ liệu!</span>');
+                }
+            });
+        }
+
+        // ==========================================
+        // KHỐI XỬ LÝ Q&A (GIẢI ĐÁP THẮC MẮC)
+        // ==========================================
+        function openQASection() {
+            resetNavActive();
+            $('#btnNavQA').addClass('active');
+            $('#qaSection').removeClass('d-none');
+            
+            if(window.innerWidth < 992) {
+                sidebar.classList.remove('show');
+                overlay.classList.remove('show');
+            }
+            
+            loadQAData();
+        }
+
+        function sendQuestion() {
+            let mssvValue = $('#txtMSSV').val().trim();
+            let qText = $('#txtQuestion').val().trim();
+            
+            if (!mssvValue) { alert("Vui lòng nhập Mã số sinh viên!"); $('#txtMSSV').focus(); return; }
+            if (!qText) { alert("Vui lòng nhập nội dung câu hỏi!"); $('#txtQuestion').focus(); return; }
+
+            let btn = $('#btnSubmitQ');
+            btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
+
+            let payload = { action: "submitQuestion", mssv: mssvValue, question: qText };
+            
+            postToGAS(payload, function(response) {
+                alert(response);
+                $('#txtQuestion').val('');
+                btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false);
+                loadQAData(); 
+            }, function() {
+                alert("Lỗi kết nối máy chủ!");
+                btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false);
+            });
+        }
+
+        function maskMSSV(mssv) {
+            let str = String(mssv).trim();
+            if (str.length <= 6) return str; 
+            return str.substring(0, 3) + '***' + str.substring(str.length - 3);
+        }
+
+        function parseThread(text) {
+            let parts = text.split(/\[SV\]|\[\/SV\]/);
+            let html = '';
+            for(let i = 0; i < parts.length; i++) {
+                let content = parts[i].trim();
+                if(content === "") continue;
+                if (i % 2 === 0) {
+                    html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${content}</div>`;
+                } else {
+                    html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>Sinh viên phản hồi:</strong><br>${content}</div>`;
+                }
+            }
+            return html;
+        }
+
+        function loadQAData() {
+            $('#qaListArea').html('');
+            $('#qaLoadingStatus').removeClass('d-none');
+
+            $.ajax({
+                url: SCRIPT_URL + "?action=getQAData",
+                method: "GET",
+                dataType: "json",
+                success: function(data) {
+                    $('#qaLoadingStatus').addClass('d-none');
+                    
+                    if (!data || data.length === 0) {
+                        $('#qaListArea').html('<div class="text-center p-4 text-muted border rounded bg-white"><i class="fa-regular fa-comments fs-2 mb-2"></i><br>Chưa có câu hỏi nào. Bạn hãy là người đầu tiên đặt câu hỏi nhé!</div>');
+                        return;
+                    }
+
+                    let html = '';
+                    data.forEach(row => {
+                        let time = row[0] || '';
+                        let rawMssv = row[1] || '';
+                        
+                        let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
+                        
+                        let question = row[2] || ''; 
+                        let answer = row[3] || '';
+                        let upvotes = parseInt(row[4]) || 0;
+                        let downvotes = parseInt(row[5]) || 0;
+                        let rowIndex = row[6];       
+
+                        html += `<div class="qa-item">
+                                    <div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong></div>
+                                    <div class="qa-question">${question}</div>`;
+                        
+                        if (answer.trim() !== "") {
+                            html += parseThread(answer);
+                            html += `
+                                <div class="vote-action-bar">
+                                    <div class="vote-group" id="voteArea-${rowIndex}">
+                                        <button class="btn-vote up" onclick="castVote(${rowIndex}, 'up', this)"><i class="fa-solid fa-thumbs-up"></i> Hữu ích (${upvotes})</button>
+                                        <button class="btn-vote down" onclick="castVote(${rowIndex}, 'down', this)"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button>
+                                    </div>
+                                    <button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')">
+                                        <i class="fa-solid fa-comment-dots"></i> Phản hồi
+                                    </button>
+                                </div>
+                                <div id="replyBox-${rowIndex}" class="reply-box d-none">
+                                    <textarea id="txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập thêm ý kiến/câu hỏi phản hồi..."></textarea>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-primary fw-bold" onclick="sendReply(${rowIndex})" id="btnSendReply-${rowIndex}" style="background: var(--primary-color); border:none;">Gửi phản hồi</button>
+                                        <button class="btn btn-sm btn-light border" onclick="$('#replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
+                                    </div>
+                                </div>
+                            `;
+                        } else {
+                            html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ admin giải đáp...</div>`;
+                        }
+
+                        if (isAdmin) {
+                            html += `
+                                <div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);">
+                                    <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;">
+                                        <i class="fa-solid fa-user-shield"></i> Khung trả lời của Admin
+                                    </h6>
+                                    <textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập phản hồi dành cho sinh viên..."></textarea>
+                                    <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}">
+                                        <i class="fa-solid fa-reply"></i> Đăng câu trả lời
+                                    </button>
+                                </div>
+                            `;
+                        }
+                        html += `</div>`;
+                    });
+                    $('#qaListArea').html(html);
+                },
+                error: function() {
+                    $('#qaLoadingStatus').html('<span class="text-danger fw-bold">Lỗi tải dữ liệu Q&A!</span>');
+                }
+            });
+        }
+
+        // ==========================================
+        // KHỐI LOGIC LIÊN KẾT (WEB LINKS)
+        // ==========================================
+        function loadWebLinks() {
+            $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải danh sách liên kết...</div>');
+            
+            $.ajax({
+                url: SCRIPT_URL + "?action=getWebLinks",
+                method: "GET",
+                dataType: "json",
+                success: function(data) {
+                    if (!data || data.length === 0) {
+                        $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào được cập nhật.</div>');
+                        return;
+                    }
+
+                    let html = '';
+                    data.forEach(row => {
+                        let title = row[0] || 'Liên kết mới';
+                        let desc = row[1] || '';
+                        let url = row[2] || '#';
+                        let iconClass = row[3] || 'fa-solid fa-link';
+
+                        html += `
+                        <div class="col-12 col-md-6">
+                            <a href="${url}" target="_blank" class="link-card">
+                                <div class="icon-box"><i class="${iconClass}"></i></div>
+                                <div>
+                                    <h5>${title}</h5>
+                                    <p>${desc}</p>
+                                </div>
+                            </a>
+                        </div>`;
+                    });
+                    $('#webLinksContainer').html(html);
+                },
+                error: function() {
+                    $('#webLinksContainer').html('<div class="col-12 text-center text-danger py-5">Lỗi kết nối dữ liệu.</div>');
+                }
+            });
+        }
+
+        function castVote(rowIndex, type, btnElement) {
+            $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', true);
+            let originalText = $(btnElement).html();
+            $(btnElement).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+
+            let payload = { action: "submitVote", rowIndex: rowIndex, type: type };
+
+            postToGAS(payload, function(newData) {
+                let data = typeof newData === 'string' ? JSON.parse(newData) : newData;
+                $(`#voteArea-${rowIndex} .up`).html(`<i class="fa-solid fa-thumbs-up"></i> Hữu ích (${data.up})`);
+                $(`#voteArea-${rowIndex} .down`).html(`<i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${data.down})`);
+                $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false);
+            }, function() {
+                alert("Lỗi khi gửi đánh giá.");
+                $(btnElement).html(originalText);
+                $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false);
+            });
+        }
+
+        function sendReply(rowIndex) {
+            let replyText = $(`#txtReply-${rowIndex}`).val().trim();
+            if (!replyText) { alert("Vui lòng nhập nội dung phản hồi!"); return; }
+            let btn = $(`#btnSendReply-${rowIndex}`);
+            btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...').prop('disabled', true);
+
+            let payload = { action: "replyToAdmin", rowIndex: rowIndex, replyText: replyText };
+
+            postToGAS(payload, function(response) {
+                alert(response);
+                loadQAData(); 
+            }, function() {
+                alert("Lỗi khi gửi phản hồi.");
+                btn.html('Gửi phản hồi').prop('disabled', false);
+            });
+        }
+
+        // ==========================================
+        // KHỐI LOGIC ĐĂNG NHẬP ADMIN
+        // ==========================================
+        let isAdmin = false;
+
+        function openAdminModal() {
+            if (isAdmin) {
+                if (confirm("Bạn có muốn đăng xuất quyền Admin?")) {
+                    isAdmin = false;
+                    $('#btnAdminLoginToggle').html('<i class="fa-solid fa-lock"></i> Dành cho Ban quản trị').css('color', 'var(--text-muted)');
+                    loadQAData(); 
+                }
+            } else {
+                $('#adminLoginError').addClass('d-none');
+                $('#txtAdminPass').val('');
+                $('#adminLoginModal').modal('show');
+            }
+        }
+
+        function verifyAdmin() {
+            let pass = $('#txtAdminPass').val();
+            // Thay đổi "admin123" thành mật khẩu bạn muốn thiết lập
+            if (pass === "#226244bc#TBC") {
+                isAdmin = true;
+                $('#adminLoginModal').modal('hide');
+                $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
+                
+                if (!$('#qaSection').hasClass('d-none')) {
+                    loadQAData(); 
+                }
+                alert("Xác thực quyền Admin thành công!");
+            } else {
+                $('#adminLoginError').removeClass('d-none');
+            }
+        }
+
+        function sendAdminReply(rowIndex) {
+            let replyText = $(`#txtAdminReply-${rowIndex}`).val().trim();
+            if (!replyText) { alert("Vui lòng nhập nội dung trả lời!"); return; }
+
+            let btn = $(`#btnAdminSubmit-${rowIndex}`);
+            btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+
+            let payload = { action: "adminReplyQuestion", rowIndex: rowIndex, replyText: replyText };
+
+            postToGAS(payload, function(response) {
+                alert(response);
+                loadQAData(); 
+            }, function() {
+                alert("Lỗi khi gửi trả lời.");
+                btn.html('<i class="fa-solid fa-reply"></i> Đăng câu trả lời').prop('disabled', false);
+            });
+        }
+
+        // ==========================================
+        // TÍNH NĂNG CHỐNG XEM MÃ NGUỒN
+        // ==========================================
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) { e.preventDefault(); return false; }
+            if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c' || e.keyCode === 67)) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) { e.preventDefault(); return false; }
+            if (e.ctrlKey && (e.key === 'S' || e.key === 's' || e.keyCode === 83)) { e.preventDefault(); return false; }
+        });
+    </script>
+</body>
+</html>
