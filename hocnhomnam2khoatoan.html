@@ -85,38 +85,20 @@
             margin-bottom: 12px; display: block;
         }
 
-        .course-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .course-list { display: flex; flex-direction: column; gap: 8px; }
         
         .btn-course {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 12px 16px;
-            border-radius: 6px;
-            text-align: left;
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-main);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            padding: 12px 16px; border-radius: 6px; text-align: left;
+            font-size: 15px; font-weight: 600; color: var(--text-main);
+            cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 10px;
         }
         
-        .btn-course:hover {
-            background: var(--bg-global);
-            border-color: #9ca3af;
-        }
+        .btn-course:hover { background: var(--bg-global); border-color: #9ca3af; }
         
         .btn-course.active {
-            background: var(--primary-light);
-            color: var(--primary-color);
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 1px var(--primary-color);
+            background: var(--primary-light); color: var(--primary-color);
+            border-color: var(--primary-color); box-shadow: 0 0 0 1px var(--primary-color);
         }
 
         .btn-qa-menu {
@@ -188,32 +170,9 @@
         .qa-answer { background: var(--lesson-bg); border-left: 4px solid #166534; padding: 14px 18px; border-radius: 6px; color: #166534; font-size: 15px; font-weight: 500; margin-top: 10px; white-space: pre-wrap; word-break: break-word; }
         .qa-no-answer { background: #f3f4f6; border-left: 4px solid #9ca3af; padding: 10px 14px; border-radius: 6px; color: #4b5563; font-size: 14px; font-style: italic; margin-top: 10px; }
 
-        .link-card {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 20px;
-            background: #fff;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            text-decoration: none;
-            color: var(--text-main);
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm);
-        }
-        .link-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--primary-color);
-        }
-        .link-card .icon-box {
-            width: 50px; height: 50px;
-            background: var(--primary-light);
-            color: var(--primary-color);
-            border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px;
-        }
+        .link-card { display: flex; align-items: center; gap: 16px; padding: 20px; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; text-decoration: none; color: var(--text-main); transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
+        .link-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--primary-color); }
+        .link-card .icon-box { width: 50px; height: 50px; background: var(--primary-light); color: var(--primary-color); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
         .link-card h5 { margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: var(--primary-color); }
         .link-card p { margin: 0; font-size: 14px; color: var(--text-muted); }
 
@@ -229,7 +188,7 @@
         .sched td { border: 2.4px solid var(--border-color); padding: 8px; text-align: center; height: 50px; font-size: 15px; }
         .sched td[rowspan] { background: #ffffff; }
         .col-tiet { background: #f9fafb; font-weight: 600; }
-        .td-subject { padding: 12px; border-radius: 8px; vertical-align: middle; }
+        .td-subject { padding: 12px; border-radius: 8px; vertical-align: top; text-align: left; }
         .td-subject .subject { background: transparent; line-height: 1.4; }
         .session-label { font-weight: bold; background: #fff; text-transform: uppercase; color: var(--primary-color); }
 
@@ -428,10 +387,8 @@
         // ==========================================
         // CẤU HÌNH API URL
         // ==========================================
-        // DÁN URL WEB APP CỦA GOOGLE APPS SCRIPT VÀO ĐÂY
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwxeiLi11V8xHvoix1nbsYkH4oSpTYzoN6i_du2f2sW918TORcwf47ktK_P8v27D3c/exec'; 
 
-        // Hàm hỗ trợ gửi dữ liệu POST an toàn (tránh lỗi CORS)
         function postToGAS(payload, onSuccess, onError) {
             $.ajax({
                 url: SCRIPT_URL,
@@ -443,7 +400,6 @@
             });
         }
 
-        // Xử lý Mobile Sidebar
         const sidebar = document.getElementById('sidebarMenu');
         const overlay = document.getElementById('sidebarOverlay');
         const btnToggle = document.getElementById('btnToggleMenu');
@@ -456,7 +412,6 @@
         btnToggle.addEventListener('click', toggleMenu);
         overlay.addEventListener('click', toggleMenu);
 
-        // Reset trạng thái các nút menu bên Sidebar và ẩn toàn bộ Section
         function resetNavActive() {
             $('.btn-course').removeClass('active');
             $('#btnNavQA').removeClass('active');
@@ -468,38 +423,28 @@
             $('#tkbSection').addClass('d-none');
         }
 
-        // CHUYỂN TRANG: TỔNG HỢP LINK
         function loadTongHopView() {
             resetNavActive();
             $('#btnNavTongHop').addClass('active');
             $('#tongHopSection').removeClass('d-none');
 
-            if(window.innerWidth < 992) {
-                sidebar.classList.remove('show');
-                overlay.classList.remove('show');
-            }
+            if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
         }
 
-        // CHUYỂN TRANG: THỜI GIAN BIỂU
         function loadTKBView() {
             resetNavActive();
             $('#btnNavTKB').addClass('active');
             $('#tkbSection').removeClass('d-none');
 
-            if(window.innerWidth < 992) { 
-                sidebar.classList.remove('show'); 
-                overlay.classList.remove('show'); 
-            }
+            if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
             
             loadThoiGianBieu();
         }
 
         $(document).ready(function() {
-            // Mặc định load trang Tổng hợp lúc mới vào web
             loadTongHopView();
             loadWebLinks();
             
-            // Load danh sách học phần thành các button qua API
             $.ajax({
                 url: SCRIPT_URL + "?action=getHocPhanList",
                 method: "GET",
@@ -520,7 +465,7 @@
         });
 
         // ==========================================
-        // KHỐI LOGIC THỜI GIAN BIỂU (TKB)
+        // KHỐI LOGIC THỜI GIAN BIỂU (TKB) - ĐÃ CẬP NHẬT 9 CỘT THEO MÀU
         // ==========================================
         function loadThoiGianBieu() {
             $('#tkb-body').html('<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải thời gian biểu...</td></tr>');
@@ -534,10 +479,12 @@
                         thu: parseInt(row[0]) || 0,
                         tietBd: parseInt(row[1]) || 0,
                         soTiet: parseInt(row[2]) || 1,
-                        mon: row[3] || "",
-                        phong: row[4] || "",
-                        gv: row[5] || "",
-                        color: row[6] || "#e0f2fe"
+                        thoiGian: row[3] || "",  // Cột D: Thời gian
+                        hinhThuc: row[4] || "",  // Cột E: Hình thức học
+                        mon: row[5] || "",       // Cột F: Môn học
+                        phong: row[6] || "",     // Cột G: Phòng
+                        gv: row[7] || "",        // Cột H: Giảng viên
+                        color: row[8] || "#e0f2fe" // Cột I: Màu nền
                     })).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
 
                     renderTKBTable(courseData);
@@ -577,9 +524,15 @@
                         tableHtml += `
                         <td rowspan="${len}" class="td-subject" style="background:${course.color}; border: 2.4px solid var(--border-color);">
                             <div class="subject">
-                                <div style="font-weight:700; color: #dc2626; margin-bottom: 4px;">${course.phong}</div>
-                                <div style="font-weight:600; font-size: 15px;">${course.mon}</div>
-                                ${course.gv ? `<span style="display:block; margin-top:6px; font-size:13px; color:#4b5563; border-top:1px dashed rgba(0,0,0,0.1); padding-top:4px;">GV: ${course.gv}</span>` : ''}
+                                ${course.thoiGian ? `<div style="font-weight:700; color: #dc2626; margin-bottom: 2px; font-size: 13.5px;"><i class="fa-regular fa-clock me-1"></i>${course.thoiGian}</div>` : ''}
+                                
+                                ${course.hinhThuc ? `<div style="font-weight:700; color: #1e3a8a; margin-bottom: 6px; font-size: 13.5px;"><i class="fa-solid fa-laptop-house me-1"></i>${course.hinhThuc}</div>` : ''}
+                                
+                                <div style="font-weight:700; color: #000000; font-size: 15px; line-height: 1.3; margin-bottom: 4px;">${course.mon}</div>
+                                
+                                ${course.phong ? `<div style="font-size: 13.5px; color: #000000; font-weight: 500; margin-bottom: 2px;"><i class="fa-solid fa-location-dot me-1"></i>${course.phong}</div>` : ''}
+                                
+                                ${course.gv ? `<div style="margin-top:6px; font-size:13px; color: #000000; font-weight: 500; border-top:1px dashed rgba(0,0,0,0.3); padding-top:6px;"><i class="fa-solid fa-chalkboard-user me-1"></i>${course.gv}</div>` : ''}
                             </div>
                         </td>`;
                     } else { 
@@ -602,22 +555,15 @@
 
         function loadDataByHocPhan(sheetName, element) {
             if(!sheetName) return;
-            
             resetNavActive();
-            if(element) {
-                $(element).addClass('active');
-            }
+            if(element) $(element).addClass('active');
 
             $('#courseSection').removeClass('d-none');
-            
             $('#tableWrapper').addClass('d-none');
             $('#instructorArea').addClass('d-none').html('');
             $('#loadingStatus').removeClass('d-none');
 
-            if(window.innerWidth < 992) {
-                sidebar.classList.remove('show');
-                overlay.classList.remove('show');
-            }
+            if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
 
             $.ajax({
                 url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
@@ -639,10 +585,7 @@
                         let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
 
                         if (rowIndex === 0) {
-                            headHtml += `<th>${String(row[0] || 'STT')}</th>`;
-                            headHtml += `<th>${String(row[1] || 'Nội dung')}</th>`;
-                            headHtml += `<th>${String(row[2] || 'Hình thức')}</th>`;
-                            headHtml += `<th>${String(row[4] || row[3] || 'Tài liệu học tập')}</th>`;
+                            headHtml += `<th>${String(row[0] || 'STT')}</th><th>${String(row[1] || 'Nội dung')}</th><th>${String(row[2] || 'Hình thức')}</th><th>${String(row[4] || row[3] || 'Tài liệu học tập')}</th>`;
                             return;
                         }
 
@@ -655,24 +598,11 @@
                         let isNewRow = /^new$/i.test(firstCellTextRaw) || firstCellTextRaw.toLowerCase().includes('new');
                         let rowClass = 'grid-row'; let iconPrefix = '';
 
-                        if (isNewRow) { 
-                            rowClass += ' row-new'; 
-                        }
-                        else if (/ngânhàng/.test(fullRowText)) { 
-                            rowClass += ' row-white'; 
-                            iconPrefix = '<i class="fa-solid fa-box-archive me-2 text-secondary"></i>'; 
-                        }
-                        else if (/bàithi|kiểmtra|thi/.test(fullRowText)) { 
-                            rowClass += ' row-exam'; 
-                            iconPrefix = '<i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>'; 
-                        }
-                        else if (/chủđề|chương/.test(firstCellText)) { 
-                            rowClass += ' row-topic'; 
-                        }
-                        else if (/bài/.test(firstCellText)) { 
-                            rowClass += ' row-lesson'; 
-                            iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; 
-                        }
+                        if (isNewRow) { rowClass += ' row-new'; }
+                        else if (/ngânhàng/.test(fullRowText)) { rowClass += ' row-white'; iconPrefix = '<i class="fa-solid fa-box-archive me-2 text-secondary"></i>'; }
+                        else if (/bàithi|kiểmtra|thi/.test(fullRowText)) { rowClass += ' row-exam'; iconPrefix = '<i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>'; }
+                        else if (/chủđề|chương/.test(firstCellText)) { rowClass += ' row-topic'; }
+                        else if (/bài/.test(firstCellText)) { rowClass += ' row-lesson'; iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; }
 
                         bodyHtml += `<tr class="${rowClass}">`;
                         row.forEach((cell, cellIndex) => {
@@ -711,18 +641,13 @@
         }
 
         // ==========================================
-        // KHỐI XỬ LÝ Q&A (GIẢI ĐÁP THẮC MẮC)
+        // KHỐI LOGIC Q&A
         // ==========================================
         function openQASection() {
             resetNavActive();
             $('#btnNavQA').addClass('active');
             $('#qaSection').removeClass('d-none');
-            
-            if(window.innerWidth < 992) {
-                sidebar.classList.remove('show');
-                overlay.classList.remove('show');
-            }
-            
+            if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
             loadQAData();
         }
 
@@ -730,7 +655,7 @@
             let mssvValue = $('#txtMSSV').val().trim();
             let qText = $('#txtQuestion').val().trim();
             
-            if (!mssvValue) { alert("Vui lòng nhập Mã số sinh viên!"); $('#txtMSSV').focus(); return; }
+            if (!mssvValue) { alert("Vui lòng nhập mã số sinh viên hoặc email liên hệ!"); $('#txtMSSV').focus(); return; }
             if (!qText) { alert("Vui lòng nhập nội dung câu hỏi!"); $('#txtQuestion').focus(); return; }
 
             let btn = $('#btnSubmitQ');
@@ -780,7 +705,6 @@
                 dataType: "json",
                 success: function(data) {
                     $('#qaLoadingStatus').addClass('d-none');
-                    
                     if (!data || data.length === 0) {
                         $('#qaListArea').html('<div class="text-center p-4 text-muted border rounded bg-white"><i class="fa-regular fa-comments fs-2 mb-2"></i><br>Chưa có câu hỏi nào. Bạn hãy là người đầu tiên đặt câu hỏi nhé!</div>');
                         return;
@@ -790,9 +714,7 @@
                     data.forEach(row => {
                         let time = row[0] || '';
                         let rawMssv = row[1] || '';
-                        
                         let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
-                        
                         let question = row[2] || ''; 
                         let answer = row[3] || '';
                         let upvotes = parseInt(row[4]) || 0;
@@ -855,7 +777,6 @@
         // ==========================================
         function loadWebLinks() {
             $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải danh sách liên kết...</div>');
-            
             $.ajax({
                 url: SCRIPT_URL + "?action=getWebLinks",
                 method: "GET",
@@ -865,30 +786,20 @@
                         $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào được cập nhật.</div>');
                         return;
                     }
-
                     let html = '';
                     data.forEach(row => {
-                        let title = row[0] || 'Liên kết mới';
-                        let desc = row[1] || '';
-                        let url = row[2] || '#';
-                        let iconClass = row[3] || 'fa-solid fa-link';
-
+                        let title = row[0] || 'Liên kết mới'; let desc = row[1] || ''; let url = row[2] || '#'; let iconClass = row[3] || 'fa-solid fa-link';
                         html += `
                         <div class="col-12 col-md-6">
                             <a href="${url}" target="_blank" class="link-card">
                                 <div class="icon-box"><i class="${iconClass}"></i></div>
-                                <div>
-                                    <h5>${title}</h5>
-                                    <p>${desc}</p>
-                                </div>
+                                <div><h5>${title}</h5><p>${desc}</p></div>
                             </a>
                         </div>`;
                     });
                     $('#webLinksContainer').html(html);
                 },
-                error: function() {
-                    $('#webLinksContainer').html('<div class="col-12 text-center text-danger py-5">Lỗi kết nối dữ liệu.</div>');
-                }
+                error: function() { $('#webLinksContainer').html('<div class="col-12 text-center text-danger py-5">Lỗi kết nối dữ liệu.</div>'); }
             });
         }
 
@@ -897,17 +808,13 @@
             let originalText = $(btnElement).html();
             $(btnElement).html('<i class="fa-solid fa-spinner fa-spin"></i>');
 
-            let payload = { action: "submitVote", rowIndex: rowIndex, type: type };
-
-            postToGAS(payload, function(newData) {
+            postToGAS({ action: "submitVote", rowIndex: rowIndex, type: type }, function(newData) {
                 let data = typeof newData === 'string' ? JSON.parse(newData) : newData;
                 $(`#voteArea-${rowIndex} .up`).html(`<i class="fa-solid fa-thumbs-up"></i> Hữu ích (${data.up})`);
                 $(`#voteArea-${rowIndex} .down`).html(`<i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${data.down})`);
                 $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false);
             }, function() {
-                alert("Lỗi khi gửi đánh giá.");
-                $(btnElement).html(originalText);
-                $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false);
+                alert("Lỗi khi gửi đánh giá."); $(btnElement).html(originalText); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false);
             });
         }
 
@@ -917,15 +824,9 @@
             let btn = $(`#btnSendReply-${rowIndex}`);
             btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...').prop('disabled', true);
 
-            let payload = { action: "replyToAdmin", rowIndex: rowIndex, replyText: replyText };
-
-            postToGAS(payload, function(response) {
-                alert(response);
-                loadQAData(); 
-            }, function() {
-                alert("Lỗi khi gửi phản hồi.");
-                btn.html('Gửi phản hồi').prop('disabled', false);
-            });
+            postToGAS({ action: "replyToAdmin", rowIndex: rowIndex, replyText: replyText }, function(response) {
+                alert(response); loadQAData(); 
+            }, function() { alert("Lỗi khi gửi phản hồi."); btn.html('Gửi phản hồi').prop('disabled', false); });
         }
 
         // ==========================================
@@ -940,55 +841,33 @@
                     $('#btnAdminLoginToggle').html('<i class="fa-solid fa-lock"></i> Dành cho Ban quản trị').css('color', 'var(--text-muted)');
                     loadQAData(); 
                 }
-            } else {
-                $('#adminLoginError').addClass('d-none');
-                $('#txtAdminPass').val('');
-                $('#adminLoginModal').modal('show');
-            }
+            } else { $('#adminLoginError').addClass('d-none'); $('#txtAdminPass').val(''); $('#adminLoginModal').modal('show'); }
         }
 
         function verifyAdmin() {
             let pass = $('#txtAdminPass').val();
-            // Thay đổi "admin123" thành mật khẩu bạn muốn thiết lập
             if (pass === "#226244bc#TBC") {
-                isAdmin = true;
-                $('#adminLoginModal').modal('hide');
+                isAdmin = true; $('#adminLoginModal').modal('hide');
                 $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
-                
-                if (!$('#qaSection').hasClass('d-none')) {
-                    loadQAData(); 
-                }
-                alert("Xác thực quyền Admin thành công!");
-            } else {
-                $('#adminLoginError').removeClass('d-none');
-            }
+                if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } alert("Xác thực quyền Admin thành công!");
+            } else { $('#adminLoginError').removeClass('d-none'); }
         }
 
         function sendAdminReply(rowIndex) {
             let replyText = $(`#txtAdminReply-${rowIndex}`).val().trim();
             if (!replyText) { alert("Vui lòng nhập nội dung trả lời!"); return; }
-
             let btn = $(`#btnAdminSubmit-${rowIndex}`);
             btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
 
-            let payload = { action: "adminReplyQuestion", rowIndex: rowIndex, replyText: replyText };
-
-            postToGAS(payload, function(response) {
-                alert(response);
-                loadQAData(); 
-            }, function() {
-                alert("Lỗi khi gửi trả lời.");
-                btn.html('<i class="fa-solid fa-reply"></i> Đăng câu trả lời').prop('disabled', false);
-            });
+            postToGAS({ action: "adminReplyQuestion", rowIndex: rowIndex, replyText: replyText }, function(response) {
+                alert(response); loadQAData(); 
+            }, function() { alert("Lỗi khi gửi trả lời."); btn.html('<i class="fa-solid fa-reply"></i> Đăng câu trả lời').prop('disabled', false); });
         }
 
         // ==========================================
         // TÍNH NĂNG CHỐNG XEM MÃ NGUỒN
         // ==========================================
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-        });
-
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
         document.addEventListener('keydown', function(e) {
             if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
             if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) { e.preventDefault(); return false; }
