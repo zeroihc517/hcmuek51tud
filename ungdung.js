@@ -8,5 +8,5 @@ const ungdungData = [
     { href: "https://moon.vn/home", icon: "📘", title: "Moon.vn" },
     { href: "https://mapstudy.edu.vn/", icon: "📘", title: "Mapstudy" },
     { href: "https://sites.google.com/", icon: "📖", title: "Google Sites" },
-    { href: "https://zeroihc517.github.io/anhduyacademy/login.html", icon: "💻", title: "Web Toán (Anh Duy Academy)" }
+    { href: "https://zeroihc517.github.io/anhduyacademy/", icon: "💻", title: "Web Toán (Anh Duy Academy)" }
 ];
