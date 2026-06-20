@@ -58,9 +58,10 @@
             background: none; border: none; color: #ffffff; font-size: 26px; cursor: pointer; padding: 0;
         }
 
+        /* Sidebar nhường 46px ở bottom cho Footer lồng bên dưới */
         .sidebar {
             width: var(--sidebar-width); background: var(--card-bg); border-right: 1px solid var(--border-color);
-            display: flex; flex-direction: column; position: fixed; top: 0; bottom: 0; left: 0;
+            display: flex; flex-direction: column; position: fixed; top: 0; bottom: 46px; left: 0;
             z-index: 100; transition: transform 0.3s ease; box-shadow: var(--shadow-sm);
         }
         
@@ -105,7 +106,7 @@
             background: var(--topic-bg); border: 1px dashed var(--primary-color); color: var(--primary-color);
             padding: 14px; border-radius: 8px; width: 100%; text-align: left;
             font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s;
-            display: flex; align-items: center; gap: 10px; margin-top: 10px;
+            display: flex; align-items: center; justify-content: space-between; margin-top: 10px;
         }
         .btn-qa-menu:hover { background: var(--primary-light); transform: translateY(-2px); }
         .btn-qa-menu.active { background: var(--primary-color); color: #fff; border-style: solid; }
@@ -124,7 +125,15 @@
         .btn-reply-toggle:hover { color: var(--accent-red); text-decoration-color: var(--accent-red); }
         .reply-box { background: #f9fafb; border: 1px dashed var(--border-color); border-radius: 6px; padding: 12px; margin-top: 12px; }
         
-        .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 40px; transition: all 0.3s ease; }
+        .main-content { 
+            flex: 1; 
+            margin-left: var(--sidebar-width); 
+            padding: 40px 40px 80px 40px; /* Padding dưới để không bị dính Footer */
+            transition: all 0.3s ease; 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
         .top-header {
             background: var(--card-bg); border-radius: var(--card-border-radius); padding: 24px 32px;
@@ -155,8 +164,17 @@
         .grid-row.row-white td { background-color: #ffffff; color: var(--text-main); font-weight: 500; border-bottom-color: #e5e7eb; }
         .badge-new { background-color: var(--accent-red); color: #ffffff; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin-right: 8px; text-transform: uppercase; display: inline-block; vertical-align: middle; }
 
-        .btn-portal-action { background: var(--primary-light); color: var(--primary-color) !important; padding: 10px 18px; border-radius: 6px; font-size: 15px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s ease; border: 1px solid transparent; }
-        .btn-portal-action:hover { background: var(--accent-red); color: #ffffff !important; transform: translateY(-2px); }
+        /* Tinh chỉnh nút Truy cập gọn, đẹp */
+        .btn-portal-action {
+            background: #ffffff; color: var(--primary-color) !important;
+            border: 1.5px solid var(--primary-color); padding: 6px 16px;
+            border-radius: 6px; font-size: 14px; font-weight: 600;
+            text-decoration: none; display: inline-flex; align-items: center;
+            gap: 6px; transition: 0.2s ease;
+        }
+        .btn-portal-action:hover {
+            background: var(--primary-color); color: #ffffff !important; box-shadow: var(--shadow-sm);
+        }
 
         .pulse-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 0; }
         .spinner-modern { width: 50px; height: 50px; border: 4px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
@@ -164,8 +182,22 @@
         
         .sidebar-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 99; display: none; opacity: 0; transition: opacity 0.3s; }
 
-        .qa-item { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
-        .qa-question { font-size: 17px; font-weight: 600; color: var(--primary-color); margin-bottom: 8px; white-space: pre-wrap; word-break: break-word; }
+        .qa-item { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-sm); transition: all 0.3s ease; }
+        .qa-item.unanswered-item { border-left: 4px solid #ef4444; background: #fffcfc; }
+        .qa-question { font-size: 17px; font-weight: 600; color: var(--primary-color); margin-bottom: 8px; white-space: pre-wrap; word-break: break-word; line-height: 1.5; }
+        
+        /* Hiệu ứng nhấp nháy cho badge MỚI bên thanh Menu */
+        .badge-new-qa {
+            background-color: #ef4444; color: #ffffff; font-size: 11px; font-weight: 700;
+            padding: 2px 8px; border-radius: 12px;
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
         .qa-time { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
         .qa-answer { background: var(--lesson-bg); border-left: 4px solid #166534; padding: 14px 18px; border-radius: 6px; color: #166534; font-size: 15px; font-weight: 500; margin-top: 10px; white-space: pre-wrap; word-break: break-word; }
         .qa-no-answer { background: #f3f4f6; border-left: 4px solid #9ca3af; padding: 10px 14px; border-radius: 6px; color: #4b5563; font-size: 14px; font-style: italic; margin-top: 10px; }
@@ -176,9 +208,7 @@
         .link-card h5 { margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: var(--primary-color); }
         .link-card p { margin: 0; font-size: 14px; color: var(--text-muted); }
 
-        /* =====================================
-           CSS DÀNH CHO THỜI GIAN BIỂU (TKB) 
-           ===================================== */
+        /* CSS THỜI GIAN BIỂU */
         .tkb-wrapper { width: 100%; overflow-x: auto; background: #fff; border-radius: var(--card-border-radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); }
         .sched { width: 100%; min-width: 1000px; border-collapse: collapse; table-layout: fixed; }
         .sched th { background: var(--primary-color); color: #fff; padding: 14px 8px; font-size: 15px; border: 1px solid rgba(255,255,255,0.15); text-align: center; }
@@ -192,75 +222,51 @@
         .td-subject .subject { background: transparent; line-height: 1.4; }
         .session-label { font-weight: bold; background: #fff; text-transform: uppercase; color: var(--primary-color); }
 
+        /* THANH ĐIỀU HƯỚNG TUẦN */
+        .nav-week-container { display: flex; align-items: stretch; gap: 8px; margin-bottom: 24px; height: 42px; }
+        .select-week-custom {
+            border-radius: 8px !important; border-color: #cbd5e1 !important; font-weight: 600;
+            color: var(--primary-color) !important; box-shadow: var(--shadow-sm); cursor: pointer;
+            height: 100% !important; padding: 0 1rem !important; /* Đã xóa padding lỗi để hiện chữ */
+        }
+        .btn-nav-square {
+            background-color: #2b476e; color: #ffffff; border-radius: 8px; padding: 0; border: none;
+            flex: 1; display: flex; align-items: center; justify-content: center; width: 44px;
+            box-shadow: var(--shadow-sm); transition: all 0.2s;
+        }
+        .btn-nav-square:hover { background-color: #1a2f4c; color: #ffffff; transform: scale(0.95); }
+        .btn-hientai {
+            background-color: #2b476e; color: #ffffff; border-radius: 26px; padding: 0 20px;
+            font-weight: 600; font-size: 14px; border: none; box-shadow: var(--shadow-sm); transition: all 0.2s;
+        }
+        .btn-hientai:hover { background-color: #1a2f4c; color: #ffffff; transform: translateY(-2px); }
+
+        /* CHÂN TRANG NGANG NHỎ, CỐ ĐỊNH Ở ĐÁY 100% WIDTH, MÀU XANH NAVY */
+        .fixed-bottom-footer {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 46px;
+            background-color: #0b2a4a; color: #e2e8f0; padding: 0 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 1050; font-size: 13.5px; box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
+        }
+        .fixed-bottom-footer a { color: #38bdf8; text-decoration: none; font-weight: 600; transition: 0.2s; }
+        .fixed-bottom-footer a:hover { color: #bae6fd; text-decoration: underline; }
+        .footer-info-left { display: flex; align-items: center; gap: 12px; }
+        .footer-info-right { display: flex; align-items: center; gap: 15px; }
+
         @media (max-width: 991.98px) {
             .mobile-header { display: flex; align-items: center; justify-content: space-between; }
-            .sidebar { transform: translateX(-100%); }
+            .sidebar { transform: translateX(-100%); bottom: 0; }
             .sidebar.show { transform: translateX(0); }
             .sidebar-overlay.show { display: block; opacity: 1; }
-            .main-content { margin-left: 0; padding: 100px 16px 24px 16px; }
+            .main-content { margin-left: 0; padding: 100px 16px 80px 16px; }
             .top-header { padding: 20px; }
             .page-title { font-size: 20px; }
             .custom-portal-table th, .custom-portal-table td { padding: 16px; font-size: 15px; }
+            
+            /* Responsive cho footer ngang gọn */
+            .fixed-bottom-footer { flex-direction: column; gap: 6px; padding: 10px; font-size: 12px; height: auto; text-align: center; }
+            .sidebar { bottom: 65px; } /* Cân chỉnh lại chiều cao trên mobile */
         }
-        /* GIAO DIỆN THANH ĐIỀU HƯỚNG TUẦN (GIỐNG ẢNH) */
-.nav-week-container {
-    display: flex;
-    align-items: stretch;
-    gap: 8px;
-    margin-bottom: 24px;
-    height: 52px; /* Cố định chiều cao để các phần tử đồng đều */
-}
-
-.select-week-custom {
-    border-radius: 26px !important;
-    border-color: #cbd5e1 !important;
-    font-weight: 600;
-    color: var(--primary-color) !important;
-    box-shadow: var(--shadow-sm);
-    cursor: pointer;
-    height: 100% !important;
-    padding-top: 1.25rem !important;
-    padding-bottom: 0.25rem !important;
-}
-
-.btn-nav-square {
-    background-color: #2b476e; 
-    color: #ffffff;
-    border-radius: 8px;
-    padding: 0;
-    border: none;
-    flex: 1; /* Tự động chia đều chiều cao cho 2 nút */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.2s;
-}
-
-.btn-nav-square:hover {
-    background-color: #1a2f4c;
-    color: #ffffff;
-    transform: scale(0.95);
-}
-
-.btn-hientai {
-    background-color: #2b476e;
-    color: #ffffff;
-    border-radius: 26px;
-    padding: 0 20px;
-    font-weight: 600;
-    font-size: 15px;
-    border: none;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.2s;
-}
-
-.btn-hientai:hover {
-    background-color: #1a2f4c;
-    color: #ffffff;
-    transform: translateY(-2px);
-}
     </style>
 </head>
 <body>
@@ -285,9 +291,14 @@
             
             <div class="sidebar-content">
                 <div class="portal-filter-box">
-                    <label class="portal-label">Danh mục truy cập</label>
+                    <label class="portal-label">DANH MỤC TRUY CẬP</label>
                     <div class="course-list" id="mainNavigationList">
-                        <button class="btn-course active" id="btnNavTongHop" onclick="loadTongHopView()">
+                        
+                        <button class="btn-course active" id="btnNavThongBao" onclick="loadDataByHocPhan('Thông báo', this)">
+                            <i class="fa-solid fa-bell" style="color: #f59e0b;"></i> Thông báo
+                        </button>
+
+                        <button class="btn-course" id="btnNavTongHop" onclick="loadTongHopView()">
                             <i class="fa-solid fa-link" style="color: var(--accent-red);"></i> Tổng hợp Link
                         </button>
                         
@@ -297,9 +308,9 @@
                         
                         <div id="dynamicCourseList" class="course-list mt-2">
                             <span class="text-muted small px-2">Đang tải danh sách học phần...</span>
-<button class="btn-course d-none mt-4" id="btnNavAdminTKB" onclick="loadAdminTKBView()" style="border-color: var(--accent-red); color: var(--accent-red);">
-    <i class="fa-solid fa-user-tie"></i> TKB Quản trị
-</button>
+                            <button class="btn-course d-none mt-4" id="btnNavAdminTKB" onclick="loadAdminTKBView()" style="border-color: var(--accent-red); color: var(--accent-red);">
+                                <i class="fa-solid fa-user-tie"></i> TKB Quản trị
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -307,8 +318,12 @@
                 <hr class="my-4" style="border-color: var(--border-color);">
                 
                 <button class="btn-qa-menu" id="btnNavQA" onclick="openQASection()">
-                    <i class="fa-regular fa-comments fa-lg"></i> Giải đáp thắc mắc
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-regular fa-comments fa-lg"></i> Giải đáp thắc mắc
+                    </div>
+                    <span id="qaSidebarBadge" class="badge-new-qa d-none">Mới</span>
                 </button>
+                
                 <button class="btn mt-3 w-100 text-start" id="btnAdminLoginToggle" onclick="openAdminModal()" style="color: var(--text-muted); font-size: 14px; font-weight: 500;">
                     <i class="fa-solid fa-lock"></i> Dành cho Ban quản trị
                 </button>
@@ -317,14 +332,10 @@
 
         <main class="main-content">
             
-            <div id="tongHopSection">
+            <div id="tongHopSection" class="d-none">
                 <header class="top-header">
                     <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
-                    <div class="text-muted student-badge d-none d-md-flex align-items-center gap-2 bg-light rounded-pill">
-                        <i class="fa-regular fa-clock text-primary"></i> Khóa K51
-                    </div>
                 </header>
-
                 <div class="row g-4" id="webLinksContainer">
                     <div class="col-12 text-center text-muted py-5">
                         <i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải danh sách liên kết...
@@ -335,30 +346,25 @@
             <div id="tkbSection" class="d-none">
                 <header class="top-header">
                     <div class="page-title"><i class="fa-regular fa-calendar-days"></i> Thời gian biểu tự học</div>
-                    <div class="text-muted student-badge d-none d-md-flex align-items-center gap-2 bg-light rounded-pill">
-                        <i class="fa-solid fa-rotate text-primary"></i> Kì Hè
-                    </div>
                 </header>
                 <div class="nav-week-container">
-    <div class="form-floating flex-grow-1" style="height: 100%;">
-        <select class="form-select select-week-custom" id="weekSelect" onchange="jumpToWeek(this.value)">
-            </select>
-        <label for="weekSelect" style="color: #64748b; font-weight: 600; padding: 0.6rem 1.2rem;">Tuần</label>
-    </div>
+                    <div class="flex-grow-1" style="height: 100%;">
+                        <select class="form-select select-week-custom" id="weekSelect" onchange="jumpToWeek(this.value)"></select>
+                    </div>
 
-    <div class="d-flex flex-column justify-content-between gap-1">
-        <button class="btn btn-nav-square" onclick="changeWeek(-1)" title="Tuần trước">
-            <i class="fa-solid fa-backward-step" style="font-size: 13px;"></i>
-        </button>
-        <button class="btn btn-nav-square" onclick="changeWeek(1)" title="Tuần sau">
-            <i class="fa-solid fa-forward-step" style="font-size: 13px;"></i>
-        </button>
-    </div>
+                    <div class="d-flex flex-column justify-content-between gap-1">
+                        <button class="btn btn-nav-square" onclick="changeWeek(-1)" title="Tuần trước">
+                            <i class="fa-solid fa-backward-step" style="font-size: 13px;"></i>
+                        </button>
+                        <button class="btn btn-nav-square" onclick="changeWeek(1)" title="Tuần sau">
+                            <i class="fa-solid fa-forward-step" style="font-size: 13px;"></i>
+                        </button>
+                    </div>
 
-    <button class="btn btn-hientai d-flex align-items-center gap-2" onclick="resetWeek()">
-        📅 Hiện tại
-    </button>
-</div>
+                    <button class="btn btn-hientai d-flex align-items-center gap-2" onclick="resetWeek()">
+                        📅 Hiện tại
+                    </button>
+                </div>
                 <div class="tkb-wrapper">
                     <table class="sched">
                         <thead>
@@ -385,12 +391,9 @@
                 </div>
             </div>
 
-            <div id="courseSection" class="d-none">
+            <div id="courseSection">
                 <header class="top-header">
                     <div class="page-title"><i class="fa-solid fa-book-open"></i> Học nhóm - Năm 2 - Khoa Toán-Tin học</div>
-                    <div class="text-muted student-badge d-none d-md-flex align-items-center gap-2 bg-light rounded-pill">
-                        <i class="fa-regular fa-clock text-primary"></i> Năm học: 2026 - 2027
-                    </div>
                 </header>
 
                 <div id="instructorArea" class="d-none"></div>
@@ -398,7 +401,7 @@
                 <div class="data-card" id="mainDataCard">
                     <div id="loadingStatus" class="pulse-loader">
                         <div class="spinner-modern"></div>
-                        <span class="text-muted fw-bold" style="font-size: 16px;">Đang tải dữ liệu học phần...</span>
+                        <span class="text-muted fw-bold" style="font-size: 16px;">Đang tải dữ liệu...</span>
                     </div>
 
                     <div id="tableWrapper" class="table-responsive d-none border-0">
@@ -419,7 +422,7 @@
                     <h6 class="mb-3">Đặt câu hỏi cho Admin</h6>
                     <div class="row mb-3">
                         <div class="col-12 col-md-4">
-                            <input type="text" id="txtMSSV" class="form-control p-2.5 fw-bold" placeholder="Nhập mã số sinh viên hoặc email liên hệ" maxlength="65">
+                            <input type="text" id="txtMSSV" class="form-control p-2.5 fw-bold" placeholder="Nhập mã số sinh viên/email" maxlength="65">
                         </div>
                     </div>
                     <textarea id="txtQuestion" class="form-control mb-3 p-3" rows="3" placeholder="Nhập câu hỏi hoặc vướng mắc của bạn tại đây..."></textarea>
@@ -439,6 +442,21 @@
                 
                 <div id="qaListArea"></div>
             </div>
+
+            <footer class="fixed-bottom-footer">
+                <div class="footer-info-left">
+                    <span><i class="fa-solid fa-user-shield text-primary-light"></i> <strong>Admin:</strong> Trương Bảo Chí (K51)</span>
+                    <span class="d-none d-md-inline" style="color: #64748b;">|</span>
+                    <span class="d-none d-md-inline"><i class="fa-solid fa-envelope text-primary-light"></i> <a href="mailto:51.01.108.008@student.hcmue.edu.vn">51.01.108.008@student.hcmue.edu.vn</a></span>
+                </div>
+                
+                <div class="footer-info-right">
+                    <span class="d-none d-sm-inline"><i class="fa-solid fa-link text-primary-light"></i> Truy cập nhanh:</span>
+                    <a href="#" target="_blank"><i class="fa-brands fa-microsoft"></i> Teams</a>
+                    <a href="#" target="_blank"><i class="fa-solid fa-chalkboard-user"></i> Classroom</a>
+                </div>
+            </footer>
+            
         </main>
     </div>
 
@@ -464,9 +482,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        // ==========================================
-        // CẤU HÌNH API URL
-        // ==========================================
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwxeiLi11V8xHvoix1nbsYkH4oSpTYzoN6i_du2f2sW918TORcwf47ktK_P8v27D3c/exec'; 
 
         function postToGAS(payload, onSuccess, onError) {
@@ -507,7 +522,6 @@
             resetNavActive();
             $('#btnNavTongHop').addClass('active');
             $('#tongHopSection').removeClass('d-none');
-
             if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
         }
 
@@ -515,15 +529,19 @@
             resetNavActive();
             $('#btnNavTKB').addClass('active');
             $('#tkbSection').removeClass('d-none');
-
             if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
-            
             loadThoiGianBieu();
         }
 
         $(document).ready(function() {
-            loadTongHopView();
+            // Chuẩn bị Select Box của TKB luôn
+            populateWeekDropdown();
+            
+            // MẶC ĐỊNH MỞ VÀ TẢI SHEET "THÔNG BÁO" VÀO BẢNG
+            loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
+            
             loadWebLinks();
+            checkNewQA(); // Gọi luồng kiểm tra câu hỏi chưa rep
             
             $.ajax({
                 url: SCRIPT_URL + "?action=getHocPhanList",
@@ -532,9 +550,12 @@
                 success: function(list) {
                     let optionsHtml = '';
                     list.forEach((name) => {
-                        optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)">
-                                            <i class="fa-solid fa-folder-closed"></i> ${name}
-                                        </button>`;
+                        // Không tải lại nút Thông Báo vì đã ghi cứng phía trên HTML
+                        if(name.trim().toLowerCase() !== 'thông báo') {
+                            optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)">
+                                                <i class="fa-solid fa-folder-closed"></i> ${name}
+                                            </button>`;
+                        }
                     });
                     $('#dynamicCourseList').html(optionsHtml);
                 },
@@ -545,7 +566,7 @@
         });
 
         // ==========================================
-        // KHỐI LOGIC THỜI GIAN BIỂU (TKB) - ĐÃ CẬP NHẬT 9 CỘT THEO MÀU
+        // KHỐI LOGIC THỜI GIAN BIỂU (TKB)
         // ==========================================
         function loadThoiGianBieu() {
             $('#tkb-body').html('<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải thời gian biểu...</td></tr>');
@@ -559,12 +580,12 @@
                         thu: parseInt(row[0]) || 0,
                         tietBd: parseInt(row[1]) || 0,
                         soTiet: parseInt(row[2]) || 1,
-                        thoiGian: row[3] || "",  // Cột D: Thời gian
-                        hinhThuc: row[4] || "",  // Cột E: Hình thức học
-                        mon: row[5] || "",       // Cột F: Môn học
-                        phong: row[6] || "",     // Cột G: Phòng
-                        gv: row[7] || "",        // Cột H: Giảng viên
-                        color: row[8] || "#e0f2fe" // Cột I: Màu nền
+                        thoiGian: row[3] || "",  
+                        hinhThuc: row[4] || "",  
+                        mon: row[5] || "",       
+                        phong: row[6] || "",     
+                        gv: row[7] || "",        
+                        color: row[8] || "#e0f2fe" 
                     })).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
 
                     renderTKBTable(courseData);
@@ -585,7 +606,6 @@
 
             for (let i = 1; i <= totalRows; i++) {
                 tableHtml += `<tr>`;
-                
                 if (i === 1) tableHtml += `<td rowspan="6" class="session-label">Sáng</td>`;
                 if (i === 7) tableHtml += `<td rowspan="6" class="session-label">Chiều</td>`;
                 if (i === 13) tableHtml += `<td rowspan="3" class="session-label">Tối</td>`;
@@ -594,9 +614,7 @@
 
                 for (let thu = 2; thu <= 8; thu++) {
                     if (occupied[i][thu]) continue; 
-
                     const course = courses.find(c => c.thu === thu && c.tietBd === i);
-                    
                     if (course) {
                         const len = course.soTiet;
                         for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
@@ -605,13 +623,9 @@
                         <td rowspan="${len}" class="td-subject" style="background:${course.color}; border: 2.4px solid var(--border-color);">
                             <div class="subject">
                                 ${course.thoiGian ? `<div style="font-weight:700; color: #dc2626; margin-bottom: 2px; font-size: 13.5px;"><i class="fa-regular fa-clock me-1"></i>${course.thoiGian}</div>` : ''}
-                                
                                 ${course.hinhThuc ? `<div style="font-weight:700; color: #1e3a8a; margin-bottom: 6px; font-size: 13.5px;"><i class="fa-solid fa-laptop-house me-1"></i>${course.hinhThuc}</div>` : ''}
-                                
                                 <div style="font-weight:700; color: #000000; font-size: 15px; line-height: 1.3; margin-bottom: 4px;">${course.mon}</div>
-                                
                                 ${course.phong ? `<div style="font-size: 13.5px; color: #000000; font-weight: 500; margin-bottom: 2px;"><i class="fa-solid fa-location-dot me-1"></i>${course.phong}</div>` : ''}
-                                
                                 ${course.gv ? `<div style="margin-top:6px; font-size:13px; color: #000000; font-weight: 500; border-top:1px dashed rgba(0,0,0,0.3); padding-top:6px;"><i class="fa-solid fa-chalkboard-user me-1"></i>${course.gv}</div>` : ''}
                             </div>
                         </td>`;
@@ -625,7 +639,7 @@
         }
 
         // ==========================================
-        // KHỐI XỬ LÝ GIAO DIỆN CHÍNH (HỌC PHẦN)
+        // KHỐI XỬ LÝ GIAO DIỆN CHÍNH BẢNG (HỌC PHẦN / THÔNG BÁO)
         // ==========================================
         function checkAndExtractUrl(text) {
             let urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -652,8 +666,7 @@
                 success: function(data) {
                     if (!data || data.length === 0) {
                         $('#sheetTableBody').html('<tr><td colspan="4" class="text-center py-5 text-muted"><i class="fa-regular fa-folder-open fs-1 mb-3 d-block"></i>Chưa có dữ liệu.</td></tr>');
-                        $('#loadingStatus').addClass('d-none');
-                        $('#tableWrapper').removeClass('d-none');
+                        $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none');
                         return;
                     }
 
@@ -709,10 +722,8 @@
                         $('#instructorArea').html(cardContent).removeClass('d-none');
                     }
 
-                    $('#sheetTableHead').html(headHtml);
-                    $('#sheetTableBody').html(bodyHtml);
-                    $('#loadingStatus').addClass('d-none');
-                    $('#tableWrapper').removeClass('d-none');
+                    $('#sheetTableHead').html(headHtml); $('#sheetTableBody').html(bodyHtml);
+                    $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none');
                 },
                 error: function() {
                     $('#loadingStatus').html('<span class="text-danger fw-bold">Có lỗi xảy ra khi tải dữ liệu!</span>');
@@ -721,12 +732,28 @@
         }
 
         // ==========================================
-        // KHỐI LOGIC Q&A
+        // KHỐI LOGIC Q&A (LÀM NỔI BẬT "MỚI" Ở MENU)
         // ==========================================
+        function checkNewQA() {
+            $.ajax({
+                url: SCRIPT_URL + "?action=getQAData",
+                method: "GET",
+                dataType: "json",
+                success: function(data) {
+                    if (!data || data.length === 0) return;
+                    let hasNew = data.some(row => {
+                        let ans = row[3] || '';
+                        return ans.trim() === '';
+                    });
+                    if (hasNew) $('#qaSidebarBadge').removeClass('d-none');
+                    else $('#qaSidebarBadge').addClass('d-none');
+                }
+            });
+        }
+
         function openQASection() {
             resetNavActive();
-            $('#btnNavQA').addClass('active');
-            $('#qaSection').removeClass('d-none');
+            $('#btnNavQA').addClass('active'); $('#qaSection').removeClass('d-none');
             if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
             loadQAData();
         }
@@ -740,17 +767,15 @@
 
             let btn = $('#btnSubmitQ');
             btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
-
             let payload = { action: "submitQuestion", mssv: mssvValue, question: qText };
             
             postToGAS(payload, function(response) {
-                alert(response);
-                $('#txtQuestion').val('');
+                alert(response); $('#txtQuestion').val('');
                 btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false);
-                loadQAData(); 
+                loadQAData();
+                checkNewQA(); 
             }, function() {
-                alert("Lỗi kết nối máy chủ!");
-                btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false);
+                alert("Lỗi kết nối máy chủ!"); btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false);
             });
         }
 
@@ -776,36 +801,37 @@
         }
 
         function loadQAData() {
-            $('#qaListArea').html('');
-            $('#qaLoadingStatus').removeClass('d-none');
-
+            $('#qaListArea').html(''); $('#qaLoadingStatus').removeClass('d-none');
             $.ajax({
-                url: SCRIPT_URL + "?action=getQAData",
-                method: "GET",
-                dataType: "json",
+                url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json",
                 success: function(data) {
                     $('#qaLoadingStatus').addClass('d-none');
                     if (!data || data.length === 0) {
                         $('#qaListArea').html('<div class="text-center p-4 text-muted border rounded bg-white"><i class="fa-regular fa-comments fs-2 mb-2"></i><br>Chưa có câu hỏi nào. Bạn hãy là người đầu tiên đặt câu hỏi nhé!</div>');
+                        $('#qaSidebarBadge').addClass('d-none');
                         return;
                     }
 
                     let html = '';
+                    let hasUnanswered = false;
+
                     data.forEach(row => {
-                        let time = row[0] || '';
-                        let rawMssv = row[1] || '';
+                        let time = row[0] || ''; let rawMssv = row[1] || '';
                         let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
-                        let question = row[2] || ''; 
-                        let answer = row[3] || '';
-                        let upvotes = parseInt(row[4]) || 0;
-                        let downvotes = parseInt(row[5]) || 0;
+                        let question = row[2] || ''; let answer = row[3] || '';
+                        let upvotes = parseInt(row[4]) || 0; let downvotes = parseInt(row[5]) || 0;
                         let rowIndex = row[6];       
 
-                        html += `<div class="qa-item">
+                        let isNew = answer.trim() === "";
+                        if (isNew) hasUnanswered = true;
+
+                        let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
+
+                        html += `<div class="${itemClass}">
                                     <div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong></div>
                                     <div class="qa-question">${question}</div>`;
                         
-                        if (answer.trim() !== "") {
+                        if (!isNew) {
                             html += parseThread(answer);
                             html += `
                                 <div class="vote-action-bar">
@@ -832,23 +858,20 @@
                         if (isAdmin) {
                             html += `
                                 <div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);">
-                                    <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;">
-                                        <i class="fa-solid fa-user-shield"></i> Khung trả lời của Admin
-                                    </h6>
+                                    <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Khung trả lời của Admin</h6>
                                     <textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập phản hồi dành cho sinh viên..."></textarea>
-                                    <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}">
-                                        <i class="fa-solid fa-reply"></i> Đăng câu trả lời
-                                    </button>
-                                </div>
-                            `;
+                                    <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}"><i class="fa-solid fa-reply"></i> Đăng câu trả lời</button>
+                                </div>`;
                         }
                         html += `</div>`;
                     });
+                    
                     $('#qaListArea').html(html);
+                    
+                    if (hasUnanswered) $('#qaSidebarBadge').removeClass('d-none');
+                    else $('#qaSidebarBadge').addClass('d-none');
                 },
-                error: function() {
-                    $('#qaLoadingStatus').html('<span class="text-danger fw-bold">Lỗi tải dữ liệu Q&A!</span>');
-                }
+                error: function() { $('#qaLoadingStatus').html('<span class="text-danger fw-bold">Lỗi tải dữ liệu Q&A!</span>'); }
             });
         }
 
@@ -858,9 +881,7 @@
         function loadWebLinks() {
             $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải danh sách liên kết...</div>');
             $.ajax({
-                url: SCRIPT_URL + "?action=getWebLinks",
-                method: "GET",
-                dataType: "json",
+                url: SCRIPT_URL + "?action=getWebLinks", method: "GET", dataType: "json",
                 success: function(data) {
                     if (!data || data.length === 0) {
                         $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào được cập nhật.</div>');
@@ -885,8 +906,7 @@
 
         function castVote(rowIndex, type, btnElement) {
             $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', true);
-            let originalText = $(btnElement).html();
-            $(btnElement).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+            let originalText = $(btnElement).html(); $(btnElement).html('<i class="fa-solid fa-spinner fa-spin"></i>');
 
             postToGAS({ action: "submitVote", rowIndex: rowIndex, type: type }, function(newData) {
                 let data = typeof newData === 'string' ? JSON.parse(newData) : newData;
@@ -905,7 +925,7 @@
             btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...').prop('disabled', true);
 
             postToGAS({ action: "replyToAdmin", rowIndex: rowIndex, replyText: replyText }, function(response) {
-                alert(response); loadQAData(); 
+                alert(response); loadQAData(); checkNewQA(); 
             }, function() { alert("Lỗi khi gửi phản hồi."); btn.html('Gửi phản hồi').prop('disabled', false); });
         }
 
@@ -940,201 +960,81 @@
             btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
 
             postToGAS({ action: "adminReplyQuestion", rowIndex: rowIndex, replyText: replyText }, function(response) {
-                alert(response); loadQAData(); 
+                alert(response); loadQAData(); checkNewQA(); 
             }, function() { alert("Lỗi khi gửi trả lời."); btn.html('<i class="fa-solid fa-reply"></i> Đăng câu trả lời').prop('disabled', false); });
         }
-// ==========================================
-// ==========================================
-// ==========================================
-// HÀM TIỆN ÍCH VÀ BIẾN TOÀN CỤC CHO TKB
-// ==========================================
-let currentWeekOffset = 0; 
-let globalTkbData = [];    
 
-function parseDateString(dateStr) {
-    if (!dateStr || dateStr.trim() === "") return null;
-    let parts = dateStr.split('/');
-    if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]); 
-    return null; 
-}
+        // ==========================================
+        // TIỆN ÍCH CHO TKB (HỖ TRỢ LỌC TUẦN - BIÊN ĐỘ 52 TUẦN)
+        // ==========================================
+        let currentWeekOffset = 0; let globalTkbData = [];    
 
-function getDateOfSpecificWeekday(thu) {
-    let today = new Date();
-    today.setHours(0, 0, 0, 0); 
-    today.setDate(today.getDate() + (currentWeekOffset * 7));
-    
-    let currentDay = today.getDay(); 
-    let mappedCurrentDay = currentDay === 0 ? 8 : currentDay + 1; 
-    
-    let diff = thu - mappedCurrentDay;
-    let targetDate = new Date(today);
-    targetDate.setDate(today.getDate() + diff);
-    return targetDate;
-}
-
-// Hàm tự động tạo danh sách 21 tuần đưa vào Dropdown
-// Hàm tự động tạo danh sách 105 tuần (1 năm trước và 1 năm sau) đưa vào Dropdown
-function populateWeekDropdown() {
-    let select = $('#weekSelect');
-    select.empty();
-
-    let today = new Date();
-    today.setHours(0,0,0,0);
-    let currentDay = today.getDay();
-    let diffToMonday = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1);
-    let currentMonday = new Date(today.setDate(diffToMonday));
-
-    // THAY ĐỔI Ở ĐÂY: Chạy từ -52 (1 năm trước) đến 52 (1 năm sau)
-    for (let i = 0; i <= 52; i++) {
-        let m = new Date(currentMonday);
-        m.setDate(m.getDate() + (i * 7));
-        let s = new Date(m);
-        s.setDate(s.getDate() + 6);
-
-        // Định dạng hiển thị có thêm Năm để không bị nhầm lẫn giữa các năm
-        let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-        
-        let label = `Từ ngày ${format(m)} đến ${format(s)}`;
-        if (i === 0) label = `Từ ngày ${format(m)} đến ${format(s)} (Hiện tại)`;
-
-        select.append(`<option value="${i}">${label}</option>`);
-    }
-    
-    select.val(currentWeekOffset);
-}
-// Đồng bộ giá trị Dropdown khi bấm nút ngoài
-function syncDropdown() {
-    $('#weekSelect').val(currentWeekOffset);
-}
-
-function changeWeek(delta) {
-    currentWeekOffset += delta;
-    
-    // THAY ĐỔI Ở ĐÂY: Khóa giới hạn biên mới từ -52 đến 52
-    if (currentWeekOffset < -52) currentWeekOffset = -52;
-    if (currentWeekOffset > 52) currentWeekOffset = 52;
-    
-    syncDropdown();
-    filterAndRenderTKB();
-}
-
-function resetWeek() {
-    if (currentWeekOffset !== 0) {
-        currentWeekOffset = 0;
-        syncDropdown();
-        filterAndRenderTKB();
-    }
-}
-
-function jumpToWeek(val) {
-    currentWeekOffset = parseInt(val);
-    filterAndRenderTKB();
-}
-
-// ==========================================
-// KHỐI LOGIC THỜI GIAN BIỂU (TKB) CHÍNH
-// ==========================================
-function loadThoiGianBieu() {
-    currentWeekOffset = 0;
-    populateWeekDropdown(); // Khởi tạo Dropdown
-
-    $('#tkb-body').html('<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải thời gian biểu...</td></tr>');
-    
-    $.ajax({
-        url: SCRIPT_URL + "?action=getTKB",
-        method: "GET",
-        dataType: "json",
-        success: function(data) {
-            globalTkbData = data.map(row => ({
-                thu: parseInt(row[0]) || 0,
-                tietBd: parseInt(row[1]) || 0,
-                soTiet: parseInt(row[2]) || 1,
-                thoiGian: row[3] || "",  
-                hinhThuc: row[4] || "",  
-                mon: row[5] || "",       
-                phong: row[6] || "",     
-                gv: row[7] || "",        
-                color: row[8] || "#e0f2fe",
-                ngayBatDau: row[9] || "",   
-                ngayKetThuc: row[10] || ""  
-            }));
-
-            filterAndRenderTKB();
-        },
-        error: function() {
-            $('#tkb-body').html('<tr><td colspan="9" style="color: red; padding: 20px; text-align:center;">Lỗi kết nối dữ liệu Thời gian biểu!</td></tr>');
+        function parseDateString(dateStr) {
+            if (!dateStr || dateStr.trim() === "") return null;
+            let parts = dateStr.split('/');
+            if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]); 
+            return null; 
         }
-    });
-}
 
-function filterAndRenderTKB() {
-    let filteredData = globalTkbData.filter(c => {
-        if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
+        function getDateOfSpecificWeekday(thu) {
+            let today = new Date(); today.setHours(0, 0, 0, 0); 
+            today.setDate(today.getDate() + (currentWeekOffset * 7));
+            let currentDay = today.getDay(); 
+            let mappedCurrentDay = currentDay === 0 ? 8 : currentDay + 1; 
+            let diff = thu - mappedCurrentDay;
+            let targetDate = new Date(today); targetDate.setDate(today.getDate() + diff);
+            return targetDate;
+        }
 
-        if (c.ngayBatDau && c.ngayKetThuc) {
-            let startDate = parseDateString(c.ngayBatDau);
-            let endDate = parseDateString(c.ngayKetThuc);
-            
-            if (startDate && endDate) {
-                let classDateInThisWeek = getDateOfSpecificWeekday(c.thu);
-                if (classDateInThisWeek < startDate || classDateInThisWeek > endDate) {
-                    return false; 
+        function populateWeekDropdown() {
+            let select = $('#weekSelect'); select.empty();
+            let today = new Date(); today.setHours(0,0,0,0);
+            let currentDay = today.getDay();
+            let diffToMonday = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1);
+            let currentMonday = new Date(today.setDate(diffToMonday));
+
+            for (let i = 0; i <= 52; i++) {
+                let m = new Date(currentMonday); m.setDate(m.getDate() + (i * 7));
+                let s = new Date(m); s.setDate(s.getDate() + 6);
+                let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                let label = `Từ ngày ${format(m)} đến ${format(s)}`;
+                if (i === 0) label = `Từ ngày ${format(m)} đến ${format(s)} (Hiện tại)`;
+                select.append(`<option value="${i}">${label}</option>`);
+            }
+            select.val(currentWeekOffset);
+        }
+
+        function syncDropdown() { $('#weekSelect').val(currentWeekOffset); }
+
+        function changeWeek(delta) {
+            currentWeekOffset += delta;
+            if (currentWeekOffset < -52) currentWeekOffset = -52;
+            if (currentWeekOffset > 52) currentWeekOffset = 52;
+            syncDropdown(); filterAndRenderTKB();
+        }
+
+        function resetWeek() {
+            if (currentWeekOffset !== 0) { currentWeekOffset = 0; syncDropdown(); filterAndRenderTKB(); }
+        }
+
+        function jumpToWeek(val) { currentWeekOffset = parseInt(val); filterAndRenderTKB(); }
+
+        function filterAndRenderTKB() {
+            let filteredData = globalTkbData.filter(c => {
+                if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
+                if (c.ngayBatDau && c.ngayKetThuc) {
+                    let startDate = parseDateString(c.ngayBatDau); let endDate = parseDateString(c.ngayKetThuc);
+                    if (startDate && endDate) {
+                        let classDateInThisWeek = getDateOfSpecificWeekday(c.thu);
+                        if (classDateInThisWeek < startDate || classDateInThisWeek > endDate) return false; 
+                    }
                 }
-            }
+                return true; 
+            });
+            renderTKBTable(filteredData);
         }
-        return true; 
-    });
 
-    renderTKBTable(filteredData);
-}
-
-function renderTKBTable(courses) {
-    const tbody = document.getElementById('tkb-body');
-    if (!tbody) return;
-
-    const totalRows = 15; 
-    const occupied = Array.from({ length: totalRows + 1 }, () => Array(9).fill(false));
-    let tableHtml = "";
-
-    for (let i = 1; i <= totalRows; i++) {
-        tableHtml += `<tr>`;
-        
-        if (i === 1) tableHtml += `<td rowspan="6" class="session-label">Sáng</td>`;
-        if (i === 7) tableHtml += `<td rowspan="6" class="session-label">Chiều</td>`;
-        if (i === 13) tableHtml += `<td rowspan="3" class="session-label">Tối</td>`;
-        
-        tableHtml += `<td class="col-tiet">${i}</td>`;
-
-        for (let thu = 2; thu <= 8; thu++) {
-            if (occupied[i][thu]) continue; 
-
-            const course = courses.find(c => c.thu === thu && c.tietBd === i);
-            
-            if (course) {
-                const len = course.soTiet;
-                for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
-
-                tableHtml += `
-                <td rowspan="${len}" class="td-subject" style="background:${course.color}; border: 2.4px solid var(--border-color);">
-                    <div class="subject">
-                        ${course.thoiGian ? `<div style="font-weight:700; color: #dc2626; margin-bottom: 2px; font-size: 13.5px;"><i class="fa-regular fa-clock me-1"></i>${course.thoiGian}</div>` : ''}
-                        ${course.hinhThuc ? `<div style="font-weight:700; color: #1e3a8a; margin-bottom: 6px; font-size: 13.5px;"><i class="fa-solid fa-laptop-house me-1"></i>${course.hinhThuc}</div>` : ''}
-                        <div style="font-weight:700; color: #000000; font-size: 15px; line-height: 1.3; margin-bottom: 4px;">${course.mon}</div>
-                        ${course.phong ? `<div style="font-size: 13.5px; color: #000000; font-weight: 500; margin-bottom: 2px;"><i class="fa-solid fa-location-dot me-1"></i>${course.phong}</div>` : ''}
-                        ${course.gv ? `<div style="margin-top:6px; font-size:13px; color: #000000; font-weight: 500; border-top:1px dashed rgba(0,0,0,0.3); padding-top:6px;"><i class="fa-solid fa-chalkboard-user me-1"></i>${course.gv}</div>` : ''}
-                    </div>
-                </td>`;
-            } else { 
-                tableHtml += `<td style="background: #ffffff; border: 2.4px solid var(--border-color);"></td>`; 
-            }
-        }
-        tableHtml += `</tr>`;
-    }
-    tbody.innerHTML = tableHtml;
-}
-        // ==========================================
-        // TÍNH NĂNG CHỐNG XEM MÃ NGUỒN
-        // ==========================================
+        // CHỐNG XEM MÃ NGUỒN TÍCH HỢP
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
         document.addEventListener('keydown', function(e) {
             if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
