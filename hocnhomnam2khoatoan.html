@@ -58,7 +58,6 @@
             background: none; border: none; color: #ffffff; font-size: 26px; cursor: pointer; padding: 0;
         }
 
-        /* Sidebar nhường 46px ở bottom cho Footer lồng bên dưới */
         .sidebar {
             width: var(--sidebar-width); background: var(--card-bg); border-right: 1px solid var(--border-color);
             display: flex; flex-direction: column; position: fixed; top: 0; bottom: 46px; left: 0;
@@ -128,7 +127,7 @@
         .main-content { 
             flex: 1; 
             margin-left: var(--sidebar-width); 
-            padding: 40px 40px 80px 40px; /* Padding dưới để không bị dính Footer */
+            padding: 40px 40px 80px 40px;
             transition: all 0.3s ease; 
             display: flex;
             flex-direction: column;
@@ -143,7 +142,6 @@
         
         .page-title { font-size: 24px; font-weight: 700; color: var(--primary-color); margin: 0; display: flex; align-items: center; }
         .page-title i { font-size: 26px; margin-right: 14px; }
-        .student-badge { font-size: 15px; font-weight: 600; padding: 8px 16px; }
 
         .instructor-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 6px solid var(--primary-color); border-radius: var(--card-border-radius); padding: 24px 32px; margin-bottom: 32px; box-shadow: var(--shadow-md); }
         .instructor-card h6 { font-size: 20px; font-weight: 700; color: var(--primary-color); }
@@ -161,10 +159,8 @@
         .grid-row.row-exam td { background-color: var(--exam-bg); color: #be123c; font-weight: 600; border-bottom-color: var(--exam-border); }
         .grid-row.row-new td { background-color: #fff1f2; color: #9f1239; font-weight: 600; border-bottom-color: #fecdd3; }
         .grid-row.row-new td:first-child { border-left: 4px solid var(--accent-red); }
-        .grid-row.row-white td { background-color: #ffffff; color: var(--text-main); font-weight: 500; border-bottom-color: #e5e7eb; }
         .badge-new { background-color: var(--accent-red); color: #ffffff; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin-right: 8px; text-transform: uppercase; display: inline-block; vertical-align: middle; }
 
-        /* Tinh chỉnh nút Truy cập gọn, đẹp */
         .btn-portal-action {
             background: #ffffff; color: var(--primary-color) !important;
             border: 1.5px solid var(--primary-color); padding: 6px 16px;
@@ -186,7 +182,6 @@
         .qa-item.unanswered-item { border-left: 4px solid #ef4444; background: #fffcfc; }
         .qa-question { font-size: 17px; font-weight: 600; color: var(--primary-color); margin-bottom: 8px; white-space: pre-wrap; word-break: break-word; line-height: 1.5; }
         
-        /* Hiệu ứng nhấp nháy cho badge MỚI bên thanh Menu */
         .badge-new-qa {
             background-color: #ef4444; color: #ffffff; font-size: 11px; font-weight: 700;
             padding: 2px 8px; border-radius: 12px;
@@ -199,7 +194,6 @@
         }
 
         .qa-time { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
-        .qa-answer { background: var(--lesson-bg); border-left: 4px solid #166534; padding: 14px 18px; border-radius: 6px; color: #166534; font-size: 15px; font-weight: 500; margin-top: 10px; white-space: pre-wrap; word-break: break-word; }
         .qa-no-answer { background: #f3f4f6; border-left: 4px solid #9ca3af; padding: 10px 14px; border-radius: 6px; color: #4b5563; font-size: 14px; font-style: italic; margin-top: 10px; }
 
         .link-card { display: flex; align-items: center; gap: 16px; padding: 20px; background: #fff; border: 1px solid var(--border-color); border-radius: 8px; text-decoration: none; color: var(--text-main); transition: all 0.2s ease; box-shadow: var(--shadow-sm); }
@@ -222,32 +216,14 @@
         .td-subject .subject { background: transparent; line-height: 1.4; }
         .session-label { font-weight: bold; background: #fff; text-transform: uppercase; color: var(--primary-color); }
 
-        /* THANH ĐIỀU HƯỚNG TUẦN */
         .nav-week-container { display: flex; align-items: stretch; gap: 8px; margin-bottom: 24px; height: 42px; }
-        .select-week-custom {
-            border-radius: 8px !important; border-color: #cbd5e1 !important; font-weight: 600;
-            color: var(--primary-color) !important; box-shadow: var(--shadow-sm); cursor: pointer;
-            height: 100% !important; padding: 0 1rem !important; /* Đã xóa padding lỗi để hiện chữ */
-        }
-        .btn-nav-square {
-            background-color: #2b476e; color: #ffffff; border-radius: 8px; padding: 0; border: none;
-            flex: 1; display: flex; align-items: center; justify-content: center; width: 44px;
-            box-shadow: var(--shadow-sm); transition: all 0.2s;
-        }
+        .select-week-custom { border-radius: 8px !important; border-color: #cbd5e1 !important; font-weight: 600; color: var(--primary-color) !important; box-shadow: var(--shadow-sm); cursor: pointer; height: 100% !important; padding: 0 1rem !important; }
+        .btn-nav-square { background-color: #2b476e; color: #ffffff; border-radius: 8px; padding: 0; border: none; flex: 1; display: flex; align-items: center; justify-content: center; width: 44px; box-shadow: var(--shadow-sm); transition: all 0.2s; }
         .btn-nav-square:hover { background-color: #1a2f4c; color: #ffffff; transform: scale(0.95); }
-        .btn-hientai {
-            background-color: #2b476e; color: #ffffff; border-radius: 26px; padding: 0 20px;
-            font-weight: 600; font-size: 14px; border: none; box-shadow: var(--shadow-sm); transition: all 0.2s;
-        }
+        .btn-hientai { background-color: #2b476e; color: #ffffff; border-radius: 26px; padding: 0 20px; font-weight: 600; font-size: 14px; border: none; box-shadow: var(--shadow-sm); transition: all 0.2s; }
         .btn-hientai:hover { background-color: #1a2f4c; color: #ffffff; transform: translateY(-2px); }
 
-        /* CHÂN TRANG NGANG NHỎ, CỐ ĐỊNH Ở ĐÁY 100% WIDTH, MÀU XANH NAVY */
-        .fixed-bottom-footer {
-            position: fixed; bottom: 0; left: 0; width: 100%; height: 46px;
-            background-color: #0b2a4a; color: #e2e8f0; padding: 0 24px;
-            display: flex; justify-content: space-between; align-items: center;
-            z-index: 1050; font-size: 13.5px; box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
-        }
+        .fixed-bottom-footer { position: fixed; bottom: 0; left: 0; width: 100%; height: 46px; background-color: #0b2a4a; color: #e2e8f0; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; z-index: 1050; font-size: 13.5px; box-shadow: 0 -2px 8px rgba(0,0,0,0.2); }
         .fixed-bottom-footer a { color: #38bdf8; text-decoration: none; font-weight: 600; transition: 0.2s; }
         .fixed-bottom-footer a:hover { color: #bae6fd; text-decoration: underline; }
         .footer-info-left { display: flex; align-items: center; gap: 12px; }
@@ -262,10 +238,8 @@
             .top-header { padding: 20px; }
             .page-title { font-size: 20px; }
             .custom-portal-table th, .custom-portal-table td { padding: 16px; font-size: 15px; }
-            
-            /* Responsive cho footer ngang gọn */
             .fixed-bottom-footer { flex-direction: column; gap: 6px; padding: 10px; font-size: 12px; height: auto; text-align: center; }
-            .sidebar { bottom: 65px; } /* Cân chỉnh lại chiều cao trên mobile */
+            .sidebar { bottom: 65px; } 
         }
     </style>
 </head>
@@ -308,9 +282,6 @@
                         
                         <div id="dynamicCourseList" class="course-list mt-2">
                             <span class="text-muted small px-2">Đang tải danh sách học phần...</span>
-                            <button class="btn-course d-none mt-4" id="btnNavAdminTKB" onclick="loadAdminTKBView()" style="border-color: var(--accent-red); color: var(--accent-red);">
-                                <i class="fa-solid fa-user-tie"></i> TKB Quản trị
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -336,11 +307,7 @@
                 <header class="top-header">
                     <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
                 </header>
-                <div class="row g-4" id="webLinksContainer">
-                    <div class="col-12 text-center text-muted py-5">
-                        <i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải danh sách liên kết...
-                    </div>
-                </div>
+                <div class="row g-4" id="webLinksContainer"></div>
             </div>
 
             <div id="tkbSection" class="d-none">
@@ -361,32 +328,16 @@
                         </button>
                     </div>
 
-                    <button class="btn btn-hientai d-flex align-items-center gap-2" onclick="resetWeek()">
-                        📅 Hiện tại
-                    </button>
+                    <button class="btn btn-hientai d-flex align-items-center gap-2" onclick="resetWeek()">📅 Hiện tại</button>
                 </div>
                 <div class="tkb-wrapper">
                     <table class="sched">
                         <thead>
                             <tr id="header-row">
-                                <th>Buổi</th>
-                                <th>Tiết</th>
-                                <th>Thứ 2</th>
-                                <th>Thứ 3</th>
-                                <th>Thứ 4</th>
-                                <th>Thứ 5</th>
-                                <th>Thứ 6</th>
-                                <th>Thứ 7</th>
-                                <th>Chủ nhật</th>
+                                <th>Buổi</th><th>Tiết</th><th>Thứ 2</th><th>Thứ 3</th><th>Thứ 4</th><th>Thứ 5</th><th>Thứ 6</th><th>Thứ 7</th><th>Chủ nhật</th>
                             </tr>
                         </thead>
-                        <tbody id="tkb-body">
-                            <tr>
-                                <td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;">
-                                    <i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải thời gian biểu...
-                                </td>
-                            </tr>
-                        </tbody>
+                        <tbody id="tkb-body"></tbody>
                     </table>
                 </div>
             </div>
@@ -395,6 +346,31 @@
                 <header class="top-header">
                     <div class="page-title"><i class="fa-solid fa-book-open"></i> Học nhóm - Năm 2 - Khoa Toán-Tin học</div>
                 </header>
+
+                <div id="adminNotificationArea" class="instructor-card d-none mb-3" style="border-left-color: var(--accent-red); padding: 24px;">
+                    <h6 class="mb-3" style="color: var(--accent-red);"><i class="fa-solid fa-bullhorn"></i> Đăng thông báo mới</h6>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold small text-muted">Loại / Tiêu đề (Cột 1)</label>
+                            <input type="text" id="txtNotifCol1" class="form-control" placeholder="VD: NEW hoặc Toán học...">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold small text-muted">Nội dung chi tiết (Cột 2)</label>
+                            <input type="text" id="txtNotifCol2" class="form-control" placeholder="Nhập nội dung thông báo...">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-muted">Hình thức (Cột 3)</label>
+                            <input type="text" id="txtNotifCol3" class="form-control" placeholder="VD: Online, Offline, Thi...">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold small text-muted">Tài liệu / Link đính kèm (Cột 4)</label>
+                            <input type="text" id="txtNotifCol4" class="form-control" placeholder="Dán đường dẫn (link) hoặc ghi chú thêm tại đây...">
+                        </div>
+                    </div>
+                    <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="submitNotification()" id="btnSubmitNotif">
+                        <i class="fa-solid fa-plus me-2"></i> Đăng thông báo
+                    </button>
+                </div>
 
                 <div id="instructorArea" class="d-none"></div>
 
@@ -452,11 +428,10 @@
                 
                 <div class="footer-info-right">
                     <span class="d-none d-sm-inline"><i class="fa-solid fa-link text-primary-light"></i> Truy cập nhanh:</span>
-                    <a href="https://teams.cloud.microsoft/l/team/19%3AG3AZ0si8ueyRMaXW3zI-siWOxk1cyIA9Aol3zliL8Sw1%40thread.tacv2/conversations?groupId=d88461ae-d3dd-44d2-aae0-e8d021da1e68&tenantId=b1a9fdc0-1d56-4c3d-a481-809fff8a26db"><i class="fa-brands fa-microsoft" target=""></i> Nhóm Teams</a>
-                    <a href="https://classroom.google.com/c/ODI0MjY2NDc0OTQx?cjc=fmvongzm"><i class="fa-solid fa-chalkboard-user" target=""></i> Google Classroom</a>
+                    <a href="#"><i class="fa-brands fa-microsoft"></i> Nhóm Teams</a>
+                    <a href="#"><i class="fa-solid fa-chalkboard-user"></i> Google Classroom</a>
                 </div>
             </footer>
-            
         </main>
     </div>
 
@@ -479,10 +454,49 @@
         </div>
     </div>
 
+    <div class="modal fade" id="editNotifModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-warning text-dark">
+                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa thông báo</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Loại / Tiêu đề</label>
+                        <input type="text" id="editNotifCol1" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nội dung chi tiết</label>
+                        <textarea id="editNotifCol2" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Hình thức</label>
+                        <input type="text" id="editNotifCol3" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Tài liệu / Link đính kèm</label>
+                        <input type="text" id="editNotifCol4" class="form-control">
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditNotification()" id="btnSaveEditNotif">Lưu thay đổi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxwxeiLi11V8xHvoix1nbsYkH4oSpTYzoN6i_du2f2sW918TORcwf47ktK_P8v27D3c/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9EIAnfju5gd2v1tIjdcDHZawXrzlUE8n1lSSmxNC3rBKcBcAk_tHsuSTcminAF8U/exec'; 
+
+        let isAdmin = false;
+        let currentSheetName = "";
+
+        // Biến lưu trữ cấu trúc Q&A cho việc sửa từng phần
+        window.qaThreadParts = {};
 
         function postToGAS(payload, onSuccess, onError) {
             $.ajax({
@@ -534,33 +548,21 @@
         }
 
         $(document).ready(function() {
-            // Chuẩn bị Select Box của TKB luôn
             populateWeekDropdown();
-            
-            // MẶC ĐỊNH MỞ VÀ TẢI SHEET "THÔNG BÁO" VÀO BẢNG
             loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
-            
             loadWebLinks();
-            checkNewQA(); // Gọi luồng kiểm tra câu hỏi chưa rep
+            checkNewQA(); 
             
             $.ajax({
-                url: SCRIPT_URL + "?action=getHocPhanList",
-                method: "GET",
-                dataType: "json",
+                url: SCRIPT_URL + "?action=getHocPhanList", method: "GET", dataType: "json",
                 success: function(list) {
                     let optionsHtml = '';
                     list.forEach((name) => {
-                        // Không tải lại nút Thông Báo vì đã ghi cứng phía trên HTML
                         if(name.trim().toLowerCase() !== 'thông báo') {
-                            optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)">
-                                                <i class="fa-solid fa-folder-closed"></i> ${name}
-                                            </button>`;
+                            optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)"><i class="fa-solid fa-folder-closed"></i> ${name}</button>`;
                         }
                     });
                     $('#dynamicCourseList').html(optionsHtml);
-                },
-                error: function(err) {
-                    $('#dynamicCourseList').html('<span class="text-danger small px-2">Lỗi tải danh sách môn học.</span>');
                 }
             });
         });
@@ -572,30 +574,14 @@
             $('#tkb-body').html('<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải thời gian biểu...</td></tr>');
             
             $.ajax({
-                url: SCRIPT_URL + "?action=getTKB",
-                method: "GET",
-                dataType: "json",
+                url: SCRIPT_URL + "?action=getTKB", method: "GET", dataType: "json",
                 success: function(data) {
-                    // SỬA Ở ĐÂY: Gán trực tiếp vào globalTkbData thay vì dùng let courseData
                     globalTkbData = data.map(row => ({
-                        thu: parseInt(row[0]) || 0,
-                        tietBd: parseInt(row[1]) || 0,
-                        soTiet: parseInt(row[2]) || 1,
-                        thoiGian: row[3] || "",  
-                        hinhThuc: row[4] || "",  
-                        mon: row[5] || "",       
-                        phong: row[6] || "",     
-                        gv: row[7] || "",        
-                        color: row[8] || "#e0f2fe",
-                        ngayBatDau: row[9] || "",  // Lấy thêm ngày bắt đầu từ Sheet
-                        ngayKetThuc: row[10] || "" // Lấy thêm ngày kết thúc từ Sheet
+                        thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
+                        thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: row[5] || "", phong: row[6] || "",     
+                        gv: row[7] || "", color: row[8] || "#e0f2fe", ngayBatDau: row[9] || "", ngayKetThuc: row[10] || "" 
                     })).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
-
-                    // SỬA Ở ĐÂY: Gọi hàm filterAndRenderTKB để nó tự xử lý logic tuần hiện tại thay vì render thẳng
                     filterAndRenderTKB();
-                },
-                error: function() {
-                    $('#tkb-body').html('<tr><td colspan="9" style="color: red; padding: 20px; text-align:center;">Lỗi kết nối dữ liệu Thời gian biểu!</td></tr>');
                 }
             });
         }
@@ -603,7 +589,6 @@
         function renderTKBTable(courses) {
             const tbody = document.getElementById('tkb-body');
             if (!tbody) return;
-
             const totalRows = 15; 
             const occupied = Array.from({ length: totalRows + 1 }, () => Array(9).fill(false));
             let tableHtml = "";
@@ -615,7 +600,6 @@
                 if (i === 13) tableHtml += `<td rowspan="3" class="session-label">Tối</td>`;
                 
                 tableHtml += `<td class="col-tiet">${i}</td>`;
-
                 for (let thu = 2; thu <= 8; thu++) {
                     if (occupied[i][thu]) continue; 
                     const course = courses.find(c => c.thu === thu && c.tietBd === i);
@@ -643,7 +627,7 @@
         }
 
         // ==========================================
-        // KHỐI XỬ LÝ GIAO DIỆN CHÍNH BẢNG (HỌC PHẦN / THÔNG BÁO)
+        // KHỐI XỬ LÝ BẢNG & ĐĂNG/SỬA/XÓA THÔNG BÁO (ADMIN)
         // ==========================================
         function checkAndExtractUrl(text) {
             let urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -651,8 +635,54 @@
             return match ? match[0] : null;
         }
 
+        function submitNotification() {
+            let col1 = $('#txtNotifCol1').val().trim(); let col2 = $('#txtNotifCol2').val().trim();
+            let col3 = $('#txtNotifCol3').val().trim(); let col4 = $('#txtNotifCol4').val().trim();
+
+            if (!col1 && !col2) { alert("Vui lòng nhập nội dung thông báo!"); return; }
+
+            let btn = $('#btnSubmitNotif');
+            btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
+
+            postToGAS({ action: "addNotification", col1: col1, col2: col2, col3: col3, col4: col4 }, function(response) {
+                alert(response);
+                $('#txtNotifCol1').val(''); $('#txtNotifCol2').val(''); $('#txtNotifCol3').val(''); $('#txtNotifCol4').val('');
+                btn.html('<i class="fa-solid fa-plus me-2"></i> Đăng thông báo').prop('disabled', false);
+                loadDataByHocPhan('Thông báo');
+            }, function() { alert("Lỗi kết nối khi gửi thông báo!"); btn.html('<i class="fa-solid fa-plus me-2"></i> Đăng thông báo').prop('disabled', false); });
+        }
+
+        let editNotifRowIndex = -1;
+        function openEditNotifModal(sheetRowIndex, c1, c2, c3, c4) {
+            editNotifRowIndex = sheetRowIndex;
+            $('#editNotifCol1').val(c1); $('#editNotifCol2').val(c2);
+            $('#editNotifCol3').val(c3); $('#editNotifCol4').val(c4);
+            $('#editNotifModal').modal('show');
+        }
+
+        function saveEditNotification() {
+            let c1 = $('#editNotifCol1').val(); let c2 = $('#editNotifCol2').val();
+            let c3 = $('#editNotifCol3').val(); let c4 = $('#editNotifCol4').val();
+            let btn = $('#btnSaveEditNotif');
+            btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
+
+            postToGAS({ action: "editNotification", rowIndex: editNotifRowIndex, col1: c1, col2: c2, col3: c3, col4: c4 }, res => {
+                alert(res); btn.html('Lưu thay đổi').prop('disabled', false);
+                $('#editNotifModal').modal('hide');
+                loadDataByHocPhan('Thông báo');
+            });
+        }
+
+        function deleteNotificationItem(sheetRowIndex) {
+            if(!confirm("Bạn có chắc chắn muốn xóa thông báo này? Hành động này không thể hoàn tác.")) return;
+            postToGAS({ action: "deleteNotification", rowIndex: sheetRowIndex }, res => {
+                alert(res); loadDataByHocPhan('Thông báo');
+            });
+        }
+
         function loadDataByHocPhan(sheetName, element) {
             if(!sheetName) return;
+            currentSheetName = sheetName;
             resetNavActive();
             if(element) $(element).addClass('active');
 
@@ -661,15 +691,19 @@
             $('#instructorArea').addClass('d-none').html('');
             $('#loadingStatus').removeClass('d-none');
 
+            if (isAdmin && sheetName.trim().toLowerCase() === 'thông báo') {
+                $('#adminNotificationArea').removeClass('d-none');
+            } else {
+                $('#adminNotificationArea').addClass('d-none');
+            }
+
             if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
 
             $.ajax({
-                url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
-                method: "GET",
-                dataType: "json",
+                url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName), method: "GET", dataType: "json",
                 success: function(data) {
                     if (!data || data.length === 0) {
-                        $('#sheetTableBody').html('<tr><td colspan="4" class="text-center py-5 text-muted"><i class="fa-regular fa-folder-open fs-1 mb-3 d-block"></i>Chưa có dữ liệu.</td></tr>');
+                        $('#sheetTableBody').html('<tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa-regular fa-folder-open fs-1 mb-3 d-block"></i>Chưa có dữ liệu.</td></tr>');
                         $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none');
                         return;
                     }
@@ -683,6 +717,7 @@
 
                         if (rowIndex === 0) {
                             headHtml += `<th>${String(row[0] || 'STT')}</th><th>${String(row[1] || 'Nội dung')}</th><th>${String(row[2] || 'Hình thức')}</th><th>${String(row[4] || row[3] || 'Tài liệu học tập')}</th>`;
+                            if (isAdmin && currentSheetName === 'Thông báo') headHtml += `<th style="width: 100px;">Thao tác</th>`;
                             return;
                         }
 
@@ -716,6 +751,21 @@
                                 else bodyHtml += `<td>${cellIndex === 0 && !isNewRow ? iconPrefix + cellText : cellText}</td>`;
                             }
                         });
+
+                        // Cột Thao tác của Admin
+                        if (isAdmin && currentSheetName === 'Thông báo') {
+                            let sheetRowIndex = rowIndex + 1; // rowIndex của mảng là 1 -> dòng 2 trong sheet
+                            let c1 = String(row[0]||'').replace(/'/g, "\\'"); let c2 = String(row[1]||'').replace(/'/g, "\\'");
+                            let c3 = String(row[2]||'').replace(/'/g, "\\'"); let c4 = String(row[3]||'').replace(/'/g, "\\'");
+                            
+                            bodyHtml += `<td>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-warning py-1 px-2" title="Chỉnh sửa" onclick="openEditNotifModal(${sheetRowIndex}, '${c1}', '${c2}', '${c3}', '${c4}')"><i class="fa-solid fa-pen"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger py-1 px-2" title="Xóa bỏ" onclick="deleteNotificationItem(${sheetRowIndex})"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </td>`;
+                        }
+
                         bodyHtml += '</tr>';
                     });
 
@@ -729,26 +779,19 @@
                     $('#sheetTableHead').html(headHtml); $('#sheetTableBody').html(bodyHtml);
                     $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none');
                 },
-                error: function() {
-                    $('#loadingStatus').html('<span class="text-danger fw-bold">Có lỗi xảy ra khi tải dữ liệu!</span>');
-                }
+                error: function() { $('#loadingStatus').html('<span class="text-danger fw-bold">Có lỗi xảy ra khi tải dữ liệu!</span>'); }
             });
         }
 
         // ==========================================
-        // KHỐI LOGIC Q&A (LÀM NỔI BẬT "MỚI" Ở MENU)
+        // KHỐI LOGIC Q&A: SỬA/XÓA TỪNG PHẦN (ADMIN)
         // ==========================================
         function checkNewQA() {
             $.ajax({
-                url: SCRIPT_URL + "?action=getQAData",
-                method: "GET",
-                dataType: "json",
+                url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json",
                 success: function(data) {
                     if (!data || data.length === 0) return;
-                    let hasNew = data.some(row => {
-                        let ans = row[3] || '';
-                        return ans.trim() === '';
-                    });
+                    let hasNew = data.some(row => (row[3] || '').trim() === '');
                     if (hasNew) $('#qaSidebarBadge').removeClass('d-none');
                     else $('#qaSidebarBadge').addClass('d-none');
                 }
@@ -763,24 +806,18 @@
         }
 
         function sendQuestion() {
-            let mssvValue = $('#txtMSSV').val().trim();
-            let qText = $('#txtQuestion').val().trim();
-            
+            let mssvValue = $('#txtMSSV').val().trim(); let qText = $('#txtQuestion').val().trim();
             if (!mssvValue) { alert("Vui lòng nhập mã số sinh viên hoặc email liên hệ!"); $('#txtMSSV').focus(); return; }
             if (!qText) { alert("Vui lòng nhập nội dung câu hỏi!"); $('#txtQuestion').focus(); return; }
 
             let btn = $('#btnSubmitQ');
             btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
-            let payload = { action: "submitQuestion", mssv: mssvValue, question: qText };
             
-            postToGAS(payload, function(response) {
+            postToGAS({ action: "submitQuestion", mssv: mssvValue, question: qText }, function(response) {
                 alert(response); $('#txtQuestion').val('');
                 btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false);
-                loadQAData();
-                checkNewQA(); 
-            }, function() {
-                alert("Lỗi kết nối máy chủ!"); btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false);
-            });
+                loadQAData(); checkNewQA(); 
+            }, function() { alert("Lỗi kết nối máy chủ!"); btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); });
         }
 
         function maskMSSV(mssv) {
@@ -789,19 +826,59 @@
             return str.substring(0, 3) + '***' + str.substring(str.length - 3);
         }
 
-        function parseThread(text) {
-            let parts = text.split(/\[SV\]|\[\/SV\]/);
+        // Tách chuỗi thành mảng các phần độc lập
+        function parseThread(text, rowIndex) {
+            // Tách theo Regex (giữ lại cả chuỗi [SV]...[/SV])
+            let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== "");
+            window.qaThreadParts[rowIndex] = parts;
+
             let html = '';
-            for(let i = 0; i < parts.length; i++) {
-                let content = parts[i].trim();
-                if(content === "") continue;
-                if (i % 2 === 0) {
-                    html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${content}</div>`;
+            parts.forEach((part, index) => {
+                let content = part.trim();
+                if(content === "") return;
+                
+                if (content.startsWith("[SV]") && content.endsWith("[/SV]")) {
+                    let svText = content.replace("[SV]", "").replace("[/SV]", "").trim();
+                    html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>Sinh viên:</strong><br>${svText}`;
+                    if (isAdmin) {
+                        html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`;
+                    }
+                    html += `</div>`;
                 } else {
-                    html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>Sinh viên phản hồi:</strong><br>${content}</div>`;
+                    html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${content}`;
+                    if (isAdmin) {
+                        html += `<div class="mt-2 text-end">
+                            <button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="editThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button>
+                            <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa</button>
+                        </div>`;
+                    }
+                    html += `</div>`;
                 }
-            }
+            });
             return html;
+        }
+
+        function deleteThreadPart(rowIndex, partIndex) {
+            if(!confirm("Bạn có chắc chắn muốn xóa đoạn tin nhắn này?")) return;
+            window.qaThreadParts[rowIndex].splice(partIndex, 1);
+            let fullText = window.qaThreadParts[rowIndex].join("\n\n");
+            syncQAThread(rowIndex, fullText);
+        }
+
+        function editThreadPart(rowIndex, partIndex) {
+            let oldText = window.qaThreadParts[rowIndex][partIndex].trim();
+            let newText = prompt("Chỉnh sửa trả lời của Admin:", oldText);
+            if(newText !== null && newText.trim() !== "") {
+                window.qaThreadParts[rowIndex][partIndex] = newText.trim();
+                let fullText = window.qaThreadParts[rowIndex].join("\n\n");
+                syncQAThread(rowIndex, fullText);
+            }
+        }
+
+        function syncQAThread(rowIndex, fullText) {
+            postToGAS({ action: "updateQAThread", rowIndex: rowIndex, fullText: fullText }, function(res) {
+                loadQAData(); // Load lại ngay sau khi thay đổi
+            }, function() { alert("Lỗi khi đồng bộ chuỗi trả lời!"); });
         }
 
         function loadQAData() {
@@ -816,8 +893,7 @@
                         return;
                     }
 
-                    let html = '';
-                    let hasUnanswered = false;
+                    let html = ''; let hasUnanswered = false;
 
                     data.forEach(row => {
                         let time = row[0] || ''; let rawMssv = row[1] || '';
@@ -832,11 +908,16 @@
                         let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
 
                         html += `<div class="${itemClass}">
-                                    <div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong></div>
-                                    <div class="qa-question">${question}</div>`;
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong></div>`;
+                        
+                        if (isAdmin) html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ</button>`;
+
+                        html += `</div>
+                                 <div class="qa-question">${question}</div>`;
                         
                         if (!isNew) {
-                            html += parseThread(answer);
+                            html += parseThread(answer, rowIndex);
                             html += `
                                 <div class="vote-action-bar">
                                     <div class="vote-group" id="voteArea-${rowIndex}">
@@ -844,7 +925,7 @@
                                         <button class="btn-vote down" onclick="castVote(${rowIndex}, 'down', this)"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button>
                                     </div>
                                     <button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')">
-                                        <i class="fa-solid fa-comment-dots"></i> Phản hồi
+                                        <i class="fa-solid fa-comment-dots"></i> Phản hồi admin
                                     </button>
                                 </div>
                                 <div id="replyBox-${rowIndex}" class="reply-box d-none">
@@ -862,8 +943,8 @@
                         if (isAdmin) {
                             html += `
                                 <div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);">
-                                    <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Khung trả lời của Admin</h6>
-                                    <textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập phản hồi dành cho sinh viên..."></textarea>
+                                    <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
+                                    <textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
                                     <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}"><i class="fa-solid fa-reply"></i> Đăng câu trả lời</button>
                                 </div>`;
                         }
@@ -879,32 +960,34 @@
             });
         }
 
+        function deleteQA(rowIndex) {
+            if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ Q&A này không? Hành động này không thể hoàn tác.")) return;
+            let btn = $(`#btnDelQA-${rowIndex}`);
+            btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
+
+            postToGAS({ action: "deleteQA", rowIndex: rowIndex }, function(res) {
+                alert(res); loadQAData(); checkNewQA();
+            }, function() { alert("Lỗi khi xóa Q&A!"); btn.html('<i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này').prop('disabled', false); });
+        }
+
         // ==========================================
-        // KHỐI LOGIC LIÊN KẾT (WEB LINKS)
+        // CÁC LOGIC LIÊN KẾT & LOGIN CŨ...
         // ==========================================
         function loadWebLinks() {
-            $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải danh sách liên kết...</div>');
+            $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải...</div>');
             $.ajax({
                 url: SCRIPT_URL + "?action=getWebLinks", method: "GET", dataType: "json",
                 success: function(data) {
                     if (!data || data.length === 0) {
-                        $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào được cập nhật.</div>');
-                        return;
+                        $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào.</div>'); return;
                     }
                     let html = '';
                     data.forEach(row => {
-                        let title = row[0] || 'Liên kết mới'; let desc = row[1] || ''; let url = row[2] || '#'; let iconClass = row[3] || 'fa-solid fa-link';
-                        html += `
-                        <div class="col-12 col-md-6">
-                            <a href="${url}" target="_blank" class="link-card">
-                                <div class="icon-box"><i class="${iconClass}"></i></div>
-                                <div><h5>${title}</h5><p>${desc}</p></div>
-                            </a>
-                        </div>`;
+                        let title = row[0] || 'Liên kết'; let desc = row[1] || ''; let url = row[2] || '#'; let iconClass = row[3] || 'fa-solid fa-link';
+                        html += `<div class="col-12 col-md-6"><a href="${url}" target="_blank" class="link-card"><div class="icon-box"><i class="${iconClass}"></i></div><div><h5>${title}</h5><p>${desc}</p></div></a></div>`;
                     });
                     $('#webLinksContainer').html(html);
-                },
-                error: function() { $('#webLinksContainer').html('<div class="col-12 text-center text-danger py-5">Lỗi kết nối dữ liệu.</div>'); }
+                }
             });
         }
 
@@ -917,33 +1000,27 @@
                 $(`#voteArea-${rowIndex} .up`).html(`<i class="fa-solid fa-thumbs-up"></i> Hữu ích (${data.up})`);
                 $(`#voteArea-${rowIndex} .down`).html(`<i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${data.down})`);
                 $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false);
-            }, function() {
-                alert("Lỗi khi gửi đánh giá."); $(btnElement).html(originalText); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false);
-            });
+            }, function() { alert("Lỗi khi đánh giá."); $(btnElement).html(originalText); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false); });
         }
 
         function sendReply(rowIndex) {
             let replyText = $(`#txtReply-${rowIndex}`).val().trim();
             if (!replyText) { alert("Vui lòng nhập nội dung phản hồi!"); return; }
             let btn = $(`#btnSendReply-${rowIndex}`);
-            btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...').prop('disabled', true);
+            btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
 
             postToGAS({ action: "replyToAdmin", rowIndex: rowIndex, replyText: replyText }, function(response) {
                 alert(response); loadQAData(); checkNewQA(); 
             }, function() { alert("Lỗi khi gửi phản hồi."); btn.html('Gửi phản hồi').prop('disabled', false); });
         }
 
-        // ==========================================
-        // KHỐI LOGIC ĐĂNG NHẬP ADMIN
-        // ==========================================
-        let isAdmin = false;
-
         function openAdminModal() {
             if (isAdmin) {
                 if (confirm("Bạn có muốn đăng xuất quyền Admin?")) {
                     isAdmin = false;
                     $('#btnAdminLoginToggle').html('<i class="fa-solid fa-lock"></i> Dành cho Ban quản trị').css('color', 'var(--text-muted)');
-                    loadQAData(); 
+                    if (!$('#qaSection').hasClass('d-none')) { loadQAData(); }
+                    if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); }
                 }
             } else { $('#adminLoginError').addClass('d-none'); $('#txtAdminPass').val(''); $('#adminLoginModal').modal('show'); }
         }
@@ -953,7 +1030,9 @@
             if (pass === "#226244bc#TBC") {
                 isAdmin = true; $('#adminLoginModal').modal('hide');
                 $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
-                if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } alert("Xác thực quyền Admin thành công!");
+                if (!$('#qaSection').hasClass('d-none')) { loadQAData(); }
+                if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); }
+                alert("Xác thực quyền Admin thành công!");
             } else { $('#adminLoginError').removeClass('d-none'); }
         }
 
@@ -969,9 +1048,9 @@
         }
 
         // ==========================================
-        // TIỆN ÍCH CHO TKB (HỖ TRỢ LỌC TUẦN - BIÊN ĐỘ 52 TUẦN)
+        // CÁC HÀM THỜI GIAN
         // ==========================================
-        let currentWeekOffset = 0; let globalTkbData = [];    
+        let currentWeekOffset = 0;
 
         function parseDateString(dateStr) {
             if (!dateStr || dateStr.trim() === "") return null;
@@ -1009,18 +1088,13 @@
         }
 
         function syncDropdown() { $('#weekSelect').val(currentWeekOffset); }
-
         function changeWeek(delta) {
             currentWeekOffset += delta;
             if (currentWeekOffset < -52) currentWeekOffset = -52;
             if (currentWeekOffset > 52) currentWeekOffset = 52;
             syncDropdown(); filterAndRenderTKB();
         }
-
-        function resetWeek() {
-            if (currentWeekOffset !== 0) { currentWeekOffset = 0; syncDropdown(); filterAndRenderTKB(); }
-        }
-
+        function resetWeek() { if (currentWeekOffset !== 0) { currentWeekOffset = 0; syncDropdown(); filterAndRenderTKB(); } }
         function jumpToWeek(val) { currentWeekOffset = parseInt(val); filterAndRenderTKB(); }
 
         function filterAndRenderTKB() {
