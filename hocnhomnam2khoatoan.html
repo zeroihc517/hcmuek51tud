@@ -445,9 +445,9 @@
 
             <footer class="fixed-bottom-footer">
                 <div class="footer-info-left">
-                    <span><i class="fa-solid fa-user-shield text-primary-light"></i> <strong>Email liên hệ</strong> </span>
+                    <span><i class="fa-solid fa-user-shield text-primary-light"></i> <strong>Admin</strong> </span>
                     <span class="d-none d-md-inline" style="color: #64748b;">|</span>
-                    <span class="d-none d-md-inline"><i class="fa-solid fa-envelope text-primary-light"></i> <a href="mailto: giaidapthacmac@outlook.com.vn">giaidapthacmac@outlook.com.vn</a></span>
+                    <span class="d-none d-md-inline"><i class="fa-solid fa-envelope text-primary-light"></i> <a href="mailto: admin@outlook.com.vn">admin@outlook.com.vn</a></span>
                 </div>
                 
                 <div class="footer-info-right">
@@ -576,7 +576,8 @@
                 method: "GET",
                 dataType: "json",
                 success: function(data) {
-                    let courseData = data.map(row => ({
+                    // SỬA Ở ĐÂY: Gán trực tiếp vào globalTkbData thay vì dùng let courseData
+                    globalTkbData = data.map(row => ({
                         thu: parseInt(row[0]) || 0,
                         tietBd: parseInt(row[1]) || 0,
                         soTiet: parseInt(row[2]) || 1,
@@ -585,10 +586,13 @@
                         mon: row[5] || "",       
                         phong: row[6] || "",     
                         gv: row[7] || "",        
-                        color: row[8] || "#e0f2fe" 
+                        color: row[8] || "#e0f2fe",
+                        ngayBatDau: row[9] || "",  // Lấy thêm ngày bắt đầu từ Sheet
+                        ngayKetThuc: row[10] || "" // Lấy thêm ngày kết thúc từ Sheet
                     })).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
 
-                    renderTKBTable(courseData);
+                    // SỬA Ở ĐÂY: Gọi hàm filterAndRenderTKB để nó tự xử lý logic tuần hiện tại thay vì render thẳng
+                    filterAndRenderTKB();
                 },
                 error: function() {
                     $('#tkb-body').html('<tr><td colspan="9" style="color: red; padding: 20px; text-align:center;">Lỗi kết nối dữ liệu Thời gian biểu!</td></tr>');
