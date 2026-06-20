@@ -423,13 +423,13 @@
                 <div class="footer-info-left">
                     <span><i class="fa-solid fa-user-shield text-primary-light"></i> <strong>Admin</strong> </span>
                     <span class="d-none d-md-inline" style="color: #64748b;">|</span>
-                    <span class="d-none d-md-inline"><i class="fa-solid fa-envelope text-primary-light"></i> <a href="mailto: giaidapthacmac@outlook.com.vn">giaidapthacmac@outlook.com.vn</a></span>
+                    <span class="d-none d-md-inline"><i class="fa-solid fa-envelope text-primary-light"></i> <a href="mailto: admin@outlook.com.vn">admin@outlook.com.vn</a></span>
                 </div>
                 
                 <div class="footer-info-right">
                     <span class="d-none d-sm-inline"><i class="fa-solid fa-link text-primary-light"></i> Truy cập nhanh:</span>
-                    <a href="https://teams.cloud.microsoft/l/team/19%3AG3AZ0si8ueyRMaXW3zI-siWOxk1cyIA9Aol3zliL8Sw1%40thread.tacv2/conversations?groupId=d88461ae-d3dd-44d2-aae0-e8d021da1e68&tenantId=b1a9fdc0-1d56-4c3d-a481-809fff8a26db"><i class="fa-brands fa-microsoft"></i> Nhóm Teams</a>
-                    <a href="https://classroom.google.com/c/ODI0MjY2NDc0OTQx?cjc=fmvongzm"><i class="fa-solid fa-chalkboard-user"></i> Google Classroom</a>
+                    <a href="#"><i class="fa-brands fa-microsoft"></i> Nhóm Teams</a>
+                    <a href="#"><i class="fa-solid fa-chalkboard-user"></i> Google Classroom</a>
                 </div>
             </footer>
         </main>
@@ -737,10 +737,17 @@
                         let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
 
                         if (rowIndex === 0) {
-                            headHtml += `<th>${String(row[0] || 'STT')}</th><th>${String(row[1] || 'Nội dung')}</th><th>${String(row[2] || 'Hình thức')}</th><th>${String(row[4] || row[3] || 'Tài liệu học tập')}</th>`;
-                            if (isAdmin && currentSheetName === 'Thông báo') headHtml += `<th style="width: 100px;">Thao tác</th>`;
-                            return;
-                        }
+    // Ép tỷ lệ và kích thước tối thiểu cho các cột để không bị nội dung dài chèn ép
+    headHtml += `<th style="width: 3%; min-width: 120px;">${String(row[0] || 'STT')}</th>`;
+    headHtml += `<th>${String(row[1] || 'Nội dung')}</th>`; // Không set width để cột này tự động co giãn ôm hết phần diện tích dư
+    headHtml += `<th style="width: 15%; min-width: 140px;">${String(row[2] || 'Hình thức')}</th>`;
+    headHtml += `<th style="width: 15%; min-width: 160px;">${String(row[4] || row[3] || 'Tài liệu học tập')}</th>`;
+    
+    if (isAdmin && currentSheetName === 'Thông báo') {
+        headHtml += `<th style="width: 110px; min-width: 110px;">Thao tác</th>`;
+    }
+    return;
+}
 
                         if (/mãhp|họcphần|gv\d|giảngviên|email|facebook|sốtínchỉ/.test(fullRowText)) {
                             let info = row.filter(cell => String(cell).trim() !== "").join(" <span class='mx-2 text-black-50'>|</span> ");
@@ -753,7 +760,7 @@
 
                         if (isNewRow) { rowClass += ' row-new'; }
                         else if (/ngânhàng/.test(fullRowText)) { rowClass += ' row-white'; iconPrefix = '<i class="fa-solid fa-box-archive me-2 text-secondary"></i>'; }
-                        else if (/bàithi|kiểmtra|thi/.test(fullRowText)) { rowClass += ' row-exam'; iconPrefix = '<i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>'; }
+                        else if (/bàithi|kiểmtra/.test(fullRowText)) { rowClass += ' row-exam'; iconPrefix = '<i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>'; }
                         else if (/chủđề|chương/.test(firstCellText)) { rowClass += ' row-topic'; }
                         else if (/bài/.test(firstCellText)) { rowClass += ' row-lesson'; iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; }
 
