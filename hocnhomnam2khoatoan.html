@@ -351,7 +351,7 @@
                     <h6 class="mb-3" style="color: var(--accent-red);"><i class="fa-solid fa-bullhorn"></i> Đăng thông báo mới</h6>
                     <div class="row g-3 mb-3">
                         <div class="col-md-3">
-                            <label class="form-label fw-bold small text-muted">STT</label>
+                            <label class="form-label fw-bold small text-muted">STT / Tiêu đề</label>
                             <input type="text" id="txtNotifCol1" class="form-control" placeholder="VD: NEW hoặc STT...">
                         </div>
                         <div class="col-md-5">
@@ -359,7 +359,7 @@
                             <input type="text" id="txtNotifCol2" class="form-control" placeholder="Nhập nội dung thông báo...">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-bold small text-muted">Ngày cập nhật</label>
+                            <label class="form-label fw-bold small text-muted">Ngày cập nhật / Hình thức</label>
                             <input type="text" id="txtNotifCol3" class="form-control" placeholder="VD: 01/01/2026...">
                         </div>
                         <div class="col-md-12">
@@ -482,6 +482,27 @@
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
                     <button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditNotification()" id="btnSaveEditNotif">Lưu thay đổi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editQAModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-warning text-dark">
+                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa câu trả lời Q&A</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nội dung câu trả lời</label>
+                        <textarea id="editQAText" class="form-control" rows="6" placeholder="Nhập nội dung chỉnh sửa tại đây..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditQA()" id="btnSaveEditQA">Lưu thay đổi</button>
                 </div>
             </div>
         </div>
@@ -784,7 +805,7 @@
         }
 
         // ==========================================
-        // KHỐI LOGIC Q&A: SỬA/XÓA TỪNG PHẦN (ADMIN)
+        // KHỐI LOGIC Q&A: SỬA/XÓA TỪNG PHẦN (ADMIN) BẰNG MODAL
         // ==========================================
         function checkNewQA() {
             $.ajax({
@@ -826,9 +847,7 @@
             return str.substring(0, 3) + '***' + str.substring(str.length - 3);
         }
 
-        // Tách chuỗi thành mảng các phần độc lập
         function parseThread(text, rowIndex) {
-            // Tách theo Regex (giữ lại cả chuỗi [SV]...[/SV])
             let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== "");
             window.qaThreadParts[rowIndex] = parts;
 
@@ -848,7 +867,7 @@
                     html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${content}`;
                     if (isAdmin) {
                         html += `<div class="mt-2 text-end">
-                            <button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="editThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button>
+                            <button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="openEditQAModal(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button>
                             <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa</button>
                         </div>`;
                     }
@@ -862,23 +881,41 @@
             if(!confirm("Bạn có chắc chắn muốn xóa đoạn tin nhắn này?")) return;
             window.qaThreadParts[rowIndex].splice(partIndex, 1);
             let fullText = window.qaThreadParts[rowIndex].join("\n\n");
-            syncQAThread(rowIndex, fullText);
-        }
-
-        function editThreadPart(rowIndex, partIndex) {
-            let oldText = window.qaThreadParts[rowIndex][partIndex].trim();
-            let newText = prompt("Chỉnh sửa trả lời của Admin:", oldText);
-            if(newText !== null && newText.trim() !== "") {
-                window.qaThreadParts[rowIndex][partIndex] = newText.trim();
-                let fullText = window.qaThreadParts[rowIndex].join("\n\n");
-                syncQAThread(rowIndex, fullText);
-            }
-        }
-
-        function syncQAThread(rowIndex, fullText) {
+            
             postToGAS({ action: "updateQAThread", rowIndex: rowIndex, fullText: fullText }, function(res) {
-                loadQAData(); // Load lại ngay sau khi thay đổi
+                loadQAData();
             }, function() { alert("Lỗi khi đồng bộ chuỗi trả lời!"); });
+        }
+
+        let editQARowIndex = -1;
+        let editQAPartIndex = -1;
+
+        function openEditQAModal(rowIndex, partIndex) {
+            editQARowIndex = rowIndex;
+            editQAPartIndex = partIndex;
+            let oldText = window.qaThreadParts[rowIndex][partIndex].trim();
+            $('#editQAText').val(oldText);
+            $('#editQAModal').modal('show');
+        }
+
+        function saveEditQA() {
+            let newText = $('#editQAText').val().trim();
+            if (newText === "") { alert("Nội dung không được để trống!"); return; }
+            
+            let btn = $('#btnSaveEditQA');
+            btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...').prop('disabled', true);
+
+            window.qaThreadParts[editQARowIndex][editQAPartIndex] = newText;
+            let fullText = window.qaThreadParts[editQARowIndex].join("\n\n");
+            
+            postToGAS({ action: "updateQAThread", rowIndex: editQARowIndex, fullText: fullText }, function(res) {
+                btn.html('Lưu thay đổi').prop('disabled', false);
+                $('#editQAModal').modal('hide');
+                loadQAData(); 
+            }, function() { 
+                alert("Lỗi khi đồng bộ chuỗi trả lời!"); 
+                btn.html('Lưu thay đổi').prop('disabled', false); 
+            });
         }
 
         function loadQAData() {
@@ -911,7 +948,7 @@
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong></div>`;
                         
-                        if (isAdmin) html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ</button>`;
+                        if (isAdmin) html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`;
 
                         html += `</div>
                                  <div class="qa-question">${question}</div>`;
@@ -925,7 +962,7 @@
                                         <button class="btn-vote down" onclick="castVote(${rowIndex}, 'down', this)"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button>
                                     </div>
                                     <button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')">
-                                        <i class="fa-solid fa-comment-dots"></i> Phản hồi admin
+                                        <i class="fa-solid fa-comment-dots"></i> Phản hồi thêm
                                     </button>
                                 </div>
                                 <div id="replyBox-${rowIndex}" class="reply-box d-none">
