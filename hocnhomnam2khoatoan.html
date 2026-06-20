@@ -298,6 +298,9 @@
                 <button class="btn mt-3 w-100 text-start" id="btnAdminLoginToggle" onclick="openAdminModal()" style="color: var(--text-muted); font-size: 14px; font-weight: 500;">
                     <i class="fa-solid fa-lock"></i> Dành cho Ban quản trị
                 </button>
+                <button class="btn mt-2 w-100 text-start d-none" id="btnManageCategories" onclick="openCategoryManager()" style="color: var(--accent-red); font-size: 14px; font-weight: 600;">
+                    <i class="fa-solid fa-list-check"></i> Quản lý Danh mục truy cập
+                </button>
             </div>
         </aside>
 
@@ -373,7 +376,7 @@
                         <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="submitRowData()" id="btnSubmitRow">
                             <i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng
                         </button>
-<button class="btn btn-outline-danger fw-bold px-4" onclick="submitRowBottomData()" id="btnSubmitRowBottom">
+                        <button class="btn btn-outline-danger fw-bold px-4" onclick="submitRowBottomData()" id="btnSubmitRowBottom">
                             <i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng
                         </button>
                     </div>
@@ -470,22 +473,10 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 1</label>
-                        <input type="text" id="insertCol1" class="form-control" placeholder="Nhập cột 1">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 2</label>
-                        <textarea id="insertCol2" class="form-control" rows="3" placeholder="Nhập cột 2"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 3</label>
-                        <input type="text" id="insertCol3" class="form-control" placeholder="Nhập cột 3">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 4</label>
-                        <input type="text" id="insertCol4" class="form-control" placeholder="Nhập cột 4">
-                    </div>
+                    <div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="insertCol1" class="form-control" placeholder="Nhập cột 1"></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="insertCol2" class="form-control" rows="3" placeholder="Nhập cột 2"></textarea></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="insertCol3" class="form-control" placeholder="Nhập cột 3"></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="insertCol4" class="form-control" placeholder="Nhập cột 4"></div>
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
@@ -503,22 +494,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 1</label>
-                        <input type="text" id="editCol1" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 2</label>
-                        <textarea id="editCol2" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 3</label>
-                        <input type="text" id="editCol3" class="form-control">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 4</label>
-                        <input type="text" id="editCol4" class="form-control">
-                    </div>
+                    <div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="editCol1" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="editCol2" class="form-control" rows="3"></textarea></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="editCol3" class="form-control"></div>
+                    <div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="editCol4" class="form-control"></div>
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
@@ -549,15 +528,47 @@
         </div>
     </div>
 
+    <div class="modal fade" id="manageCategoryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Quản lý Danh mục truy cập</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="input-group mb-4">
+                        <input type="text" id="txtNewCategory" class="form-control" placeholder="Nhập tên danh mục (học phần) mới...">
+                        <button class="btn fw-bold text-white" style="background: var(--accent-red);" onclick="addCategory()" id="btnAddCategory">
+                            <i class="fa-solid fa-plus me-1"></i> Thêm mới
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover border align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tên danh mục</th>
+                                    <th class="text-end" style="width: 200px;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoryManagerList">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQ0TkAtJ-iEOurKanohAsejXtGjiEhBOT7H7Q-dRT0sqtREn5XPF5DvCDE7DLGgWmV/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsAEpU3Ucc-fHUwXf9dTW3s5ls3qNMx7onQWmFj7p_Va5kkk5YibLYDQs61tx0PKPM/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
-        let currentSheetTotalRows = 0; // Biến theo dõi tổng số dòng để chèn xuống cuối cùng
+        let currentSheetTotalRows = 0;
         window.qaThreadParts = {};
+        let globalCategories = []; 
 
         function postToGAS(payload, onSuccess, onError) {
             $.ajax({
@@ -594,23 +605,35 @@
             loadThoiGianBieu();
         }
 
+        function fetchAndRenderCategories() {
+            $('#dynamicCourseList').html('<span class="text-muted small px-2">Đang tải danh sách...</span>');
+            $.ajax({
+                url: SCRIPT_URL + "?action=getHocPhanList", method: "GET", dataType: "json",
+                success: function(list) {
+                    globalCategories = list;
+                    renderSidebarCategories();
+                    if ($('#manageCategoryModal').is(':visible')) {
+                        renderCategoryManager();
+                    }
+                }
+            });
+        }
+
+        function renderSidebarCategories() {
+            let optionsHtml = '';
+            globalCategories.forEach((name) => {
+                if(name.trim().toLowerCase() !== 'thông báo') {
+                    optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)"><i class="fa-solid fa-folder-closed"></i> ${name}</button>`;
+                }
+            });
+            $('#dynamicCourseList').html(optionsHtml);
+        }
+
         $(document).ready(function() {
             populateWeekDropdown();
             loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
             loadWebLinks(); checkNewQA(); 
-            
-            $.ajax({
-                url: SCRIPT_URL + "?action=getHocPhanList", method: "GET", dataType: "json",
-                success: function(list) {
-                    let optionsHtml = '';
-                    list.forEach((name) => {
-                        if(name.trim().toLowerCase() !== 'thông báo') {
-                            optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)"><i class="fa-solid fa-folder-closed"></i> ${name}</button>`;
-                        }
-                    });
-                    $('#dynamicCourseList').html(optionsHtml);
-                }
-            });
+            fetchAndRenderCategories();
         });
 
         function loadThoiGianBieu() {
@@ -661,9 +684,6 @@
             tbody.innerHTML = tableHtml;
         }
 
-        // ==========================================
-        // CÁC HÀM XỬ LÝ NỘI DUNG (THÊM / SỬA / XÓA / DI CHUYỂN / CHÈN)
-        // ==========================================
         function checkAndExtractUrl(text) {
             let urlRegex = /(https?:\/\/[^\s]+)/g;
             let match = text.match(urlRegex);
@@ -673,13 +693,9 @@
         function submitRowData() {
             let col1 = $('#txtCol1').val().trim(); let col2 = $('#txtCol2').val().trim();
             let col3 = $('#txtCol3').val().trim(); let col4 = $('#txtCol4').val().trim();
-
             if (!col1 && !col2) { alert("Vui lòng nhập nội dung!"); return; }
-
             let btn = $('#btnSubmitRow');
             btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
-
-            // Chèn bằng cách mượn hàm insertRowAfter ở vị trí dòng 1 (Tức là ngay dưới header)
             postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: 1, col1: col1, col2: col2, col3: col3, col4: col4 }, function(response) {
                 alert(response);
                 $('#txtCol1').val(''); $('#txtCol2').val(''); $('#txtCol3').val(''); $('#txtCol4').val('');
@@ -691,13 +707,9 @@
         function submitRowBottomData() {
             let col1 = $('#txtCol1').val().trim(); let col2 = $('#txtCol2').val().trim();
             let col3 = $('#txtCol3').val().trim(); let col4 = $('#txtCol4').val().trim();
-
             if (!col1 && !col2) { alert("Vui lòng nhập nội dung!"); return; }
-
             let btn = $('#btnSubmitRowBottom');
             btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
-
-            // Chèn xuống cuối cùng bằng cách sử dụng currentSheetTotalRows
             postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: currentSheetTotalRows, col1: col1, col2: col2, col3: col3, col4: col4 }, function(response) {
                 alert(response);
                 $('#txtCol1').val(''); $('#txtCol2').val(''); $('#txtCol3').val(''); $('#txtCol4').val('');
@@ -717,12 +729,9 @@
         function saveInsertRow() {
             let c1 = $('#insertCol1').val().trim(); let c2 = $('#insertCol2').val().trim();
             let c3 = $('#insertCol3').val().trim(); let c4 = $('#insertCol4').val().trim();
-            
             if (!c1 && !c2) { alert("Vui lòng nhập nội dung!"); return; }
-
             let btn = $('#btnSaveInsertRow');
             btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
-
             postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: insertRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4 }, res => {
                 alert(res); btn.html('Chèn nội dung').prop('disabled', false);
                 $('#insertRowModal').modal('hide');
@@ -743,7 +752,6 @@
             let c3 = $('#editCol3').val(); let c4 = $('#editCol4').val();
             let btn = $('#btnSaveEditRow');
             btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
-
             postToGAS({ action: "editSheetRow", sheetName: currentSheetName, rowIndex: editRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4 }, res => {
                 alert(res); btn.html('Lưu thay đổi').prop('disabled', false);
                 $('#editRowModal').modal('hide');
@@ -845,9 +853,8 @@
                             }
                         });
 
-                        // CỘT THAO TÁC CỦA ADMIN MỞ RỘNG (CHÈN & DI CHUYỂN)
                         if (isAdmin) {
-                            let sheetRowIndex = rowIndex + 1; // rowIndex của mảng là 1 -> dòng 2 trong sheet
+                            let sheetRowIndex = rowIndex + 1;
                             let c1 = String(row[0]||'').replace(/'/g, "\\'"); let c2 = String(row[1]||'').replace(/'/g, "\\'");
                             let c3 = String(row[2]||'').replace(/'/g, "\\'"); let c4 = String(row[3]||'').replace(/'/g, "\\'");
                             
@@ -861,7 +868,6 @@
                                 </div>
                             </td>`;
                         }
-
                         bodyHtml += '</tr>';
                     });
 
@@ -962,7 +968,6 @@
         }
 
         let editQARowIndex = -1; let editQAPartIndex = -1;
-
         function openEditQAModal(rowIndex, partIndex) {
             editQARowIndex = rowIndex; editQAPartIndex = partIndex;
             let oldText = window.qaThreadParts[rowIndex][partIndex].trim();
@@ -1003,7 +1008,6 @@
                     }
 
                     let html = ''; let hasUnanswered = false;
-
                     data.forEach(row => {
                         let time = row[0] || ''; let rawMssv = row[1] || '';
                         let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
@@ -1074,9 +1078,6 @@
             }, function() { alert("Lỗi khi xóa Q&A!"); btn.html('<i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này').prop('disabled', false); });
         }
 
-        // ==========================================
-        // CÁC LOGIC LIÊN KẾT & LOGIN...
-        // ==========================================
         function loadWebLinks() {
             $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải...</div>');
             $.ajax({
@@ -1123,6 +1124,7 @@
                 if (confirm("Bạn có muốn đăng xuất quyền Admin?")) {
                     isAdmin = false;
                     $('#btnAdminLoginToggle').html('<i class="fa-solid fa-lock"></i> Dành cho Ban quản trị').css('color', 'var(--text-muted)');
+                    $('#btnManageCategories').addClass('d-none');
                     if (!$('#qaSection').hasClass('d-none')) { loadQAData(); }
                     if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); }
                 }
@@ -1134,6 +1136,7 @@
             if (pass === "#226244bc#TBC") {
                 isAdmin = true; $('#adminLoginModal').modal('hide');
                 $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
+                $('#btnManageCategories').removeClass('d-none');
                 if (!$('#qaSection').hasClass('d-none')) { loadQAData(); }
                 if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); }
                 alert("Xác thực quyền Admin thành công!");
@@ -1149,6 +1152,86 @@
             postToGAS({ action: "adminReplyQuestion", rowIndex: rowIndex, replyText: replyText }, function(response) {
                 alert(response); loadQAData(); checkNewQA(); 
             }, function() { alert("Lỗi khi gửi trả lời."); btn.html('<i class="fa-solid fa-reply"></i> Đăng câu trả lời').prop('disabled', false); });
+        }
+
+        // ==========================================
+        // CÁC HÀM QUẢN LÝ DANH MỤC TRUY CẬP (THÊM, SỬA, XÓA, DI CHUYỂN)
+        // ==========================================
+        function openCategoryManager() {
+            renderCategoryManager();
+            $('#manageCategoryModal').modal('show');
+        }
+
+        function renderCategoryManager() {
+            let html = '';
+            globalCategories.forEach((name, index) => {
+                if(name.trim().toLowerCase() === 'thông báo') return;
+                
+                html += `<tr>
+                    <td>
+                        <input type="text" class="form-control form-control-sm category-input" id="catEdit-${index}" value="${name}" disabled>
+                    </td>
+                    <td class="text-end">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="moveCategory('${name}', 'up')" title="Lên"><i class="fa-solid fa-arrow-up"></i></button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="moveCategory('${name}', 'down')" title="Xuống"><i class="fa-solid fa-arrow-down"></i></button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="toggleEditCategory(${index}, '${name}')" id="btnEditCat-${index}"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCategory('${name}')"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+            $('#categoryManagerList').html(html);
+        }
+
+        function addCategory() {
+            let newName = $('#txtNewCategory').val().trim();
+            if (!newName) { alert("Vui lòng nhập tên danh mục!"); return; }
+            
+            let btn = $('#btnAddCategory');
+            btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
+            
+            postToGAS({ action: "addHocPhan", name: newName }, res => {
+                alert(res);
+                $('#txtNewCategory').val('');
+                btn.html('<i class="fa-solid fa-plus me-1"></i> Thêm mới').prop('disabled', false);
+                fetchAndRenderCategories();
+            }, () => { alert("Lỗi kết nối!"); btn.html('<i class="fa-solid fa-plus me-1"></i> Thêm mới').prop('disabled', false); });
+        }
+
+        function deleteCategory(name) {
+            if(!confirm(`Xác nhận xóa danh mục: ${name}? (Lưu ý: Sheet dữ liệu tương ứng có thể sẽ bị xóa hoặc ẩn)`)) return;
+            postToGAS({ action: "deleteHocPhan", name: name }, res => {
+                alert(res);
+                fetchAndRenderCategories();
+            });
+        }
+
+        function moveCategory(name, direction) {
+            postToGAS({ action: "moveHocPhan", name: name, direction: direction }, res => {
+                fetchAndRenderCategories();
+            });
+        }
+
+        function toggleEditCategory(index, oldName) {
+            let input = $(`#catEdit-${index}`);
+            let btn = $(`#btnEditCat-${index}`);
+            
+            if (input.prop('disabled')) {
+                input.prop('disabled', false).focus();
+                btn.removeClass('btn-outline-primary').addClass('btn-success').html('<i class="fa-solid fa-check"></i>');
+            } else {
+                let newName = input.val().trim();
+                if (!newName || newName === oldName) {
+                    input.prop('disabled', true).val(oldName);
+                    btn.removeClass('btn-success').addClass('btn-outline-primary').html('<i class="fa-solid fa-pen"></i>');
+                    return;
+                }
+                
+                btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
+                postToGAS({ action: "editHocPhan", oldName: oldName, newName: newName }, res => {
+                    alert(res);
+                    fetchAndRenderCategories();
+                });
+            }
         }
 
         // ==========================================
