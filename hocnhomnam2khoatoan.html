@@ -348,28 +348,35 @@
                 </header>
 
                 <div id="adminAddRowArea" class="instructor-card d-none mb-3" style="border-left-color: var(--accent-red); padding: 24px;">
-                    <h6 class="mb-3" style="color: var(--accent-red);"><i class="fa-solid fa-bullhorn"></i> Thêm nội dung lên đầu bảng</h6>
+                    <h6 class="mb-3" style="color: var(--accent-red);"><i class="fa-solid fa-bullhorn"></i> Thêm nội dung</h6>
                     <div class="row g-3 mb-3">
                         <div class="col-md-3">
-                            <label class="form-label fw-bold small text-muted">Cột 1 (STT / Tiêu đề)</label>
+                            <label class="form-label fw-bold small text-muted">Cột 1</label>
                             <input type="text" id="txtCol1" class="form-control" placeholder="VD: NEW hoặc STT...">
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label fw-bold small text-muted">Cột 2 (Nội dung chi tiết)</label>
+                            <label class="form-label fw-bold small text-muted">Cột 2</label>
                             <input type="text" id="txtCol2" class="form-control" placeholder="Nhập nội dung...">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label fw-bold small text-muted">Cột 3 (Hình thức / Ngày)</label>
-                            <input type="text" id="txtCol3" class="form-control" placeholder="VD: Online, Offline, Thi...">
+                            <label class="form-label fw-bold small text-muted">Cột 3</label>
+                            <input type="text" id="txtCol3" class="form-control" placeholder="VD: Ngày 01/01/2026...">
                         </div>
                         <div class="col-md-12">
-                            <label class="form-label fw-bold small text-muted">Cột 4 (Tài liệu / Link đính kèm)</label>
+                            <label class="form-label fw-bold small text-muted">Cột 4</label>
                             <input type="text" id="txtCol4" class="form-control" placeholder="Dán đường dẫn (link) hoặc ghi chú thêm tại đây...">
                         </div>
                     </div>
-                    <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="submitRowData()" id="btnSubmitRow">
-                        <i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu trang
-                    </button>
+                    
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        
+                        <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="submitRowData()" id="btnSubmitRow">
+                            <i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng
+                        </button>
+<button class="btn btn-outline-danger fw-bold px-4" onclick="submitRowBottomData()" id="btnSubmitRowBottom">
+                            <i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng
+                        </button>
+                    </div>
                 </div>
 
                 <div id="instructorArea" class="d-none"></div>
@@ -387,6 +394,7 @@
                         </table>
                     </div>
                 </div>
+
             </div>
 
             <div id="qaSection" class="d-none">
@@ -463,19 +471,19 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 1 (STT / Tiêu đề)</label>
+                        <label class="form-label fw-bold">Cột 1</label>
                         <input type="text" id="insertCol1" class="form-control" placeholder="Nhập cột 1">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 2 (Nội dung chi tiết)</label>
+                        <label class="form-label fw-bold">Cột 2</label>
                         <textarea id="insertCol2" class="form-control" rows="3" placeholder="Nhập cột 2"></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 3 (Hình thức / Ngày)</label>
+                        <label class="form-label fw-bold">Cột 3</label>
                         <input type="text" id="insertCol3" class="form-control" placeholder="Nhập cột 3">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 4 (Tài liệu / Link đính kèm)</label>
+                        <label class="form-label fw-bold">Cột 4</label>
                         <input type="text" id="insertCol4" class="form-control" placeholder="Nhập cột 4">
                     </div>
                 </div>
@@ -496,19 +504,19 @@
                 </div>
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 1 (STT / Tiêu đề)</label>
+                        <label class="form-label fw-bold">Cột 1</label>
                         <input type="text" id="editCol1" class="form-control">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 2 (Nội dung chi tiết)</label>
+                        <label class="form-label fw-bold">Cột 2</label>
                         <textarea id="editCol2" class="form-control" rows="3"></textarea>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 3 (Hình thức / Ngày)</label>
+                        <label class="form-label fw-bold">Cột 3</label>
                         <input type="text" id="editCol3" class="form-control">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Cột 4 (Tài liệu / Link đính kèm)</label>
+                        <label class="form-label fw-bold">Cột 4</label>
                         <input type="text" id="editCol4" class="form-control">
                     </div>
                 </div>
@@ -548,6 +556,7 @@
 
         let isAdmin = false;
         let currentSheetName = "";
+        let currentSheetTotalRows = 0; // Biến theo dõi tổng số dòng để chèn xuống cuối cùng
         window.qaThreadParts = {};
 
         function postToGAS(payload, onSuccess, onError) {
@@ -674,9 +683,27 @@
             postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: 1, col1: col1, col2: col2, col3: col3, col4: col4 }, function(response) {
                 alert(response);
                 $('#txtCol1').val(''); $('#txtCol2').val(''); $('#txtCol3').val(''); $('#txtCol4').val('');
-                btn.html('<i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu trang').prop('disabled', false);
+                btn.html('<i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng').prop('disabled', false);
                 loadDataByHocPhan(currentSheetName);
-            }, function() { alert("Lỗi kết nối!"); btn.html('<i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu trang').prop('disabled', false); });
+            }, function() { alert("Lỗi kết nối!"); btn.html('<i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng').prop('disabled', false); });
+        }
+
+        function submitRowBottomData() {
+            let col1 = $('#txtCol1').val().trim(); let col2 = $('#txtCol2').val().trim();
+            let col3 = $('#txtCol3').val().trim(); let col4 = $('#txtCol4').val().trim();
+
+            if (!col1 && !col2) { alert("Vui lòng nhập nội dung!"); return; }
+
+            let btn = $('#btnSubmitRowBottom');
+            btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
+
+            // Chèn xuống cuối cùng bằng cách sử dụng currentSheetTotalRows
+            postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: currentSheetTotalRows, col1: col1, col2: col2, col3: col3, col4: col4 }, function(response) {
+                alert(response);
+                $('#txtCol1').val(''); $('#txtCol2').val(''); $('#txtCol3').val(''); $('#txtCol4').val('');
+                btn.html('<i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng').prop('disabled', false);
+                loadDataByHocPhan(currentSheetName);
+            }, function() { alert("Lỗi kết nối!"); btn.html('<i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng').prop('disabled', false); });
         }
 
         let insertRowIndexVar = -1;
@@ -764,11 +791,13 @@
                 url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName), method: "GET", dataType: "json",
                 success: function(data) {
                     if (!data || data.length === 0) {
+                        currentSheetTotalRows = 1;
                         $('#sheetTableBody').html('<tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa-regular fa-folder-open fs-1 mb-3 d-block"></i>Chưa có dữ liệu.</td></tr>');
                         $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none');
                         return;
                     }
 
+                    currentSheetTotalRows = data.length;
                     let bodyHtml = ''; let headHtml = ''; let instructorInfos = [];
 
                     data.forEach((row, rowIndex) => {
