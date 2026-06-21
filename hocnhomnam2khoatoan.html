@@ -1443,7 +1443,7 @@ function loadQAData() {
             let select = $('#weekSelect'); select.empty();
             let today = new Date(); today.setHours(0,0,0,0); let currentDay = today.getDay(); let diffToMonday = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1);
             let currentMonday = new Date(today.setDate(diffToMonday));
-            for (let i = 0; i <= 52; i++) {
+            for (let i = -1; i <= 28; i++) {
                 let m = new Date(currentMonday); m.setDate(m.getDate() + (i * 7)); let s = new Date(m); s.setDate(s.getDate() + 6);
                 let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
                 let label = `Từ ngày ${format(m)} đến ${format(s)}`; if (i === 0) label = `Từ ngày ${format(m)} đến ${format(s)} (Hiện tại)`;
