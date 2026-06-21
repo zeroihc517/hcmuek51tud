@@ -149,7 +149,7 @@
         .instructor-item i { color: var(--primary-color); margin-top: 4px; font-size: 18px; }
 
         .data-card { background: var(--card-bg); border-radius: var(--card-border-radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); overflow: hidden; }
-        .custom-portal-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .custom-portal-table { width: 100%; min-width: 850px; border-collapse: separate; border-spacing: 0; }
         .custom-portal-table th { background: var(--primary-color); color: #ffffff; font-weight: 600; font-size: 16px; text-transform: uppercase; padding: 18px 24px; border-right: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10; }
         .custom-portal-table td { padding: 20px 24px; border-bottom: 1px solid #e5e7eb; font-size: 16px; font-weight: 500; vertical-align: middle; color: var(--text-main); white-space: pre-wrap; word-break: break-word; }
 
@@ -240,6 +240,26 @@
             .custom-portal-table th, .custom-portal-table td { padding: 16px; font-size: 15px; }
             .fixed-bottom-footer { flex-direction: column; gap: 6px; padding: 10px; font-size: 12px; height: auto; text-align: center; }
             .sidebar { bottom: 65px; } 
+        }
+
+        /* Custom thanh lướt ngang cho bảng */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch; /* Giúp lướt mượt mà trên màn hình cảm ứng */
+            padding-bottom: 8px; /* Tăng khoảng trống để thanh cuộn không đè vào chữ */
+        }
+
+        /* Ép thanh cuộn hiển thị trên mobile */
+        .table-responsive::-webkit-scrollbar {
+            height: 6px; /* Độ dày của thanh cuộn */
+        }
+        .table-responsive::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color); /* Màu của thanh trượt */
+            border-radius: 10px;
+        }
+        .table-responsive::-webkit-scrollbar-track {
+            background-color: var(--border-color); /* Màu nền của rãnh trượt */
+            border-radius: 10px;
         }
     </style>
 </head>
@@ -388,6 +408,10 @@
                     <div id="loadingStatus" class="pulse-loader">
                         <div class="spinner-modern"></div>
                         <span class="text-muted fw-bold" style="font-size: 16px;">Đang tải dữ liệu...</span>
+                    </div>
+
+                    <div id="swipeHint" class="d-none d-lg-none text-center py-2 fw-bold" style="font-size: 13px; color: var(--accent-red); background: var(--exam-bg); border-bottom: 1px dashed var(--exam-border);">
+                        <i class="fa-solid fa-arrows-left-right fa-fade me-1"></i> Vuốt ngang để xem hết các cột
                     </div>
 
                     <div id="tableWrapper" class="table-responsive d-none border-0">
@@ -784,6 +808,7 @@
 
             $('#courseSection').removeClass('d-none');
             $('#tableWrapper').addClass('d-none');
+            $('#swipeHint').addClass('d-none');
             $('#instructorArea').addClass('d-none').html('');
             $('#loadingStatus').removeClass('d-none');
 
@@ -801,7 +826,9 @@
                     if (!data || data.length === 0) {
                         currentSheetTotalRows = 1;
                         $('#sheetTableBody').html('<tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa-regular fa-folder-open fs-1 mb-3 d-block"></i>Chưa có dữ liệu.</td></tr>');
-                        $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none');
+                        $('#loadingStatus').addClass('d-none'); 
+                        $('#tableWrapper').removeClass('d-none');
+                        $('#swipeHint').removeClass('d-none');
                         return;
                     }
 
@@ -815,7 +842,7 @@
 
                         if (rowIndex === 0) {
                             headHtml += `<th style="width: 3%; min-width: 120px;">${String(row[0] || 'STT')}</th>`;
-                            headHtml += `<th>${String(row[1] || 'Nội dung')}</th>`; 
+                            headHtml += `<th style="min-width: 280px;">${String(row[1] || 'Nội dung')}</th>`;
                             headHtml += `<th style="width: 15%; min-width: 140px;">${String(row[2] || 'Hình thức')}</th>`;
                             headHtml += `<th style="width: 15%; min-width: 160px;">${String(row[4] || row[3] || 'Tài liệu học tập')}</th>`;
                             if (isAdmin) headHtml += `<th style="width: 180px; min-width: 180px;">Thao tác</th>`;
@@ -879,7 +906,9 @@
                     }
 
                     $('#sheetTableHead').html(headHtml); $('#sheetTableBody').html(bodyHtml);
-                    $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none');
+                    $('#loadingStatus').addClass('d-none'); 
+                    $('#tableWrapper').removeClass('d-none');
+                    $('#swipeHint').removeClass('d-none');
                 },
                 error: function() { $('#loadingStatus').html('<span class="text-danger fw-bold">Có lỗi xảy ra khi tải dữ liệu!</span>'); }
             });
