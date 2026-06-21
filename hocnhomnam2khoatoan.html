@@ -229,8 +229,8 @@
         .footer-info-left { display: flex; align-items: center; gap: 12px; }
         .footer-info-right { display: flex; align-items: center; gap: 15px; }
 
-        @media (max-width: 991.98px) {
-            .mobile-header { display: flex; align-items: center; justify-content: space-between; }
+       @media (max-width: 991.98px) {
+    .mobile-header { display: flex; align-items: center; justify-content: flex-start; gap: 16px; }
             .sidebar { transform: translateX(-100%); bottom: 0; }
             .sidebar.show { transform: translateX(0); }
             .sidebar-overlay.show { display: block; opacity: 1; }
@@ -266,13 +266,13 @@
 <body>
 
     <div class="mobile-header">
-        <h6 class="m-0 fw-bold text-white d-flex align-items-center gap-2" style="font-size: 20px;">
-            <i class="fa-solid fa-layer-group"></i> Học nhóm
-        </h6>
-        <button class="menu-toggle" id="btnToggleMenu">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-    </div>
+    <button class="menu-toggle" id="btnToggleMenu">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+    <h6 class="m-0 fw-bold text-white d-flex align-items-center gap-2" style="font-size: 20px;">
+        <i class="fa-solid fa-layer-group"></i> Học nhóm
+    </h6>
+</div>
 
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
