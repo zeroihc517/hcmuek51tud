@@ -10,7 +10,7 @@
     
     <style>
         :root {
-            --sidebar-width: 320px;
+            --sidebar-width: 260px;
             --primary-color: #154c79; 
             --primary-hover: #0f395c;
             --primary-light: #e8f1f8;
@@ -145,7 +145,7 @@
 
         .instructor-card { background: var(--card-bg); border: 1px solid var(--border-color); border-left: 6px solid var(--primary-color); border-radius: var(--card-border-radius); padding: 24px 32px; margin-bottom: 32px; box-shadow: var(--shadow-md); }
         .instructor-card h6 { font-size: 20px; font-weight: 700; color: var(--primary-color); }
-        .instructor-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; color: var(--text-main); font-size: 17px; font-weight: 500; }
+        .instructor-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; color: var(--text-main); font-size: 15px; font-weight: 500; }
         .instructor-item i { color: var(--primary-color); margin-top: 4px; font-size: 18px; }
 
         .data-card { background: var(--card-bg); border-radius: var(--card-border-radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); overflow: hidden; }
@@ -222,7 +222,7 @@
         .session-label { font-weight: bold; background: #fff; text-transform: uppercase; color: var(--primary-color); }
 
         .tkb-time-display {
-            font-size: 16.5px !important; 
+            font-size: 16px !important; 
             font-weight: 700 !important;
             color: #dc2626 !important; 
             margin-bottom: 4px;
@@ -311,7 +311,7 @@
                         </button>
                         
                         <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
-                            <i class="fa-regular fa-calendar-days" style="color: #0ea5e9;"></i> Thời gian biểu cá nhân
+                            <i class="fa-regular fa-calendar-days" style="color: #0ea5e9;"></i> Thời gian biểu
                         </button>
                         
                         <div id="dynamicCourseList" class="course-list mt-2">
@@ -1100,8 +1100,8 @@
                             </div>
                             <div class="subject">
                                 ${course.thoiGian ? `<div class="tkb-time-display"><i class="fa-regular fa-clock me-1"></i>${course.thoiGian}</div>` : ''}
-                                ${course.hinhThuc ? `<div style="font-weight: 700; color: #4d69e8; font-size: 16px; margin-bottom: 6px; line-height: 1.3;"><i class="fa-solid fa-laptop-house me-1"></i>${course.hinhThuc}</div>` : ''}
-                                <div style="color: #000000; font-size: 17px; line-height: 1.3; margin-bottom: 4px;">${course.mon}</div>
+                                ${course.hinhThuc ? `<div style="font-weight: 700; color: #4d69e8; font-size: 15px; margin-bottom: 6px; line-height: 1.3;"><i class="fa-solid fa-laptop-house me-1"></i>${course.hinhThuc}</div>` : ''}
+                                <div style="color: #000000; font-size: 15px; line-height: 1.3; margin-bottom: 4px;">${course.mon}</div>
                                 ${course.phong ? `<div style="font-size: 13.5px; color: #000000; font-weight: 500; margin-bottom: 2px;"><i class="fa-solid fa-location-dot me-1"></i>${course.phong}</div>` : ''}
                                 ${course.gv ? `<div style="margin-top:6px; font-size:13px; color: #000000; font-weight: 500; border-top:1px dashed rgba(0,0,0,0.3); padding-top:6px;"><i class="fa-solid fa-chalkboard-user me-1"></i>${course.gv}</div>` : ''}
                             </div>
