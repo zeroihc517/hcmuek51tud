@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Học nhóm Năm 2 Khoa Toán</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght={400;500;600;700}&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
@@ -202,7 +202,6 @@
         .link-card h5 { margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: var(--primary-color); }
         .link-card p { margin: 0; font-size: 14px; color: var(--text-muted); }
 
-        /* CSS THỜI GIAN BIỂU CƠ BẢN */
         .tkb-wrapper { width: 100%; overflow-x: auto; background: #fff; border-radius: var(--card-border-radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); }
         .sched { width: 100%; min-width: 1000px; border-collapse: collapse; table-layout: fixed; }
         .sched th { background: var(--primary-color); color: #fff; padding: 14px 8px; font-size: 15px; border: 1px solid rgba(255,255,255,0.15); text-align: center; }
@@ -213,7 +212,6 @@
         .sched td[rowspan] { background: #ffffff; }
         .col-tiet { background: #f9fafb; font-weight: 600; }
         
-        /* CSS LỊCH CÁ NHÂN & HOVER THAO TÁC */
         .td-subject { padding: 12px; border-radius: 8px; vertical-align: top; text-align: left; position: relative; }
         .td-subject:hover .tkb-actions { display: flex !important; }
         .tkb-actions { position: absolute; top: 5px; right: 5px; display: none; gap: 4px; z-index: 5; }
@@ -222,6 +220,13 @@
         
         .td-subject .subject { background: transparent; line-height: 1.4; }
         .session-label { font-weight: bold; background: #fff; text-transform: uppercase; color: var(--primary-color); }
+
+        .tkb-time-display {
+            font-size: 16.5px !important; 
+            font-weight: 700 !important;
+            color: #dc2626 !important; 
+            margin-bottom: 4px;
+        }
 
         .nav-week-container { display: flex; align-items: stretch; gap: 8px; margin-bottom: 24px; height: 42px; }
         .select-week-custom { border-radius: 8px !important; border-color: #cbd5e1 !important; font-weight: 600; color: var(--primary-color) !important; box-shadow: var(--shadow-sm); cursor: pointer; height: 100% !important; padding: 0 1rem !important; }
@@ -257,6 +262,8 @@
         .table-responsive::-webkit-scrollbar { height: 6px; }
         .table-responsive::-webkit-scrollbar-thumb { background-color: var(--primary-color); border-radius: 10px; }
         .table-responsive::-webkit-scrollbar-track { background-color: var(--border-color); border-radius: 10px; }
+        
+        .tkb-mgr-table th, .tkb-mgr-table td { padding: 10px; font-size: 14px; vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -526,6 +533,61 @@
         </div>
     </div>
 
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-warning text-dark">
+                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-key me-2"></i>Thay đổi mật khẩu cá nhân</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mật khẩu cũ hiện tại</label>
+                        <input type="password" id="txtOldPass" class="form-control" placeholder="Nhập mật khẩu cũ...">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Mật khẩu mới muốn đổi</label>
+                        <input type="password" id="txtNewPass" class="form-control" placeholder="Nhập mật khẩu mới...">
+                    </div>
+                    <small class="text-danger d-none mt-2 fw-bold" id="changePassError"></small>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-warning fw-bold" onclick="submitChangePassword()" id="btnConfirmChangePass">Xác nhận thay đổi</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="manageTkbListModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-dark text-white">
+                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học chung - Nhấn Xóa/Sửa nhanh</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle tkb-mgr-table m-0">
+                            <thead class="table-primary text-center">
+                                <tr>
+                                    <th>Môn học</th>
+                                    <th>Thứ</th>
+                                    <th>Tiết học</th>
+                                    <th>Thời gian</th>
+                                    <th>Phòng</th>
+                                    <th>Giảng viên</th>
+                                    <th>Thao tác nhanh</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tkbManagerListBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="tkbPersonalModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
@@ -551,6 +613,8 @@
                         <div class="col-md-4"><label class="form-label fw-bold">Màu nền lịch</label><input type="color" id="pTkbColor" class="form-control form-control-color w-100" value="#e0f2fe"></div>
                         <div class="col-md-4"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="pTkbNgayBD" class="form-control" placeholder="DD/MM/YYYY"></div>
                         <div class="col-md-4"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="pTkbNgayKT" class="form-control" placeholder="DD/MM/YYYY"></div>
+                        
+                        <div class="col-md-12"><label class="form-label fw-bold text-danger">Ngày nghỉ / Ngoại lệ (Không học)</label><input type="text" id="pTkbNgoaiLe" class="form-control" placeholder="Nhập các ngày nghỉ học theo định dạng DD/MM/YYYY, cách nhau bởi dấu phẩy. VD: 15/04/2026, 01/05/2026"></div>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
@@ -677,7 +741,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwJy3hsiYQWg50iKbswKLL30S8hkGyARKDZy1M79H2LY-UJtupp6ruZ-mrONwm6b9Gw/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDvd7brADt1-u-k1-WyqqCE6N7b85wdioakDExd9tOZoWcpKIUkJJatEdTObo_Ddoa/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -686,7 +750,6 @@
         let globalCategories = []; 
         let globalTkbData = [];
         
-        // Quản lý thông tin phiên tài khoản đang đăng nhập
         let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
 
         function generateUUID() {
@@ -744,9 +807,7 @@
             if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
         }
 
-        // ==========================================
-        // CÁC HÀM XỬ LÝ ĐĂNG NHẬP, ĐĂNG KÝ CÁ NHÂN
-        // ==========================================
+        // Auth Functions
         function loginStudent() {
             let mssv = $('#txtUserMSSV').val().trim();
             let pass = $('#txtUserPass').val().trim();
@@ -796,9 +857,36 @@
             }
         }
 
-        // ==========================================
-        // CÁC HÀM CRUD THỜI GIAN BIỂU CÁ NHÂN
-        // ==========================================
+        function openChangePasswordModal() {
+            $('#txtOldPass').val('');
+            $('#txtNewPass').val('');
+            $('#changePassError').addClass('d-none');
+            $('#changePasswordModal').modal('show');
+        }
+
+        function submitChangePassword() {
+            let oldPass = $('#txtOldPass').val().trim();
+            let newPass = $('#txtNewPass').val().trim();
+            if(!oldPass || !newPass) { $('#changePassError').removeClass('d-none').text("Vui lòng điền đủ mật khẩu cũ và mới!"); return; }
+            
+            let btn = $('#btnConfirmChangePass');
+            btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+            
+            postToGAS({ action: "changePassword", mssv: currentUser.mssv, oldPassword: oldPass, newPassword: newPass }, function(res) {
+                if(res.includes("thành công")) {
+                    alert(res);
+                    $('#changePasswordModal').modal('hide');
+                } else {
+                    $('#changePassError').removeClass('d-none').text(res);
+                }
+                btn.html('Xác nhận thay đổi').prop('disabled', false);
+            }, function() {
+                alert("Lỗi kết nối đến server!");
+                btn.html('Xác nhận thay đổi').prop('disabled', false);
+            });
+        }
+
+        // TKB CRUD Functions
         function loadTKBView() {
             resetNavActive(); $('#btnNavTKB').addClass('active'); $('#tkbSection').removeClass('d-none');
             if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
@@ -845,21 +933,52 @@
         function renderTkbToolBar() {
             $('.tkb-personal-toolbar').remove(); 
             let toolbarHtml = `
-                <div class="tkb-personal-toolbar d-flex justify-content-between align-items-center mb-3 p-3 bg-white rounded border shadow-sm">
+                <div class="tkb-personal-toolbar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 p-3 bg-white rounded border shadow-sm">
                     <div>
-                        <span class="badge bg-primary fs-6 me-2"><i class="fa-solid fa-user"></i> ${currentUser.name} - ${currentUser.mssv}</span>
+                        <span class="badge bg-primary fs-6 me-2"><i class="fa-solid fa-user"></i> ${currentUser.name} (${currentUser.mssv})</span>
+                        <button class="btn btn-sm btn-outline-secondary font-weight-bold" onclick="openChangePasswordModal()"><i class="fa-solid fa-key text-warning"></i> Đổi mật khẩu</button>
                     </div>
-                    <div>
-                        <button class="btn btn-sm btn-success fw-bold me-2" onclick="openAddTkbModal(false)"><i class="fa-solid fa-plus"></i> Thêm lịch học mới</button>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-dark fw-bold" onclick="openManageTkbListModal()"><i class="fa-solid fa-list-check text-info"></i> Xóa/Sửa TKB</button>
+                        <button class="btn btn-sm btn-success fw-bold" onclick="openAddTkbModal(false)"><i class="fa-solid fa-plus"></i> Thêm lịch mới</button>
                         <button class="btn btn-sm btn-outline-danger fw-bold" onclick="logoutStudent()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
                     </div>
                 </div>`;
             $('.tkb-wrapper').before(toolbarHtml);
         }
 
+        function openManageTkbListModal() {
+            let html = '';
+            if(globalTkbData.length === 0) {
+                html = '<tr><td colspan="7" class="text-center text-muted">Chưa có môn học lịch trình cá nhân nào được tạo!</td></tr>';
+            } else {
+                globalTkbData.forEach(c => {
+                    let thuText = c.thu === 8 ? "Chủ nhật" : "Thứ " + c.thu;
+                    html += `<tr>
+                        <td class="fw-bold text-dark">${c.mon}</td>
+                        <td class="text-center">${thuText}</td>
+                        <td class="text-center">Tiết ${c.tietBd} (${c.soTiet} tiết)</td>
+                        <td class="text-center fw-bold text-danger">${c.thoiGian || '-'}</td>
+                        <td class="text-center">${c.phong || '-'}</td>
+                        <td>${c.gv || '-'}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1" onclick="closeAndOpenEditTkb(${c.sheetRowIndex})"><i class="fa-solid fa-pen"></i> Sửa</button>
+                            <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2" onclick="deletePersonalTkb(${c.sheetRowIndex})"><i class="fa-solid fa-trash"></i> Xóa nhanh</button>
+                        </td>
+                    </tr>`;
+                });
+            }
+            $('#tkbManagerListBody').html(html);
+            $('#manageTkbListModal').modal('show');
+        }
+
+        function closeAndOpenEditTkb(sheetRowIndex) {
+            $('#manageTkbListModal').modal('hide');
+            setTimeout(() => { openEditTkbModal(sheetRowIndex); }, 400);
+        }
+
         function processTKBData(data) {
             globalTkbData = data.map((row) => {
-                // Tách phần tử cuối cùng ra (chắc chắn là sheetRowIndex từ Backend)
                 let actualRowIndex = parseInt(row.pop()) || -1; 
                 
                 return {
@@ -874,6 +993,7 @@
                     color: row[8] || "#e0f2fe", 
                     ngayBatDau: row[9] || "", 
                     ngayKetThuc: row[10] || "",
+                    ngayNgoaiLe: row[11] || "", // Xử lý dữ liệu Ngày Ngoại Lệ
                     sheetRowIndex: actualRowIndex 
                 };
             }).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
@@ -885,7 +1005,7 @@
             if (triggerAuthModal) { $('#userAuthModal').modal('show'); return; }
             $('#tkbModalTitle').html('<i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân');
             $('#pTkbRowIndex').val(''); 
-            $('#pTkbMon, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc').val('');
+            $('#pTkbMon, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbNgoaiLe').val('');
             $('#pTkbThu').val(2); $('#pTkbTiet').val(1); $('#pTkbSoTiet').val(3); $('#pTkbColor').val('#e0f2fe');
             $('#tkbPersonalModal').modal('show');
         }
@@ -908,6 +1028,7 @@
             $('#pTkbColor').val(course.color);
             $('#pTkbNgayBD').val(course.ngayBatDau);
             $('#pTkbNgayKT').val(course.ngayKetThuc);
+            $('#pTkbNgoaiLe').val(course.ngayNgoaiLe); // Nạp lại ngày ngoại lệ lên Input
 
             $('#tkbPersonalModal').modal('show');
         }
@@ -923,7 +1044,8 @@
                 thu: $('#pTkbThu').val(), tietBd: $('#pTkbTiet').val(), soTiet: $('#pTkbSoTiet').val(),
                 thoiGian: $('#pTkbThoiGian').val(), hinhThuc: $('#pTkbHinhThuc').val(), mon: $('#pTkbMon').val(),
                 phong: $('#pTkbPhong').val(), gv: $('#pTkbGV').val(), color: $('#pTkbColor').val(),
-                ngayBatDau: $('#pTkbNgayBD').val(), ngayKetThuc: $('#pTkbNgayKT').val()
+                ngayBatDau: $('#pTkbNgayBD').val(), ngayKetThuc: $('#pTkbNgayKT').val(),
+                ngayNgoaiLe: $('#pTkbNgoaiLe').val() // Gửi ngày ngoại lệ xuống Server
             };
 
             if(!pData.thu || !pData.tietBd || !pData.mon) { alert("Vui lòng nhập đầy đủ Thứ, Tiết và Tên môn học!"); return; }
@@ -937,6 +1059,7 @@
                 btn.html('Lưu thông tin').prop('disabled', false);
                 sessionStorage.removeItem('tkbDataUser_' + currentUser.mssv); 
                 loadThoiGianBieu(); 
+                if($('#manageTkbListModal').is(':visible')) { $('#manageTkbListModal').modal('hide'); }
             }, function() { alert("Giao tiếp máy chủ thất bại!"); btn.html('Lưu thông tin').prop('disabled', false); });
         }
 
@@ -946,6 +1069,9 @@
                 alert(res);
                 sessionStorage.removeItem('tkbDataUser_' + currentUser.mssv);
                 loadThoiGianBieu();
+                if($('#manageTkbListModal').is(':visible')) {
+                    setTimeout(() => { openManageTkbListModal(); }, 600);
+                }
             }, function() { alert("Lỗi khi kết nối yêu cầu xóa bỏ lịch!"); });
         }
 
@@ -966,15 +1092,16 @@
                         const len = course.soTiet;
                         for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
                         tableHtml += `
-                        <td rowspan="${len}" class="td-subject" style="background:${course.color}; border: 2.4px solid var(--border-color);">
+                       <td rowspan="${len}" class="td-subject" style="background:${course.color}; border: 2.4px solid var(--border-color);">
+
                             <div class="tkb-actions">
                                 <button class="btn-tkb-act text-warning" onclick="openEditTkbModal(${course.sheetRowIndex})" title="Sửa lịch học"><i class="fa-solid fa-pen"></i></button>
                                 <button class="btn-tkb-act text-danger" onclick="deletePersonalTkb(${course.sheetRowIndex})" title="Xóa lịch học"><i class="fa-solid fa-trash"></i></button>
                             </div>
                             <div class="subject">
-                                ${course.thoiGian ? `<div style="font-weight:700; color: #dc2626; margin-bottom: 2px; font-size: 13.5px;"><i class="fa-regular fa-clock me-1"></i>${course.thoiGian}</div>` : ''}
-                                ${course.hinhThuc ? `<div style="font-weight:700; color: #1e3a8a; margin-bottom: 6px; font-size: 13.5px;"><i class="fa-solid fa-laptop-house me-1"></i>${course.hinhThuc}</div>` : ''}
-                                <div style="font-weight:700; color: #000000; font-size: 15px; line-height: 1.3; margin-bottom: 4px;">${course.mon}</div>
+                                ${course.thoiGian ? `<div class="tkb-time-display"><i class="fa-regular fa-clock me-1"></i>${course.thoiGian}</div>` : ''}
+                                ${course.hinhThuc ? `<div style="font-weight: 700; color: #4d69e8; font-size: 16px; margin-bottom: 6px; line-height: 1.3;"><i class="fa-solid fa-laptop-house me-1"></i>${course.hinhThuc}</div>` : ''}
+                                <div style="color: #000000; font-size: 17px; line-height: 1.3; margin-bottom: 4px;">${course.mon}</div>
                                 ${course.phong ? `<div style="font-size: 13.5px; color: #000000; font-weight: 500; margin-bottom: 2px;"><i class="fa-solid fa-location-dot me-1"></i>${course.phong}</div>` : ''}
                                 ${course.gv ? `<div style="margin-top:6px; font-size:13px; color: #000000; font-weight: 500; border-top:1px dashed rgba(0,0,0,0.3); padding-top:6px;"><i class="fa-solid fa-chalkboard-user me-1"></i>${course.gv}</div>` : ''}
                             </div>
@@ -986,21 +1113,14 @@
             tbody.innerHTML = tableHtml;
         }
 
-        // ==========================================
-        // CÁC HÀM XỬ LÝ KHÁC (DANH MỤC & HỌC PHẦN)
-        // ==========================================
-        
-        // --- UPDATE 1: Điều chỉnh ẩn danh mục Users tự động ---
+        // Sidebar & Other Functions
         function renderSidebarCategories() {
             let optionsHtml = '';
             globalCategories.forEach((name) => {
                 let lowerName = name.trim().toLowerCase();
                 
                 if(lowerName !== 'thông báo') {
-                    // Nếu là danh mục Users mà không phải Admin thì ẩn đi
                     if (lowerName === 'users' && !isAdmin) return;
-                    
-                    // Đổi icon nếu là tab quản lý người dùng
                     let icon = lowerName === 'users' ? 'fa-users-gear' : 'fa-folder-closed';
                     
                     optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)">
@@ -1011,7 +1131,6 @@
             $('#dynamicCourseList').html(optionsHtml);
         }
 
-        // --- UPDATE 2: Render lại Menu khi Admin đăng nhập ---
         function verifyAdmin() {
             let pass = $('#txtAdminPass').val();
             if (pass === "#226244bc#TBC") {
@@ -1019,7 +1138,6 @@
                 $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
                 $('#btnManageCategories').removeClass('d-none');
                 
-                // Gọi render lại để xuất hiện danh mục Users
                 renderSidebarCategories(); 
                 
                 if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
@@ -1028,17 +1146,14 @@
             } else { $('#adminLoginError').removeClass('d-none'); }
         }
 
-        // --- UPDATE 3: Render lại Menu khi Admin đăng xuất ---
         function openAdminModal() {
             if (isAdmin) {
                 if (confirm("Bạn có muốn đăng xuất quyền Admin?")) {
                     isAdmin = false; $('#btnAdminLoginToggle').html('<i class="fa-solid fa-lock"></i> Dành cho Ban quản trị').css('color', 'var(--text-muted)');
                     $('#btnManageCategories').addClass('d-none');
                     
-                    // Render lại menu để ẨN tab Users
                     renderSidebarCategories(); 
                     
-                    // Xử lý điều hướng nếu đang ở màn hình Users
                     if (currentSheetName.toLowerCase() === 'users') {
                         loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
                     } else if (!$('#courseSection').hasClass('d-none')) { 
@@ -1233,126 +1348,123 @@
             }, function() { alert("Lỗi kết nối máy chủ!"); btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); });
         }
         function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) return str; return str.substring(0, 3) + '***' + str.substring(str.length - 3); }
-        // Thay thế hàm parseThread hiện tại bằng hàm này:
-function parseThread(text, rowIndex) {
-    let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== "");
-    window.qaThreadParts[rowIndex] = parts; 
-    
-    let html = '';
-    parts.forEach((part, index) => {
-        let content = part.trim(); 
-        if(content === "") return;
         
-        if (content.startsWith("[SV]") && content.endsWith("[/SV]")) {
-            let svText = content.replace("[SV]", "").replace("[/SV]", "").trim();
-            // Đảm bảo hiển thị xuống dòng chính xác
-            svText = svText.replace(/\n/g, '<br>');
+        function parseThread(text, rowIndex) {
+            let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== "");
+            window.qaThreadParts[rowIndex] = parts; 
             
-            html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>Sinh viên:</strong><br>${svText}`;
-            if (isAdmin) {
-                html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`;
-            }
-            html += `</div>`;
-        } else {
-            let adminText = content.replace(/\n/g, '<br>');
-            
-            html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${adminText}`;
-            if (isAdmin) {
-                html += `<div class="mt-2 text-end">
-                            <button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="openEditQAModal(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button>
-                            <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa</button>
-                         </div>`;
-            }
-            html += `</div>`;
+            let html = '';
+            parts.forEach((part, index) => {
+                let content = part.trim(); 
+                if(content === "") return;
+                
+                if (content.startsWith("[SV]") && content.endsWith("[/SV]")) {
+                    let svText = content.replace("[SV]", "").replace("[/SV]", "").trim();
+                    svText = svText.replace(/\n/g, '<br>');
+                    
+                    html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>Sinh viên:</strong><br>${svText}`;
+                    if (isAdmin) {
+                        html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`;
+                    }
+                    html += `</div>`;
+                } else {
+                    let adminText = content.replace(/\n/g, '<br>');
+                    
+                    html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${adminText}`;
+                    if (isAdmin) {
+                        html += `<div class="mt-2 text-end">
+                                    <button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="openEditQAModal(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button>
+                                    <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa</button>
+                                 </div>`;
+                    }
+                    html += `</div>`;
+                }
+            }); 
+            return html;
         }
-    }); 
-    return html;
-}
 
-// Thay thế hàm loadQAData hiện tại bằng hàm này:
-function loadQAData() {
-    $('#qaListArea').html(''); 
-    $('#qaLoadingStatus').removeClass('d-none');
-    
-    $.ajax({ 
-        url: SCRIPT_URL + "?action=getQAData", 
-        method: "GET", 
-        dataType: "json", 
-        success: function(data) {
-            $('#qaLoadingStatus').addClass('d-none');
-            if (!data || data.length === 0) { 
-                $('#qaListArea').html('<div class="text-center p-4 text-muted border rounded bg-white"><i class="fa-regular fa-comments fs-2 mb-2"></i><br>Chưa có câu hỏi nào. Bạn hãy là người đầu tiên đặt câu hỏi nhé!</div>'); 
-                $('#qaSidebarBadge').addClass('d-none'); 
-                return; 
-            }
+        function loadQAData() {
+            $('#qaListArea').html(''); 
+            $('#qaLoadingStatus').removeClass('d-none');
             
-            let html = ''; 
-            let hasUnanswered = false;
-            
-            data.forEach(row => {
-                let time = row[0] || ''; 
-                let rawMssv = row[1] || ''; 
-                let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
-                let question = row[2] || ''; 
-                let answer = row[3] || ''; 
-                let upvotes = parseInt(row[4]) || 0; 
-                let downvotes = parseInt(row[5]) || 0; 
-                let rowIndex = row[6];       
-                
-                let isNew = answer.trim() === ""; 
-                if (isNew) hasUnanswered = true;
-                
-                let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
-                
-                html += `<div class="${itemClass}">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="qa-time">
-                                    <i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong>
-                                </div>`;
-                                
-                if (isAdmin) {
-                    html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`;
+            $.ajax({ 
+                url: SCRIPT_URL + "?action=getQAData", 
+                method: "GET", 
+                dataType: "json", 
+                success: function(data) {
+                    $('#qaLoadingStatus').addClass('d-none');
+                    if (!data || data.length === 0) { 
+                        $('#qaListArea').html('<div class="text-center p-4 text-muted border rounded bg-white"><i class="fa-regular fa-comments fs-2 mb-2"></i><br>Chưa có câu hỏi nào. Bạn hãy là người đầu tiên đặt câu hỏi nhé!</div>'); 
+                        $('#qaSidebarBadge').addClass('d-none'); 
+                        return; 
+                    }
+                    
+                    let html = ''; 
+                    let hasUnanswered = false;
+                    
+                    data.forEach(row => {
+                        let time = row[0] || ''; 
+                        let rawMssv = row[1] || ''; 
+                        let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
+                        let question = row[2] || ''; 
+                        let answer = row[3] || ''; 
+                        let upvotes = parseInt(row[4]) || 0; 
+                        let downvotes = parseInt(row[5]) || 0; 
+                        let rowIndex = row[6];       
+                        
+                        let isNew = answer.trim() === ""; 
+                        if (isNew) hasUnanswered = true;
+                        
+                        let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
+                        
+                        html += `<div class="${itemClass}">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="qa-time">
+                                            <i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong>
+                                        </div>`;
+                                        
+                        if (isAdmin) {
+                            html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`;
+                        }
+                        
+                        html += `   </div>
+                                    <div class="qa-question">${question}</div>`;
+                                    
+                        if (!isNew) {
+                            html += parseThread(answer, rowIndex);
+                            html += `<div class="vote-action-bar">
+                                        <div class="vote-group" id="voteArea-${rowIndex}">
+                                            <button class="btn-vote up" onclick="castVote(${rowIndex}, 'up', this)"><i class="fa-solid fa-thumbs-up"></i> Hữu ích (${upvotes})</button>
+                                            <button class="btn-vote down" onclick="castVote(${rowIndex}, 'down', this)"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button>
+                                        </div>
+                                        <button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')"><i class="fa-solid fa-comment-dots"></i> Phản hồi thêm</button>
+                                    </div>
+                                    <div id="replyBox-${rowIndex}" class="reply-box d-none mt-3">
+                                        <textarea id="txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập thêm ý kiến/câu hỏi phản hồi..."></textarea>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-sm btn-primary fw-bold" onclick="sendReply(${rowIndex})" id="btnSendReply-${rowIndex}" style="background: var(--primary-color); border:none;">Gửi phản hồi</button>
+                                            <button class="btn btn-sm btn-light border" onclick="$('#replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
+                                        </div>
+                                    </div>`;
+                        } else { 
+                            html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ admin giải đáp...</div>`; 
+                        }
+                        
+                        if (isAdmin) { 
+                            html += `<div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);">
+                                        <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
+                                        <textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
+                                        <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}"><i class="fa-solid fa-reply"></i> Đăng câu trả lời</button>
+                                     </div>`; 
+                        }
+                        html += `</div>`;
+                    });
+                    
+                    $('#qaListArea').html(html);
+                    if (hasUnanswered) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none');
                 }
-                
-                html += `   </div>
-                            <div class="qa-question">${question}</div>`;
-                            
-                if (!isNew) {
-                    // Chỗ này gọi hàm parseThread để build giao diện tin nhắn
-                    html += parseThread(answer, rowIndex);
-                    html += `<div class="vote-action-bar">
-                                <div class="vote-group" id="voteArea-${rowIndex}">
-                                    <button class="btn-vote up" onclick="castVote(${rowIndex}, 'up', this)"><i class="fa-solid fa-thumbs-up"></i> Hữu ích (${upvotes})</button>
-                                    <button class="btn-vote down" onclick="castVote(${rowIndex}, 'down', this)"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button>
-                                </div>
-                                <button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')"><i class="fa-solid fa-comment-dots"></i> Phản hồi thêm</button>
-                            </div>
-                            <div id="replyBox-${rowIndex}" class="reply-box d-none mt-3">
-                                <textarea id="txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập thêm ý kiến/câu hỏi phản hồi..."></textarea>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-primary fw-bold" onclick="sendReply(${rowIndex})" id="btnSendReply-${rowIndex}" style="background: var(--primary-color); border:none;">Gửi phản hồi</button>
-                                    <button class="btn btn-sm btn-light border" onclick="$('#replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
-                                </div>
-                            </div>`;
-                } else { 
-                    html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ admin giải đáp...</div>`; 
-                }
-                
-                if (isAdmin) { 
-                    html += `<div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);">
-                                <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
-                                <textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
-                                <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}"><i class="fa-solid fa-reply"></i> Đăng câu trả lời</button>
-                             </div>`; 
-                }
-                html += `</div>`;
             });
-            
-            $('#qaListArea').html(html);
-            if (hasUnanswered) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none');
         }
-    });
-}
         function deleteThreadPart(rowIndex, partIndex) {
             if(!confirm("Bạn có chắc chắn muốn xóa đoạn tin nhắn này?")) return;
             window.qaThreadParts[rowIndex].splice(partIndex, 1);
@@ -1439,6 +1551,9 @@ function loadQAData() {
             let currentDay = today.getDay(); let mappedCurrentDay = currentDay === 0 ? 8 : currentDay + 1; let diff = thu - mappedCurrentDay;
             let targetDate = new Date(today); targetDate.setDate(today.getDate() + diff); return targetDate;
         }
+        function formatDateDDMMYYYY(dateObj) {
+            return `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`;
+        }
         function populateWeekDropdown() {
             let select = $('#weekSelect'); select.empty();
             let today = new Date(); today.setHours(0,0,0,0); let currentDay = today.getDay(); let diffToMonday = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1);
@@ -1457,11 +1572,28 @@ function loadQAData() {
         function filterAndRenderTKB() {
             let filteredData = globalTkbData.filter(c => {
                 if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
+                
+                let classDateInThisWeek = getDateOfSpecificWeekday(c.thu);
+
+                // 1. Kiểm tra Ngày Bắt Đầu & Kết Thúc (Nếu có)
                 if (c.ngayBatDau && c.ngayKetThuc) {
                     let startDate = parseDateString(c.ngayBatDau); let endDate = parseDateString(c.ngayKetThuc);
-                    if (startDate && endDate) { let classDateInThisWeek = getDateOfSpecificWeekday(c.thu); if (classDateInThisWeek < startDate || classDateInThisWeek > endDate) return false; }
-                } return true; 
-            }); renderTKBTable(filteredData);
+                    if (startDate && endDate) { if (classDateInThisWeek < startDate || classDateInThisWeek > endDate) return false; }
+                } 
+
+                // 2. Kiểm tra danh sách Ngày Ngoại Lệ (Không học)
+                if (c.ngayNgoaiLe && c.ngayNgoaiLe.trim() !== "") {
+                    let skipDates = c.ngayNgoaiLe.split(',').map(d => d.trim()); // Cắt chuỗi thành mảng: ["15/04", "01/05"]
+                    let formattedClassDate = formatDateDDMMYYYY(classDateInThisWeek);
+                    
+                    if (skipDates.includes(formattedClassDate)) {
+                        return false; // Nếu ngày học tuần này nằm trong danh sách ngoại lệ => Loại bỏ
+                    }
+                }
+
+                return true; 
+            }); 
+            renderTKBTable(filteredData);
         }
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
         document.addEventListener('keydown', function(e) {
