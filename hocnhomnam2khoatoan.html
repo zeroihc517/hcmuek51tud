@@ -227,7 +227,64 @@
             color: #dc2626 !important; 
             margin-bottom: 4px;
         }
+/* Container viền cắt ngang (Floating Label) */
+.select-floating-box {
+    position: relative;
+    width: 100%;
+    margin-top: 6px; 
+}
 
+/* Nhãn đè lên viền */
+.select-floating-box label {
+    position: absolute;
+    top: -9px;
+    left: 16px; /* Đẩy nhãn sang phải một chút cho hợp với góc bo tròn */
+    background-color: #ffffff; 
+    padding: 0 6px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #64748b; 
+    z-index: 10;
+    line-height: 1;
+    pointer-events: none;
+}
+
+/* Input select bo tròn hoàn toàn */
+.select-floating-box .form-select {
+    height: 44px; 
+    border-radius: 50px !important; /* Tăng lên 50px để bo tròn hẳn 2 đầu */
+    border: 1px solid #cbd5e1;
+    font-weight: 500;
+    font-size: 15px;
+    color: #1e293b;
+    padding-left: 18px; /* Tăng khoảng cách lề trái cho chữ không bị dính vào viền cong */
+    box-shadow: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.select-floating-box .form-select:hover {
+    border-color: #94a3b8;
+}
+
+.select-floating-box .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(21, 76, 121, 0.1); 
+}
+
+/* Căn chỉnh và bo tròn các nút bấm bên phải */
+.btn-nav-square, .btn-hientai {
+    height: 44px !important;
+    margin-top: 6px;
+}
+
+.btn-hientai {
+    border-radius: 50px !important; /* Bo tròn nút Hiện tại */
+}
+
+.btn-nav-square {
+    border-radius: 12px !important; /* Bo góc nút tới/lui (bạn có thể đổi thành 50% nếu muốn nó thành hình tròn xoe) */
+}
         .nav-week-container { display: flex; align-items: stretch; gap: 8px; margin-bottom: 24px; height: 42px; }
         .select-week-custom { border-radius: 8px !important; border-color: #cbd5e1 !important; font-weight: 600; color: var(--primary-color) !important; box-shadow: var(--shadow-sm); cursor: pointer; height: 100% !important; padding: 0 1rem !important; }
         .btn-nav-square { background-color: #2b476e; color: #ffffff; border-radius: 8px; padding: 0; border: none; flex: 1; display: flex; align-items: center; justify-content: center; width: 44px; box-shadow: var(--shadow-sm); transition: all 0.2s; }
@@ -351,28 +408,59 @@
                 <header class="top-header">
                     <div class="page-title"><i class="fa-regular fa-calendar-days"></i> Thời gian biểu cá nhân</div>
                 </header>
-                <div class="nav-week-container">
-                    <div class="flex-grow-1" style="height: 100%;">
-                        <select class="form-select select-week-custom" id="weekSelect" onchange="jumpToWeek(this.value)"></select>
-                    </div>
-
-                    <div class="d-flex flex-column justify-content-between gap-1">
-                        <button class="btn btn-nav-square" onclick="changeWeek(-1)" title="Tuần trước">
-                            <i class="fa-solid fa-backward-step" style="font-size: 13px;"></i>
-                        </button>
-                        <button class="btn btn-nav-square" onclick="changeWeek(1)" title="Tuần sau">
-                            <i class="fa-solid fa-forward-step" style="font-size: 13px;"></i>
-                        </button>
-                    </div>
-
-                    <button class="btn btn-hientai d-flex align-items-center gap-2" onclick="resetWeek()">📅 Hiện tại</button>
-                </div>
+                     <div class="nav-week-container bg-white p-3 rounded border shadow-sm mb-4" style="height: auto;">
+    <div class="row g-3 w-100 align-items-center m-0">
+        <div class="col-md-3 ps-0">
+            <div class="select-floating-box">
+                <label>Năm học</label>
+                <select class="form-select" id="namHocSelect" onchange="onNamHocChange()">
+                    <option value="">-- Chọn năm học --</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="select-floating-box">
+                <label>Học kỳ</label>
+                <select class="form-select" id="hocKySelect" onchange="onHocKyChange()">
+                    <option value="">-- Chọn học kỳ --</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="select-floating-box">
+                <label>Tuần</label>
+                <select class="form-select" id="weekSelect" onchange="onWeekChange()">
+                    <option value="">-- Chọn tuần --</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2 pe-0 d-flex gap-2 justify-content-end">
+            <button class="btn btn-nav-square" onclick="changeWeekBtn(-1)" title="Tuần trước">
+                <i class="fa-solid fa-backward-fast"></i>
+            </button>
+            <button class="btn btn-nav-square" onclick="changeWeekBtn(1)" title="Tuần sau">
+                <i class="fa-solid fa-forward-fast"></i>
+            </button>
+            <button class="btn btn-hientai d-flex align-items-center justify-content-center gap-2" onclick="jumpToCurrentWeek()" style="flex: 2;">
+                <i class="fa-regular fa-calendar-days"></i> Hiện tại
+            </button>
+        </div>
+    </div>
+</div>
                 <div class="tkb-wrapper">
                     <table class="sched">
                         <thead>
                             <tr id="header-row">
-                                <th>Buổi</th><th>Tiết</th><th>Thứ 2</th><th>Thứ 3</th><th>Thứ 4</th><th>Thứ 5</th><th>Thứ 6</th><th>Thứ 7</th><th>Chủ nhật</th>
-                            </tr>
+    <th>Buổi</th>
+    <th>Tiết</th>
+    <th id="th-day-2">Thứ 2</th>
+    <th id="th-day-3">Thứ 3</th>
+    <th id="th-day-4">Thứ 4</th>
+    <th id="th-day-5">Thứ 5</th>
+    <th id="th-day-6">Thứ 6</th>
+    <th id="th-day-7">Thứ 7</th>
+    <th id="th-day-8">Chủ nhật</th>
+</tr>
                         </thead>
                         <tbody id="tkb-body"></tbody>
                     </table>
@@ -741,7 +829,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwDvd7brADt1-u-k1-WyqqCE6N7b85wdioakDExd9tOZoWcpKIUkJJatEdTObo_Ddoa/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0nOt1JUUQFUVuxxk9XSVzhUWh1cLcDDvKZ-K5bLclvc-iaFNuoaZCtHXsvwU-tjQo/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -1190,13 +1278,13 @@
         }
 
         $(document).ready(function() {
-            setTimeout(pingOnlineStatus, 1000); 
-            setInterval(pingOnlineStatus, 25000);
-            populateWeekDropdown();
-            loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
-            loadWebLinks(); checkNewQA(); 
-            fetchAndRenderCategories();
-        });
+    setTimeout(pingOnlineStatus, 1000); 
+    setInterval(pingOnlineStatus, 25000);
+    fetchSemesterConfig(); // Đã sửa hàm gọi cấu hình tuần mới
+    loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
+    loadWebLinks(); checkNewQA(); 
+    fetchAndRenderCategories();
+});
 
         function checkAndExtractUrl(text) {
             let urlRegex = /(https?:\/\/[^\s]+)/g;
@@ -1554,21 +1642,141 @@
         function formatDateDDMMYYYY(dateObj) {
             return `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`;
         }
-        function populateWeekDropdown() {
-            let select = $('#weekSelect'); select.empty();
-            let today = new Date(); today.setHours(0,0,0,0); let currentDay = today.getDay(); let diffToMonday = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1);
-            let currentMonday = new Date(today.setDate(diffToMonday));
-            for (let i = -1; i <= 28; i++) {
-                let m = new Date(currentMonday); m.setDate(m.getDate() + (i * 7)); let s = new Date(m); s.setDate(s.getDate() + 6);
-                let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-                let label = `Từ ngày ${format(m)} đến ${format(s)}`; if (i === 0) label = `Từ ngày ${format(m)} đến ${format(s)} (Hiện tại)`;
-                select.append(`<option value="${i}">${label}</option>`);
-            } select.val(currentWeekOffset);
+       let globalConfigHK = [];
+let currentSelectedMonday = new Date();
+
+function getMondayOfDate(d) {
+    d = new Date(d);
+    var day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1);
+    return new Date(d.setHours(0,0,0,0));
+}
+
+// Gọi hàm này trong $(document).ready() thay vì populateWeekDropdown()
+function fetchSemesterConfig() {
+    $.ajax({
+        url: SCRIPT_URL + "?action=getConfigHocKy",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            globalConfigHK = data;
+            buildNamHocDropdown();
+            jumpToCurrentWeek(); 
         }
-        function syncDropdown() { $('#weekSelect').val(currentWeekOffset); }
-        function changeWeek(delta) { currentWeekOffset += delta; if (currentWeekOffset < -52) currentWeekOffset = -52; if (currentWeekOffset > 52) currentWeekOffset = 52; syncDropdown(); filterAndRenderTKB(); }
-        function resetWeek() { if (currentWeekOffset !== 0) { currentWeekOffset = 0; syncDropdown(); filterAndRenderTKB(); } }
-        function jumpToWeek(val) { currentWeekOffset = parseInt(val); filterAndRenderTKB(); }
+    });
+}
+
+function buildNamHocDropdown() {
+    let namHocs = [...new Set(globalConfigHK.map(item => item[0]))];
+    let html = '<option value="">-- Chọn năm học --</option>';
+    namHocs.forEach(nh => html += `<option value="${nh}">${nh}</option>`);
+    $('#namHocSelect').html(html);
+}
+
+function onNamHocChange() {
+    let selectedNH = $('#namHocSelect').val();
+    let hks = globalConfigHK.filter(item => item[0] === selectedNH).map(item => item[1]);
+    let html = '<option value="">-- Chọn học kỳ --</option>';
+    hks.forEach(hk => html += `<option value="${hk}">${hk}</option>`);
+    $('#hocKySelect').html(html).val('');
+    $('#weekSelect').html('<option value="">-- Chọn tuần --</option>').val('');
+}
+
+function onHocKyChange() {
+    let selectedNH = $('#namHocSelect').val();
+    let selectedHK = $('#hocKySelect').val();
+    let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+    
+    let html = '<option value="">-- Chọn tuần --</option>';
+    if (config) {
+        let startDate = parseDateString(config[2]);
+        let numWeeks = parseInt(config[3]);
+        if (startDate && numWeeks) {
+            let startMonday = getMondayOfDate(startDate);
+            for (let i = 0; i < numWeeks; i++) {
+                let m = new Date(startMonday);
+                m.setDate(m.getDate() + (i * 7));
+                let s = new Date(m);
+                s.setDate(s.getDate() + 6);
+                let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                html += `<option value="${m.getTime()}">Tuần ${i + 1} (${format(m)} - ${format(s)})</option>`;
+            }
+        }
+    }
+    $('#weekSelect').html(html);
+    
+    // Tự động chọn Tuần 1 nếu có data
+    if ($('#weekSelect option').length > 1) {
+        $('#weekSelect').prop('selectedIndex', 1);
+        onWeekChange();
+    }
+}
+
+function onWeekChange() {
+    let val = $('#weekSelect').val();
+    if (val) {
+        currentSelectedMonday = new Date(parseInt(val));
+        updateTableHeaders();
+        filterAndRenderTKB();
+    }
+}
+
+function updateTableHeaders() {
+    for (let i = 2; i <= 8; i++) {
+        let d = new Date(currentSelectedMonday);
+        d.setDate(d.getDate() + (i - 2));
+        let dayStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+        let thName = i === 8 ? "Chủ nhật" : "Thứ " + i;
+        $(`#th-day-${i}`).html(`${thName} <br><small style="font-weight: normal; color: #bae6fd;">(${dayStr})</small>`);
+    }
+}
+
+function changeWeekBtn(delta) {
+    let select = document.getElementById('weekSelect');
+    if(select.selectedIndex === 0 && select.options.length > 1) {
+         select.selectedIndex = 1;
+    } else {
+         let newIndex = select.selectedIndex + delta;
+         if (newIndex >= 1 && newIndex < select.options.length) {
+             select.selectedIndex = newIndex;
+         }
+    }
+    onWeekChange();
+}
+
+function jumpToCurrentWeek() {
+    let todayMonday = getMondayOfDate(new Date()).getTime();
+    let found = false;
+    let targetNH = "", targetHK = "";
+    
+    // Tìm tuần hiện tại thuộc Học kỳ / Năm học nào dựa vào Config
+    for (let conf of globalConfigHK) {
+        let sDate = parseDateString(conf[2]);
+        let weeks = parseInt(conf[3]);
+        if(sDate && weeks) {
+            let startMon = getMondayOfDate(sDate).getTime();
+            let endMon = startMon + (weeks - 1) * 7 * 24 * 60 * 60 * 1000;
+            if(todayMonday >= startMon && todayMonday <= endMon) {
+                targetNH = conf[0]; targetHK = conf[1]; found = true; break;
+            }
+        }
+    }
+
+    if (found) {
+        $('#namHocSelect').val(targetNH); onNamHocChange();
+        $('#hocKySelect').val(targetHK); onHocKyChange();
+        $('#weekSelect').val(todayMonday); onWeekChange();
+    } else {
+        // Nếu ngày hiện tại không nằm trong bất kỳ học kỳ nào, load mặc định rỗng
+        $('#namHocSelect').val('');
+        $('#hocKySelect').html('<option value="">-- Chọn học kỳ --</option>');
+        $('#weekSelect').html('<option value="">-- Chọn tuần --</option>');
+        currentSelectedMonday = new Date(todayMonday);
+        updateTableHeaders();
+        filterAndRenderTKB();
+    }
+}
+
+// Hàm cung cấp ngày chính xác cho engine lọc TKB
         function filterAndRenderTKB() {
             let filteredData = globalTkbData.filter(c => {
                 if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
