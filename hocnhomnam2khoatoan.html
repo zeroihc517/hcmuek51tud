@@ -1203,21 +1203,27 @@
 
         // Sidebar & Other Functions
         function renderSidebarCategories() {
-            let optionsHtml = '';
-            globalCategories.forEach((name) => {
-                let lowerName = name.trim().toLowerCase();
-                
-                if(lowerName !== 'thông báo') {
-                    if (lowerName === 'users' && !isAdmin) return;
-                    let icon = lowerName === 'users' ? 'fa-users-gear' : 'fa-folder-closed';
-                    
-                    optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)">
-                                        <i class="fa-solid ${icon}"></i> ${name}
-                                    </button>`;
-                }
-            });
-            $('#dynamicCourseList').html(optionsHtml);
+    let optionsHtml = '';
+    globalCategories.forEach((name) => {
+        let lowerName = name.trim().toLowerCase();
+        
+        if(lowerName !== 'thông báo') {
+            // Ẩn bảng Users và bảng Cấu hình học kỳ nếu không phải là Admin
+            if (lowerName === 'users' && !isAdmin) return;
+            if (lowerName === 'cauhinhhocky' && !isAdmin) return; 
+            
+            // Thiết lập icon hiển thị tương ứng
+            let icon = 'fa-folder-closed';
+            if (lowerName === 'users') icon = 'fa-users-gear';
+            if (lowerName === 'cauhinhhocky') icon = 'fa-calendar-check'; // Icon lịch cho Admin dễ nhìn
+            
+            optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)">
+                                <i class="fa-solid ${icon}"></i> ${name}
+                            </button>`;
         }
+    });
+    $('#dynamicCourseList').html(optionsHtml);
+}
 
         function verifyAdmin() {
             let pass = $('#txtAdminPass').val();
