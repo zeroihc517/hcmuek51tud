@@ -681,7 +681,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzN1Hhmy937pPQ5KAsGrFLzxrLfts7BLeG4u-ilNJ1DctuPQu5cKbDgHMzpPwLAYNi-/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKJUjBsdVmNIyqz74Jspgpt0pGEZjLkXIl6wLb4DeTV0mAuu6uEIyKqZCzp3C1l1ZI/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -1307,14 +1307,31 @@
             let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
             let html = '<option value="">-- Chọn tuần --</option>';
             if (config) {
-                let startDate = parseDateString(config[2]); let numWeeks = parseInt(config[3]);
-                if (startDate && numWeeks) {
+                let startDate = parseDateString(config[2]); 
+                let numAcademicWeeks = parseInt(config[3]); // Số tuần HỌC THỰC TẾ
+                // Lấy mảng các tuần nghỉ từ Cột 5 (VD: "5, 6, 7")
+                let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+                
+                if (startDate && numAcademicWeeks) {
                     let startMonday = getMondayOfDate(startDate);
-                    for (let i = 0; i < numWeeks; i++) {
-                        let m = new Date(startMonday); m.setDate(m.getDate() + (i * 7));
+                    let academicWk = 1; // Đếm số tuần học
+                    let calendarWk = 1; // Đếm số tuần lịch
+
+                    // Duyệt cho đến khi học đủ số tuần (Bảo vệ vòng lặp max 52 tuần/năm)
+                    while (academicWk <= numAcademicWeeks && calendarWk <= 52) {
+                        let m = new Date(startMonday); m.setDate(m.getDate() + ((calendarWk - 1) * 7));
                         let s = new Date(m); s.setDate(s.getDate() + 6);
                         let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-                        html += `<option value="${m.getTime()}">Tuần ${i + 1} (${format(m)} - ${format(s)})</option>`;
+                        
+                        if (breakWeeks.includes(calendarWk)) {
+                            // Nếu rơi vào tuần nghỉ -> Gắn thẻ data-is-break="true"
+                            html += `<option value="${m.getTime()}" data-is-break="true" style="color: red; font-weight: bold;">Tuần Nghỉ Lễ (${format(m)} - ${format(s)})</option>`;
+                        } else {
+                            // Tuần học bình thường
+                            html += `<option value="${m.getTime()}" data-is-break="false">Tuần ${academicWk} (${format(m)} - ${format(s)})</option>`;
+                            academicWk++; // Chỉ tăng tuần học khi không phải tuần nghỉ
+                        }
+                        calendarWk++; // Tuần lịch thì luôn tăng
                     }
                 }
             }
@@ -1355,25 +1372,32 @@
         function jumpToCurrentWeek() {
             let todayTime = new Date().getTime();
             let found = false;
-            let targetNH = "", targetHK = "";
-            let targetWeekSelectValue = "";
+            let targetNH = "", targetHK = "", targetWeekSelectValue = "";
             
             for (let conf of globalConfigHK) {
                 let sDate = parseDateString(conf[2]);
-                let weeks = parseInt(conf[3]);
-                if(sDate && weeks) {
-                    let startMon = getMondayOfDate(sDate).getTime();
-                    let endMon = startMon + (weeks * 7 * 24 * 60 * 60 * 1000);
+                let numAcademicWeeks = parseInt(conf[3]);
+                let breakWeeks = (conf[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+                
+                if (sDate && numAcademicWeeks) {
+                    let startMon = getMondayOfDate(sDate);
+                    let acadWk = 1;
+                    let calWk = 1;
                     
-                    if(todayTime >= startMon && todayTime < endMon) {
-                        targetNH = conf[0]; targetHK = conf[1]; found = true;
-                        let diffTime = todayTime - startMon;
-                        let weekDiff = Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000)); 
-                        let currentWeekMonday = new Date(startMon);
-                        currentWeekMonday.setDate(currentWeekMonday.getDate() + (weekDiff * 7));
-                        targetWeekSelectValue = currentWeekMonday.getTime().toString();
-                        break;
+                    while (acadWk <= numAcademicWeeks && calWk <= 52) {
+                        let m = new Date(startMon); m.setDate(m.getDate() + ((calWk - 1) * 7));
+                        let nextM = new Date(m); nextM.setDate(nextM.getDate() + 7);
+                        
+                        // Nếu Hôm nay nằm trong tuần này
+                        if (todayTime >= m.getTime() && todayTime < nextM.getTime()) {
+                            targetNH = conf[0]; targetHK = conf[1]; found = true;
+                            targetWeekSelectValue = m.getTime().toString();
+                            break;
+                        }
+                        if (!breakWeeks.includes(calWk)) { acadWk++; }
+                        calWk++;
                     }
+                    if (found) break;
                 }
             }
 
@@ -1393,15 +1417,35 @@
         }
 
         function filterAndRenderTKB() {
+            // Kiểm tra xem Option đang chọn trong Dropdown có phải Tuần Nghỉ không
+            let isBreakWeek = $('#weekSelect').find(':selected').data('is-break') === true;
+
             let filteredData = globalTkbData.filter(c => {
                 if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
                 let classDateInThisWeek = new Date(currentSelectedMonday); 
                 classDateInThisWeek.setDate(classDateInThisWeek.getDate() + (c.thu - 2));
 
+                // Phân loại: Môn học lặp lại (Chính khóa) hay Môn chỉ diễn ra 1 ngày (Học bù)
+                let isRecurring = true; 
+                if (c.ngayBatDau && c.ngayKetThuc) {
+                    let s = parseDateString(c.ngayBatDau);
+                    let e = parseDateString(c.ngayKetThuc);
+                    if (s && e) {
+                        let diffDays = (e - s) / (1000 * 60 * 60 * 24);
+                        if (diffDays <= 7) isRecurring = false; // Lịch học bù (Khoảng cách dưới 7 ngày)
+                    }
+                }
+                
+                // Nếu là Tuần Nghỉ VÀ là Môn học chính khóa -> ẨN KHỎI BẢNG (Chỉ hiện lớp học bù nếu có)
+                if (isBreakWeek && isRecurring) return false;
+
+                // Kiểm tra xem ngày học có nằm trong giới hạn Ngày bắt đầu -> Kết thúc không
                 if (c.ngayBatDau && c.ngayKetThuc) {
                     let startDate = parseDateString(c.ngayBatDau); let endDate = parseDateString(c.ngayKetThuc);
                     if (startDate && endDate) { if (classDateInThisWeek < startDate || classDateInThisWeek > endDate) return false; }
                 } 
+                
+                // Kiểm tra Ngày ngoại lệ (Nghỉ riêng môn học đó)
                 if (c.ngayNgoaiLe && c.ngayNgoaiLe.trim() !== "") {
                     let skipDates = c.ngayNgoaiLe.split(',').map(d => d.trim()); 
                     let formattedClassDate = formatDateDDMMYYYY(classDateInThisWeek);
