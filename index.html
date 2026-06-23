@@ -5,9 +5,164 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TUD K51</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
 <link rel="stylesheet" href="styleindex.css">
+
+<style>
+    /* ==========================================
+       CSS CHUẨN TỪ STYLETKB.CSS CỦA BẠN
+       ========================================== */
+    :root {
+      --line: #e5e7eb;
+      --blue: #0f4c81;
+    }
+    
+    .table-box {
+      background: #fff;
+      border-radius: 14px;
+      overflow: auto;
+      box-shadow: 0 6px 24px rgba(0,0,0,.05);
+      margin-top: 20px;
+    }
+    .sched {
+      width: 100%;
+      min-width: 1000px;
+      border-collapse: collapse;
+      table-layout: fixed; /* QUAN TRỌNG */
+    }
+    .sched th {
+      background: var(--blue);
+      color: #fff;
+      padding: 14px 8px;
+      font-size: 14px;
+      border-right: 1px solid rgba(255,255,255,.15);
+      text-align: center;
+    }
+    .sched th:nth-child(1), .sched td:nth-child(1) { width: 60px; }
+    .sched th:nth-child(2), .sched td:nth-child(2) { width: 50px; }
+    .sched th:nth-child(n+3), .sched td:nth-child(n+3) { width: calc((100% - 150px) / 6); }
+    
+    /* Viền to 2.4px chuẩn */
+    .sched td {
+      border: 2.4px solid var(--line);
+      padding: 8px 8px;  
+      text-align: center;
+      height: 50px;   
+      font-size: 16px;
+    }
+    .sched td[rowspan] {
+      background: #ffffff;
+      width: 80px;
+    }
+    .col-tiet {
+      background: #ffffff;
+      font-weight: 600;
+    }
+    .td-subject {
+      background: #e0f2fe; 
+      padding: 12px;
+      text-align: center; 
+      vertical-align: middle; 
+      border-radius: 10px; 
+    }
+    .td-subject .subject {
+      background: transparent; 
+      padding: 6px;
+      line-height: 1.4;
+    }
+    .subject {
+      background: #e0f2fe;
+      border-radius: 10px;
+      padding: 10px;
+      line-height: 1.5;
+    }
+    .subject .time {
+      color: #dc2626;
+      font-weight: 700;
+    }
+    .subject .room {
+      font-style: italic;
+      color: #4b5563;
+    }
+    .subject .teacher {
+      display: block;
+      margin-top: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #4b5563;
+      border-top: 1px dashed rgba(0,0,0,0.1);
+      padding-top: 2px;
+    }
+
+    /* ONLINE BOX (DEADLINE) */
+    .online-box {
+      position: relative;
+      margin-top: 32px;
+      padding: 24px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #fff7fa, #ffe9f0, #ffd6e5, #ffe9f0, #fff7fa);
+      background-size: 400% 400%;
+      animation: sparkleSoft 20s ease infinite;
+      border: 2px solid #ffc2d1;
+      box-shadow: 0 4px 18px rgba(255, 182, 193, 0.25), 0 0 25px rgba(255, 150, 170, 0.15);
+    }
+    @keyframes sparkleSoft {
+      0%   {background-position:0% 50%;}
+      50%  {background-position:100% 50%;}
+      100% {background-position:0% 50%;}
+    }
+    .online-box::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      border-radius: 20px;
+      background-image:
+         radial-gradient(circle at 20% 30%, rgba(255,255,255,0.12) 1px, transparent 1px),
+         radial-gradient(circle at 80% 60%, rgba(255,255,255,0.1) 1px, transparent 1px),
+         radial-gradient(circle at 40% 80%, rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 180px 180px;
+      pointer-events: none;
+    }
+    .online-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #b91c1c;
+      text-align: center;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .online-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr); 
+      gap: 20px;
+    }
+    @media (max-width: 1024px) { .online-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .online-grid { grid-template-columns: 1fr; } }
+    
+    .online-card {
+      background: white; border-radius: 16px; padding: 20px; text-align: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05); transition: transform 0.25s ease,box-shadow 0.25s ease;
+      position: relative;
+      z-index: 2;
+    }
+    .online-card:hover { transform: translateY(-4px); box-shadow: 0 6px 14px rgba(0,0,0,0.08); }
+    .online-card h3 { font-size: 16px; font-weight: 700; color: #111827; margin: 10px 0 6px; }
+    .online-card .desc { font-size: 14px; color: #374151; margin-bottom: 10px; }
+    .tag { display: inline-block; padding: 4px 12px; background: #dbeafe; color: #1e40af; font-weight: 600; border-radius: 999px; font-size: 13px; }
+    .icon-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; margin: 0 auto 10px; }
+    
+    /* MÀU SẮC ĐÃ ĐƯỢC ĐỒNG BỘ CHUẨN VỚI HỌC NHÓM NĂM 2 */
+    .icon-circle.success { background-color: #86efac; color: #166534; }
+    .icon-circle.fire { background: #fee2e2; color: #b91c1c; }
+    .icon-circle.alert { background: #fef9c3; color: #92400e; }
+    .icon-circle.primary { background: #bfdbfe; color: #1e40af; } /* Xanh dương pastel */
+    .icon-circle.secondary { background: #e9d5ff; color: #6b21a8; } /* Tím pastel */
+    
+    .sched td.day:empty { background: #ffffff !important; }
+</style>
 </head>
 
 <body>
@@ -17,111 +172,444 @@
   TRƯỜNG ĐẠI HỌC SƯ PHẠM THÀNH PHỐ HỒ CHÍ MINH
 </div>
 
-
 <div class="layout">
 
-  <!-- SIDEBAR -->
   <div class="sidebar">
       <h3>Nền tảng</h3>
-<a class="active" onclick="showTab('nentang',this)">HCMUE</a>
-<a onclick="showTab('ungdung',this)">Cá nhân</a>
-<a href="hocnhomnam2khoatoan.html" target="_self" onclick="showTab('ungdung', this)">Học nhóm Năm 2</a>
-    <h3>Thời khóa biểu</h3>
-    <a onclick="showTab('hk2',this)">TUD K51</a>
+      <a class="active" onclick="showTab('nentang',this)">HCMUE</a>
+      <a onclick="showTab('ungdung',this)">Cá nhân</a>
+      <a href="hocnhomnam2khoatoan.html" target="_self" onclick="showTab('ungdung', this)">Học nhóm Năm 2</a>
+      
+      <h3>Thời khóa biểu</h3>
+      <a onclick="showTab('hk2',this)">TKB Cá nhân</a>
   </div>
 
-  <!-- MAIN -->
   <div class="main">
 
-<div id="nentang" class="content active">
-    <div class="platform-grid">
-        </div>
+      <div id="nentang" class="content active">
+          <div class="platform-grid"></div>
+      </div>
+
+      <div id="ungdung" class="content">
+          <div class="platform-grid"></div>
+      </div>
+
+      <div id="hk2" class="content">
+          <div class="card">
+              <div class="card-header">Thời khóa biểu cá nhân</div>
+              
+              <div class="form-row-custom">
+                  <div class="input-group">
+                      <label>Năm học</label>
+                      <select id="apiNamHoc" onchange="onNamHocChange()">
+                          <option value="">-- Đang tải... --</option>
+                      </select>
+                  </div>
+
+                  <div class="input-group">
+                      <label>Học kỳ</label>
+                      <select id="apiHocKy" onchange="onHocKyChange()">
+                          <option value="">-- Chọn học kỳ --</option>
+                      </select>
+                  </div>
+
+                  <div class="input-group" style="flex: 1.5;">
+                      <label>Tuần</label>
+                      <select id="apiWeek" onchange="onWeekChange()">
+                          <option value="">-- Chọn tuần --</option>
+                      </select>
+                  </div>
+
+                  <div class="button-group">
+                      <div class="nav-btns">
+                          <button class="btn-nav" onclick="changeWeekBtn(-1)">⏮</button>
+                          <button class="btn-nav" onclick="changeWeekBtn(1)">⏭</button>
+                      </div>
+                      <button class="btn-blue" onclick="jumpToCurrentWeek()">
+                          <span>📅</span> Hiện tại
+                      </button>
+                  </div>
+              </div>
+
+              <div class="table-box" style="padding: 0 20px;">
+                  <table class="sched">
+                      <thead>
+                          <tr id="header-row">
+                              <th>Buổi</th>
+                              <th>Tiết</th>
+                              <th id="th-day-2">Thứ 2</th>
+                              <th id="th-day-3">Thứ 3</th>
+                              <th id="th-day-4">Thứ 4</th>
+                              <th id="th-day-5">Thứ 5</th>
+                              <th id="th-day-6">Thứ 6</th>
+                              <th id="th-day-7">Thứ 7</th>
+                              <th id="th-day-8">Chủ nhật</th>
+                          </tr>
+                      </thead>
+                      <tbody id="tkb-body">
+                          <tr><td colspan="9" style="padding: 40px; color: #6b7280; font-weight: 500;">Đang đồng bộ dữ liệu TKB...</td></tr>
+                      </tbody>
+                  </table>
+              </div>
+
+              <div class="online-box" id="deadlineBox" style="display: none;">
+                  <h2 class="online-title">📌 DEADLINE</h2>
+                  <div class="online-grid" id="deadline-container">
+                      </div>
+              </div>
+
+          </div>
+      </div>
+
+  </div>
 </div>
 
-<div id="ungdung" class="content">
-    <div class="platform-grid">
-        </div>
-</div>
-<!-- TAB THỜI KHÓA BIỂU (Đã sửa lỗi hiển thị đè) -->
-        <div id="hk2" class="content">
-<div class="card">
-    <div class="card-header">Thời khóa biểu TUD K51</div>
-    
-    <div class="form-row-custom">
-        <div class="input-group">
-            <label>Năm học</label>
-            <select id="selectNamHoc" onchange="updateHocKy()">
-                 <option value="">-- Chọn năm học --</option>
-<option value="2025-2026">2025 - 2026</option>
-<option value="2026-2027">2026 - 2027</option>
-<option value="2027-2028">2027 - 2028</option>
-<option value="2028-2029">2028 - 2029</option>
-<option value="2029-2030">2029 - 2030</option>
-<option value="2030-2031">2030 - 2031</option>
-
-            </select>
-        </div>
-
-        <div class="input-group">
-            <label>Học kỳ</label>
-            <select id="selectHocKy" onchange="updateTuan()">
-                <option value="" selected>-- Chọn học kỳ --</option>
-                <option value="Nam1HK1TUD">Học kỳ 1</option>
-                <option value="Nam1HK2TUD">Học kỳ 2</option>
-		<option value="Nam1HK3TUD">Học kỳ 3 (Hè)</option>
-            </select>
-        </div>
-
-        <div class="input-group" style="flex: 1.5;">
-            <label>Tuần</label>
-            <select id="selectTuan" onchange="displayIframe()">
-                <option value="">-- Chọn tuần --</option>
-            </select>
-        </div>
-
-        <div class="button-group">
-            <div class="nav-btns">
-                <button class="btn-nav" onclick="navTuan(-1)">⏮</button>
-                <button class="btn-nav" onclick="navTuan(1)">⏭</button>
-
-            </div>
-            
-            <button class="btn-blue" onclick="goToday()">
-    <span>📅</span> Hiện tại
-</button>
-<button class="btn-blue" onclick="viewFullTKB()">
-            <span>👁</span> TKB Tổng hợp
-        </button>
-        </div>
-    </div>
-
-
-    <div id="boxTKB" class="iframe-box">
-        <iframe id="iframeTKB"></iframe>
-    </div>
-</div>
-        </div>
-    </div>
-</div>
-<div id="modalTongHop" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <span>XEM THỜI KHÓA BIỂU TỔNG HỢP</span>
-            <span class="close-modal" onclick="closeModal()">×</span>
-        </div>
-        <div class="modal-body">
-            <iframe id="iframeTongHop" src=""></iframe>
-        </div>
-        <div style="padding: 10px 20px; border-top: 1px solid #eee; text-align: right;">
-            <button class="btn-blue" style="padding: 8px 15px; font-size: 13px;" onclick="closeModal()">
-                Đóng
-            </button>
-        </div>
-    </div>
-</div>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="nentang.js"></script>
 <script src="ungdung.js"></script>
-<script src="datatkbindex.js"></script>
 <script src="scriptindex.js"></script>
+
+<script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzg-krdzVfCmZJw9bDz9DTFRKsKqkrlqd-LTRtMIMj0waFNlF-cMR9MGRS_M1sPS0-U/exec';
+    const ADMIN_MSSV = "51.01.108.008"; 
+
+    let globalTkbData = [];
+    let globalDeadlineData = [];
+    let globalConfigHK = [];
+    let currentSelectedMonday = new Date();
+
+    function getMondayOfDate(d) {
+        d = new Date(d);
+        var day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1);
+        return new Date(d.setHours(0,0,0,0));
+    }
+
+    function parseDateString(dateStr) { 
+        if (!dateStr || dateStr.trim() === "") return null; 
+        let parts = dateStr.split('/'); 
+        if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]); 
+        return null; 
+    }
+
+    function formatDateDDMMYYYY(dateObj) { 
+        return `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`; 
+    }
+
+    function formatShort(dateObj) {
+        return `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+    }
+
+    $(document).ready(function() {
+        fetchSemesterConfig();
+        loadThoiGianBieuAdmin();
+        loadDeadlinesAdmin();
+    });
+
+    function fetchSemesterConfig() {
+        $.ajax({
+            url: SCRIPT_URL + "?action=getConfigHocKy",
+            method: "GET", dataType: "json",
+            success: function(data) { 
+                globalConfigHK = data; 
+                buildNamHocDropdown(); 
+                jumpToCurrentWeek(); 
+            }
+        });
+    }
+
+    function buildNamHocDropdown() {
+        let namHocs = [...new Set(globalConfigHK.map(item => item[0]))];
+        let html = '<option value="">-- Chọn năm học --</option>';
+        namHocs.forEach(nh => html += `<option value="${nh}">${nh}</option>`);
+        $('#apiNamHoc').html(html);
+    }
+
+    function onNamHocChange() {
+        let selectedNH = $('#apiNamHoc').val();
+        let hks = globalConfigHK.filter(item => item[0] === selectedNH).map(item => item[1]);
+        let html = '<option value="">-- Chọn học kỳ --</option>';
+        hks.forEach(hk => html += `<option value="${hk}">${hk}</option>`);
+        $('#apiHocKy').html(html).val('');
+        $('#apiWeek').html('<option value="">-- Chọn tuần --</option>').val('');
+    }
+
+    function onHocKyChange() {
+        let selectedNH = $('#apiNamHoc').val(); 
+        let selectedHK = $('#apiHocKy').val();
+        let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+        let html = '<option value="">-- Chọn tuần --</option>';
+        
+        if (config) {
+            let startDate = parseDateString(config[2]); 
+            let numAcademicWeeks = parseInt(config[3]); 
+            let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+            
+            if (startDate && numAcademicWeeks) {
+                let startMonday = getMondayOfDate(startDate);
+                let academicWk = 1; let calendarWk = 1;
+
+                while (academicWk <= numAcademicWeeks && calendarWk <= 52) {
+                    let m = new Date(startMonday); m.setDate(m.getDate() + ((calendarWk - 1) * 7));
+                    let s = new Date(m); s.setDate(s.getDate() + 6);
+                    let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                    
+                    if (breakWeeks.includes(calendarWk)) {
+                        html += `<option value="${m.getTime()}" data-is-break="true">Tuần Nghỉ Lễ (${format(m)} - ${format(s)})</option>`;
+                    } else {
+                        html += `<option value="${m.getTime()}" data-is-break="false">Tuần ${academicWk} (${format(m)} - ${format(s)})</option>`;
+                        academicWk++; 
+                    }
+                    calendarWk++; 
+                }
+            }
+        }
+        $('#apiWeek').html(html);
+        if ($('#apiWeek option').length > 1) { 
+            $('#apiWeek').prop('selectedIndex', 1); 
+            onWeekChange(); 
+        }
+    }
+
+    function onWeekChange() {
+        let val = $('#apiWeek').val();
+        if (val) {
+            currentSelectedMonday = new Date(parseInt(val));
+            updateTableHeaders();
+            filterAndRenderTKB();
+            renderDeadlines();
+        }
+    }
+
+    function updateTableHeaders() {
+        for (let i = 2; i <= 8; i++) {
+            let d = new Date(currentSelectedMonday); d.setDate(d.getDate() + (i - 2));
+            let thName = i === 8 ? "Chủ nhật" : "Thứ " + i;
+            $(`#th-day-${i}`).html(`${thName} <span style="font-size: 13px; font-weight: 400; margin-left: 4px; opacity: 0.9;">(${formatShort(d)})</span>`);
+        }
+    }
+
+    function changeWeekBtn(delta) {
+        let select = document.getElementById('apiWeek');
+        if(select.selectedIndex === 0 && select.options.length > 1) { select.selectedIndex = 1; } 
+        else {
+             let newIndex = select.selectedIndex + delta;
+             if (newIndex >= 1 && newIndex < select.options.length) { select.selectedIndex = newIndex; }
+        }
+        onWeekChange();
+    }
+
+    function jumpToCurrentWeek() {
+        let todayTime = new Date().getTime();
+        let found = false;
+        let targetNH = "", targetHK = "", targetWeekSelectValue = "";
+        
+        for (let conf of globalConfigHK) {
+            let sDate = parseDateString(conf[2]);
+            let numAcademicWeeks = parseInt(conf[3]);
+            let breakWeeks = (conf[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+            
+            if (sDate && numAcademicWeeks) {
+                let startMon = getMondayOfDate(sDate);
+                let acadWk = 1; let calWk = 1;
+                
+                while (acadWk <= numAcademicWeeks && calWk <= 52) {
+                    let m = new Date(startMon); m.setDate(m.getDate() + ((calWk - 1) * 7));
+                    let nextM = new Date(m); nextM.setDate(nextM.getDate() + 7);
+                    
+                    if (todayTime >= m.getTime() && todayTime < nextM.getTime()) {
+                        targetNH = conf[0]; targetHK = conf[1]; found = true;
+                        targetWeekSelectValue = m.getTime().toString();
+                        break;
+                    }
+                    if (!breakWeeks.includes(calWk)) { acadWk++; }
+                    calWk++;
+                }
+                if (found) break;
+            }
+        }
+
+        if (found) {
+            $('#apiNamHoc').val(targetNH); onNamHocChange();
+            $('#apiHocKy').val(targetHK); onHocKyChange();
+            $('#apiWeek').val(targetWeekSelectValue); onWeekChange();
+        } else {
+            $('#apiNamHoc').val('');
+            $('#apiHocKy').html('<option value="">-- Chọn học kỳ --</option>');
+            $('#apiWeek').html('<option value="">-- Chọn tuần --</option>');
+            currentSelectedMonday = getMondayOfDate(new Date());
+            updateTableHeaders();
+            filterAndRenderTKB();
+            renderDeadlines();
+        }
+    }
+
+    function loadDeadlinesAdmin() {
+        $('#deadlineBox').show();
+        $('#deadline-container').html('<div style="text-align:center; width:100%; color:#666; font-weight:500;">Đang tải dữ liệu Deadline...</div>');
+
+        $.ajax({
+            url: SCRIPT_URL + "?action=getDeadlinesUser&mssv=" + ADMIN_MSSV,
+            method: "GET", dataType: "json",
+            success: function(data) {
+                globalDeadlineData = data.map(r => ({
+                    title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5],
+                    dateStart: r[6] || "", dateEnd: r[7] || "", sheetRowIndex: parseInt(r[8])
+                }));
+                renderDeadlines();
+            }
+        });
+    }
+
+    function renderDeadlines() {
+        const container = document.getElementById('deadline-container');
+        if (!container) return;
+        
+        let weekStart = new Date(currentSelectedMonday);
+        weekStart.setHours(0,0,0,0);
+        
+        let weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        weekEnd.setHours(23,59,59,999);
+
+        let filtered = globalDeadlineData.filter(d => {
+            let sDate = parseDateString(d.dateStart);
+            let eDate = parseDateString(d.dateEnd);
+            if(!sDate || !eDate) return false;
+            return sDate <= weekEnd && eDate >= weekStart;
+        });
+
+        if(filtered.length === 0) {
+            container.innerHTML = "<p style='text-align:center; width:100%; grid-column: 1 / -1; color:#666;'>Tuần này không có deadline.</p>";
+            return;
+        }
+
+        container.innerHTML = filtered.map(item => `
+            <div class="online-card">
+                <div class="icon-circle ${item.icon}">${item.emoji || '📌'}</div>
+                <h3>${item.duration}</h3>
+                <p class="desc">${item.title}</p>
+                <span class="tag">${item.tag}</span>
+            </div>`).join('');
+    }
+
+    function loadThoiGianBieuAdmin() {
+        $.ajax({
+            url: SCRIPT_URL + "?action=getTKBUser&mssv=" + ADMIN_MSSV, 
+            method: "GET", dataType: "json",
+            success: function(data) { processTKBData(data); },
+            error: function() { $('#tkb-body').html('<tr><td colspan="9" style="color:red; text-align:center; padding:20px;">Lỗi tải dữ liệu TKB!</td></tr>'); }
+        });
+    }
+
+    function processTKBData(data) {
+        globalTkbData = data.map((row) => {
+            let actualRowIndex = parseInt(row.pop()) || -1; 
+            return {
+                thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
+                thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: row[5] || "", phong: row[6] || "",     
+                gv: row[7] || "", color: row[8] || "#e0f2fe", ngayBatDau: row[9] || "", ngayKetThuc: row[10] || "",
+                ngayNgoaiLe: row[11] || "", sheetRowIndex: actualRowIndex 
+            };
+        }).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
+        filterAndRenderTKB();
+    }
+
+    function getAutoLink(locationName) {
+        if (!locationName) return "#";
+        const loc = locationName.toUpperCase();
+        if (loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV")) return "https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5";
+        if (loc.includes("LÊ VĂN SỸ") || loc.includes("LVS")) return "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5";
+        if (loc.includes("LẠC LONG QUÂN") || loc.includes("LLQ")) return "https://maps.app.goo.gl/oV1mXHYDuW44cGbN6";
+        if (loc.includes("LÊ THỊ RIÊNG") || loc.includes("CVLTR")) return "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA";
+        if (loc.includes("ONLINE") || loc.includes("HỌP")) return "#";
+        return "#";
+    }
+
+    function filterAndRenderTKB() {
+        let isBreakWeek = $('#apiWeek').find(':selected').data('is-break') === true;
+
+        let filteredData = globalTkbData.filter(c => {
+            if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
+            let classDateInThisWeek = new Date(currentSelectedMonday); 
+            classDateInThisWeek.setDate(classDateInThisWeek.getDate() + (c.thu - 2));
+
+            let isRecurring = true; 
+            if (c.ngayBatDau && c.ngayKetThuc) {
+                let s = parseDateString(c.ngayBatDau); let e = parseDateString(c.ngayKetThuc);
+                if (s && e) { let diffDays = (e - s) / (1000 * 60 * 60 * 24); if (diffDays <= 7) isRecurring = false; }
+            }
+            if (isBreakWeek && isRecurring) return false;
+
+            if (c.ngayBatDau && c.ngayKetThuc) {
+                let startDate = parseDateString(c.ngayBatDau); let endDate = parseDateString(c.ngayKetThuc);
+                if (startDate && endDate) { if (classDateInThisWeek < startDate || classDateInThisWeek > endDate) return false; }
+            } 
+            
+            if (c.ngayNgoaiLe && c.ngayNgoaiLe.trim() !== "") {
+                let skipDates = c.ngayNgoaiLe.split(',').map(d => d.trim()); 
+                let formattedClassDate = formatDateDDMMYYYY(classDateInThisWeek);
+                if (skipDates.includes(formattedClassDate)) return false; 
+            }
+            return true; 
+        }); 
+        renderTKBTable(filteredData);
+    }
+
+    function renderTKBTable(courses) {
+        const tbody = document.getElementById('tkb-body'); 
+        if (!tbody) return;
+        
+        const totalRows = 16; 
+        const occupied = Array.from({ length: totalRows + 1 }, () => Array(9).fill(false));
+        let tableHtml = "";
+        
+        for (let i = 1; i <= totalRows; i++) {
+            tableHtml += `<tr>`;
+            if (i === 1) tableHtml += `<td rowspan="6" class="session-label">Sáng</td>`;
+            if (i === 7) tableHtml += `<td rowspan="6" class="session-label">Chiều</td>`;
+            if (i === 13) tableHtml += `<td rowspan="4" class="session-label">Tối</td>`;
+            
+            tableHtml += `<td class="col-tiet">${i}</td>`;
+            
+            for (let thu = 2; thu <= 8; thu++) {
+                if (occupied[i][thu]) continue; 
+                const course = courses.find(c => c.thu === thu && c.tietBd === i);
+                
+                if (course) {
+                    const len = course.soTiet;
+                    for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
+                    
+                    let autoColor = course.color;
+                    const locU = (course.hinhThuc || "").toUpperCase();
+                    if (locU.includes("AN DƯƠNG VƯƠNG") || locU.includes("ADV")) autoColor = "#e0f2fe";
+                    else if (locU.includes("LÊ VĂN SỸ") || locU.includes("LVS")) autoColor = "#e6f9ef";
+                    else if (locU.includes("LẠC LONG QUÂN") || locU.includes("LLQ")) autoColor = "#fff3e0";
+                    else if (locU.includes("LÊ THỊ RIÊNG") || locU.includes("CVLTR")) autoColor = "#fef9c3";
+                    else if (locU.includes("ONLINE") || locU.includes("HỌP")) autoColor = "#f3e8ff";
+
+                    const finalLink = getAutoLink(course.hinhThuc);
+
+                    tableHtml += `
+                    <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'}">
+                        <div class="subject">
+                            ${course.thoiGian ? `<div class="time">${course.thoiGian}</div>` : ''}
+                            <div style="font-weight:600;">
+                                <a href="${finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">${course.hinhThuc}</a>
+                            </div>
+                            <div>${course.mon}</div>
+                            ${course.phong ? `<span class="room">Phòng: ${course.phong}</span><br>` : ''}
+                            ${course.gv ? `<span class="teacher">GV: ${course.gv}</span>` : ''}
+                        </div>
+                    </td>`;
+                } else { 
+                    tableHtml += `<td class="day"></td>`; 
+                }
+            }
+            tableHtml += `</tr>`;
+        }
+        tbody.innerHTML = tableHtml;
+    }
+</script>
+
 </body>
 </html>
