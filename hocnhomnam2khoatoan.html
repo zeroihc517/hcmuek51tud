@@ -615,7 +615,24 @@
     </div>
     <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-key me-2"></i>Thay đổi mật khẩu cá nhân</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Mật khẩu cũ hiện tại</label><input type="password" id="txtOldPass" class="form-control" placeholder="Nhập mật khẩu cũ..."></div><div class="mb-3"><label class="form-label fw-bold">Mật khẩu mới muốn đổi</label><input type="password" id="txtNewPass" class="form-control" placeholder="Nhập mật khẩu mới..."></div><small class="text-danger d-none mt-2 fw-bold" id="changePassError"></small></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning fw-bold" onclick="submitChangePassword()" id="btnConfirmChangePass">Xác nhận thay đổi</button></div></div></div></div>
     <div class="modal fade" id="manageTkbListModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-xl"><div class="modal-content border-0 shadow"><div class="modal-header bg-dark text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học - Sửa nhanh</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="table-responsive"><table class="table table-bordered table-striped align-middle tkb-mgr-table m-0"><thead class="table-primary text-center"><tr><th>Môn học</th><th>Thứ</th><th>Tiết học</th><th>Thời gian</th><th>Phòng</th><th>Giảng viên</th><th>Thao tác</th></tr></thead><tbody id="tkbManagerListBody"></tbody></table></div></div></div></div></div>
-    <div class="modal fade" id="tkbPersonalModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-success text-white" id="tkbModalHeader"><h6 class="modal-title m-0 fw-bold" id="tkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="pTkbRowIndex" value=""><div class="row g-3"><div class="col-md-4"><label class="form-label fw-bold">Thứ (VD: 2, 4, 8)</label><input type="text" id="pTkbThu" class="form-control" value="2"></div><div class="col-md-4"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="pTkbTiet" class="form-control" min="1" max="15" value="1"></div><div class="col-md-4"><label class="form-label fw-bold">Số tiết</label><input type="number" id="pTkbSoTiet" class="form-control" min="1" max="5" value="3"></div><div class="col-md-6"><label class="form-label fw-bold">Tên môn học</label><input type="text" id="pTkbMon" class="form-control"></div><div class="col-md-6"><label class="form-label fw-bold">Phòng học</label><input type="text" id="pTkbPhong" class="form-control"></div><div class="col-md-4"><label class="form-label fw-bold">Thời gian (Giờ)</label><input type="text" id="pTkbThoiGian" class="form-control"></div><div class="col-md-4"><label class="form-label fw-bold">Cơ sở/Hình thức</label><input type="text" id="pTkbHinhThuc" class="form-control"></div><div class="col-md-4"><label class="form-label fw-bold">Giảng viên</label><input type="text" id="pTkbGV" class="form-control"></div><div class="col-md-4"><label class="form-label fw-bold">Màu nền lịch</label><input type="color" id="pTkbColor" class="form-control form-control-color w-100" value="#e0f2fe"></div><div class="col-md-4"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="pTkbNgayBD" class="form-control"></div><div class="col-md-4"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="pTkbNgayKT" class="form-control"></div><div class="col-md-12"><label class="form-label fw-bold text-danger">Ngày nghỉ / Ngoại lệ</label><input type="text" id="pTkbNgoaiLe" class="form-control" placeholder="VD: 15/04/2026, 01/05/2026"></div></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-success px-4 fw-bold" onclick="savePersonalTkb()" id="btnSavePersonalTkb">Lưu thông tin</button></div></div></div></div>
+    <div class="modal fade" id="tkbPersonalModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-success text-white" id="tkbModalHeader"><h6 class="modal-title m-0 fw-bold" id="tkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="pTkbRowIndex" value=""><div class="row g-3">
+        <div class="col-md-4"><label class="form-label fw-bold">Thứ (VD: 2, 4, 8)</label><input type="text" id="pTkbThu" class="form-control" value="2"></div>
+        <div class="col-md-4"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="pTkbTiet" class="form-control" min="1" max="15" value="1"></div>
+        <div class="col-md-4"><label class="form-label fw-bold">Số tiết</label><input type="number" id="pTkbSoTiet" class="form-control" min="1" max="5" value="3"></div>
+        <div class="col-md-6"><label class="form-label fw-bold">Tên môn học</label><input type="text" id="pTkbMon" class="form-control"></div>
+        <div class="col-md-6"><label class="form-label fw-bold">Phòng học</label><input type="text" id="pTkbPhong" class="form-control"></div>
+        <div class="col-md-4"><label class="form-label fw-bold">Thời gian (Giờ)</label><input type="text" id="pTkbThoiGian" class="form-control"></div>
+        
+        <!-- TRƯỜNG CƠ SỞ & LINK ĐƯỢC CHỈNH LẠI -->
+        <div class="col-md-4"><label class="form-label fw-bold">Cơ sở/Hình thức</label><input type="text" id="pTkbHinhThuc" class="form-control"></div>
+        <div class="col-md-4"><label class="form-label fw-bold text-primary">Đường link địa điểm (nếu có)</label><input type="text" id="pTkbLink" class="form-control" placeholder="https://..."></div>
+        
+        <div class="col-md-4"><label class="form-label fw-bold">Giảng viên</label><input type="text" id="pTkbGV" class="form-control"></div>
+        <div class="col-md-4"><label class="form-label fw-bold">Màu nền lịch</label><input type="color" id="pTkbColor" class="form-control form-control-color w-100" value="#e0f2fe"></div>
+        <div class="col-md-4"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="pTkbNgayBD" class="form-control" placeholder="DD/MM/YYYY"></div>
+        <div class="col-md-4"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="pTkbNgayKT" class="form-control" placeholder="DD/MM/YYYY"></div>
+        <div class="col-md-8"><label class="form-label fw-bold text-danger">Ngày nghỉ / Ngoại lệ</label><input type="text" id="pTkbNgoaiLe" class="form-control" placeholder="VD: 15/04/2026, 01/05/2026"></div>
+    </div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-success px-4 fw-bold" onclick="savePersonalTkb()" id="btnSavePersonalTkb">Lưu thông tin</button></div></div></div></div>
 
     <div class="modal fade" id="deadlinePersonalModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -1024,6 +1041,12 @@
 
         function closeAndOpenEditTkb(sheetRowIndex) { $('#manageTkbListModal').modal('hide'); setTimeout(() => { openEditTkbModal(sheetRowIndex); }, 400); }
 
+        function checkAndExtractUrl(text) { 
+            let urlRegex = /(https?:\/\/[^\s]+)/g; 
+            let match = text.match(urlRegex); 
+            return match ? match[0] : null; 
+        }
+
         function processTKBData(data) {
             globalTkbData = data.map((row) => {
                 let actualRowIndex = parseInt(row.pop()) || -1; 
@@ -1041,7 +1064,7 @@
             if (triggerAuthModal) { $('#userAuthModal').modal('show'); return; }
             $('#tkbModalTitle').html('<i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân');
             $('#pTkbRowIndex').val(''); 
-            $('#pTkbMon, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbNgoaiLe').val('');
+            $('#pTkbMon, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink, #pTkbNgoaiLe').val('');
             $('#pTkbThu').val(2); $('#pTkbTiet').val(1); $('#pTkbSoTiet').val(3); $('#pTkbColor').val('#e0f2fe');
             $('#tkbPersonalModal').modal('show');
         }
@@ -1052,7 +1075,18 @@
             $('#pTkbRowIndex').val(sheetRowIndex); 
             $('#pTkbThu').val(course.thu); $('#pTkbTiet').val(course.tietBd); $('#pTkbSoTiet').val(course.soTiet);
             $('#pTkbMon').val(course.mon); $('#pTkbPhong').val(course.phong); $('#pTkbThoiGian').val(course.thoiGian);
-            $('#pTkbHinhThuc').val(course.hinhThuc); $('#pTkbGV').val(course.gv); $('#pTkbColor').val(course.color);
+            
+            // Xử lý tách Link ra khỏi Hình thức
+            let rawHinhThuc = course.hinhThuc || "";
+            let extLink = checkAndExtractUrl(rawHinhThuc);
+            let displayHT = rawHinhThuc;
+            if(extLink) {
+                displayHT = rawHinhThuc.replace(extLink, '').trim();
+            }
+            $('#pTkbHinhThuc').val(displayHT);
+            $('#pTkbLink').val(extLink || '');
+
+            $('#pTkbGV').val(course.gv); $('#pTkbColor').val(course.color);
             $('#pTkbNgayBD').val(course.ngayBatDau); $('#pTkbNgayKT').val(course.ngayKetThuc); $('#pTkbNgoaiLe').val(course.ngayNgoaiLe); 
             $('#tkbPersonalModal').modal('show');
         }
@@ -1060,10 +1094,18 @@
         function savePersonalTkb() {
             let targetRowIndex = $('#pTkbRowIndex').val();
             let isEditMode = targetRowIndex !== '';
+            
+            // Nối link vào cuối hình thức nếu có
+            let finalHinhThuc = $('#pTkbHinhThuc').val().trim();
+            let linkVal = $('#pTkbLink').val().trim();
+            if (linkVal) {
+                finalHinhThuc += " " + linkVal;
+            }
+
             let pData = {
                 action: isEditMode ? "editTKBUser" : "addTKBUser", rowIndex: targetRowIndex, mssv: currentUser.mssv,
                 thu: $('#pTkbThu').val(), tietBd: $('#pTkbTiet').val(), soTiet: $('#pTkbSoTiet').val(),
-                thoiGian: $('#pTkbThoiGian').val(), hinhThuc: $('#pTkbHinhThuc').val(), mon: $('#pTkbMon').val(),
+                thoiGian: $('#pTkbThoiGian').val(), hinhThuc: finalHinhThuc, mon: $('#pTkbMon').val(),
                 phong: $('#pTkbPhong').val(), gv: $('#pTkbGV').val(), color: $('#pTkbColor').val(),
                 ngayBatDau: $('#pTkbNgayBD').val(), ngayKetThuc: $('#pTkbNgayKT').val(), ngayNgoaiLe: $('#pTkbNgoaiLe').val() 
             };
@@ -1081,14 +1123,14 @@
             }, function() { alert("Lỗi khi kết nối yêu cầu xóa bỏ lịch!"); });
         }
 
-        function getAutoLink(locationName) {
+        function getAutoLink(locationName, customLink) {
+            if (customLink && customLink.trim() !== "") return customLink;
             if (!locationName) return "#";
             const loc = locationName.toUpperCase();
             if (loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV")) return "https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5";
             if (loc.includes("LÊ VĂN SỸ") || loc.includes("LVS")) return "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5";
             if (loc.includes("LẠC LONG QUÂN") || loc.includes("LLQ")) return "https://maps.app.goo.gl/oV1mXHYDuW44cGbN6";
             if (loc.includes("LÊ THỊ RIÊNG") || loc.includes("CVLTR")) return "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA";
-            if (loc.includes("ONLINE") || loc.includes("HỌP")) return "#";
             return "#";
         }
 
@@ -1109,15 +1151,23 @@
                         const len = course.soTiet;
                         for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
                         
+                        // Tách customLink nếu có trong chuỗi Hình thức
+                        let rawHinhThuc = course.hinhThuc || "";
+                        let customLink = checkAndExtractUrl(rawHinhThuc);
+                        let displayHinhThuc = rawHinhThuc;
+                        if(customLink) {
+                            displayHinhThuc = rawHinhThuc.replace(customLink, '').trim();
+                        }
+
                         let autoColor = course.color;
-                        const locU = (course.hinhThuc || "").toUpperCase();
+                        const locU = displayHinhThuc.toUpperCase();
                         if (locU.includes("AN DƯƠNG VƯƠNG") || locU.includes("ADV")) autoColor = "#e0f2fe";
                         else if (locU.includes("LÊ VĂN SỸ") || locU.includes("LVS")) autoColor = "#e6f9ef";
                         else if (locU.includes("LẠC LONG QUÂN") || locU.includes("LLQ")) autoColor = "#fff3e0";
                         else if (locU.includes("LÊ THỊ RIÊNG") || locU.includes("CVLTR")) autoColor = "#fef9c3";
                         else if (locU.includes("ONLINE") || locU.includes("HỌP")) autoColor = "#f3e8ff";
 
-                        const finalLink = getAutoLink(course.hinhThuc);
+                        const finalLink = getAutoLink(displayHinhThuc, customLink);
 
                         tableHtml += `
                        <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'}">
@@ -1128,7 +1178,7 @@
                             <div class="subject">
                                 ${course.thoiGian ? `<div class="time">${course.thoiGian}</div>` : ''}
                                 <div style="font-weight:600;">
-                                    <a href="${finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">${course.hinhThuc}</a>
+                                    <a href="${finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">${displayHinhThuc || "Truy cập"}</a>
                                 </div>
                                 <div>${course.mon}</div>
                                 ${course.phong ? `<span class="room">Phòng: ${course.phong}</span><br>` : ''}
@@ -1202,8 +1252,6 @@
             loadWebLinks(); checkNewQA(); fetchAndRenderCategories();
         });
 
-        function checkAndExtractUrl(text) { let urlRegex = /(https?:\/\/[^\s]+)/g; let match = text.match(urlRegex); return match ? match[0] : null; }
-        
         function submitRowData() {
             let col1 = $('#txtCol1').val().trim(); let col2 = $('#txtCol2').val().trim(); let col3 = $('#txtCol3').val().trim(); let col4 = $('#txtCol4').val().trim();
             if (!col1 && !col2) { alert("Vui lòng nhập nội dung!"); return; }
@@ -1258,7 +1306,12 @@
                         row.forEach((cell, cellIndex) => {
                             if (cellIndex > 3) return;  let cellText = String(cell).trim();
                             if (cellIndex === 0 && isNewRow) cellText = cellText.replace(/new/i, '<span class="badge-new">Mới</span>');
-                            let extractedUrl = checkAndExtractUrl(cellText);
+                            
+                            // Sử dụng lại hàm checkAndExtractUrl nhưng đổi tên biến để tránh trùng
+                            let _urlRegex = /(https?:\/\/[^\s]+)/g; 
+                            let _match = cellText.match(_urlRegex);
+                            let extractedUrl = _match ? _match[0] : null;
+
                             if (extractedUrl) { let label = cellText.replace(extractedUrl, '').trim() || "Truy cập"; bodyHtml += `<td><a href="${extractedUrl}" target="_blank" class="btn-portal-action"><i class="fa-solid fa-cloud-arrow-down"></i> ${label}</a></td>`; } 
                             else { if (cellText === "") bodyHtml += `<td></td>`; else bodyHtml += `<td>${cellIndex === 0 && !isNewRow ? iconPrefix + cellText : cellText}</td>`; }
                         });
