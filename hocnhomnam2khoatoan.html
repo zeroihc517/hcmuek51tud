@@ -957,29 +957,87 @@
             $('.tkb-wrapper').before(toolbarHtml);
         }
 
-        function openManageTkbListModal() {
-            let html = '';
-            if(globalTkbData.length === 0) {
-                html = '<tr><td colspan="7" class="text-center text-muted">Chưa có môn học lịch trình cá nhân nào được tạo!</td></tr>';
-            } else {
-                globalTkbData.forEach(c => {
-                    let thuText = c.thu === 8 ? "Chủ nhật" : "Thứ " + c.thu;
-                    html += `<tr>
-                        <td class="fw-bold text-dark">${c.mon}</td>
-                        <td class="text-center">${thuText}</td>
-                        <td class="text-center">Tiết ${c.tietBd} (${c.soTiet} tiết)</td>
-                        <td class="text-center fw-bold text-danger">${c.thoiGian || '-'}</td>
-                        <td class="text-center">${c.phong || '-'}</td>
-                        <td>${c.gv || '-'}</td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1" onclick="closeAndOpenEditTkb(${c.sheetRowIndex})"><i class="fa-solid fa-pen"></i> Sửa</button>
-                            <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2" onclick="deletePersonalTkb(${c.sheetRowIndex})"><i class="fa-solid fa-trash"></i> Xóa nhanh</button>
-                        </td>
-                    </tr>`;
+       function openManageTkbListModal() {
+    let html = '';
+    
+    // Lấy thông tin Năm học và Học kỳ đang được chọn ở các Dropdown màn hình chính
+    let selectedNH = $('#namHocSelect').val();
+    let selectedHK = $('#hocKySelect').val();
+    
+    let filteredTkbData = globalTkbData;
+    let titleSuffix = '';
+
+    // Lọc dữ liệu TKB theo Học kỳ và Năm học
+    if (selectedNH && selectedHK) {
+        let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+        if (config) {
+            let sDate = parseDateString(config[2]);
+            let numAcademicWeeks = parseInt(config[3]);
+            let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+            
+            if (sDate && numAcademicWeeks) {
+                let startMon = getMondayOfDate(sDate);
+                
+                // Tính ngày kết thúc của học kỳ
+                let acadWk = 1;
+                let calWk = 1;
+                while (acadWk <= numAcademicWeeks && calWk <= 52) {
+                    if (!breakWeeks.includes(calWk)) { acadWk++; }
+                    calWk++;
+                }
+                
+                let endSun = new Date(startMon);
+                endSun.setDate(endSun.getDate() + ((calWk - 1) * 7) - 1);
+                endSun.setHours(23, 59, 59, 999);
+
+                // Lọc để chỉ giữ lại những môn có thời gian nằm trong học kỳ này
+                filteredTkbData = globalTkbData.filter(c => {
+                    let cStart = parseDateString(c.ngayBatDau);
+                    let cEnd = parseDateString(c.ngayKetThuc);
+                    
+                    // Nếu môn không nhập ngày bắt đầu/kết thúc, mặc định vẫn hiện
+                    if (!cStart && !cEnd) return true; 
+
+                    // Kiểm tra khoảng thời gian môn học có giao với thời gian học kỳ không
+                    if (cStart && cEnd) return cStart <= endSun && cEnd >= startMon;
+                    if (cStart) return cStart <= endSun;
+                    if (cEnd) return cEnd >= startMon;
+                    return true;
                 });
+                
+                titleSuffix = ` - ${selectedHK} (${selectedNH})`;
             }
-            $('#tkbManagerListBody').html(html); $('#manageTkbListModal').modal('show');
         }
+    }
+
+    // Cập nhật tiêu đề của Bảng modal cho rõ ràng
+    $('#manageTkbListModal .modal-title').html(`<i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học${titleSuffix}`);
+
+    // Hiển thị danh sách môn học đã lọc ra bảng
+    if(filteredTkbData.length === 0) {
+        let emptyMsg = (selectedNH && selectedHK) ? `Không có môn học nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có môn học lịch trình cá nhân nào được tạo!";
+        html = `<tr><td colspan="7" class="text-center text-muted py-4">${emptyMsg}</td></tr>`;
+    } else {
+        filteredTkbData.forEach(c => {
+            let thuText = c.thu === 8 ? "Chủ nhật" : "Thứ " + c.thu;
+            html += `<tr>
+                <td class="fw-bold text-dark">${c.mon}</td>
+                <td class="text-center">${thuText}</td>
+                <td class="text-center">Tiết ${c.tietBd} (${c.soTiet} tiết)</td>
+                <td class="text-center fw-bold text-danger">${c.thoiGian || '-'}</td>
+                <td class="text-center">${c.phong || '-'}</td>
+                <td>${c.gv || '-'}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1" onclick="closeAndOpenEditTkb(${c.sheetRowIndex})"><i class="fa-solid fa-pen"></i> Sửa</button>
+                    <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2" onclick="deletePersonalTkb(${c.sheetRowIndex})"><i class="fa-solid fa-trash"></i> Xóa</button>
+                </td>
+            </tr>`;
+        });
+    }
+    
+    $('#tkbManagerListBody').html(html); 
+    $('#manageTkbListModal').modal('show');
+}
 
         function closeAndOpenEditTkb(sheetRowIndex) { $('#manageTkbListModal').modal('hide'); setTimeout(() => { openEditTkbModal(sheetRowIndex); }, 400); }
 
