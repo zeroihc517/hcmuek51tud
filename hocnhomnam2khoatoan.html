@@ -31,6 +31,7 @@
 
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+            --line: #e5e7eb;
         }
 
         body { 
@@ -202,31 +203,32 @@
         .link-card h5 { margin: 0 0 4px 0; font-size: 18px; font-weight: 700; color: var(--primary-color); }
         .link-card p { margin: 0; font-size: 14px; color: var(--text-muted); }
 
-        .tkb-wrapper { width: 100%; overflow-x: auto; background: #fff; border-radius: var(--card-border-radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); }
+        /* ==========================================
+           CSS CHUẨN TỪ STYLETKB.CSS
+           ========================================== */
+        .table-box { background: #fff; border-radius: 14px; overflow: auto; box-shadow: 0 6px 24px rgba(0,0,0,.05); margin-top: 20px; }
         .sched { width: 100%; min-width: 1000px; border-collapse: collapse; table-layout: fixed; }
-        .sched th { background: var(--primary-color); color: #fff; padding: 14px 8px; font-size: 15px; border: 1px solid rgba(255,255,255,0.15); text-align: center; }
+        .sched th { background: #0f4c81; color: #fff; padding: 14px 8px; font-size: 14px; border-right: 1px solid rgba(255,255,255,.15); text-align: center; }
         .sched th:nth-child(1), .sched td:nth-child(1) { width: 60px; }
         .sched th:nth-child(2), .sched td:nth-child(2) { width: 50px; }
-        .sched th:nth-child(n+3), .sched td:nth-child(n+3) { width: calc((100% - 110px) / 7); }
-        .sched td { border: 2.4px solid var(--border-color); padding: 8px; text-align: center; height: 50px; font-size: 15px; }
-        .sched td[rowspan] { background: #ffffff; }
-        .col-tiet { background: #f9fafb; font-weight: 600; }
+        .sched th:nth-child(n+3), .sched td:nth-child(n+3) { width: calc((100% - 150px) / 6); }
         
-        .td-subject { padding: 12px; border-radius: 8px; vertical-align: top; text-align: left; position: relative; }
+        .sched td { border: 2.4px solid var(--line); padding: 8px 8px; text-align: center; height: 50px; font-size: 16px; }
+        .sched td[rowspan] { background: #ffffff; width: 80px; }
+        .col-tiet { background: #ffffff; font-weight: 600; }
+        
+        .td-subject { background: #e0f2fe; padding: 12px; text-align: center; vertical-align: middle; border-radius: 10px; position: relative; }
         .td-subject:hover .tkb-actions { display: flex !important; }
         .tkb-actions { position: absolute; top: 5px; right: 5px; display: none; gap: 4px; z-index: 5; }
         .btn-tkb-act { background: rgba(255, 255, 255, 0.9); border: 1px solid #cbd5e1; border-radius: 4px; padding: 1px 5px; font-size: 11px; transition: 0.2s; cursor: pointer; }
         .btn-tkb-act:hover { transform: scale(1.08); box-shadow: var(--shadow-sm); }
         
-        .td-subject .subject { background: transparent; line-height: 1.4; }
-        .session-label { font-weight: bold; background: #fff; text-transform: uppercase; color: var(--primary-color); }
-
-        .tkb-time-display {
-            font-size: 16px !important; 
-            font-weight: 700 !important;
-            color: #dc2626 !important; 
-            margin-bottom: 4px;
-        }
+        .td-subject .subject { background: transparent; padding: 6px; line-height: 1.4; }
+        .subject { background: #e0f2fe; border-radius: 10px; padding: 10px; line-height: 1.5; }
+        .subject .time { color: #dc2626; font-weight: 700; }
+        .subject .room { font-style: italic; color: #4b5563; }
+        .subject .teacher { display: block; margin-top: 4px; font-size: 13px; font-weight: 500; color: #4b5563; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 2px; }
+        .sched td.day:empty { background: #ffffff !important; }
 
         /* Float Dropdown TKB */
         .select-floating-box { position: relative; width: 100%; margin-top: 6px; }
@@ -256,7 +258,7 @@
         .online-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         @media (max-width: 1024px) { .online-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 600px) { .online-grid { grid-template-columns: 1fr; } }
-        .online-card{ position: relative; background:white; border-radius:16px; padding:20px; text-align:center; box-shadow:0 3px 8px rgba(0,0,0,0.05); transition:transform 0.25s ease; }
+        .online-card{ position: relative; background:white; border-radius:16px; padding:20px; text-align:center; box-shadow:0 3px 8px rgba(0,0,0,0.05); transition:transform 0.25s ease; z-index: 2; }
         .online-card:hover{ transform:translateY(-4px); box-shadow:0 6px 14px rgba(0,0,0,0.08); }
         .online-card h3{ font-size:15px; font-weight:700; color:#111827; margin:10px 0 6px; }
         .online-card .desc{ font-size:14px; color:#374151; margin-bottom:10px; font-weight:600;}
@@ -429,7 +431,7 @@
                     </div>
                 </div>
                 
-                <div class="tkb-wrapper">
+                <div class="table-box">
                     <table class="sched">
                         <thead>
                             <tr id="header-row">
@@ -682,7 +684,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzg-krdzVfCmZJw9bDz9DTFRKsKqkrlqd-LTRtMIMj0waFNlF-cMR9MGRS_M1sPS0-U/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVF74VRM5_AFIVKAyAIXtlepjgfcmNt96T5udZUyHOUwLSuzyfuEAISNiZdTc_-3lM/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -690,7 +692,7 @@
         window.qaThreadParts = {};
         let globalCategories = []; 
         let globalTkbData = [];
-        let globalDeadlineData = []; // Lưu danh sách Deadline
+        let globalDeadlineData = []; 
         
         let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
 
@@ -795,25 +797,18 @@
 
             $('#tkb-body').html('<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải TKB của '+ currentUser.name +'...</td></tr>');
             
-            // Xóa cache mỗi khi tải mới (hoặc bạn có thể giữ cache nếu muốn)
             $.ajax({
                 url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv, 
                 method: "GET", dataType: "json",
                 success: function(data) {
                     processTKBData(data);
                     renderTkbToolBar();
-                    loadDeadlines(); // Sau khi load xong TKB, tải tiếp Deadlines
+                    loadDeadlines();
                 },
                 error: function() { $('#tkb-body').html('<tr><td colspan="9" class="text-danger text-center">Lỗi khi tải dữ liệu TKB!</td></tr>'); }
             });
         }
 
-        // ==========================================
-        // LẤY & RENDER DEADLINES
-        // ==========================================
-       
-// 1. Cập nhật hàm tải dữ liệu
-       // 1. Cập nhật hàm tải dữ liệu (lấy 8 cột)
         function loadDeadlines() {
             $('#deadlineBox').removeClass('d-none');
             $('#deadline-container').html('<div class="w-100 text-center text-muted" style="grid-column: 1/-1"><i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải dữ liệu Deadline...</div>');
@@ -824,8 +819,8 @@
                 success: function(data) {
                     globalDeadlineData = data.map(r => ({
                         title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5],
-                        dateStart: r[6] || "", // Ngày bắt đầu
-                        dateEnd: r[7] || "",   // Ngày kết thúc
+                        dateStart: r[6] || "", 
+                        dateEnd: r[7] || "",   
                         sheetRowIndex: parseInt(r[8])
                     }));
                     renderDeadlines();
@@ -833,27 +828,22 @@
             });
         }
 
-        // 2. Logic kiểm tra sự giao nhau của thời gian
-        // 2. Logic kiểm tra sự giao nhau của thời gian và Hiển thị
         function renderDeadlines() {
             const container = document.getElementById('deadline-container');
             if (!container) return;
             
-            // Tính mốc thời gian bắt đầu và kết thúc của tuần ĐANG CHỌN
             let weekStart = new Date(currentSelectedMonday);
             weekStart.setHours(0,0,0,0);
             
             let weekEnd = new Date(weekStart);
-            weekEnd.setDate(weekStart.getDate() + 6); // Đến hết Chủ nhật
+            weekEnd.setDate(weekStart.getDate() + 6); 
             weekEnd.setHours(23,59,59,999);
 
-            // Lọc ra các deadline có thời gian nằm vắt ngang qua tuần này
             let filtered = globalDeadlineData.filter(d => {
                 let sDate = parseDateString(d.dateStart);
                 let eDate = parseDateString(d.dateEnd);
                 if(!sDate || !eDate) return false;
                 
-                // Công thức: Bắt đầu của task <= Kết thúc của tuần VÀ Kết thúc của task >= Bắt đầu của tuần
                 return sDate <= weekEnd && eDate >= weekStart;
             });
 
@@ -879,7 +869,6 @@
             `).join('');
         }
 
-        // 3. Sửa lại các hàm đóng mở & lưu Modal
         function openAddDeadlineModal() {
             $('#dlModalTitle').html('<i class="fa-solid fa-plus me-2"></i>Thêm Deadline');
             $('#pDlRowIndex').val('');
@@ -912,7 +901,6 @@
                 return; 
             }
 
-            // Tự động gộp "Từ ngày... đến ngày..." thành chuỗi hiển thị lên thẻ Deadline
             let autoDuration = "Từ " + startDate + " đến " + endDate;
 
             let payload = {
@@ -920,7 +908,7 @@
                 rowIndex: rowIndex,
                 mssv: currentUser.mssv,
                 title: $('#pDlTitle').val(),
-                duration: autoDuration, // Hệ thống tự động điền luôn cho bạn
+                duration: autoDuration, 
                 tag: $('#pDlTag').val(),
                 icon: $('#pDlIcon').val(),
                 emoji: $('#pDlEmoji').val(),
@@ -935,15 +923,13 @@
                 alert(res); $('#deadlinePersonalModal').modal('hide'); btn.html('Lưu Deadline').prop('disabled', false); loadDeadlines();
             }, function() { alert("Giao tiếp máy chủ thất bại!"); btn.html('Lưu Deadline').prop('disabled', false); });
         }
-       function deletePersonalTkb(sheetRowIndex) {
-            if(!confirm("Bạn có chắc chắn muốn xóa học phần lịch trình cá nhân này không?")) return;
-            // Bổ sung thêm mssv: currentUser.mssv
-            postToGAS({ action: "deleteTKBUser", rowIndex: sheetRowIndex, mssv: currentUser.mssv }, function(res) {
-                alert(res); loadThoiGianBieu();
-                if($('#manageTkbListModal').is(':visible')) { setTimeout(() => { openManageTkbListModal(); }, 600); }
-            }, function() { alert("Lỗi khi kết nối yêu cầu xóa bỏ lịch!"); });
+        
+       function deletePersonalDeadline(sheetRowIndex) {
+            if(!confirm("Bạn có chắc chắn muốn xóa deadline cá nhân này không?")) return;
+            postToGAS({ action: "deleteDeadlineUser", rowIndex: sheetRowIndex, mssv: currentUser.mssv }, function(res) {
+                alert(res); loadDeadlines();
+            }, function() { alert("Lỗi khi kết nối yêu cầu xóa bỏ deadline!"); });
         }
-        // ==========================================
 
         function renderTkbToolBar() {
             $('.tkb-personal-toolbar').remove(); 
@@ -959,90 +945,82 @@
                         <button class="btn btn-sm btn-outline-danger fw-bold" onclick="logoutStudent()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
                     </div>
                 </div>`;
-            $('.tkb-wrapper').before(toolbarHtml);
+            $('.table-box').before(toolbarHtml);
         }
 
        function openManageTkbListModal() {
-    let html = '';
-    
-    // Lấy thông tin Năm học và Học kỳ đang được chọn ở các Dropdown màn hình chính
-    let selectedNH = $('#namHocSelect').val();
-    let selectedHK = $('#hocKySelect').val();
-    
-    let filteredTkbData = globalTkbData;
-    let titleSuffix = '';
-
-    // Lọc dữ liệu TKB theo Học kỳ và Năm học
-    if (selectedNH && selectedHK) {
-        let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
-        if (config) {
-            let sDate = parseDateString(config[2]);
-            let numAcademicWeeks = parseInt(config[3]);
-            let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+            let html = '';
             
-            if (sDate && numAcademicWeeks) {
-                let startMon = getMondayOfDate(sDate);
-                
-                // Tính ngày kết thúc của học kỳ
-                let acadWk = 1;
-                let calWk = 1;
-                while (acadWk <= numAcademicWeeks && calWk <= 52) {
-                    if (!breakWeeks.includes(calWk)) { acadWk++; }
-                    calWk++;
-                }
-                
-                let endSun = new Date(startMon);
-                endSun.setDate(endSun.getDate() + ((calWk - 1) * 7) - 1);
-                endSun.setHours(23, 59, 59, 999);
+            let selectedNH = $('#namHocSelect').val();
+            let selectedHK = $('#hocKySelect').val();
+            
+            let filteredTkbData = globalTkbData;
+            let titleSuffix = '';
 
-                // Lọc để chỉ giữ lại những môn có thời gian nằm trong học kỳ này
-                filteredTkbData = globalTkbData.filter(c => {
-                    let cStart = parseDateString(c.ngayBatDau);
-                    let cEnd = parseDateString(c.ngayKetThuc);
+            if (selectedNH && selectedHK) {
+                let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+                if (config) {
+                    let sDate = parseDateString(config[2]);
+                    let numAcademicWeeks = parseInt(config[3]);
+                    let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
                     
-                    // Nếu môn không nhập ngày bắt đầu/kết thúc, mặc định vẫn hiện
-                    if (!cStart && !cEnd) return true; 
+                    if (sDate && numAcademicWeeks) {
+                        let startMon = getMondayOfDate(sDate);
+                        
+                        let acadWk = 1;
+                        let calWk = 1;
+                        while (acadWk <= numAcademicWeeks && calWk <= 52) {
+                            if (!breakWeeks.includes(calWk)) { acadWk++; }
+                            calWk++;
+                        }
+                        
+                        let endSun = new Date(startMon);
+                        endSun.setDate(endSun.getDate() + ((calWk - 1) * 7) - 1);
+                        endSun.setHours(23, 59, 59, 999);
 
-                    // Kiểm tra khoảng thời gian môn học có giao với thời gian học kỳ không
-                    if (cStart && cEnd) return cStart <= endSun && cEnd >= startMon;
-                    if (cStart) return cStart <= endSun;
-                    if (cEnd) return cEnd >= startMon;
-                    return true;
-                });
-                
-                titleSuffix = ` - ${selectedHK} (${selectedNH})`;
+                        filteredTkbData = globalTkbData.filter(c => {
+                            let cStart = parseDateString(c.ngayBatDau);
+                            let cEnd = parseDateString(c.ngayKetThuc);
+                            
+                            if (!cStart && !cEnd) return true; 
+
+                            if (cStart && cEnd) return cStart <= endSun && cEnd >= startMon;
+                            if (cStart) return cStart <= endSun;
+                            if (cEnd) return cEnd >= startMon;
+                            return true;
+                        });
+                        
+                        titleSuffix = ` - ${selectedHK} (${selectedNH})`;
+                    }
+                }
             }
+
+            $('#manageTkbListModal .modal-title').html(`<i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học${titleSuffix}`);
+
+            if(filteredTkbData.length === 0) {
+                let emptyMsg = (selectedNH && selectedHK) ? `Không có môn học nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có môn học lịch trình cá nhân nào được tạo!";
+                html = `<tr><td colspan="7" class="text-center text-muted py-4">${emptyMsg}</td></tr>`;
+            } else {
+                filteredTkbData.forEach(c => {
+                    let thuText = c.thu === 8 ? "Chủ nhật" : "Thứ " + c.thu;
+                    html += `<tr>
+                        <td class="fw-bold text-dark">${c.mon}</td>
+                        <td class="text-center">${thuText}</td>
+                        <td class="text-center">Tiết ${c.tietBd} (${c.soTiet} tiết)</td>
+                        <td class="text-center fw-bold text-danger">${c.thoiGian || '-'}</td>
+                        <td class="text-center">${c.phong || '-'}</td>
+                        <td>${c.gv || '-'}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1" onclick="closeAndOpenEditTkb(${c.sheetRowIndex})"><i class="fa-solid fa-pen"></i> Sửa</button>
+                            <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2" onclick="deletePersonalTkb(${c.sheetRowIndex})"><i class="fa-solid fa-trash"></i> Xóa</button>
+                        </td>
+                    </tr>`;
+                });
+            }
+            
+            $('#tkbManagerListBody').html(html); 
+            $('#manageTkbListModal').modal('show');
         }
-    }
-
-    // Cập nhật tiêu đề của Bảng modal cho rõ ràng
-    $('#manageTkbListModal .modal-title').html(`<i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học${titleSuffix}`);
-
-    // Hiển thị danh sách môn học đã lọc ra bảng
-    if(filteredTkbData.length === 0) {
-        let emptyMsg = (selectedNH && selectedHK) ? `Không có môn học nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có môn học lịch trình cá nhân nào được tạo!";
-        html = `<tr><td colspan="7" class="text-center text-muted py-4">${emptyMsg}</td></tr>`;
-    } else {
-        filteredTkbData.forEach(c => {
-            let thuText = c.thu === 8 ? "Chủ nhật" : "Thứ " + c.thu;
-            html += `<tr>
-                <td class="fw-bold text-dark">${c.mon}</td>
-                <td class="text-center">${thuText}</td>
-                <td class="text-center">Tiết ${c.tietBd} (${c.soTiet} tiết)</td>
-                <td class="text-center fw-bold text-danger">${c.thoiGian || '-'}</td>
-                <td class="text-center">${c.phong || '-'}</td>
-                <td>${c.gv || '-'}</td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1" onclick="closeAndOpenEditTkb(${c.sheetRowIndex})"><i class="fa-solid fa-pen"></i> Sửa</button>
-                    <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2" onclick="deletePersonalTkb(${c.sheetRowIndex})"><i class="fa-solid fa-trash"></i> Xóa</button>
-                </td>
-            </tr>`;
-        });
-    }
-    
-    $('#tkbManagerListBody').html(html); 
-    $('#manageTkbListModal').modal('show');
-}
 
         function closeAndOpenEditTkb(sheetRowIndex) { $('#manageTkbListModal').modal('hide'); setTimeout(() => { openEditTkbModal(sheetRowIndex); }, 400); }
 
@@ -1097,10 +1075,21 @@
 
         function deletePersonalTkb(sheetRowIndex) {
             if(!confirm("Bạn có chắc chắn muốn xóa học phần lịch trình cá nhân này không?")) return;
-            postToGAS({ action: "deleteTKBUser", rowIndex: sheetRowIndex }, function(res) {
+            postToGAS({ action: "deleteTKBUser", rowIndex: sheetRowIndex, mssv: currentUser.mssv }, function(res) {
                 alert(res); loadThoiGianBieu();
                 if($('#manageTkbListModal').is(':visible')) { setTimeout(() => { openManageTkbListModal(); }, 600); }
             }, function() { alert("Lỗi khi kết nối yêu cầu xóa bỏ lịch!"); });
+        }
+
+        function getAutoLink(locationName) {
+            if (!locationName) return "#";
+            const loc = locationName.toUpperCase();
+            if (loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV")) return "https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5";
+            if (loc.includes("LÊ VĂN SỸ") || loc.includes("LVS")) return "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5";
+            if (loc.includes("LẠC LONG QUÂN") || loc.includes("LLQ")) return "https://maps.app.goo.gl/oV1mXHYDuW44cGbN6";
+            if (loc.includes("LÊ THỊ RIÊNG") || loc.includes("CVLTR")) return "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA";
+            if (loc.includes("ONLINE") || loc.includes("HỌP")) return "#";
+            return "#";
         }
 
         function renderTKBTable(courses) {
@@ -1109,9 +1098,9 @@
             let tableHtml = "";
             for (let i = 1; i <= totalRows; i++) {
                 tableHtml += `<tr>`;
-                if (i === 1) tableHtml += `<td rowspan="6" class="session-label">Sáng</td>`;
-                if (i === 7) tableHtml += `<td rowspan="6" class="session-label">Chiều</td>`;
-                if (i === 13) tableHtml += `<td rowspan="4" class="session-label">Tối</td>`;
+                if (i === 1) tableHtml += `<td rowspan="6" class="col-tiet" style="font-weight: bold; text-transform: uppercase;">Sáng</td>`;
+                if (i === 7) tableHtml += `<td rowspan="6" class="col-tiet" style="font-weight: bold; text-transform: uppercase;">Chiều</td>`;
+                if (i === 13) tableHtml += `<td rowspan="4" class="col-tiet" style="font-weight: bold; text-transform: uppercase;">Tối</td>`;
                 tableHtml += `<td class="col-tiet">${i}</td>`;
                 for (let thu = 2; thu <= 8; thu++) {
                     if (occupied[i][thu]) continue; 
@@ -1119,21 +1108,34 @@
                     if (course) {
                         const len = course.soTiet;
                         for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
+                        
+                        let autoColor = course.color;
+                        const locU = (course.hinhThuc || "").toUpperCase();
+                        if (locU.includes("AN DƯƠNG VƯƠNG") || locU.includes("ADV")) autoColor = "#e0f2fe";
+                        else if (locU.includes("LÊ VĂN SỸ") || locU.includes("LVS")) autoColor = "#e6f9ef";
+                        else if (locU.includes("LẠC LONG QUÂN") || locU.includes("LLQ")) autoColor = "#fff3e0";
+                        else if (locU.includes("LÊ THỊ RIÊNG") || locU.includes("CVLTR")) autoColor = "#fef9c3";
+                        else if (locU.includes("ONLINE") || locU.includes("HỌP")) autoColor = "#f3e8ff";
+
+                        const finalLink = getAutoLink(course.hinhThuc);
+
                         tableHtml += `
-                       <td rowspan="${len}" class="td-subject" style="background:${course.color}; border: 2.4px solid var(--border-color);">
+                       <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'}">
                             <div class="tkb-actions">
                                 <button class="btn-tkb-act text-warning" onclick="openEditTkbModal(${course.sheetRowIndex})" title="Sửa"><i class="fa-solid fa-pen"></i></button>
                                 <button class="btn-tkb-act text-danger" onclick="deletePersonalTkb(${course.sheetRowIndex})" title="Xóa"><i class="fa-solid fa-trash"></i></button>
                             </div>
                             <div class="subject">
-                                ${course.thoiGian ? `<div class="tkb-time-display"><i class="fa-regular fa-clock me-1"></i>${course.thoiGian}</div>` : ''}
-                                ${course.hinhThuc ? `<div style="font-weight: 700; color: #4d69e8; font-size: 15px; margin-bottom: 6px; line-height: 1.3;"><i class="fa-solid fa-laptop-house me-1"></i>${course.hinhThuc}</div>` : ''}
-                                <div style="color: #000000; font-size: 15px; line-height: 1.3; margin-bottom: 4px;">${course.mon}</div>
-                                ${course.phong ? `<div style="font-size: 13.5px; color: #000000; font-weight: 500; margin-bottom: 2px;"><i class="fa-solid fa-location-dot me-1"></i>Phòng: ${course.phong}</div>` : ''}
-                                ${course.gv ? `<div style="margin-top:6px; font-size:13px; color: #000000; font-weight: 500; border-top:1px dashed rgba(0,0,0,0.3); padding-top:6px;"><i class="fa-solid fa-chalkboard-user me-1"></i>${course.gv}</div>` : ''}
+                                ${course.thoiGian ? `<div class="time">${course.thoiGian}</div>` : ''}
+                                <div style="font-weight:600;">
+                                    <a href="${finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">${course.hinhThuc}</a>
+                                </div>
+                                <div>${course.mon}</div>
+                                ${course.phong ? `<span class="room">Phòng: ${course.phong}</span><br>` : ''}
+                                ${course.gv ? `<span class="teacher">GV: ${course.gv}</span>` : ''}
                             </div>
                         </td>`;
-                    } else { tableHtml += `<td style="background: #ffffff; border: 2.4px solid var(--border-color);"></td>`; }
+                    } else { tableHtml += `<td class="day"></td>`; }
                 }
                 tableHtml += `</tr>`;
             }
@@ -1141,24 +1143,23 @@
         }
 
         function renderSidebarCategories() {
-    let optionsHtml = '';
-    globalCategories.forEach((name) => {
-        let lowerName = name.trim().toLowerCase();
+            let optionsHtml = '';
+            globalCategories.forEach((name) => {
+                let lowerName = name.trim().toLowerCase();
 
-        // Thêm điều kiện này để ẩn hoàn toàn 2 danh mục
-        if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin') return;
+                if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin') return;
 
-        if(lowerName !== 'thông báo') {
-            if (lowerName === 'users' && !isAdmin) return;
-            if (lowerName === 'cauhinhhocky' && !isAdmin) return; 
-            let icon = 'fa-folder-closed';
-            if (lowerName === 'users') icon = 'fa-users-gear';
-            if (lowerName === 'cauhinhhocky') icon = 'fa-calendar-check'; 
-            optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)"><i class="fa-solid ${icon}"></i> ${name}</button>`;
+                if(lowerName !== 'thông báo') {
+                    if (lowerName === 'users' && !isAdmin) return;
+                    if (lowerName === 'cauhinhhocky' && !isAdmin) return; 
+                    let icon = 'fa-folder-closed';
+                    if (lowerName === 'users') icon = 'fa-users-gear';
+                    if (lowerName === 'cauhinhhocky') icon = 'fa-calendar-check'; 
+                    optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)"><i class="fa-solid ${icon}"></i> ${name}</button>`;
+                }
+            });
+            $('#dynamicCourseList').html(optionsHtml);
         }
-    });
-    $('#dynamicCourseList').html(optionsHtml);
-}
 
         function verifyAdmin() {
             let pass = $('#txtAdminPass').val();
@@ -1336,6 +1337,10 @@
         function getDateOfSpecificWeekday(thu) { let today = new Date(); today.setHours(0, 0, 0, 0); today.setDate(today.getDate() + (currentWeekOffset * 7)); let currentDay = today.getDay(); let mappedCurrentDay = currentDay === 0 ? 8 : currentDay + 1; let diff = thu - mappedCurrentDay; let targetDate = new Date(today); targetDate.setDate(today.getDate() + diff); return targetDate; }
         function formatDateDDMMYYYY(dateObj) { return `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`; }
         
+        function formatShort(dateObj) {
+            return `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
+        }
+
         let globalConfigHK = [];
         let currentSelectedMonday = new Date();
 
@@ -1375,30 +1380,26 @@
             let html = '<option value="">-- Chọn tuần --</option>';
             if (config) {
                 let startDate = parseDateString(config[2]); 
-                let numAcademicWeeks = parseInt(config[3]); // Số tuần HỌC THỰC TẾ
-                // Lấy mảng các tuần nghỉ từ Cột 5 (VD: "5, 6, 7")
+                let numAcademicWeeks = parseInt(config[3]); 
                 let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
                 
                 if (startDate && numAcademicWeeks) {
                     let startMonday = getMondayOfDate(startDate);
-                    let academicWk = 1; // Đếm số tuần học
-                    let calendarWk = 1; // Đếm số tuần lịch
+                    let academicWk = 1; 
+                    let calendarWk = 1; 
 
-                    // Duyệt cho đến khi học đủ số tuần (Bảo vệ vòng lặp max 52 tuần/năm)
                     while (academicWk <= numAcademicWeeks && calendarWk <= 52) {
                         let m = new Date(startMonday); m.setDate(m.getDate() + ((calendarWk - 1) * 7));
                         let s = new Date(m); s.setDate(s.getDate() + 6);
                         let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
                         
                         if (breakWeeks.includes(calendarWk)) {
-                            // Nếu rơi vào tuần nghỉ -> Gắn thẻ data-is-break="true"
                             html += `<option value="${m.getTime()}" data-is-break="true" style="color: red; font-weight: bold;">Tuần Nghỉ Lễ (${format(m)} - ${format(s)})</option>`;
                         } else {
-                            // Tuần học bình thường
                             html += `<option value="${m.getTime()}" data-is-break="false">Tuần ${academicWk} (${format(m)} - ${format(s)})</option>`;
-                            academicWk++; // Chỉ tăng tuần học khi không phải tuần nghỉ
+                            academicWk++; 
                         }
-                        calendarWk++; // Tuần lịch thì luôn tăng
+                        calendarWk++; 
                     }
                 }
             }
@@ -1412,16 +1413,15 @@
                 currentSelectedMonday = new Date(parseInt(val));
                 updateTableHeaders();
                 filterAndRenderTKB();
-                renderDeadlines(); // Cập nhật lại Deadline khi đổi tuần
+                renderDeadlines(); 
             }
         }
 
         function updateTableHeaders() {
             for (let i = 2; i <= 8; i++) {
                 let d = new Date(currentSelectedMonday); d.setDate(d.getDate() + (i - 2));
-                let dayStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
                 let thName = i === 8 ? "Chủ nhật" : "Thứ " + i;
-                $(`#th-day-${i}`).html(`${thName} <br><small style="font-weight: normal; color: #bae6fd;">(${dayStr})</small>`);
+                $(`#th-day-${i}`).html(`${thName} <br><small style="font-weight: normal; color: #bae6fd;">(${formatShort(d)})</small>`);
             }
         }
 
@@ -1435,7 +1435,6 @@
             onWeekChange();
         }
 
-        // Đã sửa lại Logic Nút Hiện Tại đảm bảo chính xác nhảy vào tuần hiện tại
         function jumpToCurrentWeek() {
             let todayTime = new Date().getTime();
             let found = false;
@@ -1455,7 +1454,6 @@
                         let m = new Date(startMon); m.setDate(m.getDate() + ((calWk - 1) * 7));
                         let nextM = new Date(m); nextM.setDate(nextM.getDate() + 7);
                         
-                        // Nếu Hôm nay nằm trong tuần này
                         if (todayTime >= m.getTime() && todayTime < nextM.getTime()) {
                             targetNH = conf[0]; targetHK = conf[1]; found = true;
                             targetWeekSelectValue = m.getTime().toString();
@@ -1484,7 +1482,6 @@
         }
 
         function filterAndRenderTKB() {
-            // Kiểm tra xem Option đang chọn trong Dropdown có phải Tuần Nghỉ không
             let isBreakWeek = $('#weekSelect').find(':selected').data('is-break') === true;
 
             let filteredData = globalTkbData.filter(c => {
@@ -1492,27 +1489,23 @@
                 let classDateInThisWeek = new Date(currentSelectedMonday); 
                 classDateInThisWeek.setDate(classDateInThisWeek.getDate() + (c.thu - 2));
 
-                // Phân loại: Môn học lặp lại (Chính khóa) hay Môn chỉ diễn ra 1 ngày (Học bù)
                 let isRecurring = true; 
                 if (c.ngayBatDau && c.ngayKetThuc) {
                     let s = parseDateString(c.ngayBatDau);
                     let e = parseDateString(c.ngayKetThuc);
                     if (s && e) {
                         let diffDays = (e - s) / (1000 * 60 * 60 * 24);
-                        if (diffDays <= 7) isRecurring = false; // Lịch học bù (Khoảng cách dưới 7 ngày)
+                        if (diffDays <= 7) isRecurring = false; 
                     }
                 }
                 
-                // Nếu là Tuần Nghỉ VÀ là Môn học chính khóa -> ẨN KHỎI BẢNG (Chỉ hiện lớp học bù nếu có)
                 if (isBreakWeek && isRecurring) return false;
 
-                // Kiểm tra xem ngày học có nằm trong giới hạn Ngày bắt đầu -> Kết thúc không
                 if (c.ngayBatDau && c.ngayKetThuc) {
                     let startDate = parseDateString(c.ngayBatDau); let endDate = parseDateString(c.ngayKetThuc);
                     if (startDate && endDate) { if (classDateInThisWeek < startDate || classDateInThisWeek > endDate) return false; }
                 } 
                 
-                // Kiểm tra Ngày ngoại lệ (Nghỉ riêng môn học đó)
                 if (c.ngayNgoaiLe && c.ngayNgoaiLe.trim() !== "") {
                     let skipDates = c.ngayNgoaiLe.split(',').map(d => d.trim()); 
                     let formattedClassDate = formatDateDDMMYYYY(classDateInThisWeek);
