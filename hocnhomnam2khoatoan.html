@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Học nhóm Năm 2 Khoa Toán</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght={400;500;600;700}&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
@@ -227,70 +227,50 @@
             color: #dc2626 !important; 
             margin-bottom: 4px;
         }
-/* Container viền cắt ngang (Floating Label) */
-.select-floating-box {
-    position: relative;
-    width: 100%;
-    margin-top: 6px; 
-}
 
-/* Nhãn đè lên viền */
-.select-floating-box label {
-    position: absolute;
-    top: -9px;
-    left: 16px; /* Đẩy nhãn sang phải một chút cho hợp với góc bo tròn */
-    background-color: #ffffff; 
-    padding: 0 6px;
-    font-size: 13.5px;
-    font-weight: 600;
-    color: #64748b; 
-    z-index: 10;
-    line-height: 1;
-    pointer-events: none;
-}
-
-/* Input select bo tròn hoàn toàn */
-.select-floating-box .form-select {
-    height: 44px; 
-    border-radius: 50px !important; /* Tăng lên 50px để bo tròn hẳn 2 đầu */
-    border: 1px solid #cbd5e1;
-    font-weight: 500;
-    font-size: 15px;
-    color: #1e293b;
-    padding-left: 18px; /* Tăng khoảng cách lề trái cho chữ không bị dính vào viền cong */
-    box-shadow: none;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.select-floating-box .form-select:hover {
-    border-color: #94a3b8;
-}
-
-.select-floating-box .form-select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(21, 76, 121, 0.1); 
-}
-
-/* Căn chỉnh và bo tròn các nút bấm bên phải */
-.btn-nav-square, .btn-hientai {
-    height: 44px !important;
-    margin-top: 6px;
-}
-
-.btn-hientai {
-    border-radius: 50px !important; /* Bo tròn nút Hiện tại */
-}
-
-.btn-nav-square {
-    border-radius: 12px !important; /* Bo góc nút tới/lui (bạn có thể đổi thành 50% nếu muốn nó thành hình tròn xoe) */
-}
+        /* Float Dropdown TKB */
+        .select-floating-box { position: relative; width: 100%; margin-top: 6px; }
+        .select-floating-box label { position: absolute; top: -9px; left: 16px; background-color: #ffffff; padding: 0 6px; font-size: 13.5px; font-weight: 600; color: #64748b; z-index: 10; line-height: 1; pointer-events: none; }
+        .select-floating-box .form-select { height: 44px; border-radius: 50px !important; border: 1px solid #cbd5e1; font-weight: 500; font-size: 15px; color: #1e293b; padding-left: 18px; box-shadow: none; cursor: pointer; transition: all 0.2s; }
+        .select-floating-box .form-select:hover { border-color: #94a3b8; }
+        .select-floating-box .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(21, 76, 121, 0.1); }
+        .btn-nav-square, .btn-hientai { height: 44px !important; margin-top: 6px; }
+        .btn-hientai { border-radius: 50px !important; }
+        .btn-nav-square { border-radius: 12px !important; }
+        
         .nav-week-container { display: flex; align-items: stretch; gap: 8px; margin-bottom: 24px; height: 42px; }
-        .select-week-custom { border-radius: 8px !important; border-color: #cbd5e1 !important; font-weight: 600; color: var(--primary-color) !important; box-shadow: var(--shadow-sm); cursor: pointer; height: 100% !important; padding: 0 1rem !important; }
-        .btn-nav-square { background-color: #2b476e; color: #ffffff; border-radius: 8px; padding: 0; border: none; flex: 1; display: flex; align-items: center; justify-content: center; width: 44px; box-shadow: var(--shadow-sm); transition: all 0.2s; }
+        .btn-nav-square { background-color: #2b476e; color: #ffffff; padding: 0; border: none; flex: 1; display: flex; align-items: center; justify-content: center; width: 44px; box-shadow: var(--shadow-sm); transition: all 0.2s; }
         .btn-nav-square:hover { background-color: #1a2f4c; color: #ffffff; transform: scale(0.95); }
-        .btn-hientai { background-color: #2b476e; color: #ffffff; border-radius: 26px; padding: 0 20px; font-weight: 600; font-size: 14px; border: none; box-shadow: var(--shadow-sm); transition: all 0.2s; }
+        .btn-hientai { background-color: #2b476e; color: #ffffff; padding: 0 20px; font-weight: 600; font-size: 14px; border: none; box-shadow: var(--shadow-sm); transition: all 0.2s; }
         .btn-hientai:hover { background-color: #1a2f4c; color: #ffffff; transform: translateY(-2px); }
+
+        /* Deadline Mới Thêm */
+        .online-box{
+          position: relative; margin-top: 32px; padding: 24px; border-radius: 20px;
+          background: linear-gradient(135deg, #fff7fa, #ffe9f0, #ffd6e5, #ffe9f0, #fff7fa);
+          background-size: 400% 400%; animation: sparkleSoft 20s ease infinite;
+          border: 2px solid #ffc2d1; box-shadow: 0 4px 18px rgba(255, 182, 193, 0.25);
+        }
+        @keyframes sparkleSoft { 0% {background-position:0% 50%;} 50% {background-position:100% 50%;} 100% {background-position:0% 50%;} }
+        .online-title{ font-size:20px; font-weight:800; color:#b91c1c; margin-bottom:20px; text-transform:uppercase; }
+        .online-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        @media (max-width: 1024px) { .online-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .online-grid { grid-template-columns: 1fr; } }
+        .online-card{ position: relative; background:white; border-radius:16px; padding:20px; text-align:center; box-shadow:0 3px 8px rgba(0,0,0,0.05); transition:transform 0.25s ease; }
+        .online-card:hover{ transform:translateY(-4px); box-shadow:0 6px 14px rgba(0,0,0,0.08); }
+        .online-card h3{ font-size:15px; font-weight:700; color:#111827; margin:10px 0 6px; }
+        .online-card .desc{ font-size:14px; color:#374151; margin-bottom:10px; font-weight:600;}
+        .tag{ display:inline-block; padding:4px 12px; background:#dbeafe; color:#1e40af; font-weight:600; border-radius:999px; font-size:12px; }
+        .icon-circle{ width:48px; height:48px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:22px; margin:0 auto 10px; }
+        .icon-circle.success { background-color: #86efac; color: #166534; }
+        .icon-circle.fire{background:#fee2e2;color:#b91c1c;}
+        .icon-circle.alert{background:#fef9c3;color:#92400e;}
+        .icon-circle.primary{ background:#bfdbfe; color: #1e40af; }
+        .icon-circle.secondary{ background:#e9d5ff; color: #6b21a8; }
+        .deadline-actions { position: absolute; top: 10px; right: 10px; display: none; gap: 5px; }
+        .online-card:hover .deadline-actions { display: flex; }
+        .btn-dl-act { background: #f3f4f6; border: none; border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer; transition: 0.2s;}
+        .btn-dl-act:hover { background: #e5e7eb; }
 
         .fixed-bottom-footer { position: fixed; bottom: 0; left: 0; width: 100%; height: 46px; background-color: #0b2a4a; color: #e2e8f0; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; z-index: 1050; font-size: 13.5px; box-shadow: 0 -2px 8px rgba(0,0,0,0.2); }
         .fixed-bottom-footer a { color: #38bdf8; text-decoration: none; font-weight: 600; transition: 0.2s; }
@@ -406,65 +386,75 @@
 
             <div id="tkbSection" class="d-none">
                 <header class="top-header">
-                    <div class="page-title"><i class="fa-regular fa-calendar-days"></i> Thời gian biểu cá nhân</div>
+                    <div class="page-title"><i class="fa-regular fa-calendar-days"></i> Thời gian biểu & Deadlines</div>
                 </header>
-                     <div class="nav-week-container bg-white p-3 rounded border shadow-sm mb-4" style="height: auto;">
-    <div class="row g-3 w-100 align-items-center m-0">
-        <div class="col-md-3 ps-0">
-            <div class="select-floating-box">
-                <label>Năm học</label>
-                <select class="form-select" id="namHocSelect" onchange="onNamHocChange()">
-                    <option value="">-- Chọn năm học --</option>
-                </select>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="select-floating-box">
-                <label>Học kỳ</label>
-                <select class="form-select" id="hocKySelect" onchange="onHocKyChange()">
-                    <option value="">-- Chọn học kỳ --</option>
-                </select>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="select-floating-box">
-                <label>Tuần</label>
-                <select class="form-select" id="weekSelect" onchange="onWeekChange()">
-                    <option value="">-- Chọn tuần --</option>
-                </select>
-            </div>
-        </div>
-        <div class="col-md-2 pe-0 d-flex gap-2 justify-content-end">
-            <button class="btn btn-nav-square" onclick="changeWeekBtn(-1)" title="Tuần trước">
-                <i class="fa-solid fa-backward-fast"></i>
-            </button>
-            <button class="btn btn-nav-square" onclick="changeWeekBtn(1)" title="Tuần sau">
-                <i class="fa-solid fa-forward-fast"></i>
-            </button>
-            <button class="btn btn-hientai d-flex align-items-center justify-content-center gap-2" onclick="jumpToCurrentWeek()" style="flex: 2;">
-                <i class="fa-regular fa-calendar-days"></i> Hiện tại
-            </button>
-        </div>
-    </div>
-</div>
+                <div class="nav-week-container bg-white p-3 rounded border shadow-sm mb-4" style="height: auto;">
+                    <div class="row g-3 w-100 align-items-center m-0">
+                        <div class="col-md-3 ps-0">
+                            <div class="select-floating-box">
+                                <label>Năm học</label>
+                                <select class="form-select" id="namHocSelect" onchange="onNamHocChange()">
+                                    <option value="">-- Chọn năm học --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="select-floating-box">
+                                <label>Học kỳ</label>
+                                <select class="form-select" id="hocKySelect" onchange="onHocKyChange()">
+                                    <option value="">-- Chọn học kỳ --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="select-floating-box">
+                                <label>Tuần</label>
+                                <select class="form-select" id="weekSelect" onchange="onWeekChange()">
+                                    <option value="">-- Chọn tuần --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2 pe-0 d-flex gap-2 justify-content-end">
+                            <button class="btn btn-nav-square" onclick="changeWeekBtn(-1)" title="Tuần trước">
+                                <i class="fa-solid fa-backward-fast"></i>
+                            </button>
+                            <button class="btn btn-nav-square" onclick="changeWeekBtn(1)" title="Tuần sau">
+                                <i class="fa-solid fa-forward-fast"></i>
+                            </button>
+                            <button class="btn btn-hientai d-flex align-items-center justify-content-center gap-2" onclick="jumpToCurrentWeek()" style="flex: 2;">
+                                <i class="fa-regular fa-calendar-days"></i> Hiện tại
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="tkb-wrapper">
                     <table class="sched">
                         <thead>
                             <tr id="header-row">
-    <th>Buổi</th>
-    <th>Tiết</th>
-    <th id="th-day-2">Thứ 2</th>
-    <th id="th-day-3">Thứ 3</th>
-    <th id="th-day-4">Thứ 4</th>
-    <th id="th-day-5">Thứ 5</th>
-    <th id="th-day-6">Thứ 6</th>
-    <th id="th-day-7">Thứ 7</th>
-    <th id="th-day-8">Chủ nhật</th>
-</tr>
+                                <th>Buổi</th>
+                                <th>Tiết</th>
+                                <th id="th-day-2">Thứ 2</th>
+                                <th id="th-day-3">Thứ 3</th>
+                                <th id="th-day-4">Thứ 4</th>
+                                <th id="th-day-5">Thứ 5</th>
+                                <th id="th-day-6">Thứ 6</th>
+                                <th id="th-day-7">Thứ 7</th>
+                                <th id="th-day-8">Chủ nhật</th>
+                            </tr>
                         </thead>
                         <tbody id="tkb-body"></tbody>
                     </table>
                 </div>
+
+                <div class="online-box d-none mb-5" id="deadlineBox">
+                    <h2 class="online-title d-flex justify-content-between align-items-center mb-4">
+                        <span><i class="fa-solid fa-thumbtack me-2"></i> DEADLINE CỦA TÔI</span>
+                        <button class="btn btn-sm text-white fw-bold shadow-sm" style="background: #e61d4a;" onclick="openAddDeadlineModal()"><i class="fa-solid fa-plus"></i> Thêm Deadline</button>
+                    </h2>
+                    <div class="online-grid" id="deadline-container"></div>
+                </div>
+
             </div>
 
             <div id="courseSection">
@@ -620,216 +610,78 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-key me-2"></i>Thay đổi mật khẩu cá nhân</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Mật khẩu cũ hiện tại</label><input type="password" id="txtOldPass" class="form-control" placeholder="Nhập mật khẩu cũ..."></div><div class="mb-3"><label class="form-label fw-bold">Mật khẩu mới muốn đổi</label><input type="password" id="txtNewPass" class="form-control" placeholder="Nhập mật khẩu mới..."></div><small class="text-danger d-none mt-2 fw-bold" id="changePassError"></small></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning fw-bold" onclick="submitChangePassword()" id="btnConfirmChangePass">Xác nhận thay đổi</button></div></div></div></div>
+    <div class="modal fade" id="manageTkbListModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-xl"><div class="modal-content border-0 shadow"><div class="modal-header bg-dark text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học - Sửa nhanh</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="table-responsive"><table class="table table-bordered table-striped align-middle tkb-mgr-table m-0"><thead class="table-primary text-center"><tr><th>Môn học</th><th>Thứ</th><th>Tiết học</th><th>Thời gian</th><th>Phòng</th><th>Giảng viên</th><th>Thao tác</th></tr></thead><tbody id="tkbManagerListBody"></tbody></table></div></div></div></div></div>
+    <div class="modal fade" id="tkbPersonalModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-success text-white" id="tkbModalHeader"><h6 class="modal-title m-0 fw-bold" id="tkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="pTkbRowIndex" value=""><div class="row g-3"><div class="col-md-4"><label class="form-label fw-bold">Thứ (VD: 2, 4, 8)</label><input type="text" id="pTkbThu" class="form-control" value="2"></div><div class="col-md-4"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="pTkbTiet" class="form-control" min="1" max="15" value="1"></div><div class="col-md-4"><label class="form-label fw-bold">Số tiết</label><input type="number" id="pTkbSoTiet" class="form-control" min="1" max="5" value="3"></div><div class="col-md-6"><label class="form-label fw-bold">Tên môn học</label><input type="text" id="pTkbMon" class="form-control"></div><div class="col-md-6"><label class="form-label fw-bold">Phòng học</label><input type="text" id="pTkbPhong" class="form-control"></div><div class="col-md-4"><label class="form-label fw-bold">Thời gian (Giờ)</label><input type="text" id="pTkbThoiGian" class="form-control"></div><div class="col-md-4"><label class="form-label fw-bold">Cơ sở/Hình thức</label><input type="text" id="pTkbHinhThuc" class="form-control"></div><div class="col-md-4"><label class="form-label fw-bold">Giảng viên</label><input type="text" id="pTkbGV" class="form-control"></div><div class="col-md-4"><label class="form-label fw-bold">Màu nền lịch</label><input type="color" id="pTkbColor" class="form-control form-control-color w-100" value="#e0f2fe"></div><div class="col-md-4"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="pTkbNgayBD" class="form-control"></div><div class="col-md-4"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="pTkbNgayKT" class="form-control"></div><div class="col-md-12"><label class="form-label fw-bold text-danger">Ngày nghỉ / Ngoại lệ</label><input type="text" id="pTkbNgoaiLe" class="form-control" placeholder="VD: 15/04/2026, 01/05/2026"></div></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-success px-4 fw-bold" onclick="savePersonalTkb()" id="btnSavePersonalTkb">Lưu thông tin</button></div></div></div></div>
 
-    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="deadlinePersonalModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-warning text-dark">
-                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-key me-2"></i>Thay đổi mật khẩu cá nhân</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-header bg-danger text-white" id="dlModalHeader">
+                    <h6 class="modal-title m-0 fw-bold" id="dlModalTitle"><i class="fa-solid fa-plus me-2"></i>Thêm Deadline</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Mật khẩu cũ hiện tại</label>
-                        <input type="password" id="txtOldPass" class="form-control" placeholder="Nhập mật khẩu cũ...">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Mật khẩu mới muốn đổi</label>
-                        <input type="password" id="txtNewPass" class="form-control" placeholder="Nhập mật khẩu mới...">
-                    </div>
-                    <small class="text-danger d-none mt-2 fw-bold" id="changePassError"></small>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-warning fw-bold" onclick="submitChangePassword()" id="btnConfirmChangePass">Xác nhận thay đổi</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="manageTkbListModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-dark text-white">
-                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học chung - Nhấn Xóa/Sửa nhanh</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-striped align-middle tkb-mgr-table m-0">
-                            <thead class="table-primary text-center">
-                                <tr>
-                                    <th>Môn học</th>
-                                    <th>Thứ</th>
-                                    <th>Tiết học</th>
-                                    <th>Thời gian</th>
-                                    <th>Phòng</th>
-                                    <th>Giảng viên</th>
-                                    <th>Thao tác nhanh</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tkbManagerListBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="tkbPersonalModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-success text-white" id="tkbModalHeader">
-                    <h6 class="modal-title m-0 fw-bold" id="tkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <input type="hidden" id="pTkbRowIndex" value="">
+                    <input type="hidden" id="pDlRowIndex" value="">
                     
-                    <div class="row g-3">
-                        <div class="col-md-4"><label class="form-label fw-bold">Thứ (VD: 2, 4, 8)</label><input type="text" id="pTkbThu" class="form-control" placeholder="2,4,7" value="2"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="pTkbTiet" class="form-control" min="1" max="15" value="1"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Số tiết</label><input type="number" id="pTkbSoTiet" class="form-control" min="1" max="5" value="3"></div>
-                        
-                        <div class="col-md-6"><label class="form-label fw-bold">Tên môn học</label><input type="text" id="pTkbMon" class="form-control" placeholder="VD: Đại số tuyến tính..."></div>
-                        <div class="col-md-6"><label class="form-label fw-bold">Phòng học</label><input type="text" id="pTkbPhong" class="form-control" placeholder="VD: D101..."></div>
-                        
-                        <div class="col-md-4"><label class="form-label fw-bold">Thời gian (Giờ)</label><input type="text" id="pTkbThoiGian" class="form-control" placeholder="VD: 07:00 - 09:30"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Cơ sở / Hình thức</label><input type="text" id="pTkbHinhThuc" class="form-control" placeholder="VD: An Dương Vương / Online"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Giảng viên</label><input type="text" id="pTkbGV" class="form-control" placeholder="Tên GV..."></div>
-
-                        <div class="col-md-4"><label class="form-label fw-bold">Màu nền lịch</label><input type="color" id="pTkbColor" class="form-control form-control-color w-100" value="#e0f2fe"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="pTkbNgayBD" class="form-control" placeholder="DD/MM/YYYY"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="pTkbNgayKT" class="form-control" placeholder="DD/MM/YYYY"></div>
-                        
-                        <div class="col-md-12"><label class="form-label fw-bold text-danger">Ngày nghỉ / Ngoại lệ (Không học)</label><input type="text" id="pTkbNgoaiLe" class="form-control" placeholder="Nhập các ngày nghỉ học theo định dạng DD/MM/YYYY, cách nhau bởi dấu phẩy. VD: 15/04/2026, 01/05/2026"></div>
-                    </div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-success px-4 fw-bold" onclick="savePersonalTkb()" id="btnSavePersonalTkb">Lưu thông tin</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-primary text-white">
-                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-user-shield me-2"></i>Xác thực Quản trị viên</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <label class="form-label fw-bold">Mật khẩu truy cập</label>
-                    <input type="password" id="txtAdminPass" class="form-control" placeholder="Nhập mật khẩu Admin...">
-                    <small class="text-danger d-none mt-2 fw-bold" id="adminLoginError">Mật khẩu không chính xác!</small>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-primary px-4 fw-bold" onclick="verifyAdmin()">Đăng nhập</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="insertRowModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-success text-white">
-                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-plus me-2"></i>Chèn nội dung xuống dưới hàng này</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="insertCol1" class="form-control" placeholder="Nhập cột 1"></div>
-                    <div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="insertCol2" class="form-control" rows="3" placeholder="Nhập cột 2"></textarea></div>
-                    <div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="insertCol3" class="form-control" placeholder="Nhập cột 3"></div>
-                    <div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="insertCol4" class="form-control" placeholder="Nhập cột 4"></div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-success px-4 fw-bold" onclick="saveInsertRow()" id="btnSaveInsertRow">Chèn nội dung</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="editRowModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-warning text-dark">
-                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa nội dung</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="editCol1" class="form-control"></div>
-                    <div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="editCol2" class="form-control" rows="3"></textarea></div>
-                    <div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="editCol3" class="form-control"></div>
-                    <div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="editCol4" class="form-control"></div>
-                </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditRow()" id="btnSaveEditRow">Lưu thay đổi</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="editQAModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-warning text-dark">
-                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa câu trả lời Q&A</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Nội dung câu trả lời</label>
-                        <textarea id="editQAText" class="form-control" rows="6" placeholder="Nhập nội dung chỉnh sửa tại đây..."></textarea>
+                        <label class="form-label fw-bold">Tên công việc / Bài tập</label>
+                        <input type="text" id="pDlTitle" class="form-control" placeholder="VD: Báo cáo giữa kỳ">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Hình thức / Địa điểm / ...</label>
+                        <input type="text" id="pDlTag" class="form-control" placeholder="VD: VLE">
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Màu nền</label>
+                            <select id="pDlIcon" class="form-select">
+                                <option value="fire">Đỏ</option>
+                                <option value="alert">Vàng</option>
+                                <option value="success">Xanh lá</option>
+                                <option value="primary">Xanh dương</option>
+                                <option value="secondary">Tím</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold">Emoji</label>
+                            <input type="text" id="pDlEmoji" class="form-control" placeholder="VD: ⏰, 📖, 🔥">
+                        </div>
+                    </div>
+                   <div class="row mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-primary">Từ ngày</label>
+                            <input type="text" id="pDlStartDate" class="form-control" placeholder="VD: 15/10/2026">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-bold text-danger">Đến ngày</label>
+                            <input type="text" id="pDlEndDate" class="form-control" placeholder="VD: 20/10/2026">
+                        </div>
+                        <div class="col-12 mt-1">
+                             <small class="text-muted">Nhập định dạng <b>DD/MM/YYYY</b>. Thời gian sẽ tự động hiện lên bảng Deadline trên màn hình.</small>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditQA()" id="btnSaveEditQA">Lưu thay đổi</button>
+                    <button type="button" class="btn btn-danger px-4 fw-bold" onclick="savePersonalDeadline()" id="btnSaveDeadline">Lưu Deadline</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="manageCategoryModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-danger text-white">
-                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Quản lý Danh mục truy cập</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="input-group mb-4">
-                        <input type="text" id="txtNewCategory" class="form-control" placeholder="Nhập tên danh mục (học phần) mới...">
-                        <button class="btn fw-bold text-white" style="background: var(--accent-red);" onclick="addCategory()" id="btnAddCategory">
-                            <i class="fa-solid fa-plus me-1"></i> Thêm mới
-                        </button>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover border align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Tên danh mục</th>
-                                    <th class="text-end" style="width: 200px;">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody id="categoryManagerList">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow"><div class="modal-header bg-primary text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-user-shield me-2"></i>Xác thực Quản trị viên</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><label class="form-label fw-bold">Mật khẩu truy cập</label><input type="password" id="txtAdminPass" class="form-control"><small class="text-danger d-none mt-2 fw-bold" id="adminLoginError">Mật khẩu không chính xác!</small></div><div class="modal-footer border-0"><button type="button" class="btn btn-primary px-4 fw-bold" onclick="verifyAdmin()">Đăng nhập</button></div></div></div></div>
+    <div class="modal fade" id="insertRowModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-success text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-plus me-2"></i>Chèn nội dung xuống dưới hàng này</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="insertCol1" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="insertCol2" class="form-control" rows="3"></textarea></div><div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="insertCol3" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="insertCol4" class="form-control"></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-success px-4 fw-bold" onclick="saveInsertRow()" id="btnSaveInsertRow">Chèn nội dung</button></div></div></div></div>
+    <div class="modal fade" id="editRowModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa nội dung</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="editCol1" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="editCol2" class="form-control" rows="3"></textarea></div><div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="editCol3" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="editCol4" class="form-control"></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditRow()" id="btnSaveEditRow">Lưu thay đổi</button></div></div></div></div>
+    <div class="modal fade" id="editQAModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa câu trả lời Q&A</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Nội dung câu trả lời</label><textarea id="editQAText" class="form-control" rows="6"></textarea></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditQA()" id="btnSaveEditQA">Lưu thay đổi</button></div></div></div></div>
+    <div class="modal fade" id="manageCategoryModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-danger text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Quản lý Danh mục</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="input-group mb-4"><input type="text" id="txtNewCategory" class="form-control"><button class="btn fw-bold text-white" style="background: var(--accent-red);" onclick="addCategory()" id="btnAddCategory"><i class="fa-solid fa-plus me-1"></i> Thêm mới</button></div><div class="table-responsive"><table class="table table-hover border align-middle"><thead class="table-light"><tr><th>Tên danh mục</th><th class="text-end" style="width: 200px;">Thao tác</th></tr></thead><tbody id="categoryManagerList"></tbody></table></div></div></div></div></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0nOt1JUUQFUVuxxk9XSVzhUWh1cLcDDvKZ-K5bLclvc-iaFNuoaZCtHXsvwU-tjQo/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzN1Hhmy937pPQ5KAsGrFLzxrLfts7BLeG4u-ilNJ1DctuPQu5cKbDgHMzpPwLAYNi-/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -837,6 +689,7 @@
         window.qaThreadParts = {};
         let globalCategories = []; 
         let globalTkbData = [];
+        let globalDeadlineData = []; // Lưu danh sách Deadline
         
         let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
 
@@ -846,41 +699,22 @@
                 return v.toString(16);
             });
         }
-
         let sessionUUID = sessionStorage.getItem('user_uuid');
-        if (!sessionUUID) {
-            sessionUUID = generateUUID();
-            sessionStorage.setItem('user_uuid', sessionUUID);
-        }
+        if (!sessionUUID) { sessionUUID = generateUUID(); sessionStorage.setItem('user_uuid', sessionUUID); }
 
         function pingOnlineStatus() {
-            $.ajax({
-                url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID,
-                method: "GET",
-                dataType: "json",
-                success: function(res) {
-                    if (res && res.count) {
-                        $('#onlineCountText').text(res.count + ' đang trực tuyến');
-                    }
-                }
+            $.ajax({ url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID, method: "GET", dataType: "json",
+                success: function(res) { if (res && res.count) { $('#onlineCountText').text(res.count + ' đang trực tuyến'); } }
             });
         }
         
         function postToGAS(payload, onSuccess, onError) {
-            $.ajax({
-                url: SCRIPT_URL,
-                method: "POST",
-                data: JSON.stringify(payload),
-                contentType: "text/plain;charset=utf-8",
-                success: onSuccess,
-                error: onError
-            });
+            $.ajax({ url: SCRIPT_URL, method: "POST", data: JSON.stringify(payload), contentType: "text/plain;charset=utf-8", success: onSuccess, error: onError });
         }
 
         const sidebar = document.getElementById('sidebarMenu');
         const overlay = document.getElementById('sidebarOverlay');
         const btnToggle = document.getElementById('btnToggleMenu');
-
         function toggleMenu() { sidebar.classList.toggle('show'); overlay.classList.toggle('show'); }
         btnToggle.addEventListener('click', toggleMenu); overlay.addEventListener('click', toggleMenu);
 
@@ -895,22 +729,17 @@
             if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
         }
 
-        // Auth Functions
         function loginStudent() {
-            let mssv = $('#txtUserMSSV').val().trim();
-            let pass = $('#txtUserPass').val().trim();
+            let mssv = $('#txtUserMSSV').val().trim(); let pass = $('#txtUserPass').val().trim();
             if (!mssv || !pass) { $('#userAuthError').removeClass('d-none').text("Vui lòng nhập đầy đủ thông tin!"); return; }
 
-            let btn = $('#btnLoginStudent');
-            btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
-            
+            let btn = $('#btnLoginStudent'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
             postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
                 let response = typeof res === 'string' ? JSON.parse(res) : res;
                 if (response.success) {
                     currentUser = { mssv: response.mssv, name: response.name };
                     sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    $('#userAuthModal').modal('hide');
-                    alert("Xin chào, " + response.name + "!");
+                    $('#userAuthModal').modal('hide'); alert("Xin chào, " + response.name + "!");
                     loadThoiGianBieu();
                 } else { $('#userAuthError').removeClass('d-none').text(response.message); }
                 btn.html('Đăng nhập').prop('disabled', false);
@@ -918,20 +747,15 @@
         }
 
         function registerStudent() {
-            let mssv = $('#txtRegMSSV').val().trim();
-            let pass = $('#txtRegPass').val().trim();
-            let name = $('#txtRegName').val().trim();
+            let mssv = $('#txtRegMSSV').val().trim(); let pass = $('#txtRegPass').val().trim(); let name = $('#txtRegName').val().trim();
             if (!mssv || !pass || !name) { $('#userRegError').removeClass('d-none').text("Vui lòng nhập đủ thông tin!"); return; }
 
-            let btn = $('#btnRegisterStudent');
-            btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang đăng ký...').prop('disabled', true);
-
+            let btn = $('#btnRegisterStudent'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang đăng ký...').prop('disabled', true);
             postToGAS({ action: "register", mssv: mssv, password: pass, name: name }, function(res) {
                 let response = typeof res === 'string' ? JSON.parse(res) : res;
                 if (response.success) {
                     alert("Đăng ký thành công! Hãy chuyển sang Tab Đăng nhập.");
-                    $('#txtRegMSSV').val(''); $('#txtRegPass').val(''); $('#txtRegName').val('');
-                    $('#userRegError').addClass('d-none');
+                    $('#txtRegMSSV').val(''); $('#txtRegPass').val(''); $('#txtRegName').val(''); $('#userRegError').addClass('d-none');
                 } else { $('#userRegError').removeClass('d-none').text(response.message); }
                 btn.html('Đăng ký tài khoản').prop('disabled', false);
             }, function() { $('#userRegError').removeClass('d-none').text("Lỗi kết nối!"); btn.html('Đăng ký tài khoản').prop('disabled', false); });
@@ -939,42 +763,21 @@
 
         function logoutStudent() {
             if(confirm("Bạn có chắc chắn muốn đăng xuất khỏi TKB cá nhân?")) {
-                sessionStorage.removeItem('currentUser');
-                currentUser = null;
-                loadThoiGianBieu();
+                sessionStorage.removeItem('currentUser'); currentUser = null; loadThoiGianBieu();
             }
         }
 
-        function openChangePasswordModal() {
-            $('#txtOldPass').val('');
-            $('#txtNewPass').val('');
-            $('#changePassError').addClass('d-none');
-            $('#changePasswordModal').modal('show');
-        }
-
+        function openChangePasswordModal() { $('#txtOldPass').val(''); $('#txtNewPass').val(''); $('#changePassError').addClass('d-none'); $('#changePasswordModal').modal('show'); }
         function submitChangePassword() {
-            let oldPass = $('#txtOldPass').val().trim();
-            let newPass = $('#txtNewPass').val().trim();
+            let oldPass = $('#txtOldPass').val().trim(); let newPass = $('#txtNewPass').val().trim();
             if(!oldPass || !newPass) { $('#changePassError').removeClass('d-none').text("Vui lòng điền đủ mật khẩu cũ và mới!"); return; }
-            
-            let btn = $('#btnConfirmChangePass');
-            btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
-            
+            let btn = $('#btnConfirmChangePass'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
             postToGAS({ action: "changePassword", mssv: currentUser.mssv, oldPassword: oldPass, newPassword: newPass }, function(res) {
-                if(res.includes("thành công")) {
-                    alert(res);
-                    $('#changePasswordModal').modal('hide');
-                } else {
-                    $('#changePassError').removeClass('d-none').text(res);
-                }
+                if(res.includes("thành công")) { alert(res); $('#changePasswordModal').modal('hide'); } else { $('#changePassError').removeClass('d-none').text(res); }
                 btn.html('Xác nhận thay đổi').prop('disabled', false);
-            }, function() {
-                alert("Lỗi kết nối đến server!");
-                btn.html('Xác nhận thay đổi').prop('disabled', false);
-            });
+            }, function() { alert("Lỗi kết nối đến server!"); btn.html('Xác nhận thay đổi').prop('disabled', false); });
         }
 
-        // TKB CRUD Functions
         function loadTKBView() {
             resetNavActive(); $('#btnNavTKB').addClass('active'); $('#tkbSection').removeClass('d-none');
             if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
@@ -984,39 +787,158 @@
         function loadThoiGianBieu() {
             $('.tkb-personal-toolbar').remove();
             if (!currentUser) {
-                $('#tkb-body').html(`
-                    <tr>
-                        <td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;">
-                            <i class="fa-solid fa-lock fs-1 mb-3 text-secondary"></i><br>
-                            <h6 class="fw-bold">Bạn chưa đăng nhập</h6>
-                            <p class="mb-3">Vui lòng đăng nhập để xem và tự điều chỉnh lịch học thời gian biểu cá nhân.</p>
-                            <button class="btn btn-primary fw-bold px-4" onclick="openAddTkbModal(true)">Đăng nhập / Đăng ký</button>
-                        </td>
-                    </tr>
-                `);
+                $('#tkb-body').html(`<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-lock fs-1 mb-3 text-secondary"></i><br><h6 class="fw-bold">Bạn chưa đăng nhập</h6><p class="mb-3">Vui lòng đăng nhập để xem và tự điều chỉnh lịch học thời gian biểu cá nhân.</p><button class="btn btn-primary fw-bold px-4" onclick="openAddTkbModal(true)">Đăng nhập / Đăng ký</button></td></tr>`);
+                $('#deadlineBox').addClass('d-none');
                 return;
             }
 
             $('#tkb-body').html('<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải TKB của '+ currentUser.name +'...</td></tr>');
             
-            let cachedTKB = sessionStorage.getItem('tkbDataUser_' + currentUser.mssv);
-            if (cachedTKB) {
-                processTKBData(JSON.parse(cachedTKB));
-                renderTkbToolBar();
-                return;
-            }
-
+            // Xóa cache mỗi khi tải mới (hoặc bạn có thể giữ cache nếu muốn)
             $.ajax({
                 url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv, 
                 method: "GET", dataType: "json",
                 success: function(data) {
-                    sessionStorage.setItem('tkbDataUser_' + currentUser.mssv, JSON.stringify(data));
                     processTKBData(data);
                     renderTkbToolBar();
+                    loadDeadlines(); // Sau khi load xong TKB, tải tiếp Deadlines
                 },
                 error: function() { $('#tkb-body').html('<tr><td colspan="9" class="text-danger text-center">Lỗi khi tải dữ liệu TKB!</td></tr>'); }
             });
         }
+
+        // ==========================================
+        // LẤY & RENDER DEADLINES
+        // ==========================================
+       
+// 1. Cập nhật hàm tải dữ liệu
+       // 1. Cập nhật hàm tải dữ liệu (lấy 8 cột)
+        function loadDeadlines() {
+            $('#deadlineBox').removeClass('d-none');
+            $('#deadline-container').html('<div class="w-100 text-center text-muted" style="grid-column: 1/-1"><i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải dữ liệu Deadline...</div>');
+
+            $.ajax({
+                url: SCRIPT_URL + "?action=getDeadlinesUser&mssv=" + currentUser.mssv,
+                method: "GET", dataType: "json",
+                success: function(data) {
+                    globalDeadlineData = data.map(r => ({
+                        title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5],
+                        dateStart: r[6] || "", // Ngày bắt đầu
+                        dateEnd: r[7] || "",   // Ngày kết thúc
+                        sheetRowIndex: parseInt(r[8])
+                    }));
+                    renderDeadlines();
+                }
+            });
+        }
+
+        // 2. Logic kiểm tra sự giao nhau của thời gian
+        // 2. Logic kiểm tra sự giao nhau của thời gian và Hiển thị
+        function renderDeadlines() {
+            const container = document.getElementById('deadline-container');
+            if (!container) return;
+            
+            // Tính mốc thời gian bắt đầu và kết thúc của tuần ĐANG CHỌN
+            let weekStart = new Date(currentSelectedMonday);
+            weekStart.setHours(0,0,0,0);
+            
+            let weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6); // Đến hết Chủ nhật
+            weekEnd.setHours(23,59,59,999);
+
+            // Lọc ra các deadline có thời gian nằm vắt ngang qua tuần này
+            let filtered = globalDeadlineData.filter(d => {
+                let sDate = parseDateString(d.dateStart);
+                let eDate = parseDateString(d.dateEnd);
+                if(!sDate || !eDate) return false;
+                
+                // Công thức: Bắt đầu của task <= Kết thúc của tuần VÀ Kết thúc của task >= Bắt đầu của tuần
+                return sDate <= weekEnd && eDate >= weekStart;
+            });
+
+            if(filtered.length === 0) {
+                container.innerHTML = "<div style='grid-column: 1 / -1; text-align:center; padding: 20px 0; color:#6b7280; font-weight:500;'><i class='fa-solid fa-mug-hot me-2'></i>Tuần này không có Deadline. Bạn có thể thư giãn!</div>";
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => `
+                <div class="online-card">
+                    <div class="deadline-actions">
+                        <button class="btn-dl-act text-warning shadow-sm" onclick="openEditDeadlineModal(${item.sheetRowIndex})" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-dl-act text-danger shadow-sm" onclick="deletePersonalDeadline(${item.sheetRowIndex})" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <div class="icon-circle ${item.icon}">${item.emoji || '📌'}</div>
+                    
+                    <h3 class="text-danger mb-2" style="font-size: 15px; font-weight: 800;">${item.duration}</h3>
+                    
+                    <p class="desc text-dark mb-3" style="font-size: 16px; font-weight: 600;">${item.title}</p>
+                    
+                    <span class="tag">${item.tag}</span>
+                </div>
+            `).join('');
+        }
+
+        // 3. Sửa lại các hàm đóng mở & lưu Modal
+        function openAddDeadlineModal() {
+            $('#dlModalTitle').html('<i class="fa-solid fa-plus me-2"></i>Thêm Deadline');
+            $('#pDlRowIndex').val('');
+            $('#pDlTitle, #pDlTag, #pDlEmoji, #pDlStartDate, #pDlEndDate').val('');
+            $('#pDlIcon').val('fire');
+            $('#deadlinePersonalModal').modal('show');
+        }
+
+        function openEditDeadlineModal(rowIndex) {
+            let dl = globalDeadlineData.find(d => d.sheetRowIndex === rowIndex);
+            if(!dl) return;
+            $('#dlModalTitle').html('<i class="fa-solid fa-pen me-2"></i>Sửa Deadline');
+            $('#pDlRowIndex').val(rowIndex);
+            $('#pDlTitle').val(dl.title);
+            $('#pDlTag').val(dl.tag);
+            $('#pDlIcon').val(dl.icon);
+            $('#pDlEmoji').val(dl.emoji);
+            $('#pDlStartDate').val(dl.dateStart);
+            $('#pDlEndDate').val(dl.dateEnd);
+            $('#deadlinePersonalModal').modal('show');
+        }
+
+        function savePersonalDeadline() {
+            let rowIndex = $('#pDlRowIndex').val();
+            let startDate = $('#pDlStartDate').val().trim();
+            let endDate = $('#pDlEndDate').val().trim();
+            
+            if(!$('#pDlTitle').val() || !startDate || !endDate) { 
+                alert("Vui lòng nhập Tên công việc và Ngày bắt đầu/Kết thúc!"); 
+                return; 
+            }
+
+            // Tự động gộp "Từ ngày... đến ngày..." thành chuỗi hiển thị lên thẻ Deadline
+            let autoDuration = "Từ " + startDate + " đến " + endDate;
+
+            let payload = {
+                action: rowIndex !== '' ? "editDeadlineUser" : "addDeadlineUser",
+                rowIndex: rowIndex,
+                mssv: currentUser.mssv,
+                title: $('#pDlTitle').val(),
+                duration: autoDuration, // Hệ thống tự động điền luôn cho bạn
+                tag: $('#pDlTag').val(),
+                icon: $('#pDlIcon').val(),
+                emoji: $('#pDlEmoji').val(),
+                startDate: startDate,
+                endDate: endDate
+            };
+
+            let btn = $('#btnSaveDeadline');
+            btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+
+            postToGAS(payload, function(res) {
+                alert(res); $('#deadlinePersonalModal').modal('hide'); btn.html('Lưu Deadline').prop('disabled', false); loadDeadlines();
+            }, function() { alert("Giao tiếp máy chủ thất bại!"); btn.html('Lưu Deadline').prop('disabled', false); });
+        }
+        function deletePersonalDeadline(rowIndex) {
+            if(!confirm("Bạn có chắc chắn muốn xóa Deadline này?")) return;
+            postToGAS({ action: "deleteDeadlineUser", rowIndex: rowIndex }, function(res) { alert(res); loadDeadlines(); }, function() { alert("Lỗi kết nối!"); });
+        }
+        // ==========================================
 
         function renderTkbToolBar() {
             $('.tkb-personal-toolbar').remove(); 
@@ -1027,7 +949,7 @@
                         <button class="btn btn-sm btn-outline-secondary font-weight-bold" onclick="openChangePasswordModal()"><i class="fa-solid fa-key text-warning"></i> Đổi mật khẩu</button>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-dark fw-bold" onclick="openManageTkbListModal()"><i class="fa-solid fa-list-check text-info"></i> Xóa/Sửa TKB</button>
+                        <button class="btn btn-sm btn-dark fw-bold" onclick="openManageTkbListModal()"><i class="fa-solid fa-list-check text-info"></i> Quản lý TKB</button>
                         <button class="btn btn-sm btn-success fw-bold" onclick="openAddTkbModal(false)"><i class="fa-solid fa-plus"></i> Thêm lịch mới</button>
                         <button class="btn btn-sm btn-outline-danger fw-bold" onclick="logoutStudent()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
                     </div>
@@ -1056,36 +978,21 @@
                     </tr>`;
                 });
             }
-            $('#tkbManagerListBody').html(html);
-            $('#manageTkbListModal').modal('show');
+            $('#tkbManagerListBody').html(html); $('#manageTkbListModal').modal('show');
         }
 
-        function closeAndOpenEditTkb(sheetRowIndex) {
-            $('#manageTkbListModal').modal('hide');
-            setTimeout(() => { openEditTkbModal(sheetRowIndex); }, 400);
-        }
+        function closeAndOpenEditTkb(sheetRowIndex) { $('#manageTkbListModal').modal('hide'); setTimeout(() => { openEditTkbModal(sheetRowIndex); }, 400); }
 
         function processTKBData(data) {
             globalTkbData = data.map((row) => {
                 let actualRowIndex = parseInt(row.pop()) || -1; 
-                
                 return {
-                    thu: parseInt(row[0]) || 0, 
-                    tietBd: parseInt(row[1]) || 0, 
-                    soTiet: parseInt(row[2]) || 1,
-                    thoiGian: row[3] || "", 
-                    hinhThuc: row[4] || "", 
-                    mon: row[5] || "", 
-                    phong: row[6] || "",     
-                    gv: row[7] || "", 
-                    color: row[8] || "#e0f2fe", 
-                    ngayBatDau: row[9] || "", 
-                    ngayKetThuc: row[10] || "",
-                    ngayNgoaiLe: row[11] || "", // Xử lý dữ liệu Ngày Ngoại Lệ
-                    sheetRowIndex: actualRowIndex 
+                    thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
+                    thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: row[5] || "", phong: row[6] || "",     
+                    gv: row[7] || "", color: row[8] || "#e0f2fe", ngayBatDau: row[9] || "", ngayKetThuc: row[10] || "",
+                    ngayNgoaiLe: row[11] || "", sheetRowIndex: actualRowIndex 
                 };
             }).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
-            
             filterAndRenderTKB();
         }
 
@@ -1099,67 +1006,37 @@
         }
 
         function openEditTkbModal(sheetRowIndex) {
-            let course = globalTkbData.find(c => c.sheetRowIndex === sheetRowIndex);
-            if (!course) return;
-
+            let course = globalTkbData.find(c => c.sheetRowIndex === sheetRowIndex); if (!course) return;
             $('#tkbModalTitle').html('<i class="fa-solid fa-calendar-check me-2"></i>Chỉnh Sửa Lịch Học Cá Nhân');
             $('#pTkbRowIndex').val(sheetRowIndex); 
-            
-            $('#pTkbThu').val(course.thu);
-            $('#pTkbTiet').val(course.tietBd);
-            $('#pTkbSoTiet').val(course.soTiet);
-            $('#pTkbMon').val(course.mon);
-            $('#pTkbPhong').val(course.phong);
-            $('#pTkbThoiGian').val(course.thoiGian);
-            $('#pTkbHinhThuc').val(course.hinhThuc);
-            $('#pTkbGV').val(course.gv);
-            $('#pTkbColor').val(course.color);
-            $('#pTkbNgayBD').val(course.ngayBatDau);
-            $('#pTkbNgayKT').val(course.ngayKetThuc);
-            $('#pTkbNgoaiLe').val(course.ngayNgoaiLe); // Nạp lại ngày ngoại lệ lên Input
-
+            $('#pTkbThu').val(course.thu); $('#pTkbTiet').val(course.tietBd); $('#pTkbSoTiet').val(course.soTiet);
+            $('#pTkbMon').val(course.mon); $('#pTkbPhong').val(course.phong); $('#pTkbThoiGian').val(course.thoiGian);
+            $('#pTkbHinhThuc').val(course.hinhThuc); $('#pTkbGV').val(course.gv); $('#pTkbColor').val(course.color);
+            $('#pTkbNgayBD').val(course.ngayBatDau); $('#pTkbNgayKT').val(course.ngayKetThuc); $('#pTkbNgoaiLe').val(course.ngayNgoaiLe); 
             $('#tkbPersonalModal').modal('show');
         }
 
         function savePersonalTkb() {
             let targetRowIndex = $('#pTkbRowIndex').val();
             let isEditMode = targetRowIndex !== '';
-
             let pData = {
-                action: isEditMode ? "editTKBUser" : "addTKBUser",
-                rowIndex: targetRowIndex,
-                mssv: currentUser.mssv,
+                action: isEditMode ? "editTKBUser" : "addTKBUser", rowIndex: targetRowIndex, mssv: currentUser.mssv,
                 thu: $('#pTkbThu').val(), tietBd: $('#pTkbTiet').val(), soTiet: $('#pTkbSoTiet').val(),
                 thoiGian: $('#pTkbThoiGian').val(), hinhThuc: $('#pTkbHinhThuc').val(), mon: $('#pTkbMon').val(),
                 phong: $('#pTkbPhong').val(), gv: $('#pTkbGV').val(), color: $('#pTkbColor').val(),
-                ngayBatDau: $('#pTkbNgayBD').val(), ngayKetThuc: $('#pTkbNgayKT').val(),
-                ngayNgoaiLe: $('#pTkbNgoaiLe').val() // Gửi ngày ngoại lệ xuống Server
+                ngayBatDau: $('#pTkbNgayBD').val(), ngayKetThuc: $('#pTkbNgayKT').val(), ngayNgoaiLe: $('#pTkbNgoaiLe').val() 
             };
-
             if(!pData.thu || !pData.tietBd || !pData.mon) { alert("Vui lòng nhập đầy đủ Thứ, Tiết và Tên môn học!"); return; }
-
-            let btn = $('#btnSavePersonalTkb'); 
-            btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
-            
-            postToGAS(pData, function(res) {
-                alert(res);
-                $('#tkbPersonalModal').modal('hide');
-                btn.html('Lưu thông tin').prop('disabled', false);
-                sessionStorage.removeItem('tkbDataUser_' + currentUser.mssv); 
-                loadThoiGianBieu(); 
-                if($('#manageTkbListModal').is(':visible')) { $('#manageTkbListModal').modal('hide'); }
+            let btn = $('#btnSavePersonalTkb'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+            postToGAS(pData, function(res) { alert(res); $('#tkbPersonalModal').modal('hide'); btn.html('Lưu thông tin').prop('disabled', false); loadThoiGianBieu(); if($('#manageTkbListModal').is(':visible')) { $('#manageTkbListModal').modal('hide'); }
             }, function() { alert("Giao tiếp máy chủ thất bại!"); btn.html('Lưu thông tin').prop('disabled', false); });
         }
 
         function deletePersonalTkb(sheetRowIndex) {
             if(!confirm("Bạn có chắc chắn muốn xóa học phần lịch trình cá nhân này không?")) return;
             postToGAS({ action: "deleteTKBUser", rowIndex: sheetRowIndex }, function(res) {
-                alert(res);
-                sessionStorage.removeItem('tkbDataUser_' + currentUser.mssv);
-                loadThoiGianBieu();
-                if($('#manageTkbListModal').is(':visible')) {
-                    setTimeout(() => { openManageTkbListModal(); }, 600);
-                }
+                alert(res); loadThoiGianBieu();
+                if($('#manageTkbListModal').is(':visible')) { setTimeout(() => { openManageTkbListModal(); }, 600); }
             }, function() { alert("Lỗi khi kết nối yêu cầu xóa bỏ lịch!"); });
         }
 
@@ -1181,10 +1058,9 @@
                         for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
                         tableHtml += `
                        <td rowspan="${len}" class="td-subject" style="background:${course.color}; border: 2.4px solid var(--border-color);">
-
                             <div class="tkb-actions">
-                                <button class="btn-tkb-act text-warning" onclick="openEditTkbModal(${course.sheetRowIndex})" title="Sửa lịch học"><i class="fa-solid fa-pen"></i></button>
-                                <button class="btn-tkb-act text-danger" onclick="deletePersonalTkb(${course.sheetRowIndex})" title="Xóa lịch học"><i class="fa-solid fa-trash"></i></button>
+                                <button class="btn-tkb-act text-warning" onclick="openEditTkbModal(${course.sheetRowIndex})" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                                <button class="btn-tkb-act text-danger" onclick="deletePersonalTkb(${course.sheetRowIndex})" title="Xóa"><i class="fa-solid fa-trash"></i></button>
                             </div>
                             <div class="subject">
                                 ${course.thoiGian ? `<div class="tkb-time-display"><i class="fa-regular fa-clock me-1"></i>${course.thoiGian}</div>` : ''}
@@ -1201,29 +1077,21 @@
             tbody.innerHTML = tableHtml;
         }
 
-        // Sidebar & Other Functions
         function renderSidebarCategories() {
-    let optionsHtml = '';
-    globalCategories.forEach((name) => {
-        let lowerName = name.trim().toLowerCase();
-        
-        if(lowerName !== 'thông báo') {
-            // Ẩn bảng Users và bảng Cấu hình học kỳ nếu không phải là Admin
-            if (lowerName === 'users' && !isAdmin) return;
-            if (lowerName === 'cauhinhhocky' && !isAdmin) return; 
-            
-            // Thiết lập icon hiển thị tương ứng
-            let icon = 'fa-folder-closed';
-            if (lowerName === 'users') icon = 'fa-users-gear';
-            if (lowerName === 'cauhinhhocky') icon = 'fa-calendar-check'; // Icon lịch cho Admin dễ nhìn
-            
-            optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)">
-                                <i class="fa-solid ${icon}"></i> ${name}
-                            </button>`;
+            let optionsHtml = '';
+            globalCategories.forEach((name) => {
+                let lowerName = name.trim().toLowerCase();
+                if(lowerName !== 'thông báo') {
+                    if (lowerName === 'users' && !isAdmin) return;
+                    if (lowerName === 'cauhinhhocky' && !isAdmin) return; 
+                    let icon = 'fa-folder-closed';
+                    if (lowerName === 'users') icon = 'fa-users-gear';
+                    if (lowerName === 'cauhinhhocky') icon = 'fa-calendar-check'; 
+                    optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)"><i class="fa-solid ${icon}"></i> ${name}</button>`;
+                }
+            });
+            $('#dynamicCourseList').html(optionsHtml);
         }
-    });
-    $('#dynamicCourseList').html(optionsHtml);
-}
 
         function verifyAdmin() {
             let pass = $('#txtAdminPass').val();
@@ -1231,9 +1099,7 @@
                 isAdmin = true; $('#adminLoginModal').modal('hide');
                 $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
                 $('#btnManageCategories').removeClass('d-none');
-                
                 renderSidebarCategories(); 
-                
                 if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
                 if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); } 
                 alert("Xác thực quyền Admin thành công!");
@@ -1245,14 +1111,9 @@
                 if (confirm("Bạn có muốn đăng xuất quyền Admin?")) {
                     isAdmin = false; $('#btnAdminLoginToggle').html('<i class="fa-solid fa-lock"></i> Dành cho Ban quản trị').css('color', 'var(--text-muted)');
                     $('#btnManageCategories').addClass('d-none');
-                    
                     renderSidebarCategories(); 
-                    
-                    if (currentSheetName.toLowerCase() === 'users') {
-                        loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
-                    } else if (!$('#courseSection').hasClass('d-none')) { 
-                        loadDataByHocPhan(currentSheetName); 
-                    }
+                    if (currentSheetName.toLowerCase() === 'users') { loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
+                    } else if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); }
                     if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
                 }
             } else { $('#adminLoginError').addClass('d-none'); $('#txtAdminPass').val(''); $('#adminLoginModal').modal('show'); }
@@ -1260,65 +1121,35 @@
 
         function fetchAndRenderCategories() {
             $('#dynamicCourseList').html('<span class="text-muted small px-2">Đang tải danh sách...</span>');
-            let cached = sessionStorage.getItem('danhSachHocPhan');
-            if (cached) {
-                globalCategories = JSON.parse(cached);
-                renderSidebarCategories();
-                if ($('#manageCategoryModal').is(':visible')) renderCategoryManager();
-                return;
-            }
-            $.ajax({
-                url: SCRIPT_URL + "?action=getHocPhanList", method: "GET", dataType: "json",
-                success: function(list) {
-                    globalCategories = list;
-                    sessionStorage.setItem('danhSachHocPhan', JSON.stringify(list));
-                    renderSidebarCategories();
-                    if ($('#manageCategoryModal').is(':visible')) { renderCategoryManager(); }
-                }
+            $.ajax({ url: SCRIPT_URL + "?action=getHocPhanList", method: "GET", dataType: "json",
+                success: function(list) { globalCategories = list; renderSidebarCategories(); if ($('#manageCategoryModal').is(':visible')) { renderCategoryManager(); } }
             });
         }
-
-        function clearCacheAndReload() {
-            sessionStorage.removeItem('danhSachHocPhan');
-            fetchAndRenderCategories();
-        }
+        function clearCacheAndReload() { fetchAndRenderCategories(); }
 
         $(document).ready(function() {
-    setTimeout(pingOnlineStatus, 1000); 
-    setInterval(pingOnlineStatus, 25000);
-    fetchSemesterConfig(); // Đã sửa hàm gọi cấu hình tuần mới
-    loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
-    loadWebLinks(); checkNewQA(); 
-    fetchAndRenderCategories();
-});
+            setTimeout(pingOnlineStatus, 1000); setInterval(pingOnlineStatus, 25000);
+            fetchSemesterConfig(); 
+            loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
+            loadWebLinks(); checkNewQA(); fetchAndRenderCategories();
+        });
 
-        function checkAndExtractUrl(text) {
-            let urlRegex = /(https?:\/\/[^\s]+)/g;
-            let match = text.match(urlRegex);
-            return match ? match[0] : null;
-        }
+        function checkAndExtractUrl(text) { let urlRegex = /(https?:\/\/[^\s]+)/g; let match = text.match(urlRegex); return match ? match[0] : null; }
+        
         function submitRowData() {
-            let col1 = $('#txtCol1').val().trim(); let col2 = $('#txtCol2').val().trim();
-            let col3 = $('#txtCol3').val().trim(); let col4 = $('#txtCol4').val().trim();
+            let col1 = $('#txtCol1').val().trim(); let col2 = $('#txtCol2').val().trim(); let col3 = $('#txtCol3').val().trim(); let col4 = $('#txtCol4').val().trim();
             if (!col1 && !col2) { alert("Vui lòng nhập nội dung!"); return; }
-            let btn = $('#btnSubmitRow');
-            btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
+            let btn = $('#btnSubmitRow'); btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
             postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: 1, col1: col1, col2: col2, col3: col3, col4: col4 }, function(response) {
-                alert(response); $('#txtCol1').val(''); $('#txtCol2').val(''); $('#txtCol3').val(''); $('#txtCol4').val('');
-                btn.html('<i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng').prop('disabled', false);
-                loadDataByHocPhan(currentSheetName);
+                alert(response); $('#txtCol1').val(''); $('#txtCol2').val(''); $('#txtCol3').val(''); $('#txtCol4').val(''); btn.html('<i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng').prop('disabled', false); loadDataByHocPhan(currentSheetName);
             }, function() { alert("Lỗi kết nối!"); btn.html('<i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng').prop('disabled', false); });
         }
         function submitRowBottomData() {
-            let col1 = $('#txtCol1').val().trim(); let col2 = $('#txtCol2').val().trim();
-            let col3 = $('#txtCol3').val().trim(); let col4 = $('#txtCol4').val().trim();
+            let col1 = $('#txtCol1').val().trim(); let col2 = $('#txtCol2').val().trim(); let col3 = $('#txtCol3').val().trim(); let col4 = $('#txtCol4').val().trim();
             if (!col1 && !col2) { alert("Vui lòng nhập nội dung!"); return; }
-            let btn = $('#btnSubmitRowBottom');
-            btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
+            let btn = $('#btnSubmitRowBottom'); btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
             postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: currentSheetTotalRows, col1: col1, col2: col2, col3: col3, col4: col4 }, function(response) {
-                alert(response); $('#txtCol1').val(''); $('#txtCol2').val(''); $('#txtCol3').val(''); $('#txtCol4').val('');
-                btn.html('<i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng').prop('disabled', false);
-                loadDataByHocPhan(currentSheetName);
+                alert(response); $('#txtCol1').val(''); $('#txtCol2').val(''); $('#txtCol3').val(''); $('#txtCol4').val(''); btn.html('<i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng').prop('disabled', false); loadDataByHocPhan(currentSheetName);
             }, function() { alert("Lỗi kết nối!"); btn.html('<i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng').prop('disabled', false); });
         }
         let insertRowIndexVar = -1;
@@ -1327,488 +1158,260 @@
             let c1 = $('#insertCol1').val().trim(); let c2 = $('#insertCol2').val().trim(); let c3 = $('#insertCol3').val().trim(); let c4 = $('#insertCol4').val().trim();
             if (!c1 && !c2) { alert("Vui lòng nhập nội dung!"); return; }
             let btn = $('#btnSaveInsertRow'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
-            postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: insertRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4 }, res => {
-                alert(res); btn.html('Chèn nội dung').prop('disabled', false); $('#insertRowModal').modal('hide'); loadDataByHocPhan(currentSheetName);
-            });
+            postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: insertRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4 }, res => { alert(res); btn.html('Chèn nội dung').prop('disabled', false); $('#insertRowModal').modal('hide'); loadDataByHocPhan(currentSheetName); });
         }
         let editRowIndexVar = -1;
         function openEditRowModal(sheetRowIndex, c1, c2, c3, c4) { editRowIndexVar = sheetRowIndex; $('#editCol1').val(c1); $('#editCol2').val(c2); $('#editCol3').val(c3); $('#editCol4').val(c4); $('#editRowModal').modal('show'); }
         function saveEditRow() {
             let c1 = $('#editCol1').val(); let c2 = $('#editCol2').val(); let c3 = $('#editCol3').val(); let c4 = $('#editCol4').val();
             let btn = $('#btnSaveEditRow'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
-            postToGAS({ action: "editSheetRow", sheetName: currentSheetName, rowIndex: editRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4 }, res => {
-                alert(res); btn.html('Lưu thay đổi').prop('disabled', false); $('#editRowModal').modal('hide'); loadDataByHocPhan(currentSheetName);
-            });
+            postToGAS({ action: "editSheetRow", sheetName: currentSheetName, rowIndex: editRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4 }, res => { alert(res); btn.html('Lưu thay đổi').prop('disabled', false); $('#editRowModal').modal('hide'); loadDataByHocPhan(currentSheetName); });
         }
-        function deleteRowItem(sheetRowIndex) {
-            if(!confirm("Bạn có chắc chắn muốn xóa dữ liệu này? Hành động này không thể hoàn tác.")) return;
-            postToGAS({ action: "deleteSheetRow", sheetName: currentSheetName, rowIndex: sheetRowIndex }, res => { alert(res); loadDataByHocPhan(currentSheetName); });
-        }
-        function moveRowItem(sheetRowIndex, direction) {
-            postToGAS({ action: "moveSheetRow", sheetName: currentSheetName, rowIndex: sheetRowIndex, direction: direction }, function(res) {
-                if(res.includes("Lỗi") || res.includes("Đã ở")) alert(res); else loadDataByHocPhan(currentSheetName);
-            }, function() { alert("Lỗi khi di chuyển!"); });
-        }
+        function deleteRowItem(sheetRowIndex) { if(!confirm("Bạn có chắc chắn muốn xóa dữ liệu này? Hành động này không thể hoàn tác.")) return; postToGAS({ action: "deleteSheetRow", sheetName: currentSheetName, rowIndex: sheetRowIndex }, res => { alert(res); loadDataByHocPhan(currentSheetName); }); }
+        function moveRowItem(sheetRowIndex, direction) { postToGAS({ action: "moveSheetRow", sheetName: currentSheetName, rowIndex: sheetRowIndex, direction: direction }, function(res) { if(res.includes("Lỗi") || res.includes("Đã ở")) alert(res); else loadDataByHocPhan(currentSheetName); }, function() { alert("Lỗi khi di chuyển!"); }); }
+        
         function loadDataByHocPhan(sheetName, element) {
-            if(!sheetName) return; currentSheetName = sheetName; resetNavActive();
-            if(element) $(element).addClass('active');
+            if(!sheetName) return; currentSheetName = sheetName; resetNavActive(); if(element) $(element).addClass('active');
             $('#courseSection').removeClass('d-none'); $('#tableWrapper').addClass('d-none'); $('#swipeHint').addClass('d-none');
             $('#instructorArea').addClass('d-none').html(''); $('#loadingStatus').removeClass('d-none');
             if (isAdmin) $('#adminAddRowArea').removeClass('d-none'); else $('#adminAddRowArea').addClass('d-none');
             if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
-            $.ajax({
-                url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName), method: "GET", dataType: "json",
+            $.ajax({ url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName), method: "GET", dataType: "json",
                 success: function(data) {
-                    if (!data || data.length === 0) {
-                        currentSheetTotalRows = 1; $('#sheetTableBody').html('<tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa-regular fa-folder-open fs-1 mb-3 d-block"></i>Chưa có dữ liệu.</td></tr>');
-                        $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none'); $('#swipeHint').removeClass('d-none'); return;
-                    }
+                    if (!data || data.length === 0) { currentSheetTotalRows = 1; $('#sheetTableBody').html('<tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa-regular fa-folder-open fs-1 mb-3 d-block"></i>Chưa có dữ liệu.</td></tr>'); $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none'); $('#swipeHint').removeClass('d-none'); return; }
                     currentSheetTotalRows = data.length; let bodyHtml = ''; let headHtml = ''; let instructorInfos = [];
                     data.forEach((row, rowIndex) => {
-                        let fullRowText = row.join(" ").toLowerCase().replace(/\s+/g, '');
-                        let firstCellTextRaw = String(row[0]).trim(); let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
-                        if (rowIndex === 0) {
-                            headHtml += `<th style="width: 3%; min-width: 120px;">${String(row[0] || 'STT')}</th>`;
-                            headHtml += `<th style="min-width: 280px;">${String(row[1] || 'Nội dung')}</th>`;
-                            headHtml += `<th style="width: 15%; min-width: 140px;">${String(row[2] || 'Hình thức')}</th>`;
-                            headHtml += `<th style="width: 15%; min-width: 160px;">${String(row[4] || row[3] || 'Tài liệu học tập')}</th>`;
-                            if (isAdmin) headHtml += `<th style="width: 180px; min-width: 180px;">Thao tác</th>`; return;
-                        }
-                        if (/mãhp|họcphần|gv\d|giảngviên|email|facebook|sốtínchỉ/.test(fullRowText)) {
-                            let info = row.filter(cell => String(cell).trim() !== "").join(" <span class='mx-2 text-black-50'>|</span> ");
-                            if(info) instructorInfos.push(info); return;
-                        }
-                        let isNewRow = /^new$/i.test(firstCellTextRaw) || firstCellTextRaw.toLowerCase().includes('new');
-                        let rowClass = 'grid-row'; let iconPrefix = '';
-                        if (isNewRow) { rowClass += ' row-new'; }
-                        else if (/ngânhàng/.test(fullRowText)) { rowClass += ' row-white'; iconPrefix = '<i class="fa-solid fa-box-archive me-2 text-secondary"></i>'; }
-                        else if (/bàithi|kiểmtra|đềthi|lịchthi|phòngthi/.test(fullRowText) || row.join(" ").toLowerCase().includes(' thi ')) { rowClass += ' row-exam'; iconPrefix = '<i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>'; }
-                        else if (/chủđề|chương/.test(firstCellText)) { rowClass += ' row-topic'; }
-                        else if (/bài/.test(firstCellText)) { rowClass += ' row-lesson'; iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; }
+                        let fullRowText = row.join(" ").toLowerCase().replace(/\s+/g, ''); let firstCellTextRaw = String(row[0]).trim(); let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
+                        if (rowIndex === 0) { headHtml += `<th style="width: 3%; min-width: 120px;">${String(row[0] || 'STT')}</th><th style="min-width: 280px;">${String(row[1] || 'Nội dung')}</th><th style="width: 15%; min-width: 140px;">${String(row[2] || 'Hình thức')}</th><th style="width: 15%; min-width: 160px;">${String(row[4] || row[3] || 'Tài liệu học tập')}</th>`; if (isAdmin) headHtml += `<th style="width: 180px; min-width: 180px;">Thao tác</th>`; return; }
+                        if (/mãhp|họcphần|gv\d|giảngviên|email|facebook|sốtínchỉ/.test(fullRowText)) { let info = row.filter(cell => String(cell).trim() !== "").join(" <span class='mx-2 text-black-50'>|</span> "); if(info) instructorInfos.push(info); return; }
+                        let isNewRow = /^new$/i.test(firstCellTextRaw) || firstCellTextRaw.toLowerCase().includes('new'); let rowClass = 'grid-row'; let iconPrefix = '';
+                        if (isNewRow) { rowClass += ' row-new'; } else if (/ngânhàng/.test(fullRowText)) { rowClass += ' row-white'; iconPrefix = '<i class="fa-solid fa-box-archive me-2 text-secondary"></i>'; } else if (/bàithi|kiểmtra|đềthi|lịchthi|phòngthi/.test(fullRowText) || row.join(" ").toLowerCase().includes(' thi ')) { rowClass += ' row-exam'; iconPrefix = '<i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>'; } else if (/chủđề|chương/.test(firstCellText)) { rowClass += ' row-topic'; } else if (/bài/.test(firstCellText)) { rowClass += ' row-lesson'; iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; }
                         bodyHtml += `<tr class="${rowClass}">`;
                         row.forEach((cell, cellIndex) => {
-                            if (cellIndex > 3) return; 
-                            let cellText = String(cell).trim();
+                            if (cellIndex > 3) return;  let cellText = String(cell).trim();
                             if (cellIndex === 0 && isNewRow) cellText = cellText.replace(/new/i, '<span class="badge-new">Mới</span>');
                             let extractedUrl = checkAndExtractUrl(cellText);
-                            if (extractedUrl) {
-                                let label = cellText.replace(extractedUrl, '').trim() || "Truy cập";
-                                bodyHtml += `<td><a href="${extractedUrl}" target="_blank" class="btn-portal-action"><i class="fa-solid fa-cloud-arrow-down"></i> ${label}</a></td>`;
-                            } else {
-                                if (cellText === "") bodyHtml += `<td></td>`; else bodyHtml += `<td>${cellIndex === 0 && !isNewRow ? iconPrefix + cellText : cellText}</td>`;
-                            }
+                            if (extractedUrl) { let label = cellText.replace(extractedUrl, '').trim() || "Truy cập"; bodyHtml += `<td><a href="${extractedUrl}" target="_blank" class="btn-portal-action"><i class="fa-solid fa-cloud-arrow-down"></i> ${label}</a></td>`; } 
+                            else { if (cellText === "") bodyHtml += `<td></td>`; else bodyHtml += `<td>${cellIndex === 0 && !isNewRow ? iconPrefix + cellText : cellText}</td>`; }
                         });
                         if (isAdmin) {
-                            let sheetRowIndex = rowIndex + 1;
-                            let c1 = String(row[0]||'').replace(/'/g, "\\'"); let c2 = String(row[1]||'').replace(/'/g, "\\'");
-                            let c3 = String(row[2]||'').replace(/'/g, "\\'"); let c4 = String(row[3]||'').replace(/'/g, "\\'");
-                            bodyHtml += `<td>
-                                <div class="d-flex flex-wrap gap-1">
-                                    <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Chuyển lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
-                                    <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Chuyển xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
-                                    <button class="btn btn-sm btn-outline-success py-1 px-2" title="Chèn vào dưới" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button>
-                                    <button class="btn btn-sm btn-outline-warning py-1 px-2" title="Sửa dòng này" onclick="openEditRowModal(${sheetRowIndex}, '${c1}', '${c2}', '${c3}', '${c4}')"><i class="fa-solid fa-pen"></i></button>
-                                    <button class="btn btn-sm btn-outline-danger py-1 px-2" title="Xóa bỏ" onclick="deleteRowItem(${sheetRowIndex})"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                            </td>`;
-                        }
-                        bodyHtml += '</tr>';
+                            let sheetRowIndex = rowIndex + 1; let c1 = String(row[0]||'').replace(/'/g, "\\'"); let c2 = String(row[1]||'').replace(/'/g, "\\'"); let c3 = String(row[2]||'').replace(/'/g, "\\'"); let c4 = String(row[3]||'').replace(/'/g, "\\'");
+                            bodyHtml += `<td><div class="d-flex flex-wrap gap-1"><button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Chuyển lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button><button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Chuyển xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button><button class="btn btn-sm btn-outline-success py-1 px-2" title="Chèn vào dưới" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button><button class="btn btn-sm btn-outline-warning py-1 px-2" title="Sửa dòng này" onclick="openEditRowModal(${sheetRowIndex}, '${c1}', '${c2}', '${c3}', '${c4}')"><i class="fa-solid fa-pen"></i></button><button class="btn btn-sm btn-outline-danger py-1 px-2" title="Xóa bỏ" onclick="deleteRowItem(${sheetRowIndex})"><i class="fa-solid fa-trash"></i></button></div></td>`;
+                        } bodyHtml += '</tr>';
                     });
-                    if (instructorInfos.length > 0) {
-                        let cardContent = `<div class="instructor-card"><h6 class="mb-4"><i class="fa-solid fa-chalkboard-user me-2"></i>Thông tin lớp học & Giảng viên phụ trách</h6><div class="row">`;
-                        instructorInfos.forEach(info => { cardContent += `<div class="col-12 col-md-6 instructor-item"><i class="fa-solid fa-check"></i> <span>${info}</span></div>`; });
-                        cardContent += `</div></div>`; $('#instructorArea').html(cardContent).removeClass('d-none');
-                    }
-                    $('#sheetTableHead').html(headHtml); $('#sheetTableBody').html(bodyHtml);
-                    $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none'); $('#swipeHint').removeClass('d-none');
+                    if (instructorInfos.length > 0) { let cardContent = `<div class="instructor-card"><h6 class="mb-4"><i class="fa-solid fa-chalkboard-user me-2"></i>Thông tin lớp học & Giảng viên phụ trách</h6><div class="row">`; instructorInfos.forEach(info => { cardContent += `<div class="col-12 col-md-6 instructor-item"><i class="fa-solid fa-check"></i> <span>${info}</span></div>`; }); cardContent += `</div></div>`; $('#instructorArea').html(cardContent).removeClass('d-none'); }
+                    $('#sheetTableHead').html(headHtml); $('#sheetTableBody').html(bodyHtml); $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none'); $('#swipeHint').removeClass('d-none');
                 },
                 error: function() { $('#loadingStatus').html('<span class="text-danger fw-bold">Có lỗi xảy ra khi tải dữ liệu!</span>'); }
             });
         }
-        function checkNewQA() {
-            $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) {
-                if (!data || data.length === 0) return;
-                if (data.some(row => (row[3] || '').trim() === '')) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none');
-            }});
-        }
+
+        function checkNewQA() { $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) { if (!data || data.length === 0) return; if (data.some(row => (row[3] || '').trim() === '')) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none'); }}); }
         function openQASection() { resetNavActive(); $('#btnNavQA').addClass('active'); $('#qaSection').removeClass('d-none'); if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); } loadQAData(); }
         function sendQuestion() {
             let mssvValue = $('#txtMSSV').val().trim(); let qText = $('#txtQuestion').val().trim();
-            if (!mssvValue) { alert("Vui lòng nhập mã số sinh viên hoặc email liên hệ!"); $('#txtMSSV').focus(); return; }
-            if (!qText) { alert("Vui lòng nhập nội dung câu hỏi!"); $('#txtQuestion').focus(); return; }
+            if (!mssvValue) { alert("Vui lòng nhập mã số sinh viên hoặc email liên hệ!"); $('#txtMSSV').focus(); return; } if (!qText) { alert("Vui lòng nhập nội dung câu hỏi!"); $('#txtQuestion').focus(); return; }
             let btn = $('#btnSubmitQ'); btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
-            postToGAS({ action: "submitQuestion", mssv: mssvValue, question: qText }, function(response) {
-                alert(response); $('#txtQuestion').val(''); btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); loadQAData(); checkNewQA(); 
-            }, function() { alert("Lỗi kết nối máy chủ!"); btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); });
+            postToGAS({ action: "submitQuestion", mssv: mssvValue, question: qText }, function(response) { alert(response); $('#txtQuestion').val(''); btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); loadQAData(); checkNewQA(); }, function() { alert("Lỗi kết nối máy chủ!"); btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); });
         }
         function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) return str; return str.substring(0, 3) + '***' + str.substring(str.length - 3); }
-        
         function parseThread(text, rowIndex) {
-            let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== "");
-            window.qaThreadParts[rowIndex] = parts; 
-            
-            let html = '';
-            parts.forEach((part, index) => {
-                let content = part.trim(); 
-                if(content === "") return;
-                
-                if (content.startsWith("[SV]") && content.endsWith("[/SV]")) {
-                    let svText = content.replace("[SV]", "").replace("[/SV]", "").trim();
-                    svText = svText.replace(/\n/g, '<br>');
-                    
-                    html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>Sinh viên:</strong><br>${svText}`;
-                    if (isAdmin) {
-                        html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`;
-                    }
-                    html += `</div>`;
-                } else {
-                    let adminText = content.replace(/\n/g, '<br>');
-                    
-                    html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${adminText}`;
-                    if (isAdmin) {
-                        html += `<div class="mt-2 text-end">
-                                    <button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="openEditQAModal(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button>
-                                    <button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa</button>
-                                 </div>`;
-                    }
-                    html += `</div>`;
-                }
-            }); 
-            return html;
+            let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== ""); window.qaThreadParts[rowIndex] = parts; let html = '';
+            parts.forEach((part, index) => { let content = part.trim(); if(content === "") return;
+                if (content.startsWith("[SV]") && content.endsWith("[/SV]")) { let svText = content.replace("[SV]", "").replace("[/SV]", "").trim().replace(/\n/g, '<br>'); html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>Sinh viên:</strong><br>${svText}`; if (isAdmin) { html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`; } html += `</div>`; } 
+                else { let adminText = content.replace(/\n/g, '<br>'); html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${adminText}`; if (isAdmin) { html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="openEditQAModal(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa</button></div>`; } html += `</div>`; }
+            }); return html;
         }
-
         function loadQAData() {
-            $('#qaListArea').html(''); 
-            $('#qaLoadingStatus').removeClass('d-none');
-            
-            $.ajax({ 
-                url: SCRIPT_URL + "?action=getQAData", 
-                method: "GET", 
-                dataType: "json", 
-                success: function(data) {
+            $('#qaListArea').html(''); $('#qaLoadingStatus').removeClass('d-none');
+            $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) {
                     $('#qaLoadingStatus').addClass('d-none');
-                    if (!data || data.length === 0) { 
-                        $('#qaListArea').html('<div class="text-center p-4 text-muted border rounded bg-white"><i class="fa-regular fa-comments fs-2 mb-2"></i><br>Chưa có câu hỏi nào. Bạn hãy là người đầu tiên đặt câu hỏi nhé!</div>'); 
-                        $('#qaSidebarBadge').addClass('d-none'); 
-                        return; 
-                    }
-                    
-                    let html = ''; 
-                    let hasUnanswered = false;
-                    
+                    if (!data || data.length === 0) { $('#qaListArea').html('<div class="text-center p-4 text-muted border rounded bg-white"><i class="fa-regular fa-comments fs-2 mb-2"></i><br>Chưa có câu hỏi nào. Bạn hãy là người đầu tiên đặt câu hỏi nhé!</div>'); $('#qaSidebarBadge').addClass('d-none'); return; }
+                    let html = ''; let hasUnanswered = false;
                     data.forEach(row => {
-                        let time = row[0] || ''; 
-                        let rawMssv = row[1] || ''; 
-                        let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
-                        let question = row[2] || ''; 
-                        let answer = row[3] || ''; 
-                        let upvotes = parseInt(row[4]) || 0; 
-                        let downvotes = parseInt(row[5]) || 0; 
-                        let rowIndex = row[6];       
-                        
-                        let isNew = answer.trim() === ""; 
-                        if (isNew) hasUnanswered = true;
-                        
-                        let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
-                        
-                        html += `<div class="${itemClass}">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div class="qa-time">
-                                            <i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong>
-                                        </div>`;
-                                        
-                        if (isAdmin) {
-                            html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`;
-                        }
-                        
-                        html += `   </div>
-                                    <div class="qa-question">${question}</div>`;
-                                    
+                        let time = row[0] || ''; let rawMssv = row[1] || ''; let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv); let question = row[2] || ''; let answer = row[3] || ''; let upvotes = parseInt(row[4]) || 0; let downvotes = parseInt(row[5]) || 0; let rowIndex = row[6];       
+                        let isNew = answer.trim() === ""; if (isNew) hasUnanswered = true; let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
+                        html += `<div class="${itemClass}"><div class="d-flex justify-content-between align-items-start"><div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong></div>`;
+                        if (isAdmin) { html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`; }
+                        html += `   </div><div class="qa-question">${question}</div>`;
                         if (!isNew) {
                             html += parseThread(answer, rowIndex);
-                            html += `<div class="vote-action-bar">
-                                        <div class="vote-group" id="voteArea-${rowIndex}">
-                                            <button class="btn-vote up" onclick="castVote(${rowIndex}, 'up', this)"><i class="fa-solid fa-thumbs-up"></i> Hữu ích (${upvotes})</button>
-                                            <button class="btn-vote down" onclick="castVote(${rowIndex}, 'down', this)"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button>
-                                        </div>
-                                        <button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')"><i class="fa-solid fa-comment-dots"></i> Phản hồi thêm</button>
-                                    </div>
-                                    <div id="replyBox-${rowIndex}" class="reply-box d-none mt-3">
-                                        <textarea id="txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập thêm ý kiến/câu hỏi phản hồi..."></textarea>
-                                        <div class="d-flex gap-2">
-                                            <button class="btn btn-sm btn-primary fw-bold" onclick="sendReply(${rowIndex})" id="btnSendReply-${rowIndex}" style="background: var(--primary-color); border:none;">Gửi phản hồi</button>
-                                            <button class="btn btn-sm btn-light border" onclick="$('#replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
-                                        </div>
-                                    </div>`;
-                        } else { 
-                            html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ admin giải đáp...</div>`; 
-                        }
-                        
-                        if (isAdmin) { 
-                            html += `<div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);">
-                                        <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
-                                        <textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
-                                        <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}"><i class="fa-solid fa-reply"></i> Đăng câu trả lời</button>
-                                     </div>`; 
-                        }
-                        html += `</div>`;
+                            html += `<div class="vote-action-bar"><div class="vote-group" id="voteArea-${rowIndex}"><button class="btn-vote up" onclick="castVote(${rowIndex}, 'up', this)"><i class="fa-solid fa-thumbs-up"></i> Hữu ích (${upvotes})</button><button class="btn-vote down" onclick="castVote(${rowIndex}, 'down', this)"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button></div><button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')"><i class="fa-solid fa-comment-dots"></i> Phản hồi thêm</button></div><div id="replyBox-${rowIndex}" class="reply-box d-none mt-3"><textarea id="txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập thêm ý kiến/câu hỏi phản hồi..."></textarea><div class="d-flex gap-2"><button class="btn btn-sm btn-primary fw-bold" onclick="sendReply(${rowIndex})" id="btnSendReply-${rowIndex}" style="background: var(--primary-color); border:none;">Gửi phản hồi</button><button class="btn btn-sm btn-light border" onclick="$('#replyBox-${rowIndex}').addClass('d-none')">Hủy</button></div></div>`;
+                        } else { html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ admin giải đáp...</div>`; }
+                        if (isAdmin) { html += `<div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);"><h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6><textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea><button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}"><i class="fa-solid fa-reply"></i> Đăng câu trả lời</button></div>`; } html += `</div>`;
                     });
-                    
-                    $('#qaListArea').html(html);
-                    if (hasUnanswered) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none');
+                    $('#qaListArea').html(html); if (hasUnanswered) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none');
                 }
             });
         }
-        function deleteThreadPart(rowIndex, partIndex) {
-            if(!confirm("Bạn có chắc chắn muốn xóa đoạn tin nhắn này?")) return;
-            window.qaThreadParts[rowIndex].splice(partIndex, 1);
-            postToGAS({ action: "updateQAThread", rowIndex: rowIndex, fullText: window.qaThreadParts[rowIndex].join("\n\n") }, function(res) { loadQAData(); }, function() { alert("Lỗi!"); });
-        }
+        function deleteThreadPart(rowIndex, partIndex) { if(!confirm("Bạn có chắc chắn muốn xóa đoạn tin nhắn này?")) return; window.qaThreadParts[rowIndex].splice(partIndex, 1); postToGAS({ action: "updateQAThread", rowIndex: rowIndex, fullText: window.qaThreadParts[rowIndex].join("\n\n") }, function(res) { loadQAData(); }, function() { alert("Lỗi!"); }); }
         let editQARowIndex = -1; let editQAPartIndex = -1;
         function openEditQAModal(rowIndex, partIndex) { editQARowIndex = rowIndex; editQAPartIndex = partIndex; $('#editQAText').val(window.qaThreadParts[rowIndex][partIndex].trim()); $('#editQAModal').modal('show'); }
-        function saveEditQA() {
-            let newText = $('#editQAText').val().trim(); if (newText === "") { alert("Nội dung không được để trống!"); return; }
-            let btn = $('#btnSaveEditQA'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...').prop('disabled', true);
-            window.qaThreadParts[editQARowIndex][editQAPartIndex] = newText;
-            postToGAS({ action: "updateQAThread", rowIndex: editQARowIndex, fullText: window.qaThreadParts[editQARowIndex].join("\n\n") }, function(res) {
-                btn.html('Lưu thay đổi').prop('disabled', false); $('#editQAModal').modal('hide'); loadQAData(); 
-            }, function() { alert("Lỗi!"); btn.html('Lưu thay đổi').prop('disabled', false); });
-        }
-        function deleteQA(rowIndex) {
-            if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ Q&A này không?")) return;
-            let btn = $(`#btnDelQA-${rowIndex}`); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
-            postToGAS({ action: "deleteQA", rowIndex: rowIndex }, function(res) { alert(res); loadQAData(); checkNewQA(); }, function() { alert("Lỗi!"); btn.html('<i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này').prop('disabled', false); });
-        }
-        function loadWebLinks() {
-            $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải...</div>');
-            let cachedLinks = sessionStorage.getItem('webLinks'); if (cachedLinks) { renderWebLinks(JSON.parse(cachedLinks)); return; }
-            $.ajax({ url: SCRIPT_URL + "?action=getWebLinks", method: "GET", dataType: "json", success: function(data) { sessionStorage.setItem('webLinks', JSON.stringify(data)); renderWebLinks(data); } });
-        }
-        function renderWebLinks(data) {
-            if (!data || data.length === 0) { $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào.</div>'); return; }
-            let html = ''; data.forEach(row => { let title = row[0] || 'Liên kết'; let desc = row[1] || ''; let url = row[2] || '#'; let iconClass = row[3] || 'fa-solid fa-link'; html += `<div class="col-12 col-md-6"><a href="${url}" target="_blank" class="link-card"><div class="icon-box"><i class="${iconClass}"></i></div><div><h5>${title}</h5><p>${desc}</p></div></a></div>`; }); $('#webLinksContainer').html(html);
-        }
-        function castVote(rowIndex, type, btnElement) {
-            $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', true); let originalText = $(btnElement).html(); $(btnElement).html('<i class="fa-solid fa-spinner fa-spin"></i>');
-            postToGAS({ action: "submitVote", rowIndex: rowIndex, type: type }, function(newData) {
-                let data = typeof newData === 'string' ? JSON.parse(newData) : newData;
-                $(`#voteArea-${rowIndex} .up`).html(`<i class="fa-solid fa-thumbs-up"></i> Hữu ích (${data.up})`); $(`#voteArea-${rowIndex} .down`).html(`<i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${data.down})`); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false);
-            }, function() { alert("Lỗi khi đánh giá."); $(btnElement).html(originalText); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false); });
-        }
-        function sendReply(rowIndex) {
-            let replyText = $(`#txtReply-${rowIndex}`).val().trim(); if (!replyText) { alert("Vui lòng nhập nội dung phản hồi!"); return; }
-            let btn = $(`#btnSendReply-${rowIndex}`); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
-            postToGAS({ action: "replyToAdmin", rowIndex: rowIndex, replyText: replyText }, function(response) { alert(response); loadQAData(); checkNewQA();  }, function() { alert("Lỗi khi gửi phản hồi."); btn.html('Gửi phản hồi').prop('disabled', false); });
-        }
-        function sendAdminReply(rowIndex) {
-            let replyText = $(`#txtAdminReply-${rowIndex}`).val().trim(); if (!replyText) { alert("Vui lòng nhập nội dung trả lời!"); return; }
-            let btn = $(`#btnAdminSubmit-${rowIndex}`); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
-            postToGAS({ action: "adminReplyQuestion", rowIndex: rowIndex, replyText: replyText }, function(response) { alert(response); loadQAData(); checkNewQA();  }, function() { alert("Lỗi khi gửi trả lời."); btn.html('<i class="fa-solid fa-reply"></i> Đăng câu trả lời').prop('disabled', false); });
-        }
+        function saveEditQA() { let newText = $('#editQAText').val().trim(); if (newText === "") { alert("Nội dung không được để trống!"); return; } let btn = $('#btnSaveEditQA'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...').prop('disabled', true); window.qaThreadParts[editQARowIndex][editQAPartIndex] = newText; postToGAS({ action: "updateQAThread", rowIndex: editQARowIndex, fullText: window.qaThreadParts[editQARowIndex].join("\n\n") }, function(res) { btn.html('Lưu thay đổi').prop('disabled', false); $('#editQAModal').modal('hide'); loadQAData(); }, function() { alert("Lỗi!"); btn.html('Lưu thay đổi').prop('disabled', false); }); }
+        function deleteQA(rowIndex) { if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ Q&A này không?")) return; let btn = $(`#btnDelQA-${rowIndex}`); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true); postToGAS({ action: "deleteQA", rowIndex: rowIndex }, function(res) { alert(res); loadQAData(); checkNewQA(); }, function() { alert("Lỗi!"); btn.html('<i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này').prop('disabled', false); }); }
+        function loadWebLinks() { $.ajax({ url: SCRIPT_URL + "?action=getWebLinks", method: "GET", dataType: "json", success: function(data) { renderWebLinks(data); } }); }
+        function renderWebLinks(data) { if (!data || data.length === 0) { $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào.</div>'); return; } let html = ''; data.forEach(row => { let title = row[0] || 'Liên kết'; let desc = row[1] || ''; let url = row[2] || '#'; let iconClass = row[3] || 'fa-solid fa-link'; html += `<div class="col-12 col-md-6"><a href="${url}" target="_blank" class="link-card"><div class="icon-box"><i class="${iconClass}"></i></div><div><h5>${title}</h5><p>${desc}</p></div></a></div>`; }); $('#webLinksContainer').html(html); }
+        function castVote(rowIndex, type, btnElement) { $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', true); let originalText = $(btnElement).html(); $(btnElement).html('<i class="fa-solid fa-spinner fa-spin"></i>'); postToGAS({ action: "submitVote", rowIndex: rowIndex, type: type }, function(newData) { let data = typeof newData === 'string' ? JSON.parse(newData) : newData; $(`#voteArea-${rowIndex} .up`).html(`<i class="fa-solid fa-thumbs-up"></i> Hữu ích (${data.up})`); $(`#voteArea-${rowIndex} .down`).html(`<i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${data.down})`); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false); }, function() { alert("Lỗi khi đánh giá."); $(btnElement).html(originalText); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false); }); }
+        function sendReply(rowIndex) { let replyText = $(`#txtReply-${rowIndex}`).val().trim(); if (!replyText) { alert("Vui lòng nhập nội dung phản hồi!"); return; } let btn = $(`#btnSendReply-${rowIndex}`); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true); postToGAS({ action: "replyToAdmin", rowIndex: rowIndex, replyText: replyText }, function(response) { alert(response); loadQAData(); checkNewQA();  }, function() { alert("Lỗi khi gửi phản hồi."); btn.html('Gửi phản hồi').prop('disabled', false); }); }
+        function sendAdminReply(rowIndex) { let replyText = $(`#txtAdminReply-${rowIndex}`).val().trim(); if (!replyText) { alert("Vui lòng nhập nội dung trả lời!"); return; } let btn = $(`#btnAdminSubmit-${rowIndex}`); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true); postToGAS({ action: "adminReplyQuestion", rowIndex: rowIndex, replyText: replyText }, function(response) { alert(response); loadQAData(); checkNewQA();  }, function() { alert("Lỗi khi gửi trả lời."); btn.html('<i class="fa-solid fa-reply"></i> Đăng câu trả lời').prop('disabled', false); }); }
         function openCategoryManager() { renderCategoryManager(); $('#manageCategoryModal').modal('show'); }
-        function renderCategoryManager() {
-            let html = '';
-            globalCategories.forEach((name, index) => {
-                if(name.trim().toLowerCase() === 'thông báo') return;
-                html += `<tr><td><input type="text" class="form-control form-control-sm category-input" id="catEdit-${index}" value="${name}" disabled></td>
-                    <td class="text-end">
-                        <button class="btn btn-sm btn-outline-secondary" onclick="moveCategory('${name}', 'up')" title="Lên"><i class="fa-solid fa-arrow-up"></i></button>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="moveCategory('${name}', 'down')" title="Xuống"><i class="fa-solid fa-arrow-down"></i></button>
-                        <button class="btn btn-sm btn-outline-primary" onclick="toggleEditCategory(${index}, '${name}')" id="btnEditCat-${index}"><i class="fa-solid fa-pen"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCategory('${name}')"><i class="fa-solid fa-trash"></i></button>
-                    </td></tr>`;
-            }); $('#categoryManagerList').html(html);
-        }
-        function addCategory() {
-            let newName = $('#txtNewCategory').val().trim(); if (!newName) { alert("Vui lòng nhập tên danh mục!"); return; }
-            let btn = $('#btnAddCategory'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
-            postToGAS({ action: "addHocPhan", name: newName }, res => { alert(res); $('#txtNewCategory').val(''); btn.html('<i class="fa-solid fa-plus me-1"></i> Thêm mới').prop('disabled', false); clearCacheAndReload(); }, () => { alert("Lỗi kết nối!"); btn.html('<i class="fa-solid fa-plus me-1"></i> Thêm mới').prop('disabled', false); });
-        }
+        function renderCategoryManager() { let html = ''; globalCategories.forEach((name, index) => { if(name.trim().toLowerCase() === 'thông báo') return; html += `<tr><td><input type="text" class="form-control form-control-sm category-input" id="catEdit-${index}" value="${name}" disabled></td><td class="text-end"><button class="btn btn-sm btn-outline-secondary" onclick="moveCategory('${name}', 'up')" title="Lên"><i class="fa-solid fa-arrow-up"></i></button><button class="btn btn-sm btn-outline-secondary" onclick="moveCategory('${name}', 'down')" title="Xuống"><i class="fa-solid fa-arrow-down"></i></button><button class="btn btn-sm btn-outline-primary" onclick="toggleEditCategory(${index}, '${name}')" id="btnEditCat-${index}"><i class="fa-solid fa-pen"></i></button><button class="btn btn-sm btn-outline-danger" onclick="deleteCategory('${name}')"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); $('#categoryManagerList').html(html); }
+        function addCategory() { let newName = $('#txtNewCategory').val().trim(); if (!newName) { alert("Vui lòng nhập tên danh mục!"); return; } let btn = $('#btnAddCategory'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true); postToGAS({ action: "addHocPhan", name: newName }, res => { alert(res); $('#txtNewCategory').val(''); btn.html('<i class="fa-solid fa-plus me-1"></i> Thêm mới').prop('disabled', false); clearCacheAndReload(); }, () => { alert("Lỗi kết nối!"); btn.html('<i class="fa-solid fa-plus me-1"></i> Thêm mới').prop('disabled', false); }); }
         function deleteCategory(name) { if(!confirm(`Xác nhận xóa danh mục: ${name}?`)) return; postToGAS({ action: "deleteHocPhan", name: name }, res => { alert(res); clearCacheAndReload(); }); }
         function moveCategory(name, direction) { postToGAS({ action: "moveHocPhan", name: name, direction: direction }, res => { clearCacheAndReload(); }); }
-        function toggleEditCategory(index, oldName) {
-            let input = $(`#catEdit-${index}`); let btn = $(`#btnEditCat-${index}`);
-            if (input.prop('disabled')) { input.prop('disabled', false).focus(); btn.removeClass('btn-outline-primary').addClass('btn-success').html('<i class="fa-solid fa-check"></i>');
-            } else {
-                let newName = input.val().trim(); if (!newName || newName === oldName) { input.prop('disabled', true).val(oldName); btn.removeClass('btn-success').addClass('btn-outline-primary').html('<i class="fa-solid fa-pen"></i>'); return; }
-                btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
-                postToGAS({ action: "editHocPhan", oldName: oldName, newName: newName }, res => { alert(res); clearCacheAndReload(); });
-            }
-        }
+        function toggleEditCategory(index, oldName) { let input = $(`#catEdit-${index}`); let btn = $(`#btnEditCat-${index}`); if (input.prop('disabled')) { input.prop('disabled', false).focus(); btn.removeClass('btn-outline-primary').addClass('btn-success').html('<i class="fa-solid fa-check"></i>'); } else { let newName = input.val().trim(); if (!newName || newName === oldName) { input.prop('disabled', true).val(oldName); btn.removeClass('btn-success').addClass('btn-outline-primary').html('<i class="fa-solid fa-pen"></i>'); return; } btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true); postToGAS({ action: "editHocPhan", oldName: oldName, newName: newName }, res => { alert(res); clearCacheAndReload(); }); } }
+        
+        // ==========================================
+        // CÁC HÀM XỬ LÝ NĂM HỌC / HỌC KỲ / TUẦN
+        // ==========================================
         let currentWeekOffset = 0;
-        function parseDateString(dateStr) {
-            if (!dateStr || dateStr.trim() === "") return null; let parts = dateStr.split('/');
-            if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]); return null; 
+        function parseDateString(dateStr) { if (!dateStr || dateStr.trim() === "") return null; let parts = dateStr.split('/'); if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]); return null; }
+        function getDateOfSpecificWeekday(thu) { let today = new Date(); today.setHours(0, 0, 0, 0); today.setDate(today.getDate() + (currentWeekOffset * 7)); let currentDay = today.getDay(); let mappedCurrentDay = currentDay === 0 ? 8 : currentDay + 1; let diff = thu - mappedCurrentDay; let targetDate = new Date(today); targetDate.setDate(today.getDate() + diff); return targetDate; }
+        function formatDateDDMMYYYY(dateObj) { return `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`; }
+        
+        let globalConfigHK = [];
+        let currentSelectedMonday = new Date();
+
+        function getMondayOfDate(d) {
+            d = new Date(d);
+            var day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1);
+            return new Date(d.setHours(0,0,0,0));
         }
-        function getDateOfSpecificWeekday(thu) {
-            let today = new Date(); today.setHours(0, 0, 0, 0); today.setDate(today.getDate() + (currentWeekOffset * 7));
-            let currentDay = today.getDay(); let mappedCurrentDay = currentDay === 0 ? 8 : currentDay + 1; let diff = thu - mappedCurrentDay;
-            let targetDate = new Date(today); targetDate.setDate(today.getDate() + diff); return targetDate;
+
+        function fetchSemesterConfig() {
+            $.ajax({
+                url: SCRIPT_URL + "?action=getConfigHocKy",
+                method: "GET", dataType: "json",
+                success: function(data) { globalConfigHK = data; buildNamHocDropdown(); jumpToCurrentWeek(); }
+            });
         }
-        function formatDateDDMMYYYY(dateObj) {
-            return `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`;
+
+        function buildNamHocDropdown() {
+            let namHocs = [...new Set(globalConfigHK.map(item => item[0]))];
+            let html = '<option value="">-- Chọn năm học --</option>';
+            namHocs.forEach(nh => html += `<option value="${nh}">${nh}</option>`);
+            $('#namHocSelect').html(html);
         }
-       let globalConfigHK = [];
-let currentSelectedMonday = new Date();
 
-function getMondayOfDate(d) {
-    d = new Date(d);
-    var day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1);
-    return new Date(d.setHours(0,0,0,0));
-}
-
-// Gọi hàm này trong $(document).ready() thay vì populateWeekDropdown()
-function fetchSemesterConfig() {
-    $.ajax({
-        url: SCRIPT_URL + "?action=getConfigHocKy",
-        method: "GET",
-        dataType: "json",
-        success: function(data) {
-            globalConfigHK = data;
-            buildNamHocDropdown();
-            jumpToCurrentWeek(); 
+        function onNamHocChange() {
+            let selectedNH = $('#namHocSelect').val();
+            let hks = globalConfigHK.filter(item => item[0] === selectedNH).map(item => item[1]);
+            let html = '<option value="">-- Chọn học kỳ --</option>';
+            hks.forEach(hk => html += `<option value="${hk}">${hk}</option>`);
+            $('#hocKySelect').html(html).val('');
+            $('#weekSelect').html('<option value="">-- Chọn tuần --</option>').val('');
         }
-    });
-}
 
-function buildNamHocDropdown() {
-    let namHocs = [...new Set(globalConfigHK.map(item => item[0]))];
-    let html = '<option value="">-- Chọn năm học --</option>';
-    namHocs.forEach(nh => html += `<option value="${nh}">${nh}</option>`);
-    $('#namHocSelect').html(html);
-}
+        function onHocKyChange() {
+            let selectedNH = $('#namHocSelect').val(); let selectedHK = $('#hocKySelect').val();
+            let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+            let html = '<option value="">-- Chọn tuần --</option>';
+            if (config) {
+                let startDate = parseDateString(config[2]); let numWeeks = parseInt(config[3]);
+                if (startDate && numWeeks) {
+                    let startMonday = getMondayOfDate(startDate);
+                    for (let i = 0; i < numWeeks; i++) {
+                        let m = new Date(startMonday); m.setDate(m.getDate() + (i * 7));
+                        let s = new Date(m); s.setDate(s.getDate() + 6);
+                        let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+                        html += `<option value="${m.getTime()}">Tuần ${i + 1} (${format(m)} - ${format(s)})</option>`;
+                    }
+                }
+            }
+            $('#weekSelect').html(html);
+            if ($('#weekSelect option').length > 1) { $('#weekSelect').prop('selectedIndex', 1); onWeekChange(); }
+        }
 
-function onNamHocChange() {
-    let selectedNH = $('#namHocSelect').val();
-    let hks = globalConfigHK.filter(item => item[0] === selectedNH).map(item => item[1]);
-    let html = '<option value="">-- Chọn học kỳ --</option>';
-    hks.forEach(hk => html += `<option value="${hk}">${hk}</option>`);
-    $('#hocKySelect').html(html).val('');
-    $('#weekSelect').html('<option value="">-- Chọn tuần --</option>').val('');
-}
-
-function onHocKyChange() {
-    let selectedNH = $('#namHocSelect').val();
-    let selectedHK = $('#hocKySelect').val();
-    let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
-    
-    let html = '<option value="">-- Chọn tuần --</option>';
-    if (config) {
-        let startDate = parseDateString(config[2]);
-        let numWeeks = parseInt(config[3]);
-        if (startDate && numWeeks) {
-            let startMonday = getMondayOfDate(startDate);
-            for (let i = 0; i < numWeeks; i++) {
-                let m = new Date(startMonday);
-                m.setDate(m.getDate() + (i * 7));
-                let s = new Date(m);
-                s.setDate(s.getDate() + 6);
-                let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-                html += `<option value="${m.getTime()}">Tuần ${i + 1} (${format(m)} - ${format(s)})</option>`;
+        function onWeekChange() {
+            let val = $('#weekSelect').val();
+            if (val) {
+                currentSelectedMonday = new Date(parseInt(val));
+                updateTableHeaders();
+                filterAndRenderTKB();
+                renderDeadlines(); // Cập nhật lại Deadline khi đổi tuần
             }
         }
-    }
-    $('#weekSelect').html(html);
-    
-    // Tự động chọn Tuần 1 nếu có data
-    if ($('#weekSelect option').length > 1) {
-        $('#weekSelect').prop('selectedIndex', 1);
-        onWeekChange();
-    }
-}
 
-function onWeekChange() {
-    let val = $('#weekSelect').val();
-    if (val) {
-        currentSelectedMonday = new Date(parseInt(val));
-        updateTableHeaders();
-        filterAndRenderTKB();
-    }
-}
-
-function updateTableHeaders() {
-    for (let i = 2; i <= 8; i++) {
-        let d = new Date(currentSelectedMonday);
-        d.setDate(d.getDate() + (i - 2));
-        let dayStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
-        let thName = i === 8 ? "Chủ nhật" : "Thứ " + i;
-        $(`#th-day-${i}`).html(`${thName} <br><small style="font-weight: normal; color: #bae6fd;">(${dayStr})</small>`);
-    }
-}
-
-function changeWeekBtn(delta) {
-    let select = document.getElementById('weekSelect');
-    if(select.selectedIndex === 0 && select.options.length > 1) {
-         select.selectedIndex = 1;
-    } else {
-         let newIndex = select.selectedIndex + delta;
-         if (newIndex >= 1 && newIndex < select.options.length) {
-             select.selectedIndex = newIndex;
-         }
-    }
-    onWeekChange();
-}
-
-function jumpToCurrentWeek() {
-    let todayMonday = getMondayOfDate(new Date()).getTime();
-    let found = false;
-    let targetNH = "", targetHK = "";
-    
-    // Tìm tuần hiện tại thuộc Học kỳ / Năm học nào dựa vào Config
-    for (let conf of globalConfigHK) {
-        let sDate = parseDateString(conf[2]);
-        let weeks = parseInt(conf[3]);
-        if(sDate && weeks) {
-            let startMon = getMondayOfDate(sDate).getTime();
-            let endMon = startMon + (weeks - 1) * 7 * 24 * 60 * 60 * 1000;
-            if(todayMonday >= startMon && todayMonday <= endMon) {
-                targetNH = conf[0]; targetHK = conf[1]; found = true; break;
+        function updateTableHeaders() {
+            for (let i = 2; i <= 8; i++) {
+                let d = new Date(currentSelectedMonday); d.setDate(d.getDate() + (i - 2));
+                let dayStr = String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+                let thName = i === 8 ? "Chủ nhật" : "Thứ " + i;
+                $(`#th-day-${i}`).html(`${thName} <br><small style="font-weight: normal; color: #bae6fd;">(${dayStr})</small>`);
             }
         }
-    }
 
-    if (found) {
-        $('#namHocSelect').val(targetNH); onNamHocChange();
-        $('#hocKySelect').val(targetHK); onHocKyChange();
-        $('#weekSelect').val(todayMonday); onWeekChange();
-    } else {
-        // Nếu ngày hiện tại không nằm trong bất kỳ học kỳ nào, load mặc định rỗng
-        $('#namHocSelect').val('');
-        $('#hocKySelect').html('<option value="">-- Chọn học kỳ --</option>');
-        $('#weekSelect').html('<option value="">-- Chọn tuần --</option>');
-        currentSelectedMonday = new Date(todayMonday);
-        updateTableHeaders();
-        filterAndRenderTKB();
-    }
-}
+        function changeWeekBtn(delta) {
+            let select = document.getElementById('weekSelect');
+            if(select.selectedIndex === 0 && select.options.length > 1) { select.selectedIndex = 1; } 
+            else {
+                 let newIndex = select.selectedIndex + delta;
+                 if (newIndex >= 1 && newIndex < select.options.length) { select.selectedIndex = newIndex; }
+            }
+            onWeekChange();
+        }
 
-// Hàm cung cấp ngày chính xác cho engine lọc TKB
+        // Đã sửa lại Logic Nút Hiện Tại đảm bảo chính xác nhảy vào tuần hiện tại
+        function jumpToCurrentWeek() {
+            let todayTime = new Date().getTime();
+            let found = false;
+            let targetNH = "", targetHK = "";
+            let targetWeekSelectValue = "";
+            
+            for (let conf of globalConfigHK) {
+                let sDate = parseDateString(conf[2]);
+                let weeks = parseInt(conf[3]);
+                if(sDate && weeks) {
+                    let startMon = getMondayOfDate(sDate).getTime();
+                    let endMon = startMon + (weeks * 7 * 24 * 60 * 60 * 1000);
+                    
+                    if(todayTime >= startMon && todayTime < endMon) {
+                        targetNH = conf[0]; targetHK = conf[1]; found = true;
+                        let diffTime = todayTime - startMon;
+                        let weekDiff = Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000)); 
+                        let currentWeekMonday = new Date(startMon);
+                        currentWeekMonday.setDate(currentWeekMonday.getDate() + (weekDiff * 7));
+                        targetWeekSelectValue = currentWeekMonday.getTime().toString();
+                        break;
+                    }
+                }
+            }
+
+            if (found) {
+                $('#namHocSelect').val(targetNH); onNamHocChange();
+                $('#hocKySelect').val(targetHK); onHocKyChange();
+                $('#weekSelect').val(targetWeekSelectValue); onWeekChange();
+            } else {
+                $('#namHocSelect').val('');
+                $('#hocKySelect').html('<option value="">-- Chọn học kỳ --</option>');
+                $('#weekSelect').html('<option value="">-- Chọn tuần --</option>');
+                currentSelectedMonday = getMondayOfDate(new Date());
+                updateTableHeaders();
+                filterAndRenderTKB();
+                renderDeadlines();
+            }
+        }
+
         function filterAndRenderTKB() {
             let filteredData = globalTkbData.filter(c => {
                 if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
-                
-                let classDateInThisWeek = getDateOfSpecificWeekday(c.thu);
+                let classDateInThisWeek = new Date(currentSelectedMonday); 
+                classDateInThisWeek.setDate(classDateInThisWeek.getDate() + (c.thu - 2));
 
-                // 1. Kiểm tra Ngày Bắt Đầu & Kết Thúc (Nếu có)
                 if (c.ngayBatDau && c.ngayKetThuc) {
                     let startDate = parseDateString(c.ngayBatDau); let endDate = parseDateString(c.ngayKetThuc);
                     if (startDate && endDate) { if (classDateInThisWeek < startDate || classDateInThisWeek > endDate) return false; }
                 } 
-
-                // 2. Kiểm tra danh sách Ngày Ngoại Lệ (Không học)
                 if (c.ngayNgoaiLe && c.ngayNgoaiLe.trim() !== "") {
-                    let skipDates = c.ngayNgoaiLe.split(',').map(d => d.trim()); // Cắt chuỗi thành mảng: ["15/04", "01/05"]
+                    let skipDates = c.ngayNgoaiLe.split(',').map(d => d.trim()); 
                     let formattedClassDate = formatDateDDMMYYYY(classDateInThisWeek);
-                    
-                    if (skipDates.includes(formattedClassDate)) {
-                        return false; // Nếu ngày học tuần này nằm trong danh sách ngoại lệ => Loại bỏ
-                    }
+                    if (skipDates.includes(formattedClassDate)) return false; 
                 }
-
                 return true; 
             }); 
             renderTKBTable(filteredData);
         }
+
         document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
         document.addEventListener('keydown', function(e) {
             if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
