@@ -301,6 +301,7 @@
         .table-responsive::-webkit-scrollbar-track { background-color: var(--border-color); border-radius: 10px; }
         
         .tkb-mgr-table th, .tkb-mgr-table td { padding: 10px; font-size: 14px; vertical-align: middle; }
+
     </style>
 </head>
 <body>
@@ -681,7 +682,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzKJUjBsdVmNIyqz74Jspgpt0pGEZjLkXIl6wLb4DeTV0mAuu6uEIyKqZCzp3C1l1ZI/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzg-krdzVfCmZJw9bDz9DTFRKsKqkrlqd-LTRtMIMj0waFNlF-cMR9MGRS_M1sPS0-U/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -934,9 +935,13 @@
                 alert(res); $('#deadlinePersonalModal').modal('hide'); btn.html('Lưu Deadline').prop('disabled', false); loadDeadlines();
             }, function() { alert("Giao tiếp máy chủ thất bại!"); btn.html('Lưu Deadline').prop('disabled', false); });
         }
-        function deletePersonalDeadline(rowIndex) {
-            if(!confirm("Bạn có chắc chắn muốn xóa Deadline này?")) return;
-            postToGAS({ action: "deleteDeadlineUser", rowIndex: rowIndex }, function(res) { alert(res); loadDeadlines(); }, function() { alert("Lỗi kết nối!"); });
+       function deletePersonalTkb(sheetRowIndex) {
+            if(!confirm("Bạn có chắc chắn muốn xóa học phần lịch trình cá nhân này không?")) return;
+            // Bổ sung thêm mssv: currentUser.mssv
+            postToGAS({ action: "deleteTKBUser", rowIndex: sheetRowIndex, mssv: currentUser.mssv }, function(res) {
+                alert(res); loadThoiGianBieu();
+                if($('#manageTkbListModal').is(':visible')) { setTimeout(() => { openManageTkbListModal(); }, 600); }
+            }, function() { alert("Lỗi khi kết nối yêu cầu xóa bỏ lịch!"); });
         }
         // ==========================================
 
@@ -1136,20 +1141,24 @@
         }
 
         function renderSidebarCategories() {
-            let optionsHtml = '';
-            globalCategories.forEach((name) => {
-                let lowerName = name.trim().toLowerCase();
-                if(lowerName !== 'thông báo') {
-                    if (lowerName === 'users' && !isAdmin) return;
-                    if (lowerName === 'cauhinhhocky' && !isAdmin) return; 
-                    let icon = 'fa-folder-closed';
-                    if (lowerName === 'users') icon = 'fa-users-gear';
-                    if (lowerName === 'cauhinhhocky') icon = 'fa-calendar-check'; 
-                    optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)"><i class="fa-solid ${icon}"></i> ${name}</button>`;
-                }
-            });
-            $('#dynamicCourseList').html(optionsHtml);
+    let optionsHtml = '';
+    globalCategories.forEach((name) => {
+        let lowerName = name.trim().toLowerCase();
+
+        // Thêm điều kiện này để ẩn hoàn toàn 2 danh mục
+        if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin') return;
+
+        if(lowerName !== 'thông báo') {
+            if (lowerName === 'users' && !isAdmin) return;
+            if (lowerName === 'cauhinhhocky' && !isAdmin) return; 
+            let icon = 'fa-folder-closed';
+            if (lowerName === 'users') icon = 'fa-users-gear';
+            if (lowerName === 'cauhinhhocky') icon = 'fa-calendar-check'; 
+            optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)"><i class="fa-solid ${icon}"></i> ${name}</button>`;
         }
+    });
+    $('#dynamicCourseList').html(optionsHtml);
+}
 
         function verifyAdmin() {
             let pass = $('#txtAdminPass').val();
