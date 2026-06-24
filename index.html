@@ -298,7 +298,12 @@
     function formatShort(dateObj) {
         return `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}`;
     }
-
+	function checkAndExtractUrl(text) { 
+    if (!text) return null;
+    let urlRegex = /(https?:\/\/[^\s]+)/g; 
+    let match = text.match(urlRegex); 
+    return match ? match[0] : null; 
+}
     $(document).ready(function() {
         fetchSemesterConfig();
         loadThoiGianBieuAdmin();
@@ -556,59 +561,80 @@
     }
 
     function renderTKBTable(courses) {
-        const tbody = document.getElementById('tkb-body'); 
-        if (!tbody) return;
+    const tbody = document.getElementById('tkb-body'); 
+    if (!tbody) return;
+    
+    const totalRows = 16; 
+    const occupied = Array.from({ length: totalRows + 1 }, () => Array(9).fill(false));
+    let tableHtml = "";
+    
+    // TỐI ƯU: Tạo một bản đồ (Map) chỉ mục theo "thu-tietBd" để truy xuất O(1) thay vì lặp .find() liên tục
+    const courseMap = {};
+    courses.forEach(c => {
+        courseMap[`${c.thu}-${c.tietBd}`] = c;
+    });
+    
+    for (let i = 1; i <= totalRows; i++) {
+        tableHtml += `<tr>`;
+        if (i === 1) tableHtml += `<td rowspan="6" class="session-label">Sáng</td>`;
+        if (i === 7) tableHtml += `<td rowspan="6" class="session-label">Chiều</td>`;
+        if (i === 13) tableHtml += `<td rowspan="4" class="session-label">Tối</td>`;
         
-        const totalRows = 16; 
-        const occupied = Array.from({ length: totalRows + 1 }, () => Array(9).fill(false));
-        let tableHtml = "";
+        tableHtml += `<td class="col-tiet">${i}</td>`;
         
-        for (let i = 1; i <= totalRows; i++) {
-            tableHtml += `<tr>`;
-            if (i === 1) tableHtml += `<td rowspan="6" class="session-label">Sáng</td>`;
-            if (i === 7) tableHtml += `<td rowspan="6" class="session-label">Chiều</td>`;
-            if (i === 13) tableHtml += `<td rowspan="4" class="session-label">Tối</td>`;
+        for (let thu = 2; thu <= 8; thu++) {
+            if (occupied[i][thu]) continue; 
             
-            tableHtml += `<td class="col-tiet">${i}</td>`;
+            // Lấy dữ liệu nhanh từ map chỉ mục
+            const course = courseMap[`${thu}-${i}`];
             
-            for (let thu = 2; thu <= 8; thu++) {
-                if (occupied[i][thu]) continue; 
-                const course = courses.find(c => c.thu === thu && c.tietBd === i);
-                
-                if (course) {
-                    const len = course.soTiet;
-                    for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
-                    
-                    let autoColor = course.color;
-                    const locU = (course.hinhThuc || "").toUpperCase();
-                    if (locU.includes("AN DƯƠNG VƯƠNG") || locU.includes("ADV")) autoColor = "#e0f2fe";
-                    else if (locU.includes("LÊ VĂN SỸ") || locU.includes("LVS")) autoColor = "#e6f9ef";
-                    else if (locU.includes("LẠC LONG QUÂN") || locU.includes("LLQ")) autoColor = "#fff3e0";
-                    else if (locU.includes("LÊ THỊ RIÊNG") || locU.includes("CVLTR")) autoColor = "#fef9c3";
-                    else if (locU.includes("ONLINE") || locU.includes("HỌP")) autoColor = "#f3e8ff";
-
-                    const finalLink = getAutoLink(course.hinhThuc);
-
-                    tableHtml += `
-                    <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'}">
-                        <div class="subject">
-                            ${course.thoiGian ? `<div class="time">${course.thoiGian}</div>` : ''}
-                            <div style="font-weight:600;">
-                                <a href="${finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">${course.hinhThuc}</a>
-                            </div>
-                            <div>${course.mon}</div>
-                            ${course.phong ? `<span class="room">Phòng: ${course.phong}</span><br>` : ''}
-                            ${course.gv ? `<span class="teacher">GV: ${course.gv}</span>` : ''}
-                        </div>
-                    </td>`;
-                } else { 
-                    tableHtml += `<td class="day"></td>`; 
+            if (course) {
+                const len = course.soTiet;
+                for (let r = 0; r < len; r++) { 
+                    if (i + r <= totalRows) occupied[i + r][thu] = true; 
                 }
+                
+                // KHẮC PHỤC: Tách đường link ẩn trong chuỗi hình thức học bằng RegEx
+                let rawHinhThuc = course.hinhThuc || "";
+                let customLink = checkAndExtractUrl(rawHinhThuc);
+                let displayHinhThuc = rawHinhThuc;
+                
+                if (customLink) {
+                    displayHinhThuc = rawHinhThuc.replace(customLink, '').trim();
+                }
+                
+                let autoColor = course.color;
+                const locU = displayHinhThuc.toUpperCase();
+                if (locU.includes("AN DƯƠNG VƯƠNG") || locU.includes("ADV")) autoColor = "#e0f2fe";
+                else if (locU.includes("LÊ VĂN SỸ") || locU.includes("LVS")) autoColor = "#e6f9ef";
+                else if (locU.includes("LẠC LONG QUÂN") || locU.includes("LLQ")) autoColor = "#fff3e0";
+                else if (locU.includes("LÊ THỊ RIÊNG") || locU.includes("CVLTR")) autoColor = "#fef9c3";
+                else if (locU.includes("ONLINE") || locU.includes("HỌP")) autoColor = "#f3e8ff";
+
+                const finalLink = getAutoLink(displayHinhThuc);
+
+                tableHtml += `
+                <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'}">
+                    <div class="subject">
+                        ${course.thoiGian ? `<div class="time">${course.thoiGian}</div>` : ''}
+                        <div style="font-weight:600;">
+                            <a href="${customLink || finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">
+                                ${displayHinhThuc || "Xem liên kết"}
+                            </a>
+                        </div>
+                        <div>${course.mon}</div>
+                        ${course.phong ? `<span class="room">Phòng: ${course.phong}</span><br>` : ''}
+                        ${course.gv ? `<span class="teacher">GV: ${course.gv}</span>` : ''}
+                    </div>
+                </td>`;
+            } else { 
+                tableHtml += `<td class="day"></td>`; 
             }
-            tableHtml += `</tr>`;
         }
-        tbody.innerHTML = tableHtml;
+        tableHtml += `</tr>`;
     }
+    tbody.innerHTML = tableHtml;
+}
 </script>
 
 </body>
