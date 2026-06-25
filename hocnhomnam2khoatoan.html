@@ -74,7 +74,145 @@
             background: #ffffff; color: var(--primary-color); width: 50px; height: 50px;
             display: flex; align-items: center; justify-content: center; border-radius: 8px; font-size: 24px;
         }
-        
+        /* ==========================================
+   CSS CHO CHAT WIDGET
+   ========================================== */
+.btn-open-chat {
+    position: fixed;
+    bottom: 60px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1040;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.btn-open-chat:hover {
+    transform: scale(1.05);
+    background-color: var(--primary-hover);
+}
+.chat-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--accent-red);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    display: none; /* Ẩn mặc định */
+}
+.chat-widget {
+    position: fixed;
+    bottom: 60px;
+    right: 24px;
+    width: 350px;
+    height: 500px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    z-index: 1050;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: opacity 0.3s, transform 0.3s;
+}
+.chat-widget.minimized {
+    transform: translateY(120%);
+    opacity: 0;
+    pointer-events: none;
+}
+.chat-header {
+    background: var(--primary-color);
+    color: white;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+.chat-body {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    background: #f9fafb;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.chat-msg {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 14.5px;
+    line-height: 1.4;
+    position: relative;
+    word-break: break-word;
+}
+.chat-msg-other {
+    align-self: flex-start;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: 4px;
+    color: var(--text-main);
+}
+.chat-msg-self {
+    align-self: flex-end;
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
+    border-bottom-right-radius: 4px;
+    color: #0369a1;
+}
+.chat-msg .sender-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    display: block;
+}
+.chat-footer {
+    padding: 12px 16px;
+    background: #ffffff;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    gap: 10px;
+}
+.chat-footer .form-control {
+    border-radius: 20px;
+    font-size: 14.5px;
+}
+.btn-chat-send {
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+.btn-chat-send:hover { background: var(--primary-hover); color: white; }
+@media (max-width: 600px) {
+    .chat-widget { width: 90vw; right: 5vw; height: 60vh; bottom: 70px; }
+    .btn-open-chat { bottom: 70px; }
+}
         .sidebar-brand h6 { font-size: 22px; font-weight: 700; margin: 0; }
         .sidebar-brand small { font-size: 15px; opacity: 0.9; }
 
@@ -810,10 +948,38 @@
     <div class="modal fade" id="editQAModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa câu trả lời Q&A</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Nội dung câu trả lời</label><textarea id="editQAText" class="form-control" rows="6"></textarea></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditQA()" id="btnSaveEditQA">Lưu thay đổi</button></div></div></div></div>
     <div class="modal fade" id="manageCategoryModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-danger text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Quản lý Danh mục</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="input-group mb-4"><input type="text" id="txtNewCategory" class="form-control"><button class="btn fw-bold text-white" style="background: var(--accent-red);" onclick="addCategory()" id="btnAddCategory"><i class="fa-solid fa-plus me-1"></i> Thêm mới</button></div><div class="table-responsive"><table class="table table-hover border align-middle"><thead class="table-light"><tr><th>Tên danh mục</th><th class="text-end" style="width: 200px;">Thao tác</th></tr></thead><tbody id="categoryManagerList"></tbody></table></div></div></div></div></div>
 
+<!-- === WIDGET CHAT CHUNG === -->
+<button id="btnOpenChat" class="btn-open-chat d-none" onclick="toggleChat()">
+    <i class="fa-solid fa-comment-dots"></i>
+    <span class="chat-badge" id="chatUnreadBadge">!</span>
+</button>
+
+<div id="chatWidget" class="chat-widget d-none">
+    <div class="chat-header" onclick="toggleChat()">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-comments"></i>
+            <h6 class="m-0 fw-bold">Phòng Chat Chung</h6>
+        </div>
+        <i class="fa-solid fa-chevron-down"></i>
+    </div>
+    <div class="chat-body" id="chatBody">
+        <div class="text-center text-muted small my-3">
+            <i class="fa-solid fa-lock me-1"></i> ----- Đang tải dữ liệu ----
+        </div>
+        <!-- Nội dung chat sẽ render ở đây -->
+    </div>
+<div class="chat-footer">
+
+    <input type="text" id="txtChatMessage" class="form-control" placeholder="Nhập tin nhắn..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+    <button class="btn btn-chat-send" onclick="sendChatMessage()">
+        <i class="fa-solid fa-paper-plane"></i>
+    </button>
+</div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXGyUY-FXM93BsezgcsnCmHGO1_yKaCgETGmZ68eeQo_tVuXraAacUSmUo4BmuTNam/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwlrbjlzZqgmK0rPoNRKKNxKuOAYBXooH1YYEE7ibmDGJE9qQUJQwdQddr9FOxVBdcz/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -1497,7 +1663,7 @@ function maskName(name) {
             globalCategories.forEach((name) => {
                 let lowerName = name.trim().toLowerCase();
 
-                if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin') return;
+                if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin' || lowerName === 'chathistory') return;
 
                 if(lowerName !== 'thông báo') {
                     if (lowerName === 'users' && !isAdmin) return;
@@ -2018,6 +2184,171 @@ function maskName(name) {
             else { toastEl.classList.remove('bg-danger', 'bg-primary'); toastEl.classList.add('bg-success'); }
             let toast = new bootstrap.Toast(toastEl, { delay: 2500 }); toast.show();
         };
+// Hàm rút gọn tên (Chỉ lấy Tên đệm + Tên)
+function getShortName(fullName) {
+    if (!fullName) return "Khách";
+    let parts = fullName.trim().split(/\s+/);
+    if (parts.length <= 2) return fullName;
+    return parts.slice(-2).join(" "); // Lấy 2 chữ cuối cùng
+}
+
+// Xử lý chống XSS và render ảnh an toàn
+function formatChatMessage(text) {
+    // 1. Thoát mã HTML để chống hack XSS
+    let safeText = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
+        .replace(/\n/g, "<br>");
+    
+    // 2. Chuyển đổi cú pháp [IMG]link[/IMG] thành thẻ <img>
+    safeText = safeText.replace(/\[IMG\](.*?)\[\/IMG\]/g, '<a href="$1" target="_blank"><img src="$1" style="max-width: 100%; border-radius: 8px; margin-top: 6px; border: 1px solid #e5e7eb;"></a>');
+    
+    return safeText;
+}
+
+// GHI ĐÈ HÀM RENDER TIN NHẮN HIỆN TẠI
+// GHI ĐÈ HÀM RENDER TIN NHẮN HIỆN TẠI (ĐÃ THÊM NÚT SỬA VÀ XÓA)
+function renderSingleMessage(data, isSelf) {
+    let alignmentClass = isSelf ? "chat-msg-self" : "chat-msg-other";
+    
+    // Hiển thị tên đệm + tên
+    let shortName = getShortName(data.name);
+    let displayName = isSelf ? "Bạn" : shortName;
+    
+    // Nút sửa và xóa tin nhắn (chỉ hiện cho chính chủ)
+    let isImage = data.msg.includes("[IMG]");
+    let actionBtns = "";
+
+
+    let formattedMsg = formatChatMessage(data.msg);
+
+    let msgHtml = `
+        <div class="chat-msg ${alignmentClass}">
+            <span class="sender-name d-flex justify-content-between align-items-center">
+                <span>${displayName}</span>
+                ${actionBtns}
+            </span>
+            <div class="msg-content" data-raw-text="${data.msg.replace(/"/g, '&quot;')}">${formattedMsg}</div>
+        </div>
+    `;
+    $('#chatBody').append(msgHtml);
+}
+
+
+let isChatOpen = false;
+let chatInterval = null;
+
+// Khởi chạy khi tải xong trang (nối vào hàm initGlobalApp đã có của bạn)
+$(document).ready(function() {
+    // Chỉ hiện nút chat nếu người dùng đã đăng nhập
+    if (currentUser) {
+        $('#btnOpenChat').removeClass('d-none');
+        $('#chatWidget').addClass('minimized');
+    }
+});
+
+// Bắt sự kiện khi đăng nhập thành công để hiện nút chat
+let originalLoginStudent = loginStudent;
+loginStudent = function() {
+    originalLoginStudent();
+    setTimeout(() => {
+        if(currentUser) $('#btnOpenChat').removeClass('d-none');
+    }, 2000);
+};
+
+// Đóng/Mở chat widget
+function toggleChat() {
+    if (!currentUser) {
+        alert("Vui lòng đăng nhập để sử dụng tính năng chat!");
+        return;
+    }
+    
+    isChatOpen = !isChatOpen;
+    if (isChatOpen) {
+        $('#chatWidget').removeClass('minimized').removeClass('d-none');
+        $('#btnOpenChat').addClass('d-none');
+        $('#chatUnreadBadge').hide();
+        loadChatMessages(); // Tải tin nhắn ngay lập tức
+        // Bắt đầu tự động làm mới tin nhắn mỗi 10 giây
+        chatInterval = setInterval(loadChatMessages, 10000); 
+    } else {
+        $('#chatWidget').addClass('minimized');
+        setTimeout(() => $('#chatWidget').addClass('d-none'), 300);
+        $('#btnOpenChat').removeClass('d-none');
+        clearInterval(chatInterval); // Dừng làm mới khi đóng
+    }
+}
+
+// Hàm gửi tin nhắn lên Google Apps Script
+function sendChatMessage() {
+    let input = $('#txtChatMessage');
+    let message = input.val().trim();
+    if (!message) return;
+    
+    // Giao diện hiển thị tin nhắn ngay lập tức (Mockup UI)
+    renderSingleMessage({
+        mssv: currentUser.mssv,
+        name: currentUser.name,
+        msg: message
+    }, true);
+    
+    input.val(''); // Xóa ô nhập
+    scrollChatToBottom();
+    
+    // Đẩy dữ liệu lên Server (Bạn cần định nghĩa action 'sendChat' trong Google Apps Script)
+    let payload = {
+        action: "sendChat",
+        mssv: currentUser.mssv,
+        name: currentUser.name,
+        message: message
+    };
+    
+    postToGAS(payload, function(res) {
+        // Tải lại toàn bộ sau khi gửi thành công
+        loadChatMessages();
+    }, function() {
+        alert("Lỗi khi gửi tin nhắn!");
+    });
+}
+
+// Tải tin nhắn từ Server
+function loadChatMessages() {
+    $.ajax({
+        url: SCRIPT_URL + "?action=getChatMessages",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            let chatBody = $('#chatBody');
+            chatBody.html(''); // Xóa cũ
+            
+            if (!data || data.length === 0) {
+                chatBody.html('<div class="text-center text-muted small my-3">Phòng chat trống. Hãy gửi lời chào!</div>');
+                return;
+            }
+            
+            // Render danh sách tin nhắn
+            data.forEach(item => {
+                let isSelf = (item.mssv === currentUser.mssv);
+                renderSingleMessage({
+                    mssv: item.mssv,
+                    name: item.name,
+                    msg: item.message
+                }, isSelf);
+            });
+            scrollChatToBottom();
+        }
+    });
+}
+
+
+function scrollChatToBottom() {
+    let body = document.getElementById("chatBody");
+    body.scrollTop = body.scrollHeight;
+}
+
     </script>
 </body>
 </html>
