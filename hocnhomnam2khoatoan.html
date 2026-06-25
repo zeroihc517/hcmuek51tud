@@ -813,7 +813,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxNoQ2ehxnlOU7V4bpd0xMRJpp9-JMz1y_VwKRzDfe23XwJdmLKEx9LhHUYDow3Y0E8/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzXGyUY-FXM93BsezgcsnCmHGO1_yKaCgETGmZ68eeQo_tVuXraAacUSmUo4BmuTNam/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -837,35 +837,72 @@
 function pingOnlineStatus() {
     // Ép buộc lấy từ storage mỗi lần gọi
     let savedUser = sessionStorage.getItem('currentUser');
-    let mssv = "Khách"; 
+    let mssvParam = "Khách"; 
     
     if (savedUser) {
         try {
             let userObj = JSON.parse(savedUser);
-            mssv = userObj.mssv; // Lấy đúng MSSV từ storage
-        } catch(e) { mssv = "Khách"; }
+            // Gửi chuỗi kết hợp MSSV và Tên lên server, phân tách bằng dấu |
+            mssvParam = userObj.mssv + "|" + userObj.name; 
+        } catch(e) { mssvParam = "Khách"; }
     }
     
     // Nếu vẫn là Khách nhưng currentUser có giá trị, lấy từ biến global
-    if (mssv === "Khách" && currentUser && currentUser.mssv) {
-        mssv = currentUser.mssv;
+    if (mssvParam === "Khách" && currentUser && currentUser.mssv) {
+        mssvParam = currentUser.mssv + "|" + currentUser.name;
     }
 
     $.ajax({ 
-        url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID + "&mssv=" + encodeURIComponent(mssv), 
+        url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID + "&mssv=" + encodeURIComponent(mssvParam), 
         method: "GET", 
         dataType: "json",
         cache: false,
         success: function(res) { 
             if (res && res.list) { 
-                let displayList = res.list.join(", ");
+                // Kích hoạt quyền Admin nếu là 51.01.108.008 hoặc biến isAdmin = true
+                let currentIsAdmin = isAdmin || (currentUser && currentUser.mssv === "51.01.108.008");
+
+                let processedList = res.list.map(userStr => {
+                    let str = String(userStr).trim();
+                    if (str.toLowerCase() === "khách" || !str.includes("|")) {
+                        return str;
+                    }
+                    
+                    let parts = str.split("|");
+                    let userMssv = parts[0];
+                    let userName = parts[1];
+                    
+                    // 1. Nếu là Admin -> Hiện chữ màu vàng nổi bật
+                    if (userMssv === "51.01.108.008") {
+                        return '<span class="fw-bold" style="color: #facc15; text-transform: uppercase;"><i class="fa-solid fa-user-shield me-1"></i>Admin</span>';
+                    }
+                    
+                    // 2. Phân quyền hiển thị cho các tài khoản khác:
+                    if (currentIsAdmin) {
+                        // Góc nhìn của Admin: Thấy đầy đủ Tên thật + MSSV
+                        return userName + " (" + userMssv + ")";
+                    } else {
+                        // Góc nhìn của SV thường: Chỉ thấy MSSV bị che (VD: 51.***008)
+                        // Gọi hàm maskMSSV đã có sẵn trong file HTML của bạn
+                        return maskMSSV(userMssv);
+                    }
+                });
+
+                let displayList = processedList.join(", ");
                 $('#footerOnlineStatus').html(`<i class="fa-solid fa-users me-2"></i> ${res.count} người: <strong>${displayList}</strong>`);
             } 
         } 
     });
 }
 
-        
+// Bổ sung thêm hàm ẩn tên bảo mật cho Sinh viên thường (đặt ở cuối thẻ <script>)
+function maskName(name) {
+    if (!name || name.toLowerCase() === "khách") return name;
+    let parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].substring(0, 1) + "***";
+    if (parts.length === 2) return parts[0].substring(0, 1) + "*** " + parts[1];
+    return parts[0] + " *** " + parts[parts.length - 1]; // Ví dụ: "Nguyễn Văn Anh" -> "Nguyễn *** Anh"
+}      
         function postToGAS(payload, onSuccess, onError) {
             $.ajax({ url: SCRIPT_URL, method: "POST", data: JSON.stringify(payload), contentType: "text/plain;charset=utf-8", success: onSuccess, error: onError });
         }
