@@ -619,7 +619,13 @@
         <div class="col-md-4"><label class="form-label fw-bold">Thứ (VD: 2, 4, 8)</label><input type="text" id="pTkbThu" class="form-control" value="2"></div>
         <div class="col-md-4"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="pTkbTiet" class="form-control" min="1" max="15" value="1"></div>
         <div class="col-md-4"><label class="form-label fw-bold">Số tiết</label><input type="number" id="pTkbSoTiet" class="form-control" min="1" max="5" value="3"></div>
-        <div class="col-md-6"><label class="form-label fw-bold">Tên học phầnc</label><input type="text" id="pTkbMon" class="form-control"></div>
+<div class="col-12 d-none" id="tkbOverlapAlert">
+    <div class="alert alert-danger d-flex align-items-center m-0 py-2 px-3" style="border-radius: 8px; font-size: 14.5px; font-weight: 600;">
+        <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
+        <span id="tkbOverlapMessage"></span>
+    </div>
+</div>
+        <div class="col-md-6"><label class="form-label fw-bold">Tên học phần</label><input type="text" id="pTkbMon" class="form-control"></div>
         <div class="col-md-6"><label class="form-label fw-bold">Phòng học</label><input type="text" id="pTkbPhong" class="form-control"></div>
         <div class="col-md-4"><label class="form-label fw-bold">Thời gian (Giờ)</label><input type="text" id="pTkbThoiGian" class="form-control"></div>
         
@@ -1091,10 +1097,88 @@
             $('#tkbPersonalModal').modal('show');
         }
 
-        function savePersonalTkb() {
+       // Biến tạm để ghi nhận trạng thái người dùng đã được cảnh báo trùng lịch chưa
+        let hasWarnedOverlap = false;
+
+       function savePersonalTkb() {
             let targetRowIndex = $('#pTkbRowIndex').val();
             let isEditMode = targetRowIndex !== '';
             
+            let thuVal = parseInt($('#pTkbThu').val());
+            let tietBdVal = parseInt($('#pTkbTiet').val());
+            let soTietVal = parseInt($('#pTkbSoTiet').val());
+            let monVal = $('#pTkbMon').val().trim();
+            
+            // Lấy khoảng ngày của môn học mới nhập vào
+            let ngayBdRaw = $('#pTkbNgayBD').val().trim();
+            let ngayKtRaw = $('#pTkbNgayKT').val().trim();
+
+            if(!thuVal || !tietBdVal || !monVal) { 
+                alert("Vui lòng nhập đầy đủ Thứ, Tiết và Tên môn học!"); 
+                return; 
+            }
+
+            // --- TÍNH NĂNG CHẶN TRÙNG LỊCH THEO NGÀY THỰC TẾ ---
+            let tietKtVal = tietBdVal + soTietVal - 1;
+            let isOverlap = false;
+            let overlapCourseName = "";
+
+            // Chuyển đổi ngày nhập vào thành đối tượng Date để so sánh
+            let newStartDate = parseDateString(ngayBdRaw);
+            let newEndDate = parseDateString(ngayKtRaw);
+
+            globalTkbData.forEach(course => {
+                // Nếu đang chỉnh sửa lịch cũ, bỏ qua việc kiểm tra trùng với chính nó
+                if (isEditMode && course.sheetRowIndex === parseInt(targetRowIndex)) return;
+
+                // 1. Kiểm tra trùng Thứ trước
+                if (course.thu === thuVal) {
+                    
+                    // 2. Kiểm tra giao thoa khoảng Tiết học
+                    let existingTietBd = course.tietBd;
+                    let existingTietKt = course.tietBd + course.soTiet - 1;
+                    let isTietOverlap = Math.max(tietBdVal, existingTietBd) <= Math.min(tietKtVal, existingTietKt);
+
+                    if (isTietOverlap) {
+                        // 3. Kiểm tra giao thoa khoảng Ngày học (Chỉ xét khi cả 2 môn đều có cấu hình ngày)
+                        let isDateOverlap = true; // Mặc định nếu không nhập ngày thì coi như trùng (lịch vô thời hạn)
+
+                        if (newStartDate && newEndDate && course.ngayBatDau && course.ngayKetThuc) {
+                            let existingStartDate = parseDateString(course.ngayBatDau);
+                            let existingEndDate = parseDateString(course.ngayKetThuc);
+
+                            if (existingStartDate && existingEndDate) {
+                                // Thuật toán giao thoa khoảng ngày: Max(Start1, Start2) <= Min(End1, End2)
+                                isDateOverlap = Math.max(newStartDate, existingStartDate) <= Math.min(newEndDate, existingEndDate);
+                            }
+                        }
+
+                        // Nếu thỏa mãn trùng Thứ, trùng Tiết VÀ trùng cả khoảng Ngày thực tế
+                        if (isDateOverlap) {
+                            isOverlap = true;
+                            overlapCourseName = course.mon;
+                        }
+                    }
+                }
+            });
+
+            // Nếu phát hiện có trùng lịch thực tế, chặn xử lý và hiện thông báo lỗi
+            if (isOverlap) {
+                let thuText = thuVal === 8 ? "Chủ nhật" : "Thứ " + thuVal;
+                
+                // Hiển thị banner lỗi màu đỏ ngay trong Modal
+                $('#tkbOverlapMessage').html(`<b>Không thể đăng ký!</b> Lịch trình bị trùng tiết và ngày học thực tế với môn <b>"${overlapCourseName}"</b> (${thuText}). Vui lòng chọn thời gian khác.`);
+                $('#tkbOverlapAlert').removeClass('d-none');
+                
+                // Bắn thanh Toast đỏ góc màn hình
+                alert(`Lỗi: Trùng lịch học thực tế với môn ${overlapCourseName}!`);
+                return; 
+            }
+            // --------------------------------------------------
+
+            // Nếu không trùng lịch, tiến hành ẩn cảnh báo lỗi đi
+            $('#tkbOverlapAlert').addClass('d-none');
+
             // Nối link vào cuối hình thức nếu có
             let finalHinhThuc = $('#pTkbHinhThuc').val().trim();
             let linkVal = $('#pTkbLink').val().trim();
@@ -1103,17 +1187,50 @@
             }
 
             let pData = {
-                action: isEditMode ? "editTKBUser" : "addTKBUser", rowIndex: targetRowIndex, mssv: currentUser.mssv,
-                thu: $('#pTkbThu').val(), tietBd: $('#pTkbTiet').val(), soTiet: $('#pTkbSoTiet').val(),
-                thoiGian: $('#pTkbThoiGian').val(), hinhThuc: finalHinhThuc, mon: $('#pTkbMon').val(),
-                phong: $('#pTkbPhong').val(), gv: $('#pTkbGV').val(), color: $('#pTkbColor').val(),
-                ngayBatDau: $('#pTkbNgayBD').val(), ngayKetThuc: $('#pTkbNgayKT').val(), ngayNgoaiLe: $('#pTkbNgoaiLe').val() 
+                action: isEditMode ? "editTKBUser" : "addTKBUser", 
+                rowIndex: targetRowIndex, 
+                mssv: currentUser.mssv,
+                thu: thuVal, 
+                tietBd: tietBdVal, 
+                soTiet: soTietVal,
+                thoiGian: $('#pTkbThoiGian').val(), 
+                hinhThuc: finalHinhThuc, 
+                mon: monVal,
+                phong: $('#pTkbPhong').val(), 
+                gv: $('#pTkbGV').val(), 
+                color: $('#pTkbColor').val(),
+                ngayBatDau: ngayBdRaw, 
+                ngayKetThuc: ngayKtRaw, 
+                ngayNgoaiLe: $('#pTkbNgoaiLe').val() 
             };
-            if(!pData.thu || !pData.tietBd || !pData.mon) { alert("Vui lòng nhập đầy đủ Thứ, Tiết và Tên môn học!"); return; }
-            let btn = $('#btnSavePersonalTkb'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
-            postToGAS(pData, function(res) { alert(res); $('#tkbPersonalModal').modal('hide'); btn.html('Lưu thông tin').prop('disabled', false); loadThoiGianBieu(); if($('#manageTkbListModal').is(':visible')) { $('#manageTkbListModal').modal('hide'); }
-            }, function() { alert("Giao tiếp máy chủ thất bại!"); btn.html('Lưu thông tin').prop('disabled', false); });
+
+            let btn = $('#btnSavePersonalTkb'); 
+            btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+
+            postToGAS(pData, function(res) { 
+                alert(res); 
+                $('#tkbPersonalModal').modal('hide'); 
+                btn.html('Lưu thông tin').prop('disabled', false); 
+                loadThoiGianBieu(); 
+                if($('#manageTkbListModal').is(':visible')) { 
+                    $('#manageTkbListModal').modal('hide'); 
+                }
+            }, function() { 
+                alert("Giao tiếp máy chủ thất bại!"); 
+                btn.html('Lưu thông tin').prop('disabled', false); 
+            });
         }
+
+        // Đảm bảo ẩn banner thông báo cũ đi mỗi khi mở lại modal
+        $('#tkbPersonalModal').on('show.bs.modal', function () {
+            $('#tkbOverlapAlert').addClass('d-none');
+        });
+
+        // Bổ sung thêm logic reset thông báo lỗi mỗi khi mở/đóng modal nhập liệu
+        $('#tkbPersonalModal').on('show.bs.modal', function () {
+            hasWarnedOverlap = false;
+            $('#tkbOverlapAlert').addClass('d-none');
+        });
 
         function deletePersonalTkb(sheetRowIndex) {
             if(!confirm("Bạn có chắc chắn muốn xóa học phần lịch trình cá nhân này không?")) return;
