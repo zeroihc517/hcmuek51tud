@@ -381,7 +381,19 @@
         .table-responsive::-webkit-scrollbar-track { background-color: var(--border-color); border-radius: 10px; }
         
         .tkb-mgr-table th, .tkb-mgr-table td { padding: 10px; font-size: 14px; vertical-align: middle; }
+/* Thêm vào thẻ <style> của bạn */
+#onlineCounter {
+    max-width: 90vw;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 6px 16px;
+}
 
+/* Giúp danh sách chạy dài không làm vỡ giao diện */
+#onlineCountText {
+    font-size: 12px;
+    display: inline-block;
+}
     </style>
 </head>
 <body>
@@ -393,9 +405,7 @@
             </div>
         </div>
     </div>
-    <div id="onlineCounter" style="position: fixed; bottom: 65px; left: 20px; background: rgba(21, 76, 121, 0.9); color: #ffffff; padding: 6px 16px; border-radius: 20px; font-size: 13.5px; font-weight: 600; z-index: 1050; box-shadow: var(--shadow-md); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s;">
-        <i class="fa-solid fa-users me-2" style="color: #4ade80;"></i> <span id="onlineCountText">Đang kết nối...</span>
-    </div>
+
 
    <div class="mobile-header" style="display: none;">
         <button class="menu-toggle" id="btnToggleMenu">
@@ -627,19 +637,19 @@
                 <div id="qaListArea"></div>
             </div>
 
-            <footer class="fixed-bottom-footer">
-                <div class="footer-info-left">
-                    <span><i class="fa-solid fa-user-shield text-primary-light"></i> <strong>Admin</strong> </span>
-                    <span class="d-none d-md-inline" style="color: #64748b;">|</span>
-                    <span class="d-none d-md-inline"><i class="fa-solid fa-envelope text-primary-light"></i> <a href="mailto: giaidapthacmac@outlook.com.vn">giaidapthacmac@outlook.com.vn</a></span>
-                </div>
-                
-                <div class="footer-info-right">
-                    <span class="d-none d-sm-inline"><i class="fa-solid fa-link text-primary-light"></i> Truy cập nhanh:</span>
-                    <a href="https://teams.cloud.microsoft/l/team/19%3AG3AZ0si8ueyRMaXW3zI-siWOxk1cyIA9Aol3zliL8Sw1%40thread.tacv2/conversations?groupId=d88461ae-d3dd-44d2-aae0-e8d021da1e68&tenantId=b1a9fdc0-1d56-4c3d-a481-809fff8a26db"><i class="fa-brands fa-microsoft"></i> Nhóm Teams</a>
-                    <a href="https://classroom.google.com/c/ODI0MjY2NDc0OTQx?cjc=fmvongzm"><i class="fa-solid fa-chalkboard-user"></i> Google Classroom</a>
-                </div>
-            </footer>
+<footer class="fixed-bottom-footer">
+    <div class="footer-info-left">
+        <span id="footerOnlineStatus" style="font-size: 12px; color: #bae6fd;">
+            <i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh sách...
+        </span>
+    </div>
+    
+    <div class="footer-info-right">
+        <span class="d-none d-sm-inline"><i class="fa-solid fa-link text-primary-light"></i> Truy cập nhanh:</span>
+        <a href="..."><i class="fa-brands fa-microsoft"></i> Teams</a>
+        <a href="..."><i class="fa-solid fa-chalkboard-user"></i> Class</a>
+    </div>
+</footer>
         </main>
     </div>
 
@@ -803,7 +813,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVF74VRM5_AFIVKAyAIXtlepjgfcmNt96T5udZUyHOUwLSuzyfuEAISNiZdTc_-3lM/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxNoQ2ehxnlOU7V4bpd0xMRJpp9-JMz1y_VwKRzDfe23XwJdmLKEx9LhHUYDow3Y0E8/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -823,12 +833,38 @@
         }
         let sessionUUID = sessionStorage.getItem('user_uuid');
         if (!sessionUUID) { sessionUUID = generateUUID(); sessionStorage.setItem('user_uuid', sessionUUID); }
+	
+function pingOnlineStatus() {
+    // Ép buộc lấy từ storage mỗi lần gọi
+    let savedUser = sessionStorage.getItem('currentUser');
+    let mssv = "Khách"; 
+    
+    if (savedUser) {
+        try {
+            let userObj = JSON.parse(savedUser);
+            mssv = userObj.mssv; // Lấy đúng MSSV từ storage
+        } catch(e) { mssv = "Khách"; }
+    }
+    
+    // Nếu vẫn là Khách nhưng currentUser có giá trị, lấy từ biến global
+    if (mssv === "Khách" && currentUser && currentUser.mssv) {
+        mssv = currentUser.mssv;
+    }
 
-        function pingOnlineStatus() {
-            $.ajax({ url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID, method: "GET", dataType: "json",
-                success: function(res) { if (res && res.count) { $('#onlineCountText').text(res.count + ' đang trực tuyến'); } }
-            });
-        }
+    $.ajax({ 
+        url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID + "&mssv=" + encodeURIComponent(mssv), 
+        method: "GET", 
+        dataType: "json",
+        cache: false,
+        success: function(res) { 
+            if (res && res.list) { 
+                let displayList = res.list.join(", ");
+                $('#footerOnlineStatus').html(`<i class="fa-solid fa-users me-2"></i> ${res.count} người: <strong>${displayList}</strong>`);
+            } 
+        } 
+    });
+}
+
         
         function postToGAS(payload, onSuccess, onError) {
             $.ajax({ url: SCRIPT_URL, method: "POST", data: JSON.stringify(payload), contentType: "text/plain;charset=utf-8", success: onSuccess, error: onError });
@@ -861,7 +897,7 @@
                 if (response.success) {
                     currentUser = { mssv: response.mssv, name: response.name };
                     sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    
+                    pingOnlineStatus();
                     // Lấy instance của modal và ẩn đi (vì dùng Bootstrap 5)
                     let authModal = bootstrap.Modal.getInstance(document.getElementById('userAuthModal')) || new bootstrap.Modal(document.getElementById('userAuthModal'));
                     authModal.hide();
@@ -1578,21 +1614,107 @@
         }
 
         function checkNewQA() { $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) { if (!data || data.length === 0) return; if (data.some(row => (row[3] || '').trim() === '')) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none'); }}); }
-        function openQASection() { resetNavActive(); $('#btnNavQA').addClass('active'); $('#qaSection').removeClass('d-none'); if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); } loadQAData(); }
+        function openQASection() { 
+    resetNavActive(); 
+    $('#btnNavQA').addClass('active'); 
+    $('#qaSection').removeClass('d-none'); 
+    
+    if(window.innerWidth < 992) { 
+        sidebar.classList.remove('show'); 
+        overlay.classList.remove('show'); 
+    } 
+
+    // Tự động điền và khóa ô nhập MSSV nếu đã đăng nhập
+    if (currentUser) {
+        $('#txtMSSV').val(currentUser.mssv).prop('readonly', true).css({
+            'background-color': '#e9ecef',
+            'cursor': 'not-allowed'
+        });
+    } else {
+        $('#txtMSSV').val('').prop('readonly', false).css({
+            'background-color': '#ffffff',
+            'cursor': 'text'
+        });
+    }
+
+    loadQAData(); 
+}
         function sendQuestion() {
-            let mssvValue = $('#txtMSSV').val().trim(); let qText = $('#txtQuestion').val().trim();
-            if (!mssvValue) { alert("Vui lòng nhập mã số sinh viên hoặc email liên hệ!"); $('#txtMSSV').focus(); return; } if (!qText) { alert("Vui lòng nhập nội dung câu hỏi!"); $('#txtQuestion').focus(); return; }
-            let btn = $('#btnSubmitQ'); btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
-            postToGAS({ action: "submitQuestion", mssv: mssvValue, question: qText }, function(response) { alert(response); $('#txtQuestion').val(''); btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); loadQAData(); checkNewQA(); }, function() { alert("Lỗi kết nối máy chủ!"); btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); });
-        }
+    // Ưu tiên lấy MSSV từ session tài khoản, nếu không có mới lấy từ input
+    let mssvValue = currentUser ? currentUser.mssv : $('#txtMSSV').val().trim(); 
+    let qText = $('#txtQuestion').val().trim();
+    
+    if (!mssvValue) { 
+        alert("Vui lòng nhập mã số sinh viên hoặc email liên hệ!"); 
+        $('#txtMSSV').focus(); 
+        return; 
+    } 
+    if (!qText) { 
+        alert("Vui lòng nhập nội dung câu hỏi!"); 
+        $('#txtQuestion').focus(); 
+        return; 
+    }
+    
+    let btn = $('#btnSubmitQ'); 
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
+    
+    postToGAS({ action: "submitQuestion", mssv: mssvValue, question: qText }, function(response) { 
+        alert(response); 
+        $('#txtQuestion').val(''); 
+        btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); 
+        loadQAData(); 
+        checkNewQA(); 
+    }, function() { 
+        alert("Lỗi kết nối máy chủ!"); 
+        btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); 
+    });
+}
         function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) return str; return str.substring(0, 3) + '***' + str.substring(str.length - 3); }
         function parseThread(text, rowIndex) {
-            let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== ""); window.qaThreadParts[rowIndex] = parts; let html = '';
-            parts.forEach((part, index) => { let content = part.trim(); if(content === "") return;
-                if (content.startsWith("[SV]") && content.endsWith("[/SV]")) { let svText = content.replace("[SV]", "").replace("[/SV]", "").trim().replace(/\n/g, '<br>'); html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>Sinh viên:</strong><br>${svText}`; if (isAdmin) { html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`; } html += `</div>`; } 
-                else { let adminText = content.replace(/\n/g, '<br>'); html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${adminText}`; if (isAdmin) { html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="openEditQAModal(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa</button></div>`; } html += `</div>`; }
-            }); return html;
+    let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== ""); 
+    window.qaThreadParts[rowIndex] = parts; 
+    let html = '';
+    
+    parts.forEach((part, index) => { 
+        let content = part.trim(); 
+        if(content === "") return;
+        
+        if (content.startsWith("[SV]") && content.endsWith("[/SV]")) { 
+            let svTextRaw = content.replace("[SV]", "").replace("[/SV]", "").trim(); 
+            let svName = "Sinh viên";
+            let svMsg = svTextRaw;
+
+            // Kiểm tra và tách MSSV nếu có chứa chuỗi nhận diện ":::"
+            if (svTextRaw.includes(":::")) {
+                let splitData = svTextRaw.split(":::");
+                let rawMssv = splitData[0].trim();
+                
+                // Nếu là Admin thì hiện full MSSV, nếu là SV thì che đi (dùng hàm maskMSSV của bạn)
+                let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
+                
+                svName = "Sinh viên (" + displayMssv + ")";
+                svMsg = splitData.slice(1).join(":::").trim(); // Lấy phần nội dung phía sau
+            }
+
+            let svFormattedMsg = svMsg.replace(/\n/g, '<br>'); 
+            html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>${svName}:</strong><br>${svFormattedMsg}`; 
+            
+            if (isAdmin) { 
+                html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`; 
+            } 
+            html += `</div>`; 
+        } 
+        else { 
+            let adminText = content.replace(/\n/g, '<br>'); 
+            html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${adminText}`; 
+            if (isAdmin) { 
+                html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="openEditQAModal(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa</button></div>`; 
+            } 
+            html += `</div>`; 
         }
+    }); 
+    return html;
+}
         function loadQAData() {
             $('#qaListArea').html(''); $('#qaLoadingStatus').removeClass('d-none');
             $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) {
@@ -1623,7 +1745,31 @@
         function loadWebLinks() { $.ajax({ url: SCRIPT_URL + "?action=getWebLinks", method: "GET", dataType: "json", success: function(data) { renderWebLinks(data); } }); }
         function renderWebLinks(data) { if (!data || data.length === 0) { $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào.</div>'); return; } let html = ''; data.forEach(row => { let title = row[0] || 'Liên kết'; let desc = row[1] || ''; let url = row[2] || '#'; let iconClass = row[3] || 'fa-solid fa-link'; html += `<div class="col-12 col-md-6"><a href="${url}" target="_blank" class="link-card"><div class="icon-box"><i class="${iconClass}"></i></div><div><h5>${title}</h5><p>${desc}</p></div></a></div>`; }); $('#webLinksContainer').html(html); }
         function castVote(rowIndex, type, btnElement) { $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', true); let originalText = $(btnElement).html(); $(btnElement).html('<i class="fa-solid fa-spinner fa-spin"></i>'); postToGAS({ action: "submitVote", rowIndex: rowIndex, type: type }, function(newData) { let data = typeof newData === 'string' ? JSON.parse(newData) : newData; $(`#voteArea-${rowIndex} .up`).html(`<i class="fa-solid fa-thumbs-up"></i> Hữu ích (${data.up})`); $(`#voteArea-${rowIndex} .down`).html(`<i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${data.down})`); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false); }, function() { alert("Lỗi khi đánh giá."); $(btnElement).html(originalText); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false); }); }
-        function sendReply(rowIndex) { let replyText = $(`#txtReply-${rowIndex}`).val().trim(); if (!replyText) { alert("Vui lòng nhập nội dung phản hồi!"); return; } let btn = $(`#btnSendReply-${rowIndex}`); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true); postToGAS({ action: "replyToAdmin", rowIndex: rowIndex, replyText: replyText }, function(response) { alert(response); loadQAData(); checkNewQA();  }, function() { alert("Lỗi khi gửi phản hồi."); btn.html('Gửi phản hồi').prop('disabled', false); }); }
+       function sendReply(rowIndex) { 
+    let replyText = $(`#txtReply-${rowIndex}`).val().trim(); 
+    if (!replyText) { 
+        alert("Vui lòng nhập nội dung phản hồi!"); 
+        return; 
+    } 
+    
+    // Lấy MSSV của sinh viên đang thao tác
+    let studentMssv = currentUser ? currentUser.mssv : "Ẩn danh";
+    
+    // Ghép MSSV vào trước nội dung bằng chuỗi nhận diện ":::"
+    let formattedReply = studentMssv + ":::" + replyText;
+    
+    let btn = $(`#btnSendReply-${rowIndex}`); 
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true); 
+    
+    postToGAS({ action: "replyToAdmin", rowIndex: rowIndex, replyText: formattedReply }, function(response) { 
+        alert(response); 
+        loadQAData(); 
+        checkNewQA();  
+    }, function() { 
+        alert("Lỗi khi gửi phản hồi."); 
+        btn.html('Gửi phản hồi').prop('disabled', false); 
+    }); 
+}
         function sendAdminReply(rowIndex) { let replyText = $(`#txtAdminReply-${rowIndex}`).val().trim(); if (!replyText) { alert("Vui lòng nhập nội dung trả lời!"); return; } let btn = $(`#btnAdminSubmit-${rowIndex}`); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true); postToGAS({ action: "adminReplyQuestion", rowIndex: rowIndex, replyText: replyText }, function(response) { alert(response); loadQAData(); checkNewQA();  }, function() { alert("Lỗi khi gửi trả lời."); btn.html('<i class="fa-solid fa-reply"></i> Đăng câu trả lời').prop('disabled', false); }); }
         function openCategoryManager() { renderCategoryManager(); $('#manageCategoryModal').modal('show'); }
         function renderCategoryManager() { let html = ''; globalCategories.forEach((name, index) => { if(name.trim().toLowerCase() === 'thông báo') return; html += `<tr><td><input type="text" class="form-control form-control-sm category-input" id="catEdit-${index}" value="${name}" disabled></td><td class="text-end"><button class="btn btn-sm btn-outline-secondary" onclick="moveCategory('${name}', 'up')" title="Lên"><i class="fa-solid fa-arrow-up"></i></button><button class="btn btn-sm btn-outline-secondary" onclick="moveCategory('${name}', 'down')" title="Xuống"><i class="fa-solid fa-arrow-down"></i></button><button class="btn btn-sm btn-outline-primary" onclick="toggleEditCategory(${index}, '${name}')" id="btnEditCat-${index}"><i class="fa-solid fa-pen"></i></button><button class="btn btn-sm btn-outline-danger" onclick="deleteCategory('${name}')"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); $('#categoryManagerList').html(html); }
