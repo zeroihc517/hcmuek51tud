@@ -292,7 +292,85 @@
             .fixed-bottom-footer { flex-direction: column; gap: 6px; padding: 10px; font-size: 12px; height: auto; text-align: center; }
             .sidebar { bottom: 65px; } 
         }
-
+/* --- GIAO DIỆN ĐĂNG NHẬP HIỆN ĐẠI --- */
+        .auth-modal-content {
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+        }
+        .auth-header {
+            background: linear-gradient(135deg, var(--primary-color), #2071b3);
+            color: white;
+            padding: 35px 20px 25px;
+            text-align: center;
+        }
+        .auth-header-icon {
+            font-size: 45px;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+        }
+        .auth-tabs {
+            border-bottom: 2px solid #f3f4f6;
+            margin-bottom: 28px;
+        }
+        .auth-tabs .nav-link {
+            color: #6b7280;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: 700;
+            padding: 14px 20px;
+            margin-bottom: -2px;
+            transition: all 0.3s ease;
+            background: transparent;
+        }
+        .auth-tabs .nav-link:hover { color: var(--primary-color); }
+        .auth-tabs .nav-link.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        .input-icon-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .input-icon-wrapper i {
+            position: absolute;
+            top: 50%;
+            left: 18px;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 18px;
+            transition: color 0.3s;
+            z-index: 10;
+        }
+        .input-icon-wrapper .form-control {
+            padding-left: 50px;
+            height: 54px;
+            border-radius: 12px;
+            border: 1.5px solid #e5e7eb;
+            font-weight: 500;
+            background-color: #f9fafb;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        .input-icon-wrapper .form-control:focus {
+            border-color: var(--primary-color);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+        .input-icon-wrapper .form-control:focus ~ i { color: var(--primary-color); }
+        .btn-auth {
+            height: 54px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(21, 76, 121, 0.2);
+        }
         .table-responsive {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -319,7 +397,7 @@
         <i class="fa-solid fa-users me-2" style="color: #4ade80;"></i> <span id="onlineCountText">Đang kết nối...</span>
     </div>
 
-    <div class="mobile-header">
+   <div class="mobile-header" style="display: none;">
         <button class="menu-toggle" id="btnToggleMenu">
             <i class="fa-solid fa-bars"></i>
         </button>
@@ -330,7 +408,7 @@
 
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-    <div class="app-container">
+    <div class="app-container" style="display: none;">
         <aside class="sidebar" id="sidebarMenu">
             <div class="sidebar-brand">
                 <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
@@ -369,11 +447,13 @@
                     <span id="qaSidebarBadge" class="badge-new-qa d-none">Mới</span>
                 </button>
                 
-                <button class="btn mt-3 w-100 text-start" id="btnAdminLoginToggle" onclick="openAdminModal()" style="color: var(--text-muted); font-size: 14px; font-weight: 500;">
+               <button class="btn mt-3 w-100 text-start" id="btnAdminLoginToggle" onclick="openAdminModal()" style="color: var(--text-muted); font-size: 14px; font-weight: 500;">
                     <i class="fa-solid fa-lock"></i> Dành cho Ban quản trị
                 </button>
-                <button class="btn mt-2 w-100 text-start d-none" id="btnManageCategories" onclick="openCategoryManager()" style="color: var(--accent-red); font-size: 14px; font-weight: 600;">
-                    <i class="fa-solid fa-list-check"></i> Quản lý Danh mục truy cập
+
+                <!-- THÊM NÚT ĐĂNG XUẤT VÀO ĐÂY -->
+                <button class="btn mt-2 w-100 text-start text-danger fw-bold" id="btnStudentLogout" onclick="logoutStudent()" style="font-size: 14px;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất tài khoản
                 </button>
             </div>
         </aside>
@@ -563,51 +643,67 @@
         </main>
     </div>
 
+   <!-- MODAL ĐĂNG NHẬP / ĐĂNG KÝ -->
     <div class="modal fade" id="userAuthModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-primary text-white">
-                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-user-circle me-2"></i>Tài khoản Sinh viên</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+       <div class="modal-dialog modal-dialog-centered" style="max-width: 550px;">
+            <div class="modal-content auth-modal-content border-0">
+                
+                <!-- HEADER CHUYÊN NGHIỆP -->
+                <div class="auth-header">
+                    <div class="auth-header-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <h4 class="fw-bold mb-1">Cổng Sinh Viên</h4>
+                    <p class="mb-0" style="font-size: 14.5px; opacity: 0.9;">Đăng nhập để xem thời gian biểu và học liệu</p>
                 </div>
-                <div class="modal-body p-4">
-                    <ul class="nav nav-tabs mb-3" id="authTab" role="tablist">
+
+                <div class="modal-body p-4 p-sm-5 pt-4">
+                    <!-- TABS CHUYỂN ĐỔI (SANG TRỌNG) -->
+                    <ul class="nav auth-tabs nav-justified" id="authTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active fw-bold" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-pane" type="button" role="tab">Đăng nhập</button>
+                            <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-pane" type="button" role="tab">Đăng nhập</button>
                         </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link fw-bold" id="register-tab" data-bs-toggle="tab" data-bs-target="#register-pane" type="button" role="tab">Đăng ký mới</button>
-                        </li>
+                       <!--- <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register-pane" type="button" role="tab">Đăng ký mới</button>
+                        </li> --->
                     </ul>
+
                     <div class="tab-content" id="authTabContent">
+                        
+                        <!-- FORM ĐĂNG NHẬP -->
                         <div class="tab-pane fade show active" id="login-pane" role="tabpanel">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Mã số sinh viên (Tài khoản)</label>
-                                <input type="text" id="txtUserMSSV" class="form-control" placeholder="Nhập MSSV...">
+                            <div class="input-icon-wrapper">
+                                <input type="text" id="txtUserMSSV" class="form-control" placeholder="Mã số sinh viên (VD: 51.01.101.000)">
+                                <i class="fa-solid fa-id-card"></i>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Mật khẩu</label>
-                                <input type="password" id="txtUserPass" class="form-control" placeholder="Nhập mật khẩu...">
+                            <div class="input-icon-wrapper">
+                                <input type="password" id="txtUserPass" class="form-control" placeholder="Mật khẩu (Lần đầu là: 123)">
+                                <i class="fa-solid fa-lock"></i>
                             </div>
-                            <small class="text-danger d-none mt-2 fw-bold" id="userAuthError"></small>
-                            <button type="button" class="btn btn-primary w-100 fw-bold mt-2" onclick="loginStudent()" id="btnLoginStudent">Đăng nhập</button>
+                            <small class="text-danger text-center d-block d-none mt-1 mb-3 fw-bold" id="userAuthError"></small>
+                            <button type="button" class="btn btn-primary w-100 btn-auth mt-2" onclick="loginStudent()" id="btnLoginStudent">
+                                Đăng nhập ngay
+                            </button>
                         </div>
+
+                        <!-- FORM ĐĂNG KÝ -->
                         <div class="tab-pane fade" id="register-pane" role="tabpanel">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Mã số sinh viên</label>
-                                <input type="text" id="txtRegMSSV" class="form-control" placeholder="Nhập MSSV của bạn...">
+                            <div class="input-icon-wrapper">
+                                <input type="text" id="txtRegMSSV" class="form-control" placeholder="Mã số sinh viên">
+                                <i class="fa-solid fa-id-card"></i>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Họ và tên</label>
-                                <input type="text" id="txtRegName" class="form-control" placeholder="Nhập họ và tên...">
+                            <div class="input-icon-wrapper">
+                                <input type="text" id="txtRegName" class="form-control" placeholder="Họ và tên đầy đủ">
+                                <i class="fa-solid fa-user"></i>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Mật khẩu</label>
-                                <input type="password" id="txtRegPass" class="form-control" placeholder="Tạo mật khẩu...">
+                            <div class="input-icon-wrapper">
+                                <input type="password" id="txtRegPass" class="form-control" placeholder="Tạo mật khẩu">
+                                <i class="fa-solid fa-key"></i>
                             </div>
-                            <small class="text-danger d-none mt-2 fw-bold" id="userRegError"></small>
-                            <button type="button" class="btn btn-success w-100 fw-bold mt-2" onclick="registerStudent()" id="btnRegisterStudent">Đăng ký tài khoản</button>
+                            <small class="text-danger text-center d-block d-none mt-1 mb-3 fw-bold" id="userRegError"></small>
+                            <button type="button" class="btn btn-success w-100 btn-auth mt-2" onclick="registerStudent()" id="btnRegisterStudent">
+                                Tạo tài khoản
+                            </button>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -765,8 +861,20 @@
                 if (response.success) {
                     currentUser = { mssv: response.mssv, name: response.name };
                     sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    $('#userAuthModal').modal('hide'); alert("Xin chào, " + response.name + "!");
-                    loadThoiGianBieu();
+                    
+                    // Lấy instance của modal và ẩn đi (vì dùng Bootstrap 5)
+                    let authModal = bootstrap.Modal.getInstance(document.getElementById('userAuthModal')) || new bootstrap.Modal(document.getElementById('userAuthModal'));
+                    authModal.hide();
+                    
+                    alert("Xin chào, " + response.name + "!");
+                    
+                    // Mở khóa giao diện và load dữ liệu
+                    initGlobalApp();
+                    
+                    // Nếu đang ở tab TKB thì load thêm TKB
+                    if (!$('#tkbSection').hasClass('d-none')) {
+                        loadThoiGianBieu();
+                    }
                 } else { $('#userAuthError').removeClass('d-none').text(response.message); }
                 btn.html('Đăng nhập').prop('disabled', false);
             }, function() { $('#userAuthError').removeClass('d-none').text("Lỗi kết nối!"); btn.html('Đăng nhập').prop('disabled', false); });
@@ -787,9 +895,11 @@
             }, function() { $('#userRegError').removeClass('d-none').text("Lỗi kết nối!"); btn.html('Đăng ký tài khoản').prop('disabled', false); });
         }
 
-        function logoutStudent() {
-            if(confirm("Bạn có chắc chắn muốn đăng xuất khỏi TKB cá nhân?")) {
-                sessionStorage.removeItem('currentUser'); currentUser = null; loadThoiGianBieu();
+       function logoutStudent() {
+            if(confirm("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?")) {
+                sessionStorage.removeItem('currentUser'); 
+                currentUser = null; 
+                location.reload(); // Tải lại trang để ép hiện form đăng nhập
             }
         }
 
@@ -1361,12 +1471,35 @@
             });
         }
         function clearCacheAndReload() { fetchAndRenderCategories(); }
-
-        $(document).ready(function() {
-            setTimeout(pingOnlineStatus, 1000); setInterval(pingOnlineStatus, 25000);
+            function initGlobalApp() {
+            // Xóa inline style 'display: none' để trình duyệt dùng lại display: flex trong CSS gốc
+            // Tuyệt đối không dùng .fadeIn() ở đây vì nó sẽ ép thành display: block làm hỏng giao diện
+            $('.app-container, .mobile-header').css('display', '');
+            
+            setTimeout(pingOnlineStatus, 1000); 
+            setInterval(pingOnlineStatus, 25000);
             fetchSemesterConfig(); 
             loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
-            loadWebLinks(); checkNewQA(); fetchAndRenderCategories();
+            loadWebLinks(); 
+            checkNewQA(); 
+            fetchAndRenderCategories();
+        }
+
+        $(document).ready(function() {
+            if (!currentUser) {
+                // Khởi tạo Modal đăng nhập bắt buộc
+                let authModal = new bootstrap.Modal(document.getElementById('userAuthModal'), {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                
+                // Ẩn nút X tắt modal để ép người dùng phải đăng nhập
+                $('#userAuthModal .btn-close').hide(); 
+                authModal.show();
+            } else {
+                // Nếu đã có session đăng nhập từ trước thì khởi tạo app luôn
+                initGlobalApp();
+            }
         });
 
         function submitRowData() {
