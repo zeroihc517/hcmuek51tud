@@ -865,9 +865,10 @@
         <th style="width: 12%;">Môn học</th>
         <th style="width: 10%;">Ghi chú</th>
         <th>Thứ</th>
-        <th>Tiết học</th>
-        <th>Thời gian</th>
-        <th>Phòng</th>
+        <th style="width: 10%;">Cơ sở</th>
+        <th style="width: 11%;">Thời gian</th>
+	<th style="width: 14%;">Ngày học</th>
+        <th style="width: 12%;">Phòng</th>
         <th>Giảng viên</th>
         <th>Thao tác</th>
     </tr>
@@ -1442,11 +1443,11 @@ function openManageTkbListModal() {
 
     $('#manageTkbListModal .modal-title').html(`<i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học${titleSuffix}`);
 
-    if(filteredTkbData.length === 0) {
-        let emptyMsg = (selectedNH && selectedHK) ? `Không có môn học nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có môn học lịch trình cá nhân nào được tạo!";
-        // Tăng colspan lên 8 vì đã thêm 1 cột Ghi chú
-        html = `<tr><td colspan="8" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
-    } else {
+    // Thay đổi colspan="8" thành colspan="9"
+if(filteredTkbData.length === 0) {
+    let emptyMsg = (selectedNH && selectedHK) ? `Không có môn học nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có môn học lịch trình cá nhân nào được tạo!";
+    html = `<tr><td colspan="9" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
+}else {
         let groupedData = {};
         filteredTkbData.forEach(c => {
             let baseName = getBaseSubjectName(c.mon);
@@ -1466,9 +1467,34 @@ function openManageTkbListModal() {
             let groupItems = groupedData[baseName];
             let rowCount = groupItems.length;
 
-            groupItems.forEach((c, index) => {
+          groupItems.forEach((c, index) => {
                 let thuText = c.thu === 8 ? "Chủ nhật" : "Thứ " + c.thu;
-               let noteBadge = getNoteFromSubject(c);// Tạo nhãn từ tên môn
+                let noteBadge = getNoteFromSubject(c); // Tạo nhãn từ tên môn
+                
+                // 1. LOGIC XỬ LÝ NGÀY HỌC
+                let dateDisplay = '-';
+                if (c.ngayBatDau && c.ngayKetThuc) {
+                    if (c.ngayBatDau === c.ngayKetThuc) {
+                        dateDisplay = c.ngayBatDau;
+                    } else {
+                        dateDisplay = `Từ ${c.ngayBatDau}<br>đến ${c.ngayKetThuc}`;
+                    }
+                } else if (c.ngayBatDau) {
+                    dateDisplay = c.ngayBatDau;
+                } else if (c.ngayKetThuc) {
+                    dateDisplay = c.ngayKetThuc;
+                }
+
+                // 2. LOGIC XỬ LÝ CƠ SỞ (Yêu cầu mới)
+                let rawHinhThuc = c.hinhThuc || "";
+                let extLink = checkAndExtractUrl(rawHinhThuc);
+                // Loại bỏ phần link địa điểm nếu có để lấy text Cơ sở thuần túy
+                let coSoDisplay = extLink ? rawHinhThuc.replace(extLink, '').trim() : rawHinhThuc.trim();
+                
+                // Nếu cơ sở chứa chữ "tự học" hoặc bị bỏ trống thì để trống hoàn toàn cột này
+                if (coSoDisplay.toLowerCase().includes("tự học") || coSoDisplay === "") {
+                    coSoDisplay = ""; 
+                }
 
                 html += `<tr class="bg-white">`;
                 
@@ -1482,8 +1508,8 @@ function openManageTkbListModal() {
                 html += `
                     <td class="text-center align-middle">${noteBadge}</td>
                     <td class="text-center align-middle">${thuText}</td>
-                    <td class="text-center align-middle">Tiết ${c.tietBd} (${c.soTiet} tiết)</td>
-                    <td class="text-center fw-bold text-danger align-middle">${c.thoiGian || '-'}</td>
+                    <td class="text-center align-middle fw-bold">${coSoDisplay}</td> <td class="text-center fw-bold text-danger align-middle">${c.thoiGian || '-'}</td>
+                    <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
                     <td class="text-center align-middle">${c.phong || '-'}</td>
                     <td class="align-middle">${c.gv || '-'}</td>
                     <td class="text-center align-middle">
