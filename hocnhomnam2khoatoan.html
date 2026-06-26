@@ -818,10 +818,13 @@
                         
                         <!-- FORM ĐĂNG NHẬP -->
                         <div class="tab-pane fade show active" id="login-pane" role="tabpanel">
-                            <div class="input-icon-wrapper">
-                                <input type="text" id="txtUserMSSV" class="form-control" placeholder="Mã số sinh viên (VD: 51.01.101.000)">
-                                <i class="fa-solid fa-id-card"></i>
-                            </div>
+    
+    <div id="savedAccountsContainer"></div>
+
+    <div class="input-icon-wrapper">
+        <input type="text" id="txtUserMSSV" class="form-control" placeholder="Mã số sinh viên (VD: 51.01.101.000)">
+        <i class="fa-solid fa-id-card"></i>
+    </div>
                             <div class="input-icon-wrapper">
                                 <input type="password" id="txtUserPass" class="form-control" placeholder="Mật khẩu (Lần đầu là: 123)">
                                 <i class="fa-solid fa-lock"></i>
@@ -1113,8 +1116,20 @@ function maskName(name) {
                 let response = typeof res === 'string' ? JSON.parse(res) : res;
                 if (response.success) {
                     currentUser = { mssv: response.mssv, name: response.name };
-                    sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    pingOnlineStatus();
+    sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+    
+    // --- BẮT ĐẦU ĐOẠN CODE THÊM MỚI ---
+    let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
+    // Xóa tài khoản này nếu đã tồn tại để cập nhật nó lên đầu danh sách
+    savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
+    // Đẩy tài khoản vừa đăng nhập lên đầu
+    savedAccounts.unshift({ mssv: response.mssv, name: response.name });
+    // Giới hạn chỉ nhớ tối đa 3-5 tài khoản gần nhất cho gọn (tùy bạn chọn)
+    if (savedAccounts.length > 3) savedAccounts.pop(); 
+    localStorage.setItem('savedAccounts', JSON.stringify(savedAccounts));
+    // --- KẾT THÚC ĐOẠN CODE THÊM MỚI ---
+
+    pingOnlineStatus();
                     // Lấy instance của modal và ẩn đi (vì dùng Bootstrap 5)
                     let authModal = bootstrap.Modal.getInstance(document.getElementById('userAuthModal')) || new bootstrap.Modal(document.getElementById('userAuthModal'));
                     authModal.hide();
@@ -1854,22 +1869,23 @@ if(filteredTkbData.length === 0) {
             fetchAndRenderCategories();
         }
 
-        $(document).ready(function() {
-            if (!currentUser) {
-                // Khởi tạo Modal đăng nhập bắt buộc
-                let authModal = new bootstrap.Modal(document.getElementById('userAuthModal'), {
-                    backdrop: 'static',
-                    keyboard: false
-                });
-                
-                // Ẩn nút X tắt modal để ép người dùng phải đăng nhập
-                $('#userAuthModal .btn-close').hide(); 
-                authModal.show();
-            } else {
-                // Nếu đã có session đăng nhập từ trước thì khởi tạo app luôn
-                initGlobalApp();
-            }
+     $(document).ready(function() {
+    if (!currentUser) {
+        let authModal = new bootstrap.Modal(document.getElementById('userAuthModal'), {
+            backdrop: 'static',
+            keyboard: false
         });
+        
+        $('#userAuthModal .btn-close').hide(); 
+        
+        // Gọi hàm render để hiển thị tài khoản đã lưu
+        renderSavedAccounts(); 
+        
+        authModal.show();
+    } else {
+        initGlobalApp();
+    }
+});
 
         function submitRowData() {
             let col1 = $('#txtCol1').val().trim(); let col2 = $('#txtCol2').val().trim(); let col3 = $('#txtCol3').val().trim(); let col4 = $('#txtCol4').val().trim();
@@ -2478,7 +2494,58 @@ function scrollChatToBottom() {
     let body = document.getElementById("chatBody");
     body.scrollTop = body.scrollHeight;
 }
+// Hiển thị danh sách tài khoản đã lưu
+function renderSavedAccounts() {
+    let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
+    let container = $('#savedAccountsContainer');
+    
+    if (savedAccounts.length === 0) {
+        container.hide();
+        return;
+    }
+    
+    container.show();
+    let html = '<div class="text-muted small mb-2 fw-bold">Tài khoản đã đăng nhập:</div><div class="d-flex flex-column gap-2 mb-3">';
+    
+    savedAccounts.forEach(acc => {
+        // Lấy chữ cái đầu của tên làm Avatar
+        let avatarChar = acc.name.charAt(0).toUpperCase(); 
+        
+        html += `
+            <div class="d-flex align-items-center justify-content-between p-2 border rounded" style="cursor:pointer; background:#f9fafb; transition: all 0.2s;" onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='#f9fafb'" onclick="selectSavedAccount('${acc.mssv}')">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width:35px; height:35px; font-weight:bold; font-size: 16px;">
+                        ${avatarChar}
+                    </div>
+                    <div style="line-height:1.2;">
+                        <div class="fw-bold text-dark" style="font-size:14.5px;">${acc.name}</div>
+                        <div class="text-muted" style="font-size:12.5px;">${acc.mssv}</div>
+                    </div>
+                </div>
+                <button class="btn btn-sm text-danger" onclick="removeSavedAccount('${acc.mssv}', event)" title="Xóa khỏi lịch sử">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        `;
+    });
+    html += '</div><hr class="text-muted my-3">';
+    container.html(html);
+}
 
+// Khi người dùng click vào một tài khoản cũ
+function selectSavedAccount(mssv) {
+    $('#txtUserMSSV').val(mssv);
+    $('#txtUserPass').val('').focus(); // Tự động đưa con trỏ chuột vào ô mật khẩu
+}
+
+// Xóa tài khoản khỏi lịch sử
+function removeSavedAccount(mssv, event) {
+    event.stopPropagation(); // Ngăn không cho kích hoạt sự kiện click chọn tài khoản
+    let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
+    savedAccounts = savedAccounts.filter(acc => acc.mssv !== mssv);
+    localStorage.setItem('savedAccounts', JSON.stringify(savedAccounts));
+    renderSavedAccounts();
+}
     </script>
 </body>
 </html>
