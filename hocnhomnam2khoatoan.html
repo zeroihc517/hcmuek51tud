@@ -858,7 +858,20 @@
         </div>
     </div>
     <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-key me-2"></i>Thay đổi mật khẩu cá nhân</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Mật khẩu cũ hiện tại</label><input type="password" id="txtOldPass" class="form-control" placeholder="Nhập mật khẩu cũ..."></div><div class="mb-3"><label class="form-label fw-bold">Mật khẩu mới muốn đổi</label><input type="password" id="txtNewPass" class="form-control" placeholder="Nhập mật khẩu mới..."></div><small class="text-danger d-none mt-2 fw-bold" id="changePassError"></small></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning fw-bold" onclick="submitChangePassword()" id="btnConfirmChangePass">Xác nhận thay đổi</button></div></div></div></div>
-    <div class="modal fade" id="manageTkbListModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-xl"><div class="modal-content border-0 shadow"><div class="modal-header bg-dark text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học - Sửa nhanh</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="table-responsive"><table class="table table-bordered table-striped align-middle tkb-mgr-table m-0"><thead class="table-primary text-center"><tr><th>Môn học</th><th>Thứ</th><th>Tiết học</th><th>Thời gian</th><th>Phòng</th><th>Giảng viên</th><th>Thao tác</th></tr></thead><tbody id="tkbManagerListBody"></tbody></table></div></div></div></div></div>
+    <div class="modal fade" id="manageTkbListModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-xl"><div class="modal-content border-0 shadow"><div class="modal-header bg-dark text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học - Sửa nhanh</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="table-responsive">
+<table class="table table-bordered align-middle tkb-mgr-table m-0 bg-white">
+<thead class="table-primary text-center">
+    <tr>
+        <th style="width: 12%;">Môn học</th>
+        <th style="width: 10%;">Ghi chú</th>
+        <th>Thứ</th>
+        <th>Tiết học</th>
+        <th>Thời gian</th>
+        <th>Phòng</th>
+        <th>Giảng viên</th>
+        <th>Thao tác</th>
+    </tr>
+</thead><tbody id="tkbManagerListBody"></tbody></table></div></div></div></div></div>
     <div class="modal fade" id="tkbPersonalModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-success text-white" id="tkbModalHeader"><h6 class="modal-title m-0 fw-bold" id="tkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><input type="hidden" id="pTkbRowIndex" value=""><div class="row g-3">
         <div class="col-md-4"><label class="form-label fw-bold">Thứ (VD: 2, 4, 8)</label><input type="text" id="pTkbThu" class="form-control" value="2"></div>
         <div class="col-md-4"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="pTkbTiet" class="form-control" min="1" max="15" value="1"></div>
@@ -1320,80 +1333,171 @@ function maskName(name) {
             $('.table-box').before(toolbarHtml);
         }
 
-       function openManageTkbListModal() {
-            let html = '';
+// Hàm phụ trợ: Lấy tên gốc của môn học (Bỏ các từ khóa phụ)// Hàm phụ trợ: Lấy tên gốc của môn học (Bỏ các từ khóa phụ)
+function getBaseSubjectName(name) {
+    if (!name) return "Khác";
+    
+    let base = name
+        // 1. Xóa các cụm có dấu ngoặc và nội dung bên trong
+        .replace(/\(\s*bù.*?\)/gi, "")              
+        .replace(/\(\s*học bù.*?\)/gi, "")          
+        .replace(/\(\s*thực hành.*?\)/gi, "")       
+        .replace(/\(\s*bài tập.*?\)/gi, "")         
+        .replace(/\(\s*kiểm tra quá trình.*?\)/gi, "") 
+        .replace(/\(\s*tự học.*?\)/gi, "")          // <-- Xóa (Tự học ...)
+        
+        // 2. Xóa các cụm từ không có dấu ngoặc
+        .replace(/kiểm tra quá trình/gi, "")        
+        .replace(/kiểm tra giữa học phần/gi, "")
+        .replace(/kiểm tra kết thúc học phần/gi, "")
+        .replace(/kiểm tra/gi, "")
+        .replace(/học bù/gi, "")
+        .replace(/tự học/gi, "")                    // <-- Xóa Tự học
+        .trim();
+    
+    // 3. Dọn dẹp các ký tự thừa và khoảng trắng
+    base = base.replace(/\(\s*\)/g, '')             
+               .replace(/^[-:]\s*/, '')             
+               .replace(/\s*[-:]$/, '')             
+               .replace(/\s+/g, ' ')                
+               .trim();
+    
+    return base.toUpperCase() || "KHÁC";
+}
+
+// HÀM MỚI: Tự động trích xuất ghi chú từ tên gốc để tạo nhãn (Badge)
+// Hàm tự động trích xuất ghi chú và tô màu chữ (không đóng khung)
+// Hàm tự động trích xuất ghi chú và tô màu chữ
+function getNoteFromSubject(c) {
+    let monLower = (c.mon || "").toLowerCase();
+    let phongLower = (c.phong || "").toLowerCase();
+    let hinhThucLower = (c.hinhThuc || "").toLowerCase();
+    
+    // Trích xuất ngày tháng nếu có trong tên môn (VD: 27/10)
+    let dateMatch = (c.mon || "").match(/\d{1,2}\/\d{1,2}/);
+    let dateStr = dateMatch ? ` <br><small class="text-muted">(${dateMatch[0]})</small>` : '';
+
+    // KIỂM TRA TỰ HỌC TỪ PHÒNG HOẶC HÌNH THỨC (CƠ SỞ)
+    if (phongLower.includes('tự học') || hinhThucLower.includes('tự học')) {
+        return `<span class="fw-bold" style="color: #9333ea;">Tự học${dateStr}</span>`;
+    }
+
+    // TÔ MÀU THEO TÊN MÔN HỌC CHO CÁC LOẠI CÒN LẠI
+    if (monLower.includes('kiểm tra kết thúc')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra Kết thúc học phần${dateStr}</span>`;
+    if (monLower.includes('kiểm tra giữa')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra Giữa học phần${dateStr}</span>`;
+    if (monLower.includes('kiểm tra quá trình')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra Quá Trình${dateStr}</span>`;
+    if (monLower.includes('kiểm tra')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra${dateStr}</span>`;
+    if (monLower.includes('bù')) return `<span class="fw-bold" style="color: #d97706;">Học bù${dateStr}</span>`;
+    if (monLower.includes('thực hành')) return `<span class="fw-bold" style="color: #16a34a;">Thực hành${dateStr}</span>`;
+    if (monLower.includes('bài tập')) return `<span class="fw-bold" style="color: #2563eb;">Bài tập${dateStr}</span>`;
+    
+    return '<span class="text-muted small">Chính khóa</span>';
+}
+function openManageTkbListModal() {
+    let html = '';
+    
+    let selectedNH = $('#namHocSelect').val();
+    let selectedHK = $('#hocKySelect').val();
+    
+    let filteredTkbData = globalTkbData;
+    let titleSuffix = '';
+
+    if (selectedNH && selectedHK) {
+        let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+        if (config) {
+            let sDate = parseDateString(config[2]);
+            let numAcademicWeeks = parseInt(config[3]);
+            let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
             
-            let selectedNH = $('#namHocSelect').val();
-            let selectedHK = $('#hocKySelect').val();
-            
-            let filteredTkbData = globalTkbData;
-            let titleSuffix = '';
-
-            if (selectedNH && selectedHK) {
-                let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
-                if (config) {
-                    let sDate = parseDateString(config[2]);
-                    let numAcademicWeeks = parseInt(config[3]);
-                    let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
-                    
-                    if (sDate && numAcademicWeeks) {
-                        let startMon = getMondayOfDate(sDate);
-                        
-                        let acadWk = 1;
-                        let calWk = 1;
-                        while (acadWk <= numAcademicWeeks && calWk <= 52) {
-                            if (!breakWeeks.includes(calWk)) { acadWk++; }
-                            calWk++;
-                        }
-                        
-                        let endSun = new Date(startMon);
-                        endSun.setDate(endSun.getDate() + ((calWk - 1) * 7) - 1);
-                        endSun.setHours(23, 59, 59, 999);
-
-                        filteredTkbData = globalTkbData.filter(c => {
-                            let cStart = parseDateString(c.ngayBatDau);
-                            let cEnd = parseDateString(c.ngayKetThuc);
-                            
-                            if (!cStart && !cEnd) return true; 
-
-                            if (cStart && cEnd) return cStart <= endSun && cEnd >= startMon;
-                            if (cStart) return cStart <= endSun;
-                            if (cEnd) return cEnd >= startMon;
-                            return true;
-                        });
-                        
-                        titleSuffix = ` - ${selectedHK} (${selectedNH})`;
-                    }
+            if (sDate && numAcademicWeeks) {
+                let startMon = getMondayOfDate(sDate);
+                
+                let acadWk = 1;
+                let calWk = 1;
+                while (acadWk <= numAcademicWeeks && calWk <= 52) {
+                    if (!breakWeeks.includes(calWk)) { acadWk++; }
+                    calWk++;
                 }
-            }
+                
+                let endSun = new Date(startMon);
+                endSun.setDate(endSun.getDate() + ((calWk - 1) * 7) - 1);
+                endSun.setHours(23, 59, 59, 999);
 
-            $('#manageTkbListModal .modal-title').html(`<i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học${titleSuffix}`);
+                filteredTkbData = globalTkbData.filter(c => {
+                    let cStart = parseDateString(c.ngayBatDau);
+                    let cEnd = parseDateString(c.ngayKetThuc);
+                    
+                    if (!cStart && !cEnd) return true; 
 
-            if(filteredTkbData.length === 0) {
-                let emptyMsg = (selectedNH && selectedHK) ? `Không có môn học nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có môn học lịch trình cá nhân nào được tạo!";
-                html = `<tr><td colspan="7" class="text-center text-muted py-4">${emptyMsg}</td></tr>`;
-            } else {
-                filteredTkbData.forEach(c => {
-                    let thuText = c.thu === 8 ? "Chủ nhật" : "Thứ " + c.thu;
-                    html += `<tr>
-                        <td class="fw-bold text-dark">${c.mon}</td>
-                        <td class="text-center">${thuText}</td>
-                        <td class="text-center">Tiết ${c.tietBd} (${c.soTiet} tiết)</td>
-                        <td class="text-center fw-bold text-danger">${c.thoiGian || '-'}</td>
-                        <td class="text-center">${c.phong || '-'}</td>
-                        <td>${c.gv || '-'}</td>
-                        <td class="text-center">
-                            <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1" onclick="closeAndOpenEditTkb(${c.sheetRowIndex})"><i class="fa-solid fa-pen"></i> Sửa</button>
-                            <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2" onclick="deletePersonalTkb(${c.sheetRowIndex})"><i class="fa-solid fa-trash"></i> Xóa</button>
-                        </td>
-                    </tr>`;
+                    if (cStart && cEnd) return cStart <= endSun && cEnd >= startMon;
+                    if (cStart) return cStart <= endSun;
+                    if (cEnd) return cEnd >= startMon;
+                    return true;
                 });
+                
+                titleSuffix = ` - ${selectedHK} (${selectedNH})`;
             }
-            
-            $('#tkbManagerListBody').html(html); 
-            $('#manageTkbListModal').modal('show');
         }
+    }
 
+    $('#manageTkbListModal .modal-title').html(`<i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học${titleSuffix}`);
+
+    if(filteredTkbData.length === 0) {
+        let emptyMsg = (selectedNH && selectedHK) ? `Không có môn học nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có môn học lịch trình cá nhân nào được tạo!";
+        // Tăng colspan lên 8 vì đã thêm 1 cột Ghi chú
+        html = `<tr><td colspan="8" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
+    } else {
+        let groupedData = {};
+        filteredTkbData.forEach(c => {
+            let baseName = getBaseSubjectName(c.mon);
+            if (!groupedData[baseName]) {
+                groupedData[baseName] = [];
+            }
+            groupedData[baseName].push(c);
+        });
+
+        for (let baseName in groupedData) {
+            // Tăng colspan lên 8
+            html += `
+            <tr>
+
+            </tr>`;
+            
+            let groupItems = groupedData[baseName];
+            let rowCount = groupItems.length;
+
+            groupItems.forEach((c, index) => {
+                let thuText = c.thu === 8 ? "Chủ nhật" : "Thứ " + c.thu;
+               let noteBadge = getNoteFromSubject(c);// Tạo nhãn từ tên môn
+
+                html += `<tr class="bg-white">`;
+                
+                if (index === 0) {
+                    html += `
+                    <td rowspan="${rowCount}" class="fw-bold text-dark ps-3 border-start border-3 align-middle" style="border-left-color: var(--primary-color) !important; background-color: #fff;">
+                        ${baseName}
+                    </td>`;
+                }
+                
+                html += `
+                    <td class="text-center align-middle">${noteBadge}</td>
+                    <td class="text-center align-middle">${thuText}</td>
+                    <td class="text-center align-middle">Tiết ${c.tietBd} (${c.soTiet} tiết)</td>
+                    <td class="text-center fw-bold text-danger align-middle">${c.thoiGian || '-'}</td>
+                    <td class="text-center align-middle">${c.phong || '-'}</td>
+                    <td class="align-middle">${c.gv || '-'}</td>
+                    <td class="text-center align-middle">
+                        <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1" onclick="closeAndOpenEditTkb(${c.sheetRowIndex})"><i class="fa-solid fa-pen"></i> Sửa</button>
+                        <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2" onclick="deletePersonalTkb(${c.sheetRowIndex})"><i class="fa-solid fa-trash"></i> Xóa</button>
+                    </td>
+                </tr>`;
+            });
+        }
+    }
+    
+    $('#tkbManagerListBody').html(html); 
+    $('#manageTkbListModal').modal('show');
+}
         function closeAndOpenEditTkb(sheetRowIndex) { $('#manageTkbListModal').modal('hide'); setTimeout(() => { openEditTkbModal(sheetRowIndex); }, 400); }
 
         function checkAndExtractUrl(text) { 
