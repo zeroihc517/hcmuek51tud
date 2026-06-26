@@ -1699,7 +1699,7 @@ globalTkbData.forEach(course => {
                 
                 // Logic kiểm tra ngày có ngoại lệ
                 let currentExceptions = $('#pTkbNgoaiLe').val().split(',').map(d => d.trim());
-                let existingExceptions = (course.ngayNgaiLe || "").split(',').map(d => d.trim());
+                let existingExceptions = (course.ngayNgoaiLe || "").split(',').map(d => d.trim());
 
                 let d = new Date(Math.max(newStartDate, existingStartDate));
                 let end = new Date(Math.min(newEndDate, existingEndDate));
@@ -1726,30 +1726,16 @@ globalTkbData.forEach(course => {
     }
 });            // Nếu phát hiện có trùng lịch thực tế, chặn xử lý và hiện thông báo lỗi
            // 1. Lấy số lần đã cảnh báo từ sessionStorage (mặc định là 0 nếu chưa có)
-let overlapCount = parseInt(sessionStorage.getItem('overlapCount') || '0');
-
+// Nếu phát hiện có trùng lịch, chặn xử lý ngay lập tức
 if (isOverlap) {
-    overlapCount++;
-    sessionStorage.setItem('overlapCount', overlapCount);
-
     let thuText = thuVal === 8 ? "Chủ nhật" : "Thứ " + thuVal;
     
-    // Nếu chưa đến lần thứ 3, hiển thị cảnh báo và CHẶN lưu (return)
-    if (overlapCount < 3) {
-        $('#tkbOverlapMessage').html(`<b>Cảnh báo (${overlapCount}/2):</b> Lịch bị trùng tiết với môn <b>"${overlapCourseName}"</b> (${thuText}). Bạn cần xác nhận thêm ${3 - overlapCount} lần nữa để bỏ qua.`);
-        $('#tkbOverlapAlert').removeClass('d-none');
-        alert(`Lỗi: Trùng lịch với môn ${overlapCourseName}! Bạn cần bấm lưu thêm ${3 - overlapCount} lần nữa nếu muốn bỏ qua cảnh báo.`);
-        return; 
-    } else {
-        // Đến lần thứ 3: Reset lại bộ đếm và cho phép tiếp tục chạy code phía dưới để lưu
-        sessionStorage.setItem('overlapCount', '0');
-        alert("Đã xác nhận bỏ qua cảnh báo trùng lịch. Đang tiến hành lưu...");
-    }
-} else {
-    // Nếu không trùng, reset bộ đếm về 0
-    sessionStorage.setItem('overlapCount', '0');
+    $('#tkbOverlapMessage').html(`<b>Lỗi:</b> Lịch bị trùng tiết với môn <b>"${overlapCourseName}"</b> (${thuText}). Vui lòng chọn thời gian khác.`);
+    $('#tkbOverlapAlert').removeClass('d-none');
+    
+    alert(`Lỗi: Trùng lịch với môn ${overlapCourseName}! Không thể lưu.`);
+    return; // Chặn lưu vĩnh viễn, không cho ngoại lệ
 }
-
 // --------------------------------------------------
 // Nếu không trùng (hoặc đã xác nhận ở lần 3), code sẽ chạy tiếp xuống đây:
 $('#tkbOverlapAlert').addClass('d-none');
