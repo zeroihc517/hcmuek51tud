@@ -972,7 +972,51 @@
     <div class="modal fade" id="insertRowModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-success text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-plus me-2"></i>Chèn nội dung xuống dưới hàng này</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="insertCol1" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="insertCol2" class="form-control" rows="3"></textarea></div><div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="insertCol3" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="insertCol4" class="form-control"></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-success px-4 fw-bold" onclick="saveInsertRow()" id="btnSaveInsertRow">Chèn nội dung</button></div></div></div></div>
     <div class="modal fade" id="editRowModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa nội dung</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="editCol1" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="editCol2" class="form-control" rows="3"></textarea></div><div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="editCol3" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="editCol4" class="form-control"></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditRow()" id="btnSaveEditRow">Lưu thay đổi</button></div></div></div></div>
     <div class="modal fade" id="editQAModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa câu trả lời Q&A</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Nội dung câu trả lời</label><textarea id="editQAText" class="form-control" rows="6"></textarea></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditQA()" id="btnSaveEditQA">Lưu thay đổi</button></div></div></div></div>
-    <div class="modal fade" id="manageCategoryModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-danger text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Quản lý Danh mục</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="input-group mb-4"><input type="text" id="txtNewCategory" class="form-control"><button class="btn fw-bold text-white" style="background: var(--accent-red);" onclick="addCategory()" id="btnAddCategory"><i class="fa-solid fa-plus me-1"></i> Thêm mới</button></div><div class="table-responsive"><table class="table table-hover border align-middle"><thead class="table-light"><tr><th>Tên danh mục</th><th class="text-end" style="width: 200px;">Thao tác</th></tr></thead><tbody id="categoryManagerList"></tbody></table></div></div></div></div></div>
+    <div class="modal fade" id="systemTkbModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl"> <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-info text-white">
+                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-cloud-arrow-down me-2"></i>Đăng ký Học phần từ Hệ thống</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-light border border-info mb-3 d-flex align-items-start gap-3">
+                        <i class="fa-solid fa-circle-info text-info fs-4 mt-1"></i>
+                        <p class="m-0 small text-muted">
+                            <strong class="text-dark">Hướng dẫn:</strong> Tích chọn vào ô vuông ở cột đầu tiên để đăng ký các học phần bạn đang theo học. Bảng dữ liệu này kết nối trực tiếp với Đào tạo, lịch học của bạn sẽ luôn được đồng bộ nếu có thay đổi về phòng học, giảng viên hay thời gian.
+                        </p>
+                    </div>
+                    
+                    <div class="table-responsive border rounded" style="max-height: 450px; overflow-y: auto;">
+                        <table class="table table-hover table-bordered align-middle m-0 bg-white" style="font-size: 14px;">
+                            <thead class="table-light text-center" style="position: sticky; top: 0; z-index: 10;">
+                                <tr>
+                                    <th style="width: 50px;">Chọn</th>
+                                    <th>Mã HP</th>
+                                    <th style="width: 22%;">Tên Học Phần</th>
+                                    <th>Cơ sở</th>
+                                    <th>Phòng</th>
+                                    <th>Thứ & Tiết</th>
+                                    <th>Giảng Viên</th>
+                                    <th>Ngày học</th>
+                                </tr>
+                            </thead>
+                            <tbody id="systemCoursesContainer">
+                                <tr>
+                                    <td colspan="8" class="text-center py-5 text-muted">
+                                        <i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải dữ liệu hệ thống...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-info text-white px-4 fw-bold" onclick="saveSystemTkbSelection()" id="btnSaveSystemTkb">Đồng bộ lịch học</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <!-- === WIDGET CHAT CHUNG === -->
 <button id="btnOpenChat" class="btn-open-chat d-none" onclick="toggleChat()">
@@ -1005,7 +1049,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwlrbjlzZqgmK0rPoNRKKNxKuOAYBXooH1YYEE7ibmDGJE9qQUJQwdQddr9FOxVBdcz/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzBKubZ5eywrDjAaVRfqlhUXPOXOOFZAmRwcJT0DiPnTxkEHKzFNLRzo2Ysc6fe7oq0/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -1347,7 +1391,7 @@ function maskName(name) {
             }, function() { alert("Lỗi khi kết nối yêu cầu xóa bỏ deadline!"); });
         }
 
-        function renderTkbToolBar() {
+       function renderTkbToolBar() {
             $('.tkb-personal-toolbar').remove(); 
             let toolbarHtml = `
                 <div class="tkb-personal-toolbar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 p-3 bg-white rounded border shadow-sm">
@@ -1356,6 +1400,8 @@ function maskName(name) {
                         <button class="btn btn-sm btn-outline-secondary font-weight-bold" onclick="openChangePasswordModal()"><i class="fa-solid fa-key text-warning"></i> Đổi mật khẩu</button>
                     </div>
                     <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-info text-white fw-bold" onclick="openSystemTkbModal()"><i class="fa-solid fa-cloud-arrow-down"></i> Tích hợp từ hệ thống</button>
+                        
                         <button class="btn btn-sm btn-dark fw-bold" onclick="openManageTkbListModal()"><i class="fa-solid fa-list-check text-info"></i> Quản lý TKB</button>
                         <button class="btn btn-sm btn-success fw-bold" onclick="openAddTkbModal(false)"><i class="fa-solid fa-plus"></i> Thêm lịch mới</button>
                         <button class="btn btn-sm btn-outline-danger fw-bold" onclick="logoutStudent()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
@@ -1889,14 +1935,22 @@ let monDisplay = course.mon;
             globalCategories.forEach((name) => {
                 let lowerName = name.trim().toLowerCase();
 
+                // Ẩn hoàn toàn các sheet chức năng đặc biệt đối với mọi tài khoản
                 if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin' || lowerName === 'chathistory') return;
+                if (lowerName === 'userregisteredcourses') return; // Luôn ẩn bảng lưu trữ ID đăng ký môn
 
                 if(lowerName !== 'thông báo') {
+                    // PHÂN QUYỀN: Nếu không phải Admin thì chặn không cho thấy các trang quản trị này
                     if (lowerName === 'users' && !isAdmin) return;
                     if (lowerName === 'cauhinhhocky' && !isAdmin) return; 
+                    if (lowerName === 'mastertkb' && !isAdmin) return; // CHỈ ADMIN MỚI THẤY
+
+                    // Thiết lập biểu tượng hiển thị trực quan cho từng danh mục quản trị
                     let icon = 'fa-folder-closed';
                     if (lowerName === 'users') icon = 'fa-users-gear';
                     if (lowerName === 'cauhinhhocky') icon = 'fa-calendar-check'; 
+                    if (lowerName === 'mastertkb') icon = 'fa-table-list'; // Icon danh sách bảng cho MasterTKB
+                    
                     optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)"><i class="fa-solid ${icon}"></i> ${name}</button>`;
                 }
             });
@@ -2648,6 +2702,116 @@ function closeAndOpenEditDeadline(sheetRowIndex) {
     $('#manageTkbListModal').modal('hide'); 
     setTimeout(() => { openEditDeadlineModal(sheetRowIndex); }, 400); 
 }
+
+// --- TÍNH NĂNG TÍCH HỢP TKB HỆ THỐNG ---
+    let globalSystemCourses = [];
+    let userRegisteredCourseIds = [];
+
+    function openSystemTkbModal() {
+        $('#systemTkbModal').modal('show');
+        $('#systemCoursesContainer').html('<div class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải danh sách học phần...</div>');
+        
+        // Yêu cầu GAS trả về 2 luồng dữ liệu: Danh sách môn gốc (TKB hệ thống) và Các ID môn sinh viên này đã đăng ký
+        $.ajax({
+            url: SCRIPT_URL + "?action=getSystemTKBList&mssv=" + currentUser.mssv,
+            method: "GET", 
+            dataType: "json",
+            success: function(data) {
+                globalSystemCourses = data.allCourses || [];
+                userRegisteredCourseIds = data.registeredIds || [];
+                renderSystemCoursesList();
+            },
+            error: function() {
+                $('#systemCoursesContainer').html('<div class="alert alert-danger m-0 text-center">Lỗi khi tải dữ liệu hệ thống! Vui lòng thử lại sau.</div>');
+            }
+        });
+    }
+
+   function renderSystemCoursesList() {
+    let container = $('#systemCoursesContainer');
+    if (globalSystemCourses.length === 0) {
+        container.html('<tr><td colspan="8" class="text-center text-muted py-5"><i class="fa-regular fa-folder-open fs-2 mb-2"></i><br>Hệ thống hiện chưa có môn học nào.</td></tr>');
+        return;
+    }
+
+    // 1. Gom nhóm dữ liệu theo Mã HP (id)
+    let groupedCourses = {};
+    globalSystemCourses.forEach(course => {
+        if (!groupedCourses[course.id]) {
+            groupedCourses[course.id] = {
+                id: course.id,
+                mon: course.mon,
+                gv: course.gv,
+                phongList: [], // Danh sách phòng nếu có nhiều ca
+                thoiGianList: [], // Gom Thứ & Tiết
+                hinhThuc: course.hinhThuc,
+                ngayBatDau: course.ngayBatDau,
+                ngayKetThuc: course.ngayKetThuc
+            };
+        }
+        // Thêm thông tin vào các mảng nếu chưa trùng
+        let timeStr = `Thứ ${course.thu} (Tiết ${course.tietBd}-${course.tietBd + course.soTiet - 1})`;
+        if (!groupedCourses[course.id].thoiGianList.includes(timeStr)) {
+            groupedCourses[course.id].thoiGianList.push(timeStr);
+        }
+        if (!groupedCourses[course.id].phongList.includes(course.phong)) {
+            groupedCourses[course.id].phongList.push(course.phong);
+        }
+    });
+
+    // 2. Render danh sách đã gom nhóm
+    let html = '';
+    for (let id in groupedCourses) {
+        let c = groupedCourses[id];
+        let isChecked = userRegisteredCourseIds.includes(id) ? 'checked' : '';
+        
+        let dateDisplay = (c.ngayBatDau && c.ngayKetThuc) ? `<span class="fw-bold text-dark">${c.ngayBatDau}</span> đến <span class="fw-bold text-dark">${c.ngayKetThuc}</span>` : '-';
+
+        html += `
+        <tr style="cursor: pointer; transition: background 0.2s;" onclick="$(this).find('.system-course-checkbox').prop('checked', function(i, v) { return !v; });">
+            <td class="text-center" style="background-color: #f8fafc;">
+                <input class="form-check-input system-course-checkbox shadow-sm border-secondary" type="checkbox" value="${c.id}" ${isChecked} style="width: 20px; height: 20px; cursor: pointer;" onclick="event.stopPropagation();">
+            </td>
+            <td class="text-center fw-bold text-secondary">${c.id}</td>
+            <td class="fw-bold" style="color: var(--primary-color);">${c.mon}</td>
+            <td class="text-center">${c.hinhThuc || '-'}</td>
+            <td class="text-center fw-bold text-success">${c.phongList.join(', ')}</td>
+            <td class="text-center">
+                <small class="fw-bold text-muted">${c.thoiGianList.join('<br>')}</small>
+            </td>
+            <td class="text-center text-warning-emphasis fw-bold">${c.gv || '-'}</td>
+            <td class="text-center" style="font-size: 13px;">${dateDisplay}</td>
+        </tr>
+        `;
+    }
+    container.html(html);
+}
+    function saveSystemTkbSelection() {
+        let selectedIds = [];
+        $('.system-course-checkbox:checked').each(function() {
+            selectedIds.push($(this).val());
+        });
+
+        let btn = $('#btnSaveSystemTkb');
+        btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xử lý...').prop('disabled', true);
+
+        // Gửi danh sách các ID lên GAS để lưu vào hồ sơ sinh viên
+        postToGAS({
+            action: "saveSystemTkbSelection",
+            mssv: currentUser.mssv,
+            courseIds: selectedIds.join(',') // Ví dụ: "TUD01,TUD05,TUD12"
+        }, function(res) {
+            alert("Đã đồng bộ lịch học thành công!");
+            $('#systemTkbModal').modal('hide');
+            btn.html('Đồng bộ lịch học').prop('disabled', false);
+            
+            // Yêu cầu làm mới lại lưới TKB trên giao diện
+            loadThoiGianBieu();
+        }, function() {
+            alert("Giao tiếp máy chủ thất bại! Không thể lưu thiết lập.");
+            btn.html('Đồng bộ lịch học').prop('disabled', false);
+        });
+    }
     </script>
 </body>
 </html>
