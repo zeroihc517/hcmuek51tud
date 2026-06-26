@@ -886,7 +886,16 @@
         <span id="tkbOverlapMessage"></span>
     </div>
 </div>
-        <div class="col-md-6"><label class="form-label fw-bold">Tên học phần</label><input type="text" id="pTkbMon" class="form-control"></div>
+        <div class="col-md-12">
+            <label class="form-label fw-bold">Tên học phần</label>
+            <input type="text" id="pTkbMon" class="form-control" placeholder="VD: Giải tích hàm">
+            
+            <div class="mt-2 d-flex gap-2 flex-wrap">
+                <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Quá trình')">KT Quá trình</button>
+                <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Giữa học phần')">KT Giữa kỳ</button>
+                <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Kết thúc học phần')">KT Cuối kỳ</button>
+            </div>
+        </div>
         <div class="col-md-6"><label class="form-label fw-bold">Phòng học</label><input type="text" id="pTkbPhong" class="form-control"></div>
         <div class="col-md-4"><label class="form-label fw-bold">Thời gian (Giờ)</label><input type="text" id="pTkbThoiGian" class="form-control"></div>
         
@@ -1356,21 +1365,22 @@ function maskName(name) {
         }
 
 // Hàm phụ trợ: Lấy tên gốc của môn học (Bỏ các từ khóa phụ)// Hàm phụ trợ: Lấy tên gốc của môn học (Bỏ các từ khóa phụ)
+// Hàm phụ trợ: Lấy tên gốc của môn học (Bỏ các từ khóa phụ)
 function getBaseSubjectName(name) {
     if (!name) return "KHÁC";
     
     let base = name.toLowerCase()
         // 1. Cắt nhanh mọi nội dung nằm trong dấu ngoặc đơn
         .replace(/\(.*?\)/g, "") 
-        // 2. Gộp 8 cụm từ cần xóa thành 1 lần quét duy nhất để tăng tốc tối đa
+        // 2. Gộp 8 cụm từ cần xóa thành 1 lần quét
         .replace(/(tiểu luận kết thúc học phần|tiểu luận|kiểm tra quá trình|kiểm tra giữa học phần|kiểm tra kết thúc học phần|kiểm tra|học bù|tự học)/g, "")
-        // 3. Dọn dẹp dấu gạch ngang, dấu hai chấm và khoảng trắng thừa
-        .replace(/^[-:]\s*/, '')             
-        .replace(/\s*[-:]$/, '')             
+        // 3. Dọn dẹp dấu gạch ngang, khoảng trắng siêu sạch ở đầu và cuối
+        .replace(/^[\s-:]+/, '')             
+        .replace(/[\s-:]+$/, '')             
         .replace(/\s+/g, ' ')                
         .trim();
     
-    // 4. Xử lý đồng nhất lỗi chính tả vector / vecto siêu tốc (không dùng regex)
+    // 4. Xử lý đồng nhất lỗi chính tả vector / vecto
     if (base.endsWith("vecto")) {
         base = base.slice(0, -5) + "vector";
     }
@@ -1378,8 +1388,6 @@ function getBaseSubjectName(name) {
     return base.toUpperCase() || "KHÁC";
 }
 
-// HÀM MỚI: Tự động trích xuất ghi chú từ tên gốc để tạo nhãn (Badge)
-// Hàm tự động trích xuất ghi chú và tô màu chữ (không đóng khung)
 // Hàm tự động trích xuất ghi chú và tô màu chữ
 function getNoteFromSubject(c) {
     let monLower = (c.mon || "").toLowerCase();
@@ -1390,14 +1398,14 @@ function getNoteFromSubject(c) {
     let dateMatch = (c.mon || "").match(/\d{1,2}\/\d{1,2}/);
     let dateStr = dateMatch ? ` <br><small class="text-muted">(${dateMatch[0]})</small>` : '';
 
-    // KIỂM TRA TỰ HỌC TỪ PHÒNG HOẶC HÌNH THỨC (CƠ SỞ)
+    // KIỂM TRA TỰ HỌC
     if (phongLower.includes('tự học') || hinhThucLower.includes('tự học')) {
         return `<span class="fw-bold" style="color: #9333ea;">Tự học${dateStr}</span>`;
     }
 
-    // TÔ MÀU THEO TÊN MÔN HỌC CHO CÁC LOẠI CÒN LẠI
-    if (monLower.includes('kiểm tra kết thúc')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra Kết thúc học phần${dateStr}</span>`;
-    if (monLower.includes('kiểm tra giữa')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra Giữa học phần${dateStr}</span>`;
+    // TÔ MÀU THEO TÊN MÔN HỌC (Đã bỏ dấu '-' để hệ thống bắt chính xác 100%)
+    if (monLower.includes('kiểm tra kết thúc học phần')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra Kết thúc học phần${dateStr}</span>`;
+    if (monLower.includes('kiểm tra giữa học phần')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra Giữa học phần${dateStr}</span>`;
     if (monLower.includes('kiểm tra quá trình')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra Quá Trình${dateStr}</span>`;
     if (monLower.includes('kiểm tra')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra${dateStr}</span>`;
     if (monLower.includes('bù')) return `<span class="fw-bold" style="color: #d97706;">Học bù${dateStr}</span>`;
@@ -1637,7 +1645,7 @@ function openManageTkbListModal() {
         let hasWarnedOverlap = false;
 
        function savePersonalTkb() {
-            let targetRowIndex = $('#pTkbRowIndex').val();
+            let targetRowIndex = $('#pTkbRowIndex').val().trim();
             let isEditMode = targetRowIndex !== '';
             
             let thuVal = parseInt($('#pTkbThu').val());
@@ -1645,7 +1653,6 @@ function openManageTkbListModal() {
             let soTietVal = parseInt($('#pTkbSoTiet').val());
             let monVal = $('#pTkbMon').val().trim();
             
-            // Lấy khoảng ngày của môn học mới nhập vào
             let ngayBdRaw = $('#pTkbNgayBD').val().trim();
             let ngayKtRaw = $('#pTkbNgayKT').val().trim();
 
@@ -1654,73 +1661,107 @@ function openManageTkbListModal() {
                 return; 
             }
 
-            // --- TÍNH NĂNG CHẶN TRÙNG LỊCH THEO NGÀY THỰC TẾ ---
             let tietKtVal = tietBdVal + soTietVal - 1;
             let isOverlap = false;
             let overlapCourseName = "";
 
-            // Chuyển đổi ngày nhập vào thành đối tượng Date để so sánh
             let newStartDate = parseDateString(ngayBdRaw);
             let newEndDate = parseDateString(ngayKtRaw);
 
-            globalTkbData.forEach(course => {
-                // Nếu đang chỉnh sửa lịch cũ, bỏ qua việc kiểm tra trùng với chính nó
-                if (isEditMode && course.sheetRowIndex === parseInt(targetRowIndex)) return;
+           // Mới: Thêm điều kiện kiểm tra dữ liệu rỗng để tránh trùng lặp "bóng ma"
+// Tìm đến khối forEach này và thay thế bằng logic dưới đây:
+globalTkbData.forEach(course => {
+    // 1. CHỐT CHẶN: Bỏ qua chính bản ghi đang chỉnh sửa dựa trên Index
+    if (isEditMode && String(course.sheetRowIndex) === String(targetRowIndex)) return;
 
-                // 1. Kiểm tra trùng Thứ trước
-                if (course.thu === thuVal) {
-                    
-                    // 2. Kiểm tra giao thoa khoảng Tiết học
-                    let existingTietBd = course.tietBd;
-                    let existingTietKt = course.tietBd + course.soTiet - 1;
-                    let isTietOverlap = Math.max(tietBdVal, existingTietBd) <= Math.min(tietKtVal, existingTietKt);
+    // 2. Chỉ kiểm tra các môn có dữ liệu tên
+    if (!course.mon) return;
 
-                    if (isTietOverlap) {
-                        // 3. Kiểm tra giao thoa khoảng Ngày học (Chỉ xét khi cả 2 môn đều có cấu hình ngày)
-                        let isDateOverlap = true; // Mặc định nếu không nhập ngày thì coi như trùng (lịch vô thời hạn)
+    if (course.thu === thuVal) {
+        // Kiểm tra trùng tiết
+        let isTietOverlap = Math.max(tietBdVal, course.tietBd) <= Math.min(tietKtVal, course.tietBd + course.soTiet - 1);
 
-                        if (newStartDate && newEndDate && course.ngayBatDau && course.ngayKetThuc) {
-                            let existingStartDate = parseDateString(course.ngayBatDau);
-                            let existingEndDate = parseDateString(course.ngayKetThuc);
-
-                            if (existingStartDate && existingEndDate) {
-                                // Thuật toán giao thoa khoảng ngày: Max(Start1, Start2) <= Min(End1, End2)
-                                isDateOverlap = Math.max(newStartDate, existingStartDate) <= Math.min(newEndDate, existingEndDate);
-                            }
-                        }
-
-                        // Nếu thỏa mãn trùng Thứ, trùng Tiết VÀ trùng cả khoảng Ngày thực tế
-                        if (isDateOverlap) {
-                            isOverlap = true;
-                            overlapCourseName = course.mon;
-                        }
-                    }
-                }
-            });
-
-            // Nếu phát hiện có trùng lịch thực tế, chặn xử lý và hiện thông báo lỗi
-            if (isOverlap) {
-                let thuText = thuVal === 8 ? "Chủ nhật" : "Thứ " + thuVal;
-                
-                // Hiển thị banner lỗi màu đỏ ngay trong Modal
-                $('#tkbOverlapMessage').html(`<b>Không thể đăng ký!</b> Lịch trình bị trùng tiết và ngày học thực tế với môn <b>"${overlapCourseName}"</b> (${thuText}). Vui lòng chọn thời gian khác.`);
-                $('#tkbOverlapAlert').removeClass('d-none');
-                
-                // Bắn thanh Toast đỏ góc màn hình
-                alert(`Lỗi: Trùng lịch học thực tế với môn ${overlapCourseName}!`);
+        if (isTietOverlap) {
+            // 3. LOGIC NGOẠI LỆ: Cho phép "Kiểm tra" đè lên "Môn chính khóa"
+            let isChecking = monVal.toLowerCase().includes("kiểm tra");
+            let isExistingChecking = course.mon.toLowerCase().includes("kiểm tra");
+            
+            // Nếu một bên là lịch kiểm tra, một bên là lịch thường và cùng tên môn gốc -> Bỏ qua báo lỗi
+            if (isChecking !== isExistingChecking && getBaseSubjectName(monVal) === getBaseSubjectName(course.mon)) {
                 return; 
             }
-            // --------------------------------------------------
 
-            // Nếu không trùng lịch, tiến hành ẩn cảnh báo lỗi đi
-            $('#tkbOverlapAlert').addClass('d-none');
+            // Kiểm tra trùng ngày
+            let isDateOverlap = true;
+            if (newStartDate && newEndDate && course.ngayBatDau && course.ngayKetThuc) {
+                let existingStartDate = parseDateString(course.ngayBatDau);
+                let existingEndDate = parseDateString(course.ngayKetThuc);
+                
+                // Logic kiểm tra ngày có ngoại lệ
+                let currentExceptions = $('#pTkbNgoaiLe').val().split(',').map(d => d.trim());
+                let existingExceptions = (course.ngayNgaiLe || "").split(',').map(d => d.trim());
 
-            // Nối link vào cuối hình thức nếu có
-            let finalHinhThuc = $('#pTkbHinhThuc').val().trim();
-            let linkVal = $('#pTkbLink').val().trim();
-            if (linkVal) {
-                finalHinhThuc += " " + linkVal;
+                let d = new Date(Math.max(newStartDate, existingStartDate));
+                let end = new Date(Math.min(newEndDate, existingEndDate));
+                
+                let foundOverlap = false;
+                while (d <= end) {
+                    if (d.getDay() === (thuVal === 8 ? 0 : thuVal - 1)) {
+                        let dateStr = formatDateDDMMYYYY(d);
+                        if (!currentExceptions.includes(dateStr) && !existingExceptions.includes(dateStr)) {
+                            foundOverlap = true;
+                            break;
+                        }
+                    }
+                    d.setDate(d.getDate() + 1);
+                }
+                isDateOverlap = foundOverlap;
             }
+
+            if (isDateOverlap) {
+                isOverlap = true;
+                overlapCourseName = course.mon;
+            }
+        }
+    }
+});            // Nếu phát hiện có trùng lịch thực tế, chặn xử lý và hiện thông báo lỗi
+           // 1. Lấy số lần đã cảnh báo từ sessionStorage (mặc định là 0 nếu chưa có)
+let overlapCount = parseInt(sessionStorage.getItem('overlapCount') || '0');
+
+if (isOverlap) {
+    overlapCount++;
+    sessionStorage.setItem('overlapCount', overlapCount);
+
+    let thuText = thuVal === 8 ? "Chủ nhật" : "Thứ " + thuVal;
+    
+    // Nếu chưa đến lần thứ 3, hiển thị cảnh báo và CHẶN lưu (return)
+    if (overlapCount < 3) {
+        $('#tkbOverlapMessage').html(`<b>Cảnh báo (${overlapCount}/2):</b> Lịch bị trùng tiết với môn <b>"${overlapCourseName}"</b> (${thuText}). Bạn cần xác nhận thêm ${3 - overlapCount} lần nữa để bỏ qua.`);
+        $('#tkbOverlapAlert').removeClass('d-none');
+        alert(`Lỗi: Trùng lịch với môn ${overlapCourseName}! Bạn cần bấm lưu thêm ${3 - overlapCount} lần nữa nếu muốn bỏ qua cảnh báo.`);
+        return; 
+    } else {
+        // Đến lần thứ 3: Reset lại bộ đếm và cho phép tiếp tục chạy code phía dưới để lưu
+        sessionStorage.setItem('overlapCount', '0');
+        alert("Đã xác nhận bỏ qua cảnh báo trùng lịch. Đang tiến hành lưu...");
+    }
+} else {
+    // Nếu không trùng, reset bộ đếm về 0
+    sessionStorage.setItem('overlapCount', '0');
+}
+
+// --------------------------------------------------
+// Nếu không trùng (hoặc đã xác nhận ở lần 3), code sẽ chạy tiếp xuống đây:
+$('#tkbOverlapAlert').addClass('d-none');
+
+// Nối link vào cuối hình thức nếu có
+let finalHinhThuc = $('#pTkbHinhThuc').val().trim();
+let linkVal = $('#pTkbLink').val().trim();
+if (linkVal) {
+    finalHinhThuc += " " + linkVal;
+}
+
+// ... (phần code pData và postToGAS giữ nguyên như cũ của bạn)
 
             let pData = {
                 action: isEditMode ? "editTKBUser" : "addTKBUser", 
@@ -1821,8 +1862,19 @@ function openManageTkbListModal() {
                         else if (locU.includes("ONLINE") || locU.includes("HỌP")) autoColor = "#f3e8ff";
 
                         const finalLink = getAutoLink(displayHinhThuc, customLink);
-
-                        tableHtml += `
+let monDisplay = course.mon;
+                        let examTypes = ["Kiểm tra Quá trình", "Kiểm tra Giữa học phần", "Kiểm tra Kết thúc học phần"];
+                        
+                        for (let type of examTypes) {
+                            // Regex này bắt cả dấu gạch (-) và dấu hai chấm (:) kèm khoảng trắng dư
+                            let regex = new RegExp(`^(${type})\\s*[-:]?\\s*`, "i");
+                            if (regex.test(monDisplay)) {
+                                let subjectName = monDisplay.replace(regex, "").trim();
+                                // In đậm (b) không in nghiêng, có xuống dòng (<br>)
+                                monDisplay = `<b>${type}</b><br>${subjectName}`;
+                                break; 
+                            }
+                        }                        tableHtml += `
                        <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'}">
                             <div class="tkb-actions">
                                 <button class="btn-tkb-act text-warning" onclick="openEditTkbModal(${course.sheetRowIndex})" title="Sửa"><i class="fa-solid fa-pen"></i></button>
@@ -1830,10 +1882,11 @@ function openManageTkbListModal() {
                             </div>
                             <div class="subject">
                                 ${course.thoiGian ? `<div class="time">${course.thoiGian}</div>` : ''}
-                                <div style="font-weight:600;">
+                                                               <div style="font-weight:600;">
                                     <a href="${finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">${displayHinhThuc || "Truy cập"}</a>
                                 </div>
-                                <div>${course.mon}</div>
+                               <div>${monDisplay}</div>
+
                                 ${course.phong ? `<span class="room">Phòng: ${course.phong}</span><br>` : ''}
                                 ${course.gv ? `<span class="teacher">GV: ${course.gv}</span>` : ''}
                             </div>
@@ -2003,7 +2056,23 @@ function openManageTkbListModal() {
                 error: function() { $('#loadingStatus').html('<span class="text-danger fw-bold">Có lỗi xảy ra khi tải dữ liệu!</span>'); }
             });
         }
-
+// Hàm tự động thêm tiền tố kiểm tra vào ô nhập liệu tên môn học
+function addExamPrefix(prefix) {
+    let inputEle = $('#pTkbMon');
+    let currentVal = inputEle.val().trim();
+    
+    // Loại bỏ tiền tố cũ (nếu lỡ bấm nhầm nút khác trước đó để tránh bị lặp chữ)
+    currentVal = currentVal.replace(/^(Kiểm tra Quá trình|Kiểm tra Giữa học phần|Kiểm tra Kết thúc học phần)\s*[-:]?\s*/i, '');
+    
+    // Nối tiền tố mới vào (VD: Kiểm tra Giữa học phần - Toán ứng dụng)
+    if (currentVal === "") {
+        inputEle.val(prefix + " - ");
+    } else {
+        inputEle.val(`${prefix} - ${currentVal}`);
+    }
+    
+    inputEle.focus(); // Đưa con trỏ chuột vào ô để tiện gõ tiếp
+}
         function checkNewQA() { $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) { if (!data || data.length === 0) return; if (data.some(row => (row[3] || '').trim() === '')) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none'); }}); }
         function openQASection() { 
     resetNavActive(); 
