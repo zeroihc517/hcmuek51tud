@@ -699,14 +699,14 @@
                     <div class="alert alert-light border border-info mb-3 d-flex align-items-start gap-3">
                         <i class="fa-solid fa-circle-info text-info fs-4 mt-1"></i>
                         <p class="m-0 small text-muted">
-                            <strong class="text-dark">Hướng dẫn:</strong> Tích chọn vào ô vuông ở cột đầu tiên để đăng ký các học phần bạn đang theo học. Bảng dữ liệu này kết nối trực tiếp với Đào tạo.
+                            <strong class="text-dark">Hướng dẫn:</strong> Tích chọn vào ô vuông ở cột đầu tiên để đăng ký các học phần bạn đang theo học. Bạn không thể chỉnh sửa lịch học của những học phần này. Muốn xóa thì vào đây tích không chọn nữa
                         </p>
                     </div>
                     
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <div class="select-floating-box">
-                                <label>Lọc Năm học</label>
+                                <label>Năm học</label>
                                 <select class="form-select" id="sysNamHocFilter" onchange="renderSystemCoursesList()">
                                     <option value="">-- Tất cả năm học --</option>
                                 </select>
@@ -714,7 +714,7 @@
                         </div>
                         <div class="col-md-6">
                             <div class="select-floating-box">
-                                <label>Lọc Học kỳ</label>
+                                <label>Học kỳ</label>
                                 <select class="form-select" id="sysHocKyFilter" onchange="renderSystemCoursesList()">
                                     <option value="">-- Tất cả học kỳ --</option>
                                 </select>
@@ -1041,8 +1041,8 @@
                         <button class="btn btn-sm btn-outline-secondary font-weight-bold" onclick="openChangePasswordModal()"><i class="fa-solid fa-key text-warning"></i> Đổi mật khẩu</button>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-info text-white fw-bold" onclick="openSystemTkbModal()"><i class="fa-solid fa-cloud-arrow-down"></i> Tích hợp từ hệ thống</button>
-                        <button class="btn btn-sm btn-dark fw-bold" onclick="openManageTkbListModal()"><i class="fa-solid fa-list-check text-info"></i> Quản lý TKB</button>
+                        <button class="btn btn-sm btn-info text-white fw-bold" onclick="openSystemTkbModal()"><i class="fa-solid fa-cloud-arrow-down"></i> Đăng ký học phần</button>
+                        <button class="btn btn-sm btn-dark fw-bold" onclick="openManageTkbListModal()"><i class="fa-solid fa-list-check text-info"></i> Tổng hợp TKB</button>
                         <button class="btn btn-sm btn-success fw-bold" onclick="openAddTkbModal(false)"><i class="fa-solid fa-plus"></i> Thêm lịch mới</button>
                         <button class="btn btn-sm btn-outline-danger fw-bold" onclick="logoutStudent()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
                     </div>
