@@ -796,7 +796,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwNsStawDIQKnoVVRYCEnfuuiDg47uWf8KIujQtUvSGM2jN5EIqk8z56cFp7yRrT2hU/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbygNTWrDFSWQu2C12HMGeNX2kexmcRokj0n7IheEu_HwKqANDANpzutV-QrqoUPa5JL/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -1148,7 +1148,7 @@
                             let rawHinhThuc = c.hinhThuc || ""; let extLink = checkAndExtractUrl(rawHinhThuc);
                             let coSoDisplay = extLink ? rawHinhThuc.replace(extLink, '').trim() : rawHinhThuc.trim();
                             if (coSoDisplay.toLowerCase().includes("tự học") || coSoDisplay === "") { coSoDisplay = ""; }
-                            html += `<td class="text-center align-middle">${noteBadge}</td><td class="text-center align-middle">${thuText}</td><td class="text-center align-middle fw-bold">${coSoDisplay}</td><td class="text-center fw-bold text-danger align-middle">${c.thoiGian || '-'}</td><td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td><td class="text-center align-middle">${c.phong || '-'}</td><td class="align-middle">${c.gv || '-'}</td><td class="text-center align-middle"><button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditTkb(${c.sheetRowIndex})"><i class="fa-solid fa-pen"></i> Sửa</button><button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="promptDeletePersonalTkb(${c.sheetRowIndex})"><i class="fa-solid fa-trash"></i> Xóa</button></td>`;
+                           html += `<td class="text-center align-middle">${noteBadge}</td><td class="text-center align-middle">${thuText}</td><td class="text-center align-middle fw-bold">${coSoDisplay}</td><td class="text-center fw-bold text-danger align-middle">${c.thoiGian || '-'}</td><td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td><td class="text-center align-middle">${c.phong || '-'}</td><td class="align-middle">${c.gv || '-'}</td><td class="text-center align-middle"><button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button><button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="promptDeletePersonalTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button></td>`;
                         }
                         html += `</tr>`;
                     });
@@ -1163,21 +1163,30 @@
             let urlRegex = /(https?:\/\/[^\s]+)/g; let match = text.match(urlRegex); return match ? match[0] : null; 
         }
 
-        function processTKBData(data) {
-            globalTkbData = data.map((row) => {
-                let actualRowIndex = parseInt(row.pop()) || -1; 
-                // Cờ isSystem (Bạn có thể điều chỉnh theo index thực tế từ API nếu có, ví dụ row[11])
-                let isSystemFlag = (row.length > 11 && String(row[11]).toUpperCase() === "SYS") || false; 
-                return {
-                    thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
-                    thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: row[5] || "", phong: row[6] || "",     
-                    gv: row[7] || "", color: row[8] || "#e0f2fe", ngayBatDau: row[9] || "", ngayKetThuc: row[10] || "",
-                    ngayNgoaiLe: row[11] || "", sheetRowIndex: actualRowIndex, isSystem: isSystemFlag 
-                };
-            }).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
-            filterAndRenderTKB();
+function processTKBData(data) {
+    globalTkbData = data.map((row) => {
+        let lastElement = row.pop(); // Lấy phần tử cuối cùng ("SYS_..." hoặc số dòng)
+        let actualRowIndex = -1;
+        let isSystemFlag = false;
+
+        // Kiểm tra xem ID có phải là định dạng của môn hệ thống không
+        if (typeof lastElement === 'string' && lastElement.startsWith('SYS_')) {
+            isSystemFlag = true;
+            actualRowIndex = lastElement; // Giữ nguyên chuỗi "SYS_..." làm ID nhận diện
+        } else {
+            actualRowIndex = parseInt(lastElement) || -1;
         }
 
+        return {
+            thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
+            thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: row[5] || "", phong: row[6] || "",
+            gv: row[7] || "", color: row[8] || "#e0f2fe", ngayBatDau: row[9] || "", ngayKetThuc: row[10] || "",
+            ngayNgoaiLe: row[11] || "", sheetRowIndex: actualRowIndex, isSystem: isSystemFlag
+        };
+    }).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
+    
+    filterAndRenderTKB();
+}
         function openAddTkbModal(triggerAuthModal = false) {
             if (triggerAuthModal) { $('#userAuthModal').modal('show'); return; }
             $('#tkbModalTitle').html('<i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân');
@@ -1190,7 +1199,7 @@
         }
 
         function openEditTkbModal(sheetRowIndex) {
-            let course = globalTkbData.find(c => c.sheetRowIndex === sheetRowIndex); if (!course) return;
+            let course = globalTkbData.find(c => String(c.sheetRowIndex) === String(sheetRowIndex)); if (!course) return;
             $('#tkbModalTitle').html('<i class="fa-solid fa-calendar-check me-2"></i>Chỉnh Sửa Lịch Học');
             $('#pTkbRowIndex').val(sheetRowIndex); 
             $('#pTkbThu').val(course.thu); $('#pTkbTiet').val(course.tietBd); $('#pTkbSoTiet').val(course.soTiet);
@@ -1228,7 +1237,7 @@
         }
 
         function promptDeletePersonalTkb(sheetRowIndex) {
-            let course = globalTkbData.find(c => c.sheetRowIndex === sheetRowIndex);
+           let course = globalTkbData.find(c => String(c.sheetRowIndex) === String(sheetRowIndex));
             if (course && course.isSystem) { alert("Khóa bảo mật: Bạn không thể xóa học phần đã được đồng bộ từ hệ thống Đào tạo."); return; }
             pendingEventAction = { type: 'delete', rowIndex: sheetRowIndex };
             $('#eventScopeModal').modal('show');
@@ -1381,9 +1390,9 @@
                         tableHtml += `
                        <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'}">
                             <div class="tkb-actions">
-                                <button class="btn-tkb-act text-warning" onclick="openEditTkbModal(${course.sheetRowIndex})" title="Sửa"><i class="fa-solid fa-pen"></i></button>
-                                <button class="btn-tkb-act text-danger" onclick="promptDeletePersonalTkb(${course.sheetRowIndex})" title="Xóa"><i class="fa-solid fa-trash"></i></button>
-                            </div>
+    <button class="btn-tkb-act text-warning" onclick="openEditTkbModal('${course.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+    <button class="btn-tkb-act text-danger" onclick="promptDeletePersonalTkb('${course.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+</div>
                             <div class="subject">
                                 ${course.thoiGian ? `<div class="time">${course.thoiGian}</div>` : ''}
                                 <div style="font-weight:600;"><a href="${finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">${displayHinhThuc || "Truy cập"}</a></div>
