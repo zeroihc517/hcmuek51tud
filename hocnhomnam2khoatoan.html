@@ -1101,7 +1101,7 @@ function renderDeadlines() {
         }
 
         function openEditDeadlineModal(rowIndex) {
-            let dl = globalDeadlineData.find(d => d.sheetRowIndex === rowIndex); if(!dl) return;
+            let dl = globalDeadlineData.find(d => String(d.sheetRowIndex) === String(rowIndex)); if(!dl) return;
             $('#dlModalTitle').html('<i class="fa-solid fa-pen me-2"></i>Sửa Deadline');
             $('#pDlRowIndex').val(rowIndex); $('#pDlTitle').val(dl.title); $('#pDlTag').val(dl.tag);
             $('#pDlIcon').val(dl.icon); $('#pDlEmoji').val(dl.emoji); $('#pDlStartDate').val(dl.dateStart); $('#pDlEndDate').val(dl.dateEnd);
