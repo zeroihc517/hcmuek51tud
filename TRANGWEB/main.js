@@ -50,27 +50,72 @@ function pingOnlineStatus() {
 function loadWebLinks() { $.ajax({ url: SCRIPT_URL + "?action=getWebLinks", method: "GET", dataType: "json", success: function(data) { renderWebLinks(data); } }); }
 function renderWebLinks(data) { if (!data || data.length === 0) { $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào.</div>'); return; } let html = ''; data.forEach(row => { let title = row[0] || 'Liên kết'; let desc = row[1] || ''; let url = row[2] || '#'; let iconClass = row[3] || 'fa-solid fa-link'; html += `<div class="col-12 col-md-6"><a href="${url}" target="_blank" class="link-card"><div class="icon-box"><i class="${iconClass}"></i></div><div><h5>${title}</h5><p>${desc}</p></div></a></div>`; }); $('#webLinksContainer').html(html); }
 
-        function renderSidebarCategories() {
-            let optionsHtml = '';
-            globalCategories.forEach((name) => {
-                let lowerName = name.trim().toLowerCase();
-                if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin' || lowerName === 'chathistory') return;
-                if (lowerName === 'userregisteredcourses') return; 
+function renderSidebarCategories() {
+    let optionsHtml = '';
+    
+    // 1. Cấu hình phân nhóm danh mục (Bạn tự thêm tên Sheet thực tế vào mảng tương ứng)
+    const categoryGroups = {
+	'HK2 - Năm 2': ["Độ đo và tích phân", "Toán rời rạc", "Lập trình Python", "Phương trình vi phân và đạo hàm riêng", "Lịch sử Đảng", "Trí tuệ nhân tạo"],
+	'HK1 - Năm 2': ['Hình học vi phân', 'Cấu trúc đại số', 'Cấu trúc dữ liệu', 'Tư tưởng Hồ Chí Minh'], 
+	'HK2 - Năm 1': ["Lập trình nâng cao", "Giải tích hàm nhiều biến", "Không gian tuyến tính", "Hình học cao cấp hai chiều ba chiều", "Môn chung HK2-Năm1"],
+	'HK1 - Năm 1': ["Lập trình cơ bản", "Giải tích hàm một biến", "Đại số tuyến tính", "Môn chung HK1-Năm1"],
+        'Khác': []
+    };
 
-                if(lowerName !== 'thông báo') {
-                    if (lowerName === 'users' && !isAdmin) return;
-                    if (lowerName === 'cauhinhhocky' && !isAdmin) return; 
-                    if (lowerName === 'mastertkb' && !isAdmin) return; 
+    // Tạo object lưu trữ HTML tạm cho từng nhóm
+    let groupHtml = {};
+    for (const key in categoryGroups) { groupHtml[key] = ''; }
+    groupHtml['Khác'] = '';
 
-                    let icon = 'fa-folder-closed';
-                    if (lowerName === 'users') icon = 'fa-users-gear';
-                    if (lowerName === 'cauhinhhocky') icon = 'fa-calendar-check'; 
-                    if (lowerName === 'mastertkb') icon = 'fa-table-list'; 
-                    optionsHtml += `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)"><i class="fa-solid ${icon}"></i> ${name}</button>`;
+    globalCategories.forEach((name) => {
+        let lowerName = name.trim().toLowerCase();
+        
+        // Bỏ qua các sheet dữ liệu hệ thống ẩn
+        if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin' || lowerName === 'chathistory' || lowerName === 'userregisteredcourses') return; 
+
+        if (lowerName !== 'thông báo') {
+            if (lowerName === 'users' && !isAdmin) return;
+            if (lowerName === 'cauhinhhocky' && !isAdmin) return; 
+            if (lowerName === 'mastertkb' && !isAdmin) return; 
+
+            // Cấu hình icon
+            let icon = 'fa-folder-closed';
+            if (lowerName === 'users') icon = 'fa-users-gear';
+            if (lowerName === 'cauhinhhocky') icon = 'fa-calendar-check'; 
+            if (lowerName === 'mastertkb') icon = 'fa-table-list'; 
+            
+            let btnHtml = `<button class="btn-course nav-hocphan" onclick="loadDataByHocPhan('${name}', this)"><i class="fa-solid ${icon}"></i> ${name}</button>`;
+
+            // 2. Kiểm tra xem danh mục này thuộc nhóm nào
+            let matchedGroup = 'Khác';
+            for (const [groupName, subjects] of Object.entries(categoryGroups)) {
+                // So sánh chữ thường để đảm bảo không bị lỗi viết hoa/thường
+                if (subjects.some(sub => sub.toLowerCase() === lowerName)) {
+                    matchedGroup = groupName;
+                    break;
                 }
-            });
-            $('#dynamicCourseList').html(optionsHtml);
+            }
+            
+            // 3. Đưa HTML của nút vào nhóm tương ứng
+            groupHtml[matchedGroup] += btnHtml;
         }
+    });
+
+    // 4. Lắp ráp HTML cuối cùng để hiển thị ra giao diện
+for (const [groupName, html] of Object.entries(groupHtml)) {
+    if (html !== '') { // Chỉ in ra những nhóm có chứa danh mục bên trong
+        optionsHtml += `
+            <div class="mt-2 mb-1 ps-1 text-uppercase fw-bold" style="font-size: 14px; color: var(--primary-color); letter-spacing: 0.5px; opacity: 1;">
+                <i class="fa-solid fa-caret-right me-1" style="font-size: 11px;"></i> ${groupName}
+            </div>
+            <div class="course-list mb-2">${html}</div>
+        `;
+        }
+    }
+
+    // Đổ dữ liệu vào vùng chứa danh sách danh mục
+    $('#dynamicCourseList').html(optionsHtml);
+}
 
        
 
