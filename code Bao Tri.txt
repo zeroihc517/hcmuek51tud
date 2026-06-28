@@ -1,0 +1,17 @@
+<script>
+    (function() {
+        // 1. Cấu hình khoảng thời gian bảo trì (Định dạng: Năm, Tháng - 1, Ngày, Giờ, Phút)
+        // Lưu ý: Tháng trong JavaScript bắt đầu từ 0 (Tháng 1 là 0, Tháng 12 là 11)
+        const startMaintenance = new Date(2026, 5, 28, 0, 0);  // Ví dụ: Ngày 28 tháng 6 năm 2026
+        const endMaintenance   = new Date(2026, 7, 2, 23, 59); // Ví dụ: Ngày 02 tháng 8 năm 2026[cite: 1]
+
+        // 2. Đường dẫn đến trang thông báo bảo trì (Có thể là file local hoặc link web khác)
+        const maintenancePage = "Baotri.html"; 
+
+        // 3. Kiểm tra thời gian hiện tại
+        const now = new Date();
+        if (now >= startMaintenance && now <= endMaintenance) {
+            window.location.href = maintenancePage;
+        }
+    })();
+</script>
