@@ -57,8 +57,7 @@ function renderSidebarCategories() {
     const categoryGroups = {
 	'HK2 - Năm 2': ["Độ đo và tích phân", "Toán rời rạc", "Lập trình Python", "Phương trình vi phân và đạo hàm riêng", "Lịch sử Đảng", "Trí tuệ nhân tạo"],
 	'HK1 - Năm 2': ['Hình học vi phân', 'Cấu trúc đại số', 'Cấu trúc dữ liệu', 'Tư tưởng Hồ Chí Minh'], 
-	'HK2 - Năm 1': ["Lập trình nâng cao", "Giải tích hàm nhiều biến", "Không gian tuyến tính", "Hình học cao cấp hai chiều ba chiều", "Môn chung HK2-Năm1"],
-	'HK1 - Năm 1': ["Lập trình cơ bản", "Giải tích hàm một biến", "Đại số tuyến tính", "Môn chung HK1-Năm1"],
+	'Năm 1': ["Năm 1"],
         'Khác': []
     };
 
