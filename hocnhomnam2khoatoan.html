@@ -96,6 +96,11 @@
             border: 1px solid var(--border-color); transition: opacity 0.3s, transform 0.3s;
         }
         .chat-widget.minimized { transform: translateY(120%); opacity: 0; pointer-events: none; }
+.tkb-mgr-table thead th {
+    background-color: #0f4c81 !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
         .chat-header { background: var(--primary-color); color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .chat-body { flex: 1; padding: 16px; overflow-y: auto; background: #f9fafb; display: flex; flex-direction: column; gap: 12px; }
         .chat-msg { max-width: 80%; padding: 10px 14px; border-radius: 14px; font-size: 14.5px; line-height: 1.4; position: relative; word-break: break-word; }
@@ -256,18 +261,54 @@
         .footer-info-left { display: flex; align-items: center; gap: 12px; }
         .footer-info-right { display: flex; align-items: center; gap: 15px; }
 
-       @media (max-width: 991.98px) {
-            .mobile-header { display: flex; align-items: center; justify-content: flex-start; gap: 16px; }
-            .sidebar { transform: translateX(-100%); bottom: 0; }
-            .sidebar.show { transform: translateX(0); }
-            .sidebar-overlay.show { display: block; opacity: 1; }
-            .main-content { margin-left: 0; padding: 100px 16px 80px 16px; }
-            .top-header { padding: 20px; }
-            .page-title { font-size: 20px; }
-            .custom-portal-table th, .custom-portal-table td { padding: 16px; font-size: 15px; }
-            .fixed-bottom-footer { flex-direction: column; gap: 6px; padding: 10px; font-size: 12px; height: auto; text-align: center; }
-            .sidebar { bottom: 65px; } 
-        }
+      @media (max-width: 991.98px) {
+    .table-box {
+        -webkit-overflow-scrolling: touch; 
+        scroll-snap-type: x proximity;
+    }
+    .sched th, .sched td {
+        scroll-snap-align: start;
+    }
+    
+    /* Cố định chiều cao và dàn dọc thanh điều hướng tuần */
+    .nav-week-container {
+        height: auto !important;
+        padding: 12px !important;
+    }
+    .nav-week-container .row {
+        flex-direction: column;
+        gap: 10px !important;
+    }
+    .nav-week-container .col-md-2 {
+        justify-content: space-between !important;
+        width: 100%;
+        margin-top: 5px;
+    }
+    
+    /* Chuyển action buttons thành relative để không làm giật form khi chạm */
+    .td-subject .tkb-actions {
+        display: flex !important;
+        position: relative;
+        top: auto; right: auto;
+        justify-content: flex-end;
+        margin-bottom: 6px;
+        background: transparent;
+    }
+    .td-subject {
+        vertical-align: top;
+        padding-top: 10px !important;
+    }
+}
+.system-tkb-table th {
+    background-color: #0f4c81 !important; /* Đồng màu với bảng TKB bên ngoài */
+    color: #ffffff !important;
+    border-right: 1px solid rgba(255,255,255,.15);
+    font-weight: 600;
+}
+.system-tkb-table td {
+    vertical-align: middle;
+}
+
 
         .auth-modal-content { border-radius: 20px; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.15); }
         .auth-header { background: linear-gradient(135deg, var(--primary-color), #2071b3); color: white; padding: 35px 20px 25px; text-align: center; }
@@ -593,26 +634,43 @@
         </div>
     </div>
     
-    <div class="modal fade" id="manageTkbListModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="manageTkbListModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl">
             <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-dark text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học - Sửa nhanh</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body p-4"><div class="table-responsive">
-                    <table class="table table-bordered align-middle tkb-mgr-table m-0 bg-white">
-                        <thead class="table-primary text-center">
-                            <tr><th style="width: 12%;">Môn học</th><th style="width: 10%;">Ghi chú</th><th>Thứ</th><th style="width: 10%;">Cơ sở</th><th style="width: 11%;">Thời gian</th><th style="width: 14%;">Ngày học</th><th style="width: 12%;">Phòng</th><th>Giảng viên</th><th>Thao tác</th></tr>
-                        </thead>
-                        <tbody id="tkbManagerListBody"></tbody>
-                    </table></div>
+                <div class="modal-header text-white" style="background-color: #0f4c81;">
+                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học - Sửa nhanh</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle tkb-mgr-table m-0 bg-white">
+                            <thead class="text-center text-white">
+    <tr>
+        <th style="width: 12%;">Môn học</th>
+        <th style="width: 10%;">Ghi chú</th>
+        <th>Thứ</th>
+        <th style="width: 10%;">Cơ sở</th>
+        <th style="width: 11%;">Thời gian</th>
+        <th style="width: 14%;">Ngày học</th>
+        <th style="width: 12%;">Phòng</th>
+        <th>Giảng viên</th>
+        <th>Thao tác</th>
+    </tr>
+</thead>
+                            <tbody id="tkbManagerListBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    
     <div class="modal fade" id="tkbPersonalModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-success text-white" id="tkbModalHeader"><h6 class="modal-title m-0 fw-bold" id="tkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+                <div class="modal-header text-white" id="tkbModalHeader" style="background-color: #0f4c81;">
+                    <h6 class="modal-title m-0 fw-bold" id="tkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
                 <div class="modal-body p-4">
                     <input type="hidden" id="pTkbRowIndex" value="">
                     <div class="row g-3">
@@ -647,7 +705,7 @@
                 </div>
                 <div class="modal-footer border-0">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-success px-4 fw-bold" onclick="promptSavePersonalTkb()" id="btnSavePersonalTkb">Lưu thông tin</button>
+                    <button type="button" class="btn text-white px-4 fw-bold" style="background-color: #0f4c81;" onclick="promptSavePersonalTkb()" id="btnSavePersonalTkb">Lưu thông tin</button>
                 </div>
             </div>
         </div>
@@ -688,70 +746,76 @@
     <div class="modal fade" id="editRowModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa nội dung</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="editCol1" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="editCol2" class="form-control" rows="3"></textarea></div><div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="editCol3" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="editCol4" class="form-control"></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditRow()" id="btnSaveEditRow">Lưu thay đổi</button></div></div></div></div>
     <div class="modal fade" id="editQAModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa câu trả lời Q&A</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Nội dung câu trả lời</label><textarea id="editQAText" class="form-control" rows="6"></textarea></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditQA()" id="btnSaveEditQA">Lưu thay đổi</button></div></div></div></div>
 
-    <div class="modal fade" id="systemTkbModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl"> 
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-info text-white">
-                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-cloud-arrow-down me-2"></i>Đăng ký Học phần từ Hệ thống</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+   <div class="modal fade" id="systemTkbModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl"> 
+        <div class="modal-content border-0 shadow">
+            
+            <!-- Đổi màu Header trùng với TKB (màu xanh #0f4c81) -->
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-cloud-arrow-down me-2"></i>Đăng ký Học phần từ Hệ thống</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body p-4">
+                <div class="alert alert-light border mb-3 d-flex align-items-start gap-3" style="border-color: #0f4c81 !important;">
+                    <i class="fa-solid fa-circle-info fs-4 mt-1" style="color: #0f4c81;"></i>
+                    <p class="m-0 small text-muted">
+                        <strong class="text-dark">Hướng dẫn:</strong> Tích chọn vào ô vuông ở cột đầu tiên để đăng ký các học phần bạn đang theo học. Bạn không thể chỉnh sửa lịch học của những học phần này. Muốn xóa thì vào đây tích không chọn nữa.
+                    </p>
                 </div>
-                <div class="modal-body p-4">
-                    <div class="alert alert-light border border-info mb-3 d-flex align-items-start gap-3">
-                        <i class="fa-solid fa-circle-info text-info fs-4 mt-1"></i>
-                        <p class="m-0 small text-muted">
-                            <strong class="text-dark">Hướng dẫn:</strong> Tích chọn vào ô vuông ở cột đầu tiên để đăng ký các học phần bạn đang theo học. Bạn không thể chỉnh sửa lịch học của những học phần này. Muốn xóa thì vào đây tích không chọn nữa
-                        </p>
-                    </div>
-                    
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <div class="select-floating-box">
-                                <label>Năm học</label>
-                                <select class="form-select" id="sysNamHocFilter" onchange="renderSystemCoursesList()">
-                                    <option value="">-- Tất cả năm học --</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="select-floating-box">
-                                <label>Học kỳ</label>
-                                <select class="form-select" id="sysHocKyFilter" onchange="renderSystemCoursesList()">
-                                    <option value="">-- Tất cả học kỳ --</option>
-                                </select>
-                            </div>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="select-floating-box">
+                            <label>Năm học</label>
+                            <select class="form-select" id="sysNamHocFilter" onchange="renderSystemCoursesList()">
+                                <option value="">-- Tất cả năm học --</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="table-responsive border rounded" style="max-height: 450px; overflow-y: auto;">
-                        <table class="table table-hover table-bordered align-middle m-0 bg-white" style="font-size: 14px;">
-                            <thead class="table-light text-center" style="position: sticky; top: 0; z-index: 10;">
-                                <tr>
-                                    <th style="width: 50px;">Chọn</th>
-                                    <th>Mã HP</th>
-                                    <th style="width: 22%;">Tên Học Phần</th>
-                                    <th>Cơ sở</th>
-                                    <th>Phòng</th>
-                                    <th>Thứ & Tiết</th>
-                                    <th>Giảng Viên</th>
-                                    <th>Ngày học</th>
-                                </tr>
-                            </thead>
-                            <tbody id="systemCoursesContainer">
-                                <tr>
-                                    <td colspan="8" class="text-center py-5 text-muted">
-                                        <i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải dữ liệu hệ thống...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="col-md-6">
+                        <div class="select-floating-box">
+                            <label>Học kỳ</label>
+                            <select class="form-select" id="sysHocKyFilter" onchange="renderSystemCoursesList()">
+                                <option value="">-- Tất cả học kỳ --</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer border-0 bg-light">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-info text-white px-4 fw-bold" onclick="saveSystemTkbSelection()" id="btnSaveSystemTkb">Đồng bộ lịch học</button>
+                
+                <div class="table-responsive border rounded" style="max-height: 450px; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+                    <table class="table table-hover table-bordered align-middle m-0 bg-white system-tkb-table" style="font-size: 14px;">
+                        <thead class="text-center" style="position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th style="width: 50px;">Chọn</th>
+                                <th>Mã HP</th>
+                                <th style="width: 22%;">Tên Học Phần</th>
+                                <th>Cơ sở</th>
+                                <th>Phòng</th>
+                                <th>Thứ & Tiết</th>
+                                <th>Giảng Viên</th>
+                                <th>Ngày học</th>
+                            </tr>
+                        </thead>
+                        <tbody id="systemCoursesContainer">
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải dữ liệu hệ thống...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+            
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <!-- Đổi màu nút bấm -->
+                <button type="button" class="btn text-white px-4 fw-bold" style="background-color: #0f4c81;" onclick="saveSystemTkbSelection()" id="btnSaveSystemTkb">Đồng bộ lịch học</button>
             </div>
         </div>
     </div>
+</div>
 
     <div class="modal fade" id="eventScopeModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
         <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -796,7 +860,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbygNTWrDFSWQu2C12HMGeNX2kexmcRokj0n7IheEu_HwKqANDANpzutV-QrqoUPa5JL/exec'; 
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFrdlU4Y-v7gdqmwrUK550KU-Dnn4_wArqSNxyxsZ5AGFvmWeC4id_YP8_Lfpo25Am/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -955,53 +1019,81 @@
         }
 
         function loadDeadlines() {
-            $('#deadlineBox').removeClass('d-none');
-            $('#deadline-container').html('<div class="w-100 text-center text-muted" style="grid-column: 1/-1"><i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải dữ liệu Deadline...</div>');
+    $('#deadlineBox').removeClass('d-none');
+    $('#deadline-container').html('<div class="w-100 text-center text-muted" style="grid-column: 1/-1"><i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải dữ liệu Deadline...</div>');
 
-            $.ajax({
-                url: SCRIPT_URL + "?action=getDeadlinesUser&mssv=" + currentUser.mssv,
-                method: "GET", dataType: "json",
-                success: function(data) {
-                    globalDeadlineData = data.map(r => ({
-                        title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5],
-                        dateStart: r[6] || "", dateEnd: r[7] || "", sheetRowIndex: parseInt(r[8])
-                    }));
-                    renderDeadlines();
+    $.ajax({
+        url: SCRIPT_URL + "?action=getDeadlinesUser&mssv=" + currentUser.mssv,
+        method: "GET", dataType: "json",
+        success: function(data) {
+            globalDeadlineData = data.map(r => {
+                let rIndex = r[8];
+                let actualRowIndex = -1;
+                let isSystemFlag = false;
+
+                if (typeof rIndex === 'string' && rIndex.startsWith('SYS_')) {
+                    isSystemFlag = true;
+                    actualRowIndex = rIndex; 
+                } else {
+                    actualRowIndex = parseInt(rIndex) || -1;
                 }
+
+                return {
+                    title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5],
+                    dateStart: r[6] || "", dateEnd: r[7] || "", 
+                    sheetRowIndex: actualRowIndex, isSystem: isSystemFlag
+                };
             });
+            // Phải gọi render sau khi nạp data xong
+            renderDeadlines(); 
+        },
+        error: function() {
+            $('#deadline-container').html('<div class="w-100 text-center text-danger" style="grid-column: 1/-1">Lỗi khi tải Deadline!</div>');
         }
+    });
+}
 
-        function renderDeadlines() {
-            const container = document.getElementById('deadline-container');
-            if (!container) return;
-            
-            let weekStart = new Date(currentSelectedMonday); weekStart.setHours(0,0,0,0);
-            let weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
+function renderDeadlines() {
+    const container = document.getElementById('deadline-container');
+    if (!container) return;
+    
+    let weekStart = new Date(currentSelectedMonday); weekStart.setHours(0,0,0,0);
+    let weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
 
-            let filtered = globalDeadlineData.filter(d => {
-                let sDate = parseDateString(d.dateStart); let eDate = parseDateString(d.dateEnd);
-                if(!sDate || !eDate) return false;
-                return sDate <= weekEnd && eDate >= weekStart;
-            });
+    let filtered = globalDeadlineData.filter(d => {
+        let sDate = parseDateString(d.dateStart); 
+        let eDate = parseDateString(d.dateEnd);
+        // Nếu không có ngày bắt đầu/kết thúc (VLE hệ thống đôi khi trống), mặc định cho hiển thị hoặc lọc theo logic của bạn. 
+        // Ở đây tạm cho hiện nếu ko có ngày cụ thể, còn có ngày thì phải lọt thỏm trong tuần
+        if(!sDate || !eDate) return true; 
+        return sDate <= weekEnd && eDate >= weekStart;
+    });
 
-            if(filtered.length === 0) {
-                container.innerHTML = "<div style='grid-column: 1 / -1; text-align:center; padding: 20px 0; color:#6b7280; font-weight:500;'><i class='fa-solid fa-mug-hot me-2'></i>Tuần này không có Deadline. Bạn có thể thư giãn!</div>"; return;
-            }
+    if(filtered.length === 0) {
+        container.innerHTML = "<div style='grid-column: 1 / -1; text-align:center; padding: 20px 0; color:#6b7280; font-weight:500;'><i class='fa-solid fa-mug-hot me-2'></i>Tuần này không có Deadline. Bạn có thể thư giãn!</div>"; 
+        return;
+    }
 
-            container.innerHTML = filtered.map(item => `
-                <div class="online-card">
-                    <div class="deadline-actions">
-                        <button class="btn-dl-act text-warning shadow-sm" onclick="openEditDeadlineModal(${item.sheetRowIndex})" title="Sửa"><i class="fa-solid fa-pen"></i></button>
-                        <button class="btn-dl-act text-danger shadow-sm" onclick="deletePersonalDeadline(${item.sheetRowIndex})" title="Xóa"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                    <div class="icon-circle ${item.icon}">${item.emoji || '📌'}</div>
-                    <h3 class="text-danger mb-2" style="font-size: 15px; font-weight: 800;">${item.duration}</h3>
-                    <p class="desc text-dark mb-3" style="font-size: 16px; font-weight: 600;">${item.title}</p>
-                    <span class="tag">${item.tag}</span>
-                </div>
-            `).join('');
-        }
-
+    container.innerHTML = filtered.map(item => {
+        // Nút bấm: Ẩn nút sửa/xóa nếu là bài VLE kéo từ hệ thống
+        let actionButtons = item.isSystem ? '' : `
+            <div class="deadline-actions">
+                <button class="btn-dl-act text-warning shadow-sm" onclick="openEditDeadlineModal('${item.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn-dl-act text-danger shadow-sm" onclick="deletePersonalDeadline('${item.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        `;
+        
+        return `
+            <div class="online-card">
+                ${actionButtons}
+                <div class="icon-circle ${item.icon}">${item.emoji || '📌'}</div>
+                <h3 class="text-danger mb-2" style="font-size: 15px; font-weight: 800;">${item.duration}</h3>
+                <p class="desc text-dark mb-3" style="font-size: 16px; font-weight: 600;">${item.title}</p>
+                <span class="tag">${item.tag}</span>
+            </div>
+        `;
+    }).join('');
+}
         function openAddDeadlineModal() {
             $('#dlModalTitle').html('<i class="fa-solid fa-plus me-2"></i>Thêm Deadline');
             $('#pDlRowIndex').val(''); $('#pDlTitle, #pDlTag, #pDlEmoji, #pDlStartDate, #pDlEndDate').val(''); $('#pDlIcon').val('fire');
@@ -1032,7 +1124,7 @@
             }, function() { alert("Lỗi khi kết nối yêu cầu xóa bỏ deadline!"); });
         }
 
-       function renderTkbToolBar() {
+      function renderTkbToolBar() {
             $('.tkb-personal-toolbar').remove(); 
             let toolbarHtml = `
                 <div class="tkb-personal-toolbar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 p-3 bg-white rounded border shadow-sm">
@@ -1041,9 +1133,9 @@
                         <button class="btn btn-sm btn-outline-secondary font-weight-bold" onclick="openChangePasswordModal()"><i class="fa-solid fa-key text-warning"></i> Đổi mật khẩu</button>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-sm btn-info text-white fw-bold" onclick="openSystemTkbModal()"><i class="fa-solid fa-cloud-arrow-down"></i> Đăng ký học phần</button>
-                        <button class="btn btn-sm btn-dark fw-bold" onclick="openManageTkbListModal()"><i class="fa-solid fa-list-check text-info"></i> Tổng hợp TKB</button>
-                        <button class="btn btn-sm btn-success fw-bold" onclick="openAddTkbModal(false)"><i class="fa-solid fa-plus"></i> Thêm lịch mới</button>
+                        <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openSystemTkbModal()"><i class="fa-solid fa-cloud-arrow-down"></i> Đăng ký học phần</button>
+                        <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openManageTkbListModal()"><i class="fa-solid fa-list-check text-info"></i> Tổng hợp TKB</button>
+                        <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openAddTkbModal(false)"><i class="fa-solid fa-plus"></i> Thêm lịch mới</button>
                         <button class="btn btn-sm btn-outline-danger fw-bold" onclick="logoutStudent()"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
                     </div>
                 </div>`;
