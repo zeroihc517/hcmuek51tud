@@ -270,7 +270,7 @@
 <script src="scriptindex.js"></script>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxVF74VRM5_AFIVKAyAIXtlepjgfcmNt96T5udZUyHOUwLSuzyfuEAISNiZdTc_-3lM/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFrdlU4Y-v7gdqmwrUK550KU-Dnn4_wArqSNxyxsZ5AGFvmWeC4id_YP8_Lfpo25Am/exec';
     const ADMIN_MSSV = "51.01.108.008"; 
 
     let globalTkbData = [];
@@ -507,28 +507,41 @@
     }
 
     function processTKBData(data) {
-        globalTkbData = data.map((row) => {
-            let actualRowIndex = parseInt(row.pop()) || -1; 
-            return {
-                thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
-                thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: row[5] || "", phong: row[6] || "",     
-                gv: row[7] || "", color: row[8] || "#e0f2fe", ngayBatDau: row[9] || "", ngayKetThuc: row[10] || "",
-                ngayNgoaiLe: row[11] || "", sheetRowIndex: actualRowIndex 
-            };
-        }).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
-        filterAndRenderTKB();
-    }
+    globalTkbData = data.map((row) => {
+        let lastElement = row.pop(); // Lấy phần tử cuối cùng (Mã dòng hoặc mã môn hệ thống)
+        let actualRowIndex = -1;
+        let isSystemFlag = false;
 
-    function getAutoLink(locationName) {
-        if (!locationName) return "#";
-        const loc = locationName.toUpperCase();
-        if (loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV")) return "https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5";
-        if (loc.includes("LÊ VĂN SỸ") || loc.includes("LVS")) return "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5";
-        if (loc.includes("LẠC LONG QUÂN") || loc.includes("LLQ")) return "https://maps.app.goo.gl/oV1mXHYDuW44cGbN6";
-        if (loc.includes("LÊ THỊ RIÊNG") || loc.includes("CVLTR")) return "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA";
-        if (loc.includes("ONLINE") || loc.includes("HỌP")) return "#";
-        return "#";
-    }
+        // Kiểm tra nhận diện học phần được đồng bộ từ hệ thống
+        if (typeof lastElement === 'string' && lastElement.startsWith('SYS_')) {
+            isSystemFlag = true;
+            actualRowIndex = lastElement; 
+        } else {
+            actualRowIndex = parseInt(lastElement) || -1;
+        }
+
+        return {
+            thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
+            thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: row[5] || "", phong: row[6] || "",     
+            gv: row[7] || "", color: row[8] || "#e0f2fe", ngayBatDau: row[9] || "", ngayKetThuc: row[10] || "",
+            ngayNgoaiLe: row[11] || "", sheetRowIndex: actualRowIndex, isSystem: isSystemFlag 
+        };
+    }).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
+    
+    filterAndRenderTKB();
+}
+
+    function getAutoLink(locationName, customLink) {
+    if (customLink && customLink.trim() !== "") return customLink;
+    if (!locationName) return "#";
+    const loc = locationName.toUpperCase();
+    if (loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV")) return "https://maps.app.goo.gl/Q8dRKtTZcqGeuEmy5";
+    if (loc.includes("LÊ VĂN SỸ") || loc.includes("LVS")) return "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5";
+    if (loc.includes("LẠC LONG QUÂN") || loc.includes("LLQ")) return "https://maps.app.goo.gl/oV1mXHYDuW44cGbN6";
+    if (loc.includes("LÊ THỊ RIÊNG") || loc.includes("CVLTR")) return "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA";
+    if (loc.includes("PHÂN HIỆU LONG AN") || loc.includes("PHLA")) return "https://maps.app.goo.gl/KNwjk6CUQZM44CZ16";
+    return "#";
+}
 
     function filterAndRenderTKB() {
         let isBreakWeek = $('#apiWeek').find(':selected').data('is-break') === true;
@@ -568,7 +581,6 @@
     const occupied = Array.from({ length: totalRows + 1 }, () => Array(9).fill(false));
     let tableHtml = "";
     
-    // TỐI ƯU: Tạo một bản đồ (Map) chỉ mục theo "thu-tietBd" để truy xuất O(1) thay vì lặp .find() liên tục
     const courseMap = {};
     courses.forEach(c => {
         courseMap[`${c.thu}-${c.tietBd}`] = c;
@@ -585,7 +597,6 @@
         for (let thu = 2; thu <= 8; thu++) {
             if (occupied[i][thu]) continue; 
             
-            // Lấy dữ liệu nhanh từ map chỉ mục
             const course = courseMap[`${thu}-${i}`];
             
             if (course) {
@@ -594,7 +605,6 @@
                     if (i + r <= totalRows) occupied[i + r][thu] = true; 
                 }
                 
-                // KHẮC PHỤC: Tách đường link ẩn trong chuỗi hình thức học bằng RegEx
                 let rawHinhThuc = course.hinhThuc || "";
                 let customLink = checkAndExtractUrl(rawHinhThuc);
                 let displayHinhThuc = rawHinhThuc;
@@ -610,8 +620,21 @@
                 else if (locU.includes("LẠC LONG QUÂN") || locU.includes("LLQ")) autoColor = "#fff3e0";
                 else if (locU.includes("LÊ THỊ RIÊNG") || locU.includes("CVLTR")) autoColor = "#fef9c3";
                 else if (locU.includes("ONLINE") || locU.includes("HỌP")) autoColor = "#f3e8ff";
+                else if (locU.includes("PHÂN HIỆU LONG AN") || locU.includes("PHLA")) autoColor = "#fff5fb";
 
-                const finalLink = getAutoLink(displayHinhThuc);
+                const finalLink = getAutoLink(displayHinhThuc, customLink);
+                
+                // Chuẩn hóa định dạng hiển thị các môn kiểm tra/thi cử
+                let monDisplay = course.mon;
+                let examTypes = ["Kiểm tra Quá trình", "Kiểm tra Giữa học phần", "Kiểm tra Kết thúc học phần"];
+                for (let type of examTypes) {
+                    let regex = new RegExp(`^(${type})\\s*[-:]?\\s*`, "i");
+                    if (regex.test(monDisplay)) {
+                        let subjectName = monDisplay.replace(regex, "").trim();
+                        monDisplay = `<b>${type}</b><br>${subjectName}`; 
+                        break; 
+                    }
+                }
 
                 tableHtml += `
                 <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'}">
@@ -622,7 +645,7 @@
                                 ${displayHinhThuc || "Xem liên kết"}
                             </a>
                         </div>
-                        <div>${course.mon}</div>
+                        <div>${monDisplay}</div>
                         ${course.phong ? `<span class="room">Phòng: ${course.phong}</span><br>` : ''}
                         ${course.gv ? `<span class="teacher">GV: ${course.gv}</span>` : ''}
                     </div>
