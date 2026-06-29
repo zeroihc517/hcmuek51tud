@@ -16,7 +16,7 @@
             if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
         }
 function pingOnlineStatus() {
-            let savedUser = sessionStorage.getItem('currentUser');
+            let savedUser = localStorage.getItem('currentUser');
             let mssvParam = "Khách"; 
             if (savedUser) {
                 try {

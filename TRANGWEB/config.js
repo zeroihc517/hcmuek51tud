@@ -8,7 +8,7 @@
         let globalTkbData = [];
         let globalDeadlineData = []; 
         
-        let currentUser = JSON.parse(sessionStorage.getItem('currentUser')) || null;
+       let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
         let pendingEventAction = {}; // Lưu trữ hành động cho Lịch (Edit/Delete Scope)
 
         function generateUUID() {
@@ -17,8 +17,8 @@
                 return v.toString(16);
             });
         }
-        let sessionUUID = sessionStorage.getItem('user_uuid');
-        if (!sessionUUID) { sessionUUID = generateUUID(); sessionStorage.setItem('user_uuid', sessionUUID); }
+        let sessionUUID = localStorage.getItem('user_uuid');
+        if (!sessionUUID) { sessionUUID = generateUUID(); localStorage.setItem('user_uuid', sessionUUID); }
 
         function maskName(name) {
             if (!name || name.toLowerCase() === "khách") return name;

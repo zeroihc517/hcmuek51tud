@@ -7,7 +7,7 @@
                 let response = typeof res === 'string' ? JSON.parse(res) : res;
                 if (response.success) {
                     currentUser = { mssv: response.mssv, name: response.name };
-                    sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     
                     let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
                     savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
@@ -32,7 +32,7 @@
 
         function logoutStudent() {
             if(confirm("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?")) {
-                sessionStorage.removeItem('currentUser'); 
+                localStorage.removeItem('currentUser');
                 currentUser = null; 
                 location.reload(); 
             }
