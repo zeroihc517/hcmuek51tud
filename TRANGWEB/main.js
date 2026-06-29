@@ -47,9 +47,66 @@ function pingOnlineStatus() {
                 } 
             });
         }
-function loadWebLinks() { $.ajax({ url: SCRIPT_URL + "?action=getWebLinks", method: "GET", dataType: "json", success: function(data) { renderWebLinks(data); } }); }
-function renderWebLinks(data) { if (!data || data.length === 0) { $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào.</div>'); return; } let html = ''; data.forEach(row => { let title = row[0] || 'Liên kết'; let desc = row[1] || ''; let url = row[2] || '#'; let iconClass = row[3] || 'fa-solid fa-link'; html += `<div class="col-12 col-md-6"><a href="${url}" target="_blank" class="link-card"><div class="icon-box"><i class="${iconClass}"></i></div><div><h5>${title}</h5><p>${desc}</p></div></a></div>`; }); $('#webLinksContainer').html(html); }
+function loadWebLinks() { 
+    // 1. Hiển thị hiệu ứng "Đang tải dữ liệu..." thật xịn xò trước khi gọi dữ liệu
+    $('#webLinksContainer').html(`
+        <div class="col-12">
+            <div class="pulse-loader py-5">
+                <div class="spinner-modern"></div>
+                <span class="text-muted fw-bold" style="font-size: 15px;">Đang tải danh sách liên kết...</span>
+            </div>
+        </div>
+    `);
 
+    // 2. Tiến hành lấy dữ liệu từ máy chủ
+    $.ajax({ 
+        url: SCRIPT_URL + "?action=getWebLinks", 
+        method: "GET", 
+        dataType: "json", 
+        success: function(data) { 
+            renderWebLinks(data); // Hàm này sẽ ghi đè cái Loading ở trên khi có dữ liệu
+        },
+        error: function() {
+            // Hiển thị thông báo lỗi nếu rớt mạng
+            $('#webLinksContainer').html(`
+                <div class="col-12 text-center text-danger py-5">
+                    <i class="fa-solid fa-triangle-exclamation fs-2 mb-3"></i><br>
+                    <span class="fw-bold">Lỗi khi tải dữ liệu! Vui lòng thử lại sau.</span>
+                </div>
+            `);
+        }
+    }); 
+}function renderWebLinks(data) { 
+    if (!data || data.length === 0) { 
+        $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào.</div>'); 
+        return; 
+    } 
+    let html = ''; 
+    data.forEach(row => { 
+        let title = row[0] || 'Liên kết'; 
+        let desc = row[1] || ''; 
+        let url = row[2] || '#'; 
+        let iconClass = row[3] || 'fa-solid fa-link'; 
+        
+        let badgeHtml = '';
+
+
+        // Tự động kiểm tra: Nếu có ghi chú thì tạo thẻ p, không có thì để trống
+        let descHtml = desc ? `<p class="card-desc">${desc}</p>` : '';
+
+        html += `
+        <div class="col-6 col-md-3 col-lg-3 mb-3"> 
+            <a href="${url}" target="_blank" class="link-card-modern">
+                ${badgeHtml}
+                <div class="icon-box"><i class="${iconClass}"></i></div>
+                <div class="card-text-wrapper">
+                    <h5>${title}</h5>
+                    ${descHtml} </div>
+            </a>
+        </div>`; 
+    }); 
+    $('#webLinksContainer').html(html); 
+}
 function renderSidebarCategories() {
     let optionsHtml = '';
     
@@ -175,3 +232,5 @@ function initGlobalApp() {
                 authModal.show();
             } else { initGlobalApp(); }
         });
+
+

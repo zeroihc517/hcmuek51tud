@@ -100,7 +100,34 @@
         .chat-footer .form-control { border-radius: 20px; font-size: 14.5px; }
         .btn-chat-send { background: var(--primary-color); color: white; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border: none; }
         .btn-chat-send:hover { background: var(--primary-hover); color: white; }
-        @media (max-width: 600px) { .chat-widget { width: 90vw; right: 5vw; height: 60vh; bottom: 70px; } .btn-open-chat { bottom: 70px; } }
+       @media (max-width: 600px) {
+    .chat-widget {
+        width: 100vw; /* Chiếm trọn chiều ngang */
+        right: 0;
+        bottom: 0; /* Gắn chặt xuống đáy */
+        height: 75vh; /* Chiếm 75% màn hình */
+        border-radius: 20px 20px 0 0; /* Chỉ bo góc trên */
+        border: none;
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.15); /* Đổ bóng ngược lên trên */
+        z-index: 1060;
+    }
+    
+    .btn-open-chat {
+        bottom: 70px;
+        right: 15px;
+    }
+
+    /* Tạo một thanh kéo (handle) giả ở trên cùng khung chat cho giống app */
+    .chat-header::before {
+        content: '';
+        display: block;
+        width: 40px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 4px;
+        margin: 0 auto 8px auto;
+    }
+}
 
         .sidebar-brand h6 { font-size: 22px; font-weight: 700; margin: 0; }
         .sidebar-brand small { font-size: 15px; opacity: 0.9; }
@@ -159,7 +186,53 @@
 
         .btn-portal-action { background: #ffffff; color: var(--primary-color) !important; border: 1.5px solid var(--primary-color); padding: 6px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s ease; }
         .btn-portal-action:hover { background: var(--primary-color); color: #ffffff !important; box-shadow: var(--shadow-sm); }
+/* Hiệu ứng nổi bọt cho các nút bấm chính */
+.btn {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+.btn:active {
+    transform: translateY(0); /* Nhún xuống khi click */
+}
 
+/* Hiệu ứng cho hàng TKB (Thời gian biểu) */
+.td-subject {
+    transition: all 0.3s ease;
+}
+.td-subject:hover {
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    z-index: 10;
+}
+/* Hiệu ứng nhịp thở cho nút mở Chat */
+@keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(21, 76, 121, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(21, 76, 121, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(21, 76, 121, 0); }
+}
+
+.btn-open-chat {
+    animation: pulseGlow 2.5s infinite;
+}
+.skeleton-box {
+    background: #e2e5e7;
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.6) 20%, rgba(255, 255, 255, 0) 40%);
+    background-size: 200px 100%;
+    background-repeat: no-repeat;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+@keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+}
+/* Khi có tin nhắn mới (chưa đọc), làm viền đỏ nổi bật hơn */
+.chat-badge {
+    animation: pulse-red 1.5s infinite;
+}
         .pulse-loader { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 0; }
         .spinner-modern { width: 50px; height: 50px; border: 4px solid var(--border-color); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -321,3 +394,126 @@
         
         #onlineCounter { max-width: 90vw; overflow-x: auto; white-space: nowrap; padding: 6px 16px; }
         #onlineCountText { font-size: 12px; display: inline-block; }
+
+@media (max-width: 768px) {
+    /* Mở rộng tối đa không gian hiển thị trên điện thoại */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 80px 15px 70px 15px !important; /* Đẩy nội dung xuống dưới mobile-header và trên footer */
+    }
+
+    /* Bo tròn gọn gàng hơn cho các card nội dung */
+    .top-header, .instructor-card, .data-card, .qa-item {
+        padding: 16px !important;
+        border-radius: 12px;
+    }
+    
+    .page-title {
+        font-size: 18px; /* Giảm size chữ tiêu đề trên mobile */
+    }
+}
+
+/* Container bao bọc phần link (Tùy chọn, tạo nền xám nhạt để card trắng nổi bật) */
+#tongHopSection {
+    background-color: #f8fafc;
+    border-radius: 16px;
+}
+
+/* Định dạng thẻ Card mới */
+.link-card-modern {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 24px 12px;
+    background: #ffffff;
+    border: none;
+    border-radius: 16px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    min-height: 140px;
+}
+
+/* Hiệu ứng di chuột / chạm */
+.link-card-modern:hover, .link-card-modern:active {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* Tạo họa tiết chấm bi (Dotted pattern) ở góc trên trái và dưới trái */
+.link-card-modern::before, .link-card-modern::after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-image: radial-gradient(#bae6fd 2px, transparent 2px);
+    background-size: 10px 10px; /* Khoảng cách giữa các chấm */
+    opacity: 0.6;
+    z-index: 0;
+}
+.link-card-modern::before { top: -5px; left: -5px; }
+.link-card-modern::after { bottom: -5px; left: -5px; }
+
+/* Đảm bảo nội dung nổi lên trên họa tiết nền */
+.link-card-modern .icon-box, 
+.link-card-modern .card-text-wrapper {
+    position: relative;
+    z-index: 1;
+}
+
+/* Định dạng Icon */
+.link-card-modern .icon-box {
+    width: auto;
+    height: auto;
+    background: transparent;
+    color: #0369a1; /* Màu xanh biển đậm */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 38px; /* Icon to rõ ràng */
+    margin-bottom: 16px;
+}
+
+/* Định dạng Tiêu đề (Đã tăng kích thước chữ) */
+.link-card-modern h5 {
+    margin: 0;
+    font-size: 15px; /* Tăng từ 13px lên 15px (có thể đổi thành 16px nếu muốn to hơn nữa) */
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    line-height: 1.5; /* Khoảng cách dòng thoáng hơn */
+}
+
+/* Định dạng Huy hiệu (Đã tăng nhẹ kích thước) */
+.link-card-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #0ea5e9;
+    color: white;
+    font-size: 10px; /* Tăng từ 9px lên 10px */
+    font-weight: 700;
+    padding: 5px 10px; /* Căn lề rộng ra một chút */
+    border-radius: 12px;
+    z-index: 2;
+    letter-spacing: 0.5px;
+}
+
+.link-card-modern .card-desc {
+    margin: 8px 0 0 0;       /* Tạo khoảng cách nhẹ với tiêu đề phía trên */
+    font-size: 13px;         /* Chữ vừa vặn, nhỏ hơn tiêu đề (15px) */
+    color: #64748b;         /* Màu xám thanh lịch (Slate 500) để phân biệt với tiêu đề */
+    font-weight: 500;        /* Độ đậm vừa phải */
+    line-height: 1.4;        /* Khoảng cách dòng thoáng */
+    text-transform: none;    /* Giữ nguyên chữ thường/hoa bình thường, không ép in hoa */
+}
+/* Chỉnh khoảng cách các cột (Gutter) cho đẹp hơn trên Mobile */
+#webLinksContainer.row {
+    --bs-gutter-x: 12px;
+    --bs-gutter-y: 12px;
+}
