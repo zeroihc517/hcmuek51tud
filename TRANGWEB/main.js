@@ -240,12 +240,23 @@ if (isSpecialExam) {
     let linkUrl = '#';   // Mặc định link làm bài
     let imageUrl = '';   // Mặc định không có ảnh nền
 
-    if (extMatch) {
+   if (extMatch) {
         linkUrl = extMatch[0]; // Đường link đầu tiên luôn là link làm bài
         
         // Nếu trong ô có từ 2 đường link trở lên, lấy link thứ hai làm ảnh nền
         if (extMatch.length > 1) {
             imageUrl = extMatch[1];
+            
+            // TỰ ĐỘNG CHUYỂN ĐỔI LINK GOOGLE DRIVE
+            if (imageUrl.includes("drive.google.com/file/d/")) {
+                // Tách lấy ID của file ảnh từ link Drive
+                let matchId = imageUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (matchId && matchId[1]) {
+                    // ĐỔI SANG DÙNG LINK THUMBNAIL (Khắc phục lỗi Google chặn hiển thị)
+                    // sz=w800 nghĩa là lấy ảnh với chiều rộng 800px cho sắc nét
+                    imageUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w800`;
+                }
+            }
         }
     }
 
