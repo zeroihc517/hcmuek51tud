@@ -517,3 +517,28 @@
     --bs-gutter-x: 12px;
     --bs-gutter-y: 12px;
 }
+/* 1. Hiển thị lớp phủ mờ khi mở menu trên mobile */
+.sidebar-overlay.show {
+    display: block !important;
+    opacity: 1 !important;
+}
+
+/* 2. Kích hoạt Responsive cho Sidebar và Header trên các màn hình nhỏ (< 992px) */
+@media (max-width: 991.98px) {
+    /* Đẩy sidebar sang trái, giấu khỏi màn hình mặc định */
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    /* Trượt sidebar vào lại màn hình khi được JavaScript kích hoạt class .show */
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    
+    /* Hiển thị thanh Header dành riêng cho Mobile để chứa nút bấm Hamburger */
+    .mobile-header {
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
