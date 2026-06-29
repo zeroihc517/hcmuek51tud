@@ -542,3 +542,82 @@
         align-items: center;
     }
 }
+/* Giao diện khung bài kiểm tra nổi bật */
+.card-special-exam {
+    background-color: #ffffff;
+    border: 2px solid #ef4444; /* Viền đỏ giống ảnh minh họa */
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+}
+
+.card-special-exam:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 20px rgba(239, 68, 68, 0.15);
+}
+
+.card-exam-img {
+    width: 100%;
+    height: 130px;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    /* Hiệu ứng nền gradient đen/xanh thay thế nếu không có ảnh thực tế */
+    background: linear-gradient(135deg, #111827, #0f4c81); 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 45px;
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.card-exam-title {
+    color: #ef4444; /* Tiêu đề chữ màu đỏ */
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.card-exam-link {
+    color: #0284c7; /* Chữ Chi tiết màu xanh */
+    font-size: 15px;
+    font-weight: 700;
+    text-decoration: none;
+    margin-top: auto; /* Tự động đẩy link xuống cuối thẻ */
+}
+
+.card-exam-link:hover {
+    color: #0369a1;
+    text-decoration: underline;
+}
+/* Khung chứa dạng lưới 7 cột */
+.grid-7-cols {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Mặc định trên Mobile: 2 cột/hàng */
+    gap: 16px; /* Khoảng cách giữa các khung */
+}
+
+/* Tablet (Màn hình từ 768px trở lên) */
+@media (min-width: 768px) {
+    .grid-7-cols {
+        grid-template-columns: repeat(4, 1fr); /* 4 cột/hàng */
+    }
+}
+
+/* PC, Laptop (Màn hình từ 1200px trở lên) */
+@media (min-width: 1200px) {
+    .grid-7-cols {
+        grid-template-columns: repeat(7, 1fr); /* Đúng 7 cột/hàng cho Desktop */
+    }
+}
