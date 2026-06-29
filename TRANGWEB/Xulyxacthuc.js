@@ -90,3 +90,62 @@
 function selectSavedAccount(mssv) { $('#txtUserMSSV').val(mssv); $('#txtUserPass').val('').focus(); }
         function removeSavedAccount(mssv, event) { event.stopPropagation(); let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || []; savedAccounts = savedAccounts.filter(acc => acc.mssv !== mssv); localStorage.setItem('savedAccounts', JSON.stringify(savedAccounts)); renderSavedAccounts(); }
         function closeAndOpenEditDeadline(sheetRowIndex) { $('#manageTkbListModal').modal('hide'); setTimeout(() => { openEditDeadlineModal(sheetRowIndex); }, 400); }
+
+// Thiết lập thời gian timeout: 1 tiếng = 60 phút * 60 giây * 1000 mili-giây
+const IDLE_TIMEOUT_MS = 3600000; 
+let inactivityTimer;
+
+// Hàm xử lý tự động đăng xuất (bỏ qua confirm để tránh kẹt giao diện)
+function autoLogoutStudent() {
+    // Chỉ thực thi nếu người dùng đang đăng nhập
+    if (localStorage.getItem('currentUser')) {
+        localStorage.removeItem('currentUser');
+        currentUser = null;
+        
+        // Hiển thị thông báo qua autoToast có sẵn trong hệ thống thay vì alert
+        let toastEl = document.getElementById('autoToast'); 
+        let toastBody = document.getElementById('autoToastMessage');
+        if (toastEl && toastBody) {
+            toastBody.innerText = "Phiên làm việc đã hết hạn do không hoạt động. Vui lòng đăng nhập lại!";
+            toastEl.classList.remove('bg-success', 'bg-primary'); 
+            toastEl.classList.add('bg-danger');
+            let toast = new bootstrap.Toast(toastEl, { delay: 5000 }); 
+            toast.show();
+        } else {
+            alert("Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại!");
+        }
+        
+        // Chờ 2 giây để người dùng đọc thông báo rồi tải lại trang
+        setTimeout(() => {
+            location.reload();
+        }, 2000);
+    }
+}
+
+// Hàm khởi động/đặt lại bộ đếm thời gian
+function resetInactivityTimer() {
+    // Nếu chưa đăng nhập thì không cần đếm giờ
+    if (!currentUser) return;
+
+    // Xóa bộ đếm cũ và tạo bộ đếm mới
+    clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(autoLogoutStudent, IDLE_TIMEOUT_MS);
+}
+
+// Lắng nghe các tương tác của người dùng để reset thời gian
+function initInactivityTracker() {
+    const userEvents = ['mousemove', 'mousedown', 'keypress', 'touchstart', 'scroll', 'wheel'];
+    
+    userEvents.forEach(event => {
+        document.addEventListener(event, resetInactivityTimer, { passive: true });
+    });
+}
+
+// Kích hoạt theo dõi ngay khi tải trang xong
+$(document).ready(function() {
+    initInactivityTracker();
+    // Bắt đầu đếm ngay nếu người dùng đã có phiên đăng nhập trước đó
+    if (currentUser) {
+        resetInactivityTimer();
+    }
+});
