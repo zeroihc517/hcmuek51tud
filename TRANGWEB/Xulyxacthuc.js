@@ -92,17 +92,24 @@ function selectSavedAccount(mssv) { $('#txtUserMSSV').val(mssv); $('#txtUserPass
         function closeAndOpenEditDeadline(sheetRowIndex) { $('#manageTkbListModal').modal('hide'); setTimeout(() => { openEditDeadlineModal(sheetRowIndex); }, 400); }
 
 // Thiết lập thời gian timeout: 1 tiếng = 60 phút * 60 giây * 1000 mili-giây
-const IDLE_TIMEOUT_MS = 3600000; 
+// Thiết lập thời gian timeout: 1 tiếng = 60 phút * 60 giây * 1000 mili-giây
+const IDLE_TIMEOUT_MS = 360000; 
 let inactivityTimer;
 
-// Hàm xử lý tự động đăng xuất (bỏ qua confirm để tránh kẹt giao diện)
-function autoLogoutStudent() {
-    // Chỉ thực thi nếu người dùng đang đăng nhập
+// Hàm xử lý tự động đăng xuất
+function autoLogoutStudent(isSilent = false) {
     if (localStorage.getItem('currentUser')) {
         localStorage.removeItem('currentUser');
+        localStorage.removeItem('lastActiveTime'); // Nhớ xóa luôn mốc thời gian
         currentUser = null;
         
-        // Hiển thị thông báo qua autoToast có sẵn trong hệ thống thay vì alert
+        // Nếu isSilent = true (nghĩa là tự đăng xuất khi vừa load web do quá hạn lúc tắt tab), thì chỉ reload luôn
+        if (isSilent) {
+            location.reload();
+            return;
+        }
+
+        // Nếu đang mở tab mà quá hạn thì hiện thông báo
         let toastEl = document.getElementById('autoToast'); 
         let toastBody = document.getElementById('autoToastMessage');
         if (toastEl && toastBody) {
@@ -115,37 +122,49 @@ function autoLogoutStudent() {
             alert("Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại!");
         }
         
-        // Chờ 2 giây để người dùng đọc thông báo rồi tải lại trang
-        setTimeout(() => {
-            location.reload();
-        }, 2000);
+        setTimeout(() => { location.reload(); }, 2000);
     }
 }
 
 // Hàm khởi động/đặt lại bộ đếm thời gian
 function resetInactivityTimer() {
-    // Nếu chưa đăng nhập thì không cần đếm giờ
     if (!currentUser) return;
 
-    // Xóa bộ đếm cũ và tạo bộ đếm mới
+    // Lưu lại thời điểm bạn vừa có tương tác với web (click, cuộn chuột...) vào localStorage
+    localStorage.setItem('lastActiveTime', Date.now().toString());
+
     clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(autoLogoutStudent, IDLE_TIMEOUT_MS);
+    inactivityTimer = setTimeout(() => autoLogoutStudent(false), IDLE_TIMEOUT_MS);
 }
 
-// Lắng nghe các tương tác của người dùng để reset thời gian
+// Kiểm tra hạn đăng nhập ngay khi vừa mở lại tab web
+function checkSessionExpiryOnLoad() {
+    if (!currentUser) return;
+    
+    let lastActive = localStorage.getItem('lastActiveTime');
+    if (lastActive) {
+        let timePassed = Date.now() - parseInt(lastActive);
+        // Nếu đã hơn 1 tiếng kể từ lần cuối hoạt động (dù tab có bị đóng hay không)
+        if (timePassed > IDLE_TIMEOUT_MS) {
+            autoLogoutStudent(true); 
+            return;
+        }
+    }
+    // Nếu chưa hết hạn, cho phép chạy tiếp và bắt đầu tính giờ
+    resetInactivityTimer();
+}
+
 function initInactivityTracker() {
     const userEvents = ['mousemove', 'mousedown', 'keypress', 'touchstart', 'scroll', 'wheel'];
-    
     userEvents.forEach(event => {
         document.addEventListener(event, resetInactivityTimer, { passive: true });
     });
 }
 
-// Kích hoạt theo dõi ngay khi tải trang xong
 $(document).ready(function() {
+    // 1. Check hạn sử dụng của phiên đăng nhập ngay khi load trang
+    checkSessionExpiryOnLoad();
+    
+    // 2. Kích hoạt theo dõi hoạt động
     initInactivityTracker();
-    // Bắt đầu đếm ngay nếu người dùng đã có phiên đăng nhập trước đó
-    if (currentUser) {
-        resetInactivityTimer();
-    }
 });

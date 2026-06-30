@@ -1,5 +1,6 @@
 function checkNewQA() { $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) { if (!data || data.length === 0) return; if (data.some(row => (row[3] || '').trim() === '')) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none'); }}); }
         function openQASection() { 
+			document.title = "Hỗ trợ & Giải đáp | Học nhóm Năm 2 Khoa Toán";
             resetNavActive(); $('#btnNavQA').addClass('active'); $('#qaSection').removeClass('d-none'); 
             if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); } 
             if (currentUser) { $('#txtMSSV').val(currentUser.mssv).prop('readonly', true).css({ 'background-color': '#e9ecef', 'cursor': 'not-allowed' }); } 

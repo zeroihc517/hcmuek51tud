@@ -1,4 +1,5 @@
 function loadTKBView() {
+	document.title = "Thời gian biểu | Học nhóm Năm 2 Khoa Toán";
     resetNavActive(); $('#btnNavTKB').addClass('active'); $('#tkbSection').removeClass('d-none');
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
     loadThoiGianBieu(); loadDeadlines();

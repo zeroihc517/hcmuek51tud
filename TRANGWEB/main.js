@@ -12,7 +12,8 @@
         }
 
         function loadTongHopView() {
-            resetNavActive(); $('#btnNavTongHop').addClass('active'); $('#tongHopSection').removeClass('d-none');
+            document.title = "Tổng hợp Link | Học nhóm Năm 2 Khoa Toán";
+			resetNavActive(); $('#btnNavTongHop').addClass('active'); $('#tongHopSection').removeClass('d-none');
             if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
         }
 function pingOnlineStatus() {
@@ -183,6 +184,7 @@ for (const [groupName, html] of Object.entries(groupHtml)) {
         }
 function loadDataByHocPhan(sheetName, element) {
     if(!sheetName) return; 
+	document.title = sheetName + " | Học nhóm Năm 2 Khoa Toán";
     currentSheetName = sheetName; resetNavActive(); if(element) $(element).addClass('active');
     $('#courseSection').removeClass('d-none'); $('#tableWrapper').addClass('d-none'); $('#swipeHint').addClass('d-none');
     $('#instructorArea').addClass('d-none').html(''); $('#loadingStatus').removeClass('d-none');
