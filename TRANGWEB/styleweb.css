@@ -622,3 +622,114 @@
         grid-template-columns: repeat(7, 1fr); /* Đúng 7 cột/hàng cho Desktop */
     }
 }
+/* GIAO DIỆN CHUYÊN BIỆT CHO THÔNG BÁO */
+.thongbao-box {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-left: 4px solid var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+.thongbao-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+.thongbao-box.ren-luyen { border-left-color: #16a34a; }
+.thongbao-box.hoc-thuat { border-left-color: #0ea5e9; }
+.thongbao-box.is-new { background: #fff0f2; border-left-color: var(--accent-red); }
+
+.tb-date { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;}
+.tb-title { font-size: 15px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; line-height: 1.5;}
+.badge-new-tb { 
+    background: var(--accent-red); color: white; font-size: 10px; font-weight: bold; 
+    padding: 3px 8px; border-radius: 12px; margin-right: 6px; 
+    animation: pulse-red 2s infinite; vertical-align: middle;
+}
+/* GIAO DIỆN THÔNG BÁO CHUYÊN NGHIỆP CÓ NÚT XEM CHI TIẾT */
+.tb-modern-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    border: 1px solid #f1f5f9;
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+.tb-modern-card:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+.tb-modern-card.ht { border-left-color: #0ea5e9; }
+.tb-modern-card.rl { border-left-color: #16a34a; }
+.tb-modern-card.is-new { border-left-color: var(--accent-red); background: #fffcfc; }
+
+.tb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-size: 13px; color: #64748b; font-weight: 600; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px;}
+.tb-content-summary { font-size: 15.5px; color: #1e293b; line-height: 1.5; font-weight: 600; white-space: pre-wrap; }
+.tb-content-full { font-size: 15px; color: #334155; line-height: 1.6; background: #f8fafc; padding: 16px; border-radius: 8px; margin-top: 12px; border: 1px dashed #cbd5e1; white-space: pre-wrap; }
+.tb-btn-toggle { font-size: 14px; font-weight: 700; color: #0284c7; background: none; border: none; padding: 0; margin-top: 10px; transition: 0.2s; display: inline-flex; align-items: center; gap: 6px;}
+.tb-btn-toggle:hover { color: #0369a1; text-decoration: underline; }
+.badge-new-tb { background: var(--accent-red); color: white; font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 12px; animation: pulse-red 2s infinite; }
+/* Giao diện Thẻ Thông báo chuyên nghiệp */
+.tb-card-pro {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    border-left: 6px solid #cbd5e1;
+    transition: all 0.3s ease;
+}
+.tb-card-pro.ht { border-left-color: #0ea5e9; } /* Học thuật */
+.tb-card-pro.rl { border-left-color: #16a34a; } /* Rèn luyện */
+
+.tb-card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.tb-card-tag {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    text-transform: uppercase;
+    background: #f1f5f9;
+}
+
+.tb-card-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+
+.tb-card-content {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #475569;
+}
+
+.tb-btn-toggle {
+    display: block;
+    width: 100%;
+    margin-top: 15px;
+    padding: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    text-align: center;
+}
+.tb-btn-toggle:hover { background: #edf2f7; }
