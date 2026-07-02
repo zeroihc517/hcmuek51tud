@@ -113,7 +113,27 @@ function savePersonalDeadline() {
     let rowIndex = $('#pDlRowIndex').val(); let startDate = $('#pDlStartDate').val().trim(); let endDate = $('#pDlEndDate').val().trim();
     if(!$('#pDlTitle').val() || !startDate || !endDate) { alert("Vui lòng nhập Tên công việc và Ngày bắt đầu/Kết thúc!"); return; }
     let autoDuration = "Từ " + startDate + " đến " + endDate;
-    let payload = { action: rowIndex !== '' ? "editDeadlineUser" : "addDeadlineUser", rowIndex: rowIndex, mssv: currentUser.mssv, title: $('#pDlTitle').val(), duration: autoDuration, tag: $('#pDlTag').val(), icon: $('#pDlIcon').val(), emoji: $('#pDlEmoji').val(), startDate: startDate, endDate: endDate };
+    // Tìm đoạn cấu hình payload trong hàm executeSavePersonalTkb():
+let payload = {
+    action: "editTKBUser",
+    rowIndex: pendingEventAction.rowIndex,
+    mssv: currentUser.mssv,
+    thu: $('#editTkbThu').val(),
+    tietBd: parseInt($('#editTkbTietBd').val()),
+    soTiet: parseInt($('#editTkbSoTiet').val()),
+    thoiGian: $('#editTkbThoiGian').val(),
+    hinhThuc: $('#editTkbHinhThuc').val(),
+    mon: $('#editTkbMon').val(),
+    phong: $('#editTkbPhong').val(),
+    gv: $('#editTkbGv').val(),
+    color: $('#editTkbColor').val(),
+    ngayBatDau: $('#editTkbNgayBatDau').val(),
+    ngayKetThuc: $('#editTkbNgayKetThuc').val(),
+    ngayNgoaiLe: $('#editTkbNgayNgoaiLe').val(),
+    editScope: pendingEventAction.scope,
+    // ĐẢM BẢO DÒNG NÀY: Truyền chuẩn chuỗi ngày của sự kiện được click
+    targetDate: pendingEventAction.targetDate 
+};
     let btn = $('#btnSaveDeadline'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
     postToGAS(payload, function(res) { alert(res); $('#deadlinePersonalModal').modal('hide'); btn.html('Lưu Deadline').prop('disabled', false); loadDeadlines(); }, function() { alert("Giao tiếp máy chủ thất bại!"); btn.html('Lưu Deadline').prop('disabled', false); });
 }
@@ -318,7 +338,19 @@ function openEditTkbModal(sheetRowIndex) {
     
     $('#tkbPersonalModal').modal('show');
 }
+// Ví dụ trong hàm xử lý nút "Chỉ sự kiện này" hoặc khi chuẩn bị gửi data:
+function getCorrectLocalDateString(dateInput) {
+    // Nếu dateInput là đối tượng Date, chuyển về dạng YYYY-MM-DD theo giờ địa phương
+    if (dateInput instanceof Date) {
+        let tzoffset = dateInput.getTimezoneOffset() * 60000; // độ lệch múi giờ tính bằng ms
+        let localISOTime = (new Date(dateInput.getTime() - tzoffset)).toISOString().slice(0, 10);
+        return localISOTime;
+    }
+    return dateInput; // Nếu đã là chuỗi "YYYY-MM-DD" thì giữ nguyên
+}
 
+// Khi người dùng chọn "Chỉ sự kiện này", hãy gán lại ngày chuẩn:
+pendingEventAction.date = getCorrectLocalDateString(pendingEventAction.date);
 function promptSavePersonalTkb() {
     let targetRowIndex = $('#pTkbRowIndex').val().trim();
     if (targetRowIndex !== '') {
@@ -334,6 +366,7 @@ function promptDeletePersonalTkb(sheetRowIndex) {
     let course = globalTkbData.find(c => String(c.sheetRowIndex) === String(sheetRowIndex));
     if (course && course.isSystem) { alert("Khóa bảo mật: Bạn không thể xóa học phần đã được đồng bộ từ hệ thống Đào tạo."); return; }
     pendingEventAction = { type: 'delete', rowIndex: sheetRowIndex };
+   pendingEventAction = { type: 'delete', rowIndex: sheetRowIndex, thu: course.thu };
     $('#eventScopeModal').modal('show');
 }
 
@@ -342,6 +375,18 @@ function submitEventScope(scope) {
     pendingEventAction.scope = scope;
     let selectedDateStr = formatDateDDMMYYYY(currentSelectedMonday); 
     pendingEventAction.targetDate = selectedDateStr;
+
+if (scope === 'single' || scope === 'future') {
+        // Tính toán ngày chính xác của sự kiện dựa vào "thu" của sự kiện đó
+        let eventDate = new Date(currentSelectedMonday); 
+        // course.thu có giá trị từ 2 (Thứ 2) đến 8 (Chủ nhật)
+        let dayDiff = pendingEventAction.thu - 2; 
+        eventDate.setDate(eventDate.getDate() + dayDiff);
+        
+        pendingEventAction.targetDate = formatDateDDMMYYYY(eventDate); 
+    } else {
+        pendingEventAction.targetDate = formatDateDDMMYYYY(currentSelectedMonday); 
+    }
 
     if (pendingEventAction.type === 'edit') {
         executeSavePersonalTkb();

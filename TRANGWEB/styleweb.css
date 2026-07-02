@@ -171,21 +171,114 @@
         .instructor-item { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; color: var(--text-main); font-size: 15px; font-weight: 500; }
         .instructor-item i { color: var(--primary-color); margin-top: 4px; font-size: 18px; }
 
-        .data-card { background: var(--card-bg); border-radius: var(--card-border-radius); border: 1px solid var(--border-color); box-shadow: var(--shadow-md); overflow: hidden; }
-        .custom-portal-table { width: 100%; min-width: 850px; border-collapse: separate; border-spacing: 0; }
-        .custom-portal-table th { background: var(--primary-color); color: #ffffff; font-weight: 600; font-size: 16px; text-transform: uppercase; padding: 18px 24px; border-right: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 10; }
-        .custom-portal-table td { padding: 20px 24px; border-bottom: 1px solid #e5e7eb; font-size: 16px; font-weight: 500; vertical-align: middle; color: var(--text-main); white-space: pre-wrap; word-break: break-word; }
+       .data-card { 
+    background: var(--card-bg); 
+    border-radius: 12px; 
+    border: 1px solid #e2e8f0; 
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); 
+    overflow: hidden; 
+    margin-bottom: 30px;
+}
 
-        .grid-row:hover td { background-color: var(--bg-global); }
-        .grid-row.row-topic td { background-color: var(--topic-bg); color: #1e40af; font-weight: 600; border-bottom-color: var(--topic-border); }
-        .grid-row.row-lesson td { background-color: var(--lesson-bg); color: #166534; font-weight: 600; border-bottom-color: var(--lesson-border); }
-        .grid-row.row-exam td { background-color: var(--exam-bg); color: #be123c; font-weight: 600; border-bottom-color: var(--exam-border); }
+/* Cấu hình chung cho bảng */
+.custom-portal-table { 
+    width: 100%; 
+    min-width: 900px; 
+    border-collapse: separate; 
+    border-spacing: 0; 
+}
+
+/* Tiêu đề bảng - Hiện đại & Sticky */
+.custom-portal-table th { 
+    background: #0f4c81 !important; /* Đổi sang màu xanh đồng bộ TKB */
+    color: #ffffff; 
+    font-weight: 600; 
+    font-size: 15px; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px;
+    padding: 16px 20px; 
+    border: none;
+    position: sticky; 
+    top: 0; 
+    z-index: 10; 
+}
+
+/* Ô dữ liệu - Thoáng và dễ đọc hơn */
+.custom-portal-table td { 
+    padding: 16px 20px; 
+    border-bottom: 1px solid #f1f5f9; /* Đường kẻ ngang nhạt, tinh tế */
+    font-size: 15px; 
+    font-weight: 500; 
+    vertical-align: middle; 
+    color: #334155; 
+    white-space: pre-wrap; 
+    word-break: break-word; 
+}
+
+/* Hiệu ứng di chuột qua các hàng */
+.grid-row {
+    transition: background-color 0.2s ease;
+}
+.grid-row:hover td { 
+    background-color: #f8fafc !important; 
+}
+
+/* Màu sắc chuyên biệt cho từng loại hàng */
+.grid-row.row-topic td { 
+    background-color: #f0f7ff; 
+    color: #1d4ed8; 
+    font-weight: 600; 
+}
+.grid-row.row-lesson td { 
+    background-color: #f0fdf4; 
+    color: #15803d; 
+    font-weight: 600; 
+}
+.grid-row.row-exam td { 
+    background-color: #fff1f2; 
+    color: #be123c; 
+    font-weight: 600; 
+}
         .grid-row.row-new td { background-color: #fff1f2; color: #9f1239; font-weight: 600; border-bottom-color: #fecdd3; }
         .grid-row.row-new td:first-child { border-left: 4px solid var(--accent-red); }
         .badge-new { background-color: var(--accent-red); color: #ffffff; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px; margin-right: 8px; text-transform: uppercase; display: inline-block; vertical-align: middle; }
 
-        .btn-portal-action { background: #ffffff; color: var(--primary-color) !important; border: 1.5px solid var(--primary-color); padding: 6px 16px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s ease; }
-        .btn-portal-action:hover { background: var(--primary-color); color: #ffffff !important; box-shadow: var(--shadow-sm); }
+        .btn-portal-action { 
+    background: #ffffff; 
+    color: #0f4c81 !important; 
+    border: 1.5px solid #0f4c81; 
+    padding: 5px 14px; 
+    border-radius: 6px; 
+    font-size: 13.5px; 
+    font-weight: 600; 
+    text-decoration: none; 
+    display: inline-flex; 
+    align-items: center; 
+    gap: 6px; 
+    transition: all 0.2s ease; 
+}
+.btn-portal-action:hover { 
+    background: #0f4c81; 
+    color: #ffffff !important; 
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(15, 76, 129, 0.15);
+}
+
+/* Định dạng khu vực nút thao tác của Admin */
+.grid-row td .d-flex.flex-wrap.gap-1 .btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+.grid-row td .d-flex.flex-wrap.gap-1 .btn:hover {
+    transform: translateY(-1px);
+}
+#tableWrapper {
+    border-radius: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Giúp vuốt mượt trên iOS */
+}
 /* Hiệu ứng nổi bọt cho các nút bấm chính */
 .btn {
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
