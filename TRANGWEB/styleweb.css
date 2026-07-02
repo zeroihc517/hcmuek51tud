@@ -733,3 +733,174 @@
     text-align: center;
 }
 .tb-btn-toggle:hover { background: #edf2f7; }
+
+/* ==========================================
+   CSS CHO GIAO DIỆN THÔNG BÁO MỚI (LIST & DETAIL)
+   ========================================== */
+
+/* CONTAINER DANH SÁCH */
+.tb-list-container {
+    background: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* HEADER MÀU XANH CHUNG CHO LIST & DETAIL */
+.tb-header-blue {
+    background-color: #0f4c81;
+    color: #fff;
+    padding: 12px 20px;
+    font-size: 17px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+/* PHẦN THÂN DANH SÁCH */
+.tb-list-body {
+    background: #fff;
+    padding: 10px 30px;
+}
+
+/* TỪNG MỤC THÔNG BÁO */
+.tb-list-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 20px 0;
+    border-bottom: 1px dashed #ccc;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.tb-list-item:hover {
+    background-color: #fafafa;
+}
+.tb-list-item:last-child {
+    border-bottom: none;
+}
+
+/* BIỂU TƯỢNG CÁI CHUÔNG & NHÃN MỚI */
+.tb-icon-wrapper {
+    position: relative;
+    margin-right: 20px;
+    padding-top: 4px;
+}
+.tb-icon-wrapper i.fa-bell {
+    font-size: 28px;
+    color: #999;
+}
+.tb-badge-new {
+    position: absolute;
+    top: -2px;
+    right: -8px;
+    background-color: #e61d4a; /* Đỏ đặc trưng */
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 12px;
+    border: 2px solid white;
+    animation: pulse-red 2s infinite;
+}
+
+/* NỘI DUNG TIÊU ĐỀ BÊN NGOÀI */
+.tb-item-info {
+    flex: 1;
+}
+.tb-item-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 6px;
+}
+.tb-item-dates {
+    font-size: 13px;
+    font-style: italic;
+    color: #6b7280;
+}
+.tb-date-text {
+    display: inline-block;
+}
+
+/* ==========================================
+   CSS CHO GIAO DIỆN CHI TIẾT (DETAIL)
+   ========================================== */
+/* ==========================================
+   CSS CHO GIAO DIỆN CHI TIẾT (DETAIL) - BẢN NÂNG CẤP
+   ========================================== */
+.tb-detail-box {
+    background: #ffffff;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08); /* Đổ bóng mềm mại, sang trọng */
+    overflow: hidden;
+}
+
+.tb-header-blue {
+    background: linear-gradient(135deg, #0f4c81, #1664a8); /* Tạo dải màu gradient cho thanh tiêu đề */
+    color: #fff;
+    padding: 16px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    transition: background 0.3s;
+}
+
+.tb-header-blue:hover {
+    background: linear-gradient(135deg, #0d4270, #135896);
+}
+
+.tb-detail-body {
+    background: #fff;
+    padding: 30px 40px; /* Thu nhỏ lề trên dưới/trái phải một chút */
+    min-height: 400px;
+    /* Đã xóa max-width và margin auto để nội dung tràn đều lấp đầy khung */
+}
+
+.tb-detail-title-small {
+    font-size: 22px; /* Tiêu đề to và nổi bật hơn */
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 12px;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.tb-detail-dates {
+    font-size: 14px;
+    color: #6b7280;
+    border-bottom: 2px solid #f3f4f6; /* Đường gạch chân nhạt, tinh tế */
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.tb-date-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px; /* Khoảng cách giữa icon và chữ */
+    background: #f8fafc;
+    padding: 4px 12px;
+    border-radius: 20px; /* Đóng khung ngày tháng cho hiện đại */
+}
+
+.tb-detail-main-content {
+    font-family: 'Inter', sans-serif; /* Chuyển về font hiện đại của web thay vì Times New Roman */
+    font-size: 16px;
+    line-height: 1.8; /* Căn dãn dòng rộng rãi dễ đọc */
+    color: #374151;
+    text-align: justify;
+}
+
+/* Đảm bảo nội dung trên điện thoại không bị quá sát lề */
+@media (max-width: 768px) {
+    .tb-detail-body {
+        padding: 24px 20px;
+    }
+    .tb-detail-title-small {
+        font-size: 18px;
+    }
+}

@@ -211,122 +211,154 @@ function loadDataByHocPhan(sheetName, element) {
             // ==========================================
  
             // ==========================================
+            // ==========================================
+            // XỬ LÝ RIÊNG: GIAO DIỆN THÔNG BÁO MỚI (DẠNG DANH SÁCH & CHI TIẾT)
+            // ==========================================
             if (sheetName.toLowerCase() === 'thông báo') {
-                let hocThuatHtml = ''; let renLuyenHtml = '';
+                let listHtml = `
+                <div class="tb-list-container shadow-sm">
+                    <div class="tb-header-blue">
+                        <div class="d-flex align-items-center"><i class="fa-solid fa-globe me-2"></i> Thông báo mới</div>
+                        <div class="ms-auto d-flex gap-2">
+                            <input type="text" class="form-control form-control-sm border-0" placeholder="Tìm kiếm..." style="width: 200px; border-radius: 4px;">
+                            <button class="btn btn-sm text-white fw-bold px-3" style="background: #e61d4a; border-radius: 4px;">Tìm kiếm</button>
+                        </div>
+                    </div>
+                    <div class="tb-list-body">
+                `;
+
+                let detailData = [];
 
                 data.forEach((row, rowIndex) => {
                     if (rowIndex === 0) return; // Bỏ qua tiêu đề
                     
-                    let c1 = String(row[0] || '').trim(); let c2 = String(row[1] || '').trim();
-                    let c3 = String(row[2] || '').trim(); let c4 = String(row[3] || '').trim();
-                    let c5 = String(row[4] || '').trim(); let c6 = String(row[5] || '').trim();
-                    let c7 = String(row[6] || '').trim();
+                    let c1 = String(row[0] || '').trim(); // STT/Mới
+                    let c2 = String(row[1] || '').trim(); // Tiêu đề
+                    let c3 = String(row[2] || '').trim(); // Nội dung
+                    let c4 = String(row[3] || '').trim(); // Ngày đăng
+                    let c5 = String(row[4] || '').trim(); // Ngày cập nhật
+                    let c6 = String(row[5] || '').trim(); // Link đính kèm
+                    let c7 = String(row[6] || '').trim(); // Ghi chú
 
                     let isNew = /^new$/i.test(c1) || c1.toLowerCase().includes('new');
                     
-                    // LỌC RÈN LUYỆN/HỌC THUẬT DỰA VÀO CỘT 7 (GHI CHÚ)
-                    let isRenLuyen = c7.toLowerCase().includes('rèn luyện');
+                    // Lưu dữ liệu để gọi ra ở màn hình Chi tiết
+                    detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew };
 
-                    let typeClass = isRenLuyen ? 'rl' : 'ht';
-                    let typeIcon = isRenLuyen ? '<i class="fa-solid fa-person-running"></i>' : '<i class="fa-solid fa-book-open-reader"></i>';
-                    let typeText = isRenLuyen ? 'Rèn luyện' : 'Học thuật';
+                    let dateDisplay = `<span class="tb-date-text">Ngày đăng tin ${c4 || 'Gần đây'}</span>`;
+                    if (c5) dateDisplay += `<span class="tb-date-text ms-4">Ngày cập nhật ${c5}</span>`;
 
-                    // Xử lý Ngày tháng
-                    // Thay bằng đoạn này:
-let dateDisplay = `<i class="fa-regular fa-calendar"></i> Ngày đăng: ${c4 || 'Gần đây'}`;
-                    if (c5) dateDisplay += ` <span class="ms-2 d-none d-sm-inline" style="opacity: 0.7;"><i class="fa-solid fa-pen-to-square"></i> Ngày cập nhật: ${c5}</span>`;
+                    let badgeHtml = isNew ? `<div class="tb-badge-new">Mới</div>` : '';
 
-                    // Xử lý Thu gọn nội dung nếu quá dài (hơn 150 ký tự)
-                    let hasContent = c3.length > 0;
-                    let isLongContent = c3.length > 150 || c3.split('\n').length > 3;
-                    let summaryContent = isLongContent ? c3.substring(0, 0) + '------------' : c3;
-                    let collapseId = `collapseTb_${rowIndex}`;
-
-                    // Nút link đính kèm
-                    let linkHtml = c6 ? `<a href="${c6}" target="_blank" class="btn btn-sm mt-3 fw-bold shadow-sm" style="background: #f1f5f9; color: var(--primary-color); border: 1px solid #cbd5e1;"><i class="fa-solid fa-link"></i> Xem liên kết đính kèm</a>` : '';
-                    
-                    // Ẩn Ghi chú nếu chỉ dùng để gõ từ khóa phân loại "Rèn luyện" hoặc "Học thuật"
-                    let noteHtml = '';
-                    if (c7 && c7.toLowerCase() !== 'rèn luyện' && c7.toLowerCase() !== 'học thuật') {
-                        noteHtml = `<div class="mt-3 text-danger small fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> Nguồn: ${c7}</div>`;
-                    }
-
+                    // Nút thao tác dành cho Admin (không thay đổi)
                     let adminHtml = '';
                     if (isAdmin) {
                         let sheetRowIndex = rowIndex + 1;
                         let ec1 = c1.replace(/'/g, "\\'"); let ec2 = c2.replace(/'/g, "\\'"); let ec3 = c3.replace(/'/g, "\\'"); let ec4 = c4.replace(/'/g, "\\'");
                         let ec5 = c5.replace(/'/g, "\\'"); let ec6 = c6.replace(/'/g, "\\'"); let ec7 = c7.replace(/'/g, "\\'");
-                        adminHtml = `<div class="mt-4 pt-3 border-top d-flex flex-wrap gap-2">
-                            <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
-                            <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
-                            <button class="btn btn-sm btn-outline-success py-1 px-2 fw-bold" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i> Chèn</button>
-                            <button class="btn btn-sm btn-outline-warning py-1 px-2 fw-bold" onclick="openEditRowModal(${sheetRowIndex}, '${ec1}', '${ec2}', '${ec3}', '${ec4}', '${ec5}', '${ec6}', '${ec7}')"><i class="fa-solid fa-pen"></i> Sửa</button>
-                            <button class="btn btn-sm btn-outline-danger py-1 px-2 fw-bold" onclick="deleteRowItem(${sheetRowIndex})"><i class="fa-solid fa-trash"></i> Xóa</button>
+                        adminHtml = `
+                        <div class="mt-2" onclick="event.stopPropagation();">
+                            <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
+                            <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
+                            <button class="btn btn-sm btn-outline-success py-0 px-2 fw-bold" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button>
+                            <button class="btn btn-sm btn-outline-warning py-0 px-2 fw-bold" onclick="openEditRowModal(${sheetRowIndex}, '${ec1}', '${ec2}', '${ec3}', '${ec4}', '${ec5}', '${ec6}', '${ec7}')"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-sm btn-outline-danger py-0 px-2 fw-bold" onclick="deleteRowItem(${sheetRowIndex})"><i class="fa-solid fa-trash"></i></button>
                         </div>`;
                     }
 
-                    let badgeNew = isNew ? `<span class="tb-card-tag new me-2"><i class="fa-solid fa-bolt"></i> MỚI</span>` : '';
-
-                    let cardHtml = `
-                    <div class="tb-card-pro ${isNew ? 'is-new' : ''} ${typeClass}">
-                        <div class="tb-card-header">
-                            <div>
-                                ${badgeNew}
-                                <span class="tb-card-tag ${typeClass}">${typeIcon} ${typeText}</span>
-                            </div>
-                            <div class="tb-card-date">${dateDisplay}</div>
+                    listHtml += `
+                    <div class="tb-list-item" onclick="viewThongBaoDetail(${rowIndex})">
+                        <div class="tb-icon-wrapper">
+                            <i class="fa-solid fa-bell"></i>
+                            ${badgeHtml}
                         </div>
-                        
-                        <div class="tb-card-title">${c2}</div>
-                        
-                        ${hasContent ? `
-                        <div class="tb-card-content">
-                            ${isLongContent ? summaryContent : c3}
+                        <div class="tb-item-info">
+                            <div class="tb-item-title">${c2}</div>
+                            <div class="tb-item-dates">${dateDisplay}</div>
+                            ${adminHtml}
                         </div>
-                        
-                        ${isLongContent ? `
-                            <div class="collapse" id="${collapseId}">
-                                <div class="tb-card-content-full">${c3}</div>
-                            </div>
-                            <button class="btn btn-link p-0 text-decoration-none fw-bold mt-2" style="font-size: 14.5px;" data-bs-toggle="collapse" data-bs-target="#${collapseId}"
-                                onclick="setTimeout(() => { this.innerHTML = this.getAttribute('aria-expanded') === 'true' ? '<i class=\\\'fa-solid fa-chevron-up\\\'></i> Thu gọn' : '<i class=\\\'fa-solid fa-chevron-down\\\'></i> Xem chi tiết'; }, 50);">
-                                <i class="fa-solid fa-chevron-down"></i> Xem chi tiết
-                            </button>
-                        ` : ''}
-                        ` : ''}
-
-                        <div>${linkHtml}</div>
-                        ${noteHtml}
-                        ${adminHtml}
                     </div>`;
-
-                    if (isRenLuyen) renLuyenHtml += cardHtml; else hocThuatHtml += cardHtml;
                 });
 
-                if (!hocThuatHtml) hocThuatHtml = '<div class="text-muted text-center py-4"><i class="fa-regular fa-folder-open fs-2 mb-2"></i><br>Chưa có thông báo học thuật</div>';
-                if (!renLuyenHtml) renLuyenHtml = '<div class="text-muted text-center py-4"><i class="fa-regular fa-folder-open fs-2 mb-2"></i><br>Chưa có thông báo rèn luyện</div>';
+                if (data.length <= 1) {
+                    listHtml += '<div class="text-muted text-center py-4"><i class="fa-regular fa-folder-open fs-2 mb-2"></i><br>Chưa có thông báo nào</div>';
+                }
+
+                listHtml += `</div></div>`; // Đóng tb-list-container
+
+                // Gán dữ liệu vào window để truy cập từ giao diện
+                window.thongBaoData = detailData;
+
+                // Giao diện chi tiết (ẩn mặc định)
+                let detailHtml = `
+                <div id="tbDetailContainer" class="d-none">
+                    <div class="tb-detail-box shadow-sm">
+                        <div class="tb-header-blue" style="cursor: pointer;" onclick="backToThongBaoList()">
+                            <i class="fa-solid fa-arrow-left me-2"></i> Trở lại <span class="mx-2">|</span> <i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo
+                        </div>
+                        <div class="tb-detail-body" id="tbDetailContent">
+                            <!-- Nội dung chi tiết sẽ được Javascript chèn vào đây -->
+                        </div>
+                    </div>
+                </div>
+                `;
+
+                // Khởi tạo các hàm xử lý hiển thị / ẩn chi tiết (chỉ chạy 1 lần)
+                if (!window.tbDetailFunctionsInjected) {
+                   window.viewThongBaoDetail = function(index) {
+                        let data = window.thongBaoData[index];
+                        if(!data) return;
+                        
+                        // Thêm icon Lịch và Đồng hồ để giao diện bớt trống trải
+                        let dateDisplay = `<span class="tb-date-text"><i class="fa-regular fa-calendar text-primary"></i> Đăng: ${data.c4 || 'Gần đây'}</span>`;
+                        if (data.c5) dateDisplay += `<span class="tb-date-text"><i class="fa-solid fa-clock-rotate-left text-success"></i> Cập nhật: ${data.c5}</span>`;
+
+                        let linkHtml = data.c6 ? `<div class="mt-4"><a href="${data.c6}" target="_blank" class="btn fw-bold text-white shadow-sm px-4" style="background: #0f4c81; border-radius: 8px;"><i class="fa-solid fa-link me-2"></i>Truy cập liên kết đính kèm</a></div>` : '';
+                        
+                        let noteHtml = data.c7 ? `<div class="mt-4 p-3 border-start border-4 border-warning rounded text-dark" style="background: #fffbeb;"><strong><i class="fa-solid fa-paperclip me-1"></i> Ghi chú:</strong> ${data.c7}</div>` : '';
+
+                        // Render cấu trúc bên trong chi tiết
+                        let html = `
+                            <div class="tb-detail-title-small">${data.c2}</div>
+                            <div class="tb-detail-dates mb-4">${dateDisplay}</div>
+                            <div class="tb-detail-main-content">
+                                ${data.c3.replace(/\n/g, '<br>')}
+                            </div>
+                            ${noteHtml}
+                            ${linkHtml}
+                        `;
+                        $('#tbDetailContent').html(html);
+                        
+                        // Chuyển đổi hiển thị
+                        $('#tbMainView').addClass('d-none');
+                        $('#tbDetailContainer').removeClass('d-none');
+                        window.scrollTo({ top: 0, behavior: 'smooth' }); // Tự động cuộn lên đầu
+                    };
+
+                    window.backToThongBaoList = function() {
+                        $('#tbDetailContainer').addClass('d-none');
+                        $('#tbMainView').removeClass('d-none');
+                    };
+                    window.tbDetailFunctionsInjected = true;
+                }
 
                 let customViewHtml = `
                 <div class="row g-4 mt-2 mb-4">
+                    <div class="col-12" id="tbMainView">
+                        ${listHtml}
+                    </div>
                     <div class="col-12">
-                        <div class="p-4 bg-white rounded-4 shadow-sm" style="border-top: 5px solid #0ea5e9;">
-                            <h5 class="fw-bold mb-4" style="color: #0ea5e9; font-size: 18px; text-transform: uppercase;"><i class="fa-solid fa-book-open-reader me-2"></i>THÔNG BÁO HỌC THUẬT</h5>
-                            ${hocThuatHtml}
-                        </div>
+                        ${detailHtml}
                     </div>
-                    <div class="col-12 mt-4">
-                        <div class="p-4 bg-white rounded-4 shadow-sm" style="border-top: 5px solid #16a34a;">
-                            <h5 class="fw-bold mb-4" style="color: #16a34a; font-size: 18px; text-transform: uppercase;"><i class="fa-solid fa-person-running me-2"></i>HOẠT ĐỘNG RÈN LUYỆN</h5>
-                            ${renLuyenHtml}
-                        </div>
-                    </div>
-                </div>`;
+                </div>
+                `;
 
                 if ($('#customViewWrapper').length === 0) $('#tableWrapper').before('<div id="customViewWrapper" class="w-100"></div>');
                 $('#customViewWrapper').html(customViewHtml).removeClass('d-none');
                 $('#loadingStatus').addClass('d-none');
                 return;
             }
+
               
 
             // ==========================================
