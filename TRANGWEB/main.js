@@ -351,7 +351,6 @@ function loadDataByHocPhan(sheetName, element) {
     <div class="tb-detail-dates mb-4" style="font-size: 15px;">${dateDisplay}</div>
     <div class="tb-detail-main-content" style="font-size: 18px; line-height: 1.6;"> <!-- Chỉnh size nội dung -->
         ${data.c3.replace(/\n/g, '<br>')}
-                                ${data.c3.replace(/\n/g, '<br>')}
                             </div>
                             ${noteHtml}
                             ${linkHtml}
