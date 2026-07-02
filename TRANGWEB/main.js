@@ -185,17 +185,31 @@ for (const [groupName, html] of Object.entries(groupHtml)) {
 function loadDataByHocPhan(sheetName, element) {
     if(!sheetName) return; 
     document.title = sheetName + " | Học nhóm Năm 2 Khoa Toán";
-    currentSheetName = sheetName; resetNavActive(); if(element) $(element).addClass('active');
-    $('#courseSection').removeClass('d-none'); $('#tableWrapper').addClass('d-none'); $('#swipeHint').addClass('d-none');
-    $('#instructorArea').addClass('d-none').html(''); $('#loadingStatus').removeClass('d-none');
+    currentSheetName = sheetName; 
+    resetNavActive(); 
+    if(element) $(element).addClass('active');
+    
+    // Reset giao diện trước khi tải
+    $('#courseSection').removeClass('d-none'); 
+    $('#tableWrapper').addClass('d-none'); 
+    $('#swipeHint').addClass('d-none');
+    $('#instructorArea').addClass('d-none').html(''); 
+    $('#loadingStatus').removeClass('d-none');
     
     if ($('#customViewWrapper').length > 0) $('#customViewWrapper').addClass('d-none');
     $('#examCardsContainer').addClass('d-none').html(''); 
 
-    if (isAdmin) $('#adminAddRowArea').removeClass('d-none'); else $('#adminAddRowArea').addClass('d-none');
+    // Hiển thị form thêm dữ liệu nếu là Admin
+    if (isAdmin) $('#adminAddRowArea').removeClass('d-none'); 
+    else $('#adminAddRowArea').addClass('d-none');
+    
+    // Đóng sidebar trên mobile
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
     
-    $.ajax({ url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName), method: "GET", dataType: "json",
+    $.ajax({ 
+        url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName), 
+        method: "GET", 
+        dataType: "json",
         success: function(data) {
             if (!data || data.length === 0) { 
                 currentSheetTotalRows = 1; 
@@ -207,42 +221,62 @@ function loadDataByHocPhan(sheetName, element) {
             currentSheetTotalRows = data.length; 
 
             // ==========================================
-            // XỬ LÝ RIÊNG: GIAO DIỆN THÔNG BÁO 7 CỘT CHUYÊN NGHIỆP
-            // ==========================================
- 
-            // ==========================================
-            // ==========================================
-            // XỬ LÝ RIÊNG: GIAO DIỆN THÔNG BÁO MỚI (DẠNG DANH SÁCH & CHI TIẾT)
+            // XỬ LÝ RIÊNG: GIAO DIỆN THÔNG BÁO (HỌC THUẬT & RÈN LUYỆN)
             // ==========================================
             if (sheetName.toLowerCase() === 'thông báo') {
-                let listHtml = `
-                <div class="tb-list-container shadow-sm">
+               let mainHtml = `
+                <div class="tb-list-container shadow-sm mb-4">
                     <div class="tb-header-blue">
-                        <div class="d-flex align-items-center"><i class="fa-solid fa-globe me-2"></i> Thông báo mới</div>
+                        <div class="d-flex align-items-center"><i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo mới</div>
                         <div class="ms-auto d-flex gap-2">
-                            <input type="text" class="form-control form-control-sm border-0" placeholder="Tìm kiếm..." style="width: 200px; border-radius: 4px;">
-                            <button class="btn btn-sm text-white fw-bold px-3" style="background: #e61d4a; border-radius: 4px;">Tìm kiếm</button>
+                            <input type="text" id="tbSearchInput" class="form-control form-control-sm border-0" placeholder="Tìm kiếm thông báo..." style="width: 220px; border-radius: 4px;" onkeyup="if(event.key === 'Enter') searchThongBao()">
+                            <button class="btn btn-sm text-white fw-bold px-3" style="background: #e61d4a; border-radius: 4px;" onclick="searchThongBao()">Tìm kiếm</button>
                         </div>
                     </div>
+                    
                     <div class="tb-list-body">
+                        <div class="row g-4">
+                            <div class="col-md-6 tb-section-block" id="tbSectionHocThuat">
+                                <div class="tb-section-heading ht border-bottom pb-2 mb-3"><i class="fa-solid fa-book-open-reader me-2"></i> THÔNG BÁO HỌC THUẬT</div>
+                                <div class="tb-section-items" id="tbItemsHocThuat"></div>
+                            </div>
+                            
+                            <div class="col-md-6 tb-section-block" id="tbSectionRenLuyen">
+                                <div class="tb-section-heading rl border-bottom pb-2 mb-3"><i class="fa-solid fa-person-running me-2"></i> HOẠT ĐỘNG RÈN LUYỆN</div>
+                                <div class="tb-section-items" id="tbItemsRenLuyen"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 `;
 
                 let detailData = [];
+                let hocThuatItemsHtml = '';
+                let renLuyenItemsHtml = '';
 
                 data.forEach((row, rowIndex) => {
                     if (rowIndex === 0) return; // Bỏ qua tiêu đề
                     
-                    let c1 = String(row[0] || '').trim(); // STT/Mới
-                    let c2 = String(row[1] || '').trim(); // Tiêu đề
-                    let c3 = String(row[2] || '').trim(); // Nội dung
-                    let c4 = String(row[3] || '').trim(); // Ngày đăng
-                    let c5 = String(row[4] || '').trim(); // Ngày cập nhật
-                    let c6 = String(row[5] || '').trim(); // Link đính kèm
-                    let c7 = String(row[6] || '').trim(); // Ghi chú
+                    let c1 = String(row[0] || '').trim();
+                    let c2 = String(row[1] || '').trim();
+                    let c3 = String(row[2] || '').trim();
+                    let c4 = String(row[3] || '').trim();
+                    let c5 = String(row[4] || '').trim();
+                    let c6 = String(row[5] || '').trim();
+                    let c7 = String(row[6] || '').trim();
 
                     let isNew = /^new$/i.test(c1) || c1.toLowerCase().includes('new');
                     
-                    // Lưu dữ liệu để gọi ra ở màn hình Chi tiết
+                    // 1. Kiểm tra xem ghi chú có chứa chữ Rèn luyện không
+                    let isRenLuyen = c7.toLowerCase().includes('rèn luyện');
+                    
+                    // 2. Nếu có, tiến hành xóa chữ "Rèn luyện" khỏi Ghi chú
+                    if (isRenLuyen) {
+                        // Xóa chữ "rèn luyện" (không phân biệt hoa thường) 
+                        // và dọn dẹp các dấu câu thừa (như dấu :, -, phẩy) nếu có ở đầu câu
+                        c7 = c7.replace(/rèn luyện/ig, '').replace(/^[:\-,\s]+/, '').trim();
+                    }
+                    
                     detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew };
 
                     let dateDisplay = `<span class="tb-date-text">Ngày đăng tin ${c4 || 'Gần đây'}</span>`;
@@ -250,7 +284,6 @@ function loadDataByHocPhan(sheetName, element) {
 
                     let badgeHtml = isNew ? `<div class="tb-badge-new">Mới</div>` : '';
 
-                    // Nút thao tác dành cho Admin (không thay đổi)
                     let adminHtml = '';
                     if (isAdmin) {
                         let sheetRowIndex = rowIndex + 1;
@@ -266,7 +299,7 @@ function loadDataByHocPhan(sheetName, element) {
                         </div>`;
                     }
 
-                    listHtml += `
+                    let itemHtml = `
                     <div class="tb-list-item" onclick="viewThongBaoDetail(${rowIndex})">
                         <div class="tb-icon-wrapper">
                             <i class="fa-solid fa-bell"></i>
@@ -278,46 +311,41 @@ function loadDataByHocPhan(sheetName, element) {
                             ${adminHtml}
                         </div>
                     </div>`;
+
+                    if (isRenLuyen) {
+                        renLuyenItemsHtml += itemHtml;
+                    } else {
+                        hocThuatItemsHtml += itemHtml;
+                    }
                 });
 
-                if (data.length <= 1) {
-                    listHtml += '<div class="text-muted text-center py-4"><i class="fa-regular fa-folder-open fs-2 mb-2"></i><br>Chưa có thông báo nào</div>';
-                }
+                if (!hocThuatItemsHtml) hocThuatItemsHtml = '<div class="text-muted text-center py-4">Chưa có thông báo học thuật nào.</div>';
+                if (!renLuyenItemsHtml) renLuyenItemsHtml = '<div class="text-muted text-center py-4">Chưa có hoạt động rèn luyện nào.</div>';
 
-                listHtml += `</div></div>`; // Đóng tb-list-container
-
-                // Gán dữ liệu vào window để truy cập từ giao diện
                 window.thongBaoData = detailData;
 
-                // Giao diện chi tiết (ẩn mặc định)
                 let detailHtml = `
                 <div id="tbDetailContainer" class="d-none">
                     <div class="tb-detail-box shadow-sm">
                         <div class="tb-header-blue" style="cursor: pointer;" onclick="backToThongBaoList()">
-                            <i class="fa-solid fa-arrow-left me-2"></i> Trở lại <span class="mx-2">|</span> <i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo
+                            <i class="fa-solid fa-arrow-left me-2"></i> Trở lại <span class="mx-2">|</span> <i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo chi tiết
                         </div>
-                        <div class="tb-detail-body" id="tbDetailContent">
-                            <!-- Nội dung chi tiết sẽ được Javascript chèn vào đây -->
-                        </div>
+                        <div class="tb-detail-body" id="tbDetailContent"></div>
                     </div>
                 </div>
                 `;
 
-                // Khởi tạo các hàm xử lý hiển thị / ẩn chi tiết (chỉ chạy 1 lần)
                 if (!window.tbDetailFunctionsInjected) {
-                   window.viewThongBaoDetail = function(index) {
+                    window.viewThongBaoDetail = function(index) {
                         let data = window.thongBaoData[index];
                         if(!data) return;
                         
-                        // Thêm icon Lịch và Đồng hồ để giao diện bớt trống trải
-                        let dateDisplay = `<span class="tb-date-text"><i class="fa-regular fa-calendar text-primary"></i> Đăng: ${data.c4 || 'Gần đây'}</span>`;
-                        if (data.c5) dateDisplay += `<span class="tb-date-text"><i class="fa-solid fa-clock-rotate-left text-success"></i> Cập nhật: ${data.c5}</span>`;
+                        let dateDisplay = `<span class="tb-date-text"><i class="fa-regular fa-calendar text-primary"></i> Ngày đăng: ${data.c4 || 'Gần đây'}</span>`;
+                        if (data.c5) dateDisplay += `<span class="tb-date-text"><i class="fa-solid fa-clock-rotate-left text-success"></i> Ngày cập nhật: ${data.c5}</span>`;
 
                         let linkHtml = data.c6 ? `<div class="mt-4"><a href="${data.c6}" target="_blank" class="btn fw-bold text-white shadow-sm px-4" style="background: #0f4c81; border-radius: 8px;"><i class="fa-solid fa-link me-2"></i>Truy cập liên kết đính kèm</a></div>` : '';
-                        
                         let noteHtml = data.c7 ? `<div class="mt-4 p-3 border-start border-4 border-warning rounded text-dark" style="background: #fffbeb;"><strong><i class="fa-solid fa-paperclip me-1"></i> Ghi chú:</strong> ${data.c7}</div>` : '';
 
-                        // Render cấu trúc bên trong chi tiết
                         let html = `
                             <div class="tb-detail-title-small">${data.c2}</div>
                             <div class="tb-detail-dates mb-4">${dateDisplay}</div>
@@ -328,24 +356,45 @@ function loadDataByHocPhan(sheetName, element) {
                             ${linkHtml}
                         `;
                         $('#tbDetailContent').html(html);
-                        
-                        // Chuyển đổi hiển thị
                         $('#tbMainView').addClass('d-none');
                         $('#tbDetailContainer').removeClass('d-none');
-                        window.scrollTo({ top: 0, behavior: 'smooth' }); // Tự động cuộn lên đầu
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                     };
 
                     window.backToThongBaoList = function() {
                         $('#tbDetailContainer').addClass('d-none');
                         $('#tbMainView').removeClass('d-none');
                     };
+
+                    window.searchThongBao = function() {
+                        let keyword = $('#tbSearchInput').val().toLowerCase().trim();
+                        $('.tb-list-item').each(function() {
+                            let textContent = $(this).text().toLowerCase();
+                            if (textContent.includes(keyword)) {
+                                $(this).removeClass('d-none');
+                            } else {
+                                $(this).addClass('d-none');
+                            }
+                        });
+
+                        // Tự động ẩn danh mục nếu không tìm thấy item nào phù hợp bên trong
+                        ['HocThuat', 'RenLuyen'].forEach(type => {
+                            let visibleCount = $(`#tbItems${type} .tb-list-item:not(.d-none)`).length;
+                            if (visibleCount === 0 && keyword !== '') {
+                                $(`#tbSection${type}`).addClass('d-none');
+                            } else {
+                                $(`#tbSection${type}`).removeClass('d-none');
+                            }
+                        });
+                    };
+
                     window.tbDetailFunctionsInjected = true;
                 }
 
                 let customViewHtml = `
                 <div class="row g-4 mt-2 mb-4">
                     <div class="col-12" id="tbMainView">
-                        ${listHtml}
+                        ${mainHtml}
                     </div>
                     <div class="col-12">
                         ${detailHtml}
@@ -355,18 +404,17 @@ function loadDataByHocPhan(sheetName, element) {
 
                 if ($('#customViewWrapper').length === 0) $('#tableWrapper').before('<div id="customViewWrapper" class="w-100"></div>');
                 $('#customViewWrapper').html(customViewHtml).removeClass('d-none');
+                
+                $('#tbItemsHocThuat').html(hocThuatItemsHtml);
+                $('#tbItemsRenLuyen').html(renLuyenItemsHtml);
+                
                 $('#loadingStatus').addClass('d-none');
                 return;
             }
 
-              
-
             // ==========================================
-            // KẾT THÚC THÔNG BÁO
+            // XỬ LÝ CHO CÁC HỌC PHẦN BÌNH THƯỜNG (BẢNG 7 CỘT)
             // ==========================================
-
-
-            // DẠNG BẢNG THƯỜNG CHO CÁC HỌC PHẦN (Loop tự động tương thích 7 cột)
             let bodyHtml = ''; let headHtml = ''; let instructorInfos = [];
             let examCardsHtml = ''; let hasExamCards = false; 
 
@@ -375,18 +423,21 @@ function loadDataByHocPhan(sheetName, element) {
                 let firstCellTextRaw = String(row[0]).trim(); 
                 let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
                 
+                // Xử lý tiêu đề cột
                 if (rowIndex === 0) { 
                     row.forEach((cell) => { headHtml += `<th>${String(cell || '')}</th>`; });
                     if (isAdmin) headHtml += `<th style="width: 180px; min-width: 180px;">Thao tác</th>`; 
                     return; 
                 }
                 
+                // Trích xuất thông tin giảng viên
                 if (/mãhp|họcphần|gv\d|giảngviên|email|facebook|sốtínchỉ/.test(fullRowText.replace(/\s+/g, ''))) { 
                     let info = row.filter(cell => String(cell).trim() !== "").join(" <span class='mx-2 text-black-50'>|</span> "); 
                     if(info) instructorInfos.push(info); 
                     return; 
                 }
 
+                // Trích xuất thẻ bài kiểm tra/minigame
                 let isSpecialExam = /(đề thi thử|đề demo|minigame tuần)/i.test(fullRowText);
                 if (isSpecialExam) {
                     hasExamCards = true; let titleText = String(row[1] || row[0]).trim(); 
@@ -408,6 +459,7 @@ function loadDataByHocPhan(sheetName, element) {
                     return; 
                 }
 
+                // Định dạng hàng (màu sắc, icon)
                 let isNewRow = /^new$/i.test(firstCellTextRaw) || firstCellTextRaw.toLowerCase().includes('new'); 
                 let rowClass = 'grid-row'; let iconPrefix = '';
                 if (isNewRow) { rowClass += ' row-new'; } 
@@ -430,10 +482,11 @@ function loadDataByHocPhan(sheetName, element) {
                     }
                 });
 
+                // Render nút Admin
                 if (isAdmin) {
                     let sheetRowIndex = rowIndex + 1; 
                     let escapedCells = row.map(c => String(c || '').replace(/'/g, "\\'"));
-                    while(escapedCells.length < 7) escapedCells.push('');
+                    while(escapedCells.length < 7) escapedCells.push(''); // Đảm bảo đủ 7 cột
                     bodyHtml += `<td><div class="d-flex flex-wrap gap-1">
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
@@ -445,6 +498,7 @@ function loadDataByHocPhan(sheetName, element) {
                 bodyHtml += '</tr>';
             });
 
+            // Gắn dữ liệu vào DOM
             if (hasExamCards) $('#examCardsContainer').html(examCardsHtml).removeClass('d-none');
             if (instructorInfos.length > 0) { 
                 let cardContent = `<div class="instructor-card"><h6 class="mb-4"><i class="fa-solid fa-chalkboard-user me-2"></i>Thông tin lớp học & Giảng viên phụ trách</h6><div class="row">`; 
@@ -452,12 +506,20 @@ function loadDataByHocPhan(sheetName, element) {
                 cardContent += `</div></div>`; 
                 $('#instructorArea').html(cardContent).removeClass('d-none'); 
             }
-            $('#sheetTableHead').html(headHtml); $('#sheetTableBody').html(bodyHtml); 
-            $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none'); $('#swipeHint').removeClass('d-none');
+            
+            $('#sheetTableHead').html(headHtml); 
+            $('#sheetTableBody').html(bodyHtml); 
+            $('#loadingStatus').addClass('d-none'); 
+            $('#tableWrapper').removeClass('d-none'); 
+            $('#swipeHint').removeClass('d-none');
         },
-        error: function() { $('#loadingStatus').html('<span class="text-danger fw-bold">Có lỗi xảy ra khi tải dữ liệu!</span>'); }
+        error: function() { 
+            $('#loadingStatus').html('<span class="text-danger fw-bold">Có lỗi xảy ra khi tải dữ liệu!</span>'); 
+        }
     });
 }
+
+
 function initGlobalApp() {
             $('.app-container, .mobile-header').css('display', '');
             setTimeout(pingOnlineStatus, 1000); setInterval(pingOnlineStatus, 25000);

@@ -904,3 +904,19 @@
         font-size: 18px;
     }
 }
+
+/* TIÊU ĐỀ PHÂN CHIA DANH MỤC THÔNG BÁO */
+.tb-section-heading {
+    font-size: 16px;
+    font-weight: 800;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+.tb-section-heading.ht {
+    color: #0ea5e9; /* Xanh Cyan nổi bật cho học thuật */
+}
+.tb-section-heading.rl {
+    color: #16a34a; /* Xanh Lá tươi tắn cho rèn luyện */
+}
