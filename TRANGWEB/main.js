@@ -306,8 +306,8 @@ function loadDataByHocPhan(sheetName, element) {
                             ${badgeHtml}
                         </div>
                         <div class="tb-item-info">
-                            <div class="tb-item-title">${c2}</div>
-                            <div class="tb-item-dates">${dateDisplay}</div>
+                            <div class="tb-item-title" style="font-size: 17px; font-weight: 600;">${c2}</div> <!-- Chỉnh size ở đây -->
+        <div class="tb-item-dates" style="font-size: 13px;">${dateDisplay}</div>
                             ${adminHtml}
                         </div>
                     </div>`;
@@ -347,9 +347,10 @@ function loadDataByHocPhan(sheetName, element) {
                         let noteHtml = data.c7 ? `<div class="mt-4 p-3 border-start border-4 border-warning rounded text-dark" style="background: #fffbeb;"><strong><i class="fa-solid fa-paperclip me-1"></i> Ghi chú:</strong> ${data.c7}</div>` : '';
 
                         let html = `
-                            <div class="tb-detail-title-small">${data.c2}</div>
-                            <div class="tb-detail-dates mb-4">${dateDisplay}</div>
-                            <div class="tb-detail-main-content">
+                           <div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">${data.c2}</div> <!-- Chỉnh size tiêu đề chi tiết -->
+    <div class="tb-detail-dates mb-4" style="font-size: 15px;">${dateDisplay}</div>
+    <div class="tb-detail-main-content" style="font-size: 18px; line-height: 1.6;"> <!-- Chỉnh size nội dung -->
+        ${data.c3.replace(/\n/g, '<br>')}
                                 ${data.c3.replace(/\n/g, '<br>')}
                             </div>
                             ${noteHtml}
