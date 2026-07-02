@@ -316,7 +316,7 @@ let dateDisplay = `<i class="fa-regular fa-calendar"></i> Ngày đăng: ${c4 || 
                     </div>
                     <div class="col-12 mt-4">
                         <div class="p-4 bg-white rounded-4 shadow-sm" style="border-top: 5px solid #16a34a;">
-                            <h5 class="fw-bold mb-4" style="color: #16a34a; font-size: 18px; text-transform: uppercase;"><i class="fa-solid fa-person-running me-2"></i>THÔNG BÁO RÈN LUYỆN</h5>
+                            <h5 class="fw-bold mb-4" style="color: #16a34a; font-size: 18px; text-transform: uppercase;"><i class="fa-solid fa-person-running me-2"></i>HOẠT ĐỘNG RÈN LUYỆN</h5>
                             ${renLuyenHtml}
                         </div>
                     </div>
