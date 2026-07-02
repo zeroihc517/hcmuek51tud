@@ -354,19 +354,24 @@ pendingEventAction.date = getCorrectLocalDateString(pendingEventAction.date);
 function promptSavePersonalTkb() {
     let targetRowIndex = $('#pTkbRowIndex').val().trim();
     if (targetRowIndex !== '') {
-        pendingEventAction = { type: 'edit' };
+        // Tìm lịch học gốc để lấy chính xác 'thu', phục vụ việc tính đúng targetDate
+        let originalCourse = globalTkbData.find(c => String(c.sheetRowIndex) === targetRowIndex);
+        let originalThu = originalCourse ? originalCourse.thu : (parseInt($('#pTkbThu').val()) || 2);
+        
+        // Bổ sung 'thu' vào biến pendingEventAction
+        pendingEventAction = { type: 'edit', rowIndex: targetRowIndex, thu: originalThu };
         $('#eventScopeModal').modal('show');
     } else {
         pendingEventAction = { type: 'edit', scope: 'all' }; 
         executeSavePersonalTkb();
     }
 }
-
 function promptDeletePersonalTkb(sheetRowIndex) {
     let course = globalTkbData.find(c => String(c.sheetRowIndex) === String(sheetRowIndex));
     if (course && course.isSystem) { alert("Khóa bảo mật: Bạn không thể xóa học phần đã được đồng bộ từ hệ thống Đào tạo."); return; }
-    pendingEventAction = { type: 'delete', rowIndex: sheetRowIndex };
-   pendingEventAction = { type: 'delete', rowIndex: sheetRowIndex, thu: course.thu };
+    
+    // Xóa dòng cũ bị thiếu: pendingEventAction = { type: 'delete', rowIndex: sheetRowIndex };
+    pendingEventAction = { type: 'delete', rowIndex: sheetRowIndex, thu: course.thu };
     $('#eventScopeModal').modal('show');
 }
 
