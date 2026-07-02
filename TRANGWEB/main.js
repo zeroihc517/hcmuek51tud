@@ -346,16 +346,42 @@ function loadDataByHocPhan(sheetName, element) {
                         let linkHtml = data.c6 ? `<div class="mt-4"><a href="${data.c6}" target="_blank" class="btn fw-bold text-white shadow-sm px-4" style="background: #0f4c81; border-radius: 8px;"><i class="fa-solid fa-link me-2"></i>Truy cập liên kết đính kèm</a></div>` : '';
                         let noteHtml = data.c7 ? `<div class="mt-4 p-3 border-start border-4 border-warning rounded text-dark" style="background: #fffbeb;"><strong><i class="fa-solid fa-paperclip me-1"></i> Ghi chú:</strong> ${data.c7}</div>` : '';
 
-                        let html = `
-                           <div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">${data.c2}</div> <!-- Chỉnh size tiêu đề chi tiết -->
+                       // Xử lý xuống dòng và tự động chuyển đổi [IMG] thành hình ảnh (kèm hiệu ứng bo góc, đổ bóng mượt mà)
+// Xử lý xuống dòng
+// Xử lý xuống dòng
+let processedContent = data.c3.replace(/\n/g, '<br>');
+
+// 1. Tự động nhận diện Link thành chữ gạch chân (Bảo vệ an toàn cho cú pháp [IMG])
+processedContent = processedContent.replace(/(\[IMG(?:=.*?)?\].*?\[\/IMG\])|(https?:\/\/[^\s<]+)/gi, function(match, isImg, isUrl) {
+    if (isImg) {
+        return isImg; // Nếu là thẻ hình ảnh [IMG] thì giữ nguyên không đụng tới
+    }
+    if (isUrl) {
+        // Cắt bỏ dấu câu (chấm, phẩy...) ở cuối link nếu người dùng lỡ gõ dính vào
+        let cleanUrl = isUrl.replace(/[.,;!?]+$/, ''); 
+        let trailing = isUrl.slice(cleanUrl.length);
+        
+        // Tạo chữ gạch chân đơn giản, màu xanh lam nhạt cho hài hòa giao diện
+        return `<a href="${cleanUrl}" target="_blank" style="color: #0284c7; text-decoration: underline; font-weight: 600;">${cleanUrl}</a>${trailing}`;
+    }
+    return match;
+});
+
+// 2. Xử lý ảnh có kích thước tùy chỉnh (Ví dụ: [IMG=500px]link[/IMG] hoặc [IMG=50%]link[/IMG])
+processedContent = processedContent.replace(/\[IMG=(.*?)\](.*?)\[\/IMG\]/gi, '<div class="text-center my-3"><a href="$2" target="_blank" title="Bấm để xem ảnh gốc"><img src="$2" style="width: $1; max-width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); object-fit: contain;"></a></div>');
+
+// 3. Xử lý ảnh mặc định to full màn hình (Ví dụ: [IMG]link[/IMG])
+processedContent = processedContent.replace(/\[IMG\](.*?)\[\/IMG\]/gi, '<div class="text-center my-3"><a href="$1" target="_blank" title="Bấm để xem ảnh gốc"><img src="$1" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);"></a></div>');
+
+let html = `
+    <div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">${data.c2}</div>
     <div class="tb-detail-dates mb-4" style="font-size: 15px;">${dateDisplay}</div>
-    <div class="tb-detail-main-content" style="font-size: 18px; line-height: 1.6;"> <!-- Chỉnh size nội dung -->
-        ${data.c3.replace(/\n/g, '<br>')}
-                            </div>
-                            ${noteHtml}
-                            ${linkHtml}
-                        `;
-                        $('#tbDetailContent').html(html);
+    <div class="tb-detail-main-content" style="font-size: 18px; line-height: 1.6;">
+        ${processedContent}
+    </div>
+    ${noteHtml}
+    ${linkHtml}
+`;                        $('#tbDetailContent').html(html);
                         $('#tbMainView').addClass('d-none');
                         $('#tbDetailContainer').removeClass('d-none');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
