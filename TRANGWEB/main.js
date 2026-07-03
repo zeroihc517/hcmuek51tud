@@ -128,7 +128,7 @@ function renderSidebarCategories() {
         let lowerName = name.trim().toLowerCase();
         
         // Bỏ qua các sheet dữ liệu hệ thống ẩn
-        if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin' || lowerName === 'chathistory' || lowerName === 'userregisteredcourses') return; 
+if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin' || lowerName === 'chathistory' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb') return;
 
         if (lowerName !== 'thông báo') {
             if (lowerName === 'users' && !isAdmin) return;
@@ -237,12 +237,12 @@ function loadDataByHocPhan(sheetName, element) {
                     <div class="tb-list-body">
                         <div class="row g-4">
                             <div class="col-md-6 tb-section-block" id="tbSectionHocThuat">
-                                <div class="tb-section-heading ht border-bottom pb-2 mb-3"><i class="fa-solid fa-book-open-reader me-2"></i> THÔNG BÁO HỌC THUẬT</div>
+                                <div class="tb-section-heading ht border-bottom pb-2 mb-3"><i class="fa-solid fa-book-open-reader me-2"></i> Không gian học thuật & Nghiên cứu khoa học</div>
                                 <div class="tb-section-items" id="tbItemsHocThuat"></div>
                             </div>
                             
                             <div class="col-md-6 tb-section-block" id="tbSectionRenLuyen">
-                                <div class="tb-section-heading rl border-bottom pb-2 mb-3"><i class="fa-solid fa-person-running me-2"></i> HOẠT ĐỘNG RÈN LUYỆN</div>
+                                <div class="tb-section-heading rl border-bottom pb-2 mb-3"><i class="fa-solid fa-person-running me-2"></i> Hoạt động Rèn luyện</div>
                                 <div class="tb-section-items" id="tbItemsRenLuyen"></div>
                             </div>
                         </div>
@@ -264,16 +264,15 @@ function loadDataByHocPhan(sheetName, element) {
                     let c5 = String(row[4] || '').trim();
                     let c6 = String(row[5] || '').trim();
                     let c7 = String(row[6] || '').trim();
+                    let c7_raw = c7; // THÊM DÒNG NÀY: Lưu lại dữ liệu gốc của cột 7
 
                     let isNew = /^new$/i.test(c1) || c1.toLowerCase().includes('new');
                     
-                    // 1. Kiểm tra xem ghi chú có chứa chữ Rèn luyện không
-                    let isRenLuyen = c7.toLowerCase().includes('rèn luyện');
+                    // 1. Kiểm tra xem ghi chú có chứa chữ Rèn luyện không (Dựa vào dữ liệu gốc)
+                    let isRenLuyen = c7_raw.toLowerCase().includes('rèn luyện');
                     
-                    // 2. Nếu có, tiến hành xóa chữ "Rèn luyện" khỏi Ghi chú
+                    // 2. Nếu có, tiến hành xóa chữ "Rèn luyện" khỏi Ghi chú (Chỉ để hiển thị giao diện cho đẹp)
                     if (isRenLuyen) {
-                        // Xóa chữ "rèn luyện" (không phân biệt hoa thường) 
-                        // và dọn dẹp các dấu câu thừa (như dấu :, -, phẩy) nếu có ở đầu câu
                         c7 = c7.replace(/rèn luyện/ig, '').replace(/^[:\-,\s]+/, '').trim();
                     }
                     
@@ -288,7 +287,11 @@ function loadDataByHocPhan(sheetName, element) {
                     if (isAdmin) {
                         let sheetRowIndex = rowIndex + 1;
                         let ec1 = c1.replace(/'/g, "\\'"); let ec2 = c2.replace(/'/g, "\\'"); let ec3 = c3.replace(/'/g, "\\'"); let ec4 = c4.replace(/'/g, "\\'");
-                        let ec5 = c5.replace(/'/g, "\\'"); let ec6 = c6.replace(/'/g, "\\'"); let ec7 = c7.replace(/'/g, "\\'");
+                        let ec5 = c5.replace(/'/g, "\\'"); let ec6 = c6.replace(/'/g, "\\'"); 
+                        
+                        // QUAN TRỌNG: Truyền c7_raw vào nút Sửa thay vì c7 để không bị mất chữ "Rèn luyện"
+                        let ec7 = c7_raw.replace(/'/g, "\\'");
+                        
                         adminHtml = `
                         <div class="mt-2" onclick="event.stopPropagation();">
                             <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
@@ -552,8 +555,13 @@ function initGlobalApp() {
             fetchSemesterConfig(); 
             loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
             loadWebLinks(); checkNewQA(); fetchAndRenderCategories();
-        }
-
+       
+	if (currentUser && currentUser.mssv === "51.01.108.008") {
+        $('#adminDatabaseLink').removeClass('d-none');
+    } else {
+        $('#adminDatabaseLink').addClass('d-none');
+    }
+}
         $(document).ready(function() {
             if (!currentUser) {
                 let authModal = new bootstrap.Modal(document.getElementById('userAuthModal'), { backdrop: 'static', keyboard: false });

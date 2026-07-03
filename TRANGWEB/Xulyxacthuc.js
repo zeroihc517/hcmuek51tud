@@ -56,6 +56,7 @@
                 $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
                 $('#btnManageCategories').removeClass('d-none');
                 renderSidebarCategories(); 
+		$('#adminDatabaseLink').removeClass('d-none');
                 if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
                 if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); } 
                 alert("Xác thực quyền Admin thành công!");
@@ -68,8 +69,12 @@
                     isAdmin = false; $('#btnAdminLoginToggle').html('<i class="fa-solid fa-lock"></i> Dành cho Ban quản trị').css('color', 'var(--text-muted)');
                     $('#btnManageCategories').addClass('d-none');
                     renderSidebarCategories(); 
+		if (!currentUser || currentUser.mssv !== "51.01.108.008") {
+                $('#adminDatabaseLink').addClass('d-none');
+            }
                     if (currentSheetName.toLowerCase() === 'users') { loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
                     } else if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); }
+		   
                     if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
                 }
             } else { $('#adminLoginError').addClass('d-none'); $('#txtAdminPass').val(''); $('#adminLoginModal').modal('show'); }
