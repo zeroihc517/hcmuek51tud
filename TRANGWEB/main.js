@@ -467,7 +467,7 @@ let html = `
                 }
 
                 // Trích xuất thẻ bài kiểm tra/minigame
-                let isSpecialExam = /(đề thi thử|đề demo|minigame tuần|minigame hè)/i.test(fullRowText);
+                let isSpecialExam = /(đề thi thử|đề demo|minigame tuần|minigame hè|minigame số)/i.test(fullRowText);
                 if (isSpecialExam) {
                     hasExamCards = true; let titleText = String(row[1] || row[0]).trim(); 
                     let _extRegex = /(https?:\/\/[^\s]+)/g; let extMatch = row.join(" ").match(_extRegex); 
