@@ -1013,3 +1013,433 @@
 .tb-section-heading.rl {
     color: #16a34a; /* Xanh Lá tươi tắn cho rèn luyện */
 }
+
+/* ==========================================================================
+   BỘ CSS DARK MODE TOÀN DIỆN - TINH CHỈNH SẠCH SẼ MỌI PHÂN HỆ
+   ========================================================================== */
+body.dark-mode {
+    --bg-global: #0b0f19 !important;       /* Nền Midnight thẫm sâu */
+    --card-bg: #131c30 !important;         /* Nền card xanh đen công nghệ */
+    --text-main: #f8fafc !important;       /* Chữ trắng sáng dịu */
+    --text-muted: #94a3b8 !important;      /* Chữ mờ thanh lịch */
+    --border-color: #1e293b !important;    /* Đường viền mỏng tối */
+    --line: #1e293b !important;
+    
+    --primary-light: #172554 !important;
+    --topic-bg: #1e3a8a !important;       
+    --lesson-bg: #064e3b !important;      
+    --exam-bg: #4c0519 !important;        
+}
+
+/* --- HỆ THỐNG NỀN & CHỮ GỐC --- */
+body.dark-mode, 
+body.dark-mode .app-container {
+    background-color: #0b0f19 !important;
+    color: #f8fafc !important;
+}
+
+/* --- THANH SIDEBAR & DANH MỤC TRUY CẬP --- */
+body.dark-mode .sidebar {
+    background-color: #131c30 !important;
+    border-right-color: #1e293b !important;
+}
+body.dark-mode .btn-course {
+    background-color: #19243d !important;
+    border-color: #2e3d5c !important;
+    color: #e2e8f0 !important;
+}
+body.dark-mode .btn-course:hover {
+    background-color: #233152 !important;
+    border-color: #475569 !important;
+}
+body.dark-mode .btn-course.active {
+    background-color: #1d4ed8 !important;
+    color: #ffffff !important;
+    border-color: #3b82f6 !important;
+}
+body.dark-mode .btn-qa-menu {
+    background-color: #131c30 !important;
+    border-color: #3b82f6 !important;
+}
+
+/* --- KHỐI TIÊU ĐỀ HEADER TRÊN CÙNG --- */
+body.dark-mode .top-header {
+    background-color: #131c30 !important;
+    border-color: #1e293b !important;
+    color: #ffffff !important;
+}
+body.dark-mode .page-title {
+    color: #ffffff !important;
+}
+body.dark-mode .instructor-card {
+    background-color: #131c30 !important;
+    border-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .instructor-card h6 {
+    color: #38bdf8 !important;
+}
+body.dark-mode .instructor-item {
+    color: #cbd5e1 !important;
+}
+
+/* --- PHÂN HỆ: TỔNG HỢP LINK --- */
+body.dark-mode #tongHopSection {
+    background-color: #0b0f19 !important;
+}
+body.dark-mode .link-card-modern {
+    background-color: #131c30 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+body.dark-mode .link-card-modern h5 {
+    color: #ffffff !important;
+}
+body.dark-mode .link-card-modern .card-desc {
+    color: #94a3b8 !important;
+}
+body.dark-mode .link-card-modern::before, 
+body.dark-mode .link-card-modern::after {
+    background-image: radial-gradient(#2563eb 1.5px, transparent 1.5px) !important;
+    opacity: 0.3 !important;
+}
+
+/* --- PHÂN HỆ: BẢNG DỮ LIỆU HỌC PHẦN (Data Card) --- */
+body.dark-mode .data-card {
+    background-color: #131c30 !important;
+    border-color: #1e293b !important;
+}
+body.dark-mode .custom-portal-table td {
+    color: #cbd5e1 !important;
+    border-bottom-color: #1e293b !important;
+}
+body.dark-mode .grid-row:hover td {
+    background-color: #1e293b !important;
+}
+body.dark-mode .grid-row td:first-child {
+    color: #ffffff !important;
+}
+body.dark-mode .grid-row.row-topic td { 
+    background-color: #1e3a8a !important; 
+    color: #93c5fd !important; 
+}
+body.dark-mode .grid-row.row-lesson td { 
+    background-color: #064e3b !important; 
+    color: #6ee7b7 !important; 
+}
+body.dark-mode .grid-row.row-exam td { 
+    background-color: #4c0519 !important; 
+    color: #fda4af !important; 
+}
+body.dark-mode .grid-row.row-new td {
+    background-color: #4c0519 !important;
+    color: #fda4af !important;
+    border-bottom-color: #9f1239 !important;
+}
+
+/* --- PHÂN HỆ: GIẢI ĐÁP THẮC MẮC Q&A --- */
+body.dark-mode .qa-item {
+    background-color: #131c30 !important;
+    border-color: #1e293b !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+}
+body.dark-mode .qa-item.unanswered-item {
+    background-color: #1c1618 !important;
+    border-left-color: #ef4444 !important;
+}
+body.dark-mode .qa-question {
+    color: #38bdf8 !important; /* Xanh trời nổi bật câu hỏi */
+}
+body.dark-mode .qa-time {
+    color: #94a3b8 !important;
+}
+body.dark-mode .qa-no-answer {
+    background-color: #1e293b !important;
+    color: #cbd5e1 !important;
+    border-left-color: #475569 !important;
+}
+body.dark-mode .msg-admin {
+    background-color: #064e3b !important;
+    border-left-color: #10b981 !important;
+    color: #a7f3d0 !important;
+}
+body.dark-mode .msg-sv {
+    background-color: #1e3a8a !important;
+    border-left-color: #3b82f6 !important;
+    color: #bfdbfe !important;
+}
+body.dark-mode .vote-action-bar {
+    border-top-color: #1e293b !important;
+}
+body.dark-mode .btn-vote {
+    background-color: #1e293b !important;
+    color: #cbd5e1 !important;
+}
+body.dark-mode .btn-vote:hover {
+    background-color: #334155 !important;
+}
+body.dark-mode .reply-box {
+    background-color: #0b0f19 !important;
+    border-color: #1e293b !important;
+}
+
+/* --- PHÂN HỆ: THỜI GIAN BIỂU & DEADLINES --- */
+body.dark-mode .nav-week-container {
+    background-color: #131c30 !important;
+    border-color: #1e293b !important;
+}
+body.dark-mode .select-floating-box label {
+    background-color: #131c30 !important;
+    color: #38bdf8 !important;
+}
+body.dark-mode .table-box {
+    background-color: #131c30 !important;
+}
+body.dark-mode .sched td {
+    border-color: #1e293b !important;
+    background-color: #131c30 !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .sched td[rowspan] {
+    background-color: #131c30 !important;
+}
+body.dark-mode .col-tiet {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .sched td.day:empty {
+    background-color: #131c30 !important;
+}
+
+body.dark-mode .td-subject {
+    background-color: #1e3a8a !important;
+}
+body.dark-mode .subject {
+    background-color: #1e3a8a !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .subject .time {
+    color: #fca5a5 !important;
+}
+body.dark-mode .subject .room {
+    color: #93c5fd !important;
+}
+body.dark-mode .subject .teacher {
+    color: #cbd5e1 !important;
+    border-top-color: rgba(255,255,255,0.1) !important;
+}
+
+body.dark-mode .online-box {
+    background: linear-gradient(135deg, #181115, #29161c, #3d1422, #29161c, #181115) !important;
+    border-color: #7f1d1d !important;
+}
+body.dark-mode .online-card {
+    background-color: #131c30 !important;
+    color: #f8fafc !important;
+    border-color: #1e293b !important;
+}
+body.dark-mode .online-card h3 {
+    color: #fca5a5 !important;
+}
+body.dark-mode .online-card .desc {
+    color: #ffffff !important;
+}
+body.dark-mode .online-title {
+    color: #fca5a5 !important;
+}
+
+/* --- PHÂN HỆ: THÔNG BÁO --- */
+body.dark-mode .tb-list-container,
+body.dark-mode .tb-list-body,
+body.dark-mode .tb-detail-body,
+body.dark-mode .tb-detail-main-content {
+    background-color: #131c30 !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .tb-detail-main-content * {
+    color: #e2e8f0 !important;
+}
+body.dark-mode .tb-list-item {
+    border-bottom-color: #1e293b !important;
+}
+body.dark-mode .tb-list-item:hover {
+    background-color: #1e293b !important;
+}
+body.dark-mode .tb-item-title,
+body.dark-mode .tb-detail-title-small {
+    color: #ffffff !important;
+}
+body.dark-mode .tb-detail-dates,
+body.dark-mode .tb-date-text {
+    background: #1e293b !important;
+    color: #94a3b8 !important;
+    border-bottom-color: #1e293b !important;
+}
+
+/* --- CHAT BOX --- */
+body.dark-mode .chat-body {
+    background-color: #0b0f19 !important;
+}
+body.dark-mode .chat-msg-other {
+    background-color: #131c30 !important;
+    border-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+body.dark-mode .chat-msg-self {
+    background-color: #1e3a8a !important;
+    border-color: #1d4ed8 !important;
+    color: #e0f2fe !important;
+}
+body.dark-mode .chat-footer {
+    background-color: #131c30 !important;
+    border-top-color: #1e293b !important;
+}
+
+/* --- BIỂU MẪU & CÁC Ô ĐIỀU KHIỂN INPUT --- */
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+    background-color: #0b0f19 !important;
+    color: #ffffff !important;
+    border-color: #2e3d5c !important;
+}
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus {
+    border-color: #3b82f6 !important;
+    background-color: #0b0f19 !important;
+}
+
+/* --- THANH ĐÁY FOOTER TRUY CẬP NHANH --- */
+body.dark-mode .fixed-bottom-footer {
+    background-color: #061524 !important;
+    border-top: 1px solid #1e293b !important;
+}
+
+/* --- CÔNG TẮC ĐỔI NỀN (DARK MODE SWITCH) --- */
+.dark-mode-switch {
+    position: relative;
+    width: 48px;
+    height: 24px;
+    background: #cbd5e1;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 4px;
+}
+.dark-mode-switch .switch-handle {
+    width: 18px;
+    height: 18px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: #f59e0b;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+body.dark-mode .dark-mode-switch {
+    background: #2563eb;
+}
+body.dark-mode .dark-mode-switch .switch-handle {
+    transform: translateX(22px);
+    color: #f8fafc;
+    background: #0f172a;
+}
+/* ==========================================================================
+   DARK MODE NÂNG CẤP - FIX LỖI CÁC POPUP, MODAL, BẢNG BIỂU & TOOLBAR
+   ========================================================================== */
+
+/* --- 1. SỬA THANH CÔNG CỤ TKB (Ảnh b39f1c) --- */
+body.dark-mode .tkb-personal-toolbar {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+}
+body.dark-mode .tkb-personal-toolbar .badge.bg-primary {
+    background-color: #1e3a8a !important; /* Xanh tối dịu hơn */
+}
+body.dark-mode .tkb-personal-toolbar .btn-outline-secondary {
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+body.dark-mode .tkb-personal-toolbar .btn-outline-secondary:hover {
+    background-color: #1e293b !important;
+}
+
+/* --- 2. SỬA CÁC KHUNG CHỨA MODAL & FORM (Ảnh b39f16, b3a1e0) --- */
+body.dark-mode .modal-content,
+body.dark-mode .auth-modal-content {
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+body.dark-mode .modal-header {
+    border-bottom-color: var(--border-color) !important;
+}
+body.dark-mode .modal-footer.bg-light,
+body.dark-mode .modal-footer {
+    background-color: #0b0f19 !important; /* Thay màu nền sáng ở footer */
+    border-top-color: var(--border-color) !important;
+}
+body.dark-mode .modal-body label,
+body.dark-mode .modal-body p {
+    color: var(--text-main) !important;
+}
+body.dark-mode .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%); /* Đổi màu nút X sang trắng */
+}
+body.dark-mode .btn-close-white {
+    filter: none;
+}
+
+/* --- 3. SỬA BẢNG ĐỒNG BỘ HỌC PHẦN & TỔNG HỢP LỊCH (Ảnh b39f35, b39f3b) --- */
+body.dark-mode .table,
+body.dark-mode .table-bordered,
+body.dark-mode .table-bordered td,
+body.dark-mode .table-bordered th {
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+body.dark-mode .tkb-mgr-table, 
+body.dark-mode .system-tkb-table {
+    background-color: var(--card-bg) !important;
+}
+body.dark-mode .tkb-mgr-table td, 
+body.dark-mode .system-tkb-table td {
+    background-color: var(--card-bg) !important;
+}
+/* Hiệu ứng hover cho bảng */
+body.dark-mode .table-hover tbody tr:hover td {
+    background-color: #1e293b !important;
+}
+/* Sửa ô Checkbox */
+body.dark-mode .form-check-input {
+    background-color: #0b0f19 !important;
+    border-color: #475569 !important;
+}
+body.dark-mode .form-check-input:checked {
+    background-color: #3b82f6 !important;
+    border-color: #3b82f6 !important;
+}
+
+/* --- 4. SỬA MÀU NỀN CÁC DÒNG ĐẶC BIỆT TRONG BẢNG QUẢN LÝ --- */
+/* Sửa dòng Deadline màu hồng chói */
+body.dark-mode .tkb-mgr-table tr[style*="background-color: #fff5f6"] td,
+body.dark-mode .tkb-mgr-table tr[style*="background-color: #fff5f6"] {
+    background-color: #3f1d24 !important; 
+}
+/* Sửa nền ô cột 1 gom nhóm (Gộp môn) */
+body.dark-mode .tkb-mgr-table td[rowspan] {
+    background-color: var(--card-bg) !important;
+}
+
+/* --- 5. SỬA CÁC ALERT THÔNG BÁO (Hướng dẫn) --- */
+body.dark-mode .alert-light {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: var(--text-main) !important;
+}
+body.dark-mode .alert-light .text-dark {
+    color: #38bdf8 !important; /* Sửa chữ đen thành xanh sáng */
+}

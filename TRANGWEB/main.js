@@ -570,5 +570,39 @@ function initGlobalApp() {
                 authModal.show();
             } else { initGlobalApp(); }
         });
+// ==========================================
+// LOGIC XỬ LÝ CHẾ ĐỘ NỀN TỐI (DARK MODE)
+// ==========================================
+function initDarkMode() {
+    // Kiểm tra xem người dùng trước đó có bật Nền tối không
+    const isDarkMode = localStorage.getItem('darkModeEnabled') === 'true';
+    
+    if (isDarkMode) {
+        $('body').addClass('dark-mode');
+        $('.toggle-dark-mode-btn i').removeClass('fa-moon').addClass('fa-sun');
+    }
 
+    // Lắng nghe sự kiện click nút đổi nền (cho cả 2 nút trên mobile và desktop)
+    $('.toggle-dark-mode-btn').on('click', function(e) {
+        e.stopPropagation(); // Tránh kích hoạt các sự kiện ẩn menu không mong muốn
+        
+        $('body').toggleClass('dark-mode');
+        const hasDark = $('body').hasClass('dark-mode');
+        
+        // Lưu trạng thái vào localStorage
+        localStorage.setItem('darkModeEnabled', hasDark);
+        
+        // Thay đổi icon tương ứng giữa mặt trăng và mặt trời
+        if (hasDark) {
+            $('.toggle-dark-mode-btn i').removeClass('fa-moon').addClass('fa-sun');
+        } else {
+            $('.toggle-dark-mode-btn i').removeClass('fa-sun').addClass('fa-moon');
+        }
+    });
+}
+
+// Kích hoạt ngay khi tài liệu đã sẵn sàng
+$(document).ready(function() {
+    initDarkMode();
+});
 
