@@ -167,30 +167,23 @@
             </div>
 
 <div id="gpaSection" class="d-none">
-    <header class="top-header">
-        <div class="page-title"><i class="fa-solid fa-calculator"></i> Bảng tính điểm GPA Tích lũy</div>
+    <header class="top-header flex-column align-items-start gap-3">
+        <div class="d-flex justify-content-between w-100 align-items-center">
+            <div class="page-title"><i class="fa-solid fa-calculator"></i> Bảng tính điểm GPA Tích lũy</div>
+            <button class="btn btn-sm btn-outline-secondary fw-bold" onclick="openGpaConfigModal()">
+                <i class="fa-solid fa-gear"></i> Cài đặt Ngành
+            </button>
+        </div>
+        
+        <div id="gpaMajorFilters" class="d-none w-100 d-flex gap-2 p-1 bg-light rounded border">
+            <button class="btn btn-sm flex-fill fw-bold active btn-major-filter" id="filterMajorAll" onclick="setGpaMajorFilter('all')">Tất cả</button>
+            <button class="btn btn-sm flex-fill fw-bold btn-major-filter" id="filterMajor1" onclick="setGpaMajorFilter('1')">Ngành 1</button>
+            <button class="btn btn-sm flex-fill fw-bold btn-major-filter" id="filterMajor2" onclick="setGpaMajorFilter('2')">Ngành 2</button>
+        </div>
     </header>
 
-    <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="online-card text-center shadow-sm border">
-                <h6 class="text-muted fw-bold mb-2">GPA (Hệ 4.0)</h6>
-                <h2 id="gpaTotal4" class="text-danger fw-bold m-0">0.00</h2>
-            </div>
+    <div class="row g-4 mb-4" id="gpaStatsArea">
         </div>
-        <div class="col-md-4">
-            <div class="online-card text-center shadow-sm border">
-                <h6 class="text-muted fw-bold mb-2">Trung bình (Hệ 10)</h6>
-                <h2 id="gpaTotal10" class="text-primary fw-bold m-0">0.0</h2>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="online-card text-center shadow-sm border">
-                <h6 class="text-muted fw-bold mb-2">Tín chỉ tích lũy</h6>
-                <h2 id="gpaTotalCredits" class="text-success fw-bold m-0">0</h2>
-            </div>
-        </div>
-    </div>
 
     <div class="tb-list-container shadow-sm mb-4 bg-white">
         <div class="tb-header-blue d-flex justify-content-between align-items-center">
@@ -213,6 +206,7 @@
             </div>
             <div class="modal-body p-4">
                 <input type="hidden" id="gpaEditId" value="">
+                
                 <div class="row g-3 mb-3">
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Mã HP</label>
@@ -229,14 +223,40 @@
                     <div class="col-md-3">
                         <label class="form-label fw-bold">Phân loại</label>
                         <select id="gpaCourseType" class="form-select">
-    <option value="chuyen_nganh">Học phần chuyên ngành</option>
-    <option value="mon_chung">Môn chung</option>
-    <option value="ngoai_le">GDTC + GDQP (Không tính GPA)</option>
-</select>
+                            <option value="chuyen_nganh">Học phần chuyên ngành</option>
+                            <option value="mon_chung">Môn chung</option>
+                            <option value="ngoai_le">GDTC + GDQP (Không tính GPA)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row g-3 mb-3" id="gpaMajorSelectionGroup" style="display: none;">
+                    <div class="col-12">
+                        <label class="form-label fw-bold text-primary">Thuộc ngành học nào? (Có thể chọn cả 2 nếu được chuyển điểm)</label>
+                        <div class="d-flex gap-4 p-2 bg-light rounded border">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="gpaBelongsToMajor1" value="1" checked>
+                                <label class="form-check-label fw-bold" for="gpaBelongsToMajor1" id="lblMajor1Name">Ngành 1</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="gpaBelongsToMajor2" value="2">
+                                <label class="form-check-label fw-bold" for="gpaBelongsToMajor2" id="lblMajor2Name">Ngành 2</label>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <hr>
+                
+                <div class="mb-3 bg-light p-2 rounded border border-primary-subtle">
+                    <div class="form-check form-switch custom-switch-pro d-flex align-items-center">
+                        <input class="form-check-input shadow-sm me-2" type="checkbox" id="gpaIsRetake" onchange="toggleGPARetakeCols()" style="cursor: pointer; width: 40px; height: 20px;">
+                        <label class="form-check-label fw-bold text-primary" for="gpaIsRetake" style="cursor: pointer; padding-top: 2px;">
+                            <i class="fa-solid fa-rotate-right me-1"></i> Bật chế độ nhập điểm Cải thiện / Học lại (Lần 2, Lần 3)
+                        </label>
+                    </div>
+                </div>
+                
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <label class="form-label fw-bold m-0 text-danger">Các cột điểm (Tổng % phải = 100%)</label>
                     <button class="btn btn-sm btn-outline-success fw-bold" onclick="addGPAColumnInput()">
@@ -254,7 +274,39 @@
             </div>
         </div>
     </div>
-</div>            <div id="courseSection">
+</div>
+
+<div class="modal fade" id="gpaConfigModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-secondary text-white">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-gear me-2"></i>Cài đặt Song ngành</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="form-check form-switch custom-switch-pro mb-3">
+                    <input class="form-check-input shadow-sm" type="checkbox" id="enableDoubleMajor" onchange="toggleDoubleMajorConfig()" style="cursor: pointer; width: 40px; height: 20px;">
+                    <label class="form-check-label fw-bold ms-2 mt-1" for="enableDoubleMajor">Có học Ngành 2</label>
+                </div>
+                
+                <div id="doubleMajorConfigArea" class="d-none">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Tên Ngành 1</label>
+                        <input type="text" id="configMajor1Name" class="form-control fw-bold" placeholder="VD: Sư phạm Toán">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Tên Ngành 2</label>
+                        <input type="text" id="configMajor2Name" class="form-control fw-bold" placeholder="VD: Ngôn ngữ Anh">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary px-4 fw-bold w-100" onclick="saveGpaConfig()">Lưu cài đặt</button>
+            </div>
+        </div>
+    </div>
+</div>
+            <div id="courseSection">
                 <header class="top-header">
                     <div class="page-title"><i class="fa-solid fa-book-open"></i> Học nhóm - Năm 2 - Khoa Toán-Tin học</div>
                 </header>

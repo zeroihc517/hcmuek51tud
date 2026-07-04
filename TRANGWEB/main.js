@@ -659,26 +659,26 @@ function convertGradeToSystem(score10, type) {
     return { scale4, letter, passed, roundedScore };
 }
 
-function calculateOverallGPA() {
+// 1. HÀM TÍNH TOÁN ĐIỂM SỐ ĐỘC LẬP
+function computeStatsForDataset(dataset) {
     let totalAttemptedCredits = 0; 
     let totalAccumulatedCredits = 0; 
     let totalScore4 = 0;
     let totalScore10 = 0;
 
-    myGPADataset.forEach(course => {
+    dataset.forEach(course => {
         let bestAttempt = 1; 
         let maxScore4 = -1; 
         let maxScore10 = -1; 
         let bestConv = null;
 
         for(let i = 1; i <= 3; i++) {
-            let hasAllScores = true; // Cờ kiểm tra xem ĐÃ NHẬP ĐỦ điểm thành phần chưa
+            let hasAllScores = true; 
             let currentScore10 = 0;
             let hasAnyColumn = course.columns.length > 0;
 
             course.columns.forEach(col => {
                 let val = parseFloat(col['score' + i]);
-                // Nếu cột điểm trống hoặc không phải số -> đánh dấu là chưa hoàn thành
                 if(isNaN(val) || col['score' + i] === '') { 
                     hasAllScores = false; 
                 } else {
@@ -686,7 +686,6 @@ function calculateOverallGPA() {
                 }
             });
 
-            // CHỈ TÍNH ĐIỂM khi tất cả các cột thành phần của lần thi này đều đã có điểm
             if(hasAllScores && hasAnyColumn) {
                 let conv = convertGradeToSystem(currentScore10, course.type);
                 if(conv.scale4 > maxScore4 || (conv.scale4 === maxScore4 && conv.roundedScore > maxScore10)) {
@@ -698,14 +697,13 @@ function calculateOverallGPA() {
             }
         }
 
-        // Cập nhật trạng thái hiển thị của học phần
+        // Gán trạng thái đậu rớt vào object môn học
         if (maxScore10 >= 0) {
             course.finalScore10 = maxScore10.toFixed(1);
             course.finalScore4 = bestConv.scale4.toFixed(1);
             course.letter = bestConv.letter;
             course.passed = bestConv.passed;
         } else {
-            // Nếu chưa nhập đủ điểm -> hiển thị "-"
             course.finalScore10 = "-";
             course.finalScore4 = "-";
             course.letter = "-";
@@ -713,17 +711,19 @@ function calculateOverallGPA() {
         }
         
         course.bestAttempt = maxScore10 >= 0 ? bestAttempt : 1;
-
         let creds = parseInt(course.credits) || 0;
 
         if (course.type !== 'ngoai_le') {
             if (maxScore10 >= 0) { 
-                totalAttemptedCredits += creds;
+                // Cộng dồn để chia trung bình GPA (Bao gồm cả môn Rớt)
+                totalAttemptedCredits += creds; 
                 totalScore4 += (maxScore4 * creds);
                 totalScore10 += (maxScore10 * creds);
-            }
-            if (course.passed) {
-                totalAccumulatedCredits += creds;
+                
+                // CHỈ TÍNH TÍN CHỈ TÍCH LŨY NẾU ĐÃ QUA MÔN (ĐẠT)
+                if (course.passed) {
+                    totalAccumulatedCredits += creds;
+                }
             }
         }
     });
@@ -731,38 +731,154 @@ function calculateOverallGPA() {
     let gpa4 = totalAttemptedCredits > 0 ? (totalScore4 / totalAttemptedCredits).toFixed(2) : "0.00";
     let gpa10 = totalAttemptedCredits > 0 ? (totalScore10 / totalAttemptedCredits).toFixed(2) : "0.00";
 
-    $('#gpaTotal4').text(gpa4); 
-    $('#gpaTotal10').text(gpa10); 
-    $('#gpaTotalCredits').text(totalAccumulatedCredits);
+    return { gpa4, gpa10, credits: totalAccumulatedCredits };
 }
 
+// 2. HÀM HIỂN THỊ CÁC Ô CARD THỐNG KÊ LÊN GIAO DIỆN
+function renderGPAStats() {
+    let statsContainer = $('#gpaStatsArea');
+    
+    // NẾU BẬT SONG NGÀNH VÀ ĐANG XEM TAB "TẤT CẢ" -> HIỂN THỊ CHIA ĐÔI
+    if (gpaConfig.isDoubleMajor && currentMajorFilter === 'all') {
+        let ds1 = myGPADataset.filter(c => {
+            let m = c.majors || ['1'];
+
+            return m.includes('1');
+        });
+        let ds2 = myGPADataset.filter(c => {
+            let m = c.majors || ['1'];
+
+            return m.includes('2');
+        });
+
+        let s1 = computeStatsForDataset(ds1);
+        let s2 = computeStatsForDataset(ds2);
+
+        let n1 = gpaConfig.name1;
+        let n2 = gpaConfig.name2;
+
+        let html = `
+            <div class="col-md-4">
+                <div class="online-card text-center shadow-sm border px-2 py-3 h-100">
+                    <h6 class="text-muted fw-bold mb-3">GPA (Hệ 4.0)</h6>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="w-50 text-center"><h3 class="text-danger fw-bold m-0">${s1.gpa4}</h3><small class="text-muted d-block text-truncate mt-1" style="font-size: 11px;">${n1}</small></div>
+                        <div style="width: 1px; height: 35px; background-color: #e2e8f0; margin: 0 10px;"></div>
+                        <div class="w-50 text-center"><h3 class="text-danger fw-bold m-0">${s2.gpa4}</h3><small class="text-muted d-block text-truncate mt-1" style="font-size: 11px;">${n2}</small></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="online-card text-center shadow-sm border px-2 py-3 h-100">
+                    <h6 class="text-muted fw-bold mb-3">Trung bình (Hệ 10)</h6>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="w-50 text-center"><h3 class="text-primary fw-bold m-0">${s1.gpa10}</h3><small class="text-muted d-block text-truncate mt-1" style="font-size: 11px;">${n1}</small></div>
+                        <div style="width: 1px; height: 35px; background-color: #e2e8f0; margin: 0 10px;"></div>
+                        <div class="w-50 text-center"><h3 class="text-primary fw-bold m-0">${s2.gpa10}</h3><small class="text-muted d-block text-truncate mt-1" style="font-size: 11px;">${n2}</small></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="online-card text-center shadow-sm border px-2 py-3 h-100">
+                    <h6 class="text-muted fw-bold mb-3">Tín chỉ (Đã qua)</h6>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="w-50 text-center"><h3 class="text-success fw-bold m-0">${s1.credits}</h3><small class="text-muted d-block text-truncate mt-1" style="font-size: 11px;">${n1}</small></div>
+                        <div style="width: 1px; height: 35px; background-color: #e2e8f0; margin: 0 10px;"></div>
+                        <div class="w-50 text-center"><h3 class="text-success fw-bold m-0">${s2.credits}</h3><small class="text-muted d-block text-truncate mt-1" style="font-size: 11px;">${n2}</small></div>
+                    </div>
+                </div>
+            </div>
+        `;
+        statsContainer.html(html);
+    } else {
+        // HIỂN THỊ 1 GIÁ TRỊ (Khi không bật Song ngành hoặc đang click Lọc xem 1 ngành cụ thể)
+        let displayDataset = myGPADataset.filter(c => {
+            let cMajors = c.majors || ['1']; 
+
+            if (currentMajorFilter === 'all') return true;
+            if (currentMajorFilter === '1') return cMajors.includes('1');
+            if (currentMajorFilter === '2') return cMajors.includes('2');
+            return true;
+        });
+        
+        let s = computeStatsForDataset(displayDataset);
+        let labelSuffix = "";
+        if (gpaConfig.isDoubleMajor && currentMajorFilter === '1') labelSuffix = `<br><span class="badge bg-primary mt-2" style="font-size:10px;">${gpaConfig.name1}</span>`;
+        if (gpaConfig.isDoubleMajor && currentMajorFilter === '2') labelSuffix = `<br><span class="badge bg-success mt-2" style="font-size:10px;">${gpaConfig.name2}</span>`;
+
+        let html = `
+            <div class="col-md-4">
+                <div class="online-card text-center shadow-sm border h-100">
+                    <h6 class="text-muted fw-bold mb-2">GPA (Hệ 4.0)</h6>
+                    <h2 class="text-danger fw-bold m-0">${s.gpa4}</h2>
+                    ${labelSuffix}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="online-card text-center shadow-sm border h-100">
+                    <h6 class="text-muted fw-bold mb-2">Trung bình (Hệ 10)</h6>
+                    <h2 class="text-primary fw-bold m-0">${s.gpa10}</h2>
+                    ${labelSuffix}
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="online-card text-center shadow-sm border h-100">
+                    <h6 class="text-muted fw-bold mb-2">Tín chỉ tích lũy (Đã qua)</h6>
+                    <h2 class="text-success fw-bold m-0">${s.credits}</h2>
+                    ${labelSuffix}
+                </div>
+            </div>
+        `;
+        statsContainer.html(html);
+    }
+}
+
+// 3. HÀM RENDER TỔNG THỂ (ĐƯỢC GỌI KHI CẬP NHẬT GIAO DIỆN)
 function renderGPAList(syncToServer = true) {
-    calculateOverallGPA();
+    applyGpaConfigUI();
+    
+    // Lọc danh sách học phần theo tab Ngành đang xem
+    let displayDataset = myGPADataset.filter(c => {
+        let cMajors = c.majors || ['1']; 
+        if (currentMajorFilter === 'all') return true;
+        if (currentMajorFilter === '1') return cMajors.includes('1');
+        if (currentMajorFilter === '2') return cMajors.includes('2');
+        return true;
+    });
+
+    // Tính toán để gán điểm số vào object cho việc vẽ Bảng
+    computeStatsForDataset(displayDataset);
+    
+    // Vẽ lại 3 khung thẻ điểm số trên cùng
+    renderGPAStats();
     
     let storageKey = currentUser ? 'myGPADataset_' + currentUser.mssv : 'myGPADataset_guest';
     localStorage.setItem(storageKey, JSON.stringify(myGPADataset));
     
     if (syncToServer && currentUser) {
-        postToGAS({ action: "saveGPAUser", mssv: currentUser.mssv, gpaData: JSON.stringify(myGPADataset) }, 
-        function(){}, function(){});
+        postToGAS({ action: "saveGPAUser", mssv: currentUser.mssv, gpaData: JSON.stringify(myGPADataset) }, function(){}, function(){});
     }
     
-    if (myGPADataset.length === 0) {
-        $('#gpaCourseList').html('<div class="text-center text-muted py-5"><i class="fa-solid fa-box-open fs-2 mb-2"></i><br>Chưa có học phần nào được thêm.</div>');
+    if (displayDataset.length === 0) {
+        let msg = currentMajorFilter === 'all' 
+            ? "Chưa có học phần nào được thêm." 
+            : "Chưa có học phần nào thuộc ngành này.";
+        $('#gpaCourseList').html(`<div class="text-center text-muted py-5"><i class="fa-solid fa-box-open fs-2 mb-2"></i><br>${msg}</div>`);
         return;
     }
 
+    // (Phần vẽ bảng chi tiết ở dưới giữ nguyên như cũ của bạn)
     const groups = [
         { type: 'chuyen_nganh', title: 'Học phần Chuyên ngành', icon: 'fa-book-open', color: 'primary' },
         { type: 'mon_chung', title: 'Môn học Chung', icon: 'fa-layer-group', color: 'success' },
         { type: 'ngoai_le', title: 'GDTC & GDQP (Không tính GPA)', icon: 'fa-person-running', color: 'secondary' }
     ];
 
-    let html = '<div class="table-responsive border-0"><table class="gpa-main-table">';
+    let html = '<div class="table-responsive border-0"><table class="gpa-main-table w-100" style="border-collapse: collapse; background: #fff;">';
     let globalIndex = 1;
     
     groups.forEach(group => {
-        let coursesInGroup = myGPADataset.filter(c => c.type === group.type);
+        let coursesInGroup = displayDataset.filter(c => c.type === group.type);
         
         if (coursesInGroup.length > 0) {
             html += `
@@ -772,91 +888,97 @@ function renderGPAList(syncToServer = true) {
                             <i class="fa-solid ${group.icon} me-2"></i>${group.title}
                         </th>
                     </tr>
-                    <tr>
-                        <th style="width: 50px;">STT</th>
-                        <th style="width: 110px;">Mã HP</th>
-                        <th class="text-start">Tên học phần</th>
-                        <th style="width: 70px;">Tín chỉ</th>
-                        <th style="width: 80px;">Hệ 10</th>
-                        <th style="width: 80px;">Hệ 4.0</th>
-                        <th style="width: 90px;">Điểm chữ</th>
-                        <th style="width: 70px;">Đạt</th>
-                        <th style="width: 130px;">Thao tác</th>
+                    <tr style="background: #0f4c81; color: white;">
+                        <th class="text-center" style="padding: 16px 10px; width: 50px; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">STT</th>
+                        <th class="text-center" style="padding: 16px 10px; width: 110px; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Mã HP</th>
+                        <th class="text-start" style="padding: 16px 10px; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Tên học phần</th>
+                        <th class="text-center" style="padding: 16px 10px; width: 70px; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Tín chỉ</th>
+                        <th class="text-center" style="padding: 16px 10px; width: 80px; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Hệ 10</th>
+                        <th class="text-center" style="padding: 16px 10px; width: 80px; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Hệ 4.0</th>
+                        <th class="text-center" style="padding: 16px 10px; width: 90px; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Điểm chữ</th>
+                        <th class="text-center" style="padding: 16px 10px; width: 70px; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.1);">Đạt</th>
+                        <th class="text-center" style="padding: 16px 10px; width: 130px; font-weight: 600;">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
             `;
             
             coursesInGroup.forEach((c) => {
-                // Xử lý icon Đạt/Chưa đạt khi chưa nhập đủ điểm
-                let statusIcon = c.finalScore10 === "-" ? '<i class="fa-solid fa-minus text-muted" title="Chưa đủ điểm"></i>' : (c.passed ? '<i class="fa-solid fa-circle-check status-icon passed"></i>' : '<i class="fa-solid fa-circle-xmark status-icon failed"></i>');
-                let letterColor = c.finalScore10 === "-" ? "text-muted" : (c.passed ? "text-dark" : "text-danger");
+                let statusIcon = c.finalScore10 === "-" 
+                    ? '<i class="fa-solid fa-minus text-muted" title="Chưa đủ điểm"></i>' 
+                    : (c.passed ? '<i class="fa-solid fa-circle-check text-success fs-5"></i>' : '<i class="fa-solid fa-circle-xmark text-danger fs-5"></i>');
+                let letterColor = c.finalScore10 === "-" 
+                    ? "text-muted" 
+                    : (c.passed ? "text-dark" : "text-danger");
                 
                 let subRows = '';
                 c.columns.forEach((col, i) => {
-                    let h1 = (c.bestAttempt === 1 && col.score1 !== '' && c.finalScore10 !== "-") ? 'best-attempt-highlight' : '';
-                    let h2 = (c.bestAttempt === 2 && col.score2 !== '' && c.finalScore10 !== "-") ? 'best-attempt-highlight' : '';
-                    let h3 = (c.bestAttempt === 3 && col.score3 !== '' && c.finalScore10 !== "-") ? 'best-attempt-highlight' : '';
-
                     subRows += `
-                    <tr>
-                        <td class="text-center">${i + 1}</td>
-                        <td class="text-start fw-bold" style="color: #334155;">${col.name}</td>
-                        <td class="text-center fw-bold">${col.percent}%</td>
-                        <td class="text-center ${h1} fw-bold">${col.score1 || ''}</td>
-                        <td class="text-center ${h2} fw-bold">${col.score2 || ''}</td>
-                        <td class="text-center ${h3} fw-bold">${col.score3 || ''}</td>
+                    <tr style="border-bottom: 1px solid #e2e8f0; background: #fff; height: 60px;">
+                        <td class="text-center" style="padding: 22px 16px; border-right: 1px solid #e2e8f0; color: #4b5563; font-size: 15px;">${i + 1}</td>
+                        <td class="text-start" style="padding: 22px 16px; border-right: 1px solid #e2e8f0; color: #1e293b; font-weight: 600; font-size: 15px;">${col.name}</td>
+                        <td class="text-center" style="padding: 22px 16px; border-right: 1px solid #e2e8f0; color: #4b5563; font-size: 15px;">${col.percent}%</td>
+                        <td class="text-center" style="padding: 22px 16px; border-right: 1px solid #e2e8f0; font-weight: 600; color: #1e293b; font-size: 15px;">${col.score1 || ''}</td>
+                        <td class="text-center" style="padding: 22px 16px; border-right: 1px solid #e2e8f0; font-weight: 600; color: #1e293b; font-size: 15px;">${col.score2 || ''}</td>
+                        <td class="text-center" style="padding: 22px 16px; font-weight: 600; color: #1e293b; font-size: 15px;">${col.score3 || ''}</td>
                     </tr>`;
                 });
 
                 let courseCode = c.code || '-';
                 let titleDetail = c.code ? `${c.code} - ${c.name}` : c.name;
-                
-                let badgeBestAttempt = c.finalScore10 === "-" 
-                    ? `<span class="badge bg-secondary ms-2 rounded-pill fw-normal" style="font-size: 11px;">Chưa hoàn thành</span>`
-                    : `<span class="badge bg-success ms-2 rounded-pill fw-normal" style="font-size: 11px;">Tính điểm Lần ${c.bestAttempt}</span>`;
+
+                let badgeHtml = '';
+                if (gpaConfig.isDoubleMajor && currentMajorFilter === 'all') {
+                    let cMajors = c.majors || ['1'];
+                                      if (cMajors.includes('1')) badgeHtml += `<span class="badge bg-primary ms-2 shadow-sm" style="font-size: 10px; opacity: 0.9;">${gpaConfig.name1}</span>`;
+                    if (cMajors.includes('2')) badgeHtml += `<span class="badge bg-success ms-2 shadow-sm" style="font-size: 10px; opacity: 0.9;">${gpaConfig.name2}</span>`;
+                }
 
                 html += `
-                    <tr class="main-row" data-bs-toggle="collapse" data-bs-target="#detail-${c.id}" onclick="$(this).find('.btn-expand').toggleClass('open')">
-                        <td class="text-muted fw-bold">${globalIndex++}</td>
-                        <td class="fw-bold text-secondary">${courseCode}</td>
-                        <td class="text-start fw-bold" style="color: #334155;">${c.name}</td>
-                        <td>${c.credits}</td>
-                        <td class="text-dark fw-bold">${c.finalScore10}</td>
-                        <td class="text-primary fw-bold">${c.finalScore4}</td>
-                        <td class="${letterColor} fw-bold fs-6">${c.letter}</td>
-                        <td>${statusIcon}</td>
-                        <td>
+                    <tr class="main-row" data-bs-toggle="collapse" data-bs-target="#detail-${c.id}" onclick="$(this).find('.btn-expand').toggleClass('open')" style="border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+                        <td class="text-center text-muted fw-bold" style="padding: 18px 10px;">${globalIndex++}</td>
+                        <td class="text-center fw-bold text-secondary" style="padding: 18px 10px;">${courseCode}</td>
+                        <td class="text-start fw-bold" style="padding: 18px 10px; color: #334155;">
+                            ${c.name} ${badgeHtml}
+                        </td>
+                        <td class="text-center" style="padding: 18px 10px;">${c.credits}</td>
+                        <td class="text-center text-dark fw-bold" style="padding: 18px 10px;">${c.finalScore10}</td>
+                        <td class="text-center text-primary fw-bold" style="padding: 18px 10px;">${c.finalScore4}</td>
+                        <td class="text-center ${letterColor} fw-bold fs-6" style="padding: 18px 10px;">${c.letter}</td>
+                        <td class="text-center" style="padding: 18px 10px;">${statusIcon}</td>
+                        <td class="text-center" style="padding: 18px 10px;">
                             <div class="d-flex align-items-center justify-content-center">
                                 <button class="btn btn-sm btn-outline-warning py-1 px-2 border-0 shadow-sm" onclick="event.stopPropagation(); editGPACourse('${c.id}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
                                 <button class="btn btn-sm btn-outline-danger py-1 px-2 border-0 shadow-sm ms-1" onclick="event.stopPropagation(); deleteGPACourse('${c.id}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
-                                <button class="btn-expand ms-2"><i class="fa-solid fa-chevron-down"></i></button>
+                                <button class="btn-expand ms-2" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; transition: 0.3s;"><i class="fa-solid fa-chevron-down text-secondary" style="font-size: 13px;"></i></button>
                             </div>
                         </td>
                     </tr>
+                    
                     <tr class="gpa-detail-row">
                         <td colspan="9" class="p-0 border-0">
                             <div class="collapse" id="detail-${c.id}">
-                                <div class="gpa-detail-container">
-                                    <div class="gpa-detail-title">
+                                <div style="padding: 24px 28px 28px 28px; background: #ffffff; border-bottom: 1px solid #e2e8f0;">
+                                    <div class="fw-bold mb-3" style="font-size: 15.5px; color: #1e293b; text-align: left;">
                                         Chi tiết học phần: ${titleDetail}
-                                        ${badgeBestAttempt}
                                     </div>
-                                    <table class="gpa-sub-table">
-                                        <thead>
-                                            <tr>
-                                                <th style="width: 60px;">STT</th>
-                                                <th class="text-start">Tên thành phần</th>
-                                                <th style="width: 120px;">Trọng số</th>
-                                                <th style="width: 120px;">Điểm lần 1</th>
-                                                <th style="width: 120px;">Điểm lần 2</th>
-                                                <th style="width: 120px;">Điểm lần 3</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${subRows}
-                                        </tbody>
-                                    </table>
+                                    <div style="border: 1px solid #cbd5e1; border-radius: 12px; overflow: hidden; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.04);">
+                                        <table class="w-100" style="border-collapse: collapse; text-align: center; font-size: 14.5px; min-width: 750px;">
+                                            <thead>
+                                                <tr style="background: #194670; color: #ffffff; height: 62px;">
+                                                    <th class="text-center" style="padding: 20px 16px; font-weight: 600; width: 70px; border-right: 1px solid rgba(255,255,255,0.15); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">STT</th>
+                                                    <th class="text-start" style="padding: 20px 16px; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.15); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Tên thành phần</th>
+                                                    <th class="text-center" style="padding: 20px 16px; font-weight: 600; width: 14%; border-right: 1px solid rgba(255,255,255,0.15); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Trọng số</th>
+                                                    <th class="text-center" style="padding: 20px 16px; font-weight: 600; width: 14%; border-right: 1px solid rgba(255,255,255,0.15); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Điểm lần 1</th>
+                                                    <th class="text-center" style="padding: 20px 16px; font-weight: 600; width: 14%; border-right: 1px solid rgba(255,255,255,0.15); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Điểm lần 2</th>
+                                                    <th class="text-center" style="padding: 20px 16px; font-weight: 600; width: 14%; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Điểm lần 3</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                ${subRows}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </td>
@@ -870,71 +992,215 @@ function renderGPAList(syncToServer = true) {
     html += '</table></div>';
     $('#gpaCourseList').html(html);
 }
-function openAddCourseGPAModal() {
-    $('#gpaEditId').val(''); $('#gpaCourseCode').val(''); $('#gpaCourseName').val('');
-    $('#gpaCourseCredits').val(3); $('#gpaCourseType').val('chuyen_nganh');
-    $('#gpaColumnsContainer').html(''); addGPAColumnInput();
-    $('#gpaPercentWarning').addClass('d-none'); $('#gpaCourseModal').modal('show');
+function toggleGPARetakeCols() {
+    let isRetake = $('#gpaIsRetake').is(':checked');
+    if (isRetake) {
+        $('.gpa-col-s2-wrapper, .gpa-col-s3-wrapper').removeClass('d-none');
+        $('.gpa-col-s1-wrapper').removeClass('col-md-5').addClass('col-md-2');
+    } else {
+        $('.gpa-col-s2-wrapper, .gpa-col-s3-wrapper').addClass('d-none');
+        $('.gpa-col-s1-wrapper').removeClass('col-md-2').addClass('col-md-5');
+    }
 }
 
 function addGPAColumnInput(name = '', percent = '', s1 = '', s2 = '', s3 = '') {
     let colId = 'col_' + Math.random().toString(36).substr(2, 9);
+    let isRetake = $('#gpaIsRetake').is(':checked');
+    let s1Class = isRetake ? 'col-md-2' : 'col-md-5';
+    let retakeClass = isRetake ? '' : 'd-none';
+
     let html = `
     <div class="col-grade-input row g-2 align-items-center mb-2" id="${colId}">
-        <div class="col-md-3"><input type="text" class="form-control form-control-sm gpa-col-name" placeholder="Tên (VD: Giữa kỳ)" value="${name}"></div>
+        <div class="col-md-3"><input type="text" class="form-control form-control-sm gpa-col-name fw-bold" placeholder="Tên (VD: Giữa kỳ)" value="${name}"></div>
         <div class="col-md-2">
             <div class="input-group input-group-sm">
-                <input type="number" class="form-control gpa-col-percent" placeholder="Tỉ lệ" value="${percent}">
-                <span class="input-group-text">%</span>
+                <input type="number" class="form-control gpa-col-percent fw-bold text-center" placeholder="Tỉ lệ" value="${percent}">
+                <span class="input-group-text bg-light">%</span>
             </div>
         </div>
-        <div class="col-md-2"><input type="number" step="0.1" class="form-control form-control-sm gpa-col-s1" placeholder="Lần 1" value="${s1}"></div>
-        <div class="col-md-2"><input type="number" step="0.1" class="form-control form-control-sm gpa-col-s2" placeholder="Lần 2" value="${s2}"></div>
-        <div class="col-md-2"><input type="number" step="0.1" class="form-control form-control-sm gpa-col-s3" placeholder="Lần 3" value="${s3}"></div>
+        <div class="${s1Class} gpa-col-s1-wrapper"><input type="number" step="0.1" class="form-control form-control-sm gpa-col-s1 fw-bold text-center text-primary" placeholder="Điểm L1" value="${s1}"></div>
+        <div class="col-md-2 gpa-col-s2-wrapper ${retakeClass}"><input type="number" step="0.1" class="form-control form-control-sm gpa-col-s2 fw-bold text-center text-success" placeholder="Điểm L2" value="${s2}"></div>
+        <div class="col-md-2 gpa-col-s3-wrapper ${retakeClass}"><input type="number" step="0.1" class="form-control form-control-sm gpa-col-s3 fw-bold text-center text-warning" placeholder="Điểm L3" value="${s3}"></div>
         <div class="col-md-1 text-end"><button class="btn btn-sm text-danger p-1" onclick="$('#${colId}').remove()"><i class="fa-solid fa-xmark"></i></button></div>
     </div>`;
     $('#gpaColumnsContainer').append(html);
 }
+function openAddCourseGPAModal() {
+    $('#gpaEditId').val(''); $('#gpaCourseCode').val(''); $('#gpaCourseName').val('');
+    $('#gpaCourseCredits').val(3); $('#gpaCourseType').val('chuyen_nganh');
+    $('#gpaIsRetake').prop('checked', false);
+    
+    $('#gpaBelongsToMajor1').prop('checked', true).prop('disabled', false);
+    $('#gpaBelongsToMajor2').prop('checked', false).prop('disabled', false);
 
-function saveGPACourse() {
-    let id = $('#gpaEditId').val() || Date.now().toString();
-    let code = $('#gpaCourseCode').val().trim();
-    let name = $('#gpaCourseName').val().trim();
-    let credits = $('#gpaCourseCredits').val();
-    let type = $('#gpaCourseType').val();
-
-    if(!name || !credits) { alert("Vui lòng nhập Tên môn và Số tín chỉ!"); return; }
-
-    let columns = []; let totalPercent = 0;
-    $('.col-grade-input').each(function() {
-        let cName = $(this).find('.gpa-col-name').val() || 'Thành phần';
-        let cPercent = parseFloat($(this).find('.gpa-col-percent').val()) || 0;
-        let s1 = $(this).find('.gpa-col-s1').val(); let s2 = $(this).find('.gpa-col-s2').val(); let s3 = $(this).find('.gpa-col-s3').val();
-        totalPercent += cPercent;
-        columns.push({ name: cName, percent: cPercent, score1: s1, score2: s2, score3: s3 });
-    });
-
-    if (Math.abs(totalPercent - 100) > 0.01 && columns.length > 0) { $('#gpaPercentWarning').removeClass('d-none'); return; } 
-    else { $('#gpaPercentWarning').addClass('d-none'); }
-
-    let courseObj = { id, code, name, credits, type, columns };
-    let existingIndex = myGPADataset.findIndex(c => c.id === id);
-    if(existingIndex >= 0) { myGPADataset[existingIndex] = courseObj; } else { myGPADataset.push(courseObj); }
-
-    $('#gpaCourseModal').modal('hide'); renderGPAList();
+    $('#gpaColumnsContainer').html(''); 
+    addGPAColumnInput();
+    $('#gpaPercentWarning').addClass('d-none'); 
+    
+    handleGpaCourseTypeChange(); // Thêm dòng này
+    $('#gpaCourseModal').modal('show');
 }
 
 function editGPACourse(id) {
     let course = myGPADataset.find(c => c.id === id); if(!course) return;
     $('#gpaEditId').val(course.id); $('#gpaCourseCode').val(course.code || ''); $('#gpaCourseName').val(course.name);
     $('#gpaCourseCredits').val(course.credits); $('#gpaCourseType').val(course.type);
+    
+    let courseMajors = course.majors || ['1']; 
+    $('#gpaBelongsToMajor1').prop('checked', courseMajors.includes('1')).prop('disabled', false);
+    $('#gpaBelongsToMajor2').prop('checked', courseMajors.includes('2')).prop('disabled', false);
+
+    let hasRetake = course.columns.some(col => (col.score2 && col.score2 !== '') || (col.score3 && col.score3 !== ''));
+    $('#gpaIsRetake').prop('checked', hasRetake);
+    
     $('#gpaColumnsContainer').html('');
     course.columns.forEach(col => { addGPAColumnInput(col.name, col.percent, col.score1 || '', col.score2 || '', col.score3 || ''); });
-    $('#gpaPercentWarning').addClass('d-none'); $('#gpaCourseModal').modal('show');
+    $('#gpaPercentWarning').addClass('d-none'); 
+    
+    handleGpaCourseTypeChange(); // Thêm dòng này
+    $('#gpaCourseModal').modal('show');
 }
+function saveGPACourse() {
+    let id = $('#gpaEditId').val() || Date.now().toString();
+    let code = $('#gpaCourseCode').val().trim();
+    let name = $('#gpaCourseName').val().trim();
+    let credits = $('#gpaCourseCredits').val();
+    let type = $('#gpaCourseType').val();
+    
+    // Lấy danh sách ngành được chọn
+    let selectedMajors = [];
+    if (gpaConfig.isDoubleMajor) {
+        // Chỉ lấy đúng theo trạng thái tick trên giao diện, bất kể loại môn gì
+        if ($('#gpaBelongsToMajor1').is(':checked')) selectedMajors.push('1');
+        if ($('#gpaBelongsToMajor2').is(':checked')) selectedMajors.push('2');
+        if (selectedMajors.length === 0) { alert("Vui lòng chọn ít nhất 1 ngành học cho môn này!"); return; }
+    } else {
+        selectedMajors = ['1'];
+    }
+
+    if(!name || !credits) { alert("Vui lòng nhập Tên môn và Số tín chỉ!"); return; }
+    
+    let columns = [];
+    let totalPercent = 0;
+
+    $('.col-grade-input').each(function() {
+        let cName = $(this).find('.gpa-col-name').val().trim();
+        let cPercent = parseFloat($(this).find('.gpa-col-percent').val()) || 0;
+        let cScore1 = $(this).find('.gpa-col-s1').val();
+        let cScore2 = $(this).find('.gpa-col-s2').val();
+        let cScore3 = $(this).find('.gpa-col-s3').val();
+
+        if (!cName && cPercent === 0) return;
+
+        totalPercent += cPercent;
+        columns.push({
+            name: cName || "Cột điểm",
+            percent: cPercent,
+            score1: cScore1,
+            score2: cScore2,
+            score3: cScore3
+        });
+    });
+
+    if (columns.length > 0 && Math.abs(totalPercent - 100) > 0.1) {
+        $('#gpaPercentWarning').removeClass('d-none');
+        return; 
+    } else {
+        $('#gpaPercentWarning').addClass('d-none');
+    }
+    
+    let courseObj = { id, code, name, credits, type, columns, majors: selectedMajors };
+    
+    let existingIndex = myGPADataset.findIndex(c => c.id === id);
+    if(existingIndex >= 0) { 
+        myGPADataset[existingIndex] = courseObj; 
+    } else { 
+        myGPADataset.push(courseObj); 
+    }
+
+    $('#gpaCourseModal').modal('hide'); 
+    renderGPAList();
+}
+
+function handleGpaCourseTypeChange() {
+    if (!gpaConfig.isDoubleMajor) return;
+    let type = $('#gpaCourseType').val();
+    let isEdit = $('#gpaEditId').val() !== ''; // Kiểm tra xem đang thêm mới hay sửa
+    
+    // Chỉ tự động tick gợi ý Ngành 2 khi THÊM MỚI môn chung/ngoại lệ
+    if (!isEdit && (type === 'mon_chung' || type === 'ngoai_le')) {
+        $('#gpaBelongsToMajor1').prop('checked', true);
+        $('#gpaBelongsToMajor2').prop('checked', true);
+    }
+    
+    // Đảm bảo luôn MỞ KHÓA để người dùng tự do thay đổi
+    $('#gpaBelongsToMajor1').prop('disabled', false);
+    $('#gpaBelongsToMajor2').prop('disabled', false);
+}
+
+// Lắng nghe sự kiện thay đổi phân loại ngay trên form
+$(document).on('change', '#gpaCourseType', function() {
+    handleGpaCourseTypeChange();
+});
 
 function deleteGPACourse(id) {
     if(confirm("Bạn có chắc muốn xóa học phần này khỏi bảng tính GPA?")) {
         myGPADataset = myGPADataset.filter(c => c.id !== id); renderGPAList();
     }
+}
+
+let currentMajorFilter = 'all'; 
+let gpaConfig = JSON.parse(localStorage.getItem('gpaConfig')) || { isDoubleMajor: false, name1: "Ngành 1", name2: "Ngành 2" };
+
+function openGpaConfigModal() {
+    $('#enableDoubleMajor').prop('checked', gpaConfig.isDoubleMajor);
+    $('#configMajor1Name').val(gpaConfig.name1);
+    $('#configMajor2Name').val(gpaConfig.name2);
+    toggleDoubleMajorConfig();
+    $('#gpaConfigModal').modal('show');
+}
+
+function toggleDoubleMajorConfig() {
+    if ($('#enableDoubleMajor').is(':checked')) {
+        $('#doubleMajorConfigArea').removeClass('d-none');
+    } else {
+        $('#doubleMajorConfigArea').addClass('d-none');
+    }
+}
+
+function saveGpaConfig() {
+    gpaConfig.isDoubleMajor = $('#enableDoubleMajor').is(':checked');
+    gpaConfig.name1 = $('#configMajor1Name').val().trim() || "Ngành 1";
+    gpaConfig.name2 = $('#configMajor2Name').val().trim() || "Ngành 2";
+    localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig));
+    $('#gpaConfigModal').modal('hide');
+    applyGpaConfigUI();
+    renderGPAList();
+}
+
+function applyGpaConfigUI() {
+    if (gpaConfig.isDoubleMajor) {
+        $('#gpaMajorFilters').removeClass('d-none');
+        $('#gpaMajorSelectionGroup').show();
+        $('#filterMajor1').text(gpaConfig.name1);
+        $('#filterMajor2').text(gpaConfig.name2);
+        $('#lblMajor1Name').text(gpaConfig.name1);
+        $('#lblMajor2Name').text(gpaConfig.name2);
+    } else {
+        $('#gpaMajorFilters').addClass('d-none');
+        $('#gpaMajorSelectionGroup').hide();
+        currentMajorFilter = 'all'; // Reset filter nếu tắt song ngành
+    }
+}
+
+function setGpaMajorFilter(filterType) {
+    currentMajorFilter = filterType;
+    $('.btn-major-filter').removeClass('active');
+    
+    // Đổi màu nút dựa trên trạng thái
+    if(filterType === 'all') $('#filterMajorAll').addClass('active');
+    if(filterType === '1') $('#filterMajor1').addClass('active');
+    if(filterType === '2') $('#filterMajor2').addClass('active');
+    
+    renderGPAList();
 }

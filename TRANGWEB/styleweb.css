@@ -1462,28 +1462,41 @@ body.dark-mode .alert-light .text-dark {
 /* FIX: Bảng chi tiết điểm thành phần (Sub-table) Rộng rãi & Đẹp hơn */
 .gpa-detail-row td { padding: 0 !important; border-bottom: none !important; background: #fafafa; border-right: none !important; }
 .gpa-detail-container { 
-    padding: 20px 24px 28px 24px; /* Nới rộng khoảng cách bao quanh */
-    border-bottom: 2px solid #e5e7eb; 
-    box-shadow: inset 0 4px 8px -4px rgba(0,0,0,0.06);
-    background: #fdfdfd;
+    padding: 24px 32px 32px 32px; 
+    border-bottom: 3px solid #cbd5e1; 
+    box-shadow: inset 0 4px 12px -4px rgba(0,0,0,0.05);
+    background: #f8fafc; /* Nền xám xanh nhạt thanh lịch */
 }
 .gpa-detail-title { font-weight: 700; color: #0f4c81; margin-bottom: 16px; text-align: left; font-size: 15px; display: flex; align-items: center; }
 
 .gpa-sub-table { 
-    width: 100%; border-collapse: separate; border-spacing: 0; 
-    border-radius: 8px; /* Bo góc tròn trịa hơn */
-    overflow: hidden; border: 1px solid #cbd5e1; 
+    table-layout: fixed; /* Cố định chiều rộng để bảng không bị xô lệch */
+    width: 100%; 
+    border-collapse: separate; 
+    border-spacing: 0; 
+    border-radius: 10px; 
+    overflow: hidden; 
+    border: 1px solid #cbd5e1; 
     margin-top: 5px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
 }
 .gpa-sub-table th { 
-    background: #154c79; color: #fff; 
-    padding: 14px 16px; /* Tăng độ cao của tiêu đề */
-    font-weight: 600; text-align: center; border: none; font-size: 14.5px; 
+    background: #154c79; 
+    color: #fff; 
+    padding: 16px; 
+    font-weight: 600; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px;
+    border: none; 
+    font-size: 13.5px; 
 }
 .gpa-sub-table td { 
-    padding: 14px 16px; /* Dàn không gian cho các ô dữ liệu thoáng ra */
-    text-align: center; background: #fff; 
-    border-bottom: 1px solid #e5e7eb; font-size: 14.5px; color: #334155; 
+    padding: 16px; 
+    background: #fff; 
+    border-bottom: 1px solid #e2e8f0; 
+    font-size: 14.5px; 
+    color: #334155; 
+    vertical-align: middle;
 }
 
 /* Ẩn border-bottom ở dòng cuối cùng của bảng con */
@@ -1497,11 +1510,16 @@ body.dark-mode .alert-light .text-dark {
 /* Highlight MÀU XANH LÁ NHẠT nguyên cột của lần thi tốt nhất */
 .best-attempt-highlight { 
     background-color: #dcfce7 !important; 
-    font-weight: 700 !important; 
-    color: #166534 !important; /* Chữ xanh đậm để nổi và dễ đọc hơn */
+    font-weight: 800 !important; 
+    color: #166534 !important; 
+    border-left: 2px solid #22c55e;
+    border-right: 2px solid #22c55e;
 }
 
 /* Nút mũi tên xổ xuống */
 .btn-expand { background: #f1f5f9; border: 1px solid #cbd5e1; color: #64748b; font-size: 13px; width: 30px; height: 30px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; transition: all 0.3s; cursor: pointer; margin-left: 10px; }
 .btn-expand:hover { background: #e2e8f0; color: #0f4c81; }
 .btn-expand.open { transform: rotate(180deg); background: #0f4c81; color: #fff; border-color: #0f4c81; }
+.btn-major-filter { background-color: transparent; color: #64748b; border: none; border-radius: 6px; transition: 0.3s; }
+.btn-major-filter:hover { background-color: #e2e8f0; color: #0f4c81; }
+.btn-major-filter.active { background-color: #0f4c81; color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
