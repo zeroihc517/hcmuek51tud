@@ -23,7 +23,27 @@ function pingOnlineStatus() {
                 try {
                     let userObj = JSON.parse(savedUser);
                     mssvParam = userObj.mssv + "|" + userObj.name; 
+			
                 } catch(e) { mssvParam = "Khách"; }
+		if (savedUser) {
+        try {
+            let userObj = JSON.parse(savedUser);
+            // Kiểm tra MSSV đúng với admin
+            if (userObj.mssv === "51.01.108.008") {
+                $('#gpaNavContainer').removeClass('d-none');
+            } else {
+                $('#gpaNavContainer').addClass('d-none');
+            }
+        } catch(e) {
+            $('#gpaNavContainer').addClass('d-none');
+        }
+    } else {
+        // Chưa đăng nhập thì ẩn
+        $('#gpaNavContainer').addClass('d-none');
+    }
+$(document).ready(function() {
+    checkGPAAccessPermission();
+});
             }
             if (mssvParam === "Khách" && currentUser && currentUser.mssv) { mssvParam = currentUser.mssv + "|" + currentUser.name; }
 
@@ -128,7 +148,7 @@ function renderSidebarCategories() {
         let lowerName = name.trim().toLowerCase();
         
         // Bỏ qua các sheet dữ liệu hệ thống ẩn
-if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin' || lowerName === 'chathistory' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb') return;
+if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin' || lowerName === 'chathistory' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'gpa_data') return;
 
         if (lowerName !== 'thông báo') {
             if (lowerName === 'users' && !isAdmin) return;
@@ -606,3 +626,293 @@ $(document).ready(function() {
     initDarkMode();
 });
 
+
+// ==========================================
+// TÍNH NĂNG TÍNH ĐIỂM GPA (BẢN CHUẨN CUỐI CÙNG)
+// ==========================================
+let myGPADataset = JSON.parse(localStorage.getItem('myGPADataset')) || [];
+
+function loadGPAView() {
+    document.title = "Tính điểm GPA | Học nhóm Năm 2 Khoa Toán";
+    resetNavActive(); 
+    $('#btnNavGPA').addClass('active'); 
+    $('#gpaSection').removeClass('d-none');
+    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
+    
+    if (currentUser) {
+        $('#gpaCourseList').html('<div class="text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang đồng bộ dữ liệu điểm...</div>');
+        $.ajax({
+            url: SCRIPT_URL + "?action=getGPAUser&mssv=" + currentUser.mssv,
+            method: "GET", dataType: "json",
+            success: function(res) {
+                try {
+                    myGPADataset = typeof res === 'string' ? JSON.parse(res) : res;
+                    if(!Array.isArray(myGPADataset)) myGPADataset = [];
+                } catch(e) { myGPADataset = []; }
+                renderGPAList(false); 
+            },
+            error: function() {
+                myGPADataset = JSON.parse(localStorage.getItem('myGPADataset_' + currentUser.mssv)) || [];
+                renderGPAList(false);
+            }
+        });
+    } else {
+        myGPADataset = JSON.parse(localStorage.getItem('myGPADataset_guest')) || [];
+        renderGPAList(false);
+    }
+}
+
+const originalResetNav = resetNavActive;
+resetNavActive = function() {
+    originalResetNav();
+    $('#btnNavGPA').removeClass('active');
+    $('#gpaSection').addClass('d-none');
+};
+
+function convertGradeToSystem(score10, type) {
+    let scale4 = 0, letter = "F";
+    if (score10 >= 8.5) { scale4 = 4.0; letter = "A"; }
+    else if (score10 >= 7.8) { scale4 = 3.5; letter = "B+"; }
+    else if (score10 >= 7.0) { scale4 = 3.0; letter = "B"; }
+    else if (score10 >= 6.3) { scale4 = 2.5; letter = "C+"; }
+    else if (score10 >= 5.5) { scale4 = 2.0; letter = "C"; }
+    else if (score10 >= 4.8) { scale4 = 1.5; letter = "D+"; }
+    else if (score10 >= 4.0) { scale4 = 1.0; letter = "D"; }
+    else if (score10 >= 3.0) { scale4 = 0.0; letter = "F+"; }
+    else { scale4 = 0.0; letter = "F"; }
+
+    let passed = false;
+    if (type === 'chuyen_nganh') { passed = score10 >= 5.5; }
+    else if (type === 'mon_chung') { passed = score10 >= 4.0; }
+    else if (type === 'ngoai_le') { passed = score10 >= 5.0; }
+
+    return { scale4, letter, passed };
+}
+
+function calculateOverallGPA() {
+    let totalCredits = 0; let totalScore4 = 0; let totalScore10 = 0;
+
+    myGPADataset.forEach(course => {
+        let bestAttempt = 1; let maxScore4 = -1; let maxScore10 = -1; let bestConv = null;
+
+        for(let i = 1; i <= 3; i++) {
+            let hasScore = false; let currentScore10 = 0;
+            course.columns.forEach(col => {
+                let val = parseFloat(col['score' + i]);
+                if(!isNaN(val)) { hasScore = true; currentScore10 += (val * col.percent) / 100; }
+            });
+
+            if(hasScore || i === 1) {
+                let conv = convertGradeToSystem(currentScore10, course.type);
+                if(conv.scale4 > maxScore4 || (conv.scale4 === maxScore4 && currentScore10 > maxScore10)) {
+                    maxScore4 = conv.scale4; maxScore10 = currentScore10;
+                    bestConv = conv; bestAttempt = i;
+                }
+            }
+        }
+
+        course.finalScore10 = maxScore10 >= 0 ? maxScore10.toFixed(1) : "0.0";
+        course.finalScore4 = bestConv ? bestConv.scale4.toFixed(1) : "0.0";
+        course.letter = bestConv ? bestConv.letter : "F";
+        course.passed = bestConv ? bestConv.passed : false;
+        course.bestAttempt = bestAttempt;
+
+        if (course.type !== 'ngoai_le') {
+            totalCredits += parseInt(course.credits);
+            totalScore4 += (maxScore4 * parseInt(course.credits));
+            totalScore10 += (maxScore10 * parseInt(course.credits));
+        }
+    });
+
+    let gpa4 = totalCredits > 0 ? (totalScore4 / totalCredits).toFixed(2) : "0.00";
+    let gpa10 = totalCredits > 0 ? (totalScore10 / totalCredits).toFixed(1) : "0.0";
+
+    $('#gpaTotal4').text(gpa4); $('#gpaTotal10').text(gpa10); $('#gpaTotalCredits').text(totalCredits);
+}
+
+function renderGPAList(syncToServer = true) {
+    calculateOverallGPA();
+    
+    let storageKey = currentUser ? 'myGPADataset_' + currentUser.mssv : 'myGPADataset_guest';
+    localStorage.setItem(storageKey, JSON.stringify(myGPADataset));
+    
+    if (syncToServer && currentUser) {
+        postToGAS({ action: "saveGPAUser", mssv: currentUser.mssv, gpaData: JSON.stringify(myGPADataset) }, 
+        function(){}, function(){});
+    }
+    
+    let html = '';
+    if (myGPADataset.length === 0) {
+        html = '<div class="text-center text-muted py-5"><i class="fa-solid fa-box-open fs-2 mb-2"></i><br>Chưa có học phần nào được thêm.</div>';
+    } else {
+        html = `
+        <div class="table-responsive border-0">
+            <table class="gpa-main-table">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">STT</th>
+                        <th style="width: 110px;">Mã HP</th>
+                        <th class="text-start">Tên học phần</th>
+                        <th style="width: 70px;">Tín chỉ</th>
+                        <th style="width: 80px;">Hệ 10</th>
+                        <th style="width: 80px;">Hệ 4.0</th>
+                        <th style="width: 90px;">Điểm chữ</th>
+                        <th style="width: 70px;">Đạt</th>
+                        <th style="width: 130px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        myGPADataset.forEach((c, index) => {
+            let statusIcon = c.passed ? '<i class="fa-solid fa-circle-check status-icon passed"></i>' : '<i class="fa-solid fa-circle-xmark status-icon failed"></i>';
+            let letterColor = c.passed ? "text-dark" : "text-danger";
+            
+            // Xử lý các hàng điểm thành phần (Sub-table)
+            let subRows = '';
+            c.columns.forEach((col, i) => {
+                // Highlight nếu cột điểm đó nằm trong lần thi tốt nhất
+                let h1 = (c.bestAttempt === 1 && col.score1 !== '') ? 'best-attempt-highlight' : '';
+                let h2 = (c.bestAttempt === 2 && col.score2 !== '') ? 'best-attempt-highlight' : '';
+                let h3 = (c.bestAttempt === 3 && col.score3 !== '') ? 'best-attempt-highlight' : '';
+
+                subRows += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td class="text-start fw-bold" style="color: #334155;">${col.name}</td>
+                    <td class="fw-bold">${col.percent}%</td>
+                    <td class="${h1} fw-bold">${col.score1 || ''}</td>
+                    <td class="${h2} fw-bold">${col.score2 || ''}</td>
+                    <td class="${h3} fw-bold">${col.score3 || ''}</td>
+                </tr>`;
+            });
+
+            let courseCode = c.code || '-';
+            let titleDetail = c.code ? `${c.code} - ${c.name}` : c.name;
+
+            // Hàng chính (Main row)
+            html += `
+                <tr class="main-row" data-bs-toggle="collapse" data-bs-target="#detail-${c.id}" onclick="$(this).find('.btn-expand').toggleClass('open')">
+                    <td class="text-muted fw-bold">${index + 1}</td>
+                    <td class="fw-bold text-secondary">${courseCode}</td>
+                    <td class="text-start fw-bold" style="color: #334155;">${c.name}</td>
+                    <td>${c.credits}</td>
+                    <td class="text-dark fw-bold">${c.finalScore10}</td>
+                    <td class="text-primary fw-bold">${c.finalScore4}</td>
+                    <td class="${letterColor} fw-bold fs-6">${c.letter}</td>
+                    <td>${statusIcon}</td>
+                    <td>
+                        <div class="d-flex align-items-center justify-content-center">
+                            <button class="btn btn-sm btn-outline-warning py-1 px-2 border-0 shadow-sm" onclick="event.stopPropagation(); editGPACourse('${c.id}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-sm btn-outline-danger py-1 px-2 border-0 shadow-sm ms-1" onclick="event.stopPropagation(); deleteGPACourse('${c.id}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                            <button class="btn-expand ms-2"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            // Hàng phụ (Bảng chi tiết điểm)
+            html += `
+                <tr class="gpa-detail-row">
+                    <td colspan="9" class="p-0 border-0">
+                        <div class="collapse" id="detail-${c.id}">
+                            <div class="gpa-detail-container">
+                                <div class="gpa-detail-title">
+                                    Chi tiết học phần: ${titleDetail}
+                                    <span class="badge bg-success ms-2 rounded-pill fw-normal" style="font-size: 11px;">Tính điểm Lần ${c.bestAttempt}</span>
+                                </div>
+                                <table class="gpa-sub-table">
+                                    <thead>
+                                        <tr>
+                                            <th>STT</th>
+                                            <th class="text-start">Tên thành phần</th>
+                                            <th style="width: 120px;">Trọng số</th>
+                                            <th style="width: 120px;">Điểm lần 1</th>
+                                            <th style="width: 120px;">Điểm lần 2</th>
+                                            <th style="width: 120px;">Điểm lần 3</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${subRows}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += `</tbody></table></div>`;
+    }
+    
+    $('#gpaCourseList').html(html);
+}
+function openAddCourseGPAModal() {
+    $('#gpaEditId').val(''); $('#gpaCourseCode').val(''); $('#gpaCourseName').val('');
+    $('#gpaCourseCredits').val(3); $('#gpaCourseType').val('chuyen_nganh');
+    $('#gpaColumnsContainer').html(''); addGPAColumnInput();
+    $('#gpaPercentWarning').addClass('d-none'); $('#gpaCourseModal').modal('show');
+}
+
+function addGPAColumnInput(name = '', percent = '', s1 = '', s2 = '', s3 = '') {
+    let colId = 'col_' + Math.random().toString(36).substr(2, 9);
+    let html = `
+    <div class="col-grade-input row g-2 align-items-center mb-2" id="${colId}">
+        <div class="col-md-3"><input type="text" class="form-control form-control-sm gpa-col-name" placeholder="Tên (VD: Giữa kỳ)" value="${name}"></div>
+        <div class="col-md-2">
+            <div class="input-group input-group-sm">
+                <input type="number" class="form-control gpa-col-percent" placeholder="Tỉ lệ" value="${percent}">
+                <span class="input-group-text">%</span>
+            </div>
+        </div>
+        <div class="col-md-2"><input type="number" step="0.1" class="form-control form-control-sm gpa-col-s1" placeholder="Lần 1" value="${s1}"></div>
+        <div class="col-md-2"><input type="number" step="0.1" class="form-control form-control-sm gpa-col-s2" placeholder="Lần 2" value="${s2}"></div>
+        <div class="col-md-2"><input type="number" step="0.1" class="form-control form-control-sm gpa-col-s3" placeholder="Lần 3" value="${s3}"></div>
+        <div class="col-md-1 text-end"><button class="btn btn-sm text-danger p-1" onclick="$('#${colId}').remove()"><i class="fa-solid fa-xmark"></i></button></div>
+    </div>`;
+    $('#gpaColumnsContainer').append(html);
+}
+
+function saveGPACourse() {
+    let id = $('#gpaEditId').val() || Date.now().toString();
+    let code = $('#gpaCourseCode').val().trim();
+    let name = $('#gpaCourseName').val().trim();
+    let credits = $('#gpaCourseCredits').val();
+    let type = $('#gpaCourseType').val();
+
+    if(!name || !credits) { alert("Vui lòng nhập Tên môn và Số tín chỉ!"); return; }
+
+    let columns = []; let totalPercent = 0;
+    $('.col-grade-input').each(function() {
+        let cName = $(this).find('.gpa-col-name').val() || 'Thành phần';
+        let cPercent = parseFloat($(this).find('.gpa-col-percent').val()) || 0;
+        let s1 = $(this).find('.gpa-col-s1').val(); let s2 = $(this).find('.gpa-col-s2').val(); let s3 = $(this).find('.gpa-col-s3').val();
+        totalPercent += cPercent;
+        columns.push({ name: cName, percent: cPercent, score1: s1, score2: s2, score3: s3 });
+    });
+
+    if (Math.abs(totalPercent - 100) > 0.01 && columns.length > 0) { $('#gpaPercentWarning').removeClass('d-none'); return; } 
+    else { $('#gpaPercentWarning').addClass('d-none'); }
+
+    let courseObj = { id, code, name, credits, type, columns };
+    let existingIndex = myGPADataset.findIndex(c => c.id === id);
+    if(existingIndex >= 0) { myGPADataset[existingIndex] = courseObj; } else { myGPADataset.push(courseObj); }
+
+    $('#gpaCourseModal').modal('hide'); renderGPAList();
+}
+
+function editGPACourse(id) {
+    let course = myGPADataset.find(c => c.id === id); if(!course) return;
+    $('#gpaEditId').val(course.id); $('#gpaCourseCode').val(course.code || ''); $('#gpaCourseName').val(course.name);
+    $('#gpaCourseCredits').val(course.credits); $('#gpaCourseType').val(course.type);
+    $('#gpaColumnsContainer').html('');
+    course.columns.forEach(col => { addGPAColumnInput(col.name, col.percent, col.score1 || '', col.score2 || '', col.score3 || ''); });
+    $('#gpaPercentWarning').addClass('d-none'); $('#gpaCourseModal').modal('show');
+}
+
+function deleteGPACourse(id) {
+    if(confirm("Bạn có chắc muốn xóa học phần này khỏi bảng tính GPA?")) {
+        myGPADataset = myGPADataset.filter(c => c.id !== id); renderGPAList();
+    }
+}

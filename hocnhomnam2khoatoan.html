@@ -60,7 +60,11 @@
                         <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
                             <i class="fa-regular fa-calendar-days" style="color: #0ea5e9;"></i> Thời gian biểu
                         </button>
-                        
+                        <div id="gpaNavContainer" class="d-none">
+    <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
+        <i class="fa-solid fa-calculator" style="color: #10b981;"></i> Tính điểm GPA
+    </button>
+</div>
                         <div id="dynamicCourseList" class="course-list mt-2">
                             <span class="text-muted small px-2">Đang tải danh sách học phần...</span>
                         </div>
@@ -167,7 +171,95 @@
                 </div>
             </div>
 
-            <div id="courseSection">
+<div id="gpaSection" class="d-none">
+    <header class="top-header">
+        <div class="page-title"><i class="fa-solid fa-calculator"></i> Bảng tính điểm GPA Tích lũy</div>
+    </header>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="online-card text-center shadow-sm border">
+                <h6 class="text-muted fw-bold mb-2">GPA (Hệ 4.0)</h6>
+                <h2 id="gpaTotal4" class="text-danger fw-bold m-0">0.00</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="online-card text-center shadow-sm border">
+                <h6 class="text-muted fw-bold mb-2">Trung bình (Hệ 10)</h6>
+                <h2 id="gpaTotal10" class="text-primary fw-bold m-0">0.0</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="online-card text-center shadow-sm border">
+                <h6 class="text-muted fw-bold mb-2">Tín chỉ tích lũy</h6>
+                <h2 id="gpaTotalCredits" class="text-success fw-bold m-0">0</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="tb-list-container shadow-sm mb-4 bg-white">
+        <div class="tb-header-blue d-flex justify-content-between align-items-center">
+            <span><i class="fa-solid fa-list-check me-2"></i> Chi tiết học phần</span>
+            <button class="btn btn-sm btn-light fw-bold text-primary" onclick="openAddCourseGPAModal()">
+                <i class="fa-solid fa-plus"></i> Thêm môn học
+            </button>
+        </div>
+        <div id="gpaCourseList" class="p-0">
+            </div>
+    </div>
+</div>
+
+<div class="modal fade" id="gpaCourseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-book me-2"></i>Thông tin học phần</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="gpaEditId" value="">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Mã HP</label>
+                        <input type="text" id="gpaCourseCode" class="form-control" placeholder="VD: COMP1013">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Tên môn học</label>
+                        <input type="text" id="gpaCourseName" class="form-control" placeholder="VD: Lập trình nâng cao">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Tín chỉ</label>
+                        <input type="number" id="gpaCourseCredits" class="form-control" min="0" value="3">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Phân loại</label>
+                        <select id="gpaCourseType" class="form-select">
+                            <option value="chuyen_nganh">Chuyên ngành</option>
+                            <option value="mon_chung">Môn chung</option>
+                            <option value="ngoai_le">Không tính GPA (*)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <hr>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label fw-bold m-0 text-danger">Các cột điểm (Tổng % phải = 100%)</label>
+                    <button class="btn btn-sm btn-outline-success fw-bold" onclick="addGPAColumnInput()">
+                        <i class="fa-solid fa-plus"></i> Thêm cột điểm
+                    </button>
+                </div>
+                
+                <div id="gpaColumnsContainer" class="d-flex flex-column gap-2 mb-2">
+                    </div>
+                <small id="gpaPercentWarning" class="text-danger fw-bold d-none">Tổng tỷ lệ phần trăm đang khác 100%!</small>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveGPACourse()" id="btnSaveGPA">Lưu học phần</button>
+            </div>
+        </div>
+    </div>
+</div>            <div id="courseSection">
                 <header class="top-header">
                     <div class="page-title"><i class="fa-solid fa-book-open"></i> Học nhóm - Năm 2 - Khoa Toán-Tin học</div>
                 </header>
