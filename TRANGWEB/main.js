@@ -595,7 +595,6 @@ function initGlobalApp() {
 // TÍNH NĂNG TÍNH ĐIỂM GPA (BẢN CHUẨN CUỐI CÙNG)
 // ==========================================
 let myGPADataset = JSON.parse(localStorage.getItem('myGPADataset')) || [];
-
 function loadGPAView() {
     document.title = "Tính điểm GPA | Học nhóm Năm 2 Khoa Toán";
     resetNavActive(); 
@@ -604,20 +603,42 @@ function loadGPAView() {
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
     
     if (currentUser) {
-        $('#gpaCourseList').html('<div class="text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang đồng bộ dữ liệu điểm...</div>');
+        $('#gpaCourseList').html('<div class="text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang đồng bộ dữ liệu điểm và cấu hình...</div>');
+        
+        // 1. Gọi lấy cấu hình Song ngành từ Server trước
         $.ajax({
-            url: SCRIPT_URL + "?action=getGPAUser&mssv=" + currentUser.mssv,
-            method: "GET", dataType: "json",
-            success: function(res) {
-                try {
-                    myGPADataset = typeof res === 'string' ? JSON.parse(res) : res;
-                    if(!Array.isArray(myGPADataset)) myGPADataset = [];
-                } catch(e) { myGPADataset = []; }
-                renderGPAList(false); 
+            url: SCRIPT_URL + "?action=getGPAConfig&mssv=" + currentUser.mssv,
+            method: "GET", 
+            dataType: "json",
+            success: function(configRes) {
+                if (configRes && configRes !== "") {
+                    try {
+                        let parsedConfig = typeof configRes === 'string' ? JSON.parse(configRes) : configRes;
+                        // Chỉ cập nhật nếu có dữ liệu hợp lệ
+                        if (parsedConfig && parsedConfig.name1) {
+                            gpaConfig = parsedConfig;
+                            localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig));
+                        }
+                    } catch(e) { console.error("Lỗi đọc cấu hình GPA:", e); }
+                }
             },
-            error: function() {
-                myGPADataset = JSON.parse(localStorage.getItem('myGPADataset_' + currentUser.mssv)) || [];
-                renderGPAList(false);
+            complete: function() {
+                // 2. Sau khi đã cập nhật cấu hình xong, tiến hành tải danh sách môn học
+                $.ajax({
+                    url: SCRIPT_URL + "?action=getGPAUser&mssv=" + currentUser.mssv,
+                    method: "GET", dataType: "json",
+                    success: function(res) {
+                        try {
+                            myGPADataset = typeof res === 'string' ? JSON.parse(res) : res;
+                            if(!Array.isArray(myGPADataset)) myGPADataset = [];
+                        } catch(e) { myGPADataset = []; }
+                        renderGPAList(false); 
+                    },
+                    error: function() {
+                        myGPADataset = JSON.parse(localStorage.getItem('myGPADataset_' + currentUser.mssv)) || [];
+                        renderGPAList(false);
+                    }
+                });
             }
         });
     } else {
@@ -625,7 +646,6 @@ function loadGPAView() {
         renderGPAList(false);
     }
 }
-
 const originalResetNav = resetNavActive;
 resetNavActive = function() {
     originalResetNav();
@@ -657,6 +677,7 @@ function convertGradeToSystem(score10, type) {
     } else if (type === 'ngoai_le') { 
         passed = roundedScore >= 5.0; 
     }
+
     return { scale4, letter, passed, roundedScore };
 }
 
@@ -1177,11 +1198,21 @@ function saveGpaConfig() {
     gpaConfig.name1 = $('#configMajor1Name').val().trim() || "Ngành 1";
     gpaConfig.name2 = $('#configMajor2Name').val().trim() || "Ngành 2";
     localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig));
+
+    if (currentUser) {
+        postToGAS({ 
+            action: "saveGPAConfig",
+            mssv: currentUser.mssv, 
+            config: JSON.stringify(gpaConfig) 
+        }, function(res) {
+            alert("Đã đồng bộ cấu hình Song ngành lên hệ thống!");
+        });
+    }
+    
     $('#gpaConfigModal').modal('hide');
     applyGpaConfigUI();
     renderGPAList();
 }
-
 function applyGpaConfigUI() {
     if (gpaConfig.isDoubleMajor) {
         $('#gpaMajorFilters').removeClass('d-none');
