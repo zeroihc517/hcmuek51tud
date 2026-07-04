@@ -840,6 +840,9 @@ function renderGPAList(syncToServer = true) {
     // Lọc danh sách học phần theo tab Ngành đang xem
     let displayDataset = myGPADataset.filter(c => {
         let cMajors = c.majors || ['1']; 
+	if (c.type === 'mon_chung' || c.type === 'ngoai_le') {
+        cMajors = ['1', '2'];
+    }
         if (currentMajorFilter === 'all') return true;
         if (currentMajorFilter === '1') return cMajors.includes('1');
         if (currentMajorFilter === '2') return cMajors.includes('2');
