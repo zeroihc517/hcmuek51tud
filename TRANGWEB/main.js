@@ -590,42 +590,6 @@ function initGlobalApp() {
                 authModal.show();
             } else { initGlobalApp(); }
         });
-// ==========================================
-// LOGIC XỬ LÝ CHẾ ĐỘ NỀN TỐI (DARK MODE)
-// ==========================================
-function initDarkMode() {
-    // Kiểm tra xem người dùng trước đó có bật Nền tối không
-    const isDarkMode = localStorage.getItem('darkModeEnabled') === 'true';
-    
-    if (isDarkMode) {
-        $('body').addClass('dark-mode');
-        $('.toggle-dark-mode-btn i').removeClass('fa-moon').addClass('fa-sun');
-    }
-
-    // Lắng nghe sự kiện click nút đổi nền (cho cả 2 nút trên mobile và desktop)
-    $('.toggle-dark-mode-btn').on('click', function(e) {
-        e.stopPropagation(); // Tránh kích hoạt các sự kiện ẩn menu không mong muốn
-        
-        $('body').toggleClass('dark-mode');
-        const hasDark = $('body').hasClass('dark-mode');
-        
-        // Lưu trạng thái vào localStorage
-        localStorage.setItem('darkModeEnabled', hasDark);
-        
-        // Thay đổi icon tương ứng giữa mặt trăng và mặt trời
-        if (hasDark) {
-            $('.toggle-dark-mode-btn i').removeClass('fa-moon').addClass('fa-sun');
-        } else {
-            $('.toggle-dark-mode-btn i').removeClass('fa-sun').addClass('fa-moon');
-        }
-    });
-}
-
-// Kích hoạt ngay khi tài liệu đã sẵn sàng
-$(document).ready(function() {
-    initDarkMode();
-});
-
 
 // ==========================================
 // TÍNH NĂNG TÍNH ĐIỂM GPA (BẢN CHUẨN CUỐI CÙNG)
@@ -670,64 +634,106 @@ resetNavActive = function() {
 };
 
 function convertGradeToSystem(score10, type) {
+    // FIX: Làm tròn chính xác đến 1 chữ số thập phân trước khi đối chiếu
+    let roundedScore = Math.round(score10 * 10) / 10;
+    
     let scale4 = 0, letter = "F";
-    if (score10 >= 8.5) { scale4 = 4.0; letter = "A"; }
-    else if (score10 >= 7.8) { scale4 = 3.5; letter = "B+"; }
-    else if (score10 >= 7.0) { scale4 = 3.0; letter = "B"; }
-    else if (score10 >= 6.3) { scale4 = 2.5; letter = "C+"; }
-    else if (score10 >= 5.5) { scale4 = 2.0; letter = "C"; }
-    else if (score10 >= 4.8) { scale4 = 1.5; letter = "D+"; }
-    else if (score10 >= 4.0) { scale4 = 1.0; letter = "D"; }
-    else if (score10 >= 3.0) { scale4 = 0.0; letter = "F+"; }
+    if (roundedScore >= 8.5) { scale4 = 4.0; letter = "A"; }
+    else if (roundedScore >= 7.8) { scale4 = 3.5; letter = "B+"; }
+    else if (roundedScore >= 7.0) { scale4 = 3.0; letter = "B"; }
+    else if (roundedScore >= 6.3) { scale4 = 2.5; letter = "C+"; }
+    else if (roundedScore >= 5.5) { scale4 = 2.0; letter = "C"; }
+    else if (roundedScore >= 4.8) { scale4 = 1.5; letter = "D+"; }
+    else if (roundedScore >= 4.0) { scale4 = 1.0; letter = "D"; }
+    else if (roundedScore >= 3.0) { scale4 = 0.0; letter = "F+"; }
     else { scale4 = 0.0; letter = "F"; }
 
+    // Mức qua môn chuẩn (>= 4.0 là D). Các môn ngoại lệ có thể yêu cầu >= 5.0
     let passed = false;
-    if (type === 'chuyen_nganh') { passed = score10 >= 5.5; }
-    else if (type === 'mon_chung') { passed = score10 >= 4.0; }
-    else if (type === 'ngoai_le') { passed = score10 >= 5.0; }
+    if (type === 'chuyen_nganh' || type === 'mon_chung') { 
+        passed = roundedScore >= 4.0; 
+    } else if (type === 'ngoai_le') { 
+        passed = roundedScore >= 5.0; 
+    }
 
-    return { scale4, letter, passed };
+    return { scale4, letter, passed, roundedScore };
 }
 
 function calculateOverallGPA() {
-    let totalCredits = 0; let totalScore4 = 0; let totalScore10 = 0;
+    let totalAttemptedCredits = 0; 
+    let totalAccumulatedCredits = 0; 
+    let totalScore4 = 0;
+    let totalScore10 = 0;
 
     myGPADataset.forEach(course => {
-        let bestAttempt = 1; let maxScore4 = -1; let maxScore10 = -1; let bestConv = null;
+        let bestAttempt = 1; 
+        let maxScore4 = -1; 
+        let maxScore10 = -1; 
+        let bestConv = null;
 
         for(let i = 1; i <= 3; i++) {
-            let hasScore = false; let currentScore10 = 0;
+            let hasAllScores = true; // Cờ kiểm tra xem ĐÃ NHẬP ĐỦ điểm thành phần chưa
+            let currentScore10 = 0;
+            let hasAnyColumn = course.columns.length > 0;
+
             course.columns.forEach(col => {
                 let val = parseFloat(col['score' + i]);
-                if(!isNaN(val)) { hasScore = true; currentScore10 += (val * col.percent) / 100; }
+                // Nếu cột điểm trống hoặc không phải số -> đánh dấu là chưa hoàn thành
+                if(isNaN(val) || col['score' + i] === '') { 
+                    hasAllScores = false; 
+                } else {
+                    currentScore10 += (val * col.percent) / 100;
+                }
             });
 
-            if(hasScore || i === 1) {
+            // CHỈ TÍNH ĐIỂM khi tất cả các cột thành phần của lần thi này đều đã có điểm
+            if(hasAllScores && hasAnyColumn) {
                 let conv = convertGradeToSystem(currentScore10, course.type);
-                if(conv.scale4 > maxScore4 || (conv.scale4 === maxScore4 && currentScore10 > maxScore10)) {
-                    maxScore4 = conv.scale4; maxScore10 = currentScore10;
-                    bestConv = conv; bestAttempt = i;
+                if(conv.scale4 > maxScore4 || (conv.scale4 === maxScore4 && conv.roundedScore > maxScore10)) {
+                    maxScore4 = conv.scale4; 
+                    maxScore10 = conv.roundedScore; 
+                    bestConv = conv; 
+                    bestAttempt = i;
                 }
             }
         }
 
-        course.finalScore10 = maxScore10 >= 0 ? maxScore10.toFixed(1) : "0.0";
-        course.finalScore4 = bestConv ? bestConv.scale4.toFixed(1) : "0.0";
-        course.letter = bestConv ? bestConv.letter : "F";
-        course.passed = bestConv ? bestConv.passed : false;
-        course.bestAttempt = bestAttempt;
+        // Cập nhật trạng thái hiển thị của học phần
+        if (maxScore10 >= 0) {
+            course.finalScore10 = maxScore10.toFixed(1);
+            course.finalScore4 = bestConv.scale4.toFixed(1);
+            course.letter = bestConv.letter;
+            course.passed = bestConv.passed;
+        } else {
+            // Nếu chưa nhập đủ điểm -> hiển thị "-"
+            course.finalScore10 = "-";
+            course.finalScore4 = "-";
+            course.letter = "-";
+            course.passed = false;
+        }
+        
+        course.bestAttempt = maxScore10 >= 0 ? bestAttempt : 1;
+
+        let creds = parseInt(course.credits) || 0;
 
         if (course.type !== 'ngoai_le') {
-            totalCredits += parseInt(course.credits);
-            totalScore4 += (maxScore4 * parseInt(course.credits));
-            totalScore10 += (maxScore10 * parseInt(course.credits));
+            if (maxScore10 >= 0) { 
+                totalAttemptedCredits += creds;
+                totalScore4 += (maxScore4 * creds);
+                totalScore10 += (maxScore10 * creds);
+            }
+            if (course.passed) {
+                totalAccumulatedCredits += creds;
+            }
         }
     });
 
-    let gpa4 = totalCredits > 0 ? (totalScore4 / totalCredits).toFixed(2) : "0.00";
-    let gpa10 = totalCredits > 0 ? (totalScore10 / totalCredits).toFixed(1) : "0.0";
+    let gpa4 = totalAttemptedCredits > 0 ? (totalScore4 / totalAttemptedCredits).toFixed(2) : "0.00";
+    let gpa10 = totalAttemptedCredits > 0 ? (totalScore10 / totalAttemptedCredits).toFixed(2) : "0.00";
 
-    $('#gpaTotal4').text(gpa4); $('#gpaTotal10').text(gpa10); $('#gpaTotalCredits').text(totalCredits);
+    $('#gpaTotal4').text(gpa4); 
+    $('#gpaTotal10').text(gpa10); 
+    $('#gpaTotalCredits').text(totalAccumulatedCredits);
 }
 
 function renderGPAList(syncToServer = true) {
@@ -741,14 +747,31 @@ function renderGPAList(syncToServer = true) {
         function(){}, function(){});
     }
     
-    let html = '';
     if (myGPADataset.length === 0) {
-        html = '<div class="text-center text-muted py-5"><i class="fa-solid fa-box-open fs-2 mb-2"></i><br>Chưa có học phần nào được thêm.</div>';
-    } else {
-        html = `
-        <div class="table-responsive border-0">
-            <table class="gpa-main-table">
+        $('#gpaCourseList').html('<div class="text-center text-muted py-5"><i class="fa-solid fa-box-open fs-2 mb-2"></i><br>Chưa có học phần nào được thêm.</div>');
+        return;
+    }
+
+    const groups = [
+        { type: 'chuyen_nganh', title: 'Học phần Chuyên ngành', icon: 'fa-book-open', color: 'primary' },
+        { type: 'mon_chung', title: 'Môn học Chung', icon: 'fa-layer-group', color: 'success' },
+        { type: 'ngoai_le', title: 'GDTC & GDQP (Không tính GPA)', icon: 'fa-person-running', color: 'secondary' }
+    ];
+
+    let html = '<div class="table-responsive border-0"><table class="gpa-main-table">';
+    let globalIndex = 1;
+    
+    groups.forEach(group => {
+        let coursesInGroup = myGPADataset.filter(c => c.type === group.type);
+        
+        if (coursesInGroup.length > 0) {
+            html += `
                 <thead>
+                    <tr>
+                        <th colspan="9" class="text-start fs-6 border-bottom-0 pb-2 pt-4" style="background-color: #f8fafc !important; color: var(--bs-${group.color}); font-weight: 800; text-transform: uppercase;">
+                            <i class="fa-solid ${group.icon} me-2"></i>${group.title}
+                        </th>
+                    </tr>
                     <tr>
                         <th style="width: 50px;">STT</th>
                         <th style="width: 110px;">Mã HP</th>
@@ -762,90 +785,89 @@ function renderGPAList(syncToServer = true) {
                     </tr>
                 </thead>
                 <tbody>
-        `;
-        
-        myGPADataset.forEach((c, index) => {
-            let statusIcon = c.passed ? '<i class="fa-solid fa-circle-check status-icon passed"></i>' : '<i class="fa-solid fa-circle-xmark status-icon failed"></i>';
-            let letterColor = c.passed ? "text-dark" : "text-danger";
+            `;
             
-            // Xử lý các hàng điểm thành phần (Sub-table)
-            let subRows = '';
-            c.columns.forEach((col, i) => {
-                // Highlight nếu cột điểm đó nằm trong lần thi tốt nhất
-                let h1 = (c.bestAttempt === 1 && col.score1 !== '') ? 'best-attempt-highlight' : '';
-                let h2 = (c.bestAttempt === 2 && col.score2 !== '') ? 'best-attempt-highlight' : '';
-                let h3 = (c.bestAttempt === 3 && col.score3 !== '') ? 'best-attempt-highlight' : '';
+            coursesInGroup.forEach((c) => {
+                // Xử lý icon Đạt/Chưa đạt khi chưa nhập đủ điểm
+                let statusIcon = c.finalScore10 === "-" ? '<i class="fa-solid fa-minus text-muted" title="Chưa đủ điểm"></i>' : (c.passed ? '<i class="fa-solid fa-circle-check status-icon passed"></i>' : '<i class="fa-solid fa-circle-xmark status-icon failed"></i>');
+                let letterColor = c.finalScore10 === "-" ? "text-muted" : (c.passed ? "text-dark" : "text-danger");
+                
+                let subRows = '';
+                c.columns.forEach((col, i) => {
+                    let h1 = (c.bestAttempt === 1 && col.score1 !== '' && c.finalScore10 !== "-") ? 'best-attempt-highlight' : '';
+                    let h2 = (c.bestAttempt === 2 && col.score2 !== '' && c.finalScore10 !== "-") ? 'best-attempt-highlight' : '';
+                    let h3 = (c.bestAttempt === 3 && col.score3 !== '' && c.finalScore10 !== "-") ? 'best-attempt-highlight' : '';
 
-                subRows += `
-                <tr>
-                    <td>${i + 1}</td>
-                    <td class="text-start fw-bold" style="color: #334155;">${col.name}</td>
-                    <td class="fw-bold">${col.percent}%</td>
-                    <td class="${h1} fw-bold">${col.score1 || ''}</td>
-                    <td class="${h2} fw-bold">${col.score2 || ''}</td>
-                    <td class="${h3} fw-bold">${col.score3 || ''}</td>
-                </tr>`;
-            });
+                    subRows += `
+                    <tr>
+                        <td class="text-center">${i + 1}</td>
+                        <td class="text-start fw-bold" style="color: #334155;">${col.name}</td>
+                        <td class="text-center fw-bold">${col.percent}%</td>
+                        <td class="text-center ${h1} fw-bold">${col.score1 || ''}</td>
+                        <td class="text-center ${h2} fw-bold">${col.score2 || ''}</td>
+                        <td class="text-center ${h3} fw-bold">${col.score3 || ''}</td>
+                    </tr>`;
+                });
 
-            let courseCode = c.code || '-';
-            let titleDetail = c.code ? `${c.code} - ${c.name}` : c.name;
+                let courseCode = c.code || '-';
+                let titleDetail = c.code ? `${c.code} - ${c.name}` : c.name;
+                
+                let badgeBestAttempt = c.finalScore10 === "-" 
+                    ? `<span class="badge bg-secondary ms-2 rounded-pill fw-normal" style="font-size: 11px;">Chưa hoàn thành</span>`
+                    : `<span class="badge bg-success ms-2 rounded-pill fw-normal" style="font-size: 11px;">Tính điểm Lần ${c.bestAttempt}</span>`;
 
-            // Hàng chính (Main row)
-            html += `
-                <tr class="main-row" data-bs-toggle="collapse" data-bs-target="#detail-${c.id}" onclick="$(this).find('.btn-expand').toggleClass('open')">
-                    <td class="text-muted fw-bold">${index + 1}</td>
-                    <td class="fw-bold text-secondary">${courseCode}</td>
-                    <td class="text-start fw-bold" style="color: #334155;">${c.name}</td>
-                    <td>${c.credits}</td>
-                    <td class="text-dark fw-bold">${c.finalScore10}</td>
-                    <td class="text-primary fw-bold">${c.finalScore4}</td>
-                    <td class="${letterColor} fw-bold fs-6">${c.letter}</td>
-                    <td>${statusIcon}</td>
-                    <td>
-                        <div class="d-flex align-items-center justify-content-center">
-                            <button class="btn btn-sm btn-outline-warning py-1 px-2 border-0 shadow-sm" onclick="event.stopPropagation(); editGPACourse('${c.id}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn btn-sm btn-outline-danger py-1 px-2 border-0 shadow-sm ms-1" onclick="event.stopPropagation(); deleteGPACourse('${c.id}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
-                            <button class="btn-expand ms-2"><i class="fa-solid fa-chevron-down"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-
-            // Hàng phụ (Bảng chi tiết điểm)
-            html += `
-                <tr class="gpa-detail-row">
-                    <td colspan="9" class="p-0 border-0">
-                        <div class="collapse" id="detail-${c.id}">
-                            <div class="gpa-detail-container">
-                                <div class="gpa-detail-title">
-                                    Chi tiết học phần: ${titleDetail}
-                                    <span class="badge bg-success ms-2 rounded-pill fw-normal" style="font-size: 11px;">Tính điểm Lần ${c.bestAttempt}</span>
-                                </div>
-                                <table class="gpa-sub-table">
-                                    <thead>
-                                        <tr>
-                                            <th>STT</th>
-                                            <th class="text-start">Tên thành phần</th>
-                                            <th style="width: 120px;">Trọng số</th>
-                                            <th style="width: 120px;">Điểm lần 1</th>
-                                            <th style="width: 120px;">Điểm lần 2</th>
-                                            <th style="width: 120px;">Điểm lần 3</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${subRows}
-                                    </tbody>
-                                </table>
+                html += `
+                    <tr class="main-row" data-bs-toggle="collapse" data-bs-target="#detail-${c.id}" onclick="$(this).find('.btn-expand').toggleClass('open')">
+                        <td class="text-muted fw-bold">${globalIndex++}</td>
+                        <td class="fw-bold text-secondary">${courseCode}</td>
+                        <td class="text-start fw-bold" style="color: #334155;">${c.name}</td>
+                        <td>${c.credits}</td>
+                        <td class="text-dark fw-bold">${c.finalScore10}</td>
+                        <td class="text-primary fw-bold">${c.finalScore4}</td>
+                        <td class="${letterColor} fw-bold fs-6">${c.letter}</td>
+                        <td>${statusIcon}</td>
+                        <td>
+                            <div class="d-flex align-items-center justify-content-center">
+                                <button class="btn btn-sm btn-outline-warning py-1 px-2 border-0 shadow-sm" onclick="event.stopPropagation(); editGPACourse('${c.id}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                                <button class="btn btn-sm btn-outline-danger py-1 px-2 border-0 shadow-sm ms-1" onclick="event.stopPropagation(); deleteGPACourse('${c.id}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                                <button class="btn-expand ms-2"><i class="fa-solid fa-chevron-down"></i></button>
                             </div>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        });
-        
-        html += `</tbody></table></div>`;
-    }
+                        </td>
+                    </tr>
+                    <tr class="gpa-detail-row">
+                        <td colspan="9" class="p-0 border-0">
+                            <div class="collapse" id="detail-${c.id}">
+                                <div class="gpa-detail-container">
+                                    <div class="gpa-detail-title">
+                                        Chi tiết học phần: ${titleDetail}
+                                        ${badgeBestAttempt}
+                                    </div>
+                                    <table class="gpa-sub-table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 60px;">STT</th>
+                                                <th class="text-start">Tên thành phần</th>
+                                                <th style="width: 120px;">Trọng số</th>
+                                                <th style="width: 120px;">Điểm lần 1</th>
+                                                <th style="width: 120px;">Điểm lần 2</th>
+                                                <th style="width: 120px;">Điểm lần 3</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${subRows}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            html += `</tbody>`;
+        }
+    });
     
+    html += '</table></div>';
     $('#gpaCourseList').html(html);
 }
 function openAddCourseGPAModal() {
