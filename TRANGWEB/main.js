@@ -650,12 +650,13 @@ function convertGradeToSystem(score10, type) {
 
     // Mức qua môn chuẩn (>= 4.0 là D). Các môn ngoại lệ có thể yêu cầu >= 5.0
     let passed = false;
-    if (type === 'chuyen_nganh' || type === 'mon_chung') { 
+    if (type === 'chuyen_nganh') { 
+        passed = roundedScore >= 5.5; 
+    } else if (type === 'mon_chung') {
         passed = roundedScore >= 4.0; 
     } else if (type === 'ngoai_le') { 
         passed = roundedScore >= 5.0; 
     }
-
     return { scale4, letter, passed, roundedScore };
 }
 
