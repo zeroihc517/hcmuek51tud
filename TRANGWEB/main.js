@@ -757,6 +757,7 @@ function computeStatsForDataset(dataset) {
 }
 
 // 2. HÀM HIỂN THỊ CÁC Ô CARD THỐNG KÊ LÊN GIAO DIỆN
+// 2. HÀM HIỂN THỊ CÁC Ô CARD THỐNG KÊ LÊN GIAO DIỆN (ĐÃ FIX SONG NGÀNH)
 function renderGPAStats() {
     let statsContainer = $('#gpaStatsArea');
     
@@ -764,12 +765,19 @@ function renderGPAStats() {
     if (gpaConfig.isDoubleMajor && currentMajorFilter === 'all') {
         let ds1 = myGPADataset.filter(c => {
             let m = c.majors || ['1'];
-
+            // FIX: Tự động gán môn chung và ngoại lệ cho cả 2 ngành để tính điểm
+            if (c.type === 'mon_chung' || c.type === 'ngoai_le') {
+                m = ['1', '2'];
+            }
             return m.includes('1');
         });
+        
         let ds2 = myGPADataset.filter(c => {
             let m = c.majors || ['1'];
-
+            // FIX: Tự động gán môn chung và ngoại lệ cho cả 2 ngành để tính điểm
+            if (c.type === 'mon_chung' || c.type === 'ngoai_le') {
+                m = ['1', '2'];
+            }
             return m.includes('2');
         });
 
@@ -816,6 +824,11 @@ function renderGPAStats() {
         // HIỂN THỊ 1 GIÁ TRỊ (Khi không bật Song ngành hoặc đang click Lọc xem 1 ngành cụ thể)
         let displayDataset = myGPADataset.filter(c => {
             let cMajors = c.majors || ['1']; 
+            
+            // FIX: Tự động gán môn chung và ngoại lệ cho cả 2 ngành để tính điểm
+            if (c.type === 'mon_chung' || c.type === 'ngoai_le') {
+                cMajors = ['1', '2'];
+            }
 
             if (currentMajorFilter === 'all') return true;
             if (currentMajorFilter === '1') return cMajors.includes('1');
@@ -854,7 +867,6 @@ function renderGPAStats() {
         statsContainer.html(html);
     }
 }
-
 // 3. HÀM RENDER TỔNG THỂ (ĐƯỢC GỌI KHI CẬP NHẬT GIAO DIỆN)
 function renderGPAList(syncToServer = true) {
     applyGpaConfigUI();
