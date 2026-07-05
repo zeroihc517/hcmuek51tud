@@ -465,20 +465,98 @@
 }
 
 
-        .auth-modal-content { border-radius: 20px; overflow: hidden; box-shadow: 0 15px 50px rgba(0,0,0,0.15); }
-        .auth-header { background: linear-gradient(135deg, var(--primary-color), #2071b3); color: white; padding: 35px 20px 25px; text-align: center; }
-        .auth-header-icon { font-size: 45px; margin-bottom: 12px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); }
+        /* Khung viền tổng thể: Bo góc sâu hơn, bóng đổ đa tầng */
+.auth-modal-content { 
+    border-radius: 24px; 
+    overflow: hidden; 
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+/* Phần Header: Chèn ảnh nền, phủ lớp màu xanh gradient mờ để chữ vẫn dễ đọc */
+.auth-header { 
+    background: linear-gradient(135deg, rgba(15, 76, 129, 0.85), rgba(32, 113, 179, 0.85)), 
+                url('https://www.vietnamworks.com/hrinsider/wp-content/uploads/2023/12/hinh-nen-may-tinh-dep-a-40-1.jpg') center/cover no-repeat;
+    color: white; 
+    padding: 45px 20px 30px; 
+    text-align: center; 
+    position: relative;
+}
+
+/* Hiệu ứng nổi cho Icon cái mũ tốt nghiệp */
+.auth-header-icon { 
+    font-size: 55px; 
+    margin-bottom: 15px; 
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); 
+    animation: floatIcon 3s ease-in-out infinite; /* Gọi hiệu ứng trôi nổi */
+}
+@keyframes floatIcon {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-8px); }
+    100% { transform: translateY(0px); }
+}
+/* Phủ ảnh nền lên toàn bộ không gian màn hình đăng nhập */
+#userAuthModal {
+    background: url('https://drive.google.com/thumbnail?id=1iibBgIr9XoEcOXusF-ckVA-SBPlR_tai&sz=w1920') center/cover no-repeat !important;
+}
+
+/* Xóa lớp phủ đen mờ mặc định của Bootstrap để ảnh nền hiển thị sáng, rõ nét nhất */
+.modal-backdrop.show {
+    opacity: 0 !important;
+}
+
+/* Tạo thêm hiệu ứng bóng đổ và viền mờ cho hộp đăng nhập nổi bật trên nền ảnh */
+.auth-modal-content {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.95) !important; /* Làm hộp trắng hơi trong suốt một chút */
+    backdrop-filter: blur(10px);
+}
         .auth-tabs { border-bottom: 2px solid #f3f4f6; margin-bottom: 28px; }
         .auth-tabs .nav-link { color: #6b7280; border: none; border-bottom: 3px solid transparent; font-weight: 700; padding: 14px 20px; margin-bottom: -2px; transition: all 0.3s ease; background: transparent; }
         .auth-tabs .nav-link:hover { color: var(--primary-color); }
         .auth-tabs .nav-link.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
         .input-icon-wrapper { position: relative; margin-bottom: 20px; }
         .input-icon-wrapper i { position: absolute; top: 50%; left: 18px; transform: translateY(-50%); color: #9ca3af; font-size: 18px; transition: color 0.3s; z-index: 10; }
-        .input-icon-wrapper .form-control { padding-left: 50px; height: 54px; border-radius: 12px; border: 1.5px solid #e5e7eb; font-weight: 500; background-color: #f9fafb; font-size: 15px; transition: all 0.3s; }
-        .input-icon-wrapper .form-control:focus { border-color: var(--primary-color); background-color: #ffffff; box-shadow: 0 0 0 4px var(--primary-light); }
-        .input-icon-wrapper .form-control:focus ~ i { color: var(--primary-color); }
-        .btn-auth { height: 54px; border-radius: 12px; font-weight: 700; font-size: 16px; letter-spacing: 0.5px; text-transform: uppercase; transition: all 0.3s; }
-        .btn-auth:hover { transform: translateY(-2px); box-shadow: 0 8px 15px rgba(21, 76, 121, 0.2); }
+        .input-icon-wrapper .form-control { 
+    padding-left: 55px; 
+    height: 56px; 
+    border-radius: 16px; 
+    border: 2px solid #e2e8f0; 
+    background-color: #f8fafc; 
+    font-size: 15px; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+
+/* Khi click vào ô nhập liệu sẽ đẩy nhẹ lên */
+.input-icon-wrapper .form-control:focus { 
+    border-color: #0f4c81; 
+    background-color: #ffffff; 
+    box-shadow: 0 6px 20px rgba(15, 76, 129, 0.12); 
+    transform: translateY(-2px);
+}
+.input-icon-wrapper .form-control:focus ~ i { 
+    color: #0f4c81; 
+}
+       .btn-auth { 
+    height: 56px; 
+    border-radius: 16px; 
+    font-weight: 800; 
+    font-size: 16px; 
+    letter-spacing: 1px; 
+    background: linear-gradient(135deg, #0f4c81, #1e3a8a);
+    border: none;
+    color: white;
+    box-shadow: 0 10px 20px rgba(15, 76, 129, 0.25);
+    transition: all 0.3s; 
+}
+
+/* Hiệu ứng khi lướt chuột qua nút bấm */
+.btn-auth:hover { 
+    transform: translateY(-3px); 
+    box-shadow: 0 15px 30px rgba(15, 76, 129, 0.35); 
+    color: white;
+}
         .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
         .table-responsive::-webkit-scrollbar { height: 6px; }
         .table-responsive::-webkit-scrollbar-thumb { background-color: var(--primary-color); border-radius: 10px; }
