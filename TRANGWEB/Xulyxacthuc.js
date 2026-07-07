@@ -6,8 +6,8 @@
             postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
                 let response = typeof res === 'string' ? JSON.parse(res) : res;
                 if (response.success) {
-                    currentUser = { mssv: response.mssv, name: response.name };
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                   currentUser = { mssv: response.mssv, name: response.name };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     
                     let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
                     savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
@@ -21,7 +21,7 @@
                     
                     alert("Xin chào, " + response.name + "!");
                     initGlobalApp();
-                    
+                    renderUserInfo();
                     if (!$('#tkbSection').hasClass('d-none')) {
                         loadThoiGianBieu(); loadDeadlines();
                     }

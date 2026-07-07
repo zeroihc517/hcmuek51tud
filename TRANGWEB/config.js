@@ -121,3 +121,18 @@ function submitRowData() {
             else { toastEl.classList.remove('bg-danger', 'bg-primary'); toastEl.classList.add('bg-success'); }
             let toast = new bootstrap.Toast(toastEl, { delay: 2500 }); toast.show();
         };
+function renderUserInfo() {
+    let sidebarUserInfo = $('#sidebarUserInfo');
+    if (currentUser) {
+        // Gán Tên và MSSV vào thanh Sidebar
+        $('#sidebarUserName').text(currentUser.name);
+        $('#sidebarUserMSSV').text(currentUser.mssv);
+        
+        // THÊM MỚI: Gán chuỗi "Tên - MSSV" vào cái khung bảng nổi 
+        $('#popoverUserTitle').text(currentUser.name + "-" + currentUser.mssv);
+        
+        sidebarUserInfo.removeClass('d-none');
+    } else {
+        sidebarUserInfo.addClass('d-none');
+    }
+}

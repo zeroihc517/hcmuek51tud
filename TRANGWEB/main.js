@@ -570,13 +570,19 @@ let html = `
 
 
 function initGlobalApp() {
-            $('.app-container, .mobile-header').css('display', '');
-            setTimeout(pingOnlineStatus, 1000); setInterval(pingOnlineStatus, 25000);
-            fetchSemesterConfig(); 
-            loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
-            loadWebLinks(); checkNewQA(); fetchAndRenderCategories();
-       
-	if (currentUser && currentUser.mssv === "51.01.108.008") {
+    $('.app-container, .mobile-header').css('display', '');
+    setTimeout(pingOnlineStatus, 1000); 
+    setInterval(pingOnlineStatus, 25000);
+    fetchSemesterConfig(); 
+    loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
+    loadWebLinks(); 
+    checkNewQA(); 
+    fetchAndRenderCategories();
+    
+    // GỌI HÀM HIỂN THỊ INFO Ở ĐÂY
+    renderUserInfo();
+    
+    if (currentUser && currentUser.mssv === "51.01.108.008") {
         $('#adminDatabaseLink').removeClass('d-none');
     } else {
         $('#adminDatabaseLink').addClass('d-none');

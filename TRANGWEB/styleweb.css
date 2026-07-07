@@ -1601,3 +1601,32 @@ body.dark-mode .alert-light .text-dark {
 .btn-major-filter { background-color: transparent; color: #64748b; border: none; border-radius: 6px; transition: 0.3s; }
 .btn-major-filter:hover { background-color: #e2e8f0; color: #0f4c81; }
 .btn-major-filter.active { background-color: #0f4c81; color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+/* Hiệu ứng hover cho nút Đăng xuất trong Popover */
+#sidebarUserInfo .dropdown-menu .btn:hover {
+    background-color: #0f4c81 !important;
+    color: #ffffff !important;
+}
+
+/* Đảm bảo Dropdown Item khi lướt qua có nền xám nhẹ */
+#sidebarUserInfo .dropdown-item:hover {
+    background-color: #f1f5f9;
+}
+
+/* Fix Dark Mode cho bảng nổi */
+body.dark-mode #sidebarUserInfo {
+    background-color: #19243d !important;
+    border-bottom-color: #1e293b !important;
+}
+body.dark-mode #sidebarUserInfo .dropdown-menu {
+    background-color: #131c30 !important;
+    border: 1px solid #1e293b !important;
+}
+body.dark-mode #popoverUserTitle {
+    color: #f8fafc !important;
+}
+body.dark-mode #sidebarUserInfo .dropdown-item {
+    color: #93c5fd !important;
+}
+body.dark-mode #sidebarUserInfo .dropdown-item:hover {
+    background-color: #1e293b !important;
+}
