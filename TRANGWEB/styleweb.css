@@ -1630,3 +1630,86 @@ body.dark-mode #sidebarUserInfo .dropdown-item {
 body.dark-mode #sidebarUserInfo .dropdown-item:hover {
     background-color: #1e293b !important;
 }
+/* CONTAINER MINIGAME CHIA LƯỚI ĐỀU */
+#examCardsContainer {
+    display: grid;
+    /* Nới rộng kích thước tối thiểu từ 100px lên 120px để thẻ to hơn, chữ không bị rớt dòng xấu */
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); 
+    gap: 16px; /* Tăng khoảng cách giữa các thẻ cho thoáng */
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+/* THẺ MINIGAME: KHÔI PHỤC VIỀN ĐỎ TOÀN BỘ VÀ BO GÓC */
+.card-minigame-box {
+    background-color: #ffffff;
+    border: 2px solid #ef4444; 
+    border-radius: 12px;       
+    padding: 14px 10px; /* Tăng lề bên trong để thẻ trông đầy đặn, không bị ép sát */
+    text-align: center;
+    text-decoration: none !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    transition: all 0.25s ease;
+    height: 100%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+.card-minigame-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.15);
+}
+
+/* KHUNG ẢNH TRÒN/VUÔNG (Đã phóng to hết cỡ bên trong thẻ) */
+.card-minigame-img {
+    width: 100%;   /* Cho phép khung ảnh giãn ngang tối đa theo thẻ */
+    max-width: 100px; /* Kích thước ảnh to, rõ ràng lấp đầy khoảng trắng */
+    height: 100px; 
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-minigame-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Ảnh to ra hết cỡ nhưng vẫn không bị xén viền */
+    transition: transform 0.3s;
+}
+
+.card-minigame-box:hover .card-minigame-img img {
+    transform: scale(1.12); /* Khi di chuột vào ảnh sẽ zoom lên một chút cho sống động */
+}
+
+/* Biểu tượng thay thế nếu không có ảnh */
+.card-minigame-img.default-icon {
+    background: linear-gradient(135deg, #fecdd3, #fda4af);
+    color: #be123c;
+    font-size: 38px; /* Phóng to icon mặc định tương xứng với ảnh */
+    border-radius: 50%; 
+}
+/* TIÊU ĐỀ NẰM DƯỚI */
+.card-minigame-title {
+    font-size: 13.5px; /* Tăng size chữ lên một xíu */
+    font-weight: 800;
+    color: #ef4444;
+    line-height: 1.4;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+/* --- FIX DARK MODE --- */
+body.dark-mode .card-minigame-box {
+    background-color: #131c30 !important;
+    border-color: #ef4444 !important;
+}
+body.dark-mode .card-minigame-title {
+    color: #fca5a5 !important;
+}

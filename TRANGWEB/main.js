@@ -487,27 +487,52 @@ let html = `
                 }
 
                 // Trích xuất thẻ bài kiểm tra/minigame
-                let isSpecialExam = /(đề thi thử|đề demo|minigame tuần|minigame hè|minigame số)/i.test(fullRowText);
-                if (isSpecialExam) {
-                    hasExamCards = true; let titleText = String(row[1] || row[0]).trim(); 
-                    let _extRegex = /(https?:\/\/[^\s]+)/g; let extMatch = row.join(" ").match(_extRegex); 
-                    let linkUrl = '#'; let imageUrl = '';   
-                    if (extMatch) {
-                        linkUrl = extMatch[0]; 
-                        if (extMatch.length > 1) {
-                            imageUrl = extMatch[1];
-                            if (imageUrl.includes("drive.google.com/file/d/")) {
-                                let matchId = imageUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                                if (matchId && matchId[1]) imageUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w800`;
-                            }
-                        }
-                    }
-                    let iconClass = fullRowText.includes("minigame") ? "fa-gamepad" : "fa-file-lines";
-                    let imgDisplayHtml = imageUrl ? `<img src="${imageUrl}" style="width: 100%; height: 100%; object-fit: cover;">` : `<i class="fa-solid ${iconClass}"></i>`;
-                    examCardsHtml += `<div class="card-special-exam"><div class="card-exam-img">${imgDisplayHtml}</div><div class="card-exam-title">${titleText}</div><a href="${linkUrl}" target="_blank" class="card-exam-link">Chi tiết</a></div>`;
-                    return; 
-                }
+               // Trích xuất thẻ bài kiểm tra/minigame
+// Trích xuất thẻ bài kiểm tra/minigame
+// Trích xuất thẻ bài kiểm tra/minigame
+let isSpecialExam = /(đề thi thử|đề demo|minigame tuần|minigame hè|minigame số)/i.test(fullRowText);
+if (isSpecialExam) {
+    hasExamCards = true; 
+    let titleText = String(row[1] || row[0]).trim(); 
+    let _extRegex = /(https?:\/\/[^\s]+)/g; 
+    let extMatch = row.join(" ").match(_extRegex); 
+    let linkUrl = '#'; 
+    let imageUrl = '';   
+    
+    if (extMatch) {
+        linkUrl = extMatch[0]; 
+        if (extMatch.length > 1) {
+            imageUrl = extMatch[1];
+            if (imageUrl.includes("drive.google.com/file/d/")) {
+                let matchId = imageUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                if (matchId && matchId[1]) imageUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w400`; // Thu nhỏ dung lượng thumbnail
+            }
+        }
+    }
+    
+    // Khung chứa ảnh nhỏ gọn, chuyên trị ảnh tròn
+    let imgDisplayHtml = '';
+    if (imageUrl) {
+        imgDisplayHtml = `
+            <div class="card-minigame-img">
+                <img src="${imageUrl}">
+            </div>`;
+    } else {
+        let iconClass = fullRowText.includes("minigame") ? "fa-gamepad" : "fa-file-lines";
+        imgDisplayHtml = `
+            <div class="card-minigame-img default-icon">
+                <i class="fa-solid ${iconClass}"></i>
+            </div>`;
+    }
 
+    // Thẻ Minigame khôi phục lại viền đỏ bo tròn
+    examCardsHtml += `
+        <a href="${linkUrl}" target="_blank" class="card-minigame-box" title="${titleText}">
+            ${imgDisplayHtml}
+            <div class="card-minigame-title">${titleText}</div>
+        </a>`;
+    return; 
+}
                 // Định dạng hàng (màu sắc, icon)
                 let isNewRow = /^new$/i.test(firstCellTextRaw) || firstCellTextRaw.toLowerCase().includes('new'); 
                 let rowClass = 'grid-row'; let iconPrefix = '';
