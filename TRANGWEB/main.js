@@ -306,7 +306,7 @@ let deadlineTime = extractDeadline(c3) || extractDeadline(c7_raw);
 let countdownHtml = '';
 if (deadlineTime) {
     countdownHtml = `
-    <div class="tb-countdown tb-countdown-list mt-2" data-deadline="${deadlineTime}">
+    <div class="tb-countdown tb-countdown-list" data-deadline="${deadlineTime}">
         <i class="fa-solid fa-spinner fa-spin"></i> Đang tính toán...
     </div>`;
 }
@@ -337,12 +337,13 @@ if (deadlineTime) {
     </div>
     <div class="tb-item-info">
         <div class="tb-item-title" style="font-size: 17px; font-weight: 600;">${c2}</div>
-        <div class="tb-item-dates" style="font-size: 13px;">${dateDisplay}</div>
-        ${countdownHtml}
+        <div class="tb-item-dates d-flex align-items-center flex-wrap gap-3" style="font-size: 13px;">
+            ${dateDisplay}
+            ${countdownHtml}
+        </div>
         ${adminHtml}
     </div>
 </div>`;
-
                     if (isRenLuyen) {
                         renLuyenItemsHtml += itemHtml;
                     } else {
@@ -380,9 +381,9 @@ let detailDeadlineTime = extractDeadline(data.c3) || extractDeadline(data.c7);
 let detailCountdownHtml = '';
 if (detailDeadlineTime) {
     detailCountdownHtml = `
-    <div class="tb-countdown mt-2 mb-3" data-deadline="${detailDeadlineTime}" style="font-size: 15px; padding: 8px 14px; border-width: 2px;">
+    <div class="tb-countdown" data-deadline="${detailDeadlineTime}" style="font-size: 14px; padding: 6px 14px; border-width: 2px;">
         <i class="fa-solid fa-spinner fa-spin"></i> Đang tính toán...
-    </div><br>`;
+    </div>`;
 }
 
                        // Xử lý xuống dòng và tự động chuyển đổi [IMG] thành hình ảnh (kèm hiệu ứng bo góc, đổ bóng mượt mà)
@@ -413,9 +414,11 @@ processedContent = processedContent.replace(/\[IMG=(.*?)\](.*?)\[\/IMG\]/gi, '<d
 processedContent = processedContent.replace(/\[IMG\](.*?)\[\/IMG\]/gi, '<div class="text-center my-3"><a href="$1" target="_blank" title="Bấm để xem ảnh gốc"><img src="$1" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);"></a></div>');
 
 let html = `
-    <div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">${data.c2}</div>
-    <div class="tb-detail-dates mb-2" style="font-size: 15px; padding-bottom: 8px; border-bottom: none;">${dateDisplay}</div>
-    ${detailCountdownHtml}
+<div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">${data.c2}</div>
+    <div class="tb-detail-dates mb-2 d-flex align-items-center flex-wrap gap-3" style="font-size: 15px; padding-bottom: 8px; border-bottom: none;">
+        ${dateDisplay}
+        ${detailCountdownHtml}
+    </div>
     <div class="tb-detail-main-content" style="font-size: 18px; line-height: 1.6; border-top: 2px solid #f3f4f6; padding-top: 16px;">
         ${processedContent}
     </div>
