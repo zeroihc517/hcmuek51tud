@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khảo sát Nền tảng Thảo luận | Học nhóm Khoa Toán</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #0f5298; 
+            --primary-hover: #0a3d75;
+            --primary-light: #f0f7ff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --bg-global: #f8fafc;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --shadow-md: 0 4px 15px rgba(15, 23, 42, 0.05);
+            --shadow-lg: 0 10px 30px -5px rgba(15, 23, 42, 0.08);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-global);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .survey-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: var(--shadow-lg);
+            max-width: 650px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .survey-header {
+            background: #ffffff;
+            padding: 30px 40px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .survey-header .brand-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-light);
+            color: var(--primary-color);
+            font-size: 28px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .survey-body {
+            padding: 40px;
+        }
+
+        /* Tùy chỉnh các Option Card */
+        .option-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #ffffff;
+            margin-bottom: 12px;
+        }
+
+        .option-card:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+            transform: translateY(-2px);
+        }
+
+        /* Trạng thái được chọn */
+        .option-card.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+            box-shadow: 0 4px 12px rgba(15, 82, 152, 0.1);
+        }
+
+        .option-card.selected .radio-circle {
+            border-color: var(--primary-color);
+        }
+        .option-card.selected .radio-circle::after {
+            transform: scale(1);
+        }
+
+        /* Icon ứng dụng */
+        .app-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            color: white;
+        }
+        
+        .icon-zalo { background: #0068FF; }
+        .icon-messenger { background: linear-gradient(45deg, #00B2FF, #006AFF); }
+        .icon-discord { background: #5865F2; }
+        .icon-teams { background: #464EB8; }
+        .icon-other { background: #94a3b8; }
+
+        .option-text {
+            font-size: 16px;
+            font-weight: 600;
+            flex-grow: 1;
+        }
+
+        /* Nút Radio giả bọc ngoài */
+        .radio-circle {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #cbd5e1;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .radio-circle::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            transform: scale(0);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .form-control-custom {
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+        .form-control-custom:focus {
+            border-color: var(--primary-color);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(15, 82, 152, 0.1);
+            outline: none;
+        }
+
+        .btn-submit {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 4px 10px rgba(15, 82, 152, 0.2);
+        }
+        .btn-submit:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(15, 82, 152, 0.3);
+        }
+
+        /* Nút ẩn input radio thật */
+        input[type="radio"] { display: none; }
+
+        .success-state {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="survey-container">
+        <div id="formState">
+            <div class="survey-header">
+                <div class="brand-icon"><i class="fa-solid fa-square-poll-vertical"></i></div>
+                <h4 class="fw-bold mb-2">Khảo sát ý kiến</h4>
+                <p class="text-muted mb-0" style="font-size: 15px;">Học nhóm Năm 2 - Khoa Toán & Tin học</p>
+            </div>
+            
+            <div class="survey-body">
+                <h5 class="fw-bold mb-4" style="line-height: 1.5;">Bạn muốn sử dụng nền tảng nào làm kênh thảo luận chính cho nhóm?</h5>
+                
+                <form id="surveyForm">
+                    <label class="option-card" onclick="selectOption(this, 'Zalo')">
+                        <input type="radio" name="platform" value="Zalo">
+                        <div class="app-icon icon-zalo"><i class="fa-solid fa-comment-dots"></i></div>
+                        <span class="option-text">Zalo</span>
+                        <div class="radio-circle"></div>
+                    </label>
+
+                    <label class="option-card" onclick="selectOption(this, 'Messenger')">
+                        <input type="radio" name="platform" value="Messenger">
+                        <div class="app-icon icon-messenger"><i class="fa-brands fa-facebook-messenger"></i></div>
+                        <span class="option-text">Messenger</span>
+                        <div class="radio-circle"></div>
+                    </label>
+
+                    <label class="option-card" onclick="selectOption(this, 'Discord')">
+                        <input type="radio" name="platform" value="Discord">
+                        <div class="app-icon icon-discord"><i class="fa-brands fa-discord"></i></div>
+                        <span class="option-text">Discord</span>
+                        <div class="radio-circle"></div>
+                    </label>
+
+                    <label class="option-card" onclick="selectOption(this, 'MS Teams')">
+                        <input type="radio" name="platform" value="MS Teams">
+                        <div class="app-icon icon-teams"><i class="fa-brands fa-microsoft"></i></div>
+                        <span class="option-text">MS Teams</span>
+                        <div class="radio-circle"></div>
+                    </label>
+
+                    <label class="option-card" onclick="selectOption(this, 'Khác')">
+                        <input type="radio" name="platform" value="Khác">
+                        <div class="app-icon icon-other"><i class="fa-solid fa-ellipsis"></i></div>
+                        <span class="option-text">Nền tảng khác</span>
+                        <div class="radio-circle"></div>
+                    </label>
+
+                    <div id="otherInputBox" class="mt-3 mb-4 d-none">
+                        <input type="text" id="txtOtherPlatform" class="form-control form-control-custom w-100" placeholder="Vui lòng ghi rõ tên ứng dụng bạn muốn...">
+                    </div>
+
+                    <div class="mt-4 pt-2 border-top">
+                        <button type="button" class="btn-submit mt-2" id="btnSubmitSurvey" onclick="submitSurvey()">
+                            Gửi bình chọn
+                        </button>
+                        <div class="text-center mt-3">
+                            <a href="hocnhomnam2khoatoan.html" class="text-muted fw-bold" style="font-size: 14px; text-decoration: none;">
+                                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại trang chính
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="successState" class="success-state survey-body">
+            <div style="font-size: 70px; color: #10b981; margin-bottom: 20px;">
+                <i class="fa-regular fa-circle-check"></i>
+            </div>
+            <h4 class="fw-bold mb-3">Cảm ơn bạn đã góp ý!</h4>
+            <p class="text-muted mb-4">Lựa chọn của bạn đã được ghi nhận. Ban quản trị sẽ tổng hợp và thông báo kết quả sớm nhất.</p>
+            <a href="hocnhomnam2khoatoan.html" class="btn btn-light fw-bold px-4 py-2" style="border: 1px solid #cbd5e1; border-radius: 12px; color: #475569;">
+                <i class="fa-solid fa-house me-2"></i> Trở về Trang chủ
+            </a>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        let selectedValue = "";
+
+        // Hàm xử lý khi click vào các Option
+        function selectOption(element, value) {
+            // Xóa class 'selected' ở tất cả các thẻ
+            document.querySelectorAll('.option-card').forEach(el => el.classList.remove('selected'));
+            
+            // Thêm class 'selected' vào thẻ đang được click
+            element.classList.add('selected');
+            selectedValue = value;
+
+            // Xử lý hiển thị ô nhập "Khác"
+            if (value === 'Khác') {
+                document.getElementById('otherInputBox').classList.remove('d-none');
+                document.getElementById('txtOtherPlatform').focus();
+            } else {
+                document.getElementById('otherInputBox').classList.add('d-none');
+            }
+        }
+
+        // Hàm xử lý Gửi khảo sát
+        function submitSurvey() {
+            let finalSelection = selectedValue;
+
+            // Validate (Kiểm tra lỗi)
+            if (!finalSelection) {
+                alert("Vui lòng chọn một nền tảng trước khi gửi!");
+                return;
+            }
+
+            if (finalSelection === 'Khác') {
+                let otherVal = document.getElementById('txtOtherPlatform').value.trim();
+                if (!otherVal) {
+                    alert("Vui lòng ghi rõ nền tảng khác mà bạn muốn sử dụng!");
+                    document.getElementById('txtOtherPlatform').focus();
+                    return;
+                }
+                finalSelection = "Khác: " + otherVal;
+            }
+
+            let btn = document.getElementById('btnSubmitSurvey');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi dữ liệu...';
+            btn.disabled = true;
+
+            // ==========================================
+            // TÍCH HỢP VỚI GOOGLE SHEETS (GAS) CỦA BẠN TẠI ĐÂY
+            // Hiện tại mình đang mô phỏng thời gian gửi (1.5 giây)
+            // ==========================================
+// Xóa đoạn setTimeout(...) và thay bằng đoạn này:
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWSw85sNrKawlh9BPFmjeGoW4Hcy9HdqmJ2B3r510yVQ0FE9WXFTaADN_2WyuPMaBq/exec';
+
+// Lấy thông tin user nếu có đăng nhập (từ localStorage)
+let currentUser = JSON.parse(localStorage.getItem('currentUser')) || { mssv: "Khách", name: "Ẩn danh" };
+
+$.ajax({
+    url: SCRIPT_URL,
+    method: "POST",
+    data: JSON.stringify({
+        action: "submitSurvey",
+        mssv: currentUser.mssv,
+        name: currentUser.name,
+        platform: finalSelection
+    }),
+    contentType: "text/plain;charset=utf-8",
+    success: function(response) {
+        // Thành công thì chuyển sang màn hình Success
+        document.getElementById('formState').style.display = 'none';
+        document.getElementById('successState').style.display = 'block';
+    },
+    error: function() {
+        alert("Lỗi kết nối máy chủ! Vui lòng thử lại.");
+        let btn = document.getElementById('btnSubmitSurvey');
+        btn.innerHTML = 'Gửi bình chọn';
+        btn.disabled = false;
+    }
+});
+        }
+// ==========================================
+// API LƯU KHẢO SÁT NỀN TẢNG
+// ==========================================
+
+    </script>
+</body>
+</html>
