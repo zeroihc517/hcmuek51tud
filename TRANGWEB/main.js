@@ -148,7 +148,7 @@ function renderSidebarCategories() {
         let lowerName = name.trim().toLowerCase();
         
         // Bỏ qua các sheet dữ liệu hệ thống ẩn
-if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin' || lowerName === 'chathistory' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'gpa_data') return;
+if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin' || lowerName === 'khaosat' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'gpa_data') return;
 
         if (lowerName !== 'thông báo') {
             if (lowerName === 'users' && !isAdmin) return;
