@@ -1756,3 +1756,44 @@ body.dark-mode .card-minigame-box {
 body.dark-mode .card-minigame-title {
     color: #fca5a5 !important;
 }
+/* ==========================================
+   CSS CHO ĐỒNG HỒ ĐẾM NGƯỢC THÔNG BÁO
+   ========================================== */
+.tb-countdown {
+    font-size: 13px;
+    font-weight: 700;
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+/* Đang trong thời gian đếm ngược (Màu đỏ cảnh báo) */
+.tb-countdown.active-timer {
+    background-color: #fef2f2;
+    color: #dc2626; 
+    border: 1px solid #fecaca;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.15);
+}
+
+/* Đã hết hạn (Màu xám mờ và gạch ngang chữ) */
+.tb-countdown.expired-timer {
+    background-color: #f3f4f6;
+    color: #9ca3af; 
+    border: 1px solid #e5e7eb;
+    text-decoration: line-through;
+    opacity: 0.8;
+}
+
+/* --- Tương thích Dark Mode Toàn Diện --- */
+body.dark-mode .tb-countdown.active-timer {
+    background-color: #450a0a !important;
+    color: #fca5a5 !important;
+    border-color: #7f1d1d !important;
+}
+
+body.dark-mode .tb-countdown.expired-timer {
+    background-color: #1f2937 !important;
+    color: #6b7280 !important;
+    border-color: #374151 !important;
+}

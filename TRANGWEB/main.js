@@ -302,7 +302,14 @@ function loadDataByHocPhan(sheetName, element) {
                     if (c5) dateDisplay += `<span class="tb-date-text ms-4">Ngày cập nhật ${c5}</span>`;
 
                     let badgeHtml = isNew ? `<div class="tb-badge-new">Mới</div>` : '';
-
+let deadlineTime = extractDeadline(c3) || extractDeadline(c7_raw);
+let countdownHtml = '';
+if (deadlineTime) {
+    countdownHtml = `
+    <div class="tb-countdown tb-countdown-list mt-2" data-deadline="${deadlineTime}">
+        <i class="fa-solid fa-spinner fa-spin"></i> Đang tính toán...
+    </div>`;
+}
                     let adminHtml = '';
                     if (isAdmin) {
                         let sheetRowIndex = rowIndex + 1;
@@ -322,18 +329,19 @@ function loadDataByHocPhan(sheetName, element) {
                         </div>`;
                     }
 
-                    let itemHtml = `
-                    <div class="tb-list-item" onclick="viewThongBaoDetail(${rowIndex})">
-                        <div class="tb-icon-wrapper">
-                            <i class="fa-solid fa-bell"></i>
-                            ${badgeHtml}
-                        </div>
-                        <div class="tb-item-info">
-                            <div class="tb-item-title" style="font-size: 17px; font-weight: 600;">${c2}</div> <!-- Chỉnh size ở đây -->
+                   let itemHtml = `
+<div class="tb-list-item" onclick="viewThongBaoDetail(${rowIndex})">
+    <div class="tb-icon-wrapper">
+        <i class="fa-solid fa-bell"></i>
+        ${badgeHtml}
+    </div>
+    <div class="tb-item-info">
+        <div class="tb-item-title" style="font-size: 17px; font-weight: 600;">${c2}</div>
         <div class="tb-item-dates" style="font-size: 13px;">${dateDisplay}</div>
-                            ${adminHtml}
-                        </div>
-                    </div>`;
+        ${countdownHtml}
+        ${adminHtml}
+    </div>
+</div>`;
 
                     if (isRenLuyen) {
                         renLuyenItemsHtml += itemHtml;
@@ -368,6 +376,14 @@ function loadDataByHocPhan(sheetName, element) {
 
                         let linkHtml = data.c6 ? `<div class="mt-4"><a href="${data.c6}" target="_blank" class="btn fw-bold text-white shadow-sm px-4" style="background: #0f4c81; border-radius: 8px;"><i class="fa-solid fa-link me-2"></i>Truy cập liên kết đính kèm</a></div>` : '';
                         let noteHtml = data.c7 ? `<div class="mt-4 p-3 border-start border-4 border-warning rounded text-dark" style="background: #fffbeb;"><strong><i class="fa-solid fa-paperclip me-1"></i> Ghi chú:</strong> ${data.c7}</div>` : '';
+let detailDeadlineTime = extractDeadline(data.c3) || extractDeadline(data.c7);
+let detailCountdownHtml = '';
+if (detailDeadlineTime) {
+    detailCountdownHtml = `
+    <div class="tb-countdown mt-2 mb-3" data-deadline="${detailDeadlineTime}" style="font-size: 15px; padding: 8px 14px; border-width: 2px;">
+        <i class="fa-solid fa-spinner fa-spin"></i> Đang tính toán...
+    </div><br>`;
+}
 
                        // Xử lý xuống dòng và tự động chuyển đổi [IMG] thành hình ảnh (kèm hiệu ứng bo góc, đổ bóng mượt mà)
 // Xử lý xuống dòng
@@ -398,13 +414,15 @@ processedContent = processedContent.replace(/\[IMG\](.*?)\[\/IMG\]/gi, '<div cla
 
 let html = `
     <div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">${data.c2}</div>
-    <div class="tb-detail-dates mb-4" style="font-size: 15px;">${dateDisplay}</div>
-    <div class="tb-detail-main-content" style="font-size: 18px; line-height: 1.6;">
+    <div class="tb-detail-dates mb-2" style="font-size: 15px; padding-bottom: 8px; border-bottom: none;">${dateDisplay}</div>
+    ${detailCountdownHtml}
+    <div class="tb-detail-main-content" style="font-size: 18px; line-height: 1.6; border-top: 2px solid #f3f4f6; padding-top: 16px;">
         ${processedContent}
     </div>
     ${noteHtml}
     ${linkHtml}
-`;                        $('#tbDetailContent').html(html);
+`;                        
+$('#tbDetailContent').html(html);
                         $('#tbMainView').addClass('d-none');
                         $('#tbDetailContainer').removeClass('d-none');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1282,3 +1300,63 @@ function setGpaMajorFilter(filterType) {
     
     renderGPAList();
 }
+
+// ==========================================
+// TÍNH NĂNG: ĐẾM NGƯỢC THỜI GIAN THÔNG BÁO
+// ==========================================
+
+function extractDeadline(text) {
+    if (!text) return null;
+    // Tìm kiếm chuỗi "Hết hạn lúc HH:MM Ngày DD/MM/YYYY" (Có thể khuyết giờ)
+    let match = text.match(/Hết hạn(?: lúc (\d{1,2}:\d{2}))? (?:Ngày )?(\d{1,2}\/\d{1,2}\/\d{4})/i);
+    if (match) {
+        let timeStr = match[1] || "23:59"; // Mặc định 23:59 nếu thầy cô không ghi giờ
+        let dateStr = match[2];
+        let [day, month, year] = dateStr.split('/');
+        let [hour, minute] = timeStr.split(':');
+        return new Date(year, month - 1, day, hour, minute, 0).getTime();
+    }
+    return null;
+}
+
+// Chạy vòng lặp mỗi 1 giây để cập nhật toàn bộ các đồng hồ đếm ngược trên giao diện
+// Chạy vòng lặp mỗi 1 giây để cập nhật toàn bộ các đồng hồ đếm ngược trên giao diện
+setInterval(function() {
+    let now = new Date().getTime();
+    $('.tb-countdown').each(function() {
+        let deadline = parseInt($(this).attr('data-deadline'));
+        if (!deadline) return;
+        
+        let distance = deadline - now;
+        if (distance < 0) {
+            // =====================================
+            // ĐÃ QUA DEADLINE
+            // =====================================
+            if ($(this).hasClass('tb-countdown-list')) {
+                // NẾU LÀ ĐỒNG HỒ Ở BÊN NGOÀI DANH SÁCH -> ẨN ĐI
+                $(this).hide(); 
+            } else {
+                // NẾU LÀ ĐỒNG HỒ TRONG CHI TIẾT -> HIỂN THỊ CHỮ ĐÃ HẾT HẠN
+                $(this).html('<i class="fa-solid fa-circle-exclamation me-1"></i> Đã hết hạn');
+                $(this).removeClass('active-timer').addClass('expired-timer');
+                $(this).show(); // Đảm bảo luôn hiển thị
+            }
+        } else {
+            // =====================================
+            // CHƯA HẾT HẠN (VẪN CÒN THỜI GIAN)
+            // =====================================
+            let days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            let hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            let timeText = `Còn lại: `;
+            if(days > 0) timeText += `${days} ngày `;
+            timeText += `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            $(this).html(`<i class="fa-solid fa-stopwatch fa-shake me-1"></i> ${timeText}`);
+            $(this).addClass('active-timer').removeClass('expired-timer');
+            $(this).show(); // Đảm bảo hiển thị nếu trước đó bị ẩn
+        }
+    });
+}, 1000);
