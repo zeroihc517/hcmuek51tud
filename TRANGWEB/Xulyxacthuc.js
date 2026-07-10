@@ -38,16 +38,52 @@
             }
         }
 
- function openChangePasswordModal() { $('#txtOldPass').val(''); $('#txtNewPass').val(''); $('#changePassError').addClass('d-none'); $('#changePasswordModal').modal('show'); }
+function openChangePasswordModal() { 
+            $('#txtOldPass').val(''); 
+            $('#txtNewPass').val(''); 
+            $('#txtConfirmPass').val(''); 
+            $('#changePassError').addClass('d-none'); 
+            // Reset các icon mắt về mặc định (che mật khẩu)
+            $('.eye-icon').removeClass('fa-eye-slash').addClass('fa-eye');
+            $('#txtOldPass, #txtNewPass, #txtConfirmPass').attr('type', 'password');
+            $('#changePasswordModal').modal('show'); 
+        }
+
         function submitChangePassword() {
-            let oldPass = $('#txtOldPass').val().trim(); let newPass = $('#txtNewPass').val().trim();
-            if(!oldPass || !newPass) { $('#changePassError').removeClass('d-none').text("Vui lòng điền đủ mật khẩu cũ và mới!"); return; }
-            let btn = $('#btnConfirmChangePass'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+            let oldPass = $('#txtOldPass').val().trim(); 
+            let newPass = $('#txtNewPass').val().trim();
+            let confirmPass = $('#txtConfirmPass').val().trim();
+            
+            if(!oldPass || !newPass || !confirmPass) { 
+                $('#changePassError').removeClass('d-none').text("Vui lòng điền đầy đủ các trường!"); 
+                return; 
+            }
+            if (newPass !== confirmPass) {
+                $('#changePassError').removeClass('d-none').text("Mật khẩu mới và Nhập lại mật khẩu không khớp!"); 
+                return;
+            }
+
+            let btn = $('#btnConfirmChangePass'); 
+            btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
             postToGAS({ action: "changePassword", mssv: currentUser.mssv, oldPassword: oldPass, newPassword: newPass }, function(res) {
                 if(res.includes("thành công")) { alert(res); $('#changePasswordModal').modal('hide'); } else { $('#changePassError').removeClass('d-none').text(res); }
-                btn.html('Xác nhận thay đổi').prop('disabled', false);
-            }, function() { alert("Lỗi kết nối đến server!"); btn.html('Xác nhận thay đổi').prop('disabled', false); });
+                btn.html('Đổi mật khẩu').prop('disabled', false);
+            }, function() { alert("Lỗi kết nối đến server!"); btn.html('Đổi mật khẩu').prop('disabled', false); });
         }
+
+        // Hàm xử lý khi nhấn vào icon con mắt bật/tắt mật khẩu
+        window.togglePassword = function(inputId, iconEl) {
+            let input = document.getElementById(inputId);
+            if (input.type === "password") {
+                input.type = "text";
+                iconEl.classList.remove("fa-eye");
+                iconEl.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                iconEl.classList.remove("fa-eye-slash");
+                iconEl.classList.add("fa-eye");
+            }
+        };
 
  function verifyAdmin() {
             let pass = $('#txtAdminPass').val();

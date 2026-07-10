@@ -490,6 +490,40 @@
     filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); 
     animation: floatIcon 3s ease-in-out infinite; /* Gọi hiệu ứng trôi nổi */
 }
+.form-floating-custom .form-control {
+    border-radius: 50px !important;
+    border: 2px solid #cbd5e1;
+    height: 58px;
+    padding-left: 1.5rem;
+    padding-right: 3rem; /* Chừa chỗ cho icon mắt */
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+.form-floating-custom .form-control:focus {
+    border-color: #0f4c81;
+    box-shadow: 0 0 0 4px rgba(15, 76, 129, 0.15);
+}
+.form-floating-custom label {
+    padding-left: 1.5rem;
+    color: #64748b;
+    font-weight: 600;
+}
+.eye-icon {
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #94a3b8;
+    font-size: 18px;
+    z-index: 10;
+    padding: 10px;
+    transition: color 0.2s;
+}
+.eye-icon:hover {
+    color: #0f4c81;
+}
+
 @keyframes floatIcon {
     0% { transform: translateY(0px); }
     50% { transform: translateY(-8px); }
@@ -503,6 +537,10 @@
 /* Xóa lớp phủ đen mờ mặc định của Bootstrap để ảnh nền hiển thị sáng, rõ nét nhất */
 .modal-backdrop.show {
     opacity: 0 !important;
+}
+@media (min-width: 992px) {
+    .modal-lg { max-width: 950px !important; } /* Nới rộng bảng vừa */
+    .modal-xl { max-width: 1300px !important; } /* Nới rộng bảng lớn */
 }
 
 /* Tạo thêm hiệu ứng bóng đổ và viền mờ cho hộp đăng nhập nổi bật trên nền ảnh */
@@ -1606,7 +1644,12 @@ body.dark-mode .alert-light .text-dark {
     background-color: #0f4c81 !important;
     color: #ffffff !important;
 }
-
+.modal-backdrop.show {
+    opacity: 1 !important;
+    background-color: rgba(15, 30, 50, 0.4) !important; /* Nền xanh đen trong suốt */
+    backdrop-filter: blur(8px) !important; /* Làm mờ cảnh vật phía sau */
+    -webkit-backdrop-filter: blur(8px) !important;
+}
 /* Đảm bảo Dropdown Item khi lướt qua có nền xám nhẹ */
 #sidebarUserInfo .dropdown-item:hover {
     background-color: #f1f5f9;

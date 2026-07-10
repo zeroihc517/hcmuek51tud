@@ -191,9 +191,9 @@
                 </div>
 
                 <div class="online-box d-none mb-5" id="deadlineBox">
-                    <h2 class="online-title d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="online-title d-flex justify-content-between align-items-center mb-4" style="color: #0f4c81;">
                         <span><i class="fa-solid fa-thumbtack me-2"></i> DEADLINE CỦA TÔI</span>
-                        <button class="btn btn-sm text-white fw-bold shadow-sm" style="background: #e61d4a;" onclick="openAddDeadlineModal()"><i class="fa-solid fa-plus"></i> Thêm Deadline</button>
+                        <button class="btn btn-sm text-white fw-bold shadow-sm px-3" style="background-color: #0f4c81; border-radius: 50px;" onclick="openAddDeadlineModal()"><i class="fa-solid fa-plus"></i> Thêm Deadline</button>
                     </h2>
                     <div class="online-grid" id="deadline-container"></div>
                 </div>
@@ -565,12 +565,34 @@
         </div>
     </div>
     
-    <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-key me-2"></i>Thay đổi mật khẩu cá nhân</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Mật khẩu cũ hiện tại</label><input type="password" id="txtOldPass" class="form-control" placeholder="Nhập mật khẩu cũ..."></div><div class="mb-3"><label class="form-label fw-bold">Mật khẩu mới muốn đổi</label><input type="password" id="txtNewPass" class="form-control" placeholder="Nhập mật khẩu mới..."></div><small class="text-danger d-none mt-2 fw-bold" id="changePassError"></small></div>
-                <div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning fw-bold" onclick="submitChangePassword()" id="btnConfirmChangePass">Xác nhận thay đổi</button></div>
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-header text-white" style="background-color: #0f4c81; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                    <h6 class="modal-title m-0 fw-bold text-center w-100 text-uppercase"><i class="fa-solid fa-shield-halved me-2"></i>Đổi mật khẩu</h6>
+                    <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 p-md-5">
+                    <div class="form-floating form-floating-custom mb-4 position-relative">
+                        <input type="password" id="txtOldPass" class="form-control" placeholder="Mật khẩu cũ">
+                        <label for="txtOldPass">Mật khẩu cũ</label>
+                        <i class="fa-solid fa-eye eye-icon" onclick="togglePassword('txtOldPass', this)"></i>
+                    </div>
+                    <div class="form-floating form-floating-custom mb-4 position-relative">
+                        <input type="password" id="txtNewPass" class="form-control" placeholder="Mật khẩu mới">
+                        <label for="txtNewPass">Mật khẩu mới</label>
+                        <i class="fa-solid fa-eye eye-icon" onclick="togglePassword('txtNewPass', this)"></i>
+                    </div>
+                    <div class="form-floating form-floating-custom mb-3 position-relative">
+                        <input type="password" id="txtConfirmPass" class="form-control" placeholder="Nhập lại mật khẩu mới">
+                        <label for="txtConfirmPass">Nhập lại mật khẩu mới</label>
+                        <i class="fa-solid fa-eye eye-icon" onclick="togglePassword('txtConfirmPass', this)"></i>
+                    </div>
+                    <small class="text-danger d-block d-none mt-2 fw-bold text-center" id="changePassError"></small>
+                </div>
+                <div class="modal-footer border-0 d-flex justify-content-center pb-4">
+                    <button type="button" class="btn text-white fw-bold w-100 mx-3" style="background-color: #0f4c81; border-radius: 50px; height: 50px; font-size: 16px;" onclick="submitChangePassword()" id="btnConfirmChangePass">Đổi mật khẩu</button>
+                </div>
             </div>
         </div>
     </div>
@@ -654,29 +676,63 @@
 
     <div class="modal fade" id="deadlinePersonalModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-danger text-white" id="dlModalHeader"><h6 class="modal-title m-0 fw-bold" id="dlModalTitle"><i class="fa-solid fa-plus me-2"></i>Thêm Deadline</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-                <div class="modal-body p-4">
-                    <input type="hidden" id="pDlRowIndex" value="">
-                    <div class="mb-3"><label class="form-label fw-bold">Tên công việc / Bài tập</label><input type="text" id="pDlTitle" class="form-control" placeholder="VD: Báo cáo giữa kỳ"></div>
-                    <div class="mb-3"><label class="form-label fw-bold">Hình thức / Địa điểm / ...</label><input type="text" id="pDlTag" class="form-control" placeholder="VD: VLE"></div>
-                    <div class="row mb-3">
-                        <div class="col-6"><label class="form-label fw-bold">Màu nền</label>
-                            <select id="pDlIcon" class="form-select">
-                                <option value="fire">Đỏ</option><option value="alert">Vàng</option><option value="success">Xanh lá</option><option value="primary">Xanh dương</option><option value="secondary">Tím</option>
-                            </select>
-                        </div>
-                        <div class="col-6"><label class="form-label fw-bold">Emoji</label><input type="text" id="pDlEmoji" class="form-control" placeholder="VD: ⏰, 📖, 🔥"></div>
-                    </div>
-                   <div class="row mb-3">
-                        <div class="col-6"><label class="form-label fw-bold text-primary">Từ ngày</label><input type="text" id="pDlStartDate" class="form-control" placeholder="VD: 15/10/2026"></div>
-                        <div class="col-6"><label class="form-label fw-bold text-danger">Đến ngày</label><input type="text" id="pDlEndDate" class="form-control" placeholder="VD: 20/10/2026"></div>
-                        <div class="col-12 mt-1"><small class="text-muted">Nhập định dạng <b>DD/MM/YYYY</b>. Thời gian sẽ tự động hiện lên bảng Deadline trên màn hình.</small></div>
-                    </div>
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-header text-white" id="dlModalHeader" style="background-color: #0f4c81; border-top-left-radius: 20px; border-top-right-radius: 20px; position: relative;">
+                    <h6 class="modal-title m-0 fw-bold text-center w-100 text-uppercase" id="dlModalTitle"><i class="fa-solid fa-plus me-2"></i>Thêm Deadline</h6>
+                    <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn btn-danger px-4 fw-bold" onclick="savePersonalDeadline()" id="btnSaveDeadline">Lưu Deadline</button>
+                <div class="modal-body p-4 p-md-5">
+                    <input type="hidden" id="pDlRowIndex" value="">
+                    
+                    <div class="form-floating form-floating-custom mb-4">
+                        <input type="text" id="pDlTitle" class="form-control" placeholder="Tên công việc / Bài tập">
+                        <label for="pDlTitle">Tên công việc / Bài tập</label>
+                    </div>
+                    
+                    <div class="form-floating form-floating-custom mb-4">
+                        <input type="text" id="pDlTag" class="form-control" placeholder="Hình thức / Địa điểm (VD: VLE)">
+                        <label for="pDlTag">Hình thức / Địa điểm (VD: VLE)</label>
+                    </div>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="form-floating form-floating-custom">
+                                <select id="pDlIcon" class="form-select" style="border-radius: 50px !important; padding-left: 1.5rem; height: 58px;">
+                                    <option value="fire">Đỏ (Gấp)</option>
+                                    <option value="alert">Vàng</option>
+                                    <option value="success">Xanh lá</option>
+                                    <option value="primary">Xanh dương</option>
+                                    <option value="secondary">Tím</option>
+                                </select>
+                                <label for="pDlIcon" style="padding-left: 1.5rem;">Màu nền</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-floating form-floating-custom">
+                                <input type="text" id="pDlEmoji" class="form-control" placeholder="Emoji (VD: ⏰)">
+                                <label for="pDlEmoji">Emoji (VD: ⏰)</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mb-2">
+                        <div class="col-6">
+                            <div class="form-floating form-floating-custom">
+                                <input type="text" id="pDlStartDate" class="form-control" placeholder="Từ ngày (DD/MM/YYYY)">
+                                <label for="pDlStartDate">Từ ngày</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-floating form-floating-custom">
+                                <input type="text" id="pDlEndDate" class="form-control" placeholder="Đến ngày (DD/MM/YYYY)">
+                                <label for="pDlEndDate">Đến ngày</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center"><small class="text-muted" style="font-size: 12px;">Định dạng ngày chuẩn: <b>DD/MM/YYYY</b> (Ví dụ: 15/10/2026)</small></div>
+                </div>
+                <div class="modal-footer border-0 d-flex justify-content-center pb-4">
+                    <button type="button" class="btn text-white fw-bold w-100 mx-3" style="background-color: #0f4c81; border-radius: 50px; height: 50px; font-size: 16px;" onclick="savePersonalDeadline()" id="btnSaveDeadline">Lưu Deadline</button>
                 </div>
             </div>
         </div>
