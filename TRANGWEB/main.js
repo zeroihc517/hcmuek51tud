@@ -317,11 +317,16 @@ if (deadlineTime) {
                     let adminHtml = '';
                     if (isAdmin) {
                         let sheetRowIndex = rowIndex + 1;
-                        let ec1 = c1.replace(/'/g, "\\'"); let ec2 = c2.replace(/'/g, "\\'"); let ec3 = c3.replace(/'/g, "\\'"); let ec4 = c4.replace(/'/g, "\\'");
-                        let ec5 = c5.replace(/'/g, "\\'"); let ec6 = c6.replace(/'/g, "\\'"); 
-                        
-                        // QUAN TRỌNG: Truyền c7_raw vào nút Sửa thay vì c7 để không bị mất chữ "Rèn luyện"
-                        let ec7 = c7_raw.replace(/'/g, "\\'");
+// Tạo hàm xử lý ký tự đặc biệt để không làm vỡ HTML
+const escapeJS = (str) => String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, "");
+
+let ec1 = escapeJS(c1);
+let ec2 = escapeJS(c2);
+let ec3 = escapeJS(c3); // Quan trọng nhất: Cột 3 thường chứa nội dung dài và có xuống dòng
+let ec4 = escapeJS(c4);
+let ec5 = escapeJS(c5);
+let ec6 = escapeJS(c6);
+let ec7 = escapeJS(c7_raw);
                         
                         adminHtml = `
                         <div class="mt-2" onclick="event.stopPropagation();">
@@ -584,7 +589,7 @@ if (isSpecialExam) {
                 // Render nút Admin
                 if (isAdmin) {
                     let sheetRowIndex = rowIndex + 1; 
-                    let escapedCells = row.map(c => String(c || '').replace(/'/g, "\\'"));
+                  let escapedCells = row.map(c => String(c || '').replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, ""));
                     while(escapedCells.length < 7) escapedCells.push(''); // Đảm bảo đủ 7 cột
                     bodyHtml += `<td><div class="d-flex flex-wrap gap-1">
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
