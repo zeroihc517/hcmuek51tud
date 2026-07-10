@@ -412,25 +412,25 @@
     </div>
 </div>
 <button id="btnOpenChat" class="btn-open-chat d-none" onclick="toggleChat()">
-        <i class="fa-solid fa-comment-dots"></i>
-        <span class="chat-badge" id="chatUnreadBadge">!</span>
-    </button>
- <div id="chatWidget" class="chat-widget d-none">
-        <div class="chat-header" onclick="toggleChat()">
-            <div class="d-flex align-items-center gap-2">
-                <i class="fa-solid fa-comments"></i>
-                <h6 class="m-0 fw-bold">Phòng Chat Chung</h6>
-            </div>
-            <i class="fa-solid fa-chevron-down"></i>
+    <i class="fa-solid fa-comment-dots"></i>
+    <span class="chat-badge" id="chatUnreadBadge">!</span>
+</button>
+<div id="chatWidget" class="chat-widget d-none">
+    <div class="chat-header" onclick="toggleChat()">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-comments"></i>
+            <h6 class="m-0 fw-bold">Phòng Chat Chung</h6>
         </div>
-        <div class="chat-body" id="chatBody">
-            <div class="text-center text-muted small my-3"><i class="fa-solid fa-lock me-1"></i> ----- Đang tải dữ liệu ----</div>
-        </div>
-        <div class="chat-footer">
-            <input type="text" id="txtChatMessage" class="form-control" placeholder="Nhập tin nhắn..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
-            <button class="btn btn-chat-send" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
-        </div>
+        <i class="fa-solid fa-chevron-down"></i>
     </div>
+    <div class="chat-body" id="chatBody">
+        <div class="text-center text-muted small my-3"><i class="fa-solid fa-lock me-1"></i> ----- Đang tải dữ liệu ----</div>
+    </div>
+    <div class="chat-footer">
+        <input type="text" id="txtChatMessage" class="form-control" placeholder="Nhập tin nhắn..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+        <button class="btn btn-chat-send" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+</div>
 <div class="modal fade" id="editRowModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
@@ -842,7 +842,6 @@
     <script src="TRANGWEB/Xulyxacthuc.js"></script>
     <script src="TRANGWEB/tkb.js"></script>
     <script src="TRANGWEB/qa.js"></script>
-    <script src="TRANGWEB/chat.js"></script>
     <script src="TRANGWEB/main.js"></script>
 </body>
 </html>
