@@ -298,8 +298,12 @@ function loadDataByHocPhan(sheetName, element) {
                     
                     detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew };
 
-                    let dateDisplay = `<span class="tb-date-text">Ngày đăng tin ${c4 || 'Gần đây'}</span>`;
-                    if (c5) dateDisplay += `<span class="tb-date-text ms-4">Ngày cập nhật ${c5}</span>`;
+let dateDisplay = `
+<div class="d-inline-flex gap-2 flex-wrap">
+    <span class="tb-date-text"><i class="fa-regular fa-calendar"></i> Ngày đăng: ${c4 || 'Gần đây'}</span>
+    ${c5 ? `<span class="tb-date-text text-success"><i class="fa-solid fa-clock-rotate-left"></i> Ngày cập nhật: ${c5}</span>` : ''}
+</div>`;
+
 
                     let badgeHtml = isNew ? `<div class="tb-badge-new">Mới</div>` : '';
 let deadlineTime = extractDeadline(c3) || extractDeadline(c7_raw);
