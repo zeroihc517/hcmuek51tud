@@ -38,15 +38,12 @@
 
             </div>
 <!-- KHUNG THÔNG TIN CÁ NHÂN & MENU NỔI (POPOVER) -->
-<div id="sidebarUserInfo" class="p-3 border-bottom d-none position-relative" style="background-color: #f8fafc;">
-    <!-- Khu vực hiển thị (Có thể nhấn vào để mở menu) -->
+<div id="sidebarUserInfo" class="py-2 px-3 border-bottom d-none position-relative" style="background-color: #f8fafc;">
     <div class="d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; user-select: none;">
-        <!-- Avatar -->
-        <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 42px; height: 42px; background-color: #94a3b8; font-size: 18px;">
+        <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 36px; height: 36px; background-color: #94a3b8; font-size: 16px;">
             <i class="fa-solid fa-user"></i>
         </div>
-        <!-- Tên & MSSV -->
-        <div class="flex-grow-1" style="line-height: 1.3; overflow: hidden;">
+        <div class="flex-grow-1" style="line-height: 1.2; overflow: hidden;">
             <div class="fw-bold text-truncate" id="sidebarUserName" style="color: #0f4c81; font-size: 14px;">Tên Sinh Viên</div>
             <div class="text-muted small text-truncate" id="sidebarUserMSSV" style="font-size: 12px;">MSSV</div>
         </div>
@@ -60,7 +57,9 @@
         </div>
         
         <hr class="text-muted mb-2 mt-0" style="opacity: 0.15;">
-        
+        <button id="btnAdminLoginToggle" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px;" onclick="openAdminModal()">
+        <i class="fa-solid fa-user-shield text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Dành cho bản quản trị
+    </button>
         <!-- Các nút chức năng -->
          <!---<button class="dropdown-item py-2 mb-1 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;">
            <i class="fa-solid fa-user text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Hồ sơ của tôi
@@ -74,48 +73,50 @@
             Đăng xuất
         </button>
     </div>
-</div>            <div class="sidebar-content">
-                <div class="portal-filter-box">
-                    <label class="portal-label">DANH MỤC TRUY CẬP</label>
-                    <div class="course-list" id="mainNavigationList">
-                        
-                        <button class="btn-course active" id="btnNavThongBao" onclick="loadDataByHocPhan('Thông báo', this)">
-                            <i class="fa-solid fa-bell" style="color: #f59e0b;"></i> Thông báo
-                        </button>
-
-                        <button class="btn-course" id="btnNavTongHop" onclick="loadTongHopView()">
-                            <i class="fa-solid fa-link" style="color: var(--accent-red);"></i> Tổng hợp Link
-                        </button>
-                        
-                        <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
-                            <i class="fa-regular fa-calendar-days" style="color: #0ea5e9;"></i> Thời gian biểu
-                        </button>
-                        <div id="gpaNavContainer" class="d-none">
-    <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
-        <i class="fa-solid fa-calculator" style="color: #10b981;"></i> Tính điểm GPA
-    </button>
-</div>
-                        <div id="dynamicCourseList" class="course-list mt-2">
-                            <span class="text-muted small px-2">Đang tải danh sách học phần...</span>
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="my-4" style="border-color: var(--border-color);">
-                
-                <button class="btn-qa-menu" id="btnNavQA" onclick="openQASection()">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="fa-regular fa-comments fa-lg"></i> Giải đáp thắc mắc
-                    </div>
-                    <span id="qaSidebarBadge" class="badge-new-qa d-none">Mới</span>
+</div>           
+<div class="sidebar-content">
+    
+    <!-- KHỐI 1: TRANG CÁ NHÂN -->
+    <div class="portal-filter-box">
+        <label class="portal-label">TRANG CÁ NHÂN</label>
+        <div class="course-list">
+            <button class="btn-course active" id="btnNavThongBao" onclick="loadDataByHocPhan('Thông báo', this)">
+                <i class="fa-solid fa-bell"></i> Thông báo
+            </button>
+            		<button class="btn-course" id="btnNavTongHop" onclick="loadTongHopView()">
+                <i class="fa-solid fa-link"></i> Tổng hợp Link
+            </button>
+            <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
+                <i class="fa-solid fa-calendar"></i> Lịch học
+            </button>
+            
+            <div id="gpaNavContainer" class="d-none">
+                <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
+                    <i class="fa-solid fa-clipboard-check"></i> Kết quả học tập
                 </button>
-                
-               <button class="btn mt-3 w-100 text-start" id="btnAdminLoginToggle" onclick="openAdminModal()" style="color: var(--text-muted); font-size: 14px; font-weight: 500;">
-                    <i class="fa-solid fa-lock"></i> Dành cho Ban quản trị
-                </button>
-
-              
             </div>
+            
+            <!-- Chuyển nút Q&A thành định dạng btn-course phẳng luôn -->
+            <button class="btn-course" id="btnNavQA" onclick="openQASection()">
+                <i class="fa-solid fa-comments"></i> Giải đáp thắc mắc
+                <span id="qaSidebarBadge" class="badge-new-qa d-none">Mới</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- KHỐI 2: TRA CỨU THÔNG TIN -->
+    <div class="portal-filter-box mt-4">
+        <label class="portal-label">TỔNG HỢP TÀI LIỆU</label>
+        <div class="course-list">
+            
+            
+            <!-- Danh sách học phần (môn học) sẽ đổ tự động vào đây -->
+            <div id="dynamicCourseList" class="course-list mt-2">
+                <span class="text-muted small px-2">Đang tải danh sách học phần...</span>
+            </div>
+        </div>
+    </div>
+</div>
         </aside>
 
         <main class="main-content">

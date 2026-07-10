@@ -1,5 +1,5 @@
         :root {
-            --sidebar-width: 260px;
+            --sidebar-width: 230px;
             --primary-color: #154c79; 
             --primary-hover: #0f395c;
             --primary-light: #e8f1f8;
@@ -54,10 +54,14 @@
             z-index: 100; transition: transform 0.3s ease; box-shadow: var(--shadow-sm);
         }
         
-        .sidebar-brand {
-            padding: 30px 24px; background: var(--primary-color); color: #ffffff;
-            display: flex; align-items: center; gap: 16px;
-        }
+.sidebar-brand {
+    padding: 12px 18px; /* Giảm padding trái/phải xuống 18px */
+    background: var(--primary-color); 
+    color: #ffffff;
+    display: flex; 
+    align-items: center; 
+    gap: 16px;
+}
         
         .sidebar-brand .brand-icon {
             background: #ffffff; color: var(--primary-color); width: 50px; height: 50px;
@@ -131,17 +135,63 @@
 
         .sidebar-brand h6 { font-size: 22px; font-weight: 700; margin: 0; }
         .sidebar-brand small { font-size: 15px; opacity: 0.9; }
-
-        .sidebar-content { padding: 24px; flex: 1; overflow-y: auto; }
-
+.sidebar-content { 
+    /* Thứ tự: trên 10px | phải 14px | dưới 24px | trái 14px */
+    padding: 10px 14px 24px 14px; 
+    flex: 1; 
+    overflow-y: auto; 
+    background-color: #f4f6f8; 
+}
         .portal-filter-box { margin-bottom: 24px; }
-        .portal-label { font-size: 14px; text-transform: uppercase; font-weight: 700; color: var(--primary-color); margin-bottom: 12px; display: block; }
+.portal-label { 
+    font-size: 13px; 
+    text-transform: uppercase; 
+    font-weight: 800; 
+    color: #0f4c81; 
+    margin-bottom: 10px; 
+    margin-top: 5px; /* Đã giảm từ 15px xuống 5px */
+    display: block; 
+    letter-spacing: 0.5px;
+}
 
         .course-list { display: flex; flex-direction: column; gap: 8px; }
-        .btn-course { background: var(--card-bg); border: 1px solid var(--border-color); padding: 12px 16px; border-radius: 6px; text-align: left; font-size: 15px; font-weight: 600; color: var(--text-main); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 10px; }
-        .btn-course:hover { background: var(--bg-global); border-color: #9ca3af; }
-        .btn-course.active { background: var(--primary-light); color: var(--primary-color); border-color: var(--primary-color); box-shadow: 0 0 0 1px var(--primary-color); }
-
+.btn-course { 
+    background: transparent !important; 
+    border: none !important; 
+    padding: 10px 12px; /* Giảm padding để nút thon gọn lại */
+    border-radius: 8px; 
+    text-align: left; 
+    font-size: 14px; /* Giảm nhẹ font chữ xuống 14px */
+    font-weight: 500; 
+    color: #6b7280; 
+    cursor: pointer; 
+    transition: all 0.2s ease; 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; /* Rút ngắn khoảng cách giữa icon và chữ */
+    box-shadow: none !important;
+}
+.btn-course i {
+    color: #9ca3af;
+    font-size: 18px;
+    width: 24px;
+    text-align: center;
+}
+.btn-course:hover { 
+    background: #e5e7eb !important; 
+    color: #374151; 
+}
+.btn-course.active { 
+    background: transparent !important; 
+    color: #0f4c81 !important; 
+    font-weight: 700; 
+}
+.btn-course.active i {
+    color: #0f4c81;
+}
+.badge-new-qa {
+    margin-left: auto; /* Đẩy chữ "Mới" sát lề phải */
+}
         .btn-qa-menu { background: var(--topic-bg); border: 1px dashed var(--primary-color); color: var(--primary-color); padding: 14px; border-radius: 8px; width: 100%; text-align: left; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
         .btn-qa-menu:hover { background: var(--primary-light); transform: translateY(-2px); }
         .btn-qa-menu.active { background: var(--primary-color); color: #fff; border-style: solid; }

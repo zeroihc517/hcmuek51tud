@@ -128,8 +128,15 @@ function renderUserInfo() {
         $('#sidebarUserName').text(currentUser.name);
         $('#sidebarUserMSSV').text(currentUser.mssv);
         
-        // THÊM MỚI: Gán chuỗi "Tên - MSSV" vào cái khung bảng nổi 
-        $('#popoverUserTitle').text(currentUser.name + "-" + currentUser.mssv);
+        // Gán chuỗi "Tên - MSSV" vào cái khung bảng nổi 
+        $('#popoverUserTitle').text(currentUser.name + " - " + currentUser.mssv);
+        
+        // KIỂM TRA MSSV ĐỂ HIỂN THỊ NÚT QUẢN TRỊ
+        if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008") {
+            $('#btnAdminLoginToggle').removeClass('d-none').addClass('d-flex');
+        } else {
+            $('#btnAdminLoginToggle').addClass('d-none').removeClass('d-flex');
+        }
         
         sidebarUserInfo.removeClass('d-none');
     } else {

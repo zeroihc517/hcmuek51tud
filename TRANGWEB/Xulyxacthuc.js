@@ -30,13 +30,12 @@
             }, function() { $('#userAuthError').removeClass('d-none').text("Lỗi kết nối!"); btn.html('Đăng nhập').prop('disabled', false); });
         }
 
-        function logoutStudent() {
-            if(confirm("Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?")) {
-                localStorage.removeItem('currentUser');
-                currentUser = null; 
-                location.reload(); 
-            }
-        }
+function logoutStudent() {
+    // Xóa ngay dữ liệu và tải lại trang, không cần hỏi
+    localStorage.removeItem('currentUser');
+    currentUser = null; 
+    location.reload(); 
+}
 
 function openChangePasswordModal() { 
             $('#txtOldPass').val(''); 
@@ -89,7 +88,8 @@ function openChangePasswordModal() {
             let pass = $('#txtAdminPass').val();
             if (pass === "#226244bc#TBC") {
                 isAdmin = true; $('#adminLoginModal').modal('hide');
-                $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
+               // Thay đổi thành đoạn này
+$('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
                 $('#btnManageCategories').removeClass('d-none');
                 renderSidebarCategories(); 
 		$('#adminDatabaseLink').removeClass('d-none');
@@ -102,7 +102,8 @@ function openChangePasswordModal() {
         function openAdminModal() {
             if (isAdmin) {
                 if (confirm("Bạn có muốn đăng xuất quyền Admin?")) {
-                    isAdmin = false; $('#btnAdminLoginToggle').html('<i class="fa-solid fa-lock"></i> Dành cho Ban quản trị').css('color', 'var(--text-muted)');
+                    isAdmin = false; // Thay đổi thành đoạn này
+$('#btnAdminLoginToggle').html('<i class="fa-solid fa-user-shield text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Dành cho bản quản trị').css('color', '#e61d4a');
                     $('#btnManageCategories').addClass('d-none');
                     renderSidebarCategories(); 
 		if (!currentUser || currentUser.mssv !== "51.01.108.008") {
