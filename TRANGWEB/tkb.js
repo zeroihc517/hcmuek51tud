@@ -110,32 +110,45 @@ function openEditDeadlineModal(rowIndex) {
 }
 
 function savePersonalDeadline() {
-    let rowIndex = $('#pDlRowIndex').val(); let startDate = $('#pDlStartDate').val().trim(); let endDate = $('#pDlEndDate').val().trim();
-    if(!$('#pDlTitle').val() || !startDate || !endDate) { alert("Vui lòng nhập Tên công việc và Ngày bắt đầu/Kết thúc!"); return; }
+    let rowIndex = $('#pDlRowIndex').val(); 
+    let startDate = $('#pDlStartDate').val().trim(); 
+    let endDate = $('#pDlEndDate').val().trim();
+    let title = $('#pDlTitle').val().trim();
+
+    if (!title || !startDate || !endDate) { 
+        alert("Vui lòng nhập Tên công việc và Ngày bắt đầu/Kết thúc!"); 
+        return; 
+    }
+    
     let autoDuration = "Từ " + startDate + " đến " + endDate;
-    // Tìm đoạn cấu hình payload trong hàm executeSavePersonalTkb():
-let payload = {
-    action: "editTKBUser",
-    rowIndex: pendingEventAction.rowIndex,
-    mssv: currentUser.mssv,
-    thu: $('#editTkbThu').val(),
-    tietBd: parseInt($('#editTkbTietBd').val()),
-    soTiet: parseInt($('#editTkbSoTiet').val()),
-    thoiGian: $('#editTkbThoiGian').val(),
-    hinhThuc: $('#editTkbHinhThuc').val(),
-    mon: $('#editTkbMon').val(),
-    phong: $('#editTkbPhong').val(),
-    gv: $('#editTkbGv').val(),
-    color: $('#editTkbColor').val(),
-    ngayBatDau: $('#editTkbNgayBatDau').val(),
-    ngayKetThuc: $('#editTkbNgayKetThuc').val(),
-    ngayNgoaiLe: $('#editTkbNgayNgoaiLe').val(),
-    editScope: pendingEventAction.scope,
-    // ĐẢM BẢO DÒNG NÀY: Truyền chuẩn chuỗi ngày của sự kiện được click
-    targetDate: pendingEventAction.targetDate 
-};
-    let btn = $('#btnSaveDeadline'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
-    postToGAS(payload, function(res) { alert(res); $('#deadlinePersonalModal').modal('hide'); btn.html('Lưu Deadline').prop('disabled', false); loadDeadlines(); }, function() { alert("Giao tiếp máy chủ thất bại!"); btn.html('Lưu Deadline').prop('disabled', false); });
+    let isEditMode = (rowIndex !== null && rowIndex !== '');
+
+    // Đã sửa lại payload để gọi đúng action xử lý Deadline
+    let payload = {
+        action: isEditMode ? "editDeadlineUser" : "addDeadlineUser",
+        rowIndex: rowIndex,
+        mssv: currentUser.mssv,
+        title: title,
+        duration: autoDuration,
+        tag: $('#pDlTag').val().trim(),
+        icon: $('#pDlIcon').val(),
+        emoji: $('#pDlEmoji').val().trim(),
+        startDate: startDate,
+        endDate: endDate
+    };
+
+    let btn = $('#btnSaveDeadline'); 
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+    
+    postToGAS(payload, function(res) { 
+        alert(res); 
+        $('#deadlinePersonalModal').modal('hide'); 
+        btn.html('Lưu Deadline').prop('disabled', false); 
+        loadDeadlines(); 
+    }, function() { 
+        alert("Giao tiếp máy chủ thất bại!"); 
+        btn.html('Lưu Deadline').prop('disabled', false); 
+    });
 }
 
 function deletePersonalDeadline(sheetRowIndex) {
