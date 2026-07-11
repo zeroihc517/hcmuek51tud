@@ -708,13 +708,29 @@
                                 <label for="pDlIcon" style="padding-left: 1.5rem;">Màu nền</label>
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="form-floating form-floating-custom">
-                                <input type="text" id="pDlEmoji" class="form-control" placeholder="Emoji (VD: ⏰)">
-                                <label for="pDlEmoji">Emoji (VD: ⏰)</label>
-                            </div>
-                        </div>
-                    </div>
+<div class="col-6">
+    <div class="form-floating form-floating-custom">
+        <!-- Đổi thành input kết nối với datalist qua id "emojiOptions" -->
+        <input type="text" list="emojiOptions" id="pDlEmoji" class="form-control" placeholder="Biểu tượng" autocomplete="off">
+        <label for="pDlEmoji">Biểu tượng</label>
+        
+        <!-- Danh sách gợi ý thả xuống -->
+        <datalist id="emojiOptions">
+            <option value="⏰">Việc cá nhân</option>
+            <option value="🚨">Khẩn cấp</option>
+            <option value="📚">Bài tập</option>
+            <option value="💻">Lập trình / C++</option>
+            <option value="✍️">Kiểm tra</option>
+            <option value="🎯">Mục tiêu</option>
+            <option value="👥">Họp nhóm</option>
+            <option value="📢">Thuyết trình</option>
+            <option value="📝">Báo cáo</option>
+	    <option value="📣">Sự kiện</option>
+            <option value="🌐">Hệ thống VLE</option>
+        </datalist>
+    </div>
+</div>
+
                     
                     <div class="row g-3 mb-2">
                         <div class="col-6">
