@@ -97,13 +97,11 @@
                 </button>
             </div>
             
-            <!-- Chuyển nút Q&A thành định dạng btn-course phẳng luôn -->
-            <button class="btn-course" id="btnNavQA" onclick="openQASection()">
-                <i class="fa-solid fa-comments"></i> Giải đáp thắc mắc
-                <span id="qaSidebarBadge" class="badge-new-qa d-none">Mới</span>
-            </button>
+
 <button class="btn-course" id="btnNavShareCode" onclick="openShareCodeSection()">
-    <i class="fa-solid fa-laptop-code"></i> Share Code
+    <i class="fa-solid fa-laptop-code"></i> Thảo luận
+    <!-- THÊM DÒNG NÀY: Badge thông báo ở thanh menu -->
+    <span id="shareCodeSidebarBadge" class="badge-new-qa d-none">Mới</span>
 </button>
         </div>
     </div>
@@ -487,7 +485,14 @@
 
             <div id="qaSection" class="d-none">
                 <header class="top-header">
-                    <div class="page-title"><i class="fa-regular fa-comments"></i> Hỗ trợ & Giải đáp thắc mắc</div>
+<div class="d-flex align-items-center">
+        <!-- Nút Trở lại gọi hàm openShareCodeSection() để quay về kho Share Code -->
+        <button class="btn btn-light fw-bold shadow-sm me-3" onclick="openShareCodeSection()">
+            <i class="fa-solid fa-arrow-left"></i> Trở lại
+        </button>
+        <div class="page-title m-0"><i class="fa-regular fa-comments"></i> Hỗ trợ & Giải đáp thắc mắc</div>
+    </div>
+
                 </header>
 
                 <div class="instructor-card border-start-0" style="border-top: 4px solid var(--primary-color);">
@@ -524,13 +529,26 @@
 			
 <div id="shareCodeSection" class="d-none">
     <header class="top-header">
-        <div class="page-title"><i class="fa-solid fa-code-branch text-success"></i> Cộng đồng Share Code</div>
+        <div class="page-title"><i class="fa-solid fa-code-branch text-success"></i> Thảo luận</div>
     </header>
 
     <!-- MÀN HÌNH 1: CHỌN HỌC PHẦN (Sử dụng link-card-modern giống giao diện trang chủ) -->
     <div id="shareCategoryView">
-        <h6 class="mb-4 text-muted fw-bold"><i class="fa-solid fa-hand-pointer me-2"></i>Vui lòng chọn học phần để tham gia thảo luận:</h6>
+
         <div class="row g-4 mb-4">
+<div class="col-md-4">
+        <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #ef4444;" onclick="openQASection()">
+            <div class="icon-box position-relative">
+                <i class="fa-solid fa-comments text-danger"></i>
+                <!-- Giữ nguyên id qaSidebarBadge để hệ thống đếm thông báo tự động cập nhật -->
+                <span id="qaSidebarBadge" class="badge-new-qa d-none" style="position: absolute; top: -5px; right: -25px; padding: 2px 6px;">Mới</span>
+            </div>
+            <div class="card-text-wrapper">
+                <h5>Giải đáp thắc mắc</h5>
+                <p class="card-desc">Hỏi đáp & Hỗ trợ chung</p>
+            </div>
+        </div>
+    </div>
             <!-- Thẻ 1: Lập trình hướng đối tượng -->
             <div class="col-md-4">
                 <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #0ea5e9;" onclick="openShareCategory('Lập trình hướng đối tượng', 'cpp')">

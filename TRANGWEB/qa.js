@@ -41,15 +41,29 @@ function formatCodeBlocks(text) {
         return `<pre><code class="language-${safeLang}">${escapedCode}</code></pre>`;
     });
 }
-function checkNewQA() { $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) { if (!data || data.length === 0) return; if (data.some(row => (row[3] || '').trim() === '')) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none'); }}); }
-        function openQASection() { 
-			document.title = "Hỗ trợ & Giải đáp | Học nhóm Năm 2 Khoa Toán";
-            resetNavActive(); $('#btnNavQA').addClass('active'); $('#qaSection').removeClass('d-none'); 
-            if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); } 
-            if (currentUser) { $('#txtMSSV').val(currentUser.mssv).prop('readonly', true).css({ 'background-color': '#e9ecef', 'cursor': 'not-allowed' }); } 
-            else { $('#txtMSSV').val('').prop('readonly', false).css({ 'background-color': '#ffffff', 'cursor': 'text' }); }
-            loadQAData(); 
-        }
+function checkNewQA() { $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) { 
+            if (!data || data.length === 0) return; 
+            if (data.some(row => (row[3] || '').trim() === '')) {
+                // Sửa ở đây: Hiển thị cả 2 badge
+                $('#qaSidebarBadge, #shareCodeSidebarBadge').removeClass('d-none'); 
+            } else { 
+                // Sửa ở đây: Ẩn cả 2 badge
+                $('#qaSidebarBadge, #shareCodeSidebarBadge').addClass('d-none'); 
+            } 
+        }}); }
+function openQASection() { 
+    document.title = "Hỗ trợ & Giải đáp | Học nhóm Năm 2 Khoa Toán";
+    resetNavActive(); 
+    
+    // ĐỔI #btnNavQA THÀNH #btnNavShareCode TẠI ĐÂY
+    $('#btnNavShareCode').addClass('active'); 
+    
+    $('#qaSection').removeClass('d-none'); 
+    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); } 
+    if (currentUser) { $('#txtMSSV').val(currentUser.mssv).prop('readonly', true).css({ 'background-color': '#e9ecef', 'cursor': 'not-allowed' }); } 
+    else { $('#txtMSSV').val('').prop('readonly', false).css({ 'background-color': '#ffffff', 'cursor': 'text' }); }
+    loadQAData(); 
+}
        function sendQuestion() {
     let mssvValue = currentUser ? currentUser.mssv : $('#txtMSSV').val().trim(); 
     let qText = "";
