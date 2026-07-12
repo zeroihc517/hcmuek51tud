@@ -250,7 +250,8 @@ function cancelEditShareCode() {
     editingShareRowIndex = -1;
     
     $('#shareCodeFormTitle').html('<i class="fa-solid fa-pen-nib me-2"></i>Soạn thảo Code mới');
-    $('#btnSubmitShareCode').html('<i class="fa-solid fa-share-nodes me-2"></i> Chia sẻ Code này').css('background', '#10b981');
+    // Thay đổi màu nền ở đây thành #0f4c81
+    $('#btnSubmitShareCode').html('<i class="fa-solid fa-share-nodes me-2"></i> Chia sẻ Code này').css('background', '#0f4c81');
     $('#btnCancelEditCode').addClass('d-none');
 }
 
@@ -356,33 +357,34 @@ window.openShareCodeDetail = function(index) {
     }
 
     // Giao diện chi tiết thiết kế đồng bộ với trang "Thông báo"
+   // Giao diện chi tiết thiết kế đồng bộ với trang "Thông báo"
     let html = `
-        <div class="tb-detail-box shadow-sm mb-4" style="border: 1px solid #10b981;">
-            <div class="tb-header-blue" style="cursor: pointer; background: linear-gradient(135deg, #10b981, #059669);" onclick="backToShareCodeList()">
+        <div class="tb-detail-box shadow-sm mb-4" style="border: 1px solid var(--primary-color);">
+            <div class="tb-header-blue" style="cursor: pointer; background: linear-gradient(135deg, #0f4c81, #1664a8);" onclick="backToShareCodeList()">
                 <i class="fa-solid fa-arrow-left me-2"></i> Trở lại <span class="mx-2">|</span> <i class="fa-solid fa-laptop-code me-2"></i> Chi tiết Share Code
             </div>
             
             <div class="tb-detail-body p-4 p-md-5">
                 <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                     <div>
-                        <h4 class="text-success fw-bold mb-2"><i class="fa-solid fa-hashtag me-2"></i>Mã bài: ${item.maBai}</h4>
+                        <h4 class="text-primary fw-bold mb-2"><i class="fa-solid fa-hashtag me-2"></i>Mã bài: ${item.maBai}</h4>
                         <div class="qa-time m-0"><i class="fa-regular fa-clock"></i> ${item.time} <span class="mx-3">|</span> Tác giả: <strong class="text-secondary">${item.author}</strong></div>
                     </div>
-                    ${editBtnHtml} <!-- Chèn biến html nút sửa tại đây -->
+                    ${editBtnHtml}
                 </div>
                 
                 <div class="qa-question" style="font-size: 16px;">${questionFormatted}</div>
                 ${threadHtml ? `<div class="mt-5">${threadHtml}</div>` : ''}
                 
                 <div class="vote-action-bar mt-5 pt-4 border-top">
-                    <button class="btn btn-outline-success fw-bold px-4" onclick="$('#shareReplyBox-${item.rowIndex}').toggleClass('d-none')">
+                    <button class="btn btn-outline-primary fw-bold px-4" onclick="$('#shareReplyBox-${item.rowIndex}').toggleClass('d-none')">
                         <i class="fa-solid fa-comments"></i> Bình luận / Góp ý
                     </button>
                 </div>
                 
-                <div id="shareReplyBox-${item.rowIndex}" class="reply-box d-none mt-3 p-4 bg-light rounded border-success">
-                    <textarea id="txtShareReply-${item.rowIndex}" class="form-control mb-3 border-success" rows="3" placeholder="Góp ý hoặc chèn code vào đây..."></textarea>
-                    <button class="btn btn-success fw-bold px-4" onclick="sendShareCodeReply(${item.rowIndex})"><i class="fa-solid fa-paper-plane me-2"></i>Gửi bình luận</button>
+                <div id="shareReplyBox-${item.rowIndex}" class="reply-box d-none mt-3 p-4 bg-light rounded border-primary">
+                    <textarea id="txtShareReply-${item.rowIndex}" class="form-control mb-3 border-primary" rows="3" placeholder="Góp ý hoặc chèn code vào đây..."></textarea>
+                    <button class="btn btn-primary fw-bold px-4" onclick="sendShareCodeReply(${item.rowIndex})" style="background: var(--primary-color); border:none;"><i class="fa-solid fa-paper-plane me-2"></i>Gửi bình luận</button>
                 </div>
             </div>
         </div>`;
@@ -433,4 +435,17 @@ window.editShareCodeDirect = function(index) {
     
     // Cuộn mượt mà lên vị trí khung soạn thảo
     $('html, body').animate({ scrollTop: $('#shareCodeEditorContainer').offset().top - 100 }, 500);
+};
+// Hàm tìm kiếm mã bài Share Code
+window.searchShareCode = function() {
+    let keyword = $('#txtSearchShareCode').val().toLowerCase().trim();
+    $('#shareCodeListWrapper .col-6').each(function() {
+        let maBai = $(this).find('.card-sharecode-title').text().toLowerCase();
+        // Nếu mã bài chứa keyword thì hiện, ngược lại ẩn
+        if (maBai.includes(keyword)) {
+            $(this).removeClass('d-none');
+        } else {
+            $(this).addClass('d-none');
+        }
+    });
 };
