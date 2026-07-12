@@ -718,7 +718,7 @@ resetNavActive = function() {
 
 function convertGradeToSystem(score10, type) {
     // FIX: Làm tròn chính xác đến 1 chữ số thập phân trước khi đối chiếu
-    let roundedScore = Math.round(score10 * 10) / 10;
+    let roundedScore = parseFloat((Math.round((score10 + Number.EPSILON) * 100) / 100).toFixed(1));
     
     let scale4 = 0, letter = "F";
     if (roundedScore >= 8.5) { scale4 = 4.0; letter = "A"; }
