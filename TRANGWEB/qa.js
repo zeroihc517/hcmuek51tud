@@ -250,8 +250,8 @@ window.editShareCode = function(buttonElement, rowIndex, maBai) {
         $('#txtMaBai').val(maBai);
         editingShareRowIndex = rowIndex; 
         
-        $('#shareCodeFormTitle').html('<i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Đang chỉnh sửa code trực tiếp');
-        $('#btnSubmitShareCode').html('<i class="fa-solid fa-floppy-disk me-2"></i> Lưu chỉnh sửa').css('background', '#f59e0b');
+$('#shareCodeFormTitle').html('<i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Đang chỉnh sửa code trực tiếp');
+    $('#btnSubmitShareCode').html('<i class="fa-solid fa-floppy-disk me-2"></i> Lưu chỉnh sửa').css('background', '#0f4c81');
         $('#btnCancelEditCode').removeClass('d-none');
         
         $('html, body').animate({ scrollTop: $('#shareCodeEditorContainer').offset().top - 100 }, 500);
@@ -362,10 +362,10 @@ window.openShareCodeDetail = function(index) {
     }
 
     // Nút Sửa Code chỉ được tạo ra nếu thoả mãn quyền
-    let editBtnHtml = '';
+let editBtnHtml = '';
     if (canEdit) {
         editBtnHtml = `
-        <button class="btn btn-warning fw-bold shadow-sm" onclick="editShareCodeDirect(${index})">
+        <button class="btn text-white fw-bold shadow-sm" style="background: var(--primary-color);" onclick="editShareCodeDirect(${index})">
             <i class="fa-solid fa-pen-to-square"></i> Sửa Code
         </button>`;
     }
@@ -444,19 +444,58 @@ window.sendShareCodeReply = function(rowIndex) {
     btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang gửi...').prop('disabled', true); 
     
     // Gửi yêu cầu lên Google Apps Script
-    postToGAS({ 
-        action: "replyToShareCode",// Đảm bảo backend GAS của bạn có xử lý action này
+ postToGAS({ 
+        action: "replyToShareCode",
         rowIndex: rowIndex, 
         replyText: formattedReply 
     }, function(response) { 
         alert(response); 
         
-        // Làm mới lại dữ liệu phần Share Code
-        loadShareCodeData(); 
-        
-        // Clear nội dung và ẩn khung bình luận
+        // Chỉ dọn dẹp form, KHÔNG gọi loadShareCodeData() để tránh bị văng ra ngoài
         $(`#txtShareReply-${rowIndex}`).val('');
         $(`#shareReplyBox-${rowIndex}`).addClass('d-none');
+        btn.html('<i class="fa-solid fa-paper-plane me-2"></i>Gửi bình luận').prop('disabled', false); 
+
+        // Tải ngầm dữ liệu mới và làm mới lại giao diện chi tiết (Ảnh 1)
+        $.ajax({ 
+            url: SCRIPT_URL + "?action=getShareCodeData", 
+            method: "GET", 
+            dataType: "json", 
+            success: function(data) {
+                window.shareCodeList = []; 
+                data.forEach(row => {
+                    let questionRaw = row[2] || '';
+                    let targetTag = `[SHARECODE|${currentShareCategory}`;
+                    if (!questionRaw.startsWith(targetTag)) return;
+                    
+                    let time = row[0] || ''; 
+                    let displayMssv = maskMSSV(row[1] || ''); 
+                    let answer = row[3] || ''; 
+                    let rIndex = row[6];       
+                    
+                    let categoryMatch = questionRaw.match(/^\[SHARECODE\|(.*?)(?:\|(.*))?\]/);
+                    let maBaiValue = 'CODE KHÔNG TÊN';
+                    
+                    if (categoryMatch) {
+                        if (categoryMatch[2] && categoryMatch[2].trim() !== "undefined") {
+                            maBaiValue = categoryMatch[2].trim();
+                        }
+                        questionRaw = questionRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '');
+                    }
+
+                    window.shareCodeList.push({
+                        time: time, author: displayMssv, rawAuthor: row[1] || '', 
+                        maBai: maBaiValue, codeContent: questionRaw, answer: answer, rowIndex: rIndex
+                    });
+                });
+                
+                // Mở lại chính bài code đó (Cập nhật giao diện Ảnh 1 với bình luận mới)
+                let currentIndex = window.shareCodeList.findIndex(item => item.rowIndex == rowIndex);
+                if(currentIndex !== -1) {
+                    openShareCodeDetail(currentIndex); 
+                }
+            }
+        });
         
     }, function() { 
         alert("Có lỗi xảy ra khi kết nối máy chủ để gửi bình luận."); 
@@ -483,8 +522,8 @@ window.editShareCodeDirect = function(index) {
     $('#txtMaBai').val(item.maBai);
     editingShareRowIndex = item.rowIndex; 
     
-    $('#shareCodeFormTitle').html('<i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Đang chỉnh sửa code trực tiếp');
-    $('#btnSubmitShareCode').html('<i class="fa-solid fa-floppy-disk me-2"></i> Lưu chỉnh sửa').css('background', '#f59e0b');
+$('#shareCodeFormTitle').html('<i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Đang chỉnh sửa code trực tiếp');
+        $('#btnSubmitShareCode').html('<i class="fa-solid fa-floppy-disk me-2"></i> Lưu chỉnh sửa').css('background', '#0f4c81');
     $('#btnCancelEditCode').removeClass('d-none');
     
     // Cuộn mượt mà lên vị trí khung soạn thảo

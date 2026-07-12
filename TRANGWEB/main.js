@@ -117,16 +117,17 @@ function loadWebLinks() {
         // Tự động kiểm tra: Nếu có ghi chú thì tạo thẻ p, không có thì để trống
         let descHtml = desc ? `<p class="card-desc">${desc}</p>` : '';
 
-        html += `
-        <div class="col-6 col-md-3 col-lg-3 mb-3"> 
-            <a href="${url}" target="_blank" class="link-card-modern">
+html += `
+        <div class="col mb-3"> 
+            <a href="${url}" target="_blank" class="link-card-modern" style="border-bottom: 4px solid var(--primary-color);">
                 ${badgeHtml}
-                <div class="icon-box"><i class="${iconClass}"></i></div>
+                <div class="icon-box"><i class="${iconClass}" style="color: var(--primary-color);"></i></div>
                 <div class="card-text-wrapper">
                     <h5>${title}</h5>
-                    ${descHtml} </div>
+                    ${descHtml} 
+                </div>
             </a>
-        </div>`; 
+        </div>`;
     }); 
     $('#webLinksContainer').html(html); 
 }

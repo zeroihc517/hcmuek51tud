@@ -8,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="TRANGWEB/styleweb.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
 </head>
 <body>
     <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
@@ -127,7 +127,7 @@
                 <header class="top-header">
                     <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
                 </header>
-                <div class="row g-4" id="webLinksContainer"></div>
+                <div class="row row-cols-2 row-cols-lg-5 g-4" id="webLinksContainer"></div>
             </div>
 
             <div id="tkbSection" class="d-none">
@@ -532,27 +532,30 @@
         <div class="page-title"><i class="fa-solid fa-code-branch text-success"></i> Thảo luận</div>
     </header>
 
-    <!-- MÀN HÌNH 1: CHỌN HỌC PHẦN (Sử dụng link-card-modern giống giao diện trang chủ) -->
+   <!-- MÀN HÌNH 1: CHỌN HỌC PHẦN -->
     <div id="shareCategoryView">
 
-        <div class="row g-4 mb-4">
-<div class="col-md-4">
-        <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #ef4444;" onclick="openQASection()">
-            <div class="icon-box position-relative">
-                <i class="fa-solid fa-comments text-danger"></i>
-                <!-- Giữ nguyên id qaSidebarBadge để hệ thống đếm thông báo tự động cập nhật -->
-                <span id="qaSidebarBadge" class="badge-new-qa d-none" style="position: absolute; top: -5px; right: -25px; padding: 2px 6px;">Mới</span>
+        <!-- Đổi class row để hiển thị 5 cột trên PC (lg-5) và 2 cột trên Điện thoại (cols-2) -->
+        <div class="row row-cols-2 row-cols-lg-5 g-4 mb-4">
+            
+            <!-- Thẻ 1: Giải đáp thắc mắc -->
+            <div class="col">
+                <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid var(--primary-color);" onclick="openQASection()">
+                    <div class="icon-box position-relative">
+                        <i class="fa-solid fa-comments" style="color: var(--primary-color);"></i>
+                        <span id="qaSidebarBadge" class="badge-new-qa d-none" style="position: absolute; top: -5px; right: -25px; padding: 2px 6px;">Mới</span>
+                    </div>
+                    <div class="card-text-wrapper">
+                        <h5>Giải đáp thắc mắc</h5>
+                        <p class="card-desc">Hỏi đáp & Hỗ trợ chung</p>
+                    </div>
+                </div>
             </div>
-            <div class="card-text-wrapper">
-                <h5>Giải đáp thắc mắc</h5>
-                <p class="card-desc">Hỏi đáp & Hỗ trợ chung</p>
-            </div>
-        </div>
-    </div>
-            <!-- Thẻ 1: Lập trình hướng đối tượng -->
-            <div class="col-md-4">
-                <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #0ea5e9;" onclick="openShareCategory('Lập trình hướng đối tượng', 'cpp')">
-                    <div class="icon-box"><i class="fa-solid fa-cubes text-info"></i></div>
+
+            <!-- Thẻ 2: Lập trình Hướng đối tượng -->
+            <div class="col">
+                <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid var(--primary-color);" onclick="openShareCategory('Lập trình hướng đối tượng', 'cpp')">
+                    <div class="icon-box"><i class="fa-solid fa-cubes" style="color: var(--primary-color);"></i></div>
                     <div class="card-text-wrapper">
                         <h5>Lập trình Hướng đối tượng</h5>
                         <p class="card-desc">Ngôn ngữ C++ / OOP</p>
@@ -560,10 +563,10 @@
                 </div>
             </div>
             
-            <!-- Thẻ 2: Cấu trúc dữ liệu -->
-            <div class="col-md-4">
-                <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #10b981;" onclick="openShareCategory('Cấu trúc dữ liệu', 'cpp')">
-                    <div class="icon-box"><i class="fa-solid fa-network-wired text-success"></i></div>
+            <!-- Thẻ 3: Cấu trúc dữ liệu -->
+            <div class="col">
+                <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid var(--primary-color);" onclick="openShareCategory('Cấu trúc dữ liệu', 'cpp')">
+                    <div class="icon-box"><i class="fa-solid fa-network-wired" style="color: var(--primary-color);"></i></div>
                     <div class="card-text-wrapper">
                         <h5>Cấu trúc dữ liệu</h5>
                         <p class="card-desc">C++ / Thuật toán</p>
@@ -571,16 +574,19 @@
                 </div>
             </div>
             
-            <!-- Thẻ 3: Lập trình Python -->
-            <div class="col-md-4">
-                <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #f59e0b;" onclick="openShareCategory('Lập trình Python', 'python')">
-                    <div class="icon-box"><i class="fa-brands fa-python text-warning"></i></div>
+            <!-- Thẻ 4: Lập trình Python -->
+            <div class="col">
+                <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid var(--primary-color);" onclick="openShareCategory('Lập trình Python', 'python')">
+                    <div class="icon-box"><i class="fa-brands fa-python" style="color: var(--primary-color);"></i></div>
                     <div class="card-text-wrapper">
                         <h5>Lập trình Python</h5>
                         <p class="card-desc">Python cơ bản & nâng cao</p>
                     </div>
                 </div>
             </div>
+
+            <!-- NẾU BẠN CÓ THẺ THỨ 5, CỨ COPY MỘT KHỐI <div class="col">...</div> VÀ DÁN VÀO ĐÂY -->
+
         </div>
     </div>
 
