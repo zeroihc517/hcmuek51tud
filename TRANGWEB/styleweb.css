@@ -1851,3 +1851,72 @@ pre[class*="language-"],
 code[class*="language-"] {
     text-shadow: none !important;
 }
+/* ==========================================
+   CSS THẺ SHARE CODE (Dạng khung lưới)
+   ========================================== */
+.card-sharecode-box {
+    background-color: #ffffff;
+    border: 2px solid #10b981; 
+    border-radius: 12px;       
+    padding: 20px 10px; 
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    transition: all 0.25s ease;
+    height: 100%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+.card-sharecode-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
+}
+.card-sharecode-img {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #d1fae5, #34d399);
+    color: #047857;
+    font-size: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.5);
+}
+.card-sharecode-box:hover .card-sharecode-img i {
+    transform: scale(1.15);
+    transition: transform 0.3s;
+}
+.card-sharecode-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #10b981;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+.card-sharecode-info {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 4px;
+}
+.card-sharecode-time {
+    font-size: 11px;
+    color: #94a3b8;
+    font-style: italic;
+}
+
+/* DARK MODE CHO THẺ SHARE CODE */
+body.dark-mode .card-sharecode-box {
+    background-color: #131c30 !important;
+    border-color: #10b981 !important;
+}
+body.dark-mode .card-sharecode-info {
+    color: #cbd5e1 !important;
+}
+body.dark-mode .card-sharecode-time {
+    color: #94a3b8 !important;
+}

@@ -254,8 +254,10 @@ function cancelEditShareCode() {
     $('#btnCancelEditCode').addClass('d-none');
 }
 
+// 1. Hàm tải dữ liệu và tạo khung Danh sách + Khung Chi tiết ẩn
 function loadShareCodeData() {
-    $('#shareCodeListArea').html(''); $('#shareCodeLoadingStatus').removeClass('d-none');
+    $('#shareCodeListArea').html(''); 
+    $('#shareCodeLoadingStatus').removeClass('d-none');
     
     $.ajax({ url: SCRIPT_URL + "?action=getShareCodeData", method: "GET", dataType: "json", success: function(data) {
         $('#shareCodeLoadingStatus').addClass('d-none');
@@ -264,62 +266,155 @@ function loadShareCodeData() {
             return;
         }
         
-        let html = '';
+        window.shareCodeList = []; 
+        let gridHtml = '<div class="row g-3">'; 
+        
         data.forEach(row => {
             let questionRaw = row[2] || '';
             let targetTag = `[SHARECODE|${currentShareCategory}`;
             if (!questionRaw.startsWith(targetTag)) return;
             
-            let time = row[0] || ''; let displayMssv = maskMSSV(row[1] || ''); 
-            let answer = row[3] || ''; let rowIndex = row[6];       
+            let time = row[0] || ''; 
+            let displayMssv = maskMSSV(row[1] || ''); 
+            let answer = row[3] || ''; 
+            let rowIndex = row[6];       
             
             let categoryMatch = questionRaw.match(/^\[SHARECODE\|(.*?)(?:\|(.*))?\]/);
-            let badgeHtml = '';
-            let maBaiValue = '';
+            let maBaiValue = 'CODE KHÔNG TÊN';
             
             if (categoryMatch) {
-                let catName = categoryMatch[1];
-                maBaiValue = categoryMatch[2] || ''; 
-                
-                badgeHtml = `<span class="badge bg-success mb-2" style="font-size: 13px;"><i class="fa-solid fa-layer-group me-1"></i> ${catName}</span>`;
-                if (maBaiValue && maBaiValue.trim() !== "undefined") {
-                    badgeHtml += `<span class="badge bg-danger mb-2 ms-2" style="font-size: 13px;"><i class="fa-solid fa-hashtag me-1"></i> Bài: ${maBaiValue}</span>`;
+                if (categoryMatch[2] && categoryMatch[2].trim() !== "undefined") {
+                    maBaiValue = categoryMatch[2].trim();
                 }
-                badgeHtml += `<br>`;
                 questionRaw = questionRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '');
             }
 
-            let questionFormatted = formatCodeBlocks(questionRaw);
+            // Ghi dữ liệu vào mảng
+            let arrayIndex = window.shareCodeList.length;
+            window.shareCodeList.push({
+                time: time,
+                author: displayMssv,
+                maBai: maBaiValue,
+                codeContent: questionRaw,
+                answer: answer,
+                rowIndex: rowIndex
+            });
 
-            html += `<div class="qa-item border-success shadow-sm">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="qa-time m-0"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> Tác giả: <strong class="text-secondary">${displayMssv}</strong></div>
-                            <button class="btn btn-sm btn-warning fw-bold shadow-sm" onclick="editShareCode(this, ${rowIndex}, '${maBaiValue}')">
-                                <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
-                            </button>
-                        </div>
-                        <div class="qa-question">${badgeHtml}${questionFormatted}</div>`;
-            
-            if (answer.trim() !== "") html += parseThread(answer, rowIndex);
-            
-            html += `<div class="vote-action-bar mt-3 pt-3 border-top">
-                        <button class="btn btn-sm btn-outline-success fw-bold" onclick="$('#shareReplyBox-${rowIndex}').toggleClass('d-none')">
-                            <i class="fa-solid fa-comments"></i> Bình luận
-                        </button>
+            // Vẽ thẻ Card ra giao diện lưới
+            gridHtml += `
+            <div class="col-6 col-md-4 col-lg-3">
+                <div class="card-sharecode-box" onclick="openShareCodeDetail(${arrayIndex})">
+                    <div class="card-sharecode-img">
+                        <i class="fa-solid fa-file-code"></i>
                     </div>
-                    <div id="shareReplyBox-${rowIndex}" class="reply-box d-none mt-3">
-                        <textarea id="txtShareReply-${rowIndex}" class="form-control mb-2 border-success" rows="2" placeholder="Góp ý hoặc chèn code vào đây..."></textarea>
-                        <button class="btn btn-sm btn-success fw-bold" onclick="sendShareCodeReply(${rowIndex})">Gửi bình luận</button>
-                    </div></div>`;
+                    <div class="card-sharecode-title">${maBaiValue}</div>
+                    <div class="card-sharecode-info"><i class="fa-solid fa-user me-1"></i> ${displayMssv}</div>
+                    <div class="card-sharecode-time"><i class="fa-regular fa-clock me-1"></i> ${time}</div>
+                </div>
+            </div>`;
         });
         
-        if(html === '') html = `<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có code nào. Hãy chia sẻ!</div>`;
-        $('#shareCodeListArea').html(html); 
+        gridHtml += '</div>';
         
-        if (window.Prism) Prism.highlightAll();
+        if(window.shareCodeList.length === 0) {
+            gridHtml = `<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có code nào. Hãy chia sẻ!</div>`;
+        }
+        
+        // Tạo cấu trúc: 1 khung chứa lưới danh sách, 1 khung chứa chi tiết (ẩn mặc định)
+        let finalHtml = `
+            <div id="shareCodeListWrapper">${gridHtml}</div>
+            <div id="shareCodeDetailWrapper" class="d-none"></div>
+        `;
+        $('#shareCodeListArea').html(finalHtml); 
     }});
 }
 
+// 2. Hàm chuyển đổi từ Danh sách sang Xem Chi Tiết
+window.openShareCodeDetail = function(index) {
+    let item = window.shareCodeList[index];
+    if(!item) return;
+
+    let questionFormatted = formatCodeBlocks(item.codeContent);
+    let threadHtml = item.answer.trim() !== "" ? parseThread(item.answer, item.rowIndex) : '';
+
+    // Giao diện chi tiết thiết kế đồng bộ với trang "Thông báo"
+    let html = `
+        <div class="tb-detail-box shadow-sm mb-4" style="border: 1px solid #10b981;">
+            <div class="tb-header-blue" style="cursor: pointer; background: linear-gradient(135deg, #10b981, #059669);" onclick="backToShareCodeList()">
+                <i class="fa-solid fa-arrow-left me-2"></i> Trở lại <span class="mx-2">|</span> <i class="fa-solid fa-laptop-code me-2"></i> Chi tiết Share Code
+            </div>
+            
+            <div class="tb-detail-body p-4 p-md-5">
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                    <div>
+                        <h4 class="text-success fw-bold mb-2"><i class="fa-solid fa-hashtag me-2"></i>Mã bài: ${item.maBai}</h4>
+                        <div class="qa-time m-0"><i class="fa-regular fa-clock"></i> ${item.time} <span class="mx-3">|</span> Tác giả: <strong class="text-secondary">${item.author}</strong></div>
+                    </div>
+                    <button class="btn btn-warning fw-bold shadow-sm" onclick="editShareCodeDirect(${index})">
+                        <i class="fa-solid fa-pen-to-square"></i> Sửa Code
+                    </button>
+                </div>
+                
+                <div class="qa-question" style="font-size: 16px;">${questionFormatted}</div>
+                ${threadHtml ? `<div class="mt-5">${threadHtml}</div>` : ''}
+                
+                <div class="vote-action-bar mt-5 pt-4 border-top">
+                    <button class="btn btn-outline-success fw-bold px-4" onclick="$('#shareReplyBox-${item.rowIndex}').toggleClass('d-none')">
+                        <i class="fa-solid fa-comments"></i> Bình luận / Góp ý
+                    </button>
+                </div>
+                
+                <div id="shareReplyBox-${item.rowIndex}" class="reply-box d-none mt-3 p-4 bg-light rounded border-success">
+                    <textarea id="txtShareReply-${item.rowIndex}" class="form-control mb-3 border-success" rows="3" placeholder="Góp ý hoặc chèn code vào đây..."></textarea>
+                    <button class="btn btn-success fw-bold px-4" onclick="sendShareCodeReply(${item.rowIndex})"><i class="fa-solid fa-paper-plane me-2"></i>Gửi bình luận</button>
+                </div>
+            </div>
+        </div>`;
+
+    $('#shareCodeDetailWrapper').html(html);
+    
+    // Ẩn lưới danh sách, hiện khung chi tiết
+    $('#shareCodeListWrapper').addClass('d-none');
+    $('#shareCodeDetailWrapper').removeClass('d-none');
+    
+    // Tự động cuộn trang lên đầu khung chi tiết
+    window.scrollTo({ top: $('#shareCodeDetailWrapper').offset().top - 80, behavior: 'smooth' });
+    
+    // Highlight Code
+    if (window.Prism) {
+        setTimeout(() => { Prism.highlightAllUnder(document.getElementById('shareCodeDetailWrapper')); }, 50);
+    }
+};
+
+// 3. Hàm xử lý nút "Trở lại"
+window.backToShareCodeList = function() {
+    $('#shareCodeDetailWrapper').addClass('d-none');
+    $('#shareCodeListWrapper').removeClass('d-none');
+};
+
+// 4. Hàm xử lý khi nhấn "Sửa Code" ngay bên trong giao diện Chi tiết
+window.editShareCodeDirect = function(index) {
+    let item = window.shareCodeList[index];
+    
+    // Tự động quay về màn hình danh sách trước khi cuộn lên chỗ sửa code
+    backToShareCodeList();
+
+    // Bóc tách Code thô từ Markdown
+    let rawCode = item.codeContent.replace(/^```[a-zA-Z\+\#]*\n?/g, '').replace(/\n?```$/g, '');
+
+    shareCodeEditor.setValue(rawCode);
+    $('#txtMaBai').val(item.maBai);
+    editingShareRowIndex = item.rowIndex; 
+    
+    $('#shareCodeFormTitle').html('<i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Đang chỉnh sửa code trực tiếp');
+    $('#btnSubmitShareCode').html('<i class="fa-solid fa-floppy-disk me-2"></i> Lưu chỉnh sửa').css('background', '#f59e0b');
+    $('#btnCancelEditCode').removeClass('d-none');
+    
+    // Cuộn mượt mà lên vị trí khung soạn thảo
+    $('html, body').animate({ scrollTop: $('#shareCodeEditorContainer').offset().top - 100 }, 500);
+};
+
+// 5. Hàm gửi Bình Luận
 function sendShareCodeReply(rowIndex) {
     let replyText = $(`#txtShareReply-${rowIndex}`).val().trim(); 
     if (!replyText) { alert("Vui lòng nhập nội dung bình luận!"); return; } 
@@ -327,10 +422,16 @@ function sendShareCodeReply(rowIndex) {
     let studentMssv = currentUser ? currentUser.mssv : "Ẩn danh";
     let formattedReply = studentMssv + ":::" + replyText;
     
+    let btn = $(`#shareReplyBox-${rowIndex} button`);
+    let originalHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
+    
     postToGAS({ action: "replyToShareCode", rowIndex: rowIndex, replyText: formattedReply }, function(response) { 
         alert(response); 
+        // Load lại dữ liệu và tự động làm mới giao diện
         loadShareCodeData(); 
     }, function() { 
         alert("Lỗi khi gửi bình luận."); 
+        btn.html(originalHtml).prop('disabled', false);
     }); 
 }
