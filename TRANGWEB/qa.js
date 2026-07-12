@@ -290,15 +290,16 @@ function loadShareCodeData() {
             }
 
             // Ghi dữ liệu vào mảng
-            let arrayIndex = window.shareCodeList.length;
-            window.shareCodeList.push({
-                time: time,
-                author: displayMssv,
-                maBai: maBaiValue,
-                codeContent: questionRaw,
-                answer: answer,
-                rowIndex: rowIndex
-            });
+           let arrayIndex = window.shareCodeList.length;
+window.shareCodeList.push({
+    time: time,
+    author: displayMssv,
+    rawAuthor: row[1] || '', // Thêm dòng này để lưu trữ MSSV gốc của tác giả
+    maBai: maBaiValue,
+    codeContent: questionRaw,
+    answer: answer,
+    rowIndex: rowIndex
+});
 
             // Vẽ thẻ Card ra giao diện lưới
             gridHtml += `
@@ -337,6 +338,23 @@ window.openShareCodeDetail = function(index) {
     let questionFormatted = formatCodeBlocks(item.codeContent);
     let threadHtml = item.answer.trim() !== "" ? parseThread(item.answer, item.rowIndex) : '';
 
+    // KIỂM TRA QUYỀN CHỈNH SỬA
+    let canEdit = false;
+    if (currentUser) {
+        if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === item.rawAuthor) {
+            canEdit = true;
+        }
+    }
+
+    // Nút Sửa Code chỉ được tạo ra nếu thoả mãn quyền
+    let editBtnHtml = '';
+    if (canEdit) {
+        editBtnHtml = `
+        <button class="btn btn-warning fw-bold shadow-sm" onclick="editShareCodeDirect(${index})">
+            <i class="fa-solid fa-pen-to-square"></i> Sửa Code
+        </button>`;
+    }
+
     // Giao diện chi tiết thiết kế đồng bộ với trang "Thông báo"
     let html = `
         <div class="tb-detail-box shadow-sm mb-4" style="border: 1px solid #10b981;">
@@ -350,9 +368,7 @@ window.openShareCodeDetail = function(index) {
                         <h4 class="text-success fw-bold mb-2"><i class="fa-solid fa-hashtag me-2"></i>Mã bài: ${item.maBai}</h4>
                         <div class="qa-time m-0"><i class="fa-regular fa-clock"></i> ${item.time} <span class="mx-3">|</span> Tác giả: <strong class="text-secondary">${item.author}</strong></div>
                     </div>
-                    <button class="btn btn-warning fw-bold shadow-sm" onclick="editShareCodeDirect(${index})">
-                        <i class="fa-solid fa-pen-to-square"></i> Sửa Code
-                    </button>
+                    ${editBtnHtml} <!-- Chèn biến html nút sửa tại đây -->
                 </div>
                 
                 <div class="qa-question" style="font-size: 16px;">${questionFormatted}</div>
@@ -385,7 +401,6 @@ window.openShareCodeDetail = function(index) {
         setTimeout(() => { Prism.highlightAllUnder(document.getElementById('shareCodeDetailWrapper')); }, 50);
     }
 };
-
 // 3. Hàm xử lý nút "Trở lại"
 window.backToShareCodeList = function() {
     $('#shareCodeDetailWrapper').addClass('d-none');
@@ -395,6 +410,12 @@ window.backToShareCodeList = function() {
 // 4. Hàm xử lý khi nhấn "Sửa Code" ngay bên trong giao diện Chi tiết
 window.editShareCodeDirect = function(index) {
     let item = window.shareCodeList[index];
+    
+    // BẢO MẬT: Kiểm tra lại quyền một lần nữa trước khi cho phép load form sửa
+    if (!currentUser || (currentUser.mssv !== "51.01.108.008" && currentUser.mssv !== item.rawAuthor)) {
+        alert("Thao tác bị từ chối: Bạn không có quyền chỉnh sửa mã nguồn của người khác!");
+        return;
+    }
     
     // Tự động quay về màn hình danh sách trước khi cuộn lên chỗ sửa code
     backToShareCodeList();
@@ -413,25 +434,3 @@ window.editShareCodeDirect = function(index) {
     // Cuộn mượt mà lên vị trí khung soạn thảo
     $('html, body').animate({ scrollTop: $('#shareCodeEditorContainer').offset().top - 100 }, 500);
 };
-
-// 5. Hàm gửi Bình Luận
-function sendShareCodeReply(rowIndex) {
-    let replyText = $(`#txtShareReply-${rowIndex}`).val().trim(); 
-    if (!replyText) { alert("Vui lòng nhập nội dung bình luận!"); return; } 
-    
-    let studentMssv = currentUser ? currentUser.mssv : "Ẩn danh";
-    let formattedReply = studentMssv + ":::" + replyText;
-    
-    let btn = $(`#shareReplyBox-${rowIndex} button`);
-    let originalHtml = btn.html();
-    btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
-    
-    postToGAS({ action: "replyToShareCode", rowIndex: rowIndex, replyText: formattedReply }, function(response) { 
-        alert(response); 
-        // Load lại dữ liệu và tự động làm mới giao diện
-        loadShareCodeData(); 
-    }, function() { 
-        alert("Lỗi khi gửi bình luận."); 
-        btn.html(originalHtml).prop('disabled', false);
-    }); 
-}
