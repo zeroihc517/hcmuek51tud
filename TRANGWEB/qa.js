@@ -422,7 +422,47 @@ window.backToShareCodeList = function() {
     $('#shareCodeDetailWrapper').addClass('d-none');
     $('#shareCodeListWrapper').removeClass('d-none');
 };
-
+// Hàm xử lý gửi bình luận / góp ý trong phần Share Code
+window.sendShareCodeReply = function(rowIndex) { 
+    // Lấy nội dung từ khung text
+    let replyText = $(`#txtShareReply-${rowIndex}`).val().trim(); 
+    
+    if (!replyText) { 
+        alert("Vui lòng nhập nội dung bình luận hoặc góp ý!"); 
+        return; 
+    } 
+    
+    // Gắn thông tin người gửi (Lấy MSSV nếu đã đăng nhập, ngược lại là Khách)
+    let studentMssv = currentUser ? currentUser.mssv : "Khách";
+    
+    // Format chuỗi dữ liệu để hàm parseThread() có thể đọc được giống bên Q&A
+    let formattedReply = studentMssv + ":::" + replyText;
+    
+    // Lấy phần tử nút bấm và thêm hiệu ứng loading
+    let btn = $(`#shareReplyBox-${rowIndex} button`); 
+    let originalText = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang gửi...').prop('disabled', true); 
+    
+    // Gửi yêu cầu lên Google Apps Script
+    postToGAS({ 
+        action: "replyToShareCode",// Đảm bảo backend GAS của bạn có xử lý action này
+        rowIndex: rowIndex, 
+        replyText: formattedReply 
+    }, function(response) { 
+        alert(response); 
+        
+        // Làm mới lại dữ liệu phần Share Code
+        loadShareCodeData(); 
+        
+        // Clear nội dung và ẩn khung bình luận
+        $(`#txtShareReply-${rowIndex}`).val('');
+        $(`#shareReplyBox-${rowIndex}`).addClass('d-none');
+        
+    }, function() { 
+        alert("Có lỗi xảy ra khi kết nối máy chủ để gửi bình luận."); 
+        btn.html(originalText).prop('disabled', false); 
+    }); 
+};
 // 4. Hàm xử lý khi nhấn "Sửa Code" ngay bên trong giao diện Chi tiết
 window.editShareCodeDirect = function(index) {
     let item = window.shareCodeList[index];
