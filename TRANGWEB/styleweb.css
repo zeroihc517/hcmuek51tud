@@ -1847,3 +1847,7 @@ body.dark-mode .tb-countdown.expired-timer {
     color: #6b7280 !important;
     border-color: #374151 !important;
 }
+pre[class*="language-"],
+code[class*="language-"] {
+    text-shadow: none !important;
+}

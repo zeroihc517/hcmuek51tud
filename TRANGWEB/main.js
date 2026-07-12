@@ -7,8 +7,10 @@
 
         function resetNavActive() {
             $('.btn-course').removeClass('active'); $('#btnNavQA').removeClass('active'); $('#btnNavTKB').removeClass('active');
+$('#btnNavShareCode').removeClass('active');
             $('#tongHopSection').addClass('d-none'); $('#courseSection').addClass('d-none');
             $('#qaSection').addClass('d-none'); $('#tkbSection').addClass('d-none');
+$('#shareCodeSection').addClass('d-none'); // Thêm dòng này
         }
 
         function loadTongHopView() {
@@ -148,7 +150,7 @@ function renderSidebarCategories() {
         let lowerName = name.trim().toLowerCase();
         
         // Bỏ qua các sheet dữ liệu hệ thống ẩn
-if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin' || lowerName === 'khaosat' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'gpa_data') return;
+if (lowerName === 'deadlines_admin' || lowerName === 'tkb_admin' || lowerName === 'khaosat' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'gpa_data' || lowerName === 'sharecode') return;
 
         if (lowerName !== 'thông báo') {
             if (lowerName === 'users' && !isAdmin) return;

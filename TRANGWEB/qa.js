@@ -1,3 +1,46 @@
+let codeEditor;
+
+$(document).ready(function() {
+    // Khởi tạo Ace Editor giao diện sáng (giống hình của bạn)
+    codeEditor = ace.edit("codeEditorContainer");
+    codeEditor.setTheme("ace/theme/textmate"); 
+    codeEditor.session.setMode("ace/mode/c_cpp");
+    codeEditor.setOptions({ 
+        fontSize: "15px",
+        showPrintMargin: false
+    });
+});
+
+// Hàm ẩn/hiện giữa 2 chế độ
+function toggleInputMode() {
+    let mode = $('input[name="inputType"]:checked').val();
+    if (mode === 'code') {
+        $('#txtQuestion').addClass('d-none');
+        $('#codeEditorContainer').removeClass('d-none');
+        $('#codeLanguage').removeClass('d-none');
+    } else {
+        $('#txtQuestion').removeClass('d-none');
+        $('#codeEditorContainer').addClass('d-none');
+        $('#codeLanguage').addClass('d-none');
+    }
+}
+
+// Đổi ngôn ngữ tô màu trong khung gõ
+function changeCodeLang() {
+    let lang = $('#codeLanguage').val();
+    codeEditor.session.setMode("ace/mode/" + lang);
+}
+function formatCodeBlocks(text) {
+    if (!text) return "";
+    // Bắt các đoạn code bọc trong 3 dấu ngoặc ngược (```) và loại bỏ chính nó
+    return text.replace(/```(cpp|python|c\+\+|c)([\s\S]*?)```/gi, function(match, lang, code) {
+        let escapedCode = code.replace(/</g, '&lt;').replace(/>/g, '&gt;').trim();
+        let safeLang = (lang.toLowerCase() === 'c++' || lang.toLowerCase() === 'c') ? 'cpp' : lang.toLowerCase();
+        
+        // Trả về HTML chuẩn, không bao gồm ký tự ```
+        return `<pre><code class="language-${safeLang}">${escapedCode}</code></pre>`;
+    });
+}
 function checkNewQA() { $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) { if (!data || data.length === 0) return; if (data.some(row => (row[3] || '').trim() === '')) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none'); }}); }
         function openQASection() { 
 			document.title = "Hỗ trợ & Giải đáp | Học nhóm Năm 2 Khoa Toán";
@@ -7,16 +50,41 @@ function checkNewQA() { $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: 
             else { $('#txtMSSV').val('').prop('readonly', false).css({ 'background-color': '#ffffff', 'cursor': 'text' }); }
             loadQAData(); 
         }
-        function sendQuestion() {
-            let mssvValue = currentUser ? currentUser.mssv : $('#txtMSSV').val().trim(); 
-            let qText = $('#txtQuestion').val().trim();
-            if (!mssvValue) { alert("Vui lòng nhập mã số sinh viên hoặc email liên hệ!"); $('#txtMSSV').focus(); return; } 
-            if (!qText) { alert("Vui lòng nhập nội dung câu hỏi!"); $('#txtQuestion').focus(); return; }
-            let btn = $('#btnSubmitQ'); btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
-            postToGAS({ action: "submitQuestion", mssv: mssvValue, question: qText }, function(response) { 
-                alert(response); $('#txtQuestion').val(''); btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); loadQAData(); checkNewQA(); 
-            }, function() { alert("Lỗi kết nối máy chủ!"); btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); });
+       function sendQuestion() {
+    let mssvValue = currentUser ? currentUser.mssv : $('#txtMSSV').val().trim(); 
+    let qText = "";
+    
+    // Kiểm tra xem đang ở chế độ nào
+    let mode = $('input[name="inputType"]:checked').val();
+    if (mode === 'code') {
+        let rawCode = codeEditor.getValue().trim();
+        let lang = $('#codeLanguage').val() === 'c_cpp' ? 'cpp' : 'python';
+        if (rawCode !== "") {
+            // Tự động bọc code Markdown
+            qText = "```" + lang + "\n" + rawCode + "\n```"; 
         }
+    } else {
+        qText = $('#txtQuestion').val().trim();
+    }
+
+    if (!mssvValue) { alert("Vui lòng nhập mã số sinh viên hoặc email liên hệ!"); $('#txtMSSV').focus(); return; } 
+    if (!qText) { alert("Vui lòng nhập nội dung câu hỏi!"); return; }
+    
+    let btn = $('#btnSubmitQ'); 
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
+    
+    postToGAS({ action: "submitQuestion", mssv: mssvValue, question: qText }, function(response) { 
+        alert(response); 
+        $('#txtQuestion').val(''); 
+        codeEditor.setValue(''); // Xóa trắng khung code sau khi gửi
+        btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); 
+        loadQAData(); 
+        checkNewQA(); 
+    }, function() { 
+        alert("Lỗi kết nối máy chủ!"); 
+        btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); 
+    });
+}
 
 function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) return str; return str.substring(0, 3) + '***' + str.substring(str.length - 3); }
         function parseThread(text, rowIndex) {
@@ -29,10 +97,10 @@ function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) re
                         let splitData = svTextRaw.split(":::"); let rawMssv = splitData[0].trim(); let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
                         svName = "Sinh viên (" + displayMssv + ")"; svMsg = splitData.slice(1).join(":::").trim();
                     }
-                    let svFormattedMsg = svMsg.replace(/\n/g, '<br>'); html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>${svName}:</strong><br>${svFormattedMsg}`; 
+                 let svFormattedMsg = formatCodeBlocks(svMsg).replace(/(?:\r\n|\r|\n)(?!(?:[^<]*<\/pre>))/g, '<br>'); html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>${svName}:</strong><br>${svFormattedMsg}`; 
                     if (isAdmin) { html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`; } html += `</div>`; 
                 } else { 
-                    let adminText = content.replace(/\n/g, '<br>'); html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${adminText}`; 
+                    let adminText = formatCodeBlocks(content).replace(/(?:\r\n|\r|\n)(?!(?:[^<]*<\/pre>))/g, '<br>'); html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${adminText}`; 
                     if (isAdmin) { html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="openEditQAModal(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa</button></div>`; } html += `</div>`; 
                 }
             }); return html;
@@ -44,7 +112,7 @@ function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) re
                     if (!data || data.length === 0) { $('#qaListArea').html('<div class="text-center p-4 text-muted border rounded bg-white"><i class="fa-regular fa-comments fs-2 mb-2"></i><br>Chưa có câu hỏi nào. Bạn hãy là người đầu tiên đặt câu hỏi nhé!</div>'); $('#qaSidebarBadge').addClass('d-none'); return; }
                     let html = ''; let hasUnanswered = false;
                     data.forEach(row => {
-                        let time = row[0] || ''; let rawMssv = row[1] || ''; let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv); let question = row[2] || ''; let answer = row[3] || ''; let upvotes = parseInt(row[4]) || 0; let downvotes = parseInt(row[5]) || 0; let rowIndex = row[6];       
+                        let time = row[0] || ''; let rawMssv = row[1] || ''; let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv); let question = formatCodeBlocks(row[2] || '');let answer = row[3] || ''; let upvotes = parseInt(row[4]) || 0; let downvotes = parseInt(row[5]) || 0; let rowIndex = row[6];       
                         let isNew = answer.trim() === ""; if (isNew) hasUnanswered = true; let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
                         html += `<div class="${itemClass}"><div class="d-flex justify-content-between align-items-start"><div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong></div>`;
                         if (isAdmin) { html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`; }
@@ -55,7 +123,13 @@ function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) re
                         } else { html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ admin giải đáp...</div>`; }
                         if (isAdmin) { html += `<div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);"><h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6><textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea><button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}"><i class="fa-solid fa-reply"></i> Đăng câu trả lời</button></div>`; } html += `</div>`;
                     });
-                    $('#qaListArea').html(html); if (hasUnanswered) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none');
+                  $('#qaListArea').html(html); 
+                    if (hasUnanswered) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none');
+                    
+                    // CHỈ GỌI LỆNH NÀY Ở ĐÂY THÔI
+                    if (window.Prism) {
+                        Prism.highlightAll();
+                    }
                 }
             });
         }
@@ -76,3 +150,187 @@ function deleteThreadPart(rowIndex, partIndex) { if(!confirm("Bạn có chắc c
             postToGAS({ action: "replyToAdmin", rowIndex: rowIndex, replyText: formattedReply }, function(response) { alert(response); loadQAData(); checkNewQA(); }, function() { alert("Lỗi khi gửi phản hồi."); btn.html('Gửi phản hồi').prop('disabled', false); }); 
         }
         function sendAdminReply(rowIndex) { let replyText = $(`#txtAdminReply-${rowIndex}`).val().trim(); if (!replyText) { alert("Vui lòng nhập nội dung trả lời!"); return; } let btn = $(`#btnAdminSubmit-${rowIndex}`); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true); postToGAS({ action: "adminReplyQuestion", rowIndex: rowIndex, replyText: replyText }, function(response) { alert(response); loadQAData(); checkNewQA();  }, function() { alert("Lỗi khi gửi trả lời."); btn.html('<i class="fa-solid fa-reply"></i> Đăng câu trả lời').prop('disabled', false); }); }
+
+let shareCodeEditor;
+let currentShareCategory = "";
+let currentShareLang = "cpp";
+let editingShareRowIndex = -1; // Biến theo dõi đang Sửa hay Đăng mới
+
+$(document).ready(function() {
+    if ($('#shareCodeEditorContainer').length) {
+        shareCodeEditor = ace.edit("shareCodeEditorContainer");
+        shareCodeEditor.setTheme("ace/theme/textmate"); 
+        shareCodeEditor.session.setMode("ace/mode/c_cpp");
+        shareCodeEditor.setOptions({ fontSize: "15px", showPrintMargin: false });
+    }
+});
+
+function openShareCodeSection() { 
+    document.title = "Share Code | Học nhóm Năm 2 Khoa Toán";
+    resetNavActive(); 
+    $('#btnNavShareCode').addClass('active'); 
+    $('#shareCodeSection').removeClass('d-none'); 
+    
+    backToShareCategories();
+    
+    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); } 
+    if (currentUser) { $('#txtMSSVShareCode').val(currentUser.mssv).prop('readonly', true).css({ 'background-color': '#e9ecef', 'cursor': 'not-allowed' }); } 
+    else { $('#txtMSSVShareCode').val('').prop('readonly', false).css({ 'background-color': '#ffffff', 'cursor': 'text' }); }
+}
+
+function backToShareCategories() {
+    $('#shareContentView').addClass('d-none');
+    $('#shareCategoryView').removeClass('d-none');
+}
+
+function openShareCategory(categoryName, lang) {
+    currentShareCategory = categoryName;
+    currentShareLang = lang;
+    
+    $('#currentShareTitle').text(categoryName);
+    $('#shareCategoryView').addClass('d-none');
+    $('#shareContentView').removeClass('d-none');
+    
+    if(lang === 'python') shareCodeEditor.session.setMode("ace/mode/python");
+    else shareCodeEditor.session.setMode("ace/mode/c_cpp");
+    
+    shareCodeEditor.resize(); 
+    cancelEditShareCode(); // Reset form cho sạch sẽ
+    loadShareCodeData();
+}
+
+function sendShareCode() {
+    let mssvValue = currentUser ? currentUser.mssv : $('#txtMSSVShareCode').val().trim(); 
+    let rawCode = shareCodeEditor.getValue().trim();
+    let maBai = $('#txtMaBai').val().trim();
+    
+    if (!mssvValue) { alert("Vui lòng nhập MSSV!"); return; } 
+    if (!rawCode) { alert("Bạn chưa nhập mã nguồn để chia sẻ!"); return; }
+    
+    let qText = `[SHARECODE|${currentShareCategory}|${maBai}] \n` + "```" + currentShareLang + "\n" + rawCode + "\n```";
+
+    let btn = $('#btnSubmitShareCode'); 
+    let originalHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
+    
+    let actionName = (editingShareRowIndex !== -1) ? "updateShareCode" : "submitShareCode";
+    let payload = { action: actionName, mssv: mssvValue, codeData: qText };
+    if (editingShareRowIndex !== -1) payload.rowIndex = editingShareRowIndex;
+    
+    postToGAS(payload, function(response) { 
+        alert(response); 
+        cancelEditShareCode();
+        btn.html(originalHtml).prop('disabled', false); 
+        loadShareCodeData(); 
+    }, function() { 
+        alert("Lỗi kết nối máy chủ!"); 
+        btn.html(originalHtml).prop('disabled', false); 
+    });
+}
+
+window.editShareCode = function(buttonElement, rowIndex, maBai) {
+    let codeBlock = $(buttonElement).closest('.qa-item').find('code').first();
+    if(codeBlock.length > 0) {
+        let rawText = codeBlock.text();
+        shareCodeEditor.setValue(rawText);
+        $('#txtMaBai').val(maBai);
+        editingShareRowIndex = rowIndex; 
+        
+        $('#shareCodeFormTitle').html('<i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Đang chỉnh sửa code trực tiếp');
+        $('#btnSubmitShareCode').html('<i class="fa-solid fa-floppy-disk me-2"></i> Lưu chỉnh sửa').css('background', '#f59e0b');
+        $('#btnCancelEditCode').removeClass('d-none');
+        
+        $('html, body').animate({ scrollTop: $('#shareCodeEditorContainer').offset().top - 100 }, 500);
+    }
+};
+
+function cancelEditShareCode() {
+    shareCodeEditor.setValue(''); 
+    $('#txtMaBai').val('');
+    editingShareRowIndex = -1;
+    
+    $('#shareCodeFormTitle').html('<i class="fa-solid fa-pen-nib me-2"></i>Soạn thảo Code mới');
+    $('#btnSubmitShareCode').html('<i class="fa-solid fa-share-nodes me-2"></i> Chia sẻ Code này').css('background', '#10b981');
+    $('#btnCancelEditCode').addClass('d-none');
+}
+
+function loadShareCodeData() {
+    $('#shareCodeListArea').html(''); $('#shareCodeLoadingStatus').removeClass('d-none');
+    
+    $.ajax({ url: SCRIPT_URL + "?action=getShareCodeData", method: "GET", dataType: "json", success: function(data) {
+        $('#shareCodeLoadingStatus').addClass('d-none');
+        if (!data || data.length === 0) {
+            $('#shareCodeListArea').html(`<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có bài chia sẻ nào.</div>`);
+            return;
+        }
+        
+        let html = '';
+        data.forEach(row => {
+            let questionRaw = row[2] || '';
+            let targetTag = `[SHARECODE|${currentShareCategory}`;
+            if (!questionRaw.startsWith(targetTag)) return;
+            
+            let time = row[0] || ''; let displayMssv = maskMSSV(row[1] || ''); 
+            let answer = row[3] || ''; let rowIndex = row[6];       
+            
+            let categoryMatch = questionRaw.match(/^\[SHARECODE\|(.*?)(?:\|(.*))?\]/);
+            let badgeHtml = '';
+            let maBaiValue = '';
+            
+            if (categoryMatch) {
+                let catName = categoryMatch[1];
+                maBaiValue = categoryMatch[2] || ''; 
+                
+                badgeHtml = `<span class="badge bg-success mb-2" style="font-size: 13px;"><i class="fa-solid fa-layer-group me-1"></i> ${catName}</span>`;
+                if (maBaiValue && maBaiValue.trim() !== "undefined") {
+                    badgeHtml += `<span class="badge bg-danger mb-2 ms-2" style="font-size: 13px;"><i class="fa-solid fa-hashtag me-1"></i> Bài: ${maBaiValue}</span>`;
+                }
+                badgeHtml += `<br>`;
+                questionRaw = questionRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '');
+            }
+
+            let questionFormatted = formatCodeBlocks(questionRaw);
+
+            html += `<div class="qa-item border-success shadow-sm">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="qa-time m-0"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> Tác giả: <strong class="text-secondary">${displayMssv}</strong></div>
+                            <button class="btn btn-sm btn-warning fw-bold shadow-sm" onclick="editShareCode(this, ${rowIndex}, '${maBaiValue}')">
+                                <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
+                            </button>
+                        </div>
+                        <div class="qa-question">${badgeHtml}${questionFormatted}</div>`;
+            
+            if (answer.trim() !== "") html += parseThread(answer, rowIndex);
+            
+            html += `<div class="vote-action-bar mt-3 pt-3 border-top">
+                        <button class="btn btn-sm btn-outline-success fw-bold" onclick="$('#shareReplyBox-${rowIndex}').toggleClass('d-none')">
+                            <i class="fa-solid fa-comments"></i> Bình luận
+                        </button>
+                    </div>
+                    <div id="shareReplyBox-${rowIndex}" class="reply-box d-none mt-3">
+                        <textarea id="txtShareReply-${rowIndex}" class="form-control mb-2 border-success" rows="2" placeholder="Góp ý hoặc chèn code vào đây..."></textarea>
+                        <button class="btn btn-sm btn-success fw-bold" onclick="sendShareCodeReply(${rowIndex})">Gửi bình luận</button>
+                    </div></div>`;
+        });
+        
+        if(html === '') html = `<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có code nào. Hãy chia sẻ!</div>`;
+        $('#shareCodeListArea').html(html); 
+        
+        if (window.Prism) Prism.highlightAll();
+    }});
+}
+
+function sendShareCodeReply(rowIndex) {
+    let replyText = $(`#txtShareReply-${rowIndex}`).val().trim(); 
+    if (!replyText) { alert("Vui lòng nhập nội dung bình luận!"); return; } 
+    
+    let studentMssv = currentUser ? currentUser.mssv : "Ẩn danh";
+    let formattedReply = studentMssv + ":::" + replyText;
+    
+    postToGAS({ action: "replyToShareCode", rowIndex: rowIndex, replyText: formattedReply }, function(response) { 
+        alert(response); 
+        loadShareCodeData(); 
+    }, function() { 
+        alert("Lỗi khi gửi bình luận."); 
+    }); 
+}
