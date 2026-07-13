@@ -131,19 +131,43 @@ function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) re
                         html += `<div class="${itemClass}"><div class="d-flex justify-content-between align-items-start"><div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong></div>`;
                         if (isAdmin) { html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`; }
                         html += `   </div><div class="qa-question">${question}</div>`;
-                        if (!isNew) {
+                     
+if (!isNew) {
+                            // Nếu đã có luồng tin nhắn, in nội dung đó ra
                             html += parseThread(answer, rowIndex);
-                            html += `<div class="vote-action-bar"><div class="vote-group" id="voteArea-${rowIndex}"><button class="btn-vote up" onclick="castVote(${rowIndex}, 'up', this)"><i class="fa-solid fa-thumbs-up"></i> Hữu ích (${upvotes})</button><button class="btn-vote down" onclick="castVote(${rowIndex}, 'down', this)"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button></div><button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')"><i class="fa-solid fa-comment-dots"></i> Phản hồi thêm</button></div><div id="replyBox-${rowIndex}" class="reply-box d-none mt-3"><textarea id="txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập thêm ý kiến/câu hỏi phản hồi..."></textarea><div class="d-flex gap-2"><button class="btn btn-sm btn-primary fw-bold" onclick="sendReply(${rowIndex})" id="btnSendReply-${rowIndex}" style="background: var(--primary-color); border:none;">Gửi phản hồi</button><button class="btn btn-sm btn-light border" onclick="$('#replyBox-${rowIndex}').addClass('d-none')">Hủy</button></div></div>`;
-                        } else { html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ admin giải đáp...</div>`; }
+                        } else { 
+                            // Nếu trống, in dòng thông báo chờ admin
+                            html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ admin giải đáp...</div>`; 
+                        }
+                        
+                        // ĐƯA KHUNG BÌNH LUẬN RA NGOÀI IF-ELSE ĐỂ LUÔN HIỂN THỊ
+                        html += `<div class="vote-action-bar">
+                                    <div class="vote-group" id="voteArea-${rowIndex}">
+                                        <button class="btn-vote up" onclick="castVote(${rowIndex}, 'up', this)"><i class="fa-solid fa-thumbs-up"></i> Hữu ích (${upvotes})</button>
+                                        <button class="btn-vote down" onclick="castVote(${rowIndex}, 'down', this)"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button>
+                                    </div>
+                                    <button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')">
+                                        <i class="fa-solid fa-comment-dots"></i> Bình luận / Phản hồi
+                                    </button>
+                                </div>
+                                <div id="replyBox-${rowIndex}" class="reply-box d-none mt-3">
+                                    <textarea id="txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập bình luận hoặc ý kiến của bạn..."></textarea>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-sm btn-primary fw-bold" onclick="sendReply(${rowIndex})" id="btnSendReply-${rowIndex}" style="background: var(--primary-color); border:none;">Gửi bình luận</button>
+                                        <button class="btn btn-sm btn-light border" onclick="$('#replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
+                                    </div>
+                                </div>`;
                         if (isAdmin) { html += `<div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);"><h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6><textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea><button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}"><i class="fa-solid fa-reply"></i> Đăng câu trả lời</button></div>`; } html += `</div>`;
                     });
                   $('#qaListArea').html(html); 
                     if (hasUnanswered) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none');
                     
                     // CHỈ GỌI LỆNH NÀY Ở ĐÂY THÔI
-                    if (window.Prism) {
-                        Prism.highlightAll();
-                    }
+                   // Thay vì dùng Prism.highlightAll();
+if (window.Prism) {
+    Prism.highlightAllUnder(document.getElementById('qaListArea'));
+}
+applyKaTeX('qaListArea');
                 }
             });
         }
@@ -410,11 +434,16 @@ let editBtnHtml = '';
     $('#shareCodeDetailWrapper').removeClass('d-none');
     
     // Tự động cuộn trang lên đầu khung chi tiết
-    window.scrollTo({ top: $('#shareCodeDetailWrapper').offset().top - 80, behavior: 'smooth' });
+window.scrollTo({ top: $('#shareCodeDetailWrapper').offset().top - 80, behavior: 'smooth' });
     
-    // Highlight Code
+    // Highlight Code & Render Toán học
     if (window.Prism) {
-        setTimeout(() => { Prism.highlightAllUnder(document.getElementById('shareCodeDetailWrapper')); }, 50);
+        setTimeout(() => { 
+            Prism.highlightAllUnder(document.getElementById('shareCodeDetailWrapper')); 
+            
+            // GỌI KATEX Ở ĐÂY CHO CHI TIẾT SHARE CODE
+            applyKaTeX('shareCodeDetailWrapper');
+        }, 50);
     }
 };
 // 3. Hàm xử lý nút "Trở lại"
@@ -542,3 +571,19 @@ window.searchShareCode = function() {
         }
     });
 };
+// Hàm áp dụng KaTeX cho một khu vực cụ thể
+function applyKaTeX(elementId) {
+    let el = document.getElementById(elementId);
+    if (el && window.renderMathInElement) {
+        renderMathInElement(el, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},  // Công thức đứng riêng một dòng
+                {left: '$', right: '$', display: false},   // Công thức nằm cùng dòng (inline)
+                {left: '\\(', right: '\\)', display: false},
+                {left: '\\[', right: '\\]', display: true}
+            ],
+            throwOnError: false, // Bỏ qua lỗi cú pháp để không làm hỏng giao diện
+            output: "html" // Ưu tiên render ra HTML để nhẹ và nhanh hơn
+        });
+    }
+}

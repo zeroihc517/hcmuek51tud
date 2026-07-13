@@ -441,6 +441,7 @@ $('#tbDetailContent').html(html);
                         $('#tbMainView').addClass('d-none');
                         $('#tbDetailContainer').removeClass('d-none');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
+			applyKaTeX('tbDetailContent');
                     };
 
                     window.backToThongBaoList = function() {
@@ -489,7 +490,7 @@ $('#tbDetailContent').html(html);
                 
                 $('#tbItemsHocThuat').html(hocThuatItemsHtml);
                 $('#tbItemsRenLuyen').html(renLuyenItemsHtml);
-                
+                applyKaTeX('customViewWrapper');
                 $('#loadingStatus').addClass('d-none');
                 return;
             }
