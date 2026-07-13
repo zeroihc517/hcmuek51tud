@@ -101,24 +101,57 @@ function openQASection() {
 }
 
 function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) return str; return str.substring(0, 3) + '***' + str.substring(str.length - 3); }
-        function parseThread(text, rowIndex) {
-            let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== ""); window.qaThreadParts[rowIndex] = parts; let html = '';
-            parts.forEach((part, index) => { 
-                let content = part.trim(); if(content === "") return;
-                if (content.startsWith("[SV]") && content.endsWith("[/SV]")) { 
-                    let svTextRaw = content.replace("[SV]", "").replace("[/SV]", "").trim(); let svName = "Sinh viên"; let svMsg = svTextRaw;
-                    if (svTextRaw.includes(":::")) {
-                        let splitData = svTextRaw.split(":::"); let rawMssv = splitData[0].trim(); let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
-                        svName = "Sinh viên (" + displayMssv + ")"; svMsg = splitData.slice(1).join(":::").trim();
-                    }
-                 let svFormattedMsg = formatCodeBlocks(svMsg).replace(/(?:\r\n|\r|\n)(?!(?:[^<]*<\/pre>))/g, '<br>'); html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>${svName}:</strong><br>${svFormattedMsg}`; 
-                    if (isAdmin) { html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`; } html += `</div>`; 
-                } else { 
-                    let adminText = formatCodeBlocks(content).replace(/(?:\r\n|\r|\n)(?!(?:[^<]*<\/pre>))/g, '<br>'); html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${adminText}`; 
-                    if (isAdmin) { html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="openEditQAModal(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa</button></div>`; } html += `</div>`; 
-                }
-            }); return html;
+     function parseThread(text, rowIndex) {
+    let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== ""); 
+    window.qaThreadParts[rowIndex] = parts; 
+    let html = '';
+    
+    parts.forEach((part, index) => { 
+        let content = part.trim(); 
+        if(content === "") return;
+        
+        if (content.startsWith("[SV]") && content.endsWith("[/SV]")) { 
+            let svTextRaw = content.replace("[SV]", "").replace("[/SV]", "").trim(); 
+            let svName = "Sinh viên"; 
+            let svMsg = svTextRaw;
+            let timeHtml = "";
+            
+            // Xử lý tách thời gian do backend tự động chèn thêm "(dd/mm/yyyy hh:mm)\n"
+            let timeMatch = svTextRaw.match(/^\((.*?)\)\n/);
+            if (timeMatch) {
+                let timeStr = timeMatch[1]; // Lấy chuỗi thời gian
+                timeHtml = `<span class="text-muted ms-2" style="font-size: 12.5px; font-weight: normal;"><i class="fa-regular fa-clock"></i> ${timeStr}</span>`;
+                // Cắt bỏ phần thời gian ra khỏi chuỗi ban đầu để xử lý MSSV và Nội dung
+                svTextRaw = svTextRaw.replace(/^\(.*\)\n/, "").trim();
+            }
+            
+            if (svTextRaw.includes(":::")) {
+                let splitData = svTextRaw.split(":::"); 
+                let rawMssv = splitData[0].trim(); 
+                let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
+                svName = "Sinh viên (" + displayMssv + ")"; 
+                svMsg = splitData.slice(1).join(":::").trim();
+            }
+            
+            let svFormattedMsg = formatCodeBlocks(svMsg).replace(/(?:\r\n|\r|\n)(?!(?:[^<]*<\/pre>))/g, '<br>'); 
+            
+            html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>${svName}</strong>${timeHtml}:<br>${svFormattedMsg}`; 
+            
+            if (isAdmin) { 
+                html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`; 
+            } 
+            html += `</div>`; 
+        } else { 
+            let adminText = formatCodeBlocks(content).replace(/(?:\r\n|\r|\n)(?!(?:[^<]*<\/pre>))/g, '<br>'); 
+            html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${adminText}`; 
+            if (isAdmin) { 
+                html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="openEditQAModal(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa</button></div>`; 
+            } 
+            html += `</div>`; 
         }
+    }); 
+    return html;
+}
         function loadQAData() {
             $('#qaListArea').html(''); $('#qaLoadingStatus').removeClass('d-none');
             $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) {
@@ -179,14 +212,28 @@ function deleteThreadPart(rowIndex, partIndex) { if(!confirm("Bạn có chắc c
         function loadWebLinks() { $.ajax({ url: SCRIPT_URL + "?action=getWebLinks", method: "GET", dataType: "json", success: function(data) { renderWebLinks(data); } }); }
         function renderWebLinks(data) { if (!data || data.length === 0) { $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào.</div>'); return; } let html = ''; data.forEach(row => { let title = row[0] || 'Liên kết'; let desc = row[1] || ''; let url = row[2] || '#'; let iconClass = row[3] || 'fa-solid fa-link'; html += `<div class="col-12 col-md-6"><a href="${url}" target="_blank" class="link-card"><div class="icon-box"><i class="${iconClass}"></i></div><div><h5>${title}</h5><p>${desc}</p></div></a></div>`; }); $('#webLinksContainer').html(html); }
         function castVote(rowIndex, type, btnElement) { $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', true); let originalText = $(btnElement).html(); $(btnElement).html('<i class="fa-solid fa-spinner fa-spin"></i>'); postToGAS({ action: "submitVote", rowIndex: rowIndex, type: type }, function(newData) { let data = typeof newData === 'string' ? JSON.parse(newData) : newData; $(`#voteArea-${rowIndex} .up`).html(`<i class="fa-solid fa-thumbs-up"></i> Hữu ích (${data.up})`); $(`#voteArea-${rowIndex} .down`).html(`<i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${data.down})`); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false); }, function() { alert("Lỗi khi đánh giá."); $(btnElement).html(originalText); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false); }); }
-        function sendReply(rowIndex) { 
-            let replyText = $(`#txtReply-${rowIndex}`).val().trim(); 
-            if (!replyText) { alert("Vui lòng nhập nội dung phản hồi!"); return; } 
-            let studentMssv = currentUser ? currentUser.mssv : "Ẩn danh";
-            let formattedReply = studentMssv + ":::" + replyText;
-            let btn = $(`#btnSendReply-${rowIndex}`); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true); 
-            postToGAS({ action: "replyToAdmin", rowIndex: rowIndex, replyText: formattedReply }, function(response) { alert(response); loadQAData(); checkNewQA(); }, function() { alert("Lỗi khi gửi phản hồi."); btn.html('Gửi phản hồi').prop('disabled', false); }); 
-        }
+function sendReply(rowIndex) { 
+    let replyText = $(`#txtReply-${rowIndex}`).val().trim(); 
+    if (!replyText) { alert("Vui lòng nhập nội dung phản hồi!"); return; } 
+    
+    let studentMssv = currentUser ? currentUser.mssv : "Ẩn danh";
+    
+    // Lấy thời gian hiện tại
+    let now = new Date();
+    let timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} ${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+    
+    // Đóng gói cấu trúc mới: MSSV:::Thời gian:::Nội dung
+    let formattedReply = studentMssv + ":::" + timeStr + ":::" + replyText;
+    
+    let btn = $(`#btnSendReply-${rowIndex}`); 
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true); 
+    
+    postToGAS({ action: "replyToAdmin", rowIndex: rowIndex, replyText: formattedReply }, function(response) { 
+        alert(response); loadQAData(); checkNewQA(); 
+    }, function() { 
+        alert("Lỗi khi gửi phản hồi."); btn.html('Gửi phản hồi').prop('disabled', false); 
+    }); 
+}
         function sendAdminReply(rowIndex) { let replyText = $(`#txtAdminReply-${rowIndex}`).val().trim(); if (!replyText) { alert("Vui lòng nhập nội dung trả lời!"); return; } let btn = $(`#btnAdminSubmit-${rowIndex}`); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true); postToGAS({ action: "adminReplyQuestion", rowIndex: rowIndex, replyText: replyText }, function(response) { alert(response); loadQAData(); checkNewQA();  }, function() { alert("Lỗi khi gửi trả lời."); btn.html('<i class="fa-solid fa-reply"></i> Đăng câu trả lời').prop('disabled', false); }); }
 
 let shareCodeEditor;
@@ -453,44 +500,38 @@ window.backToShareCodeList = function() {
 };
 // Hàm xử lý gửi bình luận / góp ý trong phần Share Code
 window.sendShareCodeReply = function(rowIndex) { 
-    // Lấy nội dung từ khung text
     let replyText = $(`#txtShareReply-${rowIndex}`).val().trim(); 
+    if (!replyText) { alert("Vui lòng nhập nội dung bình luận hoặc góp ý!"); return; } 
     
-    if (!replyText) { 
-        alert("Vui lòng nhập nội dung bình luận hoặc góp ý!"); 
-        return; 
-    } 
-    
-    // Gắn thông tin người gửi (Lấy MSSV nếu đã đăng nhập, ngược lại là Khách)
     let studentMssv = currentUser ? currentUser.mssv : "Khách";
     
-    // Format chuỗi dữ liệu để hàm parseThread() có thể đọc được giống bên Q&A
-    let formattedReply = studentMssv + ":::" + replyText;
+    // Lấy thời gian hiện tại
+    let now = new Date();
+    let timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} ${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
     
-    // Lấy phần tử nút bấm và thêm hiệu ứng loading
+    // Đóng gói cấu trúc mới: MSSV:::Thời gian:::Nội dung
+    let formattedReply = studentMssv + ":::" + timeStr + ":::" + replyText;
+    
     let btn = $(`#shareReplyBox-${rowIndex} button`); 
     let originalText = btn.html();
     btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang gửi...').prop('disabled', true); 
     
-    // Gửi yêu cầu lên Google Apps Script
- postToGAS({ 
+    postToGAS({ 
         action: "replyToShareCode",
         rowIndex: rowIndex, 
         replyText: formattedReply 
     }, function(response) { 
         alert(response); 
-        
-        // Chỉ dọn dẹp form, KHÔNG gọi loadShareCodeData() để tránh bị văng ra ngoài
         $(`#txtShareReply-${rowIndex}`).val('');
         $(`#shareReplyBox-${rowIndex}`).addClass('d-none');
         btn.html('<i class="fa-solid fa-paper-plane me-2"></i>Gửi bình luận').prop('disabled', false); 
 
-        // Tải ngầm dữ liệu mới và làm mới lại giao diện chi tiết (Ảnh 1)
         $.ajax({ 
             url: SCRIPT_URL + "?action=getShareCodeData", 
             method: "GET", 
             dataType: "json", 
             success: function(data) {
+                // (Giữ nguyên toàn bộ logic ajax success cũ tại đây)
                 window.shareCodeList = []; 
                 data.forEach(row => {
                     let questionRaw = row[2] || '';
@@ -518,14 +559,12 @@ window.sendShareCodeReply = function(rowIndex) {
                     });
                 });
                 
-                // Mở lại chính bài code đó (Cập nhật giao diện Ảnh 1 với bình luận mới)
                 let currentIndex = window.shareCodeList.findIndex(item => item.rowIndex == rowIndex);
                 if(currentIndex !== -1) {
                     openShareCodeDetail(currentIndex); 
                 }
             }
         });
-        
     }, function() { 
         alert("Có lỗi xảy ra khi kết nối máy chủ để gửi bình luận."); 
         btn.html(originalText).prop('disabled', false); 
