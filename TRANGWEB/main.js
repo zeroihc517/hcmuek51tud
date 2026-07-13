@@ -620,6 +620,9 @@ if (isSpecialExam) {
             $('#loadingStatus').addClass('d-none'); 
             $('#tableWrapper').removeClass('d-none'); 
             $('#swipeHint').removeClass('d-none');
+applyKaTeX('instructorArea');    // Quét phần thông tin giảng viên (nếu có công thức)
+            applyKaTeX('tableWrapper');      // Quét toàn bộ nội dung trong bảng 7 cột
+            if (hasExamCards) applyKaTeX('examCardsContainer');
         },
         error: function() { 
             $('#loadingStatus').html('<span class="text-danger fw-bold">Có lỗi xảy ra khi tải dữ liệu!</span>'); 
