@@ -277,29 +277,63 @@ function loadDataByHocPhan(sheetName, element) {
                 let hocThuatItemsHtml = '';
                 let renLuyenItemsHtml = '';
 
-                data.forEach((row, rowIndex) => {
-                    if (rowIndex === 0) return; // Bỏ qua tiêu đề
-                    
-                    let c1 = String(row[0] || '').trim();
-                    let c2 = String(row[1] || '').trim();
-                    let c3 = String(row[2] || '').trim();
-                    let c4 = String(row[3] || '').trim();
-                    let c5 = String(row[4] || '').trim();
-                    let c6 = String(row[5] || '').trim();
-                    let c7 = String(row[6] || '').trim();
-                    let c7_raw = c7; // THÊM DÒNG NÀY: Lưu lại dữ liệu gốc của cột 7
+data.forEach((row, rowIndex) => {
+    if (rowIndex === 0) return; // Bỏ qua tiêu đề
+    
+    let c1 = String(row[0] || '').trim();
+    let c2 = String(row[1] || '').trim();
+    let c3 = String(row[2] || '').trim();
+    let c4_raw = String(row[3] || '').trim(); // Đổi tên biến để xử lý
+    let c5 = String(row[4] || '').trim();
+    let c6 = String(row[5] || '').trim();
+    let c7 = String(row[6] || '').trim();
+    let c7_raw = c7; // Lưu lại dữ liệu gốc của cột 7
 
-                    let isNew = /^new$/i.test(c1) || c1.toLowerCase().includes('new');
-                    
-                    // 1. Kiểm tra xem ghi chú có chứa chữ Rèn luyện không (Dựa vào dữ liệu gốc)
-                    let isRenLuyen = c7_raw.toLowerCase().includes('rèn luyện');
-                    
-                    // 2. Nếu có, tiến hành xóa chữ "Rèn luyện" khỏi Ghi chú (Chỉ để hiển thị giao diện cho đẹp)
-                    if (isRenLuyen) {
-                        c7 = c7.replace(/rèn luyện/ig, '').replace(/^[:\-,\s]+/, '').trim();
-                    }
-                    
-                    detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew };
+    // ==========================================
+    // TÍNH NĂNG MỚI: HẸN GIỜ ĐĂNG BÀI & XỬ LÝ GIAO DIỆN
+    // ==========================================
+    let publishDate = null;
+    let c4_display = c4_raw; // Mặc định hiển thị dữ liệu gốc nếu không đúng format
+    
+    // Tìm kiếm định dạng HH:MM DD/MM/YYYY hoặc chỉ DD/MM/YYYY
+    let dateMatch = c4_raw.match(/(?:(\d{1,2}):(\d{2}))?\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (dateMatch) {
+        let hour = dateMatch[1] ? parseInt(dateMatch[1]) : 0;
+        let minute = dateMatch[2] ? parseInt(dateMatch[2]) : 0;
+        let day = parseInt(dateMatch[3]);
+        let month = parseInt(dateMatch[4]) - 1;
+        let year = parseInt(dateMatch[5]);
+        
+        // Tạo đối tượng Date chứa cả giờ phút
+        publishDate = new Date(year, month, day, hour, minute, 0);
+        
+        // Ghi đè lại biến hiển thị, cắt bỏ phần giờ, chỉ giữ lại DD/MM/YYYY
+        c4_display = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
+    }
+
+    if (publishDate) {
+        let now = new Date(); // Lấy thời gian thực tế hiện tại (có cả giờ phút giây)
+        
+        // Nếu bài viết đặt giờ ở tương lai VÀ không phải Admin -> Bỏ qua không hiển thị
+        if (publishDate > now && !isAdmin) {
+            return; 
+        }
+    }
+    
+    let c4 = c4_display; // Gán lại c4 để các logic giao diện bên dưới chỉ in ra ngày
+    // ==========================================
+
+    let isNew = /^new$/i.test(c1) || c1.toLowerCase().includes('new');
+    
+    // 1. Kiểm tra xem ghi chú có chứa chữ Rèn luyện không (Dựa vào dữ liệu gốc)
+    let isRenLuyen = c7_raw.toLowerCase().includes('rèn luyện');
+    
+    // 2. Nếu có, tiến hành xóa chữ "Rèn luyện" khỏi Ghi chú (Chỉ để hiển thị giao diện cho đẹp)
+    if (isRenLuyen) {
+        c7 = c7.replace(/rèn luyện/ig, '').replace(/^[:\-,\s]+/, '').trim();
+    }
+    
+    detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew };
 
 let dateDisplay = `
 <div class="d-inline-flex gap-2 flex-wrap">
