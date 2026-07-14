@@ -247,55 +247,55 @@ function loadDataByHocPhan(sheetName, element) {
             // XỬ LÝ RIÊNG: GIAO DIỆN THÔNG BÁO (HỌC THUẬT & RÈN LUYỆN)
             // ==========================================
             if (sheetName.toLowerCase() === 'thông báo') {
-               let mainHtml = `
-                <div class="tb-list-container shadow-sm mb-4">
-                    <div class="tb-header-blue">
-                        <div class="d-flex align-items-center"><i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo mới</div>
-                        <div class="ms-auto d-flex gap-2">
-                            <input type="text" id="tbSearchInput" class="form-control form-control-sm border-0" placeholder="Tìm kiếm thông báo..." style="width: 220px; border-radius: 4px;" onkeyup="if(event.key === 'Enter') searchThongBao()">
-                            <button class="btn btn-sm text-white fw-bold px-3" style="background: #e61d4a; border-radius: 4px;" onclick="searchThongBao()">Tìm kiếm</button>
-                        </div>
-                    </div>
-                    
-                    <div class="tb-list-body">
-                        <div class="row g-4">
-                            <div class="col-md-6 tb-section-block" id="tbSectionHocThuat">
-                                <div class="tb-section-heading ht border-bottom pb-2 mb-3"><i class="fa-solid fa-book-open-reader me-2"></i> Không gian học thuật & Nghiên cứu khoa học</div>
-                                <div class="tb-section-items" id="tbItemsHocThuat"></div>
-                            </div>
-                            
-                            <div class="col-md-6 tb-section-block" id="tbSectionRenLuyen">
-                                <div class="tb-section-heading rl border-bottom pb-2 mb-3"><i class="fa-solid fa-person-running me-2"></i> Hoạt động Rèn luyện</div>
-                                <div class="tb-section-items" id="tbItemsRenLuyen"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                `;
+              let mainHtml = `
+<div class="tb-list-container shadow-sm mb-4">
+    <div class="tb-header-blue">
+        <div class="d-flex align-items-center"><i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo mới</div>
+        <div class="ms-auto d-flex gap-2">
+            <input type="text" id="tbSearchInput" class="form-control form-control-sm border-0" placeholder="Tìm kiếm thông báo..." style="width: 220px; border-radius: 4px;" onkeyup="if(event.key === 'Enter') searchThongBao()">
+            <button class="btn btn-sm text-white fw-bold px-3" style="background: #e61d4a; border-radius: 4px;" onclick="searchThongBao()">Tìm kiếm</button>
+        </div>
+    </div>
+    
+    <div class="tb-list-body">
+        <!-- KHU VỰC THÔNG BÁO HỆ THỐNG NẰM TRÊN CÙNG -->
+        <div id="tbItemsHeThong" class="mb-4"></div>
 
-                let detailData = [];
-                let hocThuatItemsHtml = '';
-                let renLuyenItemsHtml = '';
+        <div class="row g-4">
+            <div class="col-md-6 tb-section-block" id="tbSectionHocThuat">
+                <div class="tb-section-heading ht border-bottom pb-2 mb-3"><i class="fa-solid fa-book-open-reader me-2"></i> Không gian học thuật & Nghiên cứu khoa học</div>
+                <div class="tb-section-items" id="tbItemsHocThuat"></div>
+            </div>
+            
+            <div class="col-md-6 tb-section-block" id="tbSectionRenLuyen">
+                <div class="tb-section-heading rl border-bottom pb-2 mb-3"><i class="fa-solid fa-person-running me-2"></i> Hoạt động Rèn luyện</div>
+                <div class="tb-section-items" id="tbItemsRenLuyen"></div>
+            </div>
+        </div>
+    </div>
+</div>
+`;
+
+               let detailData = [];
+let hocThuatItemsHtml = '';
+let renLuyenItemsHtml = '';
+let heThongItemsHtml = ''; // Biến mới chứa HTML cho Hệ thống
 
 data.forEach((row, rowIndex) => {
-    if (rowIndex === 0) return; // Bỏ qua tiêu đề
+    if (rowIndex === 0) return; 
     
     let c1 = String(row[0] || '').trim();
     let c2 = String(row[1] || '').trim();
     let c3 = String(row[2] || '').trim();
-    let c4_raw = String(row[3] || '').trim(); // Đổi tên biến để xử lý
+    let c4_raw = String(row[3] || '').trim(); 
     let c5 = String(row[4] || '').trim();
     let c6 = String(row[5] || '').trim();
     let c7 = String(row[6] || '').trim();
-    let c7_raw = c7; // Lưu lại dữ liệu gốc của cột 7
+    let c7_raw = c7; 
 
-    // ==========================================
-    // TÍNH NĂNG MỚI: HẸN GIỜ ĐĂNG BÀI & XỬ LÝ GIAO DIỆN
-    // ==========================================
+    // Logic Hẹn giờ đăng bài (Ngày X) giữ nguyên...
     let publishDate = null;
-    let c4_display = c4_raw; // Mặc định hiển thị dữ liệu gốc nếu không đúng format
-    
-    // Tìm kiếm định dạng HH:MM DD/MM/YYYY hoặc chỉ DD/MM/YYYY
+    let c4_display = c4_raw; 
     let dateMatch = c4_raw.match(/(?:(\d{1,2}):(\d{2}))?\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
     if (dateMatch) {
         let hour = dateMatch[1] ? parseInt(dateMatch[1]) : 0;
@@ -303,99 +303,108 @@ data.forEach((row, rowIndex) => {
         let day = parseInt(dateMatch[3]);
         let month = parseInt(dateMatch[4]) - 1;
         let year = parseInt(dateMatch[5]);
-        
-        // Tạo đối tượng Date chứa cả giờ phút
         publishDate = new Date(year, month, day, hour, minute, 0);
-        
-        // Ghi đè lại biến hiển thị, cắt bỏ phần giờ, chỉ giữ lại DD/MM/YYYY
         c4_display = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
     }
 
-    if (publishDate) {
-        let now = new Date(); // Lấy thời gian thực tế hiện tại (có cả giờ phút giây)
-        
-        // Nếu bài viết đặt giờ ở tương lai VÀ không phải Admin -> Bỏ qua không hiển thị
-        if (publishDate > now && !isAdmin) {
-            return; 
-        }
+    let now = new Date(); 
+    if (publishDate && publishDate > now && !isAdmin) {
+        return; 
     }
     
-    let c4 = c4_display; // Gán lại c4 để các logic giao diện bên dưới chỉ in ra ngày
-    // ==========================================
-
+    let c4 = c4_display; 
     let isNew = /^new$/i.test(c1) || c1.toLowerCase().includes('new');
     
-    // 1. Kiểm tra xem ghi chú có chứa chữ Rèn luyện không (Dựa vào dữ liệu gốc)
+    // TÍNH NĂNG MỚI: Nhận diện Thông báo Hệ thống và Rèn luyện
+    let isHeThong = c7_raw.toLowerCase().includes('hệ thống');
     let isRenLuyen = c7_raw.toLowerCase().includes('rèn luyện');
     
-    // 2. Nếu có, tiến hành xóa chữ "Rèn luyện" khỏi Ghi chú (Chỉ để hiển thị giao diện cho đẹp)
-    if (isRenLuyen) {
+    let deadlineTime = extractDeadline(c3) || extractDeadline(c7_raw);
+
+    // KIỂM TRA NGÀY Y: Nếu là Hệ thống và đã quá hạn -> Ẩn hoàn toàn (trừ Admin)
+    if (isHeThong && deadlineTime && now.getTime() > deadlineTime && !isAdmin) {
+        return; 
+    }
+
+    // Dọn dẹp từ khóa Ghi chú để hiển thị ra UI cho đẹp
+    if (isHeThong) {
+        c7 = c7.replace(/hệ thống/ig, '').replace(/^[:\-,\s]+/, '').trim();
+    } else if (isRenLuyen) {
         c7 = c7.replace(/rèn luyện/ig, '').replace(/^[:\-,\s]+/, '').trim();
     }
     
     detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew };
 
-let dateDisplay = `
-<div class="d-inline-flex gap-2 flex-wrap">
-    <span class="tb-date-text"><i class="fa-regular fa-calendar"></i> Ngày đăng: ${c4 || 'Gần đây'}</span>
-    ${c5 ? `<span class="tb-date-text text-success"><i class="fa-solid fa-clock-rotate-left"></i> Ngày cập nhật: ${c5}</span>` : ''}
-</div>`;
-
-
-                    let badgeHtml = isNew ? `<div class="tb-badge-new">Mới</div>` : '';
-let deadlineTime = extractDeadline(c3) || extractDeadline(c7_raw);
-let countdownHtml = '';
-if (deadlineTime) {
-    countdownHtml = `
-    <div class="tb-countdown tb-countdown-list" data-deadline="${deadlineTime}">
-        <i class="fa-solid fa-spinner fa-spin"></i> Đang tính toán...
+    // Khởi tạo dateDisplay, countdownHtml, adminHtml giữ nguyên như cũ...
+    let dateDisplay = `
+    <div class="d-inline-flex gap-2 flex-wrap">
+        <span class="tb-date-text"><i class="fa-regular fa-calendar"></i> Ngày đăng: ${c4 || 'Gần đây'}</span>
+        ${c5 ? `<span class="tb-date-text text-success"><i class="fa-solid fa-clock-rotate-left"></i> Ngày cập nhật: ${c5}</span>` : ''}
     </div>`;
-}
-                    let adminHtml = '';
-                    if (isAdmin) {
-                        let sheetRowIndex = rowIndex + 1;
-// Tạo hàm xử lý ký tự đặc biệt để không làm vỡ HTML
-const escapeJS = (str) => String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, "");
 
-let ec1 = escapeJS(c1);
-let ec2 = escapeJS(c2);
-let ec3 = escapeJS(c3); // Quan trọng nhất: Cột 3 thường chứa nội dung dài và có xuống dòng
-let ec4 = escapeJS(c4);
-let ec5 = escapeJS(c5);
-let ec6 = escapeJS(c6);
-let ec7 = escapeJS(c7_raw);
-                        
-                        adminHtml = `
-                        <div class="mt-2" onclick="event.stopPropagation();">
-                            <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
-                            <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
-                            <button class="btn btn-sm btn-outline-success py-0 px-2 fw-bold" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button>
-                            <button class="btn btn-sm btn-outline-warning py-0 px-2 fw-bold" onclick="openEditRowModal(${sheetRowIndex}, '${ec1}', '${ec2}', '${ec3}', '${ec4}', '${ec5}', '${ec6}', '${ec7}')"><i class="fa-solid fa-pen"></i></button>
-                            <button class="btn btn-sm btn-outline-danger py-0 px-2 fw-bold" onclick="deleteRowItem(${sheetRowIndex})"><i class="fa-solid fa-trash"></i></button>
-                        </div>`;
-                    }
+    let badgeHtml = isNew ? `<div class="tb-badge-new">Mới</div>` : '';
+    let countdownHtml = '';
+    if (deadlineTime) {
+        countdownHtml = `
+        <div class="tb-countdown tb-countdown-list" data-deadline="${deadlineTime}">
+            <i class="fa-solid fa-spinner fa-spin"></i> Đang tính toán...
+        </div>`;
+    }
 
-                   let itemHtml = `
-<div class="tb-list-item" onclick="viewThongBaoDetail(${rowIndex})">
-    <div class="tb-icon-wrapper">
-        <i class="fa-solid fa-bell"></i>
-        ${badgeHtml}
-    </div>
-    <div class="tb-item-info">
-        <div class="tb-item-title" style="font-size: 17px; font-weight: 600;">${c2}</div>
-        <div class="tb-item-dates d-flex align-items-center flex-wrap gap-3" style="font-size: 13px;">
-            ${dateDisplay}
-            ${countdownHtml}
-        </div>
-        ${adminHtml}
-    </div>
-</div>`;
-                    if (isRenLuyen) {
-                        renLuyenItemsHtml += itemHtml;
-                    } else {
-                        hocThuatItemsHtml += itemHtml;
-                    }
-                });
+    let adminHtml = '';
+    if (isAdmin) {
+        let sheetRowIndex = rowIndex + 1;
+        const escapeJS = (str) => String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, "");
+        let ec1 = escapeJS(c1); let ec2 = escapeJS(c2); let ec3 = escapeJS(c3); 
+        let ec4 = escapeJS(c4); let ec5 = escapeJS(c5); let ec6 = escapeJS(c6); let ec7 = escapeJS(c7_raw);
+        
+        adminHtml = `
+        <div class="mt-2" onclick="event.stopPropagation();">
+            <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
+            <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
+            <button class="btn btn-sm btn-outline-success py-0 px-2 fw-bold" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button>
+            <button class="btn btn-sm btn-outline-warning py-0 px-2 fw-bold" onclick="openEditRowModal(${sheetRowIndex}, '${ec1}', '${ec2}', '${ec3}', '${ec4}', '${ec5}', '${ec6}', '${ec7}')"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-sm btn-outline-danger py-0 px-2 fw-bold" onclick="deleteRowItem(${sheetRowIndex})"><i class="fa-solid fa-trash"></i></button>
+        </div>`;
+    }
+
+    // Phân luồng HTML: Hệ thống (Banner) vs Thông thường (Item List)
+    if (isHeThong) {
+        heThongItemsHtml += `
+        <div class="alert alert-warning shadow-sm border-warning border-start border-4 mb-3 position-relative" role="alert" style="border-radius: 8px; cursor: pointer; background: #fffbeb;" onclick="viewThongBaoDetail(${rowIndex})">
+            <div class="d-flex align-items-start gap-3">
+                <i class="fa-solid fa-bullhorn text-warning fs-3 mt-1"></i>
+                <div class="flex-grow-1">
+                    <div class="fw-bold text-dark mb-1" style="font-size: 16.5px;">[THÔNG BÁO HỆ THỐNG] ${c2} ${badgeHtml}</div>
+                    <div class="tb-item-dates d-flex align-items-center flex-wrap gap-3" style="font-size: 13px;">
+                        ${dateDisplay}
+                        ${countdownHtml}
+                    </div>
+                </div>
+            </div>
+            ${isAdmin ? `<div class="mt-2 text-end">${adminHtml}</div>` : ''}
+        </div>`;
+    } else {
+        let itemHtml = `
+        <div class="tb-list-item" onclick="viewThongBaoDetail(${rowIndex})">
+            <div class="tb-icon-wrapper">
+                <i class="fa-solid fa-bell"></i>
+                ${badgeHtml}
+            </div>
+            <div class="tb-item-info">
+                <div class="tb-item-title" style="font-size: 17px; font-weight: 600;">${c2}</div>
+                <div class="tb-item-dates d-flex align-items-center flex-wrap gap-3" style="font-size: 13px;">
+                    ${dateDisplay}
+                    ${countdownHtml}
+                </div>
+                ${adminHtml}
+            </div>
+        </div>`;
+        
+        if (isRenLuyen) renLuyenItemsHtml += itemHtml;
+        else hocThuatItemsHtml += itemHtml;
+    }
+});
 
                 if (!hocThuatItemsHtml) hocThuatItemsHtml = '<div class="text-muted text-center py-4">Chưa có thông báo học thuật nào.</div>';
                 if (!renLuyenItemsHtml) renLuyenItemsHtml = '<div class="text-muted text-center py-4">Chưa có hoạt động rèn luyện nào.</div>';
@@ -521,11 +530,17 @@ $('#tbDetailContent').html(html);
 
                 if ($('#customViewWrapper').length === 0) $('#tableWrapper').before('<div id="customViewWrapper" class="w-100"></div>');
                 $('#customViewWrapper').html(customViewHtml).removeClass('d-none');
-                
-                $('#tbItemsHocThuat').html(hocThuatItemsHtml);
-                $('#tbItemsRenLuyen').html(renLuyenItemsHtml);
-                applyKaTeX('customViewWrapper');
-                $('#loadingStatus').addClass('d-none');
+                if (heThongItemsHtml === '') {
+    $('#tbItemsHeThong').addClass('d-none');
+} else {
+    $('#tbItemsHeThong').removeClass('d-none');
+}
+$('#tbItemsHeThong').html(heThongItemsHtml);
+$('#tbItemsHocThuat').html(hocThuatItemsHtml);
+$('#tbItemsRenLuyen').html(renLuyenItemsHtml);
+
+applyKaTeX('customViewWrapper');
+$('#loadingStatus').addClass('d-none');
                 return;
             }
 
@@ -1413,3 +1428,80 @@ setInterval(function() {
         }
     });
 }, 1000);
+function startHorizontalLedClock() {
+    function updateClock() {
+        const now = new Date();
+        
+        // 1. Lấy ngày, tháng, năm
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        
+        // 2. Định dạng 12 giờ (AM/PM)
+        let hours = now.getHours();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // Nếu là 0 giờ thì chuyển thành 12
+        
+        const hoursStr = String(hours).padStart(2, '0');
+        const minutesStr = String(now.getMinutes()).padStart(2, '0');
+        const secondsStr = String(now.getSeconds()).padStart(2, '0');
+        
+        // 3. Đổ văn bản trực tiếp vào giao diện
+        const elDate = document.getElementById('ledDate');
+        const elTimeMain = document.getElementById('ledTimeMain');
+        const elSeconds = document.getElementById('ledSeconds');
+        const elAmpm = document.getElementById('ledAmpm');
+        
+        if (elDate) elDate.textContent = `${day}/${month}/${year}`;
+        if (elTimeMain) elTimeMain.textContent = `${hoursStr}:${minutesStr}`;
+        if (elSeconds) elSeconds.textContent = secondsStr;
+        if (elAmpm) elAmpm.textContent = ampm;
+    }
+    
+    updateClock();
+    setInterval(updateClock, 1000);
+}
+
+// Gọi chạy đồng hồ khi website sẵn sàng
+$(document).ready(function() {
+    startHorizontalLedClock();
+});
+function startAllHorizontalLedClocks() {
+    function updateClocks() {
+        const now = new Date();
+        
+        // 1. Lấy chuỗi Ngày/Tháng/Năm
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const dateStr = `${day}/${month}/${year}`;
+        
+        // 2. Chuyển đổi định dạng giờ AM/PM
+        let hours = now.getHours();
+        const ampmStr = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12;
+        hours = hours ? hours : 12; // 0 giờ đổi sang 12 giờ
+        
+        const hoursStr = String(hours).padStart(2, '0');
+        const minutesStr = String(now.getMinutes()).padStart(2, '0');
+        const timeMainStr = `${hoursStr}:${minutesStr}`;
+        const secondsStr = String(now.getSeconds()).padStart(2, '0');
+        
+        // 3. Quét và cập nhật đồng loạt lên tất cả các phân hệ trên màn hình
+        $('.clock-led-container').each(function() {
+            $(this).find('.led-date').text(dateStr);
+            $(this).find('.led-time-main').text(timeMainStr);
+            $(this).find('.led-seconds').text(secondsStr);
+            $(this).find('.led-ampm').text(ampmStr);
+        });
+    }
+    
+    updateClocks();
+    setInterval(updateClocks, 1000); // Cập nhật đồng bộ mỗi giây
+}
+
+// Gọi thực thi khi ứng dụng tải xong
+$(document).ready(function() {
+    startAllHorizontalLedClocks();
+});
