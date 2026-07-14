@@ -205,7 +205,7 @@ function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) re
                     html += parseThread(answer, rowIndex);
                 } else { 
                     // Nếu trống, in dòng thông báo chờ admin
-                    html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ admin giải đáp...</div>`; 
+                    html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ giải đáp...</div>`; 
                 }
                 
                 // ============ TẠO ID & KIỂM TRA TRẠNG THÁI VOTE ============
