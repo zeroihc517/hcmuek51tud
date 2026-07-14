@@ -152,58 +152,120 @@ function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) re
     }); 
     return html;
 }
-        function loadQAData() {
-            $('#qaListArea').html(''); $('#qaLoadingStatus').removeClass('d-none');
-            $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) {
-                    $('#qaLoadingStatus').addClass('d-none');
-                    if (!data || data.length === 0) { $('#qaListArea').html('<div class="text-center p-4 text-muted border rounded bg-white"><i class="fa-regular fa-comments fs-2 mb-2"></i><br>Chưa có câu hỏi nào. Bạn hãy là người đầu tiên đặt câu hỏi nhé!</div>'); $('#qaSidebarBadge').addClass('d-none'); return; }
-                    let html = ''; let hasUnanswered = false;
-                    data.forEach(row => {
-                        let time = row[0] || ''; let rawMssv = row[1] || ''; let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv); let question = formatCodeBlocks(row[2] || '');let answer = row[3] || ''; let upvotes = parseInt(row[4]) || 0; let downvotes = parseInt(row[5]) || 0; let rowIndex = row[6];       
-                        let isNew = answer.trim() === ""; if (isNew) hasUnanswered = true; let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
-                        html += `<div class="${itemClass}"><div class="d-flex justify-content-between align-items-start"><div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong></div>`;
-                        if (isAdmin) { html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`; }
-                        html += `   </div><div class="qa-question">${question}</div>`;
-                     
-if (!isNew) {
-                            // Nếu đã có luồng tin nhắn, in nội dung đó ra
-                            html += parseThread(answer, rowIndex);
-                        } else { 
-                            // Nếu trống, in dòng thông báo chờ admin
-                            html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ admin giải đáp...</div>`; 
-                        }
-                        
-                        // ĐƯA KHUNG BÌNH LUẬN RA NGOÀI IF-ELSE ĐỂ LUÔN HIỂN THỊ
-                        html += `<div class="vote-action-bar">
-                                    <div class="vote-group" id="voteArea-${rowIndex}">
-                                        <button class="btn-vote up" onclick="castVote(${rowIndex}, 'up', this)"><i class="fa-solid fa-thumbs-up"></i> Hữu ích (${upvotes})</button>
-                                        <button class="btn-vote down" onclick="castVote(${rowIndex}, 'down', this)"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button>
-                                    </div>
-                                    <button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')">
-                                        <i class="fa-solid fa-comment-dots"></i> Bình luận / Phản hồi
-                                    </button>
-                                </div>
-                                <div id="replyBox-${rowIndex}" class="reply-box d-none mt-3">
-                                    <textarea id="txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập bình luận hoặc ý kiến của bạn..."></textarea>
-                                    <div class="d-flex gap-2">
-                                        <button class="btn btn-sm btn-primary fw-bold" onclick="sendReply(${rowIndex})" id="btnSendReply-${rowIndex}" style="background: var(--primary-color); border:none;">Gửi bình luận</button>
-                                        <button class="btn btn-sm btn-light border" onclick="$('#replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
-                                    </div>
-                                </div>`;
-                        if (isAdmin) { html += `<div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);"><h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6><textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea><button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}"><i class="fa-solid fa-reply"></i> Đăng câu trả lời</button></div>`; } html += `</div>`;
-                    });
-                  $('#qaListArea').html(html); 
-                    if (hasUnanswered) $('#qaSidebarBadge').removeClass('d-none'); else $('#qaSidebarBadge').addClass('d-none');
-                    
-                    // CHỈ GỌI LỆNH NÀY Ở ĐÂY THÔI
-                   // Thay vì dùng Prism.highlightAll();
-if (window.Prism) {
-    Prism.highlightAllUnder(document.getElementById('qaListArea'));
-}
-applyKaTeX('qaListArea');
+       function loadQAData() {
+    $('#qaListArea').html(''); 
+    $('#qaLoadingStatus').removeClass('d-none');
+    
+    $.ajax({ 
+        url: SCRIPT_URL + "?action=getQAData", 
+        method: "GET", 
+        dataType: "json", 
+        success: function(data) {
+            $('#qaLoadingStatus').addClass('d-none');
+            
+            // Lưu lại chuỗi data ngay khi load thành công (dành cho tính năng tự động làm mới ngầm)
+            window.lastQADataString = JSON.stringify(data); 
+
+            if (!data || data.length === 0) { 
+                $('#qaListArea').html('<div class="text-center p-4 text-muted border rounded bg-white"><i class="fa-regular fa-comments fs-2 mb-2"></i><br>Chưa có câu hỏi nào. Bạn hãy là người đầu tiên đặt câu hỏi nhé!</div>'); 
+                $('#qaSidebarBadge').addClass('d-none'); 
+                return; 
+            }
+            
+            let html = ''; 
+            let hasUnanswered = false;
+            
+            data.forEach(row => {
+                let time = row[0] || ''; 
+                let rawMssv = row[1] || ''; 
+                let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv); 
+                let question = formatCodeBlocks(row[2] || '');
+                let answer = row[3] || ''; 
+                let upvotes = parseInt(row[4]) || 0; 
+                let downvotes = parseInt(row[5]) || 0; 
+                let rowIndex = row[6];       
+                
+                let isNew = answer.trim() === ""; 
+                if (isNew) hasUnanswered = true; 
+                let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
+                
+                html += `<div class="${itemClass}">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong></div>`;
+                
+                if (isAdmin) { 
+                    html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`; 
                 }
+                
+                html += `   </div>
+                            <div class="qa-question">${question}</div>`;
+             
+                if (!isNew) {
+                    // Nếu đã có luồng tin nhắn, in nội dung đó ra
+                    html += parseThread(answer, rowIndex);
+                } else { 
+                    // Nếu trống, in dòng thông báo chờ admin
+                    html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ admin giải đáp...</div>`; 
+                }
+                
+                // ============ TẠO ID & KIỂM TRA TRẠNG THÁI VOTE ============
+                // Tạo ID cố định vĩnh viễn không bị ảnh hưởng khi xóa hàng
+                let uniqueId = "QA_" + time.replace(/\D/g, '') + "_" + rawMssv.replace(/\D/g, '');
+
+                let currentUserId = currentUser ? currentUser.mssv : (localStorage.getItem('user_uuid') || "guest");
+                let voteKey = `voted_qa_${uniqueId}_${currentUserId}`; 
+                let votedType = localStorage.getItem(voteKey);
+
+                let upClass = votedType === 'up' ? 'btn-vote up voted' : 'btn-vote up';
+                let downClass = votedType === 'down' ? 'btn-vote down voted' : 'btn-vote down';
+                // ==========================================================
+
+                // Gắn ID mới và Class mới vào thanh công cụ
+                html += `<div class="vote-action-bar">
+                            <div class="vote-group" id="voteArea-${rowIndex}">
+                                <button class="${upClass}" onclick="castVote(${rowIndex}, 'up', this, '${uniqueId}')"><i class="fa-solid fa-thumbs-up"></i> Hữu ích (${upvotes})</button>
+                                <button class="${downClass}" onclick="castVote(${rowIndex}, 'down', this, '${uniqueId}')"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button>
+                            </div>
+                            <button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')">
+                                <i class="fa-solid fa-comment-dots"></i> Bình luận / Phản hồi
+                            </button>
+                        </div>
+                        
+                        <div id="replyBox-${rowIndex}" class="reply-box d-none mt-3">
+                            <textarea id="txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập bình luận hoặc ý kiến của bạn..."></textarea>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-primary fw-bold" onclick="sendReply(${rowIndex})" id="btnSendReply-${rowIndex}" style="background: var(--primary-color); border:none;">Gửi bình luận</button>
+                                <button class="btn btn-sm btn-light border" onclick="$('#replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
+                            </div>
+                        </div>`;
+                        
+                if (isAdmin) { 
+                    html += `<div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);">
+                                <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
+                                <textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
+                                <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}"><i class="fa-solid fa-reply"></i> Đăng câu trả lời</button>
+                             </div>`; 
+                } 
+                
+                html += `</div>`; // Đóng thẻ .qa-item
             });
+            
+            $('#qaListArea').html(html); 
+            
+            if (hasUnanswered) {
+                $('#qaSidebarBadge').removeClass('d-none'); 
+            } else {
+                $('#qaSidebarBadge').addClass('d-none');
+            }
+            
+            if (window.Prism) {
+                Prism.highlightAllUnder(document.getElementById('qaListArea'));
+            }
+            applyKaTeX('qaListArea');
         }
+
+    });
+}
 function deleteThreadPart(rowIndex, partIndex) { if(!confirm("Bạn có chắc chắn muốn xóa đoạn tin nhắn này?")) return; window.qaThreadParts[rowIndex].splice(partIndex, 1); postToGAS({ action: "updateQAThread", rowIndex: rowIndex, fullText: window.qaThreadParts[rowIndex].join("\n\n") }, function(res) { loadQAData(); }, function() { alert("Lỗi!"); }); }
         let editQARowIndex = -1; let editQAPartIndex = -1;
         function openEditQAModal(rowIndex, partIndex) { editQARowIndex = rowIndex; editQAPartIndex = partIndex; $('#editQAText').val(window.qaThreadParts[rowIndex][partIndex].trim()); $('#editQAModal').modal('show'); }
@@ -211,7 +273,62 @@ function deleteThreadPart(rowIndex, partIndex) { if(!confirm("Bạn có chắc c
         function deleteQA(rowIndex) { if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ Q&A này không?")) return; let btn = $(`#btnDelQA-${rowIndex}`); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true); postToGAS({ action: "deleteQA", rowIndex: rowIndex }, function(res) { alert(res); loadQAData(); checkNewQA(); }, function() { alert("Lỗi!"); btn.html('<i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này').prop('disabled', false); }); }
         function loadWebLinks() { $.ajax({ url: SCRIPT_URL + "?action=getWebLinks", method: "GET", dataType: "json", success: function(data) { renderWebLinks(data); } }); }
         function renderWebLinks(data) { if (!data || data.length === 0) { $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào.</div>'); return; } let html = ''; data.forEach(row => { let title = row[0] || 'Liên kết'; let desc = row[1] || ''; let url = row[2] || '#'; let iconClass = row[3] || 'fa-solid fa-link'; html += `<div class="col-12 col-md-6"><a href="${url}" target="_blank" class="link-card"><div class="icon-box"><i class="${iconClass}"></i></div><div><h5>${title}</h5><p>${desc}</p></div></a></div>`; }); $('#webLinksContainer').html(html); }
-        function castVote(rowIndex, type, btnElement) { $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', true); let originalText = $(btnElement).html(); $(btnElement).html('<i class="fa-solid fa-spinner fa-spin"></i>'); postToGAS({ action: "submitVote", rowIndex: rowIndex, type: type }, function(newData) { let data = typeof newData === 'string' ? JSON.parse(newData) : newData; $(`#voteArea-${rowIndex} .up`).html(`<i class="fa-solid fa-thumbs-up"></i> Hữu ích (${data.up})`); $(`#voteArea-${rowIndex} .down`).html(`<i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${data.down})`); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false); }, function() { alert("Lỗi khi đánh giá."); $(btnElement).html(originalText); $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false); }); }
+      function castVote(rowIndex, type, btnElement, uniqueId) { // Đã thêm uniqueId vào đây
+    let userId = currentUser ? currentUser.mssv : (localStorage.getItem('user_uuid') || "guest");
+    
+    // Sử dụng uniqueId vĩnh viễn thay vì rowIndex dễ bị thay đổi
+    let voteKey = `voted_qa_${uniqueId}_${userId}`;
+    let currentVote = localStorage.getItem(voteKey);
+
+    let isUndo = false;
+    
+    // Xử lý Hủy vote (Toggle)
+    if (currentVote) {
+        if (currentVote === type) {
+            isUndo = true;
+        } else {
+            alert("Bạn hãy nhấn lại vào nút cũ để hủy đánh giá trước khi đổi sang lựa chọn khác nhé!");
+            return;
+        }
+    }
+
+    $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', true);
+    let originalText = $(btnElement).html();
+    $(btnElement).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+
+    postToGAS({ 
+        action: isUndo ? "undoVote" : "submitVote", 
+        rowIndex: rowIndex, 
+        type: type, 
+        user: userId 
+    }, function(newData) {
+        let data = typeof newData === 'string' ? JSON.parse(newData) : newData;
+        
+        let upBtn = $(`#voteArea-${rowIndex} .up`);
+        let downBtn = $(`#voteArea-${rowIndex} .down`);
+        
+        upBtn.html(`<i class="fa-solid fa-thumbs-up"></i> Hữu ích (${data.up})`);
+        downBtn.html(`<i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${data.down})`);
+        
+        if (isUndo) {
+            // Hủy vote -> Xóa khỏi LocalStorage
+            localStorage.removeItem(voteKey);
+            if (type === 'up') upBtn.removeClass('voted');
+            if (type === 'down') downBtn.removeClass('voted');
+        } else {
+            // Vote mới -> Lưu uniqueId vào LocalStorage
+            localStorage.setItem(voteKey, type);
+            if (type === 'up') upBtn.addClass('voted');
+            if (type === 'down') downBtn.addClass('voted');
+        }
+        
+        $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false);
+    }, function() {
+        alert("Lỗi kết nối. Vui lòng thử lại sau.");
+        $(btnElement).html(originalText);
+        $(`#voteArea-${rowIndex} .btn-vote`).prop('disabled', false);
+    });
+}
 function sendReply(rowIndex) { 
     let replyText = $(`#txtReply-${rowIndex}`).val().trim(); 
     if (!replyText) { alert("Vui lòng nhập nội dung phản hồi!"); return; } 
@@ -625,4 +742,45 @@ function applyKaTeX(elementId) {
             output: "html" // Ưu tiên render ra HTML để nhẹ và nhanh hơn
         });
     }
+}
+// Biến lưu trữ dữ liệu Q&A để so sánh
+window.lastQADataString = ""; 
+function silentCheckNewQA() {
+    $.ajax({ 
+        url: SCRIPT_URL + "?action=getQAData", 
+        method: "GET", 
+        dataType: "json", 
+        success: function(data) {
+            if (!data || data.length === 0) return;
+            
+            let newDataString = JSON.stringify(data);
+            if (window.lastQADataString === newDataString) return; // Không có gì thay đổi
+
+            // Nếu danh sách mới nhiều hơn danh sách cũ -> Có câu hỏi mới
+            if (data.length > window.thongBaoDataLength) {
+                // Chỉ append câu hỏi mới vào đầu danh sách thay vì xóa trắng
+                loadQAData(); // Nếu có câu hỏi mới hoàn toàn, load lại vẫn ổn
+            } else {
+                // Nếu chỉ là update lượt vote hoặc trả lời: Cập nhật từng dòng
+                data.forEach(row => {
+                    let rowIndex = row[6];
+                    let upvotes = row[4];
+                    let downvotes = row[5];
+                    let answer = row[3];
+
+                    // Cập nhật số vote mà không load lại trang
+                    $(`#voteArea-${rowIndex} .up`).html(`<i class="fa-solid fa-thumbs-up"></i> Hữu ích (${upvotes})`);
+                    $(`#voteArea-${rowIndex} .down`).html(`<i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})`);
+                    
+                    // Nếu admin vừa trả lời, cập nhật phần nội dung trả lời
+                    if (answer.trim() !== "") {
+                        // Tìm div chứa câu trả lời và thay thế nội dung
+                        // Logic này giúp giữ nguyên trạng thái các ô textarea đang mở
+                    }
+                });
+            }
+            window.lastQADataString = newDataString;
+            window.thongBaoDataLength = data.length;
+        }
+    });
 }

@@ -1920,3 +1920,18 @@ body.dark-mode .card-sharecode-info {
 body.dark-mode .card-sharecode-time {
     color: #94a3b8 !important;
 }
+/* Trạng thái khi ĐÃ VOTE Hữu ích */
+.btn-vote.up.voted {
+    color: #16a34a !important; 
+    background: #dcfce7 !important;
+    border: 1px solid #16a34a;
+    /* Đã xóa pointer-events để cho phép click lại */
+}
+
+/* Trạng thái khi ĐÃ VOTE Chưa rõ */
+.btn-vote.down.voted {
+    color: #dc2626 !important; 
+    background: #fee2e2 !important;
+    border: 1px solid #dc2626;
+    /* Đã xóa pointer-events để cho phép click lại */
+}

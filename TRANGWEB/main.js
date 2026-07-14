@@ -684,13 +684,24 @@ function initGlobalApp() {
     $('.app-container, .mobile-header').css('display', '');
     setTimeout(pingOnlineStatus, 1000); 
     setInterval(pingOnlineStatus, 25000);
+    
+    // --- THÊM MỚI TỪ ĐÂY ---
+    // Gọi ngầm kiểm tra dữ liệu Q&A mỗi 12 giây (12000 ms)
+// Thay thế đoạn setInterval kiểm tra QA ngầm thành như sau:
+setInterval(function() {
+    if (!$('#qaSection').hasClass('d-none')) {
+        silentCheckNewQA();
+    } else {
+        checkNewQA(); 
+    }
+}, 5000); // Rút ngắn xuống 5 giây để load nhanh như web Real-time
+    // --- KẾT THÚC THÊM MỚI ---
+
     fetchSemesterConfig(); 
     loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
     loadWebLinks(); 
     checkNewQA(); 
     fetchAndRenderCategories();
-    
-    // GỌI HÀM HIỂN THỊ INFO Ở ĐÂY
     renderUserInfo();
     
     if (currentUser && currentUser.mssv === "51.01.108.008") {
