@@ -68,7 +68,7 @@ function openQASection() {
     let mssvValue = currentUser ? currentUser.mssv : $('#txtMSSV').val().trim(); 
     
     // 1. XỬ LÝ LẤY CHỦ ĐỀ VÀ KIỂM TRA
-    let topicVal = $('#qaTopic').val();
+   let topicVal = $('#qaTopicHocPhan').val() || $('#qaTopicHoTro').val();
     let topicOther = $('#qaTopicOther').val().trim();
     let finalTopic = "";
     
@@ -116,8 +116,8 @@ function openQASection() {
         
         // Reset sạch sẽ form sau khi gửi thành công
         $('#txtQuestion').val(''); 
-        $('#qaTopic').val(''); 
-        $('#qaTopicOther').addClass('d-none').val('');
+      $('#qaTopicHocPhan').val(''); 
+$('#qaTopicHoTro').val('');
         if (typeof codeEditor !== 'undefined') codeEditor.setValue(''); 
         
         btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); 
@@ -852,13 +852,19 @@ window.searchQA = function() {
     let keyword = $('#txtSearchQA').val().toLowerCase().trim();
     let selectedTopic = $('#filterQATopic').val().toLowerCase().trim();
     
-    // Khai báo danh sách các chủ đề mặc định hệ thống đang có
+// Khai báo danh sách các chủ đề mặc định hệ thống đang có (Phải ghi chữ thường hết nhé)
     const defaultTopics = [
-        "hình học vi phân", 
-        "cấu trúc đại số và ứng dụng", 
-        "đăng ký học phần", 
-        "sinh hoạt công dân/thời sự", 
-        "lịch quân sự", 
+        "hệ thống",
+        "math1417-hình học vi phân", 
+        "apma1803-cấu trúc đại số và ứng dụng", 
+        "math1817-phương trình vi phân và đạo hàm riêng",
+        "math1413-độ đo và tích phân",
+        "apma1817-toán rời rạc",
+        "đăng ký học phần",
+        "chương trình đào tạo",
+        "tốt nghiệp",
+        "kết quả học tập",
+        "kết quả rèn luyện",
         "sự kiện"
     ];
     
@@ -890,4 +896,22 @@ window.searchQA = function() {
             $(this).addClass('d-none');
         }
     });
+};
+window.handleTopicSelection = function(type) {
+    if (type === 'hocphan') {
+        // Nếu chọn ô Học phần -> Reset ô Hỗ trợ & ẩn khung Khác
+        $('#qaTopicHoTro').val(''); 
+        $('#qaTopicOther').addClass('d-none').val(''); 
+    } else if (type === 'hotro') {
+        // Nếu chọn ô Hỗ trợ -> Reset ô Học phần
+        $('#qaTopicHocPhan').val(''); 
+        
+        // Kiểm tra xem có chọn "Khác" không
+        let selected = $('#qaTopicHoTro').val();
+        if (selected === 'Khác') {
+            $('#qaTopicOther').removeClass('d-none').focus();
+        } else {
+            $('#qaTopicOther').addClass('d-none').val('');
+        }
+    }
 };

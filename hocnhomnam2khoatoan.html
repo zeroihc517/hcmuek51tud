@@ -557,27 +557,42 @@
     </div>
     
     <!-- Cột chứa Chọn Chủ Đề (Chiếm 8 phần còn lại trên PC) -->
-    <div class="col-12 col-md-8">
-        <label class="form-label fw-bold text-primary" style="font-size: 14.5px;"><i class="fa-solid fa-tags me-1"></i> Chủ đề câu hỏi</label>
-        <select id="qaTopic" class="form-select p-2.5 fw-bold" style="border-radius: 8px; border-color: #cbd5e1; color: #334155;" onchange="toggleQaTopicOther()">
-            <option value="">-- Chọn chủ đề của bạn --</option>
-	   		<option value="Hệ thống">Hệ thống</option>
-            <option value="MATH1417-Hình học vi phân">MATH1417-Hình học vi phân</option>
-            <option value="APMA1803-Cấu trúc đại số và ứng dụng">APMA1803-Cấu trúc đại số và ứng dụng</option>
-            <option value="MATH1817-Phương trình vi phân và đạo hàm riêng">MATH1817-Phương trình vi phân và đạo hàm riêng</option>
-	        <option value="MATH1413-Độ đo và tích phân">MATH1413-Độ đo và tích phân</option>
-	        <option value="APMA1817-Toán rời rạc">APMA1817-Toán rời rạc</option>
-            <option value="Đăng ký học phần">Đăng ký học phần</option>
-            <option value="Chương trình đào tạo">Chương trình đào tạo</option>
-            <option value="Tốt nghiệp">Tốt nghiệp</option>
-            <option value="Kết quả học tập">Kết quả học tập</option>
-            <option value="Kết quả rèn luyện">Kết quả rèn luyện</option>
-            <option value="Sự kiện">Sự kiện</option>
-            <option value="Khác">Khác (Vui lòng ghi rõ)</option>
-        </select>
-        <!-- Ô nhập text ẩn -->
-        <input type="text" id="qaTopicOther" class="form-control p-2.5 mt-2 d-none" style="border-radius: 8px; border-color: #cbd5e1;" placeholder="Vui lòng ghi rõ chủ đề của bạn...">
+<div class="col-12 col-md-8">
+    <label class="form-label fw-bold text-primary" style="font-size: 14.5px;"><i class="fa-solid fa-tags me-1"></i> Chủ đề câu hỏi</label>
+    
+    <!-- Tạo một hàng chứa 2 cột con -->
+    <div class="row g-2">
+        <!-- Cột Trái: Học phần chuyên môn -->
+        <div class="col-md-6">
+            <select id="qaTopicHocPhan" class="form-select p-2.5 fw-bold" style="border-radius: 8px; border-color: #cbd5e1; color: #334155;" onchange="handleTopicSelection('hocphan')">
+                <option value="">-- 📚 Học phần chuyên môn --</option>
+                <option value="MATH1417-Hình học vi phân">MATH1417-Hình học vi phân</option>
+                <option value="APMA1803-Cấu trúc đại số và ứng dụng">APMA1803-Cấu trúc đại số và ứng dụng</option>
+                <option value="MATH1817-Phương trình vi phân và đạo hàm riêng">MATH1817-Phương trình vi phân và đạo hàm riêng</option>
+                <option value="MATH1413-Độ đo và tích phân">MATH1413-Độ đo và tích phân</option>
+                <option value="APMA1817-Toán rời rạc">APMA1817-Toán rời rạc</option>
+            </select>
+        </div>
+        
+        <!-- Cột Phải: Hỗ trợ & Học vụ -->
+        <div class="col-md-6">
+            <select id="qaTopicHoTro" class="form-select p-2.5 fw-bold" style="border-radius: 8px; border-color: #cbd5e1; color: #334155;" onchange="handleTopicSelection('hotro')">
+                <option value="">-- 📌 Hỗ trợ & Học vụ --</option>
+                <option value="Hệ thống">Hệ thống</option>
+                <option value="Đăng ký học phần">Đăng ký học phần</option>
+                <option value="Chương trình đào tạo">Chương trình đào tạo</option>
+                <option value="Tốt nghiệp">Tốt nghiệp</option>
+                <option value="Kết quả học tập">Kết quả học tập</option>
+                <option value="Kết quả rèn luyện">Kết quả rèn luyện</option>
+                <option value="Sự kiện">Sự kiện</option>
+                <option value="Khác">Khác (Vui lòng ghi rõ)</option>
+            </select>
+        </div>
     </div>
+    
+    <!-- Ô nhập text ẩn -->
+    <input type="text" id="qaTopicOther" class="form-control p-2.5 mt-2 d-none" style="border-radius: 8px; border-color: #cbd5e1;" placeholder="Vui lòng ghi rõ chủ đề của bạn...">
+</div>
 </div>
                     <!-- Nút chuyển đổi chế độ -->
 
@@ -597,22 +612,28 @@
     
     <!-- Bộ lọc và Tìm kiếm -->
     <div class="d-flex gap-2">
-        <select id="filterQATopic" class="form-select form-select-sm" style="border-radius: 8px; width: auto; font-weight: 600;" onchange="searchQA()">
-            <option value="">-- Tất cả chủ đề --</option>
-	    <option value="Hệ thống">Hệ thống</option>
-            <option value="MATH1417-Hình học vi phân">MATH1417-Hình học vi phân</option>
-            <option value="APMA1803-Cấu trúc đại số và ứng dụng">APMA1803-Cấu trúc đại số và ứng dụng</option>
-            <option value="MATH1817-Phương trình vi phân và đạo hàm riêng">MATH1817-Phương trình vi phân và đạo hàm riêng</option>
-	        <option value="MATH1413-Độ đo và tích phân">MATH1413-Độ đo và tích phân</option>
-	        <option value="APMA1817-Toán rời rạc">APMA1817-Toán rời rạc</option>
-            <option value="Đăng ký học phần">Đăng ký học phần</option>
-            <option value="Chương trình đào tạo">Chương trình đào tạo</option>
-            <option value="Tốt nghiệp">Tốt nghiệp</option>
-            <option value="Kết quả học tập">Kết quả học tập</option>
-            <option value="Kết quả rèn luyện">Kết quả rèn luyện</option>
-            <option value="Sự kiện">Sự kiện</option>
-           <option value="khác">Các chủ đề khác</option>
-        </select>
+<select id="filterQATopic" class="form-select form-select-sm" style="border-radius: 8px; width: auto; font-weight: 600;" onchange="searchQA()">
+    <option value="">-- Tất cả chủ đề --</option>
+    
+    <optgroup label="📚 Học phần chuyên môn">
+        <option value="MATH1417-Hình học vi phân">MATH1417-Hình học vi phân</option>
+        <option value="APMA1803-Cấu trúc đại số và ứng dụng">APMA1803-Cấu trúc đại số và ứng dụng</option>
+        <option value="MATH1817-Phương trình vi phân và đạo hàm riêng">MATH1817-Phương trình vi phân và đạo hàm riêng</option>
+        <option value="MATH1413-Độ đo và tích phân">MATH1413-Độ đo và tích phân</option>
+        <option value="APMA1817-Toán rời rạc">APMA1817-Toán rời rạc</option>
+    </optgroup>
+
+    <optgroup label="📌 Hỗ trợ & Học vụ">
+        <option value="Hệ thống">Hệ thống</option>
+        <option value="Đăng ký học phần">Đăng ký học phần</option>
+        <option value="Chương trình đào tạo">Chương trình đào tạo</option>
+        <option value="Tốt nghiệp">Tốt nghiệp</option>
+        <option value="Kết quả học tập">Kết quả học tập</option>
+        <option value="Kết quả rèn luyện">Kết quả rèn luyện</option>
+        <option value="Sự kiện">Sự kiện</option>
+        <option value="khác">Các chủ đề khác</option>
+    </optgroup>
+</select>
         
         <div class="input-group input-group-sm" style="width: 220px;">
             <input type="text" id="txtSearchQA" class="form-control" placeholder="Tìm kiếm câu hỏi..." onkeyup="searchQA()" style="border-radius: 8px 0 0 8px;">
