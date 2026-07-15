@@ -64,9 +64,10 @@
         <i class="fa-solid fa-user-shield text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Dành cho bản quản trị
     </button>
         <!-- Các nút chức năng -->
-         <!---<button class="dropdown-item py-2 mb-1 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;">
-           <i class="fa-solid fa-user text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Hồ sơ của tôi
-        </button>--->
+<!-- Nút Hồ sơ của tôi trên thanh Sidebar Dropdown -->
+<button class="dropdown-item py-2 mb-1 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadProfileView()">
+   <i class="fa-solid fa-address-card text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Hồ sơ của tôi
+</button>
         <button class="dropdown-item py-2 mb-4 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="openChangePasswordModal()">
             <i class="fa-solid fa-ellipsis text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Đổi mật khẩu
         </button>
@@ -256,7 +257,68 @@
             </div>
     </div>
 </div>
-
+<!-- KHU VỰC TRANG HỒ SƠ CÁ NHÂN -->
+<div id="profileSection" class="d-none">
+    <header class="top-header d-flex justify-content-between align-items-center">
+        <div class="page-title"><i class="fa-solid fa-address-card"></i> Hồ sơ cá nhân</div>
+    </header>
+    
+    <div class="row g-4 mt-2">
+        <!-- Cột Trái: Ảnh đại diện & Thông tin cơ bản -->
+        <div class="col-12 col-md-4">
+            <div class="data-card p-4 text-center h-100 d-flex flex-column justify-content-center">
+                <div class="mx-auto mb-3 d-flex align-items-center justify-content-center bg-light text-primary shadow-sm" style="width: 120px; height: 120px; border-radius: 50%; font-size: 50px; border: 4px solid #0f4c81;">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <h4 class="fw-bold text-primary mb-1" id="pageProfileName">Đang tải...</h4>
+                <p class="text-muted fw-bold mb-3" id="pageProfileMSSV">MSSV: ---</p>
+                <div class="mb-4">
+                    <span id="pageProfileRole" class="badge bg-secondary px-3 py-2 shadow-sm" style="font-size: 13px;">Sinh viên</span>
+                </div>
+                
+                <hr class="text-muted opacity-25 mt-auto mb-4">
+                
+                <button class="btn btn-outline-primary w-100 fw-bold mb-3" onclick="openChangePasswordModal()" style="border-radius: 8px;">
+                    <i class="fa-solid fa-key me-2"></i>Đổi mật khẩu
+                </button>
+                <button class="btn btn-outline-danger w-100 fw-bold" onclick="logoutStudent()" style="border-radius: 8px;">
+                    <i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất
+                </button>
+            </div>
+        </div>
+        
+              <!-- Cột Phải: Chi tiết thông tin học thuật (Cho phép chỉnh sửa) -->
+<div class="col-12 col-md-8">
+    <div class="data-card p-4 p-md-5 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <h5 class="fw-bold text-primary m-0"><i class="fa-solid fa-circle-info me-2"></i>Thông tin học tập</h5>
+            <button class="btn btn-primary fw-bold px-3 py-2 shadow-sm" onclick="saveUserProfile()" id="btnSaveProfile" style="border-radius: 8px;">
+                <i class="fa-solid fa-floppy-disk me-2"></i>Lưu thay đổi
+            </button>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label class="text-muted small fw-bold mb-1 text-uppercase">Chuyên ngành</label>
+                <input type="text" id="profChuyenNganh" class="form-control p-3 bg-light border-primary-subtle fw-bold" style="font-size: 15.5px; color: #1e293b; border-radius: 8px;" placeholder="VD: Sư phạm Toán học">
+            </div>
+            <div class="col-md-6">
+                <label class="text-muted small fw-bold mb-1 text-uppercase">Khoa quản lý</label>
+                <input type="text" id="profKhoa" class="form-control p-3 bg-light border-primary-subtle fw-bold" style="font-size: 15.5px; color: #1e293b; border-radius: 8px;" placeholder="VD: Toán-Tin học">
+            </div>
+            <div class="col-md-6">
+                <label class="text-muted small fw-bold mb-1 text-uppercase">Email liên hệ</label>
+                <input type="text" id="profKhoaHoc" class="form-control p-3 bg-light border-primary-subtle fw-bold" style="font-size: 15.5px; color: #1e293b; border-radius: 8px;" placeholder="VD: 123@gmail.com">
+            </div>
+            <div class="col-md-6">
+                <label class="text-muted small fw-bold mb-1 text-uppercase">Song ngành (nếu có)</label>
+                <input type="text" id="profNhom" class="form-control p-3 bg-light border-primary-subtle fw-bold" style="font-size: 15.5px; color: #1e293b; border-radius: 8px;" placeholder="VD: Sư phạm Tin học">
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+</div>
 <div class="modal fade" id="gpaCourseModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
@@ -723,7 +785,16 @@
                     </div>
                 </div>
             </div>
-
+<!-- Thẻ 5: Nhóm Messenger (Thảo luận) -->
+<div class="col">
+    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #0084ff;" onclick="window.open('https://m.me/cm/AbZ3bveE1MxijZz4/?send_source=cm%3Acopy_invite_link', '_blank')">
+        <div class="icon-box"><i class="fa-brands fa-facebook-messenger" style="color: #0084ff; font-size: 42px;"></i></div>
+        <div class="card-text-wrapper">
+            <h5>Cộng đồng Messenger</h5>
+            <p class="card-desc">Chat & Trao đổi trực tuyến</p>
+        </div>
+    </div>
+</div>
             <!-- NẾU BẠN CÓ THẺ THỨ 5, CỨ COPY MỘT KHỐI <div class="col">...</div> VÀ DÁN VÀO ĐÂY -->
 
         </div>
@@ -783,15 +854,7 @@
                     </span>
                 </div>
                 
-                <div class="footer-info-right">
-                    <span class="d-none d-sm-inline"><i class="fa-solid fa-link text-primary-light"></i> Truy cập nhanh:</span>
-                    <a href="https://teams.cloud.microsoft/l/team/19%3AG3AZ0si8ueyRMaXW3zI-siWOxk1cyIA9Aol3zliL8Sw1%40thread.tacv2/conversations?groupId=d88461ae-d3dd-44d2-aae0-e8d021da1e68&tenantId=b1a9fdc0-1d56-4c3d-a481-809fff8a26db"><i class="fa-brands fa-microsoft"></i> MS Teams</a>
-                     <a href="https://m.me/cm/AbZ3bveE1MxijZz4/?send_source=cm%3Acopy_invite_link"><i class="fa-brands fa-facebook-messenger"></i> Nhóm Messenger</a>
-					<a href="https://classroom.google.com/c/ODI0MjY2NDc0OTQx?cjc=fmvongzm"><i class="fa-solid fa-chalkboard-user"></i> Google Classroom</a>
-		<a href="https://docs.google.com/spreadsheets/d/13bQ6y0fn8n9Ah4OKQeQ9xOVJxXXnXRLjaIxTQPx-eGo/edit?usp=sharing" target="_blank" id="adminDatabaseLink" class="d-none text-warning fw-bold">
-        <i class="fa-solid fa-database"></i> Cơ sở dữ liệu
-    </a>
-                </div>
+
             </footer>
         </main>
     </div>

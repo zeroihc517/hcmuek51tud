@@ -5,13 +5,21 @@
         function toggleMenu() { sidebar.classList.toggle('show'); overlay.classList.toggle('show'); }
         btnToggle.addEventListener('click', toggleMenu); overlay.addEventListener('click', toggleMenu);
 
-        function resetNavActive() {
-            $('.btn-course').removeClass('active'); $('#btnNavQA').removeClass('active'); $('#btnNavTKB').removeClass('active');
-$('#btnNavShareCode').removeClass('active');
-            $('#tongHopSection').addClass('d-none'); $('#courseSection').addClass('d-none');
-            $('#qaSection').addClass('d-none'); $('#tkbSection').addClass('d-none');
-$('#shareCodeSection').addClass('d-none'); // Thêm dòng này
-        }
+function resetNavActive() {
+    $('.btn-course').removeClass('active'); 
+    $('#btnNavQA').removeClass('active'); 
+    $('#btnNavTKB').removeClass('active');
+    $('#btnNavShareCode').removeClass('active');
+    $('#btnNavGPA').removeClass('active');
+    
+    $('#tongHopSection').addClass('d-none'); 
+    $('#courseSection').addClass('d-none');
+    $('#qaSection').addClass('d-none'); 
+    $('#tkbSection').addClass('d-none');
+    $('#shareCodeSection').addClass('d-none'); 
+    $('#gpaSection').addClass('d-none');
+    $('#profileSection').addClass('d-none'); // <--- Ẩn trang hồ sơ
+}
 
         function loadTongHopView() {
             document.title = "Tổng hợp Link | Học nhóm Năm 2 Khoa Toán";
@@ -99,36 +107,73 @@ function loadWebLinks() {
             `);
         }
     }); 
-}function renderWebLinks(data) { 
-    if (!data || data.length === 0) { 
+}
+function renderWebLinks(data) { 
+    if (!data && currentUser?.mssv !== "51.01.108.008") { 
         $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào.</div>'); 
         return; 
     } 
+    
     let html = ''; 
-    data.forEach(row => { 
-        let title = row[0] || 'Liên kết'; 
-        let desc = row[1] || ''; 
-        let url = row[2] || '#'; 
-        let iconClass = row[3] || 'fa-solid fa-link'; 
-        
-        let badgeHtml = '';
 
-
-        // Tự động kiểm tra: Nếu có ghi chú thì tạo thẻ p, không có thì để trống
-        let descHtml = desc ? `<p class="card-desc">${desc}</p>` : '';
-
-html += `
-        <div class="col mb-3"> 
-            <a href="${url}" target="_blank" class="link-card-modern" style="border-bottom: 4px solid var(--primary-color);">
-                ${badgeHtml}
-                <div class="icon-box"><i class="${iconClass}" style="color: var(--primary-color);"></i></div>
+    // TIÊM TRỰC TIẾP CÁC CARD DÀNH RIÊNG CHO ADMIN
+    if (currentUser && currentUser.mssv === "51.01.108.008") {
+        html += `
+        <div class="col mb-3">
+            <a href="https://teams.cloud.microsoft/l/team/19%3AG3AZ0si8ueyRMaXW3zI-siWOxk1cyIA9Aol3zliL8Sw1%40thread.tacv2/conversations?groupId=d88461ae-d3dd-44d2-aae0-e8d021da1e68&tenantId=b1a9fdc0-1d56-4c3d-a481-809fff8a26db" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #464eb8; background: #f8fafc;">
+                <div class="link-card-badge bg-danger shadow-sm">ADMIN ONLY</div>
+                <div class="icon-box"><i class="fa-brands fa-microsoft" style="color: #464eb8;"></i></div>
                 <div class="card-text-wrapper">
-                    <h5>${title}</h5>
-                    ${descHtml} 
+                    <h5>MS Teams</h5>
+                    <p class="card-desc">Không gian làm việc quản trị</p>
+                </div>
+            </a>
+        </div>
+        <div class="col mb-3">
+            <a href="https://docs.google.com/spreadsheets/d/13bQ6y0fn8n9Ah4OKQeQ9xOVJxXXnXRLjaIxTQPx-eGo/edit?usp=sharing" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #16a34a; background: #f8fafc;">
+                <div class="link-card-badge bg-danger shadow-sm">ADMIN ONLY</div>
+                <div class="icon-box"><i class="fa-solid fa-database" style="color: #16a34a;"></i></div>
+                <div class="card-text-wrapper">
+                    <h5>Cơ sở dữ liệu</h5>
+                    <p class="card-desc">Quản lý hệ thống toàn diện</p>
+                </div>
+            </a>
+        </div>
+        <div class="col mb-3">
+            <a href="https://classroom.google.com/c/ODI0MjY2NDc0OTQx?cjc=fmvongzm" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #f59e0b; background: #f8fafc;">
+                <div class="link-card-badge bg-danger shadow-sm">ADMIN ONLY</div>
+                <div class="icon-box"><i class="fa-solid fa-chalkboard-user" style="color: #f59e0b;"></i></div>
+                <div class="card-text-wrapper">
+                    <h5>Google Classroom</h5>
+                    <p class="card-desc">Lớp học trực tuyến</p>
                 </div>
             </a>
         </div>`;
-    }); 
+    }
+
+    // Hiển thị các link khác (nếu có) từ hệ thống cho tất cả mọi người
+    if (data && data.length > 0) {
+        data.forEach(row => { 
+            let title = row[0] || 'Liên kết'; 
+            let desc = row[1] || ''; 
+            let url = row[2] || '#'; 
+            let iconClass = row[3] || 'fa-solid fa-link'; 
+            
+            let descHtml = desc ? `<p class="card-desc">${desc}</p>` : '';
+
+            html += `
+            <div class="col mb-3"> 
+                <a href="${url}" target="_blank" class="link-card-modern" style="border-bottom: 4px solid var(--primary-color);">
+                    <div class="icon-box"><i class="${iconClass}" style="color: var(--primary-color);"></i></div>
+                    <div class="card-text-wrapper">
+                        <h5>${title}</h5>
+                        ${descHtml} 
+                    </div>
+                </a>
+            </div>`;
+        });
+    }
+    
     $('#webLinksContainer').html(html); 
 }
 function renderSidebarCategories() {

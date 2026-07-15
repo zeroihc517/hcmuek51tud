@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzyT4Otp3xzRPmYWDSyQqH-7W8X1ueEJeSGzokuHTdVIeY9KhT1oxMTauBv5Lpw39xD/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby0H7mgMiRV5U7TmqemThegGRUX0VSJANq9TZopi3F1rD6vnM9LCXgzUBwR7G1k5ZXG/exec'; 
 
         let isAdmin = false;
         let currentSheetName = "";
@@ -127,19 +127,64 @@ function renderUserInfo() {
         // Gán Tên và MSSV vào thanh Sidebar
         $('#sidebarUserName').text(currentUser.name);
         $('#sidebarUserMSSV').text(currentUser.mssv);
-        
-        // Gán chuỗi "Tên - MSSV" vào cái khung bảng nổi 
         $('#popoverUserTitle').text(currentUser.name + " - " + currentUser.mssv);
+        // Tìm bên trong hàm renderUserInfo() và thêm 4 dòng này vào khối if (currentUser)
+$('#profChuyenNganh').val(currentUser.chuyenNganh || '');
+$('#profKhoa').val(currentUser.khoa || '');
+$('#profKhoaHoc').val(currentUser.khoaHoc || '');
+$('#profNhom').val(currentUser.nhom || '');
+        // Gán dữ liệu sang Trang Hồ Sơ
+        $('#pageProfileName').text(currentUser.name);
+        $('#pageProfileMSSV').text('MSSV: ' + currentUser.mssv);
         
-        // KIỂM TRA MSSV ĐỂ HIỂN THỊ NÚT QUẢN TRỊ
+        // Nhận diện Admin để đổi giao diện huy hiệu
         if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008") {
             $('#btnAdminLoginToggle').removeClass('d-none').addClass('d-flex');
+            $('#pageProfileRole').removeClass('bg-secondary').addClass('bg-danger').text('Quản trị viên (Admin)');
         } else {
             $('#btnAdminLoginToggle').addClass('d-none').removeClass('d-flex');
+            $('#pageProfileRole').removeClass('bg-danger').addClass('bg-secondary').text('Sinh viên');
         }
         
         sidebarUserInfo.removeClass('d-none');
     } else {
         sidebarUserInfo.addClass('d-none');
     }
+}
+function saveUserProfile() {
+    if (!currentUser) return;
+    
+    // Lấy dữ liệu người dùng gõ vào ô
+    let cNganh = $('#profChuyenNganh').val().trim();
+    let cKhoa = $('#profKhoa').val().trim();
+    let cKhoaHoc = $('#profKhoaHoc').val().trim();
+    let cNhom = $('#profNhom').val().trim();
+    
+    let btn = $('#btnSaveProfile'); 
+    let originalHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang lưu...').prop('disabled', true);
+    
+    // Đóng gói và Gửi dữ liệu về GAS
+    postToGAS({ 
+        action: "updateUserProfile", 
+        mssv: currentUser.mssv, 
+        chuyenNganh: cNganh, 
+        khoa: cKhoa, 
+        khoaHoc: cKhoaHoc, 
+        nhom: cNhom 
+    }, function(res) { 
+        alert(res); 
+        
+        // Cập nhật lại bộ nhớ trình duyệt ngay lập tức
+        currentUser.chuyenNganh = cNganh;
+        currentUser.khoa = cKhoa;
+        currentUser.khoaHoc = cKhoaHoc;
+        currentUser.nhom = cNhom;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        btn.html(originalHtml).prop('disabled', false); 
+    }, function() { 
+        alert("Lỗi kết nối máy chủ! Không thể lưu hồ sơ."); 
+        btn.html(originalHtml).prop('disabled', false); 
+    });
 }

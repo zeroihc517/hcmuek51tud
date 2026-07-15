@@ -6,8 +6,15 @@
             postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
                 let response = typeof res === 'string' ? JSON.parse(res) : res;
                 if (response.success) {
-                   currentUser = { mssv: response.mssv, name: response.name };
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                   currentUser = { 
+    mssv: response.mssv, 
+    name: response.name,
+    chuyenNganh: response.chuyenNganh,
+    khoa: response.khoa,
+    khoaHoc: response.khoaHoc,
+    nhom: response.nhom
+};
+localStorage.setItem('currentUser', JSON.stringify(currentUser));
                     
                     let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
                     savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
@@ -210,3 +217,21 @@ $(document).ready(function() {
     // 2. Kích hoạt theo dõi hoạt động
     initInactivityTracker();
 });
+function loadProfileView() {
+    document.title = "Hồ sơ cá nhân | Học nhóm Năm 2 Khoa Toán";
+    resetNavActive();
+    
+    // Đóng dropdown popover nếu đang mở
+    let dropdownMenu = document.querySelector('#sidebarUserInfo .dropdown-menu');
+    if(dropdownMenu) {
+        dropdownMenu.classList.remove('show');
+    }
+    
+    $('#profileSection').removeClass('d-none');
+    
+    // Đóng sidebar nếu đang trên điện thoại
+    if(window.innerWidth < 992) { 
+        sidebar.classList.remove('show'); 
+        overlay.classList.remove('show'); 
+    }
+}
