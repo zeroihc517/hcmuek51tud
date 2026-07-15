@@ -64,17 +64,38 @@ function openQASection() {
     else { $('#txtMSSV').val('').prop('readonly', false).css({ 'background-color': '#ffffff', 'cursor': 'text' }); }
     loadQAData(); 
 }
-       function sendQuestion() {
+      function sendQuestion() {
     let mssvValue = currentUser ? currentUser.mssv : $('#txtMSSV').val().trim(); 
-    let qText = "";
     
-    // Kiểm tra xem đang ở chế độ nào
+    // 1. XỬ LÝ LẤY CHỦ ĐỀ VÀ KIỂM TRA
+    let topicVal = $('#qaTopic').val();
+    let topicOther = $('#qaTopicOther').val().trim();
+    let finalTopic = "";
+    
+    if (!topicVal) { 
+        alert("Vui lòng chọn chủ đề cho câu hỏi của bạn!"); 
+        $('#qaTopic').focus(); 
+        return; 
+    }
+    
+    if (topicVal === 'Khác') {
+        if (!topicOther) { 
+            alert("Bạn đã chọn 'Khác', vui lòng ghi rõ chủ đề của bạn!"); 
+            $('#qaTopicOther').focus(); 
+            return; 
+        }
+        finalTopic = topicOther;
+    } else {
+        finalTopic = topicVal;
+    }
+
+    // 2. XỬ LÝ LẤY NỘI DUNG CODE HOẶC TEXT
+    let qText = "";
     let mode = $('input[name="inputType"]:checked').val();
     if (mode === 'code') {
         let rawCode = codeEditor.getValue().trim();
         let lang = $('#codeLanguage').val() === 'c_cpp' ? 'cpp' : 'python';
         if (rawCode !== "") {
-            // Tự động bọc code Markdown
             qText = "```" + lang + "\n" + rawCode + "\n```"; 
         }
     } else {
@@ -84,13 +105,21 @@ function openQASection() {
     if (!mssvValue) { alert("Vui lòng nhập mã số sinh viên hoặc email liên hệ!"); $('#txtMSSV').focus(); return; } 
     if (!qText) { alert("Vui lòng nhập nội dung câu hỏi!"); return; }
     
+    // 3. ĐÓNG GÓI CHỦ ĐỀ VÀO TRONG CÂU HỎI (Áp dụng màu sắc chuẩn của web)
+    let finalPayload = `<span class="badge mb-2 shadow-sm" style="background-color: #f1f5f9; color: #475569; font-size: 12.5px; border: 1px solid #e2e8f0;"><i class="fa-solid fa-tag me-1" style="color: #0f4c81;"></i> ${finalTopic}</span>\n\n${qText}`;
+    
     let btn = $('#btnSubmitQ'); 
     btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
     
-    postToGAS({ action: "submitQuestion", mssv: mssvValue, question: qText }, function(response) { 
+    postToGAS({ action: "submitQuestion", mssv: mssvValue, question: finalPayload }, function(response) { 
         alert(response); 
+        
+        // Reset sạch sẽ form sau khi gửi thành công
         $('#txtQuestion').val(''); 
-        codeEditor.setValue(''); // Xóa trắng khung code sau khi gửi
+        $('#qaTopic').val(''); 
+        $('#qaTopicOther').addClass('d-none').val('');
+        if (typeof codeEditor !== 'undefined') codeEditor.setValue(''); 
+        
         btn.html('<i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi').prop('disabled', false); 
         loadQAData(); 
         checkNewQA(); 
@@ -121,18 +150,29 @@ function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) re
             if (timeMatch) {
                 let timeStr = timeMatch[1]; // Lấy chuỗi thời gian
                 timeHtml = `<span class="text-muted ms-2" style="font-size: 12.5px; font-weight: normal;"><i class="fa-regular fa-clock"></i> ${timeStr}</span>`;
-                // Cắt bỏ phần thời gian ra khỏi chuỗi ban đầu để xử lý MSSV và Nội dung
-                svTextRaw = svTextRaw.replace(/^\(.*\)\n/, "").trim();
+svTextRaw = svTextRaw.replace(timeMatch[0], '').trim();
             }
             
-            if (svTextRaw.includes(":::")) {
-                let splitData = svTextRaw.split(":::"); 
-                let rawMssv = splitData[0].trim(); 
-                let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
-                svName = "Sinh viên (" + displayMssv + ")"; 
-                svMsg = splitData.slice(1).join(":::").trim();
-            }
-            
+if (svTextRaw.includes(":::")) {
+    let splitData = svTextRaw.split(":::");
+    let rawMssv = splitData[0].trim();
+    let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
+    svName = "Sinh viên (" + displayMssv + ")";
+
+    // Xử lý mới: Tách thời gian và nội dung ra riêng biệt
+    if (splitData.length >= 3) {
+        // Lấy chuỗi thời gian được kẹp ở giữa
+        let timeStr = splitData[1].trim();
+        // Gán thời gian vào UI để hiển thị gọn gàng cạnh tên người gửi
+        timeHtml = `<span class="text-muted ms-2" style="font-size: 12.5px; font-weight: normal;"><i class="fa-regular fa-clock"></i> ${timeStr}</span>`;
+
+        // Chỉ lấy nội dung tin nhắn (từ phần tử thứ 2 trở đi)
+        svMsg = splitData.slice(2).join(":::").trim();
+    } else {
+        // Dành cho các tin nhắn phiên bản cũ chỉ có [MSSV:::Nội dung]
+        svMsg = splitData.slice(1).join(":::").trim();
+    }
+}
             let svFormattedMsg = formatCodeBlocks(svMsg).replace(/(?:\r\n|\r|\n)(?!(?:[^<]*<\/pre>))/g, '<br>'); 
             
             html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>${svName}</strong>${timeHtml}:<br>${svFormattedMsg}`; 
@@ -783,4 +823,12 @@ function silentCheckNewQA() {
             window.thongBaoDataLength = data.length;
         }
     });
+}
+function toggleQaTopicOther() {
+    let selected = $('#qaTopic').val();
+    if (selected === 'Khác') {
+        $('#qaTopicOther').removeClass('d-none').focus();
+    } else {
+        $('#qaTopicOther').addClass('d-none').val('');
+    }
 }

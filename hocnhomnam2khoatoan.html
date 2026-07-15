@@ -549,11 +549,32 @@
 
                 <div class="instructor-card border-start-0" style="border-top: 4px solid var(--primary-color);">
                     <h6 class="mb-3">Đặt câu hỏi cho Admin</h6>
-                    <div class="row mb-3">
-                        <div class="col-12 col-md-4">
-                            <input type="text" id="txtMSSV" class="form-control p-2.5 fw-bold" placeholder="Nhập mã số sinh viên/email" maxlength="65">
-                        </div>
-                    </div>
+                    <div class="row mb-3 align-items-end">
+    <!-- Cột chứa MSSV (Chiếm 4 phần trên PC) -->
+    <div class="col-12 col-md-4 mb-3 mb-md-0">
+        <label class="form-label fw-bold" style="font-size: 14.5px; color: #475569;"><i class="fa-solid fa-id-card me-1"></i> MSSV / Email</label>
+        <input type="text" id="txtMSSV" class="form-control p-2.5 fw-bold" placeholder="Nhập mã số sinh viên/email" maxlength="65" style="border-radius: 8px; border-color: #cbd5e1;">
+    </div>
+    
+    <!-- Cột chứa Chọn Chủ Đề (Chiếm 8 phần còn lại trên PC) -->
+    <div class="col-12 col-md-8">
+        <label class="form-label fw-bold text-primary" style="font-size: 14.5px;"><i class="fa-solid fa-tags me-1"></i> Chủ đề câu hỏi</label>
+        <select id="qaTopic" class="form-select p-2.5 fw-bold" style="border-radius: 8px; border-color: #cbd5e1; color: #334155;" onchange="toggleQaTopicOther()">
+            <option value="">-- Chọn chủ đề của bạn --</option>
+            <option value="Hình học vi phân">Hình học vi phân</option>
+            <option value="Cấu trúc đại số và ứng dụng">Cấu trúc đại số và ứng dụng</option>
+            <option value="Đăng ký học phần">Đăng ký học phần</option>
+            <option value="Chương trình đào tạo">Chương trình đào tạo</option>
+            <option value="Tốt nghiệp">Tốt nghiệp</option>
+            <option value="Kết quả học tập">Kết quả học tập</option>
+            <option value="Kết quả rèn luyện">Kết quả rèn luyện</option>
+            <option value="Sự kiện">Sự kiện</option>
+            <option value="Khác">Khác (Vui lòng ghi rõ)</option>
+        </select>
+        <!-- Ô nhập text ẩn -->
+        <input type="text" id="qaTopicOther" class="form-control p-2.5 mt-2 d-none" style="border-radius: 8px; border-color: #cbd5e1;" placeholder="Vui lòng ghi rõ chủ đề của bạn...">
+    </div>
+</div>
                     <!-- Nút chuyển đổi chế độ -->
 
 
