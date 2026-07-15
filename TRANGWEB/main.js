@@ -319,19 +319,28 @@ data.forEach((row, rowIndex) => {
     let isHeThong = c7_raw.toLowerCase().includes('hệ thống');
     let isRenLuyen = c7_raw.toLowerCase().includes('rèn luyện');
     
-    let deadlineTime = extractDeadline(c3) || extractDeadline(c7_raw);
+ // 1. Dùng cho ĐỒNG HỒ ĐẾM NGƯỢC: CHỈ quét lấy từ Nội dung (c3)
+    let deadlineTime = extractDeadline(c3);
 
-    // KIỂM TRA NGÀY Y: Nếu là Hệ thống và đã quá hạn -> Ẩn hoàn toàn (trừ Admin)
-    if (isHeThong && deadlineTime && now.getTime() > deadlineTime && !isAdmin) {
+    // 2. Dùng để ẨN THÔNG BÁO: CHỈ quét lấy từ Ghi chú (c7)
+    let hideTime = extractDeadline(c7_raw);
+
+    // KIỂM TRA ĐIỀU KIỆN ẨN: Nếu cột Ghi chú có hẹn giờ và đã lố giờ -> Ẩn hoàn toàn (trừ Admin)
+    if (hideTime && now.getTime() > hideTime && !isAdmin) {
         return; 
     }
 
-    // Dọn dẹp từ khóa Ghi chú để hiển thị ra UI cho đẹp
+    // 3. Dọn dẹp chữ "Hết hạn..." ở cột Ghi chú để giao diện sạch đẹp
+    c7 = c7.replace(/Hết hạn(?: lúc \d{1,2}:\d{2})? (?:Ngày )?\d{1,2}\/\d{1,2}\/\d{4}/ig, '').trim();
+
     if (isHeThong) {
-        c7 = c7.replace(/hệ thống/ig, '').replace(/^[:\-,\s]+/, '').trim();
+        c7 = c7.replace(/hệ thống/ig, '').trim();
     } else if (isRenLuyen) {
-        c7 = c7.replace(/rèn luyện/ig, '').replace(/^[:\-,\s]+/, '').trim();
+        c7 = c7.replace(/rèn luyện/ig, '').trim();
     }
+    
+    // Xóa các dấu câu dư thừa ở đầu và cuối chuỗi sau khi cắt chữ
+    c7 = c7.replace(/^[:\-,\s|]+/, '').replace(/[:\-,\s|]+$/, '').trim();
     
     detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew };
 
