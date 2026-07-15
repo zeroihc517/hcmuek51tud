@@ -215,23 +215,39 @@ if (svTextRaw.includes(":::")) {
             let html = ''; 
             let hasUnanswered = false;
             
-            data.forEach(row => {
-                let time = row[0] || ''; 
-                let rawMssv = row[1] || ''; 
-                let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv); 
-                let question = formatCodeBlocks(row[2] || '');
-                let answer = row[3] || ''; 
-                let upvotes = parseInt(row[4]) || 0; 
-                let downvotes = parseInt(row[5]) || 0; 
-                let rowIndex = row[6];       
-                
-                let isNew = answer.trim() === ""; 
-                if (isNew) hasUnanswered = true; 
-                let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
-                
-                html += `<div class="${itemClass}">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong></div>`;
+data.forEach(row => {
+    let time = row[0] || ''; 
+    let rawMssv = row[1] || ''; 
+    let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv); 
+    
+    // --- XỬ LÝ LỌC THẺ TAG ---
+    let rawQuestion = row[2] || '';
+    let topicBadgeHtml = '';
+    
+    // Dùng Regex để bắt thẻ <span> chứa chủ đề đã được lưu
+    let badgeRegex = /(<span class="badge[^>]*>.*?<\/span>)\s*/;
+    let match = rawQuestion.match(badgeRegex);
+    
+    if (match) {
+        // Dịch chuyển lớp css để margin cho đẹp khi đứng cạnh MSSV
+        topicBadgeHtml = match[1].replace('mb-2', 'ms-2'); 
+        rawQuestion = rawQuestion.replace(badgeRegex, ''); // Cắt bỏ tag khỏi nội dung chính
+    }
+    
+    let question = formatCodeBlocks(rawQuestion);
+    // -------------------------
+
+    let answer = row[3] || ''; 
+    let upvotes = parseInt(row[4]) || 0; 
+    let downvotes = parseInt(row[5]) || 0; 
+    let rowIndex = row[6];       
+    
+    let isNew = answer.trim() === ""; 
+    if (isNew) hasUnanswered = true; 
+    let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
+               html += `<div class="${itemClass}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong> ${topicBadgeHtml}</div>`;
                 
                 if (isAdmin) { 
                     html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`; 
@@ -832,3 +848,46 @@ function toggleQaTopicOther() {
         $('#qaTopicOther').addClass('d-none').val('');
     }
 }
+window.searchQA = function() {
+    let keyword = $('#txtSearchQA').val().toLowerCase().trim();
+    let selectedTopic = $('#filterQATopic').val().toLowerCase().trim();
+    
+    // Khai báo danh sách các chủ đề mặc định hệ thống đang có
+    const defaultTopics = [
+        "hình học vi phân", 
+        "cấu trúc đại số và ứng dụng", 
+        "đăng ký học phần", 
+        "sinh hoạt công dân/thời sự", 
+        "lịch quân sự", 
+        "sự kiện"
+    ];
+    
+    $('#qaListArea .qa-item').each(function() {
+        let fullText = $(this).text().toLowerCase();
+        
+        // Lấy chữ bên trong thẻ Tag, xóa khoảng trắng thừa ở 2 đầu
+        let topicTag = $(this).find('.qa-time .badge').text().toLowerCase().trim();
+        
+        let matchKeyword = keyword === "" || fullText.includes(keyword);
+        let matchTopic = false;
+        
+        if (selectedTopic === "") {
+            // Nếu không chọn lọc chủ đề -> Cho qua hết
+            matchTopic = true; 
+        } else if (selectedTopic === "khác") {
+            // ĐIỂM MẤU CHỐT: Nếu chọn lọc "Khác", nó sẽ kiểm tra xem cái tag hiện tại
+            // có bị TRƯỢT KHỎI danh sách mặc định hay không. Nếu trượt, tức là "Khác".
+            matchTopic = !defaultTopics.includes(topicTag);
+        } else {
+            // So sánh bình thường nếu chọn các chủ đề mặc định
+            matchTopic = topicTag.includes(selectedTopic);
+        }
+        
+        // Nếu khớp cả từ khóa và chủ đề thì hiện ra
+        if (matchKeyword && matchTopic) {
+            $(this).removeClass('d-none');
+        } else {
+            $(this).addClass('d-none');
+        }
+    });
+};
