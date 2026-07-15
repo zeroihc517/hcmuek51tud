@@ -117,18 +117,8 @@ function renderWebLinks(data) {
     let html = ''; 
 
     // TIÊM TRỰC TIẾP CÁC CARD DÀNH RIÊNG CHO ADMIN
-    if (currentUser && currentUser.mssv === "51.01.108.008") {
+  if (currentUser && currentUser.mssv === "51.01.108.008") {
         html += `
-        <div class="col mb-3">
-            <a href="https://teams.cloud.microsoft/l/team/19%3AG3AZ0si8ueyRMaXW3zI-siWOxk1cyIA9Aol3zliL8Sw1%40thread.tacv2/conversations?groupId=d88461ae-d3dd-44d2-aae0-e8d021da1e68&tenantId=b1a9fdc0-1d56-4c3d-a481-809fff8a26db" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #464eb8; background: #f8fafc;">
-                <div class="link-card-badge bg-danger shadow-sm">ADMIN ONLY</div>
-                <div class="icon-box"><i class="fa-brands fa-microsoft" style="color: #464eb8;"></i></div>
-                <div class="card-text-wrapper">
-                    <h5>MS Teams</h5>
-                    <p class="card-desc">Không gian làm việc quản trị</p>
-                </div>
-            </a>
-        </div>
         <div class="col mb-3">
             <a href="https://docs.google.com/spreadsheets/d/13bQ6y0fn8n9Ah4OKQeQ9xOVJxXXnXRLjaIxTQPx-eGo/edit?usp=sharing" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #16a34a; background: #f8fafc;">
                 <div class="link-card-badge bg-danger shadow-sm">ADMIN ONLY</div>
@@ -140,12 +130,12 @@ function renderWebLinks(data) {
             </a>
         </div>
         <div class="col mb-3">
-            <a href="https://classroom.google.com/c/ODI0MjY2NDc0OTQx?cjc=fmvongzm" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #f59e0b; background: #f8fafc;">
+            <a href="https://teams.cloud.microsoft/l/team/19%3AG3AZ0si8ueyRMaXW3zI-siWOxk1cyIA9Aol3zliL8Sw1%40thread.tacv2/conversations?groupId=d88461ae-d3dd-44d2-aae0-e8d021da1e68&tenantId=b1a9fdc0-1d56-4c3d-a481-809fff8a26db" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #464eb8; background: #f8fafc;">
                 <div class="link-card-badge bg-danger shadow-sm">ADMIN ONLY</div>
-                <div class="icon-box"><i class="fa-solid fa-chalkboard-user" style="color: #f59e0b;"></i></div>
+                <div class="icon-box"><i class="fa-brands fa-microsoft" style="color: #464eb8;"></i></div>
                 <div class="card-text-wrapper">
-                    <h5>Google Classroom</h5>
-                    <p class="card-desc">Lớp học trực tuyến</p>
+                    <h5>MS Teams</h5>
+                    <p class="card-desc">Không gian làm việc quản trị</p>
                 </div>
             </a>
         </div>`;
