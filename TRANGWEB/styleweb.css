@@ -1935,3 +1935,56 @@ body.dark-mode .card-sharecode-time {
     border: 1px solid #dc2626;
     /* Đã xóa pointer-events để cho phép click lại */
 }
+/* ==========================================
+   CSS DÀNH RIÊNG CHO BẢNG TRONG CHI TIẾT THÔNG BÁO (BẢN FIX LỖI)
+   ========================================== */
+.tb-detail-main-content table {
+    border-collapse: collapse;
+    margin: 16px 0;
+    width: 100%;
+}
+
+/* Kẻ viền cho các ô bảng */
+.tb-detail-main-content table th,
+.tb-detail-main-content table td {
+    border: 1px solid #cbd5e1;
+    padding: 12px 16px;
+    vertical-align: middle;
+}
+
+/* XÓA VIỀN VÀ NỀN CỦA NHỮNG Ô TRỐNG (Khắc phục mấy hộp chữ nhật rỗng ở cuối) */
+.tb-detail-main-content table td:empty,
+.tb-detail-main-content table tr:empty {
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+/* KHÔNG kẻ viền cho các bảng layout ẩn do dán từ Word (có thuộc tính border="0") */
+.tb-detail-main-content table[border="0"] th,
+.tb-detail-main-content table[border="0"] td {
+    border: none !important;
+    padding: 0;
+}
+
+/* Làm nổi bật tiêu đề bảng */
+.tb-detail-main-content table th {
+    background-color: #f1f5f9;
+    color: #1e293b;
+    font-weight: 700;
+    text-align: center;
+}
+
+.tb-detail-main-content table td p {
+    margin: 0; 
+}
+
+/* Đồng bộ Dark Mode */
+body.dark-mode .tb-detail-main-content table:not([border="0"]) th,
+body.dark-mode .tb-detail-main-content table:not([border="0"]) td {
+    border-color: #334155 !important;
+}
+body.dark-mode .tb-detail-main-content table th {
+    background-color: #1e293b !important;
+    color: #f8fafc;
+}
