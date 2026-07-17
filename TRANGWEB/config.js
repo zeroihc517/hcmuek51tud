@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwLzgaZj5McZDMPkfhxmhgohS_PBnus6GB1Zo_p8DlEHWo9QUBIT6V5weD5oo-dzCLG/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzvY3U5SQVj0fhUkCFskmHyk9pwOH8vc6idOztgQBNv7hHpMUHe8Yg08GaFtoDpkZWq/exec'; 
 
      let isAdmin = localStorage.getItem('isAdmin') === 'true';
         let currentSheetName = "";
@@ -207,6 +207,7 @@ $(document).on('focusin', function(e) {
 $(document).ready(function() {
     tinymce.init({
         selector: '#txtCol3, #insertCol3, #editCol3', 
+	entity_encoding: 'raw',
         plugins: 'table lists link advlist', 
         
         // NHÌN DÒNG NÀY NHÉ: Em đã thêm chữ "lineheight" vào cạnh chữ fontsize
