@@ -194,13 +194,20 @@ function saveUserProfile() {
         btn.html(originalHtml).prop('disabled', false); 
     });
 }
+// Fix lỗi không click được bảng màu/font chữ của TinyMCE khi nằm trong Modal Sửa của Bootstrap
+$(document).on('focusin', function(e) {
+    if ($(e.target).closest(".tox-tinymce, .tox-tinymce-aux, .moxman-window, .tam-assetmanager-root").length) {
+        e.stopImmediatePropagation();
+    }
+});
+
 $(document).ready(function() {
     tinymce.init({
         selector: '#txtCol3, #insertCol3, #editCol3', 
-        plugins: 'table lists link textcolor colorpicker',
-        toolbar: 'undo redo | formatselect fontfamily fontsize | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | table | bullist numlist',
+        plugins: 'table lists link advlist', // Đã cập nhật đúng tên plugin của bản mới
+        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | table | bullist numlist | link',
         menubar: false,
-        height: 300,
+        height: 350,
         branding: false,
         setup: function (editor) {
             editor.on('change', function () {

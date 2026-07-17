@@ -488,7 +488,10 @@ if (detailDeadlineTime) {
                        // Xử lý xuống dòng và tự động chuyển đổi [IMG] thành hình ảnh (kèm hiệu ứng bo góc, đổ bóng mượt mà)
 // Xử lý xuống dòng
 // Xử lý xuống dòng
-let processedContent = data.c3.replace(/\n/g, '<br>');
+let processedContent = data.c3;
+if (!/(<p>|<table>|<br>|<br\s*\/>)/i.test(processedContent)) {
+    processedContent = processedContent.replace(/\n/g, '<br>');
+}
 
 // 1. Tự động nhận diện Link thành chữ gạch chân (Bảo vệ an toàn cho cú pháp [IMG])
 processedContent = processedContent.replace(/(\[IMG(?:=.*?)?\].*?\[\/IMG\])|(https?:\/\/[^\s<]+)/gi, function(match, isImg, isUrl) {
