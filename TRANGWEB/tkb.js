@@ -120,7 +120,7 @@ function savePersonalDeadline() {
         return; 
     }
     
-    let autoDuration = "Từ " + startDate + " đến " + endDate;
+   let autoDuration = (startDate === endDate) ? startDate : "Từ " + startDate + " đến " + endDate;
     let isEditMode = (rowIndex !== null && rowIndex !== '');
 
     // Đã sửa lại payload để gọi đúng action xử lý Deadline
