@@ -194,18 +194,27 @@ function saveUserProfile() {
         btn.html(originalHtml).prop('disabled', false); 
     });
 }
-// Fix lỗi không click được bảng màu/font chữ của TinyMCE khi nằm trong Modal Sửa của Bootstrap
+// --- BẮT ĐẦU ĐOẠN CODE CẦN DÁN VÀO CUỐI FILE config.js ---
+
+// 1. Đoạn này giúp sửa lỗi không bấm được vào menu xổ xuống khi dùng TinyMCE trong bảng nhỏ (Modal)
 $(document).on('focusin', function(e) {
     if ($(e.target).closest(".tox-tinymce, .tox-tinymce-aux, .moxman-window, .tam-assetmanager-root").length) {
         e.stopImmediatePropagation();
     }
 });
 
+// 2. Đoạn cài đặt khung soạn thảo
 $(document).ready(function() {
     tinymce.init({
         selector: '#txtCol3, #insertCol3, #editCol3', 
-        plugins: 'table lists link advlist', // Đã cập nhật đúng tên plugin của bản mới
-        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | table | bullist numlist | link',
+        plugins: 'table lists link advlist', 
+        
+        // NHÌN DÒNG NÀY NHÉ: Em đã thêm chữ "lineheight" vào cạnh chữ fontsize
+        toolbar: 'undo redo | blocks fontfamily fontsize lineheight | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | table | bullist numlist | link',
+        toolbar_mode: 'wrap', 
+        // NHÌN DÒNG NÀY NHÉ: Đây là chỗ khai báo các mức khoảng cách dòng cho menu
+        line_height_formats: '1 1.15 1.2 1.5 1.8 2.0 2.5 3.0',
+        
         menubar: false,
         height: 350,
         branding: false,
@@ -216,3 +225,5 @@ $(document).ready(function() {
         }
     });
 });
+
+// --- KẾT THÚC ĐOẠN CODE ---
