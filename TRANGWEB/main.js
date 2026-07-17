@@ -1441,7 +1441,7 @@ function setGpaMajorFilter(filterType) {
 function extractDeadline(text) {
     if (!text) return null;
     // Tìm kiếm chuỗi "Hết hạn lúc HH:MM Ngày DD/MM/YYYY" (Có thể khuyết giờ)
-    let match = text.match(/Hết hạn(?: lúc (\d{1,2}:\d{2}))? (?:Ngày )?(\d{1,2}\/\d{1,2}\/\d{4})/i);
+    let match = text.match(/DEADLINE(?: = (\d{1,2}:\d{2}))? (?:Ngày )?(\d{1,2}\/\d{1,2}\/\d{4})/i);
     if (match) {
         let timeStr = match[1] || "23:59"; // Mặc định 23:59 nếu thầy cô không ghi giờ
         let dateStr = match[2];
