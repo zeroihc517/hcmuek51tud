@@ -95,6 +95,7 @@ function openChangePasswordModal() {
             let pass = $('#txtAdminPass').val();
             if (pass === "#226244bc#TBC") {
                 isAdmin = true; $('#adminLoginModal').modal('hide');
+		localStorage.setItem('isAdmin', 'true');
                // Thay đổi thành đoạn này
 $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
                 $('#btnManageCategories').removeClass('d-none');
@@ -106,23 +107,33 @@ $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style=
             } else { $('#adminLoginError').removeClass('d-none'); }
         }
 
-        function openAdminModal() {
-            if (isAdmin) {
-                if (confirm("Bạn có muốn đăng xuất quyền Admin?")) {
-                    isAdmin = false; // Thay đổi thành đoạn này
-$('#btnAdminLoginToggle').html('<i class="fa-solid fa-user-shield text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Dành cho bản quản trị').css('color', '#e61d4a');
-                    $('#btnManageCategories').addClass('d-none');
-                    renderSidebarCategories(); 
-		if (!currentUser || currentUser.mssv !== "51.01.108.008") {
-                $('#adminDatabaseLink').addClass('d-none');
-            }
-                    if (currentSheetName.toLowerCase() === 'users') { loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
-                    } else if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); }
-		   
-                    if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
-                }
-            } else { $('#adminLoginError').addClass('d-none'); $('#txtAdminPass').val(''); $('#adminLoginModal').modal('show'); }
+function openAdminModal() {
+    if (isAdmin) {
+        // Xóa hoàn toàn lệnh if(confirm(...)) và để code thực thi luôn
+        isAdmin = false; 
+        localStorage.removeItem('isAdmin'); // Xóa quyền Admin khỏi trình duyệt
+        
+        // Cập nhật lại giao diện nút đăng xuất/đăng nhập
+        $('#btnAdminLoginToggle').html('<i class="fa-solid fa-user-shield text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Dành cho bản quản trị').css('color', '#e61d4a');
+        $('#btnManageCategories').addClass('d-none');
+        
+        renderSidebarCategories(); 
+        
+        if (!currentUser || currentUser.mssv !== "51.01.108.008") {
+            $('#adminDatabaseLink').addClass('d-none');
         }
+        
+        // Tự động chuyển về trang thông báo và reload lại dữ liệu để ẩn các nút Admin
+        loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
+        if (!$('#qaSection').hasClass('d-none')) { loadQAData(); }
+        
+        alert("Đã đăng xuất quyền Admin!"); // Bạn có thể bỏ dòng alert này luôn nếu muốn "âm thầm" đăng xuất
+    } else { 
+        $('#adminLoginError').addClass('d-none'); 
+        $('#txtAdminPass').val(''); 
+        $('#adminLoginModal').modal('show'); 
+    }
+}
 
  function renderSavedAccounts() {
             let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || []; let container = $('#savedAccountsContainer');

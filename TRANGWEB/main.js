@@ -757,6 +757,13 @@ setInterval(function() {
         $('#adminDatabaseLink').addClass('d-none');
     }
 }
+if (localStorage.getItem('isAdmin') === 'true') {
+        isAdmin = true;
+        $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
+        $('#btnManageCategories').removeClass('d-none');
+        renderSidebarCategories();
+        $('#adminDatabaseLink').removeClass('d-none');
+    }
         $(document).ready(function() {
             if (!currentUser) {
                 let authModal = new bootstrap.Modal(document.getElementById('userAuthModal'), { backdrop: 'static', keyboard: false });

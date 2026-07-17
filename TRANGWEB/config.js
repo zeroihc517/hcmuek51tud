@@ -1,6 +1,6 @@
  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby0H7mgMiRV5U7TmqemThegGRUX0VSJANq9TZopi3F1rD6vnM9LCXgzUBwR7G1k5ZXG/exec'; 
 
-        let isAdmin = false;
+     let isAdmin = localStorage.getItem('isAdmin') === 'true';
         let currentSheetName = "";
         let currentSheetTotalRows = 0;
         window.qaThreadParts = {};
