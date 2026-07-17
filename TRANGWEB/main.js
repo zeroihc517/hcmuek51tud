@@ -1560,3 +1560,17 @@ function startAllHorizontalLedClocks() {
 $(document).ready(function() {
     startAllHorizontalLedClocks();
 });
+
+tinymce.init({
+    selector: '#txtCol3, #insertCol3, #editCol3', // Gắn trình soạn thảo vào 3 ô nhập nội dung này
+    plugins: 'table lists link textcolor colorpicker',
+    toolbar: 'undo redo | formatselect fontfamily fontsize | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | table | bullist numlist',
+    menubar: false,
+    height: 300,
+    branding: false,
+    setup: function (editor) {
+        editor.on('change', function () {
+            editor.save(); // Tự động đồng bộ nội dung vào thẻ textarea gốc khi có thay đổi
+        });
+    }
+});
