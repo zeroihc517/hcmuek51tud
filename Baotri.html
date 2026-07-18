@@ -1,162 +1,27 @@
 
-<!doctype html>
-<html lang="vi">
-<head>
-  <meta charset="utf-8" />
-<!--  <meta http-equiv="refresh" content="0;url=https://test.upcoder.xyz"> -->
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bảo trì hệ thống</title>
-  <style>
-    :root{
-      --bg: #0f172a;        /* slate-900 */
-      --card: #111827;      /* gray-900 */
-      --text: #e5e7eb;      /* gray-200 */
-      --muted:#9ca3af;      /* gray-400 */
-      --accent:#38bdf8;     /* sky-400 */
-      --ring:#1f2937;       /* gray-800 */
-    }
-    @media (prefers-color-scheme: light){
-      :root{
-        --bg:#f1f5f9;       /* slate-100 */
-        --card:#ffffff;
-        --text:#0f172a;
-        --muted:#475569;
-        --accent:#0284c7;   /* sky-600 */
-        --ring:#e5e7eb;
-      }
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body{
-      margin:0;
-      background: radial-gradient(1200px 800px at 50% -10%, rgba(56,189,248,.18), transparent 60%) , var(--bg);
-      color: var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
-      display:flex; align-items:center; justify-content:center;
-      padding: 24px;
-    }
-    .card{
-      width: 100%;
-      max-width: 620px;
-      background: var(--card);
-      border: 1px solid var(--ring);
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      padding: 28px 28px 32px;
-      text-align: center;
-    }
-    .icon{
-      width: 84px; height: 84px; margin: 4px auto 14px;
-      display:block;
-      filter: drop-shadow(0 6px 16px rgba(2,132,199,.25));
-    }
-    .gear{ transform-origin: 50% 50%; animation: slowspin 8s linear infinite; }
-    @keyframes slowspin{ to{ transform: rotate(360deg);} }
-    h1{
-      font-size: clamp(22px, 3.4vw, 28px);
-      margin: 0 0 8px;
-      letter-spacing: .2px;
-    }
-    p{
-      color: var(--muted);
-      margin: 0;
-      font-size: clamp(14px, 2.4vw, 16px);
-      line-height: 1.6;
-    }
-    .tips{
-      margin-top: 18px;
-      font-size: 13px;
-      color: var(--muted);
-      opacity: .9;
-    }
-    .btn{
-      margin-top: 18px;
-      display:inline-block;
-      padding: 10px 16px;
-      border-radius: 12px;
-      border: 1px solid var(--ring);
-      background: linear-gradient(180deg, rgba(56,189,248,.12), rgba(56,189,248,.06));
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .btn:focus-visible{ outline: 3px solid var(--accent); outline-offset: 3px; }
-  </style>
-</head>
-<body>
-  <main class="card" role="main" aria-labelledby="maintitle">
-    <!-- Biểu tượng bảo trì: cờ lê + bánh răng -->
-    <svg class="icon" viewBox="0 0 128 128" aria-hidden="true">
-      <!-- Vòng nền -->
-      <circle cx="64" cy="64" r="48" fill="rgba(56,189,248,.10)" stroke="var(--accent)" stroke-width="2"/>
-      <!-- Bánh răng -->
-      <g class="gear" fill="none" stroke="var(--accent)" stroke-width="4">
-        <circle cx="64" cy="64" r="16"/>
-        <g>
-          <path d="M64 34 v-10"/>
-          <path d="M64 104 v10"/>
-          <path d="M34 64 h-10"/>
-          <path d="M104 64 h10"/>
-          <path d="M44 44 l-7 -7"/>
-          <path d="M91 91 l7 7"/>
-          <path d="M44 84 l-7 7"/>
-          <path d="M91 37 l7 -7"/>
-        </g>
-      </g>
-      <!-- Cờ lê -->
-      <path d="M28 90c-2 2-2 5 0 7l3 3c2 2 5 2 7 0l30-30c4 2 9 1 12-2 4-4 4-10 0-14-3-3-8-4-12-2l-30 30z"
-            fill="currentColor" style="color: var(--text); opacity:.9"/>
-    </svg>
-
-    <h1 id="maintitle">Hệ thống đang bảo trì</h1>
-    <p>Mời bạn quay lại sau. Chúng tôi đang cập nhật để phục vụ bạn tốt hơn.</p>
-
-    <!-- Tùy chọn: nút thử tải lại -->
-   <a class="btn" href="WEBDUPHONG.html" aria-label="Đến trang dự phòng">↻ Đến trang dự phòng</a>
-
-    <div class="tips" role="note">
-      Nếu cần gấp, vui lòng liên hệ bộ phận hỗ trợ hoặc thử lại sau vài phút.
-    </div>
-  </main>
+<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bảo trì hệ thống</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,sans-serif;height:100vh;overflow:hidden;background:#050816;color:#fff;display:flex;align-items:center;justify-content:center}
+.bg:before,.bg:after{content:"";position:absolute;width:45vw;height:45vw;border-radius:50%;filter:blur(90px);animation:float 12s ease-in-out infinite}
+.bg:before{background:#3b82f6;left:-10%;top:-10%}.bg:after{background:#7c3aed;right:-10%;bottom:-10%;animation-delay:-6s}
+@keyframes float{50%{transform:translateY(40px) translateX(30px) scale(1.15)}}
+.card{position:relative;z-index:2;width:min(92%,700px);padding:45px;border-radius:28px;background:rgba(255,255,255,.08);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.15);box-shadow:0 25px 70px rgba(0,0,0,.5);text-align:center}
+.card:before{content:"";position:absolute;inset:-2px;border-radius:30px;padding:2px;background:linear-gradient(90deg,#06b6d4,#8b5cf6,#06b6d4);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 5s linear infinite}
+@keyframes spin{to{filter:hue-rotate(360deg)}}
+.gear{font-size:90px;display:inline-block;animation:r 8s linear infinite;filter:drop-shadow(0 0 20px #60a5fa)}@keyframes r{to{transform:rotate(360deg)}}
+h1{font-size:42px;margin:18px 0}.sub{opacity:.8;font-size:18px;line-height:1.7}
+.count{margin:25px 0;font-size:30px;font-weight:800;color:#67e8f9}
+a{display:inline-block;padding:15px 34px;border-radius:15px;background:linear-gradient(90deg,#2563eb,#7c3aed);color:#fff;text-decoration:none;font-weight:700;transition:.3s}
+a:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 0 35px rgba(99,102,241,.6)}
+small{display:block;margin-top:20px;opacity:.65}
+canvas{position:fixed;inset:0}
+</style></head><body><canvas id=p></canvas><div class=bg></div><div class=card><div class=gear>⚙️</div><h1>Hệ thống đang bảo trì</h1><div class=sub>Chúng tôi đang nâng cấp hệ thống để mang đến trải nghiệm tốt hơn.</div><div class=count id=c></div><a href="WEBDUPHONG.html">Vui lòng quay lại sau</a><small>© 2026 Applied Mathematics</small></div>
 <script>
-    // 1. Chặn click chuột phải (Vô hiệu hóa menu ngữ cảnh)
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
 
-    });
-
-    // 2. Chặn các phím tắt mở bộ công cụ nhà phát triển và xem nguồn trang
-    document.addEventListener('keydown', function(e) {
-        // Chặn phím F12
-        if (e.key === 'F12') {
-            e.preventDefault();
-            return false;
-        }
-
-        // Chặn Ctrl + Shift + I (Mở Inspect Element)
-        if (e.ctrlKey && e.shiftKey && e.key === 'I') {
-            e.preventDefault();
-            return false;
-        }
-
-        // Chặn Ctrl + Shift + J (Mở Console)
-        if (e.ctrlKey && e.shiftKey && e.key === 'J') {
-            e.preventDefault();
-            return false;
-        }
-
-        // Chặn Ctrl + U (Xem nguồn trang - View Source)
-        if (e.ctrlKey && e.key === 'u') {
-            e.preventDefault();
-            return false;
-        }
-
-        // Chặn Ctrl + S (Tránh lưu trang web về máy)
-        if (e.ctrlKey && e.key === 's') {
-            e.preventDefault();
-            return false;
-        }
-    });
-</script>
-</body>
-</html>
+const cv=document.getElementById('p'),x=cv.getContext('2d');function rs(){cv.width=innerWidth;cv.height=innerHeight}rs();onresize=rs;
+let pts=[...Array(120)].map(()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,v:(Math.random()*1+.2)}));
+(function a(){x.clearRect(0,0,cv.width,cv.height);x.fillStyle="rgba(255,255,255,.7)";
+pts.forEach(o=>{o.y+=o.v;if(o.y>cv.height){o.y=0;o.x=Math.random()*cv.width}x.beginPath();x.arc(o.x,o.y,1.5,0,7);x.fill();});requestAnimationFrame(a)})();
+</script></body></html>
