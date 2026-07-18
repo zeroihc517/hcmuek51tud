@@ -669,39 +669,7 @@ if (isSpecialExam) {
 }
                 // Định dạng hàng (màu sắc, icon)
                // 1. Nhận diện trạng thái "Mới" gốc từ Cột 1 (STT / Trạng thái)
-let isNewRow = /^new$/i.test(firstCellTextRaw) || firstCellTextRaw.toLowerCase().includes('new');
-
-// 2. Kích hoạt bộ lọc thời gian nếu hàng này đang có chữ "Mới"
-if (isNewRow) {
-    let c3_content = String(row[2] || '');      // Cột 3: Nội dung
-    let c4_date = String(row[3] || '').trim();  // Cột 4: Ngày đăng
-    let c7_note = String(row[6] || '');         // Cột 7: Ghi chú
-
-    let now = new Date().getTime();
-    
-    // Tìm thời gian Deadline (quét cả trong Nội dung và Ghi chú)
-    let deadlineTime = extractDeadline(c3_content) || extractDeadline(c7_note);
-
-    if (deadlineTime) {
-        // NẾU CÓ DEADLINE: Kiểm tra xem thời điểm hiện tại đã qua Deadline chưa
-        if (now > deadlineTime) {
-            isNewRow = false; // Đã quá hạn -> Xóa chữ Mới
-        }
-    } else {
-        // NẾU KHÔNG CÓ DEADLINE: Xét theo ngày đăng bài
-        let postDateMatch = c4_date.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-        if (postDateMatch) {
-            // Chuyển đổi chuỗi DD/MM/YYYY thành Object Date
-            let postDate = new Date(postDateMatch[3], postDateMatch[2] - 1, postDateMatch[1]).getTime();
-            let daysPassed = (now - postDate) / (1000 * 60 * 60 * 24); // Đổi ra số ngày
-            
-            if (daysPassed > 15) {
-                isNewRow = false; // Đăng quá 15 ngày -> Xóa chữ Mới
-            }
-        }
-    }
-}
-
+let isNewRow = false;
 // 3. Tiến hành gắn Class CSS để render giao diện
 let rowClass = 'grid-row'; let iconPrefix = '';
 if (isNewRow) { rowClass += ' row-new'; }
