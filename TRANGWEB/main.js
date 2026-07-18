@@ -595,11 +595,14 @@ $('#loadingStatus').addClass('d-none');
                 return;
             }
 
-            // ==========================================
+        // ==========================================
             // XỬ LÝ CHO CÁC HỌC PHẦN BÌNH THƯỜNG (BẢNG 7 CỘT)
             // ==========================================
             let bodyHtml = ''; let headHtml = ''; let instructorInfos = [];
             let examCardsHtml = ''; let hasExamCards = false; 
+            
+            // THÊM MỚI: Biến quản lý ID nhóm cho tính năng Thu gọn/Thả xuống
+            let currentGroupId = 0; 
 
             data.forEach((row, rowIndex) => {
                 let fullRowText = row.join(" ").toLowerCase().replace(/\s+/g, ' '); 
@@ -621,83 +624,100 @@ $('#loadingStatus').addClass('d-none');
                 }
 
                 // Trích xuất thẻ bài kiểm tra/minigame
-               // Trích xuất thẻ bài kiểm tra/minigame
-// Trích xuất thẻ bài kiểm tra/minigame
-// Trích xuất thẻ bài kiểm tra/minigame
-let isSpecialExam = /(đề thi thử|đề demo|minigame tuần|minigame hè|minigame số)/i.test(fullRowText);
-if (isSpecialExam) {
-    hasExamCards = true; 
-    let titleText = String(row[1] || row[0]).trim(); 
-    let _extRegex = /(https?:\/\/[^\s]+)/g; 
-    let extMatch = row.join(" ").match(_extRegex); 
-    let linkUrl = '#'; 
-    let imageUrl = '';   
-    
-    if (extMatch) {
-        linkUrl = extMatch[0]; 
-        if (extMatch.length > 1) {
-            imageUrl = extMatch[1];
-            if (imageUrl.includes("drive.google.com/file/d/")) {
-                let matchId = imageUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                if (matchId && matchId[1]) imageUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w400`; // Thu nhỏ dung lượng thumbnail
-            }
-        }
-    }
-    
-    // Khung chứa ảnh nhỏ gọn, chuyên trị ảnh tròn
-    let imgDisplayHtml = '';
-    if (imageUrl) {
-        imgDisplayHtml = `
-            <div class="card-minigame-img">
-                <img src="${imageUrl}">
-            </div>`;
-    } else {
-        let iconClass = fullRowText.includes("minigame") ? "fa-gamepad" : "fa-file-lines";
-        imgDisplayHtml = `
-            <div class="card-minigame-img default-icon">
-                <i class="fa-solid ${iconClass}"></i>
-            </div>`;
-    }
+                let isSpecialExam = /(đề thi thử|đề demo|minigame tuần|minigame hè|minigame số)/i.test(fullRowText);
+                if (isSpecialExam) {
+                    hasExamCards = true; 
+                    let titleText = String(row[1] || row[0]).trim(); 
+                    let _extRegex = /(https?:\/\/[^\s]+)/g; 
+                    let extMatch = row.join(" ").match(_extRegex); 
+                    let linkUrl = '#'; 
+                    let imageUrl = '';   
+                    
+                    if (extMatch) {
+                        linkUrl = extMatch[0]; 
+                        if (extMatch.length > 1) {
+                            imageUrl = extMatch[1];
+                            if (imageUrl.includes("drive.google.com/file/d/")) {
+                                let matchId = imageUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                                if (matchId && matchId[1]) imageUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w400`; 
+                            }
+                        }
+                    }
+                    
+                    let imgDisplayHtml = '';
+                    if (imageUrl) {
+                        imgDisplayHtml = `<div class="card-minigame-img"><img src="${imageUrl}"></div>`;
+                    } else {
+                        let iconClass = fullRowText.includes("minigame") ? "fa-gamepad" : "fa-file-lines";
+                        imgDisplayHtml = `<div class="card-minigame-img default-icon"><i class="fa-solid ${iconClass}"></i></div>`;
+                    }
 
-    // Thẻ Minigame khôi phục lại viền đỏ bo tròn
-    examCardsHtml += `
-        <a href="${linkUrl}" target="_blank" class="card-minigame-box" title="${titleText}">
-            ${imgDisplayHtml}
-            <div class="card-minigame-title">${titleText}</div>
-        </a>`;
-    return; 
-}
-                // Định dạng hàng (màu sắc, icon)
-               // 1. Nhận diện trạng thái "Mới" gốc từ Cột 1 (STT / Trạng thái)
-let isNewRow = false;
-// 3. Tiến hành gắn Class CSS để render giao diện
-let rowClass = 'grid-row'; let iconPrefix = '';
-if (isNewRow) { rowClass += ' row-new'; }
+                    examCardsHtml += `
+                        <a href="${linkUrl}" target="_blank" class="card-minigame-box" title="${titleText}">
+                            ${imgDisplayHtml}
+                            <div class="card-minigame-title">${titleText}</div>
+                        </a>`;
+                    return; 
+                }
+
+                // Nhận diện trạng thái "Mới"
+                let isNewRow = false;
+                let rowClass = 'grid-row'; let iconPrefix = '';
+                
+                // THÊM MỚI: Biến cờ hiệu nhận diện dòng Tiêu đề nhóm (Chủ đề / Bài)
+                let isHeaderRow = false;
+
+                if (isNewRow) { rowClass += ' row-new'; }
                 else if (/ngânhàng/.test(fullRowText.replace(/\s+/g, ''))) { rowClass += ' row-white'; iconPrefix = '<i class="fa-solid fa-box-archive me-2 text-secondary"></i>'; } 
                 else if (/bàithi|kiểmtra|đềthi|lịchthi|phòngthi/.test(fullRowText.replace(/\s+/g, '')) || row.join(" ").toLowerCase().includes(' thi ')) { rowClass += ' row-exam'; iconPrefix = '<i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>'; } 
-                else if (/chủđề|chương/.test(firstCellText)) { rowClass += ' row-topic'; } 
-                else if (/bài/.test(firstCellText)) { rowClass += ' row-lesson'; iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; }
+                else if (/chủđề|chương/.test(firstCellText)) { 
+                    rowClass += ' row-topic'; 
+                    isHeaderRow = true;
+                    currentGroupId++; // Tạo ID mới cho nhóm
+                } 
+                else if (/bài/.test(firstCellText)) { 
+                    rowClass += ' row-lesson'; 
+                    iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; 
+                    isHeaderRow = true;
+                    currentGroupId++; // Tạo ID mới cho nhóm
+                }
                 
-                bodyHtml += `<tr class="${rowClass}">`;
+                let sheetRowIndex = rowIndex + 1;
+                let dragAttr = isAdmin ? ` draggable="true" ondragstart="handleDragStart(event, ${sheetRowIndex})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndex}, '${currentSheetName}')" style="cursor: grab;"` : '';
+                
+                // THÊM MỚI: Gắn Class child cho các dòng dữ liệu con, và gán sự kiện Click cho dòng tiêu đề
+                let childClass = (!isHeaderRow && currentGroupId > 0) ? ` group-child-${currentGroupId}` : '';
+                let clickEvent = isHeaderRow ? ` onclick="toggleCourseGroup(${currentGroupId}, this)" style="cursor: pointer;" title="Bấm để thu gọn/mở rộng"` : '';
+
+                bodyHtml += `<tr class="${rowClass}${childClass}"${clickEvent}${dragAttr}>`;
+                
                 row.forEach((cell, cellIndex) => {
                     let cellText = String(cell).trim();
                     if (cellIndex === 0 && isNewRow) cellText = cellText.replace(/new/i, '<span class="badge-new">Mới</span>');
+                    
+                    // THÊM MỚI: Mũi tên xổ xuống (Chevron) nằm ở Cột 2 (cạnh Tiêu đề)
+                    let chevronHtml = '';
+                    if (isHeaderRow && cellIndex === 1) {
+                        chevronHtml = `<button class="btn-expand ms-2" style="background: transparent; border: none; padding: 0; width: 24px; height: 24px; color: inherit; pointer-events: none;"><i class="fa-solid fa-chevron-down" style="transition: transform 0.3s ease;"></i></button>`;
+                    }
+
                     let _urlRegex = /(https?:\/\/[^\s]+)/g; let _match = cellText.match(_urlRegex); let extractedUrl = _match ? _match[0] : null;
                     if (extractedUrl) { 
                         let label = cellText.replace(extractedUrl, '').trim() || "Truy cập"; 
-                        bodyHtml += `<td><a href="${extractedUrl}" target="_blank" class="btn-portal-action"><i class="fa-solid fa-cloud-arrow-down"></i> ${label}</a></td>`; 
+                        bodyHtml += `<td><a href="${extractedUrl}" target="_blank" class="btn-portal-action" onclick="event.stopPropagation();"><i class="fa-solid fa-cloud-arrow-down"></i> ${label}</a></td>`; 
                     } else { 
                         if (cellText === "") bodyHtml += `<td></td>`; 
-                        else bodyHtml += `<td>${cellIndex === 0 && !isNewRow ? iconPrefix + cellText : cellText}</td>`; 
+                        else bodyHtml += `<td>${cellIndex === 0 && !isNewRow ? iconPrefix + cellText : cellText} ${chevronHtml}</td>`; 
                     }
                 });
 
                 // Render nút Admin
                 if (isAdmin) {
-                    let sheetRowIndex = rowIndex + 1; 
-                  let escapedCells = row.map(c => String(c || '').replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, ""));
-                    while(escapedCells.length < 7) escapedCells.push(''); // Đảm bảo đủ 7 cột
-                    bodyHtml += `<td><div class="d-flex flex-wrap gap-1">
+                    let escapedCells = row.map(c => String(c || '').replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, ""));
+                    while(escapedCells.length < 7) escapedCells.push(''); 
+                    
+                    // Chặn sự kiện click (stopPropagation) để khi Admin bấm thao tác Sửa/Xóa thì bảng không bị thu gọn
+                    bodyHtml += `<td onclick="event.stopPropagation();"><div class="d-flex flex-wrap gap-1">
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
                         <button class="btn btn-sm btn-outline-success py-1 px-2" title="Chèn" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button>
@@ -707,6 +727,7 @@ if (isNewRow) { rowClass += ' row-new'; }
                 } 
                 bodyHtml += '</tr>';
             });
+                      
 
             // Gắn dữ liệu vào DOM
             if (hasExamCards) $('#examCardsContainer').html(examCardsHtml).removeClass('d-none');
@@ -2203,3 +2224,90 @@ function deleteMasterTkbRow(rowIndex) {
         fetchAdminMasterTkb();
     });
 }
+// Bật cấu hình chống lưu Cache cục bộ. Điều này đảm bảo sau khi bạn thả chuột,
+// dữ liệu bảng sẽ được tải lại mới hoàn toàn từ Google Sheets, không bị "kẹt" lại giao diện cũ.
+$.ajaxSetup({ cache: false });
+
+let dragSourceIndex = -1;
+
+window.handleDragStart = function(e, index) {
+    dragSourceIndex = index;
+    e.dataTransfer.effectAllowed = 'move';
+    
+    // Lệnh BẮT BUỘC: Khai báo dữ liệu để trình duyệt kích hoạt chế độ Kéo-Thả (Drag & Drop)
+    e.dataTransfer.setData('text/plain', index);
+    
+    // Dùng setTimeout để tránh lỗi giật hình (flicker) trên UI khi vừa click chuột
+    setTimeout(() => {
+        $(e.target).closest('tr').css('opacity', '0.4');
+    }, 0);
+};
+
+window.handleDragOver = function(e) {
+    // Lệnh BẮT BUỘC: Hủy hành vi mặc định để hệ thống cho phép "Thả" (Drop) vào khu vực này
+    e.preventDefault(); 
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+};
+
+window.handleDragEnter = function(e) {
+    e.preventDefault();
+    let tr = $(e.target).closest('tr');
+    tr.css('border-top', '3px solid var(--accent-red)'); // Vạch đỏ báo hiệu vị trí sẽ chèn vào
+};
+
+window.handleDragLeave = function(e) {
+    let tr = $(e.target).closest('tr');
+    tr.css('border-top', ''); // Gỡ vạch đỏ khi kéo chuột rời đi
+};
+
+window.handleDrop = function(e, targetIndex, sheetName) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    let tr = $(e.target).closest('tr');
+    tr.css('border-top', '');
+    $('.grid-row').css('opacity', '1');
+
+    // Bỏ qua nếu thả lại đúng vị trí ban đầu
+    if (dragSourceIndex === -1 || dragSourceIndex === targetIndex) return;
+    
+    $('#loadingStatus').removeClass('d-none');
+    $('#tableWrapper').addClass('d-none');
+
+    // Gọi API xử lý trên Google Apps Script
+    postToGAS({
+        action: "dragDropSheetRow",
+        sheetName: sheetName,
+        fromIndex: dragSourceIndex,
+        toIndex: targetIndex
+    }, function(res) {
+        // Tải lại bảng ngay sau khi có phản hồi
+        loadDataByHocPhan(sheetName);
+    }, function() {
+        alert("Lỗi khi kéo thả di chuyển!");
+        loadDataByHocPhan(sheetName);
+    });
+};
+
+// Sự kiện phòng hờ: Khôi phục mọi hiệu ứng UI nếu người dùng kéo ra ngoài web rồi nhả chuột
+document.addEventListener("dragend", function(e) {
+    $('.grid-row').css('opacity', '1');
+    $('.grid-row').css('border-top', '');
+});
+// HÀM ĐIỀU KHIỂN THU GỌN / MỞ RỘNG NHÓM CHƯƠNG BÀI
+window.toggleCourseGroup = function(groupId, rowElement) {
+    let childRows = $(`.group-child-${groupId}`);
+    let chevronIcon = $(rowElement).find('.fa-chevron-down');
+    
+    // Chuyển đổi trạng thái ẩn/hiện của các hàng dữ liệu con
+    if (childRows.first().hasClass('d-none')) {
+        childRows.removeClass('d-none');
+        // Quay mũi tên xuống
+        chevronIcon.css('transform', 'rotate(0deg)');
+    } else {
+        childRows.addClass('d-none');
+        // Quay mũi tên sang phải (đóng lại)
+        chevronIcon.css('transform', 'rotate(-90deg)');
+    }
+};
