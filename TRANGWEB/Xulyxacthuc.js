@@ -38,9 +38,15 @@ localStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
 
 function logoutStudent() {
-    // Xóa ngay dữ liệu và tải lại trang, không cần hỏi
+    // Xóa dữ liệu phiên đăng nhập sinh viên
     localStorage.removeItem('currentUser');
     currentUser = null; 
+    
+    // Bổ sung: Xóa luôn quyền Ban quản trị (Admin)
+    localStorage.removeItem('isAdmin');
+    isAdmin = false;
+    
+    // Tải lại trang
     location.reload(); 
 }
 

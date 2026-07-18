@@ -1741,13 +1741,13 @@ function renderAdminUserDetail(mssv, data) {
         );
         return;
     }
-
-    // ========================================================
+// ========================================================
     // BƯỚC 1: Đồng bộ dữ liệu của Sinh viên vào biến toàn cục 
     // để các Form Sửa gốc của hệ thống có thể hiển thị đúng dữ liệu
     // ========================================================
     if (data.tkb) {
-        window.globalTkbData = data.tkb.map(function(row) {
+        // Đã xóa chữ "window." ở đây
+        globalTkbData = data.tkb.map(function(row) {
             return {
                 thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
                 thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: row[5] || "", phong: row[6] || "",
@@ -1758,7 +1758,8 @@ function renderAdminUserDetail(mssv, data) {
     }
 
     if (data.deadlines) {
-        window.globalDeadlineData = data.deadlines.map(function(row) {
+        // Đã xóa chữ "window." ở đây
+        globalDeadlineData = data.deadlines.map(function(row) {
             return {
                 title: row[1], duration: row[2], tag: row[3], icon: row[4], emoji: row[5],
                 dateStart: row[6] || "", dateEnd: row[7] || "", 
@@ -1936,4 +1937,282 @@ html += '        <button class="btn btn-sm btn-danger py-1 px-2 ms-1" title="Xó
     html += '</div>';
 
     area.html(html);
+}
+// 1. Tải danh sách sinh viên vào Dropdown khi mở trang Quản lý
+const originalLoadAdminManage = loadAdminUserManageView;
+loadAdminUserManageView = function() {
+    originalLoadAdminManage(); // Gọi lại UI
+    
+    // Tải danh sách sinh viên vào dropdown
+    $.ajax({
+        url: SCRIPT_URL + "?action=getAllUsers",
+        method: "GET",
+        dataType: "json",
+        success: function(users) {
+            let options = '<option value="">-- Chọn sinh viên để tra cứu --</option>';
+            users.forEach(u => options += `<option value="${u.mssv}">${u.mssv} - ${u.name}</option>`);
+            $('#adminSearchMSSV').html(options);
+        }
+    });
+};
+
+// 2. Render Dữ liệu Hồ Sơ (Profile) & Sửa lỗi nút Sửa[cite: 2]
+const originalRenderAdminUserDetail = renderAdminUserDetail;
+renderAdminUserDetail = function(mssv, data) {
+    if (!data || data.error) {
+        $('#adminUserDetailArea').html(`<div class="alert alert-danger shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi: ${data.error}</div>`);
+        return;
+    }
+    
+    // TIÊM HTML HỒ SƠ LÊN TRÊN CÙNG
+    let profileHtml = '';
+    if (data.profile && data.profile.name) {
+        profileHtml = `
+        <div class="mb-4 bg-light p-3 rounded border border-danger-subtle shadow-sm">
+            <h6 class="fw-bold text-danger mb-3"><i class="fa-solid fa-address-card"></i> Hồ sơ sinh viên</h6>
+            <div class="row g-3" style="font-size: 14.5px;">
+                <div class="col-md-6"><b>Họ và tên:</b> <span class="text-primary">${data.profile.name}</span></div>
+                <div class="col-md-6"><b>Mã số sinh viên:</b> <span class="text-primary">${mssv}</span></div>
+                <div class="col-md-6"><b>Khoa:</b> <span class="text-primary">${data.profile.khoa}</span></div>
+                <div class="col-md-6"><b>Chuyên ngành:</b> <span class="text-primary">${data.profile.chuyenNganh}</span></div>
+                <div class="col-md-6"><b>Email/Khóa học:</b> <span class="text-primary">${data.profile.email}</span></div>
+                <div class="col-md-6"><b>Song ngành:</b> <span class="text-primary">${data.profile.songNganh}</span></div>
+            </div>
+        </div>`;
+    }
+
+    // Chạy render cũ (để tạo bảng TKB và Deadlines)
+    originalRenderAdminUserDetail(mssv, data);
+
+    // CHÈN PROFILE VÀ FIX LỖI NÚT SỬA DEADLINE
+    let finalHtml = $('#adminUserDetailArea').html();
+    finalHtml = profileHtml + finalHtml;
+    
+    // FIX BUG: Trong bảng Deadlines cũ, nó đang gọi adminEditTkb thay vì adminEditDeadline[cite: 2].
+    // Ta replace để sửa nhanh gọn mà không cần viết lại toàn bộ vòng lặp render
+    finalHtml = finalHtml.replace(/adminEditTkb\('SYS_/g, 'adminEditDeadline(\'SYS_'); // Fix nhầm hàm ở Deadlines
+    
+    $('#adminUserDetailArea').html(finalHtml);
+    
+    // Fix cụ thể onclick của các thẻ Deadline thủ công (không phải SYS)
+    $('#adminUserDetailArea .bg-danger').closest('table').find('tbody tr').each(function() {
+        let btnSua = $(this).find('button.btn-warning');
+        let currentOnclick = btnSua.attr('onclick');
+        if (currentOnclick && currentOnclick.includes('adminEditTkb')) {
+            btnSua.attr('onclick', currentOnclick.replace('adminEditTkb', 'adminEditDeadline'));
+        }
+    });
+};
+
+// 3. Logic Quản lý tính năng Gán Sinh Viên vào MasterTKB
+window.openAssignStudentModal = function(courseId) {
+    $('#assignCourseId').val(courseId);
+    $('#assignStudentList').html('<div class="text-muted"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu sinh viên...</div>');
+    $('#assignStudentModal').modal('show');
+    
+    // Gọi API lấy toàn bộ Users và danh sách đã được tích gán
+    $.ajax({
+        url: SCRIPT_URL + "?action=getCourseAssignees&courseId=" + encodeURIComponent(courseId),
+        method: "GET",
+        dataType: "json",
+        success: function(res) {
+            let users = res.users;
+            let assigned = res.assigned;
+            let html = '';
+            
+            users.forEach(u => {
+                // Tích ô checked sẵn cho sinh viên đã có trong lớp
+                let isChecked = assigned.includes(u.mssv) ? 'checked' : '';
+                html += `
+                <div class="col-md-6">
+                    <div class="form-check p-2 border rounded bg-light">
+                        <input class="form-check-input ms-1 cb-assign-student" type="checkbox" value="${u.mssv}" id="cb_${u.mssv}" ${isChecked}>
+                        <label class="form-check-label fw-bold ms-2" style="font-size: 14px;" for="cb_${u.mssv}">
+                            ${u.mssv} - ${u.name}
+                        </label>
+                    </div>
+                </div>`;
+            });
+            $('#assignStudentList').html(html);
+        },
+        error: function() {
+            $('#assignStudentList').html('<div class="text-danger">Lỗi kết nối khi tải danh sách!</div>');
+        }
+    });
+};
+
+window.saveAssignedStudents = function() {
+    let courseId = $('#assignCourseId').val();
+    let selectedMssv = [];
+    $('.cb-assign-student:checked').each(function() { selectedMssv.push($(this).val()); });
+    
+    postToGAS({ 
+        action: "assignStudentsToCourse", 
+        courseId: courseId, 
+        assignedMssvList: selectedMssv.join(',') 
+    }, function(res) {
+        alert(res); 
+        $('#assignStudentModal').modal('hide');
+    }, function() { 
+        alert("Lỗi kết nối máy chủ!"); 
+    });
+};
+// 1. Hiển thị trang MasterTKB và ẩn các phân hệ khác
+function loadAdminMasterTkbView() {
+    document.title = "Quản lý MasterTKB | Admin";
+    resetNavActive();
+    
+    let dropdownMenu = document.querySelector('#sidebarUserInfo .dropdown-menu');
+    if(dropdownMenu) dropdownMenu.classList.remove('show');
+    
+    $('#adminMasterTkbSection').removeClass('d-none');
+    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
+    
+    fetchAdminMasterTkb();
+}
+
+// Chèn lệnh ẩn vào hàm reset mặc định
+const originalResetNavMaster = resetNavActive;
+resetNavActive = function() {
+    originalResetNavMaster();
+    $('#adminMasterTkbSection').addClass('d-none');
+};
+
+// Hiện nút bấm điều hướng khi xác thực Admin thành công[cite: 1]
+const originalVerifyAdmin = verifyAdmin;
+verifyAdmin = function() {
+    originalVerifyAdmin();
+    if(isAdmin) {
+        $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
+    }
+};
+
+// Hiện nút bấm điều hướng khi tải lại trang nếu phiên đăng nhập Admin còn giữ
+if (localStorage.getItem('isAdmin') === 'true') {
+    $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
+}
+
+function fetchAdminMasterTkb() {
+    $('#adminMasterTkbBody').html('<tr><td colspan="7" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu học phần...</td></tr>');
+    $.ajax({
+        url: SCRIPT_URL + "?action=getAdminMasterTkb",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            window.cachedMasterTkb = data; // Giữ lại cache gốc để chỉnh sửa nhanh
+            let html = '';
+            
+            if(data.length === 0) {
+                html = '<tr><td colspan="7" class="text-center text-muted py-4">Chưa có học phần nào trong hệ thống.</td></tr>';
+            } else {
+                // Khởi tạo đối tượng để gom nhóm theo Mã học phần (id)
+                let groupedCourses = {};
+                
+                data.forEach(course => {
+                    if (!groupedCourses[course.id]) {
+                        groupedCourses[course.id] = {
+                            id: course.id,
+                            mon: course.mon,
+                            gv: course.gv,
+                            hinhThuc: course.hinhThuc,
+                            namHoc: course.namHoc,
+                            hocKy: course.hocKy,
+                            phongList: [],
+                            thoiGianList: []
+                        };
+                    }
+                    
+                    // Tạo chuỗi hiển thị Thứ & Tiết (ví dụ: Thứ 2 (Tiết 1-4))
+                    let tietKt = parseInt(course.tietBd) + parseInt(course.soTiet) - 1;
+                    let timeStr = `Thứ ${course.thu} <span class="text-muted">(Tiết ${course.tietBd} - ${tietKt})</span>`;
+                    if (!groupedCourses[course.id].thoiGianList.includes(timeStr)) {
+                        groupedCourses[course.id].thoiGianList.push(timeStr);
+                    }
+                    
+                    // Tạo chuỗi hiển thị Phòng / Cơ sở (ví dụ: Phòng H.101 (An Dương Vương))
+                    let roomStr = `<b>${course.phong}</b> ${course.hinhThuc ? `<br><small class="text-muted">${course.hinhThuc}</small>` : ''}`;
+                    if (!groupedCourses[course.id].phongList.includes(roomStr)) {
+                        groupedCourses[course.id].phongList.push(roomStr);
+                    }
+                });
+
+                // Tiến hành vẽ bảng sau khi đã gom cụm dữ liệu sạch sẽ
+                for (let id in groupedCourses) {
+                    let c = groupedCourses[id];
+                    html += `
+                    <tr>
+                        <td class="text-center align-middle fw-bold text-secondary">${c.id}</td>
+                        <td class="align-middle fw-bold text-primary">
+                            ${c.mon} <br>
+                            <small class="text-muted font-monospace fw-normal">${c.namHoc} - ${c.hocKy}</small>
+                        </td>
+                        <td class="text-center align-middle font-monospace" style="line-height: 1.6;">
+                            ${c.thoiGianList.join('<hr class="my-1 opacity-25">')}
+                        </td>
+                        <td class="text-center align-middle" style="line-height: 1.4;">
+                            ${c.phongList.join('<hr class="my-1 opacity-25">')}
+                        </td>
+                        <td class="text-center align-middle text-muted fw-bold">${c.gv || 'Đang cập nhật'}</td>
+                        <td class="text-center align-middle">
+                            <button class="btn btn-sm btn-outline-success fw-bold py-1 px-2" onclick="openAssignStudentModal('${c.id}')">
+                                <i class="fa-solid fa-user-plus"></i> Chỉ định (${c.id})
+                            </button>
+                        </td>
+                        <td class="text-center align-middle">
+                            <div class="d-flex justify-content-center gap-1">
+                                <button class="btn btn-sm btn-warning" onclick="openEditMasterTkbModal('${c.id}')" title="Sửa học phần"><i class="fa-solid fa-pen"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteMasterTkbRow('${c.id}')" title="Xóa học phần"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>`;
+                }
+            }
+            $('#adminMasterTkbBody').html(html);
+        }
+    });
+}// 3. Form xử lý Thêm/Sửa/Xóa
+function openAddMasterTkbModal() {
+    $('#masterTkbFormModal input:not([type="color"])').val('');
+    $('#mId').prop('readonly', false);
+    $('#masterTkbModalTitle').text('Thêm Học phần MasterTKB mới');
+    $('#masterTkbFormModal').modal('show');
+}
+
+function openEditMasterTkbModal(courseId) {
+    let c = window.cachedMasterTkb.find(item => item.id === courseId);
+    if(!c) return;
+    $('#mId').val(c.id).prop('readonly', true);
+    $('#mMon').val(c.mon); $('#mThu').val(c.thu); $('#mTietBd').val(c.tietBd); $('#mSoTiet').val(c.soTiet);
+    $('#mPhong').val(c.phong); $('#mThoiGian').val(c.thoiGian); $('#mHinhThuc').val(c.hinhThuc); $('#mGv').val(c.gv);
+    $('#mNamHoc').val(c.namHoc); $('#mHocKy').val(c.hocKy); $('#mNgayBD').val(c.ngayBatDau); $('#mNgayKT').val(c.ngayKetThuc);
+    $('#mNgoaiLe').val(c.ngayNgoaiLe); $('#mColor').val(c.color || '#e0f2fe');
+    $('#masterTkbModalTitle').text('Chỉnh sửa Học phần MasterTKB');
+    $('#masterTkbFormModal').modal('show');
+}
+
+function saveMasterTkbForm() {
+    let isEdit = $('#mId').prop('readonly');
+    let payload = {
+        action: isEdit ? "editMasterTkb" : "addMasterTkb",
+        id: $('#mId').val().trim(), mon: $('#mMon').val().trim(), thu: $('#mThu').val(),
+        tietBd: $('#mTietBd').val(), soTiet: $('#mSoTiet').val(), phong: $('#mPhong').val().trim(),
+        thoiGian: $('#mThoiGian').val().trim(), hinhThuc: $('#mHinhThuc').val().trim(), gv: $('#mGv').val().trim(),
+        namHoc: $('#mNamHoc').val().trim(), hocKy: $('#mHocKy').val().trim(), ngayBatDau: $('#mNgayBD').val().trim(),
+        ngayKetThuc: $('#mNgayKT').val().trim(), ngayNgoaiLe: $('#mNgoaiLe').val().trim(), color: $('#mColor').val()
+    };
+    if(!payload.id || !payload.mon) { alert("Vui lòng nhập Mã và Tên môn!"); return; }
+    
+    postToGAS(payload, function(res) {
+        alert(res);
+        $('#masterTkbFormModal').modal('hide');
+        fetchAdminMasterTkb();
+    });
+}
+
+function deleteMasterTkbRow(courseId) {
+    if(!confirm(`Bạn có chắc chắn muốn xóa học phần ${courseId} khỏi danh sách MasterTKB hệ thống?`)) return;
+    postToGAS({ action: "deleteMasterTkb", courseId: courseId }, function(res) {
+        alert(res);
+        fetchAdminMasterTkb();
+    });
 }
