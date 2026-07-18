@@ -2092,6 +2092,8 @@ if (localStorage.getItem('isAdmin') === 'true') {
     $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
 }
 
+let currentEditMasterRowIndex = -1; // Biến toàn cục để theo dõi đang sửa hàng nào
+
 function fetchAdminMasterTkb() {
     $('#adminMasterTkbBody').html('<tr><td colspan="7" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu học phần...</td></tr>');
     $.ajax({
@@ -2099,101 +2101,116 @@ function fetchAdminMasterTkb() {
         method: "GET",
         dataType: "json",
         success: function(data) {
-            window.cachedMasterTkb = data; // Giữ lại cache gốc để chỉnh sửa nhanh
+            window.cachedMasterTkb = data; 
             let html = '';
             
             if(data.length === 0) {
                 html = '<tr><td colspan="7" class="text-center text-muted py-4">Chưa có học phần nào trong hệ thống.</td></tr>';
             } else {
-                // Khởi tạo đối tượng để gom nhóm theo Mã học phần (id)
                 let groupedCourses = {};
                 
+                // Gom nhóm các lịch học theo Mã HP
                 data.forEach(course => {
                     if (!groupedCourses[course.id]) {
                         groupedCourses[course.id] = {
                             id: course.id,
                             mon: course.mon,
-                            gv: course.gv,
-                            hinhThuc: course.hinhThuc,
                             namHoc: course.namHoc,
                             hocKy: course.hocKy,
-                            phongList: [],
-                            thoiGianList: []
+                            items: []
                         };
                     }
-                    
-                    // Tạo chuỗi hiển thị Thứ & Tiết (ví dụ: Thứ 2 (Tiết 1-4))
-                    let tietKt = parseInt(course.tietBd) + parseInt(course.soTiet) - 1;
-                    let timeStr = `Thứ ${course.thu} <span class="text-muted">(Tiết ${course.tietBd} - ${tietKt})</span>`;
-                    if (!groupedCourses[course.id].thoiGianList.includes(timeStr)) {
-                        groupedCourses[course.id].thoiGianList.push(timeStr);
-                    }
-                    
-                    // Tạo chuỗi hiển thị Phòng / Cơ sở (ví dụ: Phòng H.101 (An Dương Vương))
-                    let roomStr = `<b>${course.phong}</b> ${course.hinhThuc ? `<br><small class="text-muted">${course.hinhThuc}</small>` : ''}`;
-                    if (!groupedCourses[course.id].phongList.includes(roomStr)) {
-                        groupedCourses[course.id].phongList.push(roomStr);
-                    }
+                    groupedCourses[course.id].items.push(course);
                 });
 
-                // Tiến hành vẽ bảng sau khi đã gom cụm dữ liệu sạch sẽ
+                // Vẽ giao diện
                 for (let id in groupedCourses) {
                     let c = groupedCourses[id];
-                    html += `
-                    <tr>
-                        <td class="text-center align-middle fw-bold text-secondary">${c.id}</td>
-                        <td class="align-middle fw-bold text-primary">
-                            ${c.mon} <br>
-                            <small class="text-muted font-monospace fw-normal">${c.namHoc} - ${c.hocKy}</small>
+                    let rowSpan = c.items.length; // Lấy số lượng lịch học để gộp ô (rowspan)
+                    
+                    c.items.forEach((item, index) => {
+                        let soTiet = parseInt(item.soTiet) || 1;
+                        let tietBd = parseInt(item.tietBd) || 1;
+                        let tietKt = tietBd + soTiet - 1;
+
+                        html += `<tr>`;
+                        
+                        // Cột 1 & 2: Gộp chung Mã HP và Tên môn
+                        if (index === 0) {
+                            html += `
+                            <td rowspan="${rowSpan}" class="text-center align-middle fw-bold text-secondary border-end">${c.id}</td>
+                            <td rowspan="${rowSpan}" class="align-middle fw-bold text-primary border-end">
+                                ${c.mon} <br>
+                                <small class="text-muted font-monospace fw-normal">${c.namHoc || ''} - ${c.hocKy || ''}</small>
+                            </td>`;
+                        }
+                        
+                        // Cột 3, 4, 5: Tách riêng từng chi tiết lịch học
+                        html += `
+                        <td class="text-center align-middle font-monospace bg-light">
+                            Thứ ${item.thu} <br><small class="text-muted">(Tiết ${tietBd} - ${tietKt})</small>
                         </td>
-                        <td class="text-center align-middle font-monospace" style="line-height: 1.6;">
-                            ${c.thoiGianList.join('<hr class="my-1 opacity-25">')}
+                        <td class="text-center align-middle bg-light">
+                            <b>${item.phong}</b> ${item.hinhThuc ? `<br><small class="text-muted">${item.hinhThuc}</small>` : ''}
                         </td>
-                        <td class="text-center align-middle" style="line-height: 1.4;">
-                            ${c.phongList.join('<hr class="my-1 opacity-25">')}
-                        </td>
-                        <td class="text-center align-middle text-muted fw-bold">${c.gv || 'Đang cập nhật'}</td>
-                        <td class="text-center align-middle">
-                            <button class="btn btn-sm btn-outline-success fw-bold py-1 px-2" onclick="openAssignStudentModal('${c.id}')">
-                                <i class="fa-solid fa-user-plus"></i> Chỉ định (${c.id})
-                            </button>
-                        </td>
-                        <td class="text-center align-middle">
+                        <td class="text-center align-middle text-muted fw-bold bg-light">${item.gv || 'Đang cập nhật'}</td>`;
+                        
+                        // Cột 6: Nút Chỉ định sinh viên (Gộp chung vì dùng cho toàn bộ học phần)
+                        if (index === 0) {
+                            html += `
+                            <td rowspan="${rowSpan}" class="text-center align-middle border-start border-end">
+                                <button class="btn btn-sm btn-outline-success fw-bold py-1 px-2" onclick="openAssignStudentModal('${c.id}')">
+                                    <i class="fa-solid fa-user-plus"></i> Chỉ định
+                                </button>
+                            </td>`;
+                        }
+                        
+                        // Cột 7: Nút Sửa/Xóa tách riêng độc lập cho từng lịch học (Từng hàng)
+                        html += `
+                        <td class="text-center align-middle border-start">
                             <div class="d-flex justify-content-center gap-1">
-                                <button class="btn btn-sm btn-warning" onclick="openEditMasterTkbModal('${c.id}')" title="Sửa học phần"><i class="fa-solid fa-pen"></i></button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteMasterTkbRow('${c.id}')" title="Xóa học phần"><i class="fa-solid fa-trash"></i></button>
+                                <button class="btn btn-sm btn-warning" onclick="openEditMasterTkbModal(${item.rowIndex})" title="Sửa lịch này"><i class="fa-solid fa-pen"></i></button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteMasterTkbRow(${item.rowIndex})" title="Xóa lịch này"><i class="fa-solid fa-trash"></i></button>
                             </div>
                         </td>
-                    </tr>`;
+                        </tr>`;
+                    });
                 }
             }
             $('#adminMasterTkbBody').html(html);
         }
     });
-}// 3. Form xử lý Thêm/Sửa/Xóa
+}
+
 function openAddMasterTkbModal() {
+    currentEditMasterRowIndex = -1;
     $('#masterTkbFormModal input:not([type="color"])').val('');
     $('#mId').prop('readonly', false);
     $('#masterTkbModalTitle').text('Thêm Học phần MasterTKB mới');
     $('#masterTkbFormModal').modal('show');
 }
 
-function openEditMasterTkbModal(courseId) {
-    let c = window.cachedMasterTkb.find(item => item.id === courseId);
+function openEditMasterTkbModal(rowIndex) {
+    // Sửa trực tiếp dòng dựa trên rowIndex
+    let c = window.cachedMasterTkb.find(item => item.rowIndex === rowIndex);
     if(!c) return;
-    $('#mId').val(c.id).prop('readonly', true);
+    
+    currentEditMasterRowIndex = rowIndex;
+    $('#mId').val(c.id).prop('readonly', true); // Khóa Mã HP không cho sửa để tránh mất liên kết
     $('#mMon').val(c.mon); $('#mThu').val(c.thu); $('#mTietBd').val(c.tietBd); $('#mSoTiet').val(c.soTiet);
     $('#mPhong').val(c.phong); $('#mThoiGian').val(c.thoiGian); $('#mHinhThuc').val(c.hinhThuc); $('#mGv').val(c.gv);
     $('#mNamHoc').val(c.namHoc); $('#mHocKy').val(c.hocKy); $('#mNgayBD').val(c.ngayBatDau); $('#mNgayKT').val(c.ngayKetThuc);
     $('#mNgoaiLe').val(c.ngayNgoaiLe); $('#mColor').val(c.color || '#e0f2fe');
-    $('#masterTkbModalTitle').text('Chỉnh sửa Học phần MasterTKB');
+    
+    $('#masterTkbModalTitle').text('Chỉnh sửa Lịch MasterTKB');
     $('#masterTkbFormModal').modal('show');
 }
 
 function saveMasterTkbForm() {
-    let isEdit = $('#mId').prop('readonly');
+    let isEdit = currentEditMasterRowIndex !== -1;
     let payload = {
         action: isEdit ? "editMasterTkb" : "addMasterTkb",
+        rowIndex: currentEditMasterRowIndex,
         id: $('#mId').val().trim(), mon: $('#mMon').val().trim(), thu: $('#mThu').val(),
         tietBd: $('#mTietBd').val(), soTiet: $('#mSoTiet').val(), phong: $('#mPhong').val().trim(),
         thoiGian: $('#mThoiGian').val().trim(), hinhThuc: $('#mHinhThuc').val().trim(), gv: $('#mGv').val().trim(),
@@ -2209,9 +2226,9 @@ function saveMasterTkbForm() {
     });
 }
 
-function deleteMasterTkbRow(courseId) {
-    if(!confirm(`Bạn có chắc chắn muốn xóa học phần ${courseId} khỏi danh sách MasterTKB hệ thống?`)) return;
-    postToGAS({ action: "deleteMasterTkb", courseId: courseId }, function(res) {
+function deleteMasterTkbRow(rowIndex) {
+    if(!confirm(`Bạn có chắc chắn muốn xóa lịch học này khỏi hệ thống? (Thao tác này chỉ xóa phiên lịch học hiện tại, không xóa toàn bộ lớp)`)) return;
+    postToGAS({ action: "deleteMasterTkb", rowIndex: rowIndex }, function(res) {
         alert(res);
         fetchAdminMasterTkb();
     });
