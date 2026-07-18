@@ -1988,3 +1988,40 @@ body.dark-mode .tb-detail-main-content table th {
     background-color: #1e293b !important;
     color: #f8fafc;
 }
+/* Container cho hiệu ứng viền chạy */
+.border-animation {
+    position: relative;
+    padding: 3px; /* Độ dày của đường viền */
+    border-radius: 14px;
+    background: #e2e8f0; /* Màu nền đường viền khi không chạy */
+    overflow: hidden;
+}
+
+.border-animation::before {
+    content: "";
+    position: absolute;
+    inset: -100%; /* Mở rộng vùng bao phủ để xoay */
+    background: conic-gradient(from 0deg, transparent 0deg, #e61d4a 90deg, transparent 180deg);
+    animation: spin 3s linear infinite;
+}
+
+/* Lớp phủ bên trên để tạo hình đường viền */
+.border-animation::after {
+    content: "";
+    position: absolute;
+    inset: 3px; /* Độ dày viền */
+    background: #ffffff; /* Màu nền bên trong khung thông báo */
+    border-radius: 12px;
+}
+
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+
+/* Đảm bảo nội dung thông báo nằm trên các lớp hiệu ứng */
+.border-animation .alert {
+    position: relative;
+    z-index: 1;
+    margin: 0 !important;
+    border-radius: 10px;
+}

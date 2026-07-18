@@ -412,25 +412,27 @@ data.forEach((row, rowIndex) => {
         </div>`;
     }
 
-    // Phân luồng HTML: Hệ thống (Banner) vs Thông thường (Item List)
+   // Thay đoạn render thông báo hệ thống cũ bằng đoạn này:
 if (isHeThong) {
     heThongItemsHtml += `
-    <div class="alert shadow-sm border-danger border-start border-4 mb-4 position-relative" role="alert" style="border-radius: 12px; cursor: pointer; background: linear-gradient(to right, #fff5f5, #ffffff);" onclick="viewThongBaoDetail(${rowIndex})">
-        <div class="d-flex align-items-start gap-3">
-            <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">
-                <i class="fa-solid fa-triangle-exclamation fs-4 fa-fade"></i>
-            </div>
-            <div class="flex-grow-1 mt-1">
-                <div class="fw-bold text-danger mb-1" style="font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px;">[QUAN TRỌNG] ${c2} ${badgeHtml}</div>
-                <div class="tb-item-dates d-flex align-items-center flex-wrap gap-3" style="font-size: 13.5px; color: #64748b;">
-                    ${dateDisplay}
-                    ${countdownHtml}
+    <div class="border-animation mb-4">
+        <div class="alert shadow-sm border-0 position-relative" role="alert" style="background: linear-gradient(to right, #fff5f5, #ffffff);" onclick="viewThongBaoDetail(${rowIndex})">
+            <div class="d-flex align-items-start gap-3">
+                <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                    <i class="fa-solid fa-triangle-exclamation fs-4 fa-fade"></i>
+                </div>
+                <div class="flex-grow-1 mt-1">
+                    <div class="fw-bold text-danger mb-1" style="font-size: 18px; text-transform: uppercase;">[QUAN TRỌNG] ${c2} ${badgeHtml}</div>
+                    <div class="tb-item-dates" style="font-size: 13.5px; color: #64748b;">
+                        ${dateDisplay} ${countdownHtml}
+                    </div>
                 </div>
             </div>
+            ${isAdmin ? `<div class="mt-3 text-end pt-2 border-top">${adminHtml}</div>` : ''}
         </div>
-        ${isAdmin ? `<div class="mt-3 text-end pt-2 border-top border-danger-subtle">${adminHtml}</div>` : ''}
     </div>`;
-} else {
+}
+else {
         let itemHtml = `
         <div class="tb-list-item" onclick="viewThongBaoDetail(${rowIndex})">
             <div class="tb-icon-wrapper">
