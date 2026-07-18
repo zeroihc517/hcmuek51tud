@@ -68,6 +68,9 @@
 <button class="dropdown-item py-2 mb-1 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadProfileView()">
    <i class="fa-solid fa-address-card text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Hồ sơ của tôi
 </button>
+<button id="btnAdminManageUsers" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px;" onclick="loadAdminUserManageView()">
+    <i class="fa-solid fa-users-gear text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý Thành viên (Admin)
+</button>
         <button class="dropdown-item py-2 mb-4 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="openChangePasswordModal()">
             <i class="fa-solid fa-ellipsis text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Đổi mật khẩu
         </button>
@@ -319,6 +322,29 @@
 </div>
     </div>
 </div>
+<div id="adminUserManageSection" class="d-none">
+        <header class="top-header d-flex justify-content-between align-items-center">
+            <div class="page-title" style="color: var(--accent-red);"><i class="fa-solid fa-users-gear"></i> Quản lý Dữ liệu Thành viên</div>
+        </header>
+        
+        <div class="data-card p-4 mt-3 border-danger-subtle">
+            <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-magnifying-glass"></i> Tra cứu thành viên</h5>
+            <div class="alert alert-light border-danger-subtle text-muted small mb-4">
+                <i class="fa-solid fa-circle-info me-1"></i> Nhập MSSV của sinh viên để xem, thêm, sửa hoặc xóa Thời khóa biểu, Deadline, và Dữ liệu Đăng ký học phần.
+            </div>
+            
+            <div class="input-group mb-4 shadow-sm" style="max-width: 450px;">
+                <span class="input-group-text bg-white border-danger-subtle"><i class="fa-solid fa-id-card text-muted"></i></span>
+                <input type="text" id="adminSearchMSSV" class="form-control border-danger-subtle fw-bold" placeholder="Nhập MSSV cần can thiệp...">
+                <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="adminFetchUserData()">Tra cứu</button>
+            </div>
+            
+            <!-- Nơi đổ dữ liệu chi tiết của Sinh viên -->
+            <div id="adminUserDetailArea" class="d-none mt-4">
+                <!-- Dữ liệu sẽ được JS render vào đây -->
+            </div>
+        </div>
+    </div>
 <div class="modal fade" id="gpaCourseModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
