@@ -24,4 +24,24 @@ const cv=document.getElementById('p'),x=cv.getContext('2d');function rs(){cv.wid
 let pts=[...Array(120)].map(()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,v:(Math.random()*1+.2)}));
 (function a(){x.clearRect(0,0,cv.width,cv.height);x.fillStyle="rgba(255,255,255,.7)";
 pts.forEach(o=>{o.y+=o.v;if(o.y>cv.height){o.y=0;o.x=Math.random()*cv.width}x.beginPath();x.arc(o.x,o.y,1.5,0,7);x.fill();});requestAnimationFrame(a)})();
+</script><script>
+    // 1. Chặn chuột phải
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+
+    // 2. Chặn các phím tắt như F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+    document.onkeydown = function(e) {
+        // Chặn F12
+        if (event.keyCode == 123) {
+            return false;
+        }
+        // Chặn Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+        if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) {
+            return false;
+        }
+        if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+            return false;
+        }
+    };
 </script></body></html>
