@@ -257,9 +257,35 @@ function loadDataByHocPhan(sheetName, element) {
     if ($('#customViewWrapper').length > 0) $('#customViewWrapper').addClass('d-none');
     $('#examCardsContainer').addClass('d-none').html(''); 
 
-    // Hiển thị form thêm dữ liệu nếu là Admin
-    if (isAdmin) $('#adminAddRowArea').removeClass('d-none'); 
-    else $('#adminAddRowArea').addClass('d-none');
+   // Hiển thị form thêm dữ liệu nếu là Admin và Đổi nhãn thông minh
+    if (isAdmin) {
+        $('#adminAddRowArea').removeClass('d-none');
+        
+        if (sheetName.toLowerCase() === 'thông báo') {
+            $('#txtCol5, #txtCol6, #txtCol7').parent().show();
+            $('#insertCol5, #insertCol6, #insertCol7').parent().show();
+            $('#editCol5, #editCol6, #editCol7').parent().show();
+            
+            $('#txtCol1, #insertCol1, #editCol1').prev('label').text('STT / Trạng thái (Cột 1)');
+            $('#txtCol2, #insertCol2, #editCol2').prev('label').text('Tiêu đề (Cột 2)');
+            $('#txtCol3, #insertCol3, #editCol3').prev('label').text('Nội dung chi tiết (Cột 3)');
+            $('#txtCol4, #insertCol4, #editCol4').prev('label').text('Ngày đăng (Cột 4)');
+        } else {
+            // Nếu là Danh mục Học phần -> Ẩn 3 cột dư thừa đi
+            $('#txtCol5, #txtCol6, #txtCol7').parent().hide();
+            $('#insertCol5, #insertCol6, #insertCol7').parent().hide();
+            $('#editCol5, #editCol6, #editCol7').parent().hide();
+            
+            // Đổi nhãn theo đúng ý bạn:
+            $('#txtCol1, #insertCol1, #editCol1').prev('label').text('STT (Cột 1)');
+            $('#txtCol2, #insertCol2, #editCol2').prev('label').text('Tên bài học / Hình thức (Cột 2)');
+            $('#txtCol3, #insertCol3, #editCol3').prev('label').text('Nhập Link tài liệu (Cột 3)');
+            $('#txtCol4, #insertCol4, #editCol4').prev('label').text('Ghi chú (Cột 4)');
+        }
+    } 
+    else {
+        $('#adminAddRowArea').addClass('d-none');
+    }
     
     // Đóng sidebar trên mobile
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
@@ -601,29 +627,35 @@ $('#loadingStatus').addClass('d-none');
             let bodyHtml = ''; let headHtml = ''; let instructorInfos = [];
             let examCardsHtml = ''; let hasExamCards = false; 
             
-            // THÊM MỚI: Biến quản lý ID nhóm cho tính năng Thu gọn/Thả xuống
-            let currentGroupId = 0; 
+         // THÊM MỚI: Biến quản lý ID nhóm cho tính năng Thu gọn/Thả xuống đa cấp
+            let currentChapterId = 0;
+            let currentLessonId = 0;
 
             data.forEach((row, rowIndex) => {
                 let fullRowText = row.join(" ").toLowerCase().replace(/\s+/g, ' '); 
                 let firstCellTextRaw = String(row[0]).trim(); 
                 let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
                 
-                // Xử lý tiêu đề cột
+                // 1. Xử lý tiêu đề cột
                 if (rowIndex === 0) { 
-                    row.forEach((cell) => { headHtml += `<th>${String(cell || '')}</th>`; });
+                    if (sheetName.toLowerCase() === 'thông báo') {
+                        row.forEach((cell) => { headHtml += `<th>${String(cell || '')}</th>`; });
+                    } else {
+                        // Tùy chỉnh tiêu đề cột cho Danh mục Học phần
+                        headHtml += `<th style="width: 80px;">STT</th><th>Nội dung bài học</th><th style="width: 250px;">Ghi chú</th>`;
+                    }
                     if (isAdmin) headHtml += `<th style="width: 180px; min-width: 180px;">Thao tác</th>`; 
                     return; 
                 }
                 
-                // Trích xuất thông tin giảng viên
+                // 2. Trích xuất thông tin giảng viên
                 if (/mãhp|họcphần|gv\d|giảngviên|email|facebook|sốtínchỉ/.test(fullRowText.replace(/\s+/g, ''))) { 
                     let info = row.filter(cell => String(cell).trim() !== "").join(" <span class='mx-2 text-black-50'>|</span> "); 
                     if(info) instructorInfos.push(info); 
                     return; 
                 }
 
-                // Trích xuất thẻ bài kiểm tra/minigame
+                // 3. Trích xuất thẻ bài kiểm tra/minigame (ĐOẠN NÀY LÀ CÁI BẠN BỊ MẤT)
                 let isSpecialExam = /(đề thi thử|đề demo|minigame tuần|minigame hè|minigame số)/i.test(fullRowText);
                 if (isSpecialExam) {
                     hasExamCards = true; 
@@ -660,63 +692,122 @@ $('#loadingStatus').addClass('d-none');
                     return; 
                 }
 
-                // Nhận diện trạng thái "Mới"
+                // 4. Nhận diện trạng thái "Mới" và Phân cấp Chương/Bài
                 let isNewRow = false;
                 let rowClass = 'grid-row'; let iconPrefix = '';
                 
-                // THÊM MỚI: Biến cờ hiệu nhận diện dòng Tiêu đề nhóm (Chủ đề / Bài)
-                let isHeaderRow = false;
+                let isChapter = false;
+                let isLesson = false;
 
                 if (isNewRow) { rowClass += ' row-new'; }
                 else if (/ngânhàng/.test(fullRowText.replace(/\s+/g, ''))) { rowClass += ' row-white'; iconPrefix = '<i class="fa-solid fa-box-archive me-2 text-secondary"></i>'; } 
                 else if (/bàithi|kiểmtra|đềthi|lịchthi|phòngthi/.test(fullRowText.replace(/\s+/g, '')) || row.join(" ").toLowerCase().includes(' thi ')) { rowClass += ' row-exam'; iconPrefix = '<i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>'; } 
                 else if (/chủđề|chương/.test(firstCellText)) { 
-                    rowClass += ' row-topic'; 
-                    isHeaderRow = true;
-                    currentGroupId++; // Tạo ID mới cho nhóm
+                    rowClass += ' row-topic is-chapter'; 
+                    isChapter = true;
+                    currentChapterId++; 
+                    currentLessonId = 0; // Reset bài khi sang chương mới
                 } 
                 else if (/bài/.test(firstCellText)) { 
-                    rowClass += ' row-lesson'; 
+                    rowClass += ' row-lesson is-lesson'; 
                     iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; 
-                    isHeaderRow = true;
-                    currentGroupId++; // Tạo ID mới cho nhóm
+                    isLesson = true;
+                    currentLessonId++; 
                 }
                 
                 let sheetRowIndex = rowIndex + 1;
                 let dragAttr = isAdmin ? ` draggable="true" ondragstart="handleDragStart(event, ${sheetRowIndex})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndex}, '${currentSheetName}')" style="cursor: grab;"` : '';
                 
-                // THÊM MỚI: Gắn Class child cho các dòng dữ liệu con, và gán sự kiện Click cho dòng tiêu đề
-                let childClass = (!isHeaderRow && currentGroupId > 0) ? ` group-child-${currentGroupId}` : '';
-                let clickEvent = isHeaderRow ? ` onclick="toggleCourseGroup(${currentGroupId}, this)" style="cursor: pointer;" title="Bấm để thu gọn/mở rộng"` : '';
+                // Gắn Class child cho các dòng dữ liệu con, và gán sự kiện Click
+                let childClass = '';
+                let clickEvent = '';
 
-                bodyHtml += `<tr class="${rowClass}${childClass}"${clickEvent}${dragAttr}>`;
+                // Phân cấp và Thu gọn mặc định bằng class d-none
+                if (isChapter) {
+                    clickEvent = ` onclick="toggleChapter(${currentChapterId}, this)" style="cursor: pointer;" title="Bấm để mở rộng"`;
+                } else if (isLesson) {
+                    clickEvent = ` onclick="toggleLesson(${currentChapterId}, ${currentLessonId}, this)" style="cursor: pointer;" title="Bấm để mở rộng"`;
+                    childClass = ` child-of-chapter-${currentChapterId} d-none`; // Bài thuộc Chương (ẩn lúc đầu)
+                } else {
+                    if (currentLessonId > 0) {
+                        childClass = ` child-of-chapter-${currentChapterId} child-of-lesson-${currentChapterId}-${currentLessonId} d-none`; // Nội dung thuộc Bài (ẩn lúc đầu)
+                    } else if (currentChapterId > 0) {
+                        childClass = ` child-of-chapter-${currentChapterId} direct-chapter-child d-none`; // Nội dung trực tiếp của Chương (ẩn lúc đầu)
+                    }
+                }
+
+               bodyHtml += `<tr class="${rowClass}${childClass}"${clickEvent}${dragAttr}>`;
                 
-                row.forEach((cell, cellIndex) => {
-                    let cellText = String(cell).trim();
-                    if (cellIndex === 0 && isNewRow) cellText = cellText.replace(/new/i, '<span class="badge-new">Mới</span>');
+                if (sheetName.toLowerCase() === 'thông báo') {
+                    // GIỮ NGUYÊN LOGIC CŨ CHO BẢNG THÔNG BÁO
+                    row.forEach((cell, cellIndex) => {
+                        let cellText = String(cell).trim();
+                        if (cellIndex === 0 && isNewRow) cellText = cellText.replace(/new/i, '<span class="badge-new">Mới</span>');
+                        
+                        let chevronHtml = '';
+                        if ((isChapter || isLesson) && cellIndex === 1) {
+                            chevronHtml = `<button class="btn-expand ms-2" style="background: transparent; border: none; padding: 0; width: 24px; height: 24px; color: inherit; pointer-events: none;"><i class="fa-solid fa-chevron-down" style="transition: transform 0.3s ease; transform: rotate(-90deg);"></i></button>`;
+                        }
+
+                        let _urlRegex = /(https?:\/\/[^\s]+)/g; let _match = cellText.match(_urlRegex); let extractedUrl = _match ? _match[0] : null;
+                        if (extractedUrl) { 
+                            let label = cellText.replace(extractedUrl, '').trim() || "Truy cập tài liệu"; 
+                            bodyHtml += `<td onclick="window.open('${extractedUrl}', '_blank'); event.stopPropagation();" style="cursor: pointer; color: #0284c7; font-weight: 600; text-decoration: underline;" title="Nhấn để truy cập tài liệu">${label}</td>`; 
+                        } else { 
+                            if (cellText.toLowerCase().includes('đang cập nhật')) {
+                                let contentHtml = cellIndex === 0 && !isNewRow ? iconPrefix + cellText : cellText;
+                                bodyHtml += `<td onclick="alert('Chưa tới ngày phát hành'); event.stopPropagation();" style="cursor: pointer; color: #d97706; font-style: italic;">${contentHtml} ${chevronHtml}</td>`;
+                            }
+                            else if (cellText === "") { 
+                                bodyHtml += `<td></td>`; 
+                            } else { 
+                                bodyHtml += `<td>${cellIndex === 0 && !isNewRow ? iconPrefix + cellText : cellText} ${chevronHtml}</td>`; 
+                            }
+                        }
+                    });
+                } else {
+                    // LOGIC MỚI CHO DANH MỤC HỌC PHẦN (3 Cột: STT - Tên Bài - Ghi Chú)
+                    let c1 = String(row[0] || '').trim(); // Cột 1: STT
+                    let c2 = String(row[1] || '').trim(); // Cột 2: Hình thức / Tên bài học
+                    let c3 = String(row[2] || '').trim(); // Cột 3: Link
+                    let c4 = String(row[3] || '').trim(); // Cột 4: Ghi chú
                     
-                    // THÊM MỚI: Mũi tên xổ xuống (Chevron) nằm ở Cột 2 (cạnh Tiêu đề)
+                    if (isNewRow) c1 = c1.replace(/new/i, '<span class="badge-new">Mới</span>');
+                    
                     let chevronHtml = '';
-                    if (isHeaderRow && cellIndex === 1) {
-                        chevronHtml = `<button class="btn-expand ms-2" style="background: transparent; border: none; padding: 0; width: 24px; height: 24px; color: inherit; pointer-events: none;"><i class="fa-solid fa-chevron-down" style="transition: transform 0.3s ease;"></i></button>`;
+                    if ((isChapter || isLesson)) {
+                        chevronHtml = `<button class="btn-expand ms-2" style="background: transparent; border: none; padding: 0; width: 24px; height: 24px; color: inherit; pointer-events: none;"><i class="fa-solid fa-chevron-down" style="transition: transform 0.3s ease; transform: rotate(-90deg);"></i></button>`;
                     }
 
-                    let _urlRegex = /(https?:\/\/[^\s]+)/g; let _match = cellText.match(_urlRegex); let extractedUrl = _match ? _match[0] : null;
-                    if (extractedUrl) { 
-                        let label = cellText.replace(extractedUrl, '').trim() || "Truy cập"; 
-                        bodyHtml += `<td><a href="${extractedUrl}" target="_blank" class="btn-portal-action" onclick="event.stopPropagation();"><i class="fa-solid fa-cloud-arrow-down"></i> ${label}</a></td>`; 
-                    } else { 
-                        if (cellText === "") bodyHtml += `<td></td>`; 
-                        else bodyHtml += `<td>${cellIndex === 0 && !isNewRow ? iconPrefix + cellText : cellText} ${chevronHtml}</td>`; 
+                    // Trích xuất link từ cột 3
+                    let _urlRegex = /(https?:\/\/[^\s<"]+)/g; 
+                    let extractedUrl = c3.match(_urlRegex) ? c3.match(_urlRegex)[0] : null;
+
+                    // Cột 2: Tên bài học (Có link thì nhấp vào chữ để mở)
+                    let col2Html = c2.replace(/<\/?p>/g, '').trim(); 
+                    if (extractedUrl) {
+                        col2Html = `<span onclick="window.open('${extractedUrl}', '_blank'); event.stopPropagation();" style="cursor: pointer; color: #0284c7; font-weight: 700; text-decoration: underline;" title="Nhấn để xem bài học">${col2Html || "Xem tài liệu"}</span>`;
                     }
-                });
+
+                    // Cột 4: Ghi chú (Kiểm tra chữ "Đang cập nhật")
+                    let col4Html = c4.replace(/<\/?p>/g, '').trim();
+                    if (col4Html.toLowerCase().includes('đang cập nhật')) {
+                        col4Html = `<span onclick="alert('Chưa tới ngày phát hành'); event.stopPropagation();" style="cursor: pointer; color: #d97706; font-style: italic; font-weight: 600;"><i class="fa-solid fa-clock-rotate-left me-1"></i>${col4Html}</span>`;
+                    } else if (col4Html !== '') {
+                        col4Html = `<span style="color: #64748b; font-size: 14px;">${col4Html}</span>`;
+                    }
+
+                    // Ghép vào 3 ô TD hiển thị
+                    bodyHtml += `<td style="font-weight: 600;">${iconPrefix}${c1}</td>`;
+                    bodyHtml += `<td>${col2Html} ${chevronHtml}</td>`;
+                    bodyHtml += `<td>${col4Html}</td>`;
+                }
 
                 // Render nút Admin
                 if (isAdmin) {
                     let escapedCells = row.map(c => String(c || '').replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, ""));
                     while(escapedCells.length < 7) escapedCells.push(''); 
                     
-                    // Chặn sự kiện click (stopPropagation) để khi Admin bấm thao tác Sửa/Xóa thì bảng không bị thu gọn
                     bodyHtml += `<td onclick="event.stopPropagation();"><div class="d-flex flex-wrap gap-1">
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
@@ -727,6 +818,8 @@ $('#loadingStatus').addClass('d-none');
                 } 
                 bodyHtml += '</tr>';
             });
+
+             
                       
 
             // Gắn dữ liệu vào DOM
@@ -2295,19 +2388,54 @@ document.addEventListener("dragend", function(e) {
     $('.grid-row').css('opacity', '1');
     $('.grid-row').css('border-top', '');
 });
-// HÀM ĐIỀU KHIỂN THU GỌN / MỞ RỘNG NHÓM CHƯƠNG BÀI
-window.toggleCourseGroup = function(groupId, rowElement) {
-    let childRows = $(`.group-child-${groupId}`);
+// HÀM ĐIỀU KHIỂN THU GỌN / MỞ RỘNG (CHƯƠNG)
+window.toggleChapter = function(chapterId, rowElement) {
     let chevronIcon = $(rowElement).find('.fa-chevron-down');
+    let isExpanded = $(rowElement).hasClass('expanded');
     
-    // Chuyển đổi trạng thái ẩn/hiện của các hàng dữ liệu con
-    if (childRows.first().hasClass('d-none')) {
-        childRows.removeClass('d-none');
-        // Quay mũi tên xuống
+    if (!isExpanded) {
+        // Mở rộng Chương
+        $(rowElement).addClass('expanded');
         chevronIcon.css('transform', 'rotate(0deg)');
+        
+        // Hiện các Bài (nhưng bài vẫn đang thu gọn), và Hiện các nội dung trực tiếp của Chương
+        $(`.child-of-chapter-${chapterId}.is-lesson`).removeClass('d-none');
+        $(`.child-of-chapter-${chapterId}.direct-chapter-child`).removeClass('d-none');
     } else {
-        childRows.addClass('d-none');
-        // Quay mũi tên sang phải (đóng lại)
+        // Thu gọn Chương
+        $(rowElement).removeClass('expanded');
         chevronIcon.css('transform', 'rotate(-90deg)');
+        
+        // Ẩn tất cả Bài và Nội dung bên trong Chương
+        $(`.child-of-chapter-${chapterId}`).addClass('d-none');
+        
+        // Trả các thẻ Bài về trạng thái thu gọn
+        $(`.child-of-chapter-${chapterId}.is-lesson`).removeClass('expanded');
+        $(`.child-of-chapter-${chapterId}.is-lesson .fa-chevron-down`).css('transform', 'rotate(-90deg)');
+    }
+};
+
+// HÀM ĐIỀU KHIỂN THU GỌN / MỞ RỘNG (BÀI)
+window.toggleLesson = function(chapterId, lessonId, rowElement) {
+    let chevronIcon = $(rowElement).find('.fa-chevron-down');
+    let isExpanded = $(rowElement).hasClass('expanded');
+    
+    // Chặn sự kiện click để không lan ngược ra ngoài
+    if (event) event.stopPropagation();
+
+    if (!isExpanded) {
+        // Mở rộng Bài
+        $(rowElement).addClass('expanded');
+        chevronIcon.css('transform', 'rotate(0deg)');
+        
+        // Hiển thị nội dung của Bài này
+        $(`.child-of-lesson-${chapterId}-${lessonId}`).removeClass('d-none');
+    } else {
+        // Thu gọn Bài
+        $(rowElement).removeClass('expanded');
+        chevronIcon.css('transform', 'rotate(-90deg)');
+        
+        // Ẩn nội dung của Bài này
+        $(`.child-of-lesson-${chapterId}-${lessonId}`).addClass('d-none');
     }
 };
