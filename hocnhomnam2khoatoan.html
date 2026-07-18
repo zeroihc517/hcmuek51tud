@@ -71,6 +71,9 @@
 <button id="btnAdminManageUsers" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px;" onclick="loadAdminUserManageView()">
     <i class="fa-solid fa-users-gear text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý Thành viên (Admin)
 </button>
+<button id="btnAdminMasterTkb" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadAdminMasterTkbView()">
+    <i class="fa-solid fa-table-list text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý MasterTKB
+</button>
         <button class="dropdown-item py-2 mb-4 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="openChangePasswordModal()">
             <i class="fa-solid fa-ellipsis text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Đổi mật khẩu
         </button>
@@ -333,11 +336,14 @@
                 <i class="fa-solid fa-circle-info me-1"></i> Nhập MSSV của sinh viên để xem, thêm, sửa hoặc xóa Thời khóa biểu, Deadline, và Dữ liệu Đăng ký học phần.
             </div>
             
-            <div class="input-group mb-4 shadow-sm" style="max-width: 450px;">
-                <span class="input-group-text bg-white border-danger-subtle"><i class="fa-solid fa-id-card text-muted"></i></span>
-                <input type="text" id="adminSearchMSSV" class="form-control border-danger-subtle fw-bold" placeholder="Nhập MSSV cần can thiệp...">
-                <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="adminFetchUserData()">Tra cứu</button>
-            </div>
+<!-- KHU VỰC QUẢN LÝ THÀNH VIÊN -->
+<div class="input-group mb-4 shadow-sm" style="max-width: 450px;">
+    <span class="input-group-text bg-white border-danger-subtle"><i class="fa-solid fa-users text-muted"></i></span>
+    <select id="adminSearchMSSV" class="form-select border-danger-subtle fw-bold">
+        <option value="">Đang tải danh sách sinh viên...</option>
+    </select>
+    <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="adminFetchUserData()">Tra cứu</button>
+</div>
             
             <!-- Nơi đổ dữ liệu chi tiết của Sinh viên -->
             <div id="adminUserDetailArea" class="d-none mt-4">
@@ -345,6 +351,60 @@
             </div>
         </div>
     </div>
+<!-- KHU VỰC QUẢN LÝ MASTER TKB CHO ADMIN -->
+<div id="adminMasterTkbSection" class="d-none">
+    <header class="top-header d-flex justify-content-between align-items-center">
+        <div class="page-title" style="color: var(--primary-color);">
+            <i class="fa-solid fa-database"></i> Quản lý Dữ liệu MasterTKB
+        </div>
+        <button class="btn btn-primary fw-bold" onclick="openAddMasterTkbModal()">
+            <i class="fa-solid fa-plus"></i> Thêm Học phần mới
+        </button>
+    </header>
+    
+    <div class="data-card p-4 mt-3">
+        <div class="table-responsive border rounded" style="max-height: 600px; overflow-y: auto;">
+            <table class="table table-hover table-bordered align-middle m-0 bg-white">
+                <thead class="text-center bg-primary text-white" style="position: sticky; top: 0; z-index: 10;">
+                    <tr>
+                        <th>Mã HP</th>
+                        <th>Tên Học Phần</th>
+                        <th>Thứ & Tiết</th>
+                        <th>Phòng/Cơ sở</th>
+                        <th>Giảng Viên</th>
+                        <th>Chỉ định SV</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="adminMasterTkbBody">
+                    <tr><td colspan="7" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chỉ định Sinh viên học MasterTKB -->
+<div class="modal fade" id="assignStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-users me-2"></i>Chỉ định Sinh viên học phần</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="assignCourseId" value="">
+                <p class="text-muted small">Tích chọn các sinh viên tham gia học phần này. Các sinh viên được chọn sẽ tự động có lịch này trong TKB cá nhân mà không cần tự đồng bộ.</p>
+                <div class="row g-2 mt-2" id="assignStudentList" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Danh sách checkbox sinh viên -->
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-success px-4 fw-bold" onclick="saveAssignedStudents()">Lưu chỉ định</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="modal fade" id="gpaCourseModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
@@ -1221,7 +1281,39 @@
             </div>
         </div>
     </div>
-
+<div class="modal fade" id="masterTkbFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h6 class="modal-title m-0 fw-bold" id="masterTkbModalTitle">Thông tin Học phần MasterTKB</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label fw-bold">Mã học phần (Khóa)</label><input type="text" id="mId" class="form-control"></div>
+                    <div class="col-md-8"><label class="form-label fw-bold">Tên học phần</label><input type="text" id="mMon" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Thứ (2->8)</label><input type="number" id="mThu" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="mTietBd" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Số tiết</label><input type="number" id="mSoTiet" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Phòng</label><input type="text" id="mPhong" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Giờ học (VD: 13:00-15:30)</label><input type="text" id="mThoiGian" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Hình thức/Cơ sở</label><input type="text" id="mHinhThuc" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Giảng viên phụ trách</label><input type="text" id="mGv" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Năm học</label><input type="text" id="mNamHoc" class="form-control" placeholder="2025-2026"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Học kỳ</label><input type="text" id="mHocKy" class="form-control" placeholder="Học kì 1"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="mNgayBD" class="form-control" placeholder="DD/MM/YYYY"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="mNgayKT" class="form-control" placeholder="DD/MM/YYYY"></div>
+                    <div class="col-md-9"><label class="form-label fw-bold text-danger">Ngày ngoại lệ (Nghỉ)</label><input type="text" id="mNgoaiLe" class="form-control" placeholder="Cách nhau bằng dấu phẩy..."></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Màu sắc đổ lịch</label><input type="color" id="mColor" class="form-control form-control-color w-100" value="#e0f2fe"></div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveMasterTkbForm()">Lưu dữ liệu</button>
+            </div>
+        </div>
+    </div>
+</div>
     
    
 
