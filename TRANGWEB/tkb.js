@@ -758,13 +758,29 @@ function renderSystemCoursesList() {
 
     let groupedCourses = {};
     filteredCourses.forEach(course => {
-        if (!groupedCourses[course.id]) {
-            groupedCourses[course.id] = {
-                id: course.id, mon: course.mon, gv: course.gv,
-                phongList: [], thoiGianList: [], 
-                hinhThuc: course.hinhThuc, ngayBatDau: course.ngayBatDau, ngayKetThuc: course.ngayKetThuc
-            };
-        }
+// Sửa đoạn xử lý trong tkb.js:
+if (!groupedCourses[course.id]) {
+    groupedCourses[course.id] = {
+        id: course.id, mon: course.mon, gv: course.gv,
+        phongList: [], thoiGianList: [], 
+        hinhThuc: course.hinhThuc, 
+        ngayBatDau: course.ngayBatDau, 
+        ngayKetThuc: course.ngayKetThuc
+    };
+} else {
+    // Logic so sánh để lấy ngày bắt đầu sớm nhất và ngày kết thúc muộn nhất
+    let currentStart = parseDateString(groupedCourses[course.id].ngayBatDau);
+    let currentEnd = parseDateString(groupedCourses[course.id].ngayKetThuc);
+    let newStart = parseDateString(course.ngayBatDau);
+    let newEnd = parseDateString(course.ngayKetThuc);
+
+    if (newStart && (!currentStart || newStart < currentStart)) {
+        groupedCourses[course.id].ngayBatDau = course.ngayBatDau;
+    }
+    if (newEnd && (!currentEnd || newEnd > currentEnd)) {
+        groupedCourses[course.id].ngayKetThuc = course.ngayKetThuc;
+    }
+}
         let timeStr = `Thứ ${course.thu} (Tiết ${course.tietBd}-${course.tietBd + course.soTiet - 1})`;
         if (!groupedCourses[course.id].thoiGianList.includes(timeStr)) {
             groupedCourses[course.id].thoiGianList.push(timeStr);
@@ -807,3 +823,4 @@ function saveSystemTkbSelection() {
         alert("Đã đồng bộ lịch học thành công!"); $('#systemTkbModal').modal('hide'); btn.html('Đồng bộ lịch học').prop('disabled', false); loadThoiGianBieu();
     }, function() { alert("Giao tiếp máy chủ thất bại! Không thể lưu thiết lập."); btn.html('Đồng bộ lịch học').prop('disabled', false); });
 }
+
