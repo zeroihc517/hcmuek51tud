@@ -413,22 +413,24 @@ data.forEach((row, rowIndex) => {
     }
 
     // Phân luồng HTML: Hệ thống (Banner) vs Thông thường (Item List)
-    if (isHeThong) {
-        heThongItemsHtml += `
-        <div class="alert alert-warning shadow-sm border-warning border-start border-4 mb-3 position-relative" role="alert" style="border-radius: 8px; cursor: pointer; background: #fffbeb;" onclick="viewThongBaoDetail(${rowIndex})">
-            <div class="d-flex align-items-start gap-3">
-                <i class="fa-solid fa-bullhorn text-warning fs-3 mt-1"></i>
-                <div class="flex-grow-1">
-                    <div class="fw-bold text-dark mb-1" style="font-size: 16.5px;">[THÔNG BÁO HỆ THỐNG] ${c2} ${badgeHtml}</div>
-                    <div class="tb-item-dates d-flex align-items-center flex-wrap gap-3" style="font-size: 13px;">
-                        ${dateDisplay}
-                        ${countdownHtml}
-                    </div>
+if (isHeThong) {
+    heThongItemsHtml += `
+    <div class="alert shadow-sm border-danger border-start border-4 mb-4 position-relative" role="alert" style="border-radius: 12px; cursor: pointer; background: linear-gradient(to right, #fff5f5, #ffffff);" onclick="viewThongBaoDetail(${rowIndex})">
+        <div class="d-flex align-items-start gap-3">
+            <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);">
+                <i class="fa-solid fa-triangle-exclamation fs-4 fa-fade"></i>
+            </div>
+            <div class="flex-grow-1 mt-1">
+                <div class="fw-bold text-danger mb-1" style="font-size: 18px; text-transform: uppercase; letter-spacing: 0.5px;">[QUAN TRỌNG] ${c2} ${badgeHtml}</div>
+                <div class="tb-item-dates d-flex align-items-center flex-wrap gap-3" style="font-size: 13.5px; color: #64748b;">
+                    ${dateDisplay}
+                    ${countdownHtml}
                 </div>
             </div>
-            ${isAdmin ? `<div class="mt-2 text-end">${adminHtml}</div>` : ''}
-        </div>`;
-    } else {
+        </div>
+        ${isAdmin ? `<div class="mt-3 text-end pt-2 border-top border-danger-subtle">${adminHtml}</div>` : ''}
+    </div>`;
+} else {
         let itemHtml = `
         <div class="tb-list-item" onclick="viewThongBaoDetail(${rowIndex})">
             <div class="tb-icon-wrapper">
@@ -1618,3 +1620,320 @@ tinymce.init({
         });
     }
 });
+// 1. Hàm hiển thị View Quản lý
+function loadAdminUserManageView() {
+    document.title = "Quản lý Thành viên | Admin";
+    
+    // Gọi hàm reset gốc để ẩn các trang khác
+    resetNavActive();
+    
+    // Đóng dropdown popover nếu đang mở
+    let dropdownMenu = document.querySelector('#sidebarUserInfo .dropdown-menu');
+    if(dropdownMenu) dropdownMenu.classList.remove('show');
+    
+    // Hiển thị section Quản lý
+    $('#adminUserManageSection').removeClass('d-none');
+    
+    // Đóng sidebar trên mobile
+    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
+}
+
+// 2. Chèn logic ẩn Admin Section vào hàm resetNavActive hiện có
+const originalResetNavForAdmin = resetNavActive;
+resetNavActive = function() {
+    originalResetNavForAdmin(); // Gọi lại hàm cũ
+    $('#adminUserManageSection').addClass('d-none'); // Ẩn giao diện quản lý
+};
+
+// 3. Hàm gọi dữ liệu của sinh viên từ Backend
+function adminFetchUserData() {
+    let targetMSSV = $('#adminSearchMSSV').val().trim();
+    if (!targetMSSV) { alert("Vui lòng nhập MSSV!"); $('#adminSearchMSSV').focus(); return; }
+    
+    let area = $('#adminUserDetailArea');
+    area.removeClass('d-none').html('<div class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang lấy dữ liệu hệ thống của ' + targetMSSV + '...</div>');
+    
+    /* 
+       GHI CHÚ BACKEND:
+       Bạn cần tạo endpoint `adminGetUserData` trong Google Apps Script.
+       Nó cần trả về JSON gồm: { tkb: [...], deadlines: [...], registeredCourses: [...] }
+    */
+    
+    $.ajax({
+        url: SCRIPT_URL + "?action=adminGetUserData&targetMssv=" + targetMSSV + "&adminMssv=" + currentUser.mssv,
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            renderAdminUserDetail(targetMSSV, data);
+        },
+        error: function() {
+            // MOCK DATA: Hiển thị giao diện giả lập nếu server chưa có hàm này
+            area.html(`
+                <div class="alert alert-warning fw-bold">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Không thể kết nối hoặc Backend chưa tích hợp hàm <code>adminGetUserData</code>.
+                    Dưới đây là giao diện mẫu (Mock UI):
+                </div>
+                ${generateAdminTablesMockHTML(targetMSSV)}
+            `);
+        }
+    });
+}
+
+// 4. Hàm Render HTML Bảng điều khiển can thiệp
+function generateAdminTablesMockHTML(mssv) {
+    return `
+        <h5 class="text-danger border-bottom border-danger-subtle pb-2 mb-4">
+            <i class="fa-solid fa-user-graduate me-2"></i>Hồ sơ dữ liệu: <span class="fw-bold">${mssv}</span>
+        </h5>
+        
+        <!-- BẢNG 1: THỜI KHÓA BIỂU -->
+        <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+            <h6 class="fw-bold text-primary m-0"><i class="fa-solid fa-calendar-days me-2"></i>Thời khóa biểu cá nhân</h6>
+            <button class="btn btn-sm btn-outline-primary fw-bold"><i class="fa-solid fa-plus"></i> Thêm lịch</button>
+        </div>
+        <div class="table-responsive bg-white rounded border shadow-sm mb-4">
+            <table class="table table-bordered table-hover m-0 align-middle text-center">
+                <thead style="background: #0f4c81; color: white;">
+                    <tr><th>Môn học</th><th>Thứ & Tiết</th><th>Phòng</th><th>Thao tác (Admin)</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-start fw-bold text-primary">Toán rời rạc</td>
+                        <td>Thứ 3 (1-3)</td>
+                        <td>B.112</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning py-1 px-2"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-sm btn-danger py-1 px-2"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    <!-- Data dòng chảy vào đây -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- BẢNG 2: DEADLINES -->
+        <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+            <h6 class="fw-bold text-danger m-0"><i class="fa-solid fa-thumbtack me-2"></i>Deadlines & Sự kiện</h6>
+            <button class="btn btn-sm btn-outline-danger fw-bold"><i class="fa-solid fa-plus"></i> Thêm DL</button>
+        </div>
+        <div class="table-responsive bg-white rounded border shadow-sm mb-4">
+            <table class="table table-bordered table-hover m-0 align-middle text-center">
+                <thead class="bg-danger text-white">
+                    <tr><th>Tiêu đề</th><th>Thời gian</th><th>Thao tác (Admin)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="3" class="text-muted py-3">Chưa có dữ liệu...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    `;
+}
+
+// 5. Hàm Render thực tế khi có Data từ Backend (Hoàn thiện chức năng can thiệp Thêm/Sửa/Xóa)
+function renderAdminUserDetail(mssv, data) {
+    let area = $('#adminUserDetailArea');
+
+    if (!data || data.error) {
+        area.html(
+            '<div class="alert alert-danger fw-bold shadow-sm">' +
+                '<i class="fa-solid fa-triangle-exclamation me-2"></i> Lỗi: ' + (data.error || 'Không thể lấy dữ liệu từ máy chủ.') +
+            '</div>'
+        );
+        return;
+    }
+
+    // ========================================================
+    // BƯỚC 1: Đồng bộ dữ liệu của Sinh viên vào biến toàn cục 
+    // để các Form Sửa gốc của hệ thống có thể hiển thị đúng dữ liệu
+    // ========================================================
+    if (data.tkb) {
+        window.globalTkbData = data.tkb.map(function(row) {
+            return {
+                thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
+                thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: row[5] || "", phong: row[6] || "",
+                gv: row[7] || "", color: row[8] || "#e0f2fe", ngayBatDau: row[9] || "", ngayKetThuc: row[10] || "",
+                ngayNgoaiLe: row[11] || "", sheetRowIndex: row[12], isSystem: String(row[12]).startsWith('SYS_')
+            };
+        });
+    }
+
+    if (data.deadlines) {
+        window.globalDeadlineData = data.deadlines.map(function(row) {
+            return {
+                title: row[1], duration: row[2], tag: row[3], icon: row[4], emoji: row[5],
+                dateStart: row[6] || "", dateEnd: row[7] || "", 
+                sheetRowIndex: row[8], isSystem: String(row[8]).startsWith('SYS_')
+            };
+        });
+    }
+    
+    // ========================================================
+    // BƯỚC 2: CÁC HÀM XỬ LÝ SỰ KIỆN CHO ADMIN 
+    // (Mượn danh MSSV của sinh viên để gửi lệnh lưu/xóa)
+    // ========================================================
+    window.adminOriginalMssv = currentUser.mssv; // Lưu lại MSSV gốc của Admin để dự phòng
+
+    window.adminAddTkb = function(targetMssv) {
+        currentUser.mssv = targetMssv; 
+        openAddTkbModal(false);
+        $('#tkbPersonalModal').one('hidden.bs.modal', function() {
+            currentUser.mssv = window.adminOriginalMssv; // Trả lại MSSV cũ
+            adminFetchUserData(); // Tải lại bảng dữ liệu mới
+        });
+    };
+
+    window.adminEditTkb = function(rowIndex, targetMssv) {
+        currentUser.mssv = targetMssv;
+        openEditTkbModal(rowIndex);
+        $('#tkbPersonalModal').one('hidden.bs.modal', function() {
+            currentUser.mssv = window.adminOriginalMssv;
+            adminFetchUserData();
+        });
+    };
+
+    window.adminDeleteTkb = function(rowIndex, targetMssv) {
+        if(!confirm("Bạn có chắc muốn xóa lịch học này của sinh viên " + targetMssv + "?")) return;
+        postToGAS({ action: "deleteTKBUser", rowIndex: rowIndex, mssv: targetMssv, deleteScope: "all", targetDate: "" }, function(res) {
+            alert(res); adminFetchUserData();
+        }, function() { alert("Lỗi kết nối khi xóa lịch học."); });
+    };
+
+    window.adminAddDeadline = function(targetMssv) {
+        currentUser.mssv = targetMssv;
+        openAddDeadlineModal();
+        $('#deadlinePersonalModal').one('hidden.bs.modal', function() {
+            currentUser.mssv = window.adminOriginalMssv;
+            adminFetchUserData();
+        });
+    };
+
+    window.adminEditDeadline = function(rowIndex, targetMssv) {
+        currentUser.mssv = targetMssv;
+        openEditDeadlineModal(rowIndex);
+        $('#deadlinePersonalModal').one('hidden.bs.modal', function() {
+            currentUser.mssv = window.adminOriginalMssv;
+            adminFetchUserData();
+        });
+    };
+
+    window.adminDeleteDeadline = function(rowIndex, targetMssv) {
+        if(!confirm("Bạn có chắc muốn xóa deadline này của sinh viên " + targetMssv + "?")) return;
+        postToGAS({ action: "deleteDeadlineUser", rowIndex: rowIndex, mssv: targetMssv }, function(res) {
+            alert(res); adminFetchUserData();
+        }, function() { alert("Lỗi kết nối khi xóa deadline."); });
+    };
+
+    // ========================================================
+    // BƯỚC 3: TẠO GIAO DIỆN HIỂN THỊ
+    // ========================================================
+    let html = '';
+    html += '<h5 class="text-danger border-bottom border-danger-subtle pb-2 mb-4">';
+    html += '    <i class="fa-solid fa-user-graduate me-2"></i>Hồ sơ dữ liệu: <span class="fw-bold">' + mssv + '</span>';
+    html += '</h5>';
+    
+    html += '<!-- BẢNG 1: THỜI KHÓA BIỂU -->';
+    html += '<div class="d-flex justify-content-between align-items-center mb-2 mt-4">';
+    html += '    <h6 class="fw-bold text-primary m-0"><i class="fa-solid fa-calendar-days me-2"></i>Thời khóa biểu cá nhân</h6>';
+    html += '    <button class="btn btn-sm btn-outline-primary fw-bold" onclick="adminAddTkb(\'' + mssv + '\')"><i class="fa-solid fa-plus"></i> Thêm lịch</button>';
+    html += '</div>';
+    html += '<div class="table-responsive bg-white rounded border shadow-sm mb-4">';
+    html += '    <table class="table table-bordered table-hover m-0 align-middle text-center">';
+    html += '        <thead style="background: #0f4c81; color: white;">';
+    html += '            <tr>';
+    html += '                <th style="width: 30%;">Môn học</th>';
+    html += '                <th style="width: 25%;">Thứ & Tiết</th>';
+    html += '                <th style="width: 25%;">Phòng / Hình thức</th>';
+    html += '                <th style="width: 20%;">Thao tác</th>';
+    html += '            </tr>';
+    html += '        </thead>';
+    html += '        <tbody>';
+
+    if (data.tkb && data.tkb.length > 0) {
+        data.tkb.forEach(function(row) {
+            let monHoc = row[5] || "Không rõ";
+            let thu = row[0] ? (row[0] == 8 ? "Chủ nhật" : "Thứ " + row[0]) : "-";
+            let tietBd = parseInt(row[1]);
+            let soTiet = parseInt(row[2] || 1);
+            let tietHienThi = !isNaN(tietBd) ? ("(Tiết " + tietBd + " - " + (tietBd + soTiet - 1) + ")") : "";
+            let phongHienThi = row[6] ? row[6] : (row[4] || "-");
+            let sheetRowIndex = row[12] || ""; 
+            let isSystem = String(sheetRowIndex).startsWith('SYS_');
+
+            html += '<tr>';
+            html += '    <td class="text-start fw-bold text-primary">' + monHoc + '</td>';
+            html += '    <td>' + thu + ' <br><small class="text-muted">' + tietHienThi + '</small></td>';
+            html += '    <td class="fw-bold">' + phongHienThi + '</td>';
+            html += '    <td>';
+            
+            // Ẩn nút sửa/xóa đối với các học phần hệ thống
+            if (isSystem) {
+                html += '        <span class="badge bg-secondary" style="font-size: 11px;"><i class="fa-solid fa-lock"></i> Hệ thống (Khóa)</span>';
+            } else {
+                html += '        <button class="btn btn-sm btn-warning py-1 px-2" title="Sửa" onclick="adminEditTkb(\'' + sheetRowIndex + '\', \'' + mssv + '\')"><i class="fa-solid fa-pen"></i> Sửa</button>';
+               // Thay phần xóa Deadline của Admin thành:
+html += '        <button class="btn btn-sm btn-danger py-1 px-2 ms-1" title="Xóa" onclick="adminDeleteDeadline(\'' + sheetRowIndex + '\', \'' + mssv + '\')"><i class="fa-solid fa-trash"></i> Xóa</button>';
+            }
+            
+            html += '    </td>';
+            html += '</tr>';
+        });
+    } else {
+        html += '<tr><td colspan="4" class="text-muted py-4"><i class="fa-regular fa-folder-open fs-3 mb-2"></i><br>Sinh viên chưa có lịch học nào.</td></tr>';
+    }
+
+    html += '        </tbody>';
+    html += '    </table>';
+    html += '</div>';
+
+    html += '<!-- BẢNG 2: DEADLINES -->';
+    html += '<div class="d-flex justify-content-between align-items-center mb-2 mt-4">';
+    html += '    <h6 class="fw-bold text-danger m-0"><i class="fa-solid fa-thumbtack me-2"></i>Deadlines & Sự kiện</h6>';
+    html += '    <button class="btn btn-sm btn-outline-danger fw-bold" onclick="adminAddDeadline(\'' + mssv + '\')"><i class="fa-solid fa-plus"></i> Thêm DL</button>';
+    html += '</div>';
+    html += '<div class="table-responsive bg-white rounded border shadow-sm mb-4">';
+    html += '    <table class="table table-bordered table-hover m-0 align-middle text-center">';
+    html += '        <thead class="bg-danger text-white">';
+    html += '            <tr>';
+    html += '                <th style="width: 35%;">Tiêu đề</th>';
+    html += '                <th style="width: 25%;">Thời gian</th>';
+    html += '                <th style="width: 20%;">Phân loại</th>';
+    html += '                <th style="width: 20%;">Thao tác</th>';
+    html += '            </tr>';
+    html += '        </thead>';
+    html += '        <tbody>';
+
+    if (data.deadlines && data.deadlines.length > 0) {
+        data.deadlines.forEach(function(row) {
+            let tieuDe = row[1] || "Không rõ";
+            let thoiGian = row[2] || "-";
+            let tag = row[3] || "-";
+            let sheetRowIndex = row[8] || ""; 
+            let isSystem = String(sheetRowIndex).startsWith('SYS_');
+
+            html += '<tr>';
+            html += '    <td class="text-start fw-bold">' + tieuDe + '</td>';
+            html += '    <td><span class="text-danger fw-bold">' + thoiGian + '</span></td>';
+            html += '    <td><span class="badge bg-secondary">' + tag + '</span></td>';
+            html += '    <td>';
+            
+            // Ẩn nút sửa/xóa đối với các Deadline hệ thống đồng bộ
+            if (isSystem) {
+                html += '        <span class="badge bg-secondary" style="font-size: 11px;"><i class="fa-solid fa-lock"></i> Hệ thống (Khóa)</span>';
+            } else {
+                html += '        <button class="btn btn-sm btn-warning py-1 px-2" title="Sửa" onclick="adminEditTkb(\'' + sheetRowIndex + '\', \'' + mssv + '\')"><i class="fa-solid fa-pen"></i></button>';
+    html += '        <button class="btn btn-sm btn-danger py-1 px-2 ms-1" title="Xóa" onclick="adminDeleteTkb(\'' + sheetRowIndex + '\', \'' + mssv + '\')"><i class="fa-solid fa-trash"></i></button>';
+            }
+            
+            html += '    </td>';
+            html += '</tr>';
+        });
+    } else {
+        html += '<tr><td colspan="4" class="text-muted py-4"><i class="fa-solid fa-mug-hot fs-3 mb-2"></i><br>Không có deadline nào được ghi nhận.</td></tr>';
+    }
+
+    html += '        </tbody>';
+    html += '    </table>';
+    html += '</div>';
+
+    area.html(html);
+}

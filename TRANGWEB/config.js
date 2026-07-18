@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzvY3U5SQVj0fhUkCFskmHyk9pwOH8vc6idOztgQBNv7hHpMUHe8Yg08GaFtoDpkZWq/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxyj8OYybyeBwsSvWRG6Jl2a40fPtA2DvODVqQgnDYMgMptPdzK80HjWlafAbcrc3PQ/exec'; 
 
      let isAdmin = localStorage.getItem('isAdmin') === 'true';
         let currentSheetName = "";
@@ -144,13 +144,16 @@ $('#profNhom').val(currentUser.nhom || '');
         $('#pageProfileMSSV').text('MSSV: ' + currentUser.mssv);
         
         // Nhận diện Admin để đổi giao diện huy hiệu
-        if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008") {
-            $('#btnAdminLoginToggle').removeClass('d-none').addClass('d-flex');
-            $('#pageProfileRole').removeClass('bg-secondary').addClass('bg-danger').text('Quản trị viên (Admin)');
-        } else {
-            $('#btnAdminLoginToggle').addClass('d-none').removeClass('d-flex');
-            $('#pageProfileRole').removeClass('bg-danger').addClass('bg-secondary').text('Sinh viên');
-        }
+// Sửa lại khối kiểm tra Admin trong hàm renderUserInfo()
+if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008") {
+    $('#btnAdminLoginToggle').removeClass('d-none').addClass('d-flex');
+    $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex'); // Bật nút Quản lý
+    $('#pageProfileRole').removeClass('bg-secondary').addClass('bg-danger').text('Quản trị viên (Admin)');
+} else {
+    $('#btnAdminLoginToggle').addClass('d-none').removeClass('d-flex');
+    $('#btnAdminManageUsers').addClass('d-none').removeClass('d-flex'); // Ẩn nút Quản lý
+    $('#pageProfileRole').removeClass('bg-danger').addClass('bg-secondary').text('Sinh viên');
+}
         
         sidebarUserInfo.removeClass('d-none');
     } else {
