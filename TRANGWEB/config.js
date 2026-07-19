@@ -35,59 +35,110 @@
 
         function clearCacheAndReload() { fetchAndRenderCategories(); }
 
-function submitRowData() {
-            let col1 = $('#txtCol1').val().trim(); let col2 = $('#txtCol2').val().trim(); let col3 = tinymce.get('txtCol3').getContent().trim(); let col4 = $('#txtCol4').val().trim();
-            let col5 = $('#txtCol5').val().trim(); let col6 = $('#txtCol6').val().trim(); let col7 = $('#txtCol7').val().trim();
-tinymce.get('txtCol3').setContent('');
-            if (!col1 && !col2) { alert("Vui lòng nhập nội dung!"); return; }
-            let btn = $('#btnSubmitRow'); btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
-            postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: 1, col1: col1, col2: col2, col3: col3, col4: col4, col5: col5, col6: col6, col7: col7 }, function(response) {
-                alert(response); $('#txtCol1, #txtCol2, #txtCol3, #txtCol4, #txtCol5, #txtCol6, #txtCol7').val(''); btn.html('<i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng').prop('disabled', false); loadDataByHocPhan(currentSheetName);
-            }, function() { alert("Lỗi kết nối!"); btn.html('<i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng').prop('disabled', false); });
-        }
 
-        function submitRowBottomData() {
-            let col1 = $('#txtCol1').val().trim(); let col2 = $('#txtCol2').val().trim(); let col3 = tinymce.get('txtCol3').getContent().trim(); let col4 = $('#txtCol4').val().trim();
-            let col5 = $('#txtCol5').val().trim(); let col6 = $('#txtCol6').val().trim(); let col7 = $('#txtCol7').val().trim();
-tinymce.get('txtCol3').setContent('');
-            if (!col1 && !col2) { alert("Vui lòng nhập nội dung!"); return; }
-            let btn = $('#btnSubmitRowBottom'); btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
-            postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: currentSheetTotalRows, col1: col1, col2: col2, col3: col3, col4: col4, col5: col5, col6: col6, col7: col7 }, function(response) {
-                alert(response); $('#txtCol1, #txtCol2, #txtCol3, #txtCol4, #txtCol5, #txtCol6, #txtCol7').val(''); btn.html('<i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng').prop('disabled', false); loadDataByHocPhan(currentSheetName);
-            }, function() { alert("Lỗi kết nối!"); btn.html('<i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng').prop('disabled', false); });
-        }
-       let insertRowIndexVar = -1;
-        function openInsertRowModal(sheetRowIndex) { 
-            insertRowIndexVar = sheetRowIndex; 
-            $('#insertCol1, #insertCol2, #insertCol3, #insertCol4, #insertCol5, #insertCol6, #insertCol7').val(''); 
-            $('#insertRowModal').modal('show'); 
-        }
+  function submitRowData() {
+    let col1 = $('#txtCol1').val().trim(); 
+    let c2_val = $('#txtCol2').val().trim();
+    let c3_val = tinymce.get('txtCol3').getContent().trim();
+    
+    // Tự động hứng dữ liệu dựa theo vị trí đã đổi
+    let col2 = currentSheetName.toLowerCase() === 'thông báo' ? c2_val : c3_val;
+    let col3 = currentSheetName.toLowerCase() === 'thông báo' ? c3_val : c2_val;
+    
+    let col4 = $('#txtCol4').val().trim(); let col5 = $('#txtCol5').val().trim(); let col6 = $('#txtCol6').val().trim(); let col7 = $('#txtCol7').val().trim();
+    tinymce.get('txtCol3').setContent('');
+    if (!col1 && !col2) { alert("Vui lòng nhập nội dung!"); return; }
+    
+    let btn = $('#btnSubmitRow'); btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
+    postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: 1, col1: col1, col2: col2, col3: col3, col4: col4, col5: col5, col6: col6, col7: col7 }, function(response) {
+        alert(response); $('#txtCol1, #txtCol2, #txtCol4, #txtCol5, #txtCol6, #txtCol7').val(''); btn.html('<i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng').prop('disabled', false); loadDataByHocPhan(currentSheetName);
+    }, function() { alert("Lỗi kết nối!"); btn.html('<i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng').prop('disabled', false); });
+}
 
-        function saveInsertRow() {
-            let c1 = $('#insertCol1').val().trim(); let c2 = $('#insertCol2').val().trim(); let c3 = tinymce.get('insertCol3').getContent().trim(); let c4 = $('#insertCol4').val().trim();
-            let c5 = $('#insertCol5').val().trim(); let c6 = $('#insertCol6').val().trim(); let c7 = $('#insertCol7').val().trim();
-            if (!c1 && !c2) { alert("Vui lòng nhập nội dung!"); return; }
-            let btn = $('#btnSaveInsertRow'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
-            postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: insertRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4, col5: c5, col6: c6, col7: c7 }, res => { alert(res); btn.html('Chèn nội dung').prop('disabled', false); $('#insertRowModal').modal('hide'); loadDataByHocPhan(currentSheetName); });
-        }
-        let editRowIndexVar = -1;
-        function openEditRowModal(sheetRowIndex, c1, c2, c3, c4, c5, c6, c7) { 
-            editRowIndexVar = sheetRowIndex; 
-            $('#editCol1').val(c1); $('#editCol2').val(c2); if (tinymce.get('editCol3')) {
-    tinymce.get('editCol3').setContent(c3);
-} else {
-    $('#editCol3').val(c3);
-}$('#editCol4').val(c4); 
-            $('#editCol5').val(c5); $('#editCol6').val(c6); $('#editCol7').val(c7); 
-            $('#editRowModal').modal('show'); 
-        }
+function submitRowBottomData() {
+    let col1 = $('#txtCol1').val().trim(); 
+    let c2_val = $('#txtCol2').val().trim();
+    let c3_val = tinymce.get('txtCol3').getContent().trim();
+    
+    let col2 = currentSheetName.toLowerCase() === 'thông báo' ? c2_val : c3_val;
+    let col3 = currentSheetName.toLowerCase() === 'thông báo' ? c3_val : c2_val;
+    
+    let col4 = $('#txtCol4').val().trim(); let col5 = $('#txtCol5').val().trim(); let col6 = $('#txtCol6').val().trim(); let col7 = $('#txtCol7').val().trim();
+    tinymce.get('txtCol3').setContent('');
+    if (!col1 && !col2) { alert("Vui lòng nhập nội dung!"); return; }
+    
+    let btn = $('#btnSubmitRowBottom'); btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
+    postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: currentSheetTotalRows, col1: col1, col2: col2, col3: col3, col4: col4, col5: col5, col6: col6, col7: col7 }, function(response) {
+        alert(response); $('#txtCol1, #txtCol2, #txtCol4, #txtCol5, #txtCol6, #txtCol7').val(''); btn.html('<i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng').prop('disabled', false); loadDataByHocPhan(currentSheetName);
+    }, function() { alert("Lỗi kết nối!"); btn.html('<i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng').prop('disabled', false); });
+}
 
-        function saveEditRow() {
-            let c1 = $('#editCol1').val(); let c2 = $('#editCol2').val(); let c3 = tinymce.get('editCol3').getContent().trim(); let c4 = $('#editCol4').val();
-            let c5 = $('#editCol5').val(); let c6 = $('#editCol6').val(); let c7 = $('#editCol7').val();
-            let btn = $('#btnSaveEditRow'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
-            postToGAS({ action: "editSheetRow", sheetName: currentSheetName, rowIndex: editRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4, col5: c5, col6: c6, col7: c7 }, res => { alert(res); btn.html('Lưu thay đổi').prop('disabled', false); $('#editRowModal').modal('hide'); loadDataByHocPhan(currentSheetName); });
-        }
+let insertRowIndexVar = -1;
+function openInsertRowModal(sheetRowIndex) { 
+    insertRowIndexVar = sheetRowIndex; 
+    $('#insertCol1, #insertCol2, #insertCol4, #insertCol5, #insertCol6, #insertCol7').val(''); 
+    if (tinymce.get('insertCol3')) tinymce.get('insertCol3').setContent(''); else $('#insertCol3').val('');
+    
+    if (currentSheetName.toLowerCase() !== 'thông báo') {
+        $('#insertCol3').parent().css('order', '2');
+        $('#insertCol2').parent().css('order', '3');
+    } else {
+        $('#insertCol2').parent().css('order', '2');
+        $('#insertCol3').parent().css('order', '3');
+    }
+    $('#insertRowModal').modal('show'); 
+}
+
+function saveInsertRow() {
+    let c1 = $('#insertCol1').val().trim(); 
+    let c2_input = $('#insertCol2').val().trim();
+    let c3_input = tinymce.get('insertCol3') ? tinymce.get('insertCol3').getContent().trim() : $('#insertCol3').val().trim();
+    
+    let c2 = currentSheetName.toLowerCase() === 'thông báo' ? c2_input : c3_input;
+    let c3 = currentSheetName.toLowerCase() === 'thông báo' ? c3_input : c2_input;
+    
+    let c4 = $('#insertCol4').val().trim(); let c5 = $('#insertCol5').val().trim(); let c6 = $('#insertCol6').val().trim(); let c7 = $('#insertCol7').val().trim();
+    if (!c1 && !c2) { alert("Vui lòng nhập nội dung!"); return; }
+    
+    let btn = $('#btnSaveInsertRow'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+    postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: insertRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4, col5: c5, col6: c6, col7: c7 }, res => { alert(res); btn.html('Chèn nội dung').prop('disabled', false); $('#insertRowModal').modal('hide'); loadDataByHocPhan(currentSheetName); });
+}
+
+let editRowIndexVar = -1;
+function openEditRowModal(sheetRowIndex, c1, c2, c3, c4, c5, c6, c7) { 
+    editRowIndexVar = sheetRowIndex; 
+    $('#editCol1').val(c1); 
+    
+    if (currentSheetName.toLowerCase() === 'thông báo') {
+        $('#editCol2').val(c2); 
+        if (tinymce.get('editCol3')) tinymce.get('editCol3').setContent(c3); else $('#editCol3').val(c3);
+        $('#editCol2').parent().css('order', '2');
+        $('#editCol3').parent().css('order', '3');
+    } else {
+        // Đảo ngược vị trí hiển thị Modal Edit
+        $('#editCol2').val(c3); 
+        if (tinymce.get('editCol3')) tinymce.get('editCol3').setContent(c2); else $('#editCol3').val(c2);
+        $('#editCol3').parent().css('order', '2');
+        $('#editCol2').parent().css('order', '3');
+    }
+    
+    $('#editCol4').val(c4); $('#editCol5').val(c5); $('#editCol6').val(c6); $('#editCol7').val(c7); 
+    $('#editRowModal').modal('show'); 
+}
+
+function saveEditRow() {
+    let c1 = $('#editCol1').val(); 
+    let c2_input = $('#editCol2').val(); 
+    let c3_input = tinymce.get('editCol3') ? tinymce.get('editCol3').getContent().trim() : $('#editCol3').val().trim();
+    
+    let c2 = currentSheetName.toLowerCase() === 'thông báo' ? c2_input : c3_input;
+    let c3 = currentSheetName.toLowerCase() === 'thông báo' ? c3_input : c2_input;
+    
+    let c4 = $('#editCol4').val(); let c5 = $('#editCol5').val(); let c6 = $('#editCol6').val(); let c7 = $('#editCol7').val();
+    
+    let btn = $('#btnSaveEditRow'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
+    postToGAS({ action: "editSheetRow", sheetName: currentSheetName, rowIndex: editRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4, col5: c5, col6: c6, col7: c7 }, res => { alert(res); btn.html('Lưu thay đổi').prop('disabled', false); $('#editRowModal').modal('hide'); loadDataByHocPhan(currentSheetName); });
+}
         function deleteRowItem(sheetRowIndex) { if(!confirm("Bạn có chắc chắn muốn xóa dữ liệu này? Hành động này không thể hoàn tác.")) return; postToGAS({ action: "deleteSheetRow", sheetName: currentSheetName, rowIndex: sheetRowIndex }, res => { alert(res); loadDataByHocPhan(currentSheetName); }); }
         function moveRowItem(sheetRowIndex, direction) { postToGAS({ action: "moveSheetRow", sheetName: currentSheetName, rowIndex: sheetRowIndex, direction: direction }, function(res) { if(res.includes("Lỗi") || res.includes("Đã ở")) alert(res); else loadDataByHocPhan(currentSheetName); }, function() { alert("Lỗi khi di chuyển!"); }); }
         

@@ -266,24 +266,29 @@ function loadDataByHocPhan(sheetName, element) {
             $('#insertCol5, #insertCol6, #insertCol7').parent().show();
             $('#editCol5, #editCol6, #editCol7').parent().show();
             
+            // Xếp đúng thứ tự cho Thông báo
+            $('#txtCol2').parent().css('order', '2');
+            $('#txtCol3').parent().css('order', '3');
+
             $('#txtCol1, #insertCol1, #editCol1').prev('label').text('STT / Trạng thái (Cột 1)');
             $('#txtCol2, #insertCol2, #editCol2').prev('label').text('Tiêu đề (Cột 2)');
             $('#txtCol3, #insertCol3, #editCol3').prev('label').text('Nội dung chi tiết (Cột 3)');
             $('#txtCol4, #insertCol4, #editCol4').prev('label').text('Ngày đăng (Cột 4)');
         } else {
-            // Nếu là Danh mục Học phần -> Ẩn 3 cột dư thừa đi
             $('#txtCol5, #txtCol6, #txtCol7').parent().hide();
             $('#insertCol5, #insertCol6, #insertCol7').parent().hide();
             $('#editCol5, #editCol6, #editCol7').parent().hide();
             
-            // Đổi nhãn theo đúng ý bạn:
+            // Hoán đổi vị trí hiển thị: Textarea (Cột 3) đẩy lên trước, Input (Cột 2) lùi ra sau
+            $('#txtCol3').parent().css('order', '2'); 
+            $('#txtCol2').parent().css('order', '3'); 
+
             $('#txtCol1, #insertCol1, #editCol1').prev('label').text('STT (Cột 1)');
-            $('#txtCol2, #insertCol2, #editCol2').prev('label').text('Tên bài học / Hình thức (Cột 2)');
-            $('#txtCol3, #insertCol3, #editCol3').prev('label').text('Nhập Link tài liệu (Cột 3)');
+            $('#txtCol3, #insertCol3, #editCol3').prev('label').text('Tên bài học / Nội dung (Cột 2)');
+            $('#txtCol2, #insertCol2, #editCol2').prev('label').text('Nhập Link tài liệu (Cột 3)');
             $('#txtCol4, #insertCol4, #editCol4').prev('label').text('Ghi chú (Cột 4)');
         }
-    } 
-    else {
+    } else {
         $('#adminAddRowArea').addClass('d-none');
     }
     
@@ -766,7 +771,7 @@ $('#loadingStatus').addClass('d-none');
                         }
                     });
                 } else {
-                    // LOGIC MỚI CHO DANH MỤC HỌC PHẦN (3 Cột: STT - Tên Bài - Ghi Chú)
+                    // LOGIC MỚI CHO DANH MỤC HỌC PHẦN
                     let c1 = String(row[0] || '').trim(); // Cột 1: STT
                     let c2 = String(row[1] || '').trim(); // Cột 2: Hình thức / Tên bài học
                     let c3 = String(row[2] || '').trim(); // Cột 3: Link
@@ -783,16 +788,28 @@ $('#loadingStatus').addClass('d-none');
                     let _urlRegex = /(https?:\/\/[^\s<"]+)/g; 
                     let extractedUrl = c3.match(_urlRegex) ? c3.match(_urlRegex)[0] : null;
 
-                    // Cột 2: Tên bài học (Có link thì nhấp vào chữ để mở)
-                    let col2Html = c2.replace(/<\/?p>/g, '').trim(); 
-                    if (extractedUrl) {
-                        col2Html = `<span onclick="window.open('${extractedUrl}', '_blank'); event.stopPropagation();" style="cursor: pointer; color: #0284c7; font-weight: 700; text-decoration: underline;" title="Nhấn để xem bài học">${col2Html || "Xem tài liệu"}</span>`;
-                    }
-
                     // Cột 4: Ghi chú (Kiểm tra chữ "Đang cập nhật")
                     let col4Html = c4.replace(/<\/?p>/g, '').trim();
-                    if (col4Html.toLowerCase().includes('đang cập nhật')) {
-                        col4Html = `<span onclick="alert('Chưa tới ngày phát hành'); event.stopPropagation();" style="cursor: pointer; color: #d97706; font-style: italic; font-weight: 600;"><i class="fa-solid fa-clock-rotate-left me-1"></i>${col4Html}</span>`;
+                    let isUpdating = col4Html.toLowerCase().includes('đang cập nhật');
+
+                    // Cột 2: Tên bài học (Không gạch chân link, chặn mở link nếu đang cập nhật)
+                    let col2Html = c2.replace(/<\/?p>/g, '').trim(); 
+                    if (extractedUrl) {
+                        if (isUpdating && !isAdmin) {
+                            // Đang cập nhật + Không phải Admin -> Bấm vào hiện Modal
+                            col2Html = `<span onclick="$('#updatingModal').modal('show'); event.stopPropagation();" style="cursor: pointer; color: #0284c7; font-weight: 700; text-decoration: none;" title="Đang cập nhật">${col2Html || "Đang cập nhật"}</span>`;
+                        } else {
+                            // Bình thường hoặc là Admin -> Mở link thả ga
+                            col2Html = `<span onclick="window.open('${extractedUrl}', '_blank'); event.stopPropagation();" style="cursor: pointer; color: #0284c7; font-weight: 700; text-decoration: none;" title="Nhấn để xem bài học">${col2Html || "Xem tài liệu"}</span>`;
+                        }
+                    }
+
+                    if (isUpdating) {
+                        if (!isAdmin) {
+                            col4Html = `<span onclick="$('#updatingModal').modal('show'); event.stopPropagation();" style="cursor: pointer; color: #d97706; font-style: italic; font-weight: 600;"><i class="fa-solid fa-clock-rotate-left me-1"></i>${col4Html}</span>`;
+                        } else {
+                            col4Html = `<span style="color: #d97706; font-style: italic; font-weight: 600;"><i class="fa-solid fa-clock-rotate-left me-1"></i>${col4Html}</span>`;
+                        }
                     } else if (col4Html !== '') {
                         col4Html = `<span style="color: #64748b; font-size: 14px;">${col4Html}</span>`;
                     }
@@ -802,6 +819,8 @@ $('#loadingStatus').addClass('d-none');
                     bodyHtml += `<td>${col2Html} ${chevronHtml}</td>`;
                     bodyHtml += `<td>${col4Html}</td>`;
                 }
+
+                // (Đoạn Render nút Admin giữ nguyên...)
 
                 // Render nút Admin
                 if (isAdmin) {
@@ -913,6 +932,7 @@ function loadGPAView() {
             method: "GET", 
             dataType: "json",
             success: function(configRes) {
+				
                 if (configRes && configRes !== "") {
                     try {
                         let parsedConfig = typeof configRes === 'string' ? JSON.parse(configRes) : configRes;
@@ -1748,6 +1768,7 @@ function adminFetchUserData() {
         method: "GET",
         dataType: "json",
         success: function(data) {
+			
             renderAdminUserDetail(targetMSSV, data);
         },
         error: function() {
