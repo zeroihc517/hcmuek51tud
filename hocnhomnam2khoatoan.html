@@ -69,7 +69,7 @@
    <i class="fa-solid fa-address-card text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Hồ sơ của tôi
 </button>
 <button id="btnAdminManageUsers" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px;" onclick="loadAdminUserManageView()">
-    <i class="fa-solid fa-users-gear text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý Thành viên (Admin)
+    <i class="fa-solid fa-users-gear text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý Thành viên
 </button>
 <button id="btnAdminMasterTkb" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadAdminMasterTkbView()">
     <i class="fa-solid fa-table-list text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý MasterTKB
@@ -1315,7 +1315,21 @@
     </div>
 </div>
     
-   
+<!-- BẢNG THÔNG BÁO "ĐANG CẬP NHẬT" -->
+<div class="modal fade" id="updatingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <i class="fa-solid fa-person-digging" style="font-size: 50px; color: #0f4c81;"></i>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: #0f4c81;">Đang cập nhật!</h5>
+                <p class="text-muted mb-4" style="font-size: 14.5px;">Tài liệu bài học này đang được đội ngũ biên soạn và sẽ sớm ra mắt. Vui lòng quay lại sau nhé!</p>
+                <button type="button" class="btn fw-bold px-4 py-2 text-white" style="background-color: #0f4c81; border-radius: 50px; box-shadow: 0 4px 10px rgba(15, 76, 129, 0.2);" data-bs-dismiss="modal">Đã rõ</button>
+            </div>
+        </div>
+    </div>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
