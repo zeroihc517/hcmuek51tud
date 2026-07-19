@@ -637,6 +637,7 @@ $('#loadingStatus').addClass('d-none');
             let currentLessonId = 0;
 
             data.forEach((row, rowIndex) => {
+		if (!row || row.length === 0 || row.filter(cell => String(cell).trim() !== "").length === 0) return;
                 let fullRowText = row.join(" ").toLowerCase().replace(/\s+/g, ' '); 
                 let firstCellTextRaw = String(row[0]).trim(); 
                 let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
@@ -771,12 +772,29 @@ $('#loadingStatus').addClass('d-none');
                         }
                     });
                 } else {
-                    // LOGIC MỚI CHO DANH MỤC HỌC PHẦN
+// LOGIC MỚI CHO DANH MỤC HỌC PHẦN
                     let c1 = String(row[0] || '').trim(); // Cột 1: STT
                     let c2 = String(row[1] || '').trim(); // Cột 2: Hình thức / Tên bài học
                     let c3 = String(row[2] || '').trim(); // Cột 3: Link
                     let c4 = String(row[3] || '').trim(); // Cột 4: Ghi chú
                     
+                    // --- BẮT ĐẦU: Xử lý tách Ngày đăng và Ngày cập nhật ---
+                    let dangMatch = c4.match(/ĐĂNG=((?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4})/i);
+                    let updateMatch = c4.match(/UPDATE=((?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4})/i);
+
+                    let dateInfoHtml = '';
+                    if (dangMatch) {
+                        // Áp dụng class tb-date-text chuẩn của mục Thông báo để đóng khung chuyên nghiệp
+                        dateInfoHtml += `<span class="tb-date-text" style="font-size: 12px; font-weight: 600; padding: 2px 8px;"><i class="fa-regular fa-calendar text-primary"></i> Ngày đăng: ${dangMatch[1]}</span>`;
+                        c4 = c4.replace(dangMatch[0], '').trim();
+                    }
+                    if (updateMatch) {
+                        dateInfoHtml += `<span class="tb-date-text text-success" style="font-size: 12px; font-weight: 600; padding: 2px 8px;"><i class="fa-solid fa-clock-rotate-left"></i> Ngày cập nhật: ${updateMatch[1]}</span>`;
+                        c4 = c4.replace(updateMatch[0], '').trim();
+                    }
+                    c4 = c4.replace(/^[\s,\-]+|[\s,\-]+$/g, '');
+                    // --- KẾT THÚC XỬ LÝ ---
+
                     if (isNewRow) c1 = c1.replace(/new/i, '<span class="badge-new">Mới</span>');
                     
                     let chevronHtml = '';
@@ -792,17 +810,36 @@ $('#loadingStatus').addClass('d-none');
                     let col4Html = c4.replace(/<\/?p>/g, '').trim();
                     let isUpdating = col4Html.toLowerCase().includes('đang cập nhật');
 
-                    // Cột 2: Tên bài học (Không gạch chân link, chặn mở link nếu đang cập nhật)
+                    // --- BẮT ĐẦU CỘT 2: TÊN BÀI HỌC VÀ LOGO ---
                     let col2Html = c2.replace(/<\/?p>/g, '').trim(); 
+                    
+                    // Thêm Logo tự động: CHỈ hiện logo file tài liệu cho các hàng nội dung nhỏ bên trong
+                    let lessonIcon = ''; 
+                    if (!isChapter && !isLesson) {
+                        lessonIcon = '<i class="fa-solid fa-file-lines me-2" style="color: #0ea5e9; font-size: 16px;"></i>';
+                    }
+
                     if (extractedUrl) {
                         if (isUpdating && !isAdmin) {
-                            // Đang cập nhật + Không phải Admin -> Bấm vào hiện Modal
-                            col2Html = `<span onclick="$('#updatingModal').modal('show'); event.stopPropagation();" style="cursor: pointer; color: #0284c7; font-weight: 700; text-decoration: none;" title="Đang cập nhật">${col2Html || "Đang cập nhật"}</span>`;
+                            col2Html = `<span onclick="$('#updatingModal').modal('show'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Đang cập nhật">${lessonIcon}${col2Html || "Đang cập nhật"}</span>`;
                         } else {
-                            // Bình thường hoặc là Admin -> Mở link thả ga
-                            col2Html = `<span onclick="window.open('${extractedUrl}', '_blank'); event.stopPropagation();" style="cursor: pointer; color: #0284c7; font-weight: 700; text-decoration: none;" title="Nhấn để xem bài học">${col2Html || "Xem tài liệu"}</span>`;
+                            col2Html = `<span onclick="window.open('${extractedUrl}', '_blank'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem bài học">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;
                         }
+                    } else {
+                        col2Html = `<span style="color: #0f4c81; font-weight: 700;">${lessonIcon}${col2Html}</span>`;
                     }
+
+                    // Gói Tên bài học và Ngày tháng vào chung 1 khối (Hiển thị dọc)
+                    // margin-left: 24px để hàng ngày tháng dịch vào chuẩn tỉ lệ thẳng hàng chữ tiêu đề bài học
+                    let finalCol2 = `
+                       <div class="d-flex flex-column align-items-start" style="gap: 2px;">
+    <div class="d-flex align-items-center">
+        ${col2Html} ${chevronHtml}
+    </div>
+    ${dateInfoHtml ? `<div class="d-flex flex-wrap gap-2 mt-1" style="margin-left: 24px;">${dateInfoHtml}</div>` : ''}
+</div>
+                    `;
+                    // --- KẾT THÚC CỘT 2 ---
 
                     if (isUpdating) {
                         if (!isAdmin) {
@@ -816,9 +853,8 @@ $('#loadingStatus').addClass('d-none');
 
                     // Ghép vào 3 ô TD hiển thị
                     bodyHtml += `<td style="font-weight: 600;">${iconPrefix}${c1}</td>`;
-                    bodyHtml += `<td>${col2Html} ${chevronHtml}</td>`;
-                    bodyHtml += `<td>${col4Html}</td>`;
-                }
+                    bodyHtml += `<td>${finalCol2}</td>`; 
+                    bodyHtml += `<td>${col4Html}</td>`;                }
 
                 // (Đoạn Render nút Admin giữ nguyên...)
 

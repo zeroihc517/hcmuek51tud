@@ -253,16 +253,17 @@
     z-index: 10; 
 }
 
-/* Ô dữ liệu - Thoáng và dễ đọc hơn */
+/* Ô dữ liệu - Điều chỉnh padding nhỏ lại để hàng thon gọn hơn */
 .custom-portal-table td { 
-    padding: 16px 20px; 
-    border-bottom: 1px solid #f1f5f9; /* Đường kẻ ngang nhạt, tinh tế */
+    padding: 10px 20px; /* Giảm padding trên/dưới từ 16px xuống 10px */
+    border-bottom: 1px solid #f1f5f9; 
     font-size: 15px; 
     font-weight: 500; 
     vertical-align: middle; 
     color: #334155; 
     white-space: pre-wrap; 
     word-break: break-word; 
+    line-height: 1.4; /* Thu nhỏ khoảng cách dãn dòng */
 }
 
 /* Hiệu ứng di chuột qua các hàng */
@@ -2024,4 +2025,35 @@ body.dark-mode .tb-detail-main-content table th {
     z-index: 1;
     margin: 0 !important;
     border-radius: 10px;
+}
+
+/* Thu gọn tối đa chiều cao và ép sát khoảng cách của các hàng */
+.custom-portal-table tr {
+    height: auto !important; 
+}
+
+/* Ép padding trên/dưới của các ô nhỏ nhất có thể (chỉ còn 4px) */
+.custom-portal-table td { 
+    padding: 4px 12px !important; 
+    line-height: 1.2 !important; 
+    vertical-align: middle !important;
+}
+
+/* Triệt tiêu mọi khoảng trống từ các khối div hoặc thẻ p (nếu có do copy/paste) */
+.custom-portal-table td .d-flex.flex-column {
+    gap: 0px !important; 
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.custom-portal-table td p {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Phóng to nhẹ chữ Ngày đăng/Ngày cập nhật lên 12.5px hoặc 13px */
+.custom-portal-table .tb-date-text {
+    margin-top: 2px !important;
+    padding: 0 6px !important;
+    font-size: 12.5px !important; /* Đã tăng từ 11.5px lên 12.5px */
+    display: inline-flex !important;
 }
