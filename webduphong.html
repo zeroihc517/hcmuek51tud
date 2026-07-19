@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học nhóm Năm 2 Khoa Toán</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="TRANGWEB/styleweb.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        <div id="autoToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-bold" id="autoToastMessage" style="font-size: 15px;"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+ <div class="mobile-header" style="display: none;">
+    <button class="menu-toggle" id="btnToggleMenu">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+    <h6 class="m-0 fw-bold text-white d-flex align-items-center gap-2" style="font-size: 20px;">
+        <i class="fa-solid fa-layer-group"></i> Học nhóm
+    </h6>
+</div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="app-container" style="display: none;">
+        <aside class="sidebar" id="sidebarMenu">
+            <div class="sidebar-brand">
+                <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <div><h6>Applied mathematics</h6><small>Khoa Toán - Tin học</small></div>
+
+            </div>
+<!-- KHUNG THÔNG TIN CÁ NHÂN & MENU NỔI (POPOVER) -->
+<div id="sidebarUserInfo" class="py-2 px-3 border-bottom d-none position-relative" style="background-color: #f8fafc;">
+    <div class="d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; user-select: none;">
+        <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0" style="width: 36px; height: 36px; background-color: #94a3b8; font-size: 16px;">
+            <i class="fa-solid fa-user"></i>
+        </div>
+<div class="flex-grow-1" style="line-height: 1.3;">
+    <div class="fw-bold" id="sidebarUserName" style="color: #0f4c81; font-size: 14px; word-wrap: break-word;">Tên Sinh Viên</div>
+    <div class="text-muted small" id="sidebarUserMSSV" style="font-size: 12px; word-wrap: break-word;">MSSV</div>
+</div>
+    </div>
+
+    <!-- KHUNG BẢNG NỔI (Dropdown Menu) -->
+    <div class="dropdown-menu shadow-lg border-0 p-3" style="width: 260px; border-radius: 16px; margin-top: 10px; z-index: 1050;">
+        <!-- Tiêu đề Tên - MSSV -->
+        <div class="text-center mb-3 mt-1">
+            <span id="popoverUserTitle" class="fw-bold" style="color: #4b5563; font-size: 14px;">Tên - MSSV</span>
+        </div>
+        
+        <hr class="text-muted mb-2 mt-0" style="opacity: 0.15;">
+        <button id="btnAdminLoginToggle" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px;" onclick="openAdminModal()">
+        <i class="fa-solid fa-user-shield text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Dành cho bản quản trị
+    </button>
+        <!-- Các nút chức năng -->
+<!-- Nút Hồ sơ của tôi trên thanh Sidebar Dropdown -->
+<button class="dropdown-item py-2 mb-1 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadProfileView()">
+   <i class="fa-solid fa-address-card text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Hồ sơ của tôi
+</button>
+<button id="btnAdminManageUsers" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px;" onclick="loadAdminUserManageView()">
+    <i class="fa-solid fa-users-gear text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý Thành viên
+</button>
+<button id="btnAdminMasterTkb" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadAdminMasterTkbView()">
+    <i class="fa-solid fa-table-list text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý MasterTKB
+</button>
+        <button class="dropdown-item py-2 mb-4 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="openChangePasswordModal()">
+            <i class="fa-solid fa-ellipsis text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Đổi mật khẩu
+        </button>
+        
+        <!-- Nút Đăng xuất viền bo tròn -->
+        <button class="btn w-100 fw-bold" onclick="logoutStudent()" style="border: 1.5px solid #0f4c81; color: #0f4c81; border-radius: 25px; font-size: 14px; padding: 8px 0; background-color: transparent; transition: all 0.2s;">
+            Đăng xuất
+        </button>
+    </div>
+</div>           
+<div class="sidebar-content">
+    
+    <!-- KHỐI 1: TRANG CÁ NHÂN -->
+    <div class="portal-filter-box">
+        <label class="portal-label">TRANG CÁ NHÂN</label>
+        <div class="course-list">
+            <button class="btn-course active" id="btnNavThongBao" onclick="loadDataByHocPhan('Thông báo', this)">
+                <i class="fa-solid fa-bell"></i> Thông báo
+            </button>
+            		<button class="btn-course" id="btnNavTongHop" onclick="loadTongHopView()">
+                <i class="fa-solid fa-link"></i> Tổng hợp Link
+            </button>
+            <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
+                <i class="fa-solid fa-calendar"></i> Lịch học
+            </button>
+            
+            <div id="gpaNavContainer" class="d-none">
+                <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
+                    <i class="fa-solid fa-clipboard-check"></i> Kết quả học tập
+                </button>
+            </div>
+            
+
+<button class="btn-course" id="btnNavShareCode" onclick="openShareCodeSection()">
+    <i class="fa-solid fa-laptop-code"></i> Thảo luận
+    <!-- THÊM DÒNG NÀY: Badge thông báo ở thanh menu -->
+    <span id="shareCodeSidebarBadge" class="badge-new-qa d-none">Mới</span>
+</button>
+        </div>
+    </div>
+
+    <!-- KHỐI 2: TRA CỨU THÔNG TIN -->
+    <div class="portal-filter-box mt-4">
+        <label class="portal-label">TỔNG HỢP TÀI LIỆU</label>
+        <div class="course-list">
+            
+            
+            <!-- Danh sách học phần (môn học) sẽ đổ tự động vào đây -->
+            <div id="dynamicCourseList" class="course-list mt-2">
+                <span class="text-muted small px-2">Đang tải danh sách học phần...</span>
+            </div>
+        </div>
+    </div>
+</div>
+        </aside>
+
+        <main class="main-content">
+            
+<div id="tongHopSection" class="d-none">
+    <header class="top-header d-flex justify-content-between align-items-center">
+        <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
+        <!-- Đồng hồ LED ô 1 -->
+        <div class="d-flex align-items-center gap-3 px-3 clock-led-container" style="background: #ffffdf; border: 2px solid #365b82; height: 36px; border-radius: 4px; font-family: 'Chakra Petch', sans-serif; box-shadow: inset 0 0 4px rgba(0,0,0,0.15);">
+            <span class="led-date" style="font-size: 18px; color: #7e4d8c; font-weight: 700; letter-spacing: 0.5px;">--/--/----</span>
+            <div style="width: 1px; height: 18px; background-color: #cbd5e1;"></div>
+            <div class="d-flex align-items-center gap-1" style="font-size: 19px; font-weight: 700;">
+                <span class="led-time-main" style="color: #3b6b94; letter-spacing: 0.5px;">00:00</span>
+                <span style="color: #3b6b94;">:</span>
+                <span class="led-seconds" style="color: #c93b3b; letter-spacing: 0.5px;">00</span>
+                <span class="led-ampm" style="color: #3b6b94; font-size: 16px; margin-left: 4px; text-transform: uppercase;">--</span>
+            </div>
+        </div>
+    </header>
+                <div class="row row-cols-2 row-cols-lg-5 g-4" id="webLinksContainer"></div>
+            </div>
+
+<div id="tkbSection" class="d-none">
+    <header class="top-header d-flex justify-content-between align-items-center">
+        <div class="page-title"><i class="fa-regular fa-calendar-days"></i> Thời gian biểu & Deadlines</div>
+        <!-- Đồng hồ LED ô 2 -->
+        <div class="d-flex align-items-center gap-3 px-3 clock-led-container" style="background: #ffffdf; border: 2px solid #365b82; height: 36px; border-radius: 4px; font-family: 'Chakra Petch', sans-serif; box-shadow: inset 0 0 4px rgba(0,0,0,0.15);">
+            <span class="led-date" style="font-size: 18px; color: #7e4d8c; font-weight: 700; letter-spacing: 0.5px;">--/--/----</span>
+            <div style="width: 1px; height: 18px; background-color: #cbd5e1;"></div>
+            <div class="d-flex align-items-center gap-1" style="font-size: 19px; font-weight: 700;">
+                <span class="led-time-main" style="color: #3b6b94; letter-spacing: 0.5px;">00:00</span>
+                <span style="color: #3b6b94;">:</span>
+                <span class="led-seconds" style="color: #c93b3b; letter-spacing: 0.5px;">00</span>
+                <span class="led-ampm" style="color: #3b6b94; font-size: 16px; margin-left: 4px; text-transform: uppercase;">--</span>
+            </div>
+        </div>
+    </header>
+                <div class="nav-week-container bg-white p-3 rounded border shadow-sm mb-4" style="height: auto;">
+                    <div class="row g-3 w-100 align-items-center m-0">
+                        <div class="col-md-3 ps-0">
+                            <div class="select-floating-box">
+                                <label>Năm học</label>
+                                <select class="form-select" id="namHocSelect" onchange="onNamHocChange()">
+                                    <option value="">-- Chọn năm học --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="select-floating-box">
+                                <label>Học kỳ</label>
+                                <select class="form-select" id="hocKySelect" onchange="onHocKyChange()">
+                                    <option value="">-- Chọn học kỳ --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="select-floating-box">
+                                <label>Tuần</label>
+                                <select class="form-select" id="weekSelect" onchange="onWeekChange()">
+                                    <option value="">-- Chọn tuần --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2 pe-0 d-flex gap-2 justify-content-end">
+                            <button class="btn btn-nav-square" onclick="changeWeekBtn(-1)" title="Tuần trước">
+                                <i class="fa-solid fa-backward-fast"></i>
+                            </button>
+                            <button class="btn btn-nav-square" onclick="changeWeekBtn(1)" title="Tuần sau">
+                                <i class="fa-solid fa-forward-fast"></i>
+                            </button>
+                            <button class="btn btn-hientai d-flex align-items-center justify-content-center gap-2" onclick="jumpToCurrentWeek()" style="flex: 2;">
+                                <i class="fa-regular fa-calendar-days"></i> Hiện tại
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-box">
+                    <table class="sched">
+                        <thead>
+                            <tr id="header-row">
+                                <th>Buổi</th>
+                                <th>Tiết</th>
+                                <th id="th-day-2">Thứ 2</th>
+                                <th id="th-day-3">Thứ 3</th>
+                                <th id="th-day-4">Thứ 4</th>
+                                <th id="th-day-5">Thứ 5</th>
+                                <th id="th-day-6">Thứ 6</th>
+                                <th id="th-day-7">Thứ 7</th>
+                                <th id="th-day-8">Chủ nhật</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tkb-body"></tbody>
+                    </table>
+                </div>
+
+                <div class="online-box d-none mb-5" id="deadlineBox">
+                    <h2 class="online-title d-flex justify-content-between align-items-center mb-4" style="color: #0f4c81;">
+                        <span><i class="fa-solid fa-thumbtack me-2"></i> DEADLINE CỦA TÔI</span>
+                        <button class="btn btn-sm text-white fw-bold shadow-sm px-3" style="background-color: #0f4c81; border-radius: 50px;" onclick="openAddDeadlineModal()"><i class="fa-solid fa-plus"></i> Thêm Deadline</button>
+                    </h2>
+                    <div class="online-grid" id="deadline-container"></div>
+                </div>
+            </div>
+
+<div id="gpaSection" class="d-none">
+    <header class="top-header flex-column align-items-start gap-3">
+        <div class="d-flex justify-content-between w-100 align-items-center">
+            <div class="page-title"><i class="fa-solid fa-calculator"></i> Bảng tính điểm GPA Tích lũy</div>
+            <button class="btn btn-sm btn-outline-secondary fw-bold" onclick="openGpaConfigModal()">
+                <i class="fa-solid fa-gear"></i> Cài đặt Ngành
+            </button>
+        </div>
+        
+        <div id="gpaMajorFilters" class="d-none w-100 d-flex gap-2 p-1 bg-light rounded border">
+            <button class="btn btn-sm flex-fill fw-bold active btn-major-filter" id="filterMajorAll" onclick="setGpaMajorFilter('all')">Tất cả</button>
+            <button class="btn btn-sm flex-fill fw-bold btn-major-filter" id="filterMajor1" onclick="setGpaMajorFilter('1')">Ngành 1</button>
+            <button class="btn btn-sm flex-fill fw-bold btn-major-filter" id="filterMajor2" onclick="setGpaMajorFilter('2')">Ngành 2</button>
+        </div>
+    </header>
+
+    <div class="row g-4 mb-4" id="gpaStatsArea">
+        </div>
+
+    <div class="tb-list-container shadow-sm mb-4 bg-white">
+        <div class="tb-header-blue d-flex justify-content-between align-items-center">
+            <span><i class="fa-solid fa-list-check me-2"></i> Chi tiết học phần</span>
+            <button class="btn btn-sm btn-light fw-bold text-primary" onclick="openAddCourseGPAModal()">
+                <i class="fa-solid fa-plus"></i> Thêm môn học
+            </button>
+        </div>
+        <div id="gpaCourseList" class="p-0">
+            </div>
+    </div>
+</div>
+<!-- KHU VỰC TRANG HỒ SƠ CÁ NHÂN -->
+<div id="profileSection" class="d-none">
+    <header class="top-header d-flex justify-content-between align-items-center">
+        <div class="page-title"><i class="fa-solid fa-address-card"></i> Hồ sơ cá nhân</div>
+    </header>
+    
+    <div class="row g-4 mt-2">
+        <!-- Cột Trái: Ảnh đại diện & Thông tin cơ bản -->
+        <div class="col-12 col-md-4">
+            <div class="data-card p-4 text-center h-100 d-flex flex-column justify-content-center">
+                <div class="mx-auto mb-3 d-flex align-items-center justify-content-center bg-light text-primary shadow-sm" style="width: 120px; height: 120px; border-radius: 50%; font-size: 50px; border: 4px solid #0f4c81;">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <h4 class="fw-bold text-primary mb-1" id="pageProfileName">Đang tải...</h4>
+                <p class="text-muted fw-bold mb-3" id="pageProfileMSSV">MSSV: ---</p>
+                <div class="mb-4">
+                    <span id="pageProfileRole" class="badge bg-secondary px-3 py-2 shadow-sm" style="font-size: 13px;">Sinh viên</span>
+                </div>
+                
+                <hr class="text-muted opacity-25 mt-auto mb-4">
+                
+                <button class="btn btn-outline-primary w-100 fw-bold mb-3" onclick="openChangePasswordModal()" style="border-radius: 8px;">
+                    <i class="fa-solid fa-key me-2"></i>Đổi mật khẩu
+                </button>
+                <button class="btn btn-outline-danger w-100 fw-bold" onclick="logoutStudent()" style="border-radius: 8px;">
+                    <i class="fa-solid fa-right-from-bracket me-2"></i>Đăng xuất
+                </button>
+            </div>
+        </div>
+        
+              <!-- Cột Phải: Chi tiết thông tin học thuật (Cho phép chỉnh sửa) -->
+<div class="col-12 col-md-8">
+    <div class="data-card p-4 p-md-5 h-100">
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+            <h5 class="fw-bold text-primary m-0"><i class="fa-solid fa-circle-info me-2"></i>Thông tin học tập</h5>
+            <button class="btn btn-primary fw-bold px-3 py-2 shadow-sm" onclick="saveUserProfile()" id="btnSaveProfile" style="border-radius: 8px;">
+                <i class="fa-solid fa-floppy-disk me-2"></i>Lưu thay đổi
+            </button>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <label class="text-muted small fw-bold mb-1 text-uppercase">Chuyên ngành</label>
+                <input type="text" id="profChuyenNganh" class="form-control p-3 bg-light border-primary-subtle fw-bold" style="font-size: 15.5px; color: #1e293b; border-radius: 8px;" placeholder="VD: Sư phạm Toán học">
+            </div>
+            <div class="col-md-6">
+                <label class="text-muted small fw-bold mb-1 text-uppercase">Khoa quản lý</label>
+                <input type="text" id="profKhoa" class="form-control p-3 bg-light border-primary-subtle fw-bold" style="font-size: 15.5px; color: #1e293b; border-radius: 8px;" placeholder="VD: Toán-Tin học">
+            </div>
+            <div class="col-md-6">
+                <label class="text-muted small fw-bold mb-1 text-uppercase">Email liên hệ</label>
+                <input type="text" id="profKhoaHoc" class="form-control p-3 bg-light border-primary-subtle fw-bold" style="font-size: 15.5px; color: #1e293b; border-radius: 8px;" placeholder="VD: 123@gmail.com">
+            </div>
+            <div class="col-md-6">
+                <label class="text-muted small fw-bold mb-1 text-uppercase">Song ngành (nếu có)</label>
+                <input type="text" id="profNhom" class="form-control p-3 bg-light border-primary-subtle fw-bold" style="font-size: 15.5px; color: #1e293b; border-radius: 8px;" placeholder=" ">
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+</div>
+<div id="adminUserManageSection" class="d-none">
+        <header class="top-header d-flex justify-content-between align-items-center">
+            <div class="page-title" style="color: var(--accent-red);"><i class="fa-solid fa-users-gear"></i> Quản lý Dữ liệu Thành viên</div>
+        </header>
+        
+        <div class="data-card p-4 mt-3 border-danger-subtle">
+            <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-magnifying-glass"></i> Tra cứu thành viên</h5>
+            <div class="alert alert-light border-danger-subtle text-muted small mb-4">
+                <i class="fa-solid fa-circle-info me-1"></i> Nhập MSSV của sinh viên để xem, thêm, sửa hoặc xóa Thời khóa biểu, Deadline, và Dữ liệu Đăng ký học phần.
+            </div>
+            
+<!-- KHU VỰC QUẢN LÝ THÀNH VIÊN -->
+<div class="input-group mb-4 shadow-sm" style="max-width: 450px;">
+    <span class="input-group-text bg-white border-danger-subtle"><i class="fa-solid fa-users text-muted"></i></span>
+    <select id="adminSearchMSSV" class="form-select border-danger-subtle fw-bold">
+        <option value="">Đang tải danh sách sinh viên...</option>
+    </select>
+    <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="adminFetchUserData()">Tra cứu</button>
+</div>
+            
+            <!-- Nơi đổ dữ liệu chi tiết của Sinh viên -->
+            <div id="adminUserDetailArea" class="d-none mt-4">
+                <!-- Dữ liệu sẽ được JS render vào đây -->
+            </div>
+        </div>
+    </div>
+<!-- KHU VỰC QUẢN LÝ MASTER TKB CHO ADMIN -->
+<div id="adminMasterTkbSection" class="d-none">
+    <header class="top-header d-flex justify-content-between align-items-center">
+        <div class="page-title" style="color: var(--primary-color);">
+            <i class="fa-solid fa-database"></i> Quản lý Dữ liệu MasterTKB
+        </div>
+        <button class="btn btn-primary fw-bold" onclick="openAddMasterTkbModal()">
+            <i class="fa-solid fa-plus"></i> Thêm Học phần mới
+        </button>
+    </header>
+    
+    <div class="data-card p-4 mt-3">
+        <div class="table-responsive border rounded" style="max-height: 600px; overflow-y: auto;">
+            <table class="table table-hover table-bordered align-middle m-0 bg-white">
+                <thead class="text-center bg-primary text-white" style="position: sticky; top: 0; z-index: 10;">
+                    <tr>
+                        <th>Mã HP</th>
+                        <th>Tên Học Phần</th>
+                        <th>Thứ & Tiết</th>
+                        <th>Phòng/Cơ sở</th>
+                        <th>Giảng Viên</th>
+                        <th>Chỉ định SV</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="adminMasterTkbBody">
+                    <tr><td colspan="7" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chỉ định Sinh viên học MasterTKB -->
+<div class="modal fade" id="assignStudentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-users me-2"></i>Chỉ định Sinh viên học phần</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="assignCourseId" value="">
+                <p class="text-muted small">Tích chọn các sinh viên tham gia học phần này. Các sinh viên được chọn sẽ tự động có lịch này trong TKB cá nhân mà không cần tự đồng bộ.</p>
+                <div class="row g-2 mt-2" id="assignStudentList" style="max-height: 400px; overflow-y: auto;">
+                    <!-- Danh sách checkbox sinh viên -->
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-success px-4 fw-bold" onclick="saveAssignedStudents()">Lưu chỉ định</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="gpaCourseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-book me-2"></i>Thông tin học phần</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="gpaEditId" value="">
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Mã HP</label>
+                        <input type="text" id="gpaCourseCode" class="form-control" placeholder="VD: COMP1013">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Tên môn học</label>
+                        <input type="text" id="gpaCourseName" class="form-control" placeholder="VD: Lập trình nâng cao">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Tín chỉ</label>
+                        <input type="number" id="gpaCourseCredits" class="form-control" min="0" value="3">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Phân loại</label>
+                        <select id="gpaCourseType" class="form-select">
+                            <option value="chuyen_nganh">Học phần chuyên ngành</option>
+                            <option value="mon_chung">Môn chung</option>
+                            <option value="ngoai_le">GDTC + GDQP (Không tính GPA)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row g-3 mb-3" id="gpaMajorSelectionGroup" style="display: none;">
+                    <div class="col-12">
+                        <label class="form-label fw-bold text-primary">Thuộc ngành học nào? (Có thể chọn cả 2 nếu được chuyển điểm)</label>
+                        <div class="d-flex gap-4 p-2 bg-light rounded border">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="gpaBelongsToMajor1" value="1" checked>
+                                <label class="form-check-label fw-bold" for="gpaBelongsToMajor1" id="lblMajor1Name">Ngành 1</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="gpaBelongsToMajor2" value="2">
+                                <label class="form-check-label fw-bold" for="gpaBelongsToMajor2" id="lblMajor2Name">Ngành 2</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <div class="mb-3 bg-light p-2 rounded border border-primary-subtle">
+                    <div class="form-check form-switch custom-switch-pro d-flex align-items-center">
+                        <input class="form-check-input shadow-sm me-2" type="checkbox" id="gpaIsRetake" onchange="toggleGPARetakeCols()" style="cursor: pointer; width: 40px; height: 20px;">
+                        <label class="form-check-label fw-bold text-primary" for="gpaIsRetake" style="cursor: pointer; padding-top: 2px;">
+                            <i class="fa-solid fa-rotate-right me-1"></i> Bật chế độ nhập điểm Cải thiện / Học lại (Lần 2, Lần 3)
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label fw-bold m-0 text-danger">Các cột điểm (Tổng % phải = 100%)</label>
+                    <button class="btn btn-sm btn-outline-success fw-bold" onclick="addGPAColumnInput()">
+                        <i class="fa-solid fa-plus"></i> Thêm cột điểm
+                    </button>
+                </div>
+                
+                <div id="gpaColumnsContainer" class="d-flex flex-column gap-2 mb-2">
+                    </div>
+                <small id="gpaPercentWarning" class="text-danger fw-bold d-none">Tổng tỷ lệ phần trăm đang khác 100%!</small>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveGPACourse()" id="btnSaveGPA">Lưu học phần</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="gpaConfigModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-secondary text-white">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-gear me-2"></i>Cài đặt Song ngành</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="form-check form-switch custom-switch-pro mb-3">
+                    <input class="form-check-input shadow-sm" type="checkbox" id="enableDoubleMajor" onchange="toggleDoubleMajorConfig()" style="cursor: pointer; width: 40px; height: 20px;">
+                    <label class="form-check-label fw-bold ms-2 mt-1" for="enableDoubleMajor">Có học Ngành 2</label>
+                </div>
+                
+                <div id="doubleMajorConfigArea" class="d-none">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Tên Ngành 1</label>
+                        <input type="text" id="configMajor1Name" class="form-control fw-bold" placeholder="VD: Sư phạm Toán">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold small text-muted">Tên Ngành 2</label>
+                        <input type="text" id="configMajor2Name" class="form-control fw-bold" placeholder="VD: Ngôn ngữ Anh">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary px-4 fw-bold w-100" onclick="saveGpaConfig()">Lưu cài đặt</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="courseSection">
+    <header class="top-header d-flex justify-content-between align-items-center">
+        <div class="page-title"><i class="fa-solid fa-book-open"></i> Học nhóm - Năm 2 - Khoa Toán-Tin học</div>
+        
+        <!-- Đồng hồ LED 7-Segment Ngang Hàng Tối Giản -->
+        <div class="d-flex align-items-center gap-3 px-3" style="background: #ffffdf; border: 2px solid #365b82; height: 36px; border-radius: 4px; font-family: 'Chakra Petch', sans-serif; box-shadow: inset 0 0 4px rgba(0,0,0,0.15);">
+            <!-- Ô Ngày (Chữ màu Tím) -->
+            <span id="ledDate" style="font-size: 18px; color: #7e4d8c; font-weight: 700; letter-spacing: 0.5px;">14/07/2026</span>
+            
+            <!-- Vạch phân cách đứng -->
+            <div style="width: 1px; height: 18px; background-color: #cbd5e1;"></div>
+            
+            <!-- Khung Thời gian ngang hàng (Giờ : Phút : Giây AM/PM) -->
+            <div class="d-flex align-items-center gap-1" style="font-size: 19px; font-weight: 700;">
+                <!-- Giờ : Phút (Màu xanh denim) -->
+                <span id="ledTimeMain" style="color: #3b6b94; letter-spacing: 0.5px;">08:37</span>
+                <span style="color: #3b6b94;">:</span>
+                <!-- Giây (Màu đỏ tươi, cùng kích cỡ, đứng ngang hàng) -->
+                <span id="ledSeconds" style="color: #c93b3b; letter-spacing: 0.5px;">52</span>
+                <!-- Ký hiệu AM/PM (Màu xanh denim) -->
+                <span id="ledAmpm" style="color: #3b6b94; font-size: 16px; margin-left: 4px; text-transform: uppercase;">AM</span>
+            </div>
+        </div>
+    </header>
+<div id="adminAddRowArea" class="instructor-card d-none mb-3" style="border-left-color: var(--accent-red); padding: 24px;">
+    <h6 class="mb-3" style="color: var(--accent-red);"><i class="fa-solid fa-bullhorn"></i> Ban Quản Trị - Thêm Nội Dung Mới</h6>
+    <div class="row g-3 mb-3">
+        <div class="col-md-2">
+            <label class="form-label fw-bold small text-muted">STT / Trạng thái (Cột 1)</label>
+            <input type="text" id="txtCol1" class="form-control" placeholder="VD: 1, 2 hoặc NEW...">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Tiêu đề (Cột 2)</label>
+            <input type="text" id="txtCol2" class="form-control" placeholder="Nhập tiêu đề học phần/thông báo...">
+        </div>
+<div class="col-md-6">
+    <label class="form-label fw-bold small text-muted">Nội dung chi tiết (Cột 3)</label>
+    <textarea id="txtCol3" class="form-control" rows="3" placeholder="Nhập nội dung chi tiết bài viết..."></textarea>
+</div>
+        <div class="col-md-3">
+            <label class="form-label fw-bold small text-muted">Ngày đăng (Cột 4)</label>
+            <input type="text" id="txtCol4" class="form-control" placeholder="VD: 02/07/2026">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label fw-bold small text-muted">Ngày cập nhật (Cột 5)</label>
+            <input type="text" id="txtCol5" class="form-control" placeholder="Để trống nếu chưa có">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label fw-bold small text-muted">Đường link đính kèm (Cột 6)</label>
+            <input type="text" id="txtCol6" class="form-control" placeholder="https://...">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label fw-bold small text-muted">Ghi chú (Cột 7)</label>
+            <input type="text" id="txtCol7" class="form-control" placeholder="Ghi chú thêm...">
+        </div>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mt-2">
+        <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="submitRowData()" id="btnSubmitRow">
+            <i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng
+        </button>
+        <button class="btn btn-outline-danger fw-bold px-4" onclick="submitRowBottomData()" id="btnSubmitRowBottom">
+            <i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng
+        </button>
+    </div>
+</div>
+
+<div class="modal fade" id="insertRowModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-success text-white">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-plus me-2"></i>Chèn dữ liệu xuống dưới hàng này</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label fw-bold">STT / Trạng thái (Cột 1)</label><input type="text" id="insertCol1" class="form-control"></div>
+                    <div class="col-md-8"><label class="form-label fw-bold">Tiêu đề (Cột 2)</label><input type="text" id="insertCol2" class="form-control"></div>
+                    <div class="col-12"><label class="form-label fw-bold">Nội dung chi tiết (Cột 3)</label><textarea id="insertCol3" class="form-control" rows="3"></textarea></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">Ngày đăng (Cột 4)</label><input type="text" id="insertCol4" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">Ngày cập nhật (Cột 5)</label><input type="text" id="insertCol5" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">Đường link đính kèm (Cột 6)</label><input type="text" id="insertCol6" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">Ghi chú (Cột 7)</label><input type="text" id="insertCol7" class="form-control"></div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success px-4 fw-bold" onclick="saveInsertRow()" id="btnSaveInsertRow">Chèn nội dung</button>
+            </div>
+        </div>
+    </div>
+</div>
+<button id="btnOpenChat" class="btn-open-chat d-none" onclick="toggleChat()">
+    <i class="fa-solid fa-comment-dots"></i>
+    <span class="chat-badge" id="chatUnreadBadge">!</span>
+</button>
+<div id="chatWidget" class="chat-widget d-none">
+    <div class="chat-header" onclick="toggleChat()">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-comments"></i>
+            <h6 class="m-0 fw-bold">Phòng Chat Chung</h6>
+        </div>
+        <i class="fa-solid fa-chevron-down"></i>
+    </div>
+    <div class="chat-body" id="chatBody">
+        <div class="text-center text-muted small my-3"><i class="fa-solid fa-lock me-1"></i> ----- Đang tải dữ liệu ----</div>
+    </div>
+    <div class="chat-footer">
+        <input type="text" id="txtChatMessage" class="form-control" placeholder="Nhập tin nhắn..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+        <button class="btn btn-chat-send" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+</div>
+<div class="modal fade" id="editRowModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa thông tin hàng dữ liệu</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label fw-bold">STT / Trạng thái (Cột 1)</label><input type="text" id="editCol1" class="form-control"></div>
+                    <div class="col-md-8"><label class="form-label fw-bold">Tiêu đề (Cột 2)</label><input type="text" id="editCol2" class="form-control"></div>
+                    <div class="col-12"><label class="form-label fw-bold">Nội dung chi tiết (Cột 3)</label><textarea id="editCol3" class="form-control" rows="3"></textarea></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">Ngày đăng (Cột 4)</label><input type="text" id="editCol4" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">Ngày cập nhật (Cột 5)</label><input type="text" id="editCol5" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">Đường link đính kèm (Cột 6)</label><input type="text" id="editCol6" class="form-control"></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">Ghi chú (Cột 7)</label><input type="text" id="editCol7" class="form-control"></div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditRow()" id="btnSaveEditRow">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+                <div id="instructorArea" class="d-none"></div>
+<div id="examCardsContainer" class="grid-7-cols mb-4 d-none">
+        <!-- Các thẻ bài kiểm tra sẽ được Javascript chèn vào đây -->
+    </div>
+                <div class="data-card" id="mainDataCard">
+                    <div id="loadingStatus" class="pulse-loader">
+                        <div class="spinner-modern"></div>
+                        <span class="text-muted fw-bold" style="font-size: 16px;">Đang tải dữ liệu...</span>
+                    </div>
+
+                    <div id="swipeHint" class="d-none d-lg-none text-center py-2 fw-bold" style="font-size: 13px; color: var(--accent-red); background: var(--exam-bg); border-bottom: 1px dashed var(--exam-border);">
+                        <i class="fa-solid fa-arrows-left-right fa-fade me-1"></i> Vuốt ngang, phóng to nhỏ để xem hết các cột/nội dung
+                    </div>
+
+                    <div id="tableWrapper" class="table-responsive d-none border-0">
+                        <table class="custom-portal-table">
+                            <thead><tr id="sheetTableHead"></tr></thead>
+                            <tbody id="sheetTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+<div id="qaSection" class="d-none">
+    <header class="top-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-light fw-bold shadow-sm me-3" onclick="openShareCodeSection()">
+                <i class="fa-solid fa-arrow-left"></i> Trở lại
+            </button>
+            <div class="page-title m-0"><i class="fa-regular fa-comments"></i> Hỗ trợ & Giải đáp thắc mắc</div>
+        </div>
+        <!-- Đồng hồ LED ô 3 -->
+        <div class="d-flex align-items-center gap-3 px-3 clock-led-container" style="background: #ffffdf; border: 2px solid #365b82; height: 36px; border-radius: 4px; font-family: 'Chakra Petch', sans-serif; box-shadow: inset 0 0 4px rgba(0,0,0,0.15);">
+            <span class="led-date" style="font-size: 18px; color: #7e4d8c; font-weight: 700; letter-spacing: 0.5px;">--/--/----</span>
+            <div style="width: 1px; height: 18px; background-color: #cbd5e1;"></div>
+            <div class="d-flex align-items-center gap-1" style="font-size: 19px; font-weight: 700;">
+                <span class="led-time-main" style="color: #3b6b94; letter-spacing: 0.5px;">00:00</span>
+                <span style="color: #3b6b94;">:</span>
+                <span class="led-seconds" style="color: #c93b3b; letter-spacing: 0.5px;">00</span>
+                <span class="led-ampm" style="color: #3b6b94; font-size: 16px; margin-left: 4px; text-transform: uppercase;">--</span>
+            </div>
+        </div>
+    </header>
+
+                <div class="instructor-card border-start-0" style="border-top: 4px solid var(--primary-color);">
+                    <h6 class="mb-3">Đặt câu hỏi cho Admin</h6>
+                    <div class="row mb-3 align-items-end">
+    <!-- Cột chứa MSSV (Chiếm 4 phần trên PC) -->
+    <div class="col-12 col-md-4 mb-3 mb-md-0">
+        <label class="form-label fw-bold" style="font-size: 14.5px; color: #475569;"><i class="fa-solid fa-id-card me-1"></i> MSSV / Email</label>
+        <input type="text" id="txtMSSV" class="form-control p-2.5 fw-bold" placeholder="Nhập mã số sinh viên/email" maxlength="65" style="border-radius: 8px; border-color: #cbd5e1;">
+    </div>
+    
+    <!-- Cột chứa Chọn Chủ Đề (Chiếm 8 phần còn lại trên PC) -->
+<div class="col-12 col-md-8">
+    <label class="form-label fw-bold text-primary" style="font-size: 14.5px;"><i class="fa-solid fa-tags me-1"></i> Chủ đề câu hỏi</label>
+    
+    <!-- Tạo một hàng chứa 2 cột con -->
+    <div class="row g-2">
+        <!-- Cột Trái: Học phần chuyên môn -->
+        <div class="col-md-6">
+            <select id="qaTopicHocPhan" class="form-select p-2.5 fw-bold" style="border-radius: 8px; border-color: #cbd5e1; color: #334155;" onchange="handleTopicSelection('hocphan')">
+                <option value="">-- 📚 Học phần chuyên môn --</option>
+                <option value="MATH1417-Hình học vi phân">MATH1417-Hình học vi phân</option>
+                <option value="APMA1803-Cấu trúc đại số và ứng dụng">APMA1803-Cấu trúc đại số và ứng dụng</option>
+                <option value="MATH1817-Phương trình vi phân và đạo hàm riêng">MATH1817-Phương trình vi phân và đạo hàm riêng</option>
+                <option value="MATH1413-Độ đo và tích phân">MATH1413-Độ đo và tích phân</option>
+                <option value="APMA1817-Toán rời rạc">APMA1817-Toán rời rạc</option>
+            </select>
+        </div>
+        
+        <!-- Cột Phải: Hỗ trợ & Học vụ -->
+        <div class="col-md-6">
+            <select id="qaTopicHoTro" class="form-select p-2.5 fw-bold" style="border-radius: 8px; border-color: #cbd5e1; color: #334155;" onchange="handleTopicSelection('hotro')">
+                <option value="">-- 📌 Hỗ trợ & Học vụ --</option>
+                <option value="Hệ thống">Hệ thống</option>
+                <option value="Đăng ký học phần">Đăng ký học phần</option>
+                <option value="Chương trình đào tạo">Chương trình đào tạo</option>
+                <option value="Tốt nghiệp">Tốt nghiệp</option>
+                <option value="Kết quả học tập">Kết quả học tập</option>
+                <option value="Kết quả rèn luyện">Kết quả rèn luyện</option>
+                <option value="Sự kiện">Sự kiện</option>
+                <option value="Khác">Khác (Vui lòng ghi rõ)</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Ô nhập text ẩn -->
+    <input type="text" id="qaTopicOther" class="form-control p-2.5 mt-2 d-none" style="border-radius: 8px; border-color: #cbd5e1;" placeholder="Vui lòng ghi rõ chủ đề của bạn...">
+</div>
+</div>
+                    <!-- Nút chuyển đổi chế độ -->
+
+
+<!-- Khung 1: Nhập văn bản thường (Giữ nguyên của bạn) -->
+<textarea id="txtQuestion" class="form-control mb-3 p-3" rows="3" placeholder="Nhập câu hỏi hoặc vướng mắc của bạn tại đây... Bạn có thể nhập công thức Toán học bằng cách gõ LaTeX, ví dụ: $\int_{0}^{y} f(x) dx$"></textarea>
+
+<!-- Khung 2: Nhập Code (Ace Editor sẽ chèn vào đây) -->
+<div id="codeEditorContainer" class="mb-3 d-none" style="height: 250px; border: 1px solid #ced4da; border-radius: 8px;"></div>
+                    <button class="btn btn-primary fw-bold px-4 py-2" onclick="sendQuestion()" id="btnSubmitQ" style="background: var(--primary-color); border:none;">
+                        <i class="fa-solid fa-paper-plane me-2"></i> Gửi câu hỏi
+                    </button>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+    <h5 class="fw-bold m-0 text-primary">Các câu hỏi gần đây</h5>
+    
+    <!-- Bộ lọc và Tìm kiếm -->
+    <div class="d-flex gap-2">
+<select id="filterQATopic" class="form-select form-select-sm" style="border-radius: 8px; width: auto; font-weight: 600;" onchange="searchQA()">
+    <option value="">-- Tất cả chủ đề --</option>
+    
+    <optgroup label="📚 Học phần chuyên môn">
+        <option value="MATH1417-Hình học vi phân">MATH1417-Hình học vi phân</option>
+        <option value="APMA1803-Cấu trúc đại số và ứng dụng">APMA1803-Cấu trúc đại số và ứng dụng</option>
+        <option value="MATH1817-Phương trình vi phân và đạo hàm riêng">MATH1817-Phương trình vi phân và đạo hàm riêng</option>
+        <option value="MATH1413-Độ đo và tích phân">MATH1413-Độ đo và tích phân</option>
+        <option value="APMA1817-Toán rời rạc">APMA1817-Toán rời rạc</option>
+    </optgroup>
+
+    <optgroup label="📌 Hỗ trợ & Học vụ">
+        <option value="Hệ thống">Hệ thống</option>
+        <option value="Đăng ký học phần">Đăng ký học phần</option>
+        <option value="Chương trình đào tạo">Chương trình đào tạo</option>
+        <option value="Tốt nghiệp">Tốt nghiệp</option>
+        <option value="Kết quả học tập">Kết quả học tập</option>
+        <option value="Kết quả rèn luyện">Kết quả rèn luyện</option>
+        <option value="Sự kiện">Sự kiện</option>
+        <option value="khác">Các chủ đề khác</option>
+    </optgroup>
+</select>
+        
+        <div class="input-group input-group-sm" style="width: 220px;">
+            <input type="text" id="txtSearchQA" class="form-control" placeholder="Tìm kiếm câu hỏi..." onkeyup="searchQA()" style="border-radius: 8px 0 0 8px;">
+            <button class="btn text-white fw-bold" onclick="searchQA()" style="background: var(--primary-color); border: none; border-radius: 0 8px 8px 0;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </div>
+        
+        <button class="btn btn-sm btn-light border" onclick="loadQAData()" style="border-radius: 8px;" title="Làm mới">
+            <i class="fa-solid fa-rotate-right"></i>
+        </button>
+    </div>
+</div>
+                
+                <div id="qaLoadingStatus" class="pulse-loader d-none">
+                    <div class="spinner-modern" style="width: 30px; height: 30px; border-width: 3px;"></div>
+                </div>
+                
+                <div id="qaListArea"></div>
+            </div>
+			
+<div id="shareCodeSection" class="d-none">
+    <header class="top-header d-flex justify-content-between align-items-center">
+        <div class="page-title"><i class="fa-solid fa-code-branch text-success"></i> Thảo luận</div>
+        <!-- Đồng hồ LED ô 4 -->
+        <div class="d-flex align-items-center gap-3 px-3 clock-led-container" style="background: #ffffdf; border: 2px solid #365b82; height: 36px; border-radius: 4px; font-family: 'Chakra Petch', sans-serif; box-shadow: inset 0 0 4px rgba(0,0,0,0.15);">
+            <span class="led-date" style="font-size: 18px; color: #7e4d8c; font-weight: 700; letter-spacing: 0.5px;">--/--/----</span>
+            <div style="width: 1px; height: 18px; background-color: #cbd5e1;"></div>
+            <div class="d-flex align-items-center gap-1" style="font-size: 19px; font-weight: 700;">
+                <span class="led-time-main" style="color: #3b6b94; letter-spacing: 0.5px;">00:00</span>
+                <span style="color: #3b6b94;">:</span>
+                <span class="led-seconds" style="color: #c93b3b; letter-spacing: 0.5px;">00</span>
+                <span class="led-ampm" style="color: #3b6b94; font-size: 16px; margin-left: 4px; text-transform: uppercase;">--</span>
+            </div>
+        </div>
+    </header>
+
+  <!-- MÀN HÌNH 1: CHỌN HỌC PHẦN -->
+<div id="shareCategoryView">
+
+    <!-- HÀNG 1: CÁC KÊNH HỖ TRỢ CHUNG -->
+<div class="row row-cols-2 row-cols-lg-5 g-4 mb-5">
+        
+        <!-- Thẻ 1: Giải đáp thắc mắc -->
+        <div class="col">
+            <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid var(--primary-color);" onclick="openQASection()">
+                <div class="icon-box position-relative">
+                    <i class="fa-solid fa-comments" style="color: var(--primary-color);"></i>
+                    <span id="qaSidebarBadge" class="badge-new-qa d-none" style="position: absolute; top: -5px; right: -25px; padding: 2px 6px;">Mới</span>
+                </div>
+                <div class="card-text-wrapper">
+                    <h5>Giải đáp thắc mắc</h5>
+                    <p class="card-desc">Hỏi đáp & Hỗ trợ chung</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thẻ 2: Cộng đồng Messenger -->
+        <div class="col">
+            <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #0084ff;" onclick="window.open('https://m.me/cm/Abb7rwbcNinBoSRr/?send_source=cm%3Acopy_invite_link', '_blank')">
+                <div class="icon-box"><i class="fa-brands fa-facebook-messenger" style="color: #0084ff; font-size: 42px;"></i></div>
+                <div class="card-text-wrapper">
+                    <h5>Cộng đồng Messenger</h5>
+                    <p class="card-desc">Trao đổi bài tập Toán</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Thẻ 3: Google Classroom (Dành cho tất cả sinh viên) -->
+        <div class="col">
+            <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #f59e0b;" onclick="window.open('https://classroom.google.com/c/ODI0MjY2NDc0OTQx?cjc=fmvongzm', '_blank')">
+                <div class="icon-box"><i class="fa-solid fa-chalkboard-user" style="color: #f59e0b;"></i></div>
+                <div class="card-text-wrapper">
+                    <h5 class="text-dark">Google Classroom</h5>
+                    <p class="card-desc">Tham gia lớp học để mở khóa các tài liệu trên website này</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- HÀNG 2: CÁC HỌC PHẦN CHIA SẺ CODE -->
+    <h6 class="text-muted fw-bold mb-3"><i class="fa-solid fa-code me-2"></i>Không gian Code</h6>
+   <div class="row row-cols-2 row-cols-lg-5 g-4 mb-4">
+        
+        <!-- Thẻ 4: Lập trình Hướng đối tượng -->
+        <div class="col">
+            <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid var(--primary-color);" onclick="openShareCategory('Lập trình hướng đối tượng', 'cpp')">
+                <div class="icon-box"><i class="fa-solid fa-cubes" style="color: var(--primary-color);"></i></div>
+                <div class="card-text-wrapper">
+                    <h5>Lập trình Hướng đối tượng</h5>
+                    <p class="card-desc">Ngôn ngữ C++ / OOP</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Thẻ 5: Cấu trúc dữ liệu -->
+        <div class="col">
+            <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid var(--primary-color);" onclick="openShareCategory('Cấu trúc dữ liệu', 'cpp')">
+                <div class="icon-box"><i class="fa-solid fa-network-wired" style="color: var(--primary-color);"></i></div>
+                <div class="card-text-wrapper">
+                    <h5>Cấu trúc dữ liệu</h5>
+                    <p class="card-desc">C++ / Thuật toán</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Thẻ 6: Lập trình Python -->
+        <div class="col">
+            <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid var(--primary-color);" onclick="openShareCategory('Lập trình Python', 'python')">
+                <div class="icon-box"><i class="fa-brands fa-python" style="color: var(--primary-color);"></i></div>
+                <div class="card-text-wrapper">
+                    <h5>Lập trình Python</h5>
+                    <p class="card-desc">Python cơ bản & nâng cao</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+  <!-- MÀN HÌNH 2: KHU VỰC SHARE CODE CỦA MÔN HỌC (Ẩn mặc định) -->
+    <div id="shareContentView" class="d-none">
+        <div class="d-flex align-items-center mb-4">
+            <button class="btn btn-light fw-bold shadow-sm me-3" onclick="backToShareCategories()">
+                <i class="fa-solid fa-arrow-left"></i> Trở lại
+            </button>
+            <h5 class="fw-bold m-0 text-primary" id="currentShareTitle">Tên môn học</h5>
+        </div>
+
+        <div class="instructor-card border-start-0" style="border-top: 4px solid var(--primary-color);">
+            <h6 class="mb-3 text-primary" id="shareCodeFormTitle"><i class="fa-solid fa-pen-nib me-2"></i>Soạn thảo Code mới</h6>
+            <div class="row g-3 mb-3">
+                <div class="col-md-5">
+                    <input type="text" id="txtMSSVShareCode" class="form-control p-2.5 fw-bold" placeholder="Nhập MSSV/Email">
+                </div>
+                <!-- BỔ SUNG Ô NHẬP MÃ BÀI -->
+                <div class="col-md-4">
+                    <input type="text" id="txtMaBai" class="form-control p-2.5 fw-bold" placeholder="Nhập Mã bài (Ví dụ: B01)">
+                </div>
+            </div>
+            
+            <div id="shareCodeEditorContainer" class="mb-3" style="height: 250px; border: 1px solid #ced4da; border-radius: 8px;"></div>
+            
+            <button class="btn fw-bold px-4 py-2 text-white" onclick="sendShareCode()" id="btnSubmitShareCode" style="background: var(--primary-color); border:none;">
+                <i class="fa-solid fa-share-nodes me-2"></i> Chia sẻ Code này
+            </button>
+            <button class="btn fw-bold px-4 py-2 btn-light border d-none" onclick="cancelEditShareCode()" id="btnCancelEditCode">Hủy sửa</button>
+        </div>
+
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3 mt-4">
+            <h5 class="fw-bold m-0" style="color: var(--primary-color);">Các đoạn Code đã chia sẻ</h5>
+            <div class="d-flex gap-2">
+                <div class="input-group input-group-sm" style="width: 220px;">
+                    <input type="text" id="txtSearchShareCode" class="form-control" placeholder="Tìm mã bài..." onkeyup="if(event.key === 'Enter') searchShareCode()">
+                    <button class="btn text-white fw-bold" onclick="searchShareCode()" style="background: var(--primary-color); border: none;"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </div>
+                <button class="btn btn-sm btn-light border" onclick="loadShareCodeData()"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+        </div>
+        
+        <div id="shareCodeLoadingStatus" class="pulse-loader d-none">
+            <div class="spinner-modern" style="width: 30px; height: 30px; border-width: 3px; border-top-color: var(--primary-color);"></div>
+        </div>
+        <div id="shareCodeListArea"></div>
+    </div>
+</div>
+
+            <footer class="fixed-bottom-footer">
+                <div class="footer-info-left">
+                    <span id="footerOnlineStatus" style="font-size: 12px; color: #bae6fd;">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh sách...
+                    </span>
+                </div>
+                
+
+            </footer>
+        </main>
+    </div>
+
+   <div class="modal fade" id="userAuthModal" tabindex="-1" aria-hidden="true">
+       <div class="modal-dialog modal-dialog-centered" style="max-width: 550px;">
+            <div class="modal-content auth-modal-content border-0">
+                <div class="auth-header">
+                    <div class="auth-header-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <h4 class="fw-bold mb-1">Cổng Sinh Viên</h4>
+                    <p class="mb-0" style="font-size: 14.5px; opacity: 0.9;">Đăng nhập để xem thời gian biểu và học liệu</p>
+                </div>
+                <div class="modal-body p-4 p-sm-5 pt-4">
+                    <ul class="nav auth-tabs nav-justified" id="authTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login-pane" type="button" role="tab">Đăng nhập</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="authTabContent">
+                        <div class="tab-pane fade show active" id="login-pane" role="tabpanel">
+                            <div id="savedAccountsContainer"></div>
+                            <div class="input-icon-wrapper">
+                                <input type="text" id="txtUserMSSV" class="form-control" placeholder="Mã số sinh viên (VD: 51.01.101.000)">
+                                <i class="fa-solid fa-id-card"></i>
+                            </div>
+                            <div class="input-icon-wrapper">
+                                <input type="password" id="txtUserPass" class="form-control" placeholder="Mật khẩu (Lần đầu là: 123)">
+                                <i class="fa-solid fa-lock"></i>
+                            </div>
+                            <small class="text-danger text-center d-block d-none mt-1 mb-3 fw-bold" id="userAuthError"></small>
+                            <button type="button" class="btn btn-primary w-100 btn-auth mt-2" onclick="loginStudent()" id="btnLoginStudent">
+                                Đăng nhập ngay
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-header text-white" style="background-color: #0f4c81; border-top-left-radius: 20px; border-top-right-radius: 20px;">
+                    <h6 class="modal-title m-0 fw-bold text-center w-100 text-uppercase"><i class="fa-solid fa-shield-halved me-2"></i>Đổi mật khẩu</h6>
+                    <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 p-md-5">
+                    <div class="form-floating form-floating-custom mb-4 position-relative">
+                        <input type="password" id="txtOldPass" class="form-control" placeholder="Mật khẩu cũ">
+                        <label for="txtOldPass">Mật khẩu cũ</label>
+                        <i class="fa-solid fa-eye eye-icon" onclick="togglePassword('txtOldPass', this)"></i>
+                    </div>
+                    <div class="form-floating form-floating-custom mb-4 position-relative">
+                        <input type="password" id="txtNewPass" class="form-control" placeholder="Mật khẩu mới">
+                        <label for="txtNewPass">Mật khẩu mới</label>
+                        <i class="fa-solid fa-eye eye-icon" onclick="togglePassword('txtNewPass', this)"></i>
+                    </div>
+                    <div class="form-floating form-floating-custom mb-3 position-relative">
+                        <input type="password" id="txtConfirmPass" class="form-control" placeholder="Nhập lại mật khẩu mới">
+                        <label for="txtConfirmPass">Nhập lại mật khẩu mới</label>
+                        <i class="fa-solid fa-eye eye-icon" onclick="togglePassword('txtConfirmPass', this)"></i>
+                    </div>
+                    <small class="text-danger d-block d-none mt-2 fw-bold text-center" id="changePassError"></small>
+                </div>
+                <div class="modal-footer border-0 d-flex justify-content-center pb-4">
+                    <button type="button" class="btn text-white fw-bold w-100 mx-3" style="background-color: #0f4c81; border-radius: 50px; height: 50px; font-size: 16px;" onclick="submitChangePassword()" id="btnConfirmChangePass">Đổi mật khẩu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+<div class="modal fade" id="manageTkbListModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header text-white" style="background-color: #0f4c81;">
+                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học - Sửa nhanh</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle tkb-mgr-table m-0 bg-white">
+                            <thead class="text-center text-white">
+    <tr>
+        <th style="width: 12%;">Môn học</th>
+        <th style="width: 10%;">Ghi chú</th>
+        <th>Thứ</th>
+        <th style="width: 10%;">Cơ sở</th>
+        <th style="width: 11%;">Thời gian</th>
+        <th style="width: 14%;">Ngày học</th>
+        <th style="width: 12%;">Phòng</th>
+        <th>Giảng viên</th>
+        <th>Thao tác</th>
+    </tr>
+</thead>
+                            <tbody id="tkbManagerListBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="tkbPersonalModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header text-white" id="tkbModalHeader" style="background-color: #0f4c81;">
+                    <h6 class="modal-title m-0 fw-bold" id="tkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <input type="hidden" id="pTkbRowIndex" value="">
+                    <div class="row g-3">
+                        <div class="col-md-4"><label class="form-label fw-bold">Thứ (VD: 2, 4, 8)</label><input type="text" id="pTkbThu" class="form-control" value="2"></div>
+                        <div class="col-md-4"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="pTkbTiet" class="form-control" min="1" max="15" value="1"></div>
+                        <div class="col-md-4"><label class="form-label fw-bold">Số tiết</label><input type="number" id="pTkbSoTiet" class="form-control" min="1" max="5" value="3"></div>
+                        <div class="col-12 d-none" id="tkbOverlapAlert">
+                            <div class="alert alert-danger d-flex align-items-center m-0 py-2 px-3" style="border-radius: 8px; font-size: 14.5px; font-weight: 600;">
+                                <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
+                                <span id="tkbOverlapMessage"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label fw-bold">Tên học phần</label>
+                            <input type="text" id="pTkbMon" class="form-control" placeholder="VD: Hình học vi phân">
+                            <div class="mt-2 d-flex gap-2 flex-wrap">
+                                <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Quá trình')">Kiểm tra Quá trình</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Giữa học phần')">Kiểm tra Giữa kỳ</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Kết thúc học phần')">Kiểm tra Cuối kỳ</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6"><label class="form-label fw-bold">Phòng học</label><input type="text" id="pTkbPhong" class="form-control" placeholder="VD: B.112"></div>
+                        <div class="col-md-4"><label class="form-label fw-bold">Thời gian (Giờ)</label><input type="text" id="pTkbThoiGian" class="form-control" placeholder="VD: 6:30-9:00"></div>
+                        <div class="col-md-4"><label class="form-label fw-bold">Cơ sở/Hình thức</label><input type="text" id="pTkbHinhThuc" class="form-control" placeholder="VD: An Dương Vương / Học online / ..."></div>
+                        <div class="col-md-4"><label class="form-label fw-bold text-primary">Đường link địa điểm (nếu có)</label><input type="text" id="pTkbLink" class="form-control" placeholder="https://..."></div>
+                        <div class="col-md-4"><label class="form-label fw-bold">Giảng viên</label><input type="text" id="pTkbGV" class="form-control" placeholder="VD: Nguyễn Văn A"></div>
+                        <div class="col-md-4"><label class="form-label fw-bold">Màu nền lịch</label><input type="color" id="pTkbColor" class="form-control form-control-color w-100" value="#e0f2fe"></div>
+                        <div class="col-md-4"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="pTkbNgayBD" class="form-control" placeholder="DD/MM/YYYY"></div>
+                        <div class="col-md-4"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="pTkbNgayKT" class="form-control" placeholder="DD/MM/YYYY"></div>
+                        <div class="col-md-8"><label class="form-label fw-bold text-danger">Ngày nghỉ / Ngoại lệ</label><input type="text" id="pTkbNgoaiLe" class="form-control" placeholder="VD: 15/04/2026, 01/05/2026"></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn text-white px-4 fw-bold" style="background-color: #0f4c81;" onclick="promptSavePersonalTkb()" id="btnSavePersonalTkb">Lưu thông tin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deadlinePersonalModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+                <div class="modal-header text-white" id="dlModalHeader" style="background-color: #0f4c81; border-top-left-radius: 20px; border-top-right-radius: 20px; position: relative;">
+                    <h6 class="modal-title m-0 fw-bold text-center w-100 text-uppercase" id="dlModalTitle"><i class="fa-solid fa-plus me-2"></i>Thêm Deadline</h6>
+                    <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 p-md-5">
+                    <input type="hidden" id="pDlRowIndex" value="">
+                    
+                    <div class="form-floating form-floating-custom mb-4">
+                        <input type="text" id="pDlTitle" class="form-control" placeholder="Tên công việc / Bài tập">
+                        <label for="pDlTitle">Tên công việc / Bài tập</label>
+                    </div>
+                    
+                    <div class="form-floating form-floating-custom mb-4">
+                        <input type="text" id="pDlTag" class="form-control" placeholder="Hình thức / Địa điểm (VD: VLE)">
+                        <label for="pDlTag">Hình thức / Địa điểm (VD: VLE)</label>
+                    </div>
+                    
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="form-floating form-floating-custom">
+                                <select id="pDlIcon" class="form-select" style="border-radius: 50px !important; padding-left: 1.5rem; height: 58px;">
+                                    <option value="fire">Đỏ (Gấp)</option>
+                                    <option value="alert">Vàng</option>
+                                    <option value="success">Xanh lá</option>
+                                    <option value="primary">Xanh dương</option>
+                                    <option value="secondary">Tím</option>
+                                </select>
+                                <label for="pDlIcon" style="padding-left: 1.5rem;">Màu nền</label>
+                            </div>
+                        </div>
+<div class="col-6">
+    <div class="form-floating form-floating-custom">
+        <!-- Đổi thành input kết nối với datalist qua id "emojiOptions" -->
+        <input type="text" list="emojiOptions" id="pDlEmoji" class="form-control" placeholder="Biểu tượng" autocomplete="off">
+        <label for="pDlEmoji">Biểu tượng</label>
+        
+        <!-- Danh sách gợi ý thả xuống -->
+        <datalist id="emojiOptions">
+            <option value="⏰">Việc cá nhân</option>
+            <option value="🚨">Khẩn cấp</option>
+            <option value="📚">Bài tập</option>
+            <option value="💻">Lập trình / C++</option>
+            <option value="✍️">Kiểm tra</option>
+            <option value="🎯">Mục tiêu</option>
+            <option value="👥">Họp nhóm</option>
+            <option value="📢">Thuyết trình</option>
+            <option value="📝">Báo cáo</option>
+	    <option value="📣">Sự kiện</option>
+            <option value="🌐">Hệ thống VLE</option>
+        </datalist>
+    </div>
+</div>
+</div>
+                    
+                    <div class="row g-3 mb-2">
+                        <div class="col-6">
+                            <div class="form-floating form-floating-custom">
+                                <input type="text" id="pDlStartDate" class="form-control" placeholder="Từ ngày (DD/MM/YYYY)">
+                                <label for="pDlStartDate">Từ ngày</label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-floating form-floating-custom">
+                                <input type="text" id="pDlEndDate" class="form-control" placeholder="Đến ngày (DD/MM/YYYY)">
+                                <label for="pDlEndDate">Đến ngày</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center"><small class="text-muted" style="font-size: 12px;">Định dạng ngày chuẩn: <b>DD/MM/YYYY</b> (Ví dụ: 15/10/2026)</small></div>
+                </div>
+                <div class="modal-footer border-0 d-flex justify-content-center pb-4">
+                    <button type="button" class="btn text-white fw-bold w-100 mx-3" style="background-color: #0f4c81; border-radius: 50px; height: 50px; font-size: 16px;" onclick="savePersonalDeadline()" id="btnSaveDeadline">Lưu Deadline</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow"><div class="modal-header bg-primary text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-user-shield me-2"></i>Xác thực Quản trị viên</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><label class="form-label fw-bold">Mật khẩu truy cập</label><input type="password" id="txtAdminPass" class="form-control"><small class="text-danger d-none mt-2 fw-bold" id="adminLoginError">Mật khẩu không chính xác!</small></div><div class="modal-footer border-0"><button type="button" class="btn btn-primary px-4 fw-bold" onclick="verifyAdmin()">Đăng nhập</button></div></div></div></div>
+    <div class="modal fade" id="insertRowModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-success text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-plus me-2"></i>Chèn nội dung xuống dưới hàng này</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="insertCol1" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="insertCol2" class="form-control" rows="3"></textarea></div><div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="insertCol3" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="insertCol4" class="form-control"></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-success px-4 fw-bold" onclick="saveInsertRow()" id="btnSaveInsertRow">Chèn nội dung</button></div></div></div></div>
+    <div class="modal fade" id="editRowModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa nội dung</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="editCol1" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="editCol2" class="form-control" rows="3"></textarea></div><div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="editCol3" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="editCol4" class="form-control"></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditRow()" id="btnSaveEditRow">Lưu thay đổi</button></div></div></div></div>
+    <div class="modal fade" id="editQAModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa câu trả lời Q&A</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Nội dung câu trả lời</label><textarea id="editQAText" class="form-control" rows="6"></textarea></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditQA()" id="btnSaveEditQA">Lưu thay đổi</button></div></div></div></div>
+
+   <div class="modal fade" id="systemTkbModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl"> 
+        <div class="modal-content border-0 shadow">
+            
+            <!-- Đổi màu Header trùng với TKB (màu xanh #0f4c81) -->
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-cloud-arrow-down me-2"></i>Đăng ký Học phần từ Hệ thống</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body p-4">
+                <div class="alert alert-light border mb-3 d-flex align-items-start gap-3" style="border-color: #0f4c81 !important;">
+                    <i class="fa-solid fa-circle-info fs-4 mt-1" style="color: #0f4c81;"></i>
+                    <p class="m-0 small text-muted">
+                        <strong class="text-dark">Hướng dẫn:</strong> Tích chọn vào ô vuông ở cột đầu tiên để đăng ký các học phần bạn đang theo học. Bạn không thể chỉnh sửa lịch học của những học phần này. Muốn xóa thì vào đây tích không chọn nữa.
+                    </p>
+                </div>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="select-floating-box">
+                            <label>Năm học</label>
+                            <select class="form-select" id="sysNamHocFilter" onchange="renderSystemCoursesList()">
+                                <option value="">-- Tất cả năm học --</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="select-floating-box">
+                            <label>Học kỳ</label>
+                            <select class="form-select" id="sysHocKyFilter" onchange="renderSystemCoursesList()">
+                                <option value="">-- Tất cả học kỳ --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="table-responsive border rounded" style="max-height: 450px; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+                    <table class="table table-hover table-bordered align-middle m-0 bg-white system-tkb-table" style="font-size: 14px;">
+                        <thead class="text-center" style="position: sticky; top: 0; z-index: 10;">
+                            <tr>
+                                <th style="width: 50px;">Chọn</th>
+                                <th>Mã HP</th>
+                                <th style="width: 22%;">Tên Học Phần</th>
+                                <th>Cơ sở</th>
+                                <th>Phòng</th>
+                                <th>Thứ & Tiết</th>
+                                <th>Giảng Viên</th>
+                                <th>Ngày học</th>
+                            </tr>
+                        </thead>
+                        <tbody id="systemCoursesContainer">
+                            <tr>
+                                <td colspan="8" class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải dữ liệu hệ thống...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <!-- Đổi màu nút bấm -->
+                <button type="button" class="btn text-white px-4 fw-bold" style="background-color: #0f4c81;" onclick="saveSystemTkbSelection()" id="btnSaveSystemTkb">Đồng bộ lịch học</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="modal fade" id="eventScopeModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-light">
+                    <h6 class="modal-title fw-bold text-dark"><i class="fa-solid fa-layer-group text-primary me-2"></i>Chỉnh sửa sự kiện lặp</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-3">
+                    <p class="text-muted small mb-3">Sự kiện này lặp lại nhiều lần. Bạn muốn thay đổi phạm vi nào?</p>
+                    <div class="d-flex flex-column gap-2">
+                        <button class="btn btn-outline-primary fw-bold text-start" onclick="submitEventScope('single')"><i class="fa-solid fa-calendar-day me-2"></i>Chỉ sự kiện này</button>
+                        <button class="btn btn-outline-primary fw-bold text-start" onclick="submitEventScope('future')"><i class="fa-solid fa-calendar-arrow-down me-2"></i>Sự kiện này và về sau</button>
+                        <button class="btn btn-outline-primary fw-bold text-start" onclick="submitEventScope('all')"><i class="fa-solid fa-calendar-days me-2"></i>Tất cả các sự kiện</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<div class="modal fade" id="masterTkbFormModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h6 class="modal-title m-0 fw-bold" id="masterTkbModalTitle">Thông tin Học phần MasterTKB</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label fw-bold">Mã học phần (Khóa)</label><input type="text" id="mId" class="form-control"></div>
+                    <div class="col-md-8"><label class="form-label fw-bold">Tên học phần</label><input type="text" id="mMon" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Thứ (2->8)</label><input type="number" id="mThu" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="mTietBd" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Số tiết</label><input type="number" id="mSoTiet" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Phòng</label><input type="text" id="mPhong" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Giờ học (VD: 13:00-15:30)</label><input type="text" id="mThoiGian" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Hình thức/Cơ sở</label><input type="text" id="mHinhThuc" class="form-control"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Giảng viên phụ trách</label><input type="text" id="mGv" class="form-control"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Năm học</label><input type="text" id="mNamHoc" class="form-control" placeholder="2025-2026"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Học kỳ</label><input type="text" id="mHocKy" class="form-control" placeholder="Học kì 1"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="mNgayBD" class="form-control" placeholder="DD/MM/YYYY"></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="mNgayKT" class="form-control" placeholder="DD/MM/YYYY"></div>
+                    <div class="col-md-9"><label class="form-label fw-bold text-danger">Ngày ngoại lệ (Nghỉ)</label><input type="text" id="mNgoaiLe" class="form-control" placeholder="Cách nhau bằng dấu phẩy..."></div>
+                    <div class="col-md-3"><label class="form-label fw-bold">Màu sắc đổ lịch</label><input type="color" id="mColor" class="form-control form-control-color w-100" value="#e0f2fe"></div>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary px-4 fw-bold" onclick="saveMasterTkbForm()">Lưu dữ liệu</button>
+            </div>
+        </div>
+    </div>
+</div>
+    
+<!-- BẢNG THÔNG BÁO "ĐANG CẬP NHẬT" -->
+<div class="modal fade" id="updatingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <i class="fa-solid fa-person-digging" style="font-size: 50px; color: #0f4c81;"></i>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: #0f4c81;">Đang cập nhật!</h5>
+                <p class="text-muted mb-4" style="font-size: 14.5px;">Tài liệu bài học này đang được đội ngũ biên soạn và sẽ sớm ra mắt. Vui lòng quay lại sau nhé!</p>
+                <button type="button" class="btn fw-bold px-4 py-2 text-white" style="background-color: #0f4c81; border-radius: 50px; box-shadow: 0 4px 10px rgba(15, 76, 129, 0.2);" data-bs-dismiss="modal">Đã rõ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
+<script src="TRANGWEB/config.js"></script>
+    <script src="TRANGWEB/Xulyxacthuc.js"></script>
+    <script src="TRANGWEB/tkb.js"></script>
+    <script src="TRANGWEB/qa.js"></script>
+    <script src="TRANGWEB/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+</body>
+</html>
