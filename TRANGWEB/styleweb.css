@@ -1,7 +1,8 @@
         :root {
-            --sidebar-width: 230px;
-            --primary-color: #154c79; 
-            --primary-hover: #0f395c;
+--sidebar-width: 200px; 
+    
+    --primary-color: #154c79; 
+    --primary-hover: #0f395c;
             --primary-light: #e8f1f8;
             --accent-red: #e61d4a; 
             --text-main: #1f2937;
@@ -158,17 +159,20 @@
 .btn-course { 
     background: transparent !important; 
     border: none !important; 
-    padding: 10px 12px; /* Giảm padding để nút thon gọn lại */
+    
+    /* Giảm padding để thu hẹp khoảng cách bên trong nút */
+    padding: 8px 10px; 
+    
     border-radius: 8px; 
     text-align: left; 
-    font-size: 14px; /* Giảm nhẹ font chữ xuống 14px */
+    font-size: 13.5px; /* Có thể giảm nhẹ kích cỡ chữ */
     font-weight: 500; 
     color: #6b7280; 
     cursor: pointer; 
     transition: all 0.2s ease; 
     display: flex; 
     align-items: center; 
-    gap: 12px; /* Rút ngắn khoảng cách giữa icon và chữ */
+    gap: 10px; /* Rút ngắn khoảng cách giữa icon và chữ */
     box-shadow: none !important;
 }
 .btn-course i {

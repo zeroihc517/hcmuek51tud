@@ -655,7 +655,7 @@ $('#loadingStatus').addClass('d-none');
                 }
                 
                 // 2. Trích xuất thông tin giảng viên
-                if (/mãhp|họcphần|gv\d|giảngviên|email|facebook|sốtínchỉ/.test(fullRowText.replace(/\s+/g, ''))) { 
+                if (/mãhp|họcphần|gv\d|giảngviên|email|thôngbáo|sốtínchỉ/.test(fullRowText.replace(/\s+/g, ''))) { 
                     let info = row.filter(cell => String(cell).trim() !== "").join(" <span class='mx-2 text-black-50'>|</span> "); 
                     if(info) instructorInfos.push(info); 
                     return; 
@@ -1057,14 +1057,22 @@ function computeStatsForDataset(dataset) {
             let currentScore10 = 0;
             let hasAnyColumn = course.columns.length > 0;
 
-            course.columns.forEach(col => {
-                let val = parseFloat(col['score' + i]);
-                if(isNaN(val) || col['score' + i] === '') { 
-                    hasAllScores = false; 
-                } else {
-                    currentScore10 += (val * col.percent) / 100;
-                }
-            });
+course.columns.forEach(col => {
+    let val = parseFloat(col['score' + i]);
+    
+    // Tương thích ngược: Ưu tiên đọc % của lần thi hiện tại (percent1, percent2...), 
+    // nếu không có thì lấy % dùng chung (percent) của cấu trúc cũ.
+    let percentVal = parseFloat(col['percent' + i]);
+    if (isNaN(percentVal)) {
+        percentVal = parseFloat(col.percent) || 0;
+    }
+
+    if(isNaN(val) || col['score' + i] === '') { 
+        hasAllScores = false; 
+    } else {
+        currentScore10 += (val * percentVal) / 100;
+    }
+});
 
             if(hasAllScores && hasAnyColumn) {
                 let conv = convertGradeToSystem(currentScore10, course.type);
@@ -1306,18 +1314,36 @@ function renderGPAList(syncToServer = true) {
                     ? "text-muted" 
                     : (c.passed ? "text-dark" : "text-danger");
                 
-                let subRows = '';
-                c.columns.forEach((col, i) => {
-                    subRows += `
-                    <tr style="border-bottom: 1px solid #e2e8f0; background: #fff; height: 60px;">
-                        <td class="text-center" style="padding: 22px 16px; border-right: 1px solid #e2e8f0; color: #4b5563; font-size: 15px;">${i + 1}</td>
-                        <td class="text-start" style="padding: 22px 16px; border-right: 1px solid #e2e8f0; color: #1e293b; font-weight: 600; font-size: 15px;">${col.name}</td>
-                        <td class="text-center" style="padding: 22px 16px; border-right: 1px solid #e2e8f0; color: #4b5563; font-size: 15px;">${col.percent}%</td>
-                        <td class="text-center" style="padding: 22px 16px; border-right: 1px solid #e2e8f0; font-weight: 600; color: #1e293b; font-size: 15px;">${col.score1 || ''}</td>
-                        <td class="text-center" style="padding: 22px 16px; border-right: 1px solid #e2e8f0; font-weight: 600; color: #1e293b; font-size: 15px;">${col.score2 || ''}</td>
-                        <td class="text-center" style="padding: 22px 16px; font-weight: 600; color: #1e293b; font-size: 15px;">${col.score3 || ''}</td>
-                    </tr>`;
-                });
+             let subRows = '';
+c.columns.forEach((col, i) => {
+    let p1 = col.percent1 !== undefined ? col.percent1 : (col.percent || 0);
+    let p2 = col.percent2 !== undefined ? col.percent2 : (col.percent || 0);
+    let p3 = col.percent3 !== undefined ? col.percent3 : (col.percent || 0);
+
+    subRows += `
+    <tr style="border-bottom: 1px solid #e2e8f0; background: #fff; height: 60px;">
+        <td class="text-center" style="padding: 16px; border-right: 1px solid #e2e8f0; color: #4b5563; font-size: 15px;">${i + 1}</td>
+        <td class="text-start" style="padding: 16px; border-right: 1px solid #e2e8f0; color: #1e293b; font-weight: 600; font-size: 15px;">${col.name}</td>
+        
+        <!-- Cột 3: Trọng số Lần 1 -->
+        <td class="text-center" style="padding: 16px; border-right: 1px solid #e2e8f0; color: #4b5563; font-size: 15px;">${p1 > 0 ? p1 + '%' : '-'}</td>
+        
+        <!-- Cột 4: Điểm Lần 1 -->
+        <td class="text-center" style="padding: 16px; border-right: 1px solid #e2e8f0; font-weight: 600; color: #1e293b; font-size: 15px;">${col.score1 || ''}</td>
+        
+        <!-- Cột 5: Trọng số Lần 2 -->
+        <td class="text-center" style="padding: 16px; border-right: 1px solid #e2e8f0; color: #4b5563; font-size: 15px;">${p2 > 0 ? p2 + '%' : '-'}</td>
+        
+        <!-- Cột 6: Điểm Lần 2 -->
+        <td class="text-center" style="padding: 16px; border-right: 1px solid #e2e8f0; font-weight: 600; color: #166534; font-size: 15px;">${col.score2 || ''}</td>
+        
+        <!-- Cột 7: Trọng số Lần 3 -->
+        <td class="text-center" style="padding: 16px; border-right: 1px solid #e2e8f0; color: #4b5563; font-size: 15px;">${p3 > 0 ? p3 + '%' : '-'}</td>
+        
+        <!-- Cột 8: Điểm Lần 3 -->
+        <td class="text-center" style="padding: 16px; font-weight: 600; color: #d97706; font-size: 15px;">${col.score3 || ''}</td>
+    </tr>`;
+});
 
                 let courseCode = c.code || '-';
                 let titleDetail = c.code ? `${c.code} - ${c.name}` : c.name;
@@ -1365,7 +1391,9 @@ function renderGPAList(syncToServer = true) {
                                                     <th class="text-start" style="padding: 20px 16px; font-weight: 600; border-right: 1px solid rgba(255,255,255,0.15); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Tên thành phần</th>
                                                     <th class="text-center" style="padding: 20px 16px; font-weight: 600; width: 14%; border-right: 1px solid rgba(255,255,255,0.15); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Trọng số</th>
                                                     <th class="text-center" style="padding: 20px 16px; font-weight: 600; width: 14%; border-right: 1px solid rgba(255,255,255,0.15); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Điểm lần 1</th>
+                                                    <th class="text-center" style="padding: 20px 16px; font-weight: 600; width: 14%; border-right: 1px solid rgba(255,255,255,0.15); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Trọng số</th>
                                                     <th class="text-center" style="padding: 20px 16px; font-weight: 600; width: 14%; border-right: 1px solid rgba(255,255,255,0.15); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Điểm lần 2</th>
+                                                    <th class="text-center" style="padding: 20px 16px; font-weight: 600; width: 14%; border-right: 1px solid rgba(255,255,255,0.15); font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Trọng số</th>
                                                     <th class="text-center" style="padding: 20px 16px; font-weight: 600; width: 14%; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Điểm lần 3</th>
                                                 </tr>
                                             </thead>
@@ -1391,32 +1419,49 @@ function toggleGPARetakeCols() {
     let isRetake = $('#gpaIsRetake').is(':checked');
     if (isRetake) {
         $('.gpa-col-s2-wrapper, .gpa-col-s3-wrapper').removeClass('d-none');
-        $('.gpa-col-s1-wrapper').removeClass('col-md-5').addClass('col-md-2');
+        $('.gpa-col-s1-wrapper').removeClass('col-md-5').addClass('col-md-3');
     } else {
         $('.gpa-col-s2-wrapper, .gpa-col-s3-wrapper').addClass('d-none');
-        $('.gpa-col-s1-wrapper').removeClass('col-md-2').addClass('col-md-5');
+        $('.gpa-col-s1-wrapper').removeClass('col-md-3').addClass('col-md-5');
     }
 }
 
-function addGPAColumnInput(name = '', percent = '', s1 = '', s2 = '', s3 = '') {
+// Bổ sung thêm p1, p2, p3 vào tham số
+function addGPAColumnInput(name = '', p1 = '', p2 = '', p3 = '', s1 = '', s2 = '', s3 = '') {
     let colId = 'col_' + Math.random().toString(36).substr(2, 9);
     let isRetake = $('#gpaIsRetake').is(':checked');
-    let s1Class = isRetake ? 'col-md-2' : 'col-md-5';
+    
+    // Điều chỉnh độ rộng Lần 1 khi tắt/mở chế độ học lại
+    let s1Class = isRetake ? 'col-md-3' : 'col-md-5'; 
     let retakeClass = isRetake ? '' : 'd-none';
 
     let html = `
     <div class="col-grade-input row g-2 align-items-center mb-2" id="${colId}">
-        <div class="col-md-3"><input type="text" class="form-control form-control-sm gpa-col-name fw-bold" placeholder="Tên (VD: Giữa kỳ)" value="${name}"></div>
         <div class="col-md-2">
-            <div class="input-group input-group-sm">
-                <input type="number" class="form-control gpa-col-percent fw-bold text-center" placeholder="Tỉ lệ" value="${percent}">
-                <span class="input-group-text bg-light">%</span>
-            </div>
+            <input type="text" class="form-control form-control-sm gpa-col-name fw-bold" placeholder="Tên cột" value="${name}">
         </div>
-        <div class="${s1Class} gpa-col-s1-wrapper"><input type="number" step="0.1" class="form-control form-control-sm gpa-col-s1 fw-bold text-center text-primary" placeholder="Điểm L1" value="${s1}"></div>
-        <div class="col-md-2 gpa-col-s2-wrapper ${retakeClass}"><input type="number" step="0.1" class="form-control form-control-sm gpa-col-s2 fw-bold text-center text-success" placeholder="Điểm L2" value="${s2}"></div>
-        <div class="col-md-2 gpa-col-s3-wrapper ${retakeClass}"><input type="number" step="0.1" class="form-control form-control-sm gpa-col-s3 fw-bold text-center text-warning" placeholder="Điểm L3" value="${s3}"></div>
-        <div class="col-md-1 text-end"><button class="btn btn-sm text-danger p-1" onclick="$('#${colId}').remove()"><i class="fa-solid fa-xmark"></i></button></div>
+        
+        <!-- Nhóm Lần 1 -->
+        <div class="${s1Class} gpa-col-s1-wrapper d-flex gap-1">
+            <input type="number" class="form-control form-control-sm gpa-col-p1 text-center" placeholder="% L1" value="${p1}">
+            <input type="number" step="0.1" class="form-control form-control-sm gpa-col-s1 fw-bold text-center text-primary" placeholder="Điểm L1" value="${s1}">
+        </div>
+
+        <!-- Nhóm Lần 2 -->
+        <div class="col-md-3 gpa-col-s2-wrapper ${retakeClass} d-flex gap-1">
+            <input type="number" class="form-control form-control-sm gpa-col-p2 text-center" placeholder="% L2" value="${p2}">
+            <input type="number" step="0.1" class="form-control form-control-sm gpa-col-s2 fw-bold text-center text-success" placeholder="Điểm L2" value="${s2}">
+        </div>
+
+        <!-- Nhóm Lần 3 -->
+        <div class="col-md-3 gpa-col-s3-wrapper ${retakeClass} d-flex gap-1">
+            <input type="number" class="form-control form-control-sm gpa-col-p3 text-center" placeholder="% L3" value="${p3}">
+            <input type="number" step="0.1" class="form-control form-control-sm gpa-col-s3 fw-bold text-center text-warning" placeholder="Điểm L3" value="${s3}">
+        </div>
+
+        <div class="col-md-1 text-end">
+            <button class="btn btn-sm text-danger p-1" onclick="$('#${colId}').remove()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
     </div>`;
     $('#gpaColumnsContainer').append(html);
 }
@@ -1449,7 +1494,25 @@ function editGPACourse(id) {
     $('#gpaIsRetake').prop('checked', hasRetake);
     
     $('#gpaColumnsContainer').html('');
-    course.columns.forEach(col => { addGPAColumnInput(col.name, col.percent, col.score1 || '', col.score2 || '', col.score3 || ''); });
+// Tìm dòng này trong hàm editGPACourse(id):
+// course.columns.forEach(col => { addGPAColumnInput(col.name, col.percent, col.score1 || '', col.score2 || '', col.score3 || ''); });
+
+// VÀ THAY THẾ BẰNG ĐOẠN NÀY:
+course.columns.forEach(col => { 
+    // Lấy phần trăm mới, nếu là dữ liệu cũ thì dùng lại 'col.percent' mặc định
+    let p1 = col.percent1 !== undefined ? col.percent1 : (col.percent || '');
+    let p2 = col.percent2 !== undefined ? col.percent2 : (col.percent || '');
+    let p3 = col.percent3 !== undefined ? col.percent3 : (col.percent || '');
+    
+    // Truyền tham số đúng thứ tự: Tên, %L1, %L2, %L3, Điểm L1, Điểm L2, Điểm L3
+    addGPAColumnInput(
+        col.name, 
+        p1, p2, p3, 
+        col.score1 || '', 
+        col.score2 || '', 
+        col.score3 || ''
+    ); 
+});
     $('#gpaPercentWarning').addClass('d-none'); 
     
     handleGpaCourseTypeChange(); // Thêm dòng này
@@ -1475,29 +1538,59 @@ function saveGPACourse() {
 
     if(!name || !credits) { alert("Vui lòng nhập Tên môn và Số tín chỉ!"); return; }
     
-    let columns = [];
-    let totalPercent = 0;
+    
+ let columns = [];
+    let totalPercent1 = 0;
+    let totalPercent2 = 0;
+    let totalPercent3 = 0;
+    let hasL2 = false;
+    let hasL3 = false;
 
     $('.col-grade-input').each(function() {
         let cName = $(this).find('.gpa-col-name').val().trim();
-        let cPercent = parseFloat($(this).find('.gpa-col-percent').val()) || 0;
-        let cScore1 = $(this).find('.gpa-col-s1').val();
-        let cScore2 = $(this).find('.gpa-col-s2').val();
-        let cScore3 = $(this).find('.gpa-col-s3').val();
+        
+        // Lấy % của từng lần thi dựa theo class mới
+        let p1 = parseFloat($(this).find('.gpa-col-p1').val()) || 0;
+        let p2 = parseFloat($(this).find('.gpa-col-p2').val()) || 0;
+        let p3 = parseFloat($(this).find('.gpa-col-p3').val()) || 0;
+        
+        let s1 = $(this).find('.gpa-col-s1').val();
+        let s2 = $(this).find('.gpa-col-s2').val();
+        let s3 = $(this).find('.gpa-col-s3').val();
 
-        if (!cName && cPercent === 0) return;
+        if (!cName && p1 === 0 && p2 === 0) return;
 
-        totalPercent += cPercent;
+        totalPercent1 += p1;
+        totalPercent2 += p2;
+        totalPercent3 += p3;
+        
+        // Đánh dấu nếu người dùng có nhập điểm cho L2 hoặc L3
+        // Đánh dấu nếu có nhập điểm cho L2 hoặc L3 (Chặn triệt để lỗi undefined)
+if (s2 !== undefined && s2 !== '') hasL2 = true;
+if (s3 !== undefined && s3 !== '') hasL3 = true;
+
         columns.push({
             name: cName || "Cột điểm",
-            percent: cPercent,
-            score1: cScore1,
-            score2: cScore2,
-            score3: cScore3
+            percent1: p1,
+            score1: s1,
+            percent2: p2,
+            score2: s2,
+            percent3: p3,
+            score3: s3
         });
     });
 
-    if (columns.length > 0 && Math.abs(totalPercent - 100) > 0.1) {
+    // Kiểm tra tổng % cho từng lần thi (chỉ kiểm tra L2, L3 nếu có bật Học cải thiện và có nhập điểm)
+    let isRetake = $('#gpaIsRetake').is(':checked');
+    let isError = false;
+
+    if (columns.length > 0) {
+        if (Math.abs(totalPercent1 - 100) > 0.1) isError = true;
+        if (isRetake && hasL2 && Math.abs(totalPercent2 - 100) > 0.1) isError = true;
+        if (isRetake && hasL3 && Math.abs(totalPercent3 - 100) > 0.1) isError = true;
+    }
+
+    if (isError) {
         $('#gpaPercentWarning').removeClass('d-none');
         return; 
     } else {
