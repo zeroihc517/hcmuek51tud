@@ -1348,18 +1348,27 @@
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
 <script>
     (function() {
-        // 1. Cấu hình khoảng thời gian bảo trì (Định dạng: Năm, Tháng - 1, Ngày, Giờ, Phút)
-        // Lưu ý: Tháng trong JavaScript bắt đầu từ 0 (Tháng 1 là 0, Tháng 12 là 11)
-        const startMaintenance = new Date(2026, 6, 18, 15, 50);  // Ví dụ: Ngày 28 tháng 6 năm 2026
-        const endMaintenance   = new Date(2026, 6, 25, 7, 59); // Ví dụ: Ngày 02 tháng 8 năm 2026[cite: 1]
+        // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
+        const startMaintenance = new Date(2026, 6, 18, 15, 50);  
+        const endMaintenance   = new Date(2026, 6, 25, 7, 59); 
 
-        // 2. Đường dẫn đến trang thông báo bảo trì (Có thể là file local hoặc link web khác)
+        // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
+        const pad = (n) => n.toString().padStart(2, '0');
+        const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
+
         const maintenancePage = "Baotri.html"; 
-
-        // 3. Kiểm tra thời gian hiện tại
         const now = new Date();
+
         if (now >= startMaintenance && now <= endMaintenance) {
-            window.location.href = maintenancePage;
+            // Đóng gói cả mốc thời gian và chuỗi hiển thị gửi sang LocalStorage
+            localStorage.setItem("maintenanceConfig", JSON.stringify({
+                end: endMaintenance.getTime(), 
+                textShow: endTimeStr
+            }));
+            window.location.replace(maintenancePage);
+        } else {
+            // Xóa dữ liệu nếu chưa tới giờ hoặc đã hết bảo trì
+            localStorage.removeItem("maintenanceConfig");
         }
     })();
 </script>

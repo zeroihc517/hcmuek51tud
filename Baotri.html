@@ -1,47 +1,84 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Bảo trì hệ thống</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+    *{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,sans-serif;height:100vh;overflow:hidden;background:#050816;color:#fff;display:flex;align-items:center;justify-content:center}
+    .bg:before,.bg:after{content:"";position:absolute;width:45vw;height:45vw;border-radius:50%;filter:blur(90px);animation:float 12s ease-in-out infinite}
+    .bg:before{background:#3b82f6;left:-10%;top:-10%}.bg:after{background:#7c3aed;right:-10%;bottom:-10%;animation-delay:-6s}
+    @keyframes float{50%{transform:translateY(40px) translateX(30px) scale(1.15)}}
+    .card{position:relative;z-index:2;width:min(92%,700px);padding:45px;border-radius:28px;background:rgba(255,255,255,.08);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.15);box-shadow:0 25px 70px rgba(0,0,0,.5);text-align:center}
+    .card:before{content:"";position:absolute;inset:-2px;border-radius:30px;padding:2px;background:linear-gradient(90deg,#06b6d4,#8b5cf6,#06b6d4);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 5s linear infinite}
+    @keyframes spin{to{filter:hue-rotate(360deg)}}
+    .gear{font-size:90px;display:inline-block;animation:r 8s linear infinite;filter:drop-shadow(0 0 20px #60a5fa)}@keyframes r{to{transform:rotate(360deg)}}
+    h1{font-size:42px;margin:18px 0}.sub{opacity:.8;font-size:18px;line-height:1.7}
+    .count{margin:25px 0;font-size:30px;font-weight:800;color:#67e8f9}
+    a{display:inline-block;padding:15px 34px;border-radius:15px;background:linear-gradient(90deg,#2563eb,#7c3aed);color:#fff;text-decoration:none;font-weight:700;transition:.3s}
+    a:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 0 35px rgba(99,102,241,.6)}
+    small{display:block;margin-top:20px;opacity:.65}
+    canvas{position:fixed;inset:0}
+    </style>
+</head>
+<body>
+    <canvas id="p"></canvas>
+    <div class="bg"></div>
+    <div class="card">
+        <div class="gear">⚙️</div>
+        <h1>Hệ thống đang bảo trì</h1>
+        <div class="sub">Chúng tôi đang nâng cấp hệ thống để mang đến trải nghiệm tốt hơn.</div>
+        <div class="count" id="c"></div>
+        <a href="hocnhomnam2khoatoan.html">Vui lòng quay lại sau</a>
+        <small>© 2026 Applied Mathematics</small>
+    </div>
 
-<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Bảo trì hệ thống</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,sans-serif;height:100vh;overflow:hidden;background:#050816;color:#fff;display:flex;align-items:center;justify-content:center}
-.bg:before,.bg:after{content:"";position:absolute;width:45vw;height:45vw;border-radius:50%;filter:blur(90px);animation:float 12s ease-in-out infinite}
-.bg:before{background:#3b82f6;left:-10%;top:-10%}.bg:after{background:#7c3aed;right:-10%;bottom:-10%;animation-delay:-6s}
-@keyframes float{50%{transform:translateY(40px) translateX(30px) scale(1.15)}}
-.card{position:relative;z-index:2;width:min(92%,700px);padding:45px;border-radius:28px;background:rgba(255,255,255,.08);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.15);box-shadow:0 25px 70px rgba(0,0,0,.5);text-align:center}
-.card:before{content:"";position:absolute;inset:-2px;border-radius:30px;padding:2px;background:linear-gradient(90deg,#06b6d4,#8b5cf6,#06b6d4);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 5s linear infinite}
-@keyframes spin{to{filter:hue-rotate(360deg)}}
-.gear{font-size:90px;display:inline-block;animation:r 8s linear infinite;filter:drop-shadow(0 0 20px #60a5fa)}@keyframes r{to{transform:rotate(360deg)}}
-h1{font-size:42px;margin:18px 0}.sub{opacity:.8;font-size:18px;line-height:1.7}
-.count{margin:25px 0;font-size:30px;font-weight:800;color:#67e8f9}
-a{display:inline-block;padding:15px 34px;border-radius:15px;background:linear-gradient(90deg,#2563eb,#7c3aed);color:#fff;text-decoration:none;font-weight:700;transition:.3s}
-a:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 0 35px rgba(99,102,241,.6)}
-small{display:block;margin-top:20px;opacity:.65}
-canvas{position:fixed;inset:0}
-</style></head><body><canvas id=p></canvas><div class=bg></div><div class=card><div class=gear>⚙️</div><h1>Hệ thống đang bảo trì</h1><div class=sub>Chúng tôi đang nâng cấp hệ thống để mang đến trải nghiệm tốt hơn.</div><div class=count id=c></div><a href="WEBDUPHONG.html">Vui lòng quay lại lúc 8:00 25/07/2026</a><small>© 2026 Applied Mathematics</small></div>
-<script>
+    <!-- 1. Script tạo nền sao (Canvas) -->
+    <script>
+        const cv=document.getElementById('p'),x=cv.getContext('2d');function rs(){cv.width=innerWidth;cv.height=innerHeight}rs();onresize=rs;
+        let pts=[...Array(120)].map(()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,v:(Math.random()*1+.2)}));
+        (function a(){x.clearRect(0,0,cv.width,cv.height);x.fillStyle="rgba(255,255,255,.7)";
+        pts.forEach(o=>{o.y+=o.v;if(o.y>cv.height){o.y=0;o.x=Math.random()*cv.width}x.beginPath();x.arc(o.x,o.y,1.5,0,7);x.fill();});requestAnimationFrame(a)})();
+    </script>
 
-const cv=document.getElementById('p'),x=cv.getContext('2d');function rs(){cv.width=innerWidth;cv.height=innerHeight}rs();onresize=rs;
-let pts=[...Array(120)].map(()=>({x:Math.random()*cv.width,y:Math.random()*cv.height,v:(Math.random()*1+.2)}));
-(function a(){x.clearRect(0,0,cv.width,cv.height);x.fillStyle="rgba(255,255,255,.7)";
-pts.forEach(o=>{o.y+=o.v;if(o.y>cv.height){o.y=0;o.x=Math.random()*cv.width}x.beginPath();x.arc(o.x,o.y,1.5,0,7);x.fill();});requestAnimationFrame(a)})();
-</script><script>
-    // 1. Chặn chuột phải
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-    });
+    <!-- 2. Script chống F12, Chuột phải -->
+    <script>
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.onkeydown = function(e) {
+            if (event.keyCode == 123) return false;
+            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+    </script>
 
-    // 2. Chặn các phím tắt như F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-    document.onkeydown = function(e) {
-        // Chặn F12
-        if (event.keyCode == 123) {
-            return false;
+    <!-- 3. Script Kiểm tra bảo trì & Đẩy về trang chủ khi hết hạn -->
+    <script>
+        const configStr = localStorage.getItem("maintenanceConfig");
+        const config = configStr ? JSON.parse(configStr) : null;
+        const mainPage = "hocnhomnam2khoatoan.html"; 
+
+        function checkAndRender() {
+            const now = Date.now();
+
+            // Nếu người dùng vô tình vào từ Lịch sử (mà không có lịch bảo trì hoặc đã quá giờ)
+            if (!config || now >= config.end) {
+                localStorage.removeItem("maintenanceConfig");
+                location.replace(mainPage);
+                return;
+            }
+
+            // Chèn ngày giờ vào nút bấm bằng thẻ <span> để không bị lỗi CSS
+            const btnReturn = document.querySelector('a'); 
+            if (btnReturn && config.textShow && !btnReturn.innerHTML.includes(config.textShow)) {
+                btnReturn.innerHTML = `Vui lòng quay lại sau<br><span style="display: block; margin-top: 8px; font-size: 13px; font-weight: normal; opacity: 0.9; text-transform: none;">Dự kiến xong lúc: ${config.textShow}</span>`;
+            }
         }
-        // Chặn Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-        if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) {
-            return false;
-        }
-        if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-            return false;
-        }
-    };
-</script></body></html>
+
+        // Chạy ngay khi tải xong
+        checkAndRender();
+        // Quét tự động ngầm mỗi 30 giây để đẩy về trang chủ khi vừa hết giờ
+        setInterval(checkAndRender, 30000);
+    </script>
+</body>
+</html>
