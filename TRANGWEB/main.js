@@ -690,8 +690,11 @@ $('#loadingStatus').addClass('d-none');
                         imgDisplayHtml = `<div class="card-minigame-img default-icon"><i class="fa-solid ${iconClass}"></i></div>`;
                     }
 
+                   // Dọn dẹp dấu nháy để không làm gãy sự kiện onclick
+                    let safeTitle = titleText.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                    
                     examCardsHtml += `
-                        <a href="${linkUrl}" target="_blank" class="card-minigame-box" title="${titleText}">
+                        <a href="javascript:void(0)" onclick="openDocumentViewer('${linkUrl}', '${safeTitle}')" class="card-minigame-box" title="${titleText}">
                             ${imgDisplayHtml}
                             <div class="card-minigame-title">${titleText}</div>
                         </a>`;
@@ -819,13 +822,16 @@ $('#loadingStatus').addClass('d-none');
                         lessonIcon = '<i class="fa-solid fa-file-lines me-2" style="color: #0ea5e9; font-size: 16px;"></i>';
                     }
 
-                    if (extractedUrl) {
-                        if (isUpdating && !isAdmin) {
-                            col2Html = `<span onclick="$('#updatingModal').modal('show'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Đang cập nhật">${lessonIcon}${col2Html || "Đang cập nhật"}</span>`;
-                        } else {
-                            col2Html = `<span onclick="window.open('${extractedUrl}', '_blank'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem bài học">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;
-                        }
-                    } else {
+if (extractedUrl) {
+    if (isUpdating && !isAdmin) {
+        col2Html = `<span onclick="$('#updatingModal').modal('show'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Đang cập nhật">${lessonIcon}${col2Html || "Đang cập nhật"}</span>`;
+    } else {
+        // Dùng Regex để loại bỏ các dấu nháy gây gãy chuỗi HTML
+        let safeTitle = col2Html.replace(/'/g, "\\'").replace(/"/g, "&quot;"); 
+        // Thay window.open thành hàm gọi Modal
+        col2Html = `<span onclick="openDocumentViewer('${extractedUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem bài học trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;
+    }
+} else {
                         col2Html = `<span style="color: #0f4c81; font-weight: 700;">${lessonIcon}${col2Html}</span>`;
                     }
 

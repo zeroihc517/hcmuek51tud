@@ -282,3 +282,41 @@ $(document).ready(function() {
 });
 
 // --- KẾT THÚC ĐOẠN CODE ---
+// HÀM MỞ TÀI LIỆU TRỰC TIẾP TRÊN WEB
+window.openDocumentViewer = function(url, title) {
+    let embedUrl = url;
+    
+    // Tự động chuyển link Google Drive sang chế độ preview để xem trực tiếp
+    if (url.includes('drive.google.com/file/d/')) {
+        embedUrl = url.replace(/\/view.*$/, '/preview');
+    }
+    
+    // Dọn dẹp HTML dư thừa nếu có trong tiêu đề
+    let cleanTitle = $('<div>').html(title).text();
+    $('#docViewerTitle').html(`<i class="fa-solid fa-file-lines me-2"></i> ${cleanTitle || 'Xem tài liệu'}`);
+    
+    // KIỂM TRA QUYỀN VÀ HIỂN THỊ NÚT "MỞ TAB MỚI" CHỈ CHO ADMIN (51.01.108.008)
+    if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
+        $('#btnOpenInNewTab')
+            .removeClass('d-none')
+            .off('click') // Xóa rác sự kiện cũ
+            .on('click', function() { 
+                window.open(url, '_blank'); 
+            });
+    } else {
+        // Sinh viên thường sẽ bị ẩn đi
+        $('#btnOpenInNewTab').addClass('d-none');
+    }
+    
+    // Bật trạng thái Loading
+    $('#docLoading').show(); 
+    $('#docViewerIframe').attr('src', embedUrl);
+    $('#documentViewerModal').modal('show');
+};
+
+// Dọn dẹp iframe khi đóng để tránh rò rỉ bộ nhớ
+$(document).ready(function() {
+    $('#documentViewerModal').on('hidden.bs.modal', function () {
+        $('#docViewerIframe').attr('src', '');
+    });
+});
