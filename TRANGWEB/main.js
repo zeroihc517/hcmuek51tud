@@ -397,7 +397,7 @@ data.forEach((row, rowIndex) => {
     }
 
     // 3. Dọn dẹp chữ "Hết hạn..." ở cột Ghi chú để giao diện sạch đẹp
-    c7 = c7.replace(/Hết hạn(?: lúc \d{1,2}:\d{2})? (?:Ngày )?\d{1,2}\/\d{1,2}\/\d{4}/ig, '').trim();
+    c7 = c7.replace(/DEADLINE(?: = \d{1,2}:\d{2})? (?:Ngày )?\d{1,2}\/\d{1,2}\/\d{4}/ig, '').trim();
 
     if (isHeThong) {
         c7 = c7.replace(/hệ thống/ig, '').trim();
