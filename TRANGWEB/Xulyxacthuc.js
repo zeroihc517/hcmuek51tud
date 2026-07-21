@@ -1,42 +1,93 @@
- function loginStudent() {
-            let mssv = $('#txtUserMSSV').val().trim(); let pass = $('#txtUserPass').val().trim();
-            if (!mssv || !pass) { $('#userAuthError').removeClass('d-none').text("Vui lòng nhập đầy đủ thông tin!"); return; }
+function loginStudent() {
+    let mssv = $('#txtUserMSSV').val().trim(); 
+    let pass = $('#txtUserPass').val().trim();
+    
+    if (!mssv || !pass) { 
+        $('#userAuthError').removeClass('d-none').text("Vui lòng nhập đầy đủ thông tin!"); 
+        return; 
+    }
 
-            let btn = $('#btnLoginStudent'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
-            postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
-                let response = typeof res === 'string' ? JSON.parse(res) : res;
-                if (response.success) {
-                   currentUser = { 
-    mssv: response.mssv, 
-    name: response.name,
-    chuyenNganh: response.chuyenNganh,
-    khoa: response.khoa,
-    khoaHoc: response.khoaHoc,
-    nhom: response.nhom
-};
-localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    let btn = $('#btnLoginStudent'); 
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang xử lý...').prop('disabled', true);
+    
+    postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
+        let response = typeof res === 'string' ? JSON.parse(res) : res;
+        if (response.success) {
+            // 1. Lưu thông tin người dùng vào bộ nhớ
+            currentUser = { 
+                mssv: response.mssv, 
+                name: response.name,
+                chuyenNganh: response.chuyenNganh,
+                khoa: response.khoa,
+                khoaHoc: response.khoaHoc,
+                nhom: response.nhom
+            };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            
+            let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
+            savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
+            savedAccounts.unshift({ mssv: response.mssv, name: response.name });
+            if (savedAccounts.length > 3) savedAccounts.pop(); 
+            localStorage.setItem('savedAccounts', JSON.stringify(savedAccounts));
+
+            // 2. Đổi trạng thái UI nút bấm
+            btn.html('<i class="fa-solid fa-cloud-arrow-down fa-bounce me-2"></i>Đang tải toàn bộ dữ liệu hệ thống...');
+            
+            // 3. KÍCH HOẠT TẢI NGẦM TẤT CẢ CÁC PHÂN HỆ CÙNG MỘT LÚC (PARALLEL LOADING)
+            pingOnlineStatus();
+            renderUserInfo();
+            initGlobalApp();
+            
+            // Tải ngầm Thông báo & Danh mục học phần (Mặc định trang đầu)
+            loadDataByHocPhan('Thông báo');
+            fetchAndRenderCategories();
+            loadWebLinks();
+
+            // Tải ngầm Lịch học TKB & Deadlines
+            $.ajax({ url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(data) { processTKBData(data); } });
+            $.ajax({ url: SCRIPT_URL + "?action=getDeadlinesUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(data) { globalDeadlineData = data.map(r => ({ title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5], dateStart: r[6] || "", dateEnd: r[7] || "", sheetRowIndex: r[8] })); } });
+
+            // Tải ngầm Bảng điểm GPA (và cấu hình song ngành)
+            $.ajax({ url: SCRIPT_URL + "?action=getGPAConfig&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(configRes) { if (configRes) { try { gpaConfig = typeof configRes === 'string' ? JSON.parse(configRes) : configRes; localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig)); } catch(e){} } } });
+            $.ajax({ url: SCRIPT_URL + "?action=getGPAUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(res) { try { myGPADataset = typeof res === 'string' ? JSON.parse(res) : res; if(!Array.isArray(myGPADataset)) myGPADataset = []; } catch(e){ myGPADataset = []; } } });
+
+            // 4. KIỂM TRA ĐIỀU KIỆN HOÀN TẤT ĐỂ ĐÓNG MODAL
+            let checkLoaded = setInterval(function() {
+                // Kiểm tra xem các bảng nội dung chính đã hết hiệu ứng loading chưa
+                let isTableLoaded = $('#loadingStatus').hasClass('d-none');
+                let isLinksLoaded = $('#webLinksContainer .pulse-loader').length === 0;
+                let isCategoriesLoaded = $('#dynamicCourseList').text() !== 'Đang tải danh sách...';
+
+                if (isTableLoaded && isLinksLoaded && isCategoriesLoaded) {
+                    clearInterval(checkLoaded);
                     
-                    let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
-                    savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
-                    savedAccounts.unshift({ mssv: response.mssv, name: response.name });
-                    if (savedAccounts.length > 3) savedAccounts.pop(); 
-                    localStorage.setItem('savedAccounts', JSON.stringify(savedAccounts));
+                    let authModal = bootstrap.Modal.getInstance(document.getElementById('userAuthModal'));
+                    if(authModal) authModal.hide();
+                    
+                    alert("Xin chào, " + response.name + "! Dữ liệu đã sẵn sàng.");
+                    btn.html('Đăng nhập ngay').prop('disabled', false);
+                }
+            }, 200);
 
-                    pingOnlineStatus();
-                    let authModal = bootstrap.Modal.getInstance(document.getElementById('userAuthModal')) || new bootstrap.Modal(document.getElementById('userAuthModal'));
+            // 5. Dự phòng an toàn sau 8 giây nếu mạng chậm
+            setTimeout(function() {
+                clearInterval(checkLoaded);
+                let authModal = bootstrap.Modal.getInstance(document.getElementById('userAuthModal'));
+                if (authModal && $('#userAuthModal').is(':visible')) {
                     authModal.hide();
-                    
-                    alert("Xin chào, " + response.name + "!");
-                    initGlobalApp();
-                    renderUserInfo();
-                    if (!$('#tkbSection').hasClass('d-none')) {
-                        loadThoiGianBieu(); loadDeadlines();
-                    }
-                } else { $('#userAuthError').removeClass('d-none').text(response.message); }
-                btn.html('Đăng nhập').prop('disabled', false);
-            }, function() { $('#userAuthError').removeClass('d-none').text("Lỗi kết nối!"); btn.html('Đăng nhập').prop('disabled', false); });
-        }
+                    btn.html('Đăng nhập ngay').prop('disabled', false);
+                }
+            }, 8000);
 
+        } else { 
+            $('#userAuthError').removeClass('d-none').text(response.message); 
+            btn.html('Đăng nhập ngay').prop('disabled', false); 
+        }
+    }, function() { 
+        $('#userAuthError').removeClass('d-none').text("Lỗi kết nối!"); 
+        btn.html('Đăng nhập ngay').prop('disabled', false); 
+    });
+}
 function logoutStudent() {
     // 1. Xóa dữ liệu phiên đăng nhập sinh viên
     localStorage.removeItem('currentUser');
