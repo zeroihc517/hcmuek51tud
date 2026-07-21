@@ -806,6 +806,43 @@
         align-items: center;
     }
 }
+/* --- TẮT VUỐT NGANG, ÉP XUỐNG DÒNG VÀ CHIA TỶ LỆ TRÊN DI ĐỘNG --- */
+@media (max-width: 991.98px) {
+    .custom-portal-table {
+        min-width: 100% !important;
+        width: 100% !important;
+        table-layout: auto !important; 
+    }
+
+    .custom-portal-table th,
+    .custom-portal-table td {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        word-break: break-word !important;
+        padding: 10px 8px !important; 
+    }
+
+    /* ---------------- BỔ SUNG TỶ LỆ CỘT Ở ĐÂY ---------------- */
+    /* Cột 2: Nội dung bài học (RỘNG NHẤT) */
+    .custom-portal-table th:nth-child(2),
+    .custom-portal-table td:nth-child(2) {
+        width: 65% !important;
+        min-width: 65% !important;
+    }
+
+    /* Cột 3: Ghi chú (THIỆT NHỎ) */
+    .custom-portal-table th:nth-child(3),
+    .custom-portal-table td:nth-child(3) {
+        width: 20% !important;
+        max-width: 20% !important;
+        font-size: 13px !important; /* Chữ nhỏ lại một chút để không bị dính chùm */
+    }
+    /* --------------------------------------------------------- */
+
+    #swipeHint {
+        display: none !important;
+    }
+}
 /* Giao diện khung bài kiểm tra nổi bật */
 .card-special-exam {
     background-color: #ffffff;
@@ -2062,38 +2099,3 @@ body.dark-mode .tb-detail-main-content table th {
     display: inline-flex !important;
 }
 
-/* --- SỬA LỖI VUỐT NGANG TRÊN DI ĐỘNG --- */
-
-/* 1. Cho phép khung cha hiển thị phần tràn */
-.data-card {
-    overflow: visible !important;
-}
-
-/* 2. Cấu hình mượt mà cử chỉ vuốt tay trên Mobile */
-#tableWrapper {
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    touch-action: pan-x pan-y !important; /* Mở khóa cử chỉ vuốt ngang/dọc */
-    width: 100% !important;
-    display: block !important;
-}
-
-/* 3. Ép bảng luôn giữ độ rộng tối thiểu trên màn hình nhỏ */
-@media (max-width: 991.98px) {
-    .custom-portal-table {
-        min-width: 650px !important; /* Bắt buộc bảng rộng hơn màn hình đth để tạo vùng vuốt */
-        table-layout: auto !important;
-    }
-    
-    /* Khóa các cột cố định không cho co ép chữ quá mức */
-    .custom-portal-table th:first-child,
-    .custom-portal-table td:first-child {
-        white-space: nowrap !important;
-        width: 60px !important;
-    }
-    
-    .custom-portal-table th:last-child,
-    .custom-portal-table td:last-child {
-        white-space: nowrap !important;
-    }
-}

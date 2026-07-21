@@ -204,7 +204,21 @@
                         </div>
                     </div>
                 </div>
-                
+                <!-- BẮT ĐẦU: NÚT ĐIỀU KHIỂN VUỐT BẢNG TKB TRÊN ĐIỆN THOẠI -->
+<div class="d-flex justify-content-between align-items-center d-lg-none mb-2 px-1">
+    <span class="text-danger fw-bold" style="font-size: 13px;">
+        <i class="fa-solid fa-arrows-left-right fa-fade"></i> Bảng có thể vuốt ngang
+    </span>
+    <div class="d-flex gap-2">
+        <button class="btn btn-sm text-white fw-bold shadow-sm" style="background-color: #0f4c81; border-radius: 50px; padding: 4px 16px;" onclick="document.querySelector('.table-box').scrollBy({left: -200, behavior: 'smooth'})">
+            <i class="fa-solid fa-angle-left"></i> Trái
+        </button>
+        <button class="btn btn-sm text-white fw-bold shadow-sm" style="background-color: #0f4c81; border-radius: 50px; padding: 4px 16px;" onclick="document.querySelector('.table-box').scrollBy({left: 200, behavior: 'smooth'})">
+            Phải <i class="fa-solid fa-angle-right"></i>
+        </button>
+    </div>
+</div>
+<!-- KẾT THÚC: NÚT ĐIỀU KHIỂN -->
                 <div class="table-box">
                     <table class="sched">
                         <thead>
