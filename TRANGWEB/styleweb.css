@@ -404,7 +404,14 @@
         .link-card p { margin: 0; font-size: 14px; color: var(--text-muted); }
 
         /* TKB & Deadlines */
-        .table-box { background: #fff; border-radius: 14px; overflow: auto; box-shadow: 0 6px 24px rgba(0,0,0,.05); margin-top: 20px; }
+.table-box { 
+    background: #fff; 
+    border-radius: 14px; 
+    overflow: auto; 
+    -webkit-overflow-scrolling: touch; /* Hỗ trợ cuộn mượt trên iOS */
+    box-shadow: 0 6px 24px rgba(0,0,0,.05); 
+    margin-top: 20px; 
+}
         .sched { width: 100%; min-width: 1000px; border-collapse: collapse; table-layout: fixed; }
         .sched th { background: #0f4c81; color: #fff; padding: 14px 8px; font-size: 14px; border-right: 1px solid rgba(255,255,255,.15); text-align: center; }
         .sched th:nth-child(1), .sched td:nth-child(1) { width: 60px; }
