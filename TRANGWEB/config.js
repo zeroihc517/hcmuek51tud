@@ -198,7 +198,8 @@ $('#profNhom').val(currentUser.nhom || '');
 // Sửa lại khối kiểm tra Admin trong hàm renderUserInfo()
 if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008") {
     $('#btnAdminLoginToggle').removeClass('d-none').addClass('d-flex');
-    $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex'); // Bật nút Quản lý
+    $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex'); // Bật nút Quản lý TV
+    $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');   // Bật nút MasterTKB
     $('#pageProfileRole').removeClass('bg-secondary').addClass('bg-danger').text('Quản trị viên (Admin)');
 } else {
     $('#btnAdminLoginToggle').addClass('d-none').removeClass('d-flex');

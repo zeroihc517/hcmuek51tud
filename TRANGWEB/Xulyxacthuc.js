@@ -148,22 +148,25 @@ function openChangePasswordModal() {
             }
         };
 
- function verifyAdmin() {
-            let pass = $('#txtAdminPass').val();
-            if (pass === "#226244bc#TBC") {
-                isAdmin = true; $('#adminLoginModal').modal('hide');
-		localStorage.setItem('isAdmin', 'true');
-               // Thay đổi thành đoạn này
-$('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
-                $('#btnManageCategories').removeClass('d-none');
-                renderSidebarCategories(); 
-		$('#adminDatabaseLink').removeClass('d-none');
-                if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
-                if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); } 
-                alert("Xác thực quyền Admin thành công!");
-            } else { $('#adminLoginError').removeClass('d-none'); }
-        }
-
+function verifyAdmin() {
+    let pass = $('#txtAdminPass').val();
+    if (pass === "#226244bc#TBC") {
+        isAdmin = true; $('#adminLoginModal').modal('hide');
+        localStorage.setItem('isAdmin', 'true');
+        $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
+        $('#btnManageCategories').removeClass('d-none');
+        $('#adminDatabaseLink').removeClass('d-none');
+        
+        // Hiện cả hai menu
+        $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex');
+        $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
+        
+        renderSidebarCategories(); 
+        if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
+        if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); } 
+        alert("Xác thực quyền Admin thành công!");
+    } else { $('#adminLoginError').removeClass('d-none'); }
+}
 function openAdminModal() {
     if (isAdmin) {
         // Xóa hoàn toàn lệnh if(confirm(...)) và để code thực thi luôn

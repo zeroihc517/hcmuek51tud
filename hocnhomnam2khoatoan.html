@@ -352,6 +352,7 @@
         </div>
     </div>
 <!-- KHU VỰC QUẢN LÝ MASTER TKB CHO ADMIN -->
+<!-- KHU VỰC QUẢN LÝ MASTER TKB CHO ADMIN -->
 <div id="adminMasterTkbSection" class="d-none">
     <header class="top-header d-flex justify-content-between align-items-center">
         <div class="page-title" style="color: var(--primary-color);">
@@ -363,6 +364,22 @@
     </header>
     
     <div class="data-card p-4 mt-3">
+        <!-- BỘ LỌC NĂM HỌC / HỌC KỲ (MỚI THÊM) -->
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small"><i class="fa-regular fa-calendar"></i> Lọc theo Năm học</label>
+                <select class="form-select border-primary-subtle fw-bold" id="adminMasterTkbNamHoc" onchange="renderAdminMasterTkbTable()">
+                    <option value="">-- Tất cả Năm học --</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold text-muted small"><i class="fa-solid fa-layer-group"></i> Lọc theo Học kỳ</label>
+                <select class="form-select border-primary-subtle fw-bold" id="adminMasterTkbHocKy" onchange="renderAdminMasterTkbTable()">
+                    <option value="">-- Tất cả Học kỳ --</option>
+                </select>
+            </div>
+        </div>
+
         <div class="table-responsive border rounded" style="max-height: 600px; overflow-y: auto;">
             <table class="table table-hover table-bordered align-middle m-0 bg-white">
                 <thead class="text-center bg-primary text-white" style="position: sticky; top: 0; z-index: 10;">
@@ -383,7 +400,6 @@
         </div>
     </div>
 </div>
-
 <!-- Modal Chỉ định Sinh viên học MasterTKB -->
 <div class="modal fade" id="assignStudentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -1381,11 +1397,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
-<script>
+<!-----<script>
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
         const startMaintenance = new Date(2026, 6, 18, 15, 50);  
-        const endMaintenance   = new Date(2026, 6, 21, 12, 59); 
+        const endMaintenance   = new Date(2026, 6, 20, 7, 59); 
 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');
@@ -1406,6 +1422,6 @@
             localStorage.removeItem("maintenanceConfig");
         }
     })();
-</script>
+</script>---->
 </body>
 </html>

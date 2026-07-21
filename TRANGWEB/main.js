@@ -1127,7 +1127,94 @@ course.columns.forEach(col => {
 
     return { gpa4, gpa10, credits: totalAccumulatedCredits };
 }
+(function() {
+    let oldRenderDetail = renderAdminUserDetail;
+    window.renderAdminUserDetail = function(mssv, data) {
+        // 1. Gọi hàm render cũ để vẽ xong HTML ra màn hình
+        oldRenderDetail(mssv, data);
 
+        // 2. Chờ DOM vẽ xong HTML mới chèn các Option Năm học / Học kỳ vào
+        setTimeout(() => {
+            if (typeof globalConfigHK !== 'undefined' && globalConfigHK.length > 0) {
+                let nHocs = [...new Set(globalConfigHK.map(item => item[0]))];
+                let hKys = [...new Set(globalConfigHK.map(item => item[1]))];
+                
+                let nhHtml = '<option value="">-- Tất cả Năm học --</option>'; 
+                nHocs.forEach(nh => nhHtml += `<option value="${nh}">${nh}</option>`); 
+                $('#adminUserTkbNamHoc').html(nhHtml);
+                
+                let hkHtml = '<option value="">-- Tất cả Học kỳ --</option>'; 
+                hKys.forEach(hk => hkHtml += `<option value="${hk}">${hk}</option>`); 
+                $('#adminUserTkbHocKy').html(hkHtml);
+            }
+        }, 100);
+    };
+})();
+
+// Hàm thực thi ẩn/hiện các dòng TKB của Sinh viên dựa trên Học kỳ được chọn
+window.filterAdminUserTkb = function() {
+    let selectedNH = $('#adminUserTkbNamHoc').val();
+    let selectedHK = $('#adminUserTkbHocKy').val();
+    let startMonTime = null;
+    let endSunTime = null;
+
+    // Quy chiếu tìm Ngày Bắt đầu - Kết thúc của Học kỳ Admin đang lọc
+    if (selectedNH && selectedHK && typeof globalConfigHK !== 'undefined') {
+        let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+        if (config) {
+            let sDate = parseDateString(config[2]);
+            let numWeeks = parseInt(config[3]);
+            let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+            
+            if (sDate && numWeeks) {
+                let startMon = getMondayOfDate(sDate);
+                startMonTime = startMon.getTime();
+                let acadWk = 1, calWk = 1;
+                while (acadWk <= numWeeks && calWk <= 52) {
+                    if (!breakWeeks.includes(calWk)) acadWk++;
+                    calWk++;
+                }
+                let endSun = new Date(startMon);
+                endSun.setDate(endSun.getDate() + ((calWk - 1) * 7) - 1);
+                endSun.setHours(23, 59, 59, 999);
+                endSunTime = endSun.getTime();
+            }
+        }
+    }
+
+    const getTimeFast = (dateStr) => { let d = parseDateString(dateStr); return d ? d.getTime() : null; };
+
+    // Duyệt qua và ẩn/hiện các hàng trong Bảng 1: Thời khóa biểu cá nhân
+    $('.user-tkb-row').each(function() {
+        let ngayBd = $(this).attr('data-start');
+        let ngayKt = $(this).attr('data-end');
+
+        // Nếu Admin chọn "-- Tất cả --", hiện toàn bộ
+        if (!selectedNH && !selectedHK) {
+            $(this).removeClass('d-none');
+            return;
+        }
+
+        // Nếu môn học không có thông tin ngày bắt đầu/kết thúc, giữ nguyên không ẩn
+        if (!ngayBd && !ngayKt) {
+            $(this).removeClass('d-none');
+            return;
+        }
+
+        let cStartTime = getTimeFast(ngayBd);
+        let cEndTime = getTimeFast(ngayKt);
+        let isVisible = true;
+
+        if (startMonTime && endSunTime) {
+            if (cStartTime && cEndTime) isVisible = (cStartTime <= endSunTime && cEndTime >= startMonTime);
+            else if (cStartTime) isVisible = (cStartTime <= endSunTime);
+            else if (cEndTime) isVisible = (cEndTime >= startMonTime);
+        }
+
+        if (isVisible) { $(this).removeClass('d-none'); } 
+        else { $(this).addClass('d-none'); }
+    });
+};
 // 2. HÀM HIỂN THỊ CÁC Ô CARD THỐNG KÊ LÊN GIAO DIỆN
 // 2. HÀM HIỂN THỊ CÁC Ô CARD THỐNG KÊ LÊN GIAO DIỆN (ĐÃ FIX SONG NGÀNH)
 function renderGPAStats() {
@@ -2072,11 +2159,28 @@ function renderAdminUserDetail(mssv, data) {
     html += '    <i class="fa-solid fa-user-graduate me-2"></i>Hồ sơ dữ liệu: <span class="fw-bold">' + mssv + '</span>';
     html += '</h5>';
     
-    html += '<!-- BẢNG 1: THỜI KHÓA BIỂU -->';
+html += '<!-- BẢNG 1: THỜI KHÓA BIỂU -->';
     html += '<div class="d-flex justify-content-between align-items-center mb-2 mt-4">';
     html += '    <h6 class="fw-bold text-primary m-0"><i class="fa-solid fa-calendar-days me-2"></i>Thời khóa biểu cá nhân</h6>';
     html += '    <button class="btn btn-sm btn-outline-primary fw-bold" onclick="adminAddTkb(\'' + mssv + '\')"><i class="fa-solid fa-plus"></i> Thêm lịch</button>';
     html += '</div>';
+// (BẮT ĐẦU CHÈN HTML BỘ LỌC)
+    html += '<div class="row g-3 mb-3 mt-1">';
+    html += '    <div class="col-md-6">';
+    html += '        <select class="form-select border-primary-subtle fw-bold" id="adminUserTkbNamHoc" onchange="filterAdminUserTkb()">';
+    html += '            <option value="">-- Tất cả Năm học --</option>';
+    html += '        </select>';
+    html += '    </div>';
+    html += '    <div class="col-md-6">';
+    html += '        <select class="form-select border-primary-subtle fw-bold" id="adminUserTkbHocKy" onchange="filterAdminUserTkb()">';
+    html += '            <option value="">-- Tất cả Học kỳ --</option>';
+    html += '        </select>';
+    html += '    </div>';
+    html += '</div>';
+    // (KẾT THÚC CHÈN HTML)
+
+    html += '<div class="table-responsive bg-white rounded border shadow-sm mb-4">';
+    html += '    <table id="adminUserTkbTable" class="table table-bordered table-hover m-0 align-middle text-center">';
     html += '<div class="table-responsive bg-white rounded border shadow-sm mb-4">';
     html += '    <table class="table table-bordered table-hover m-0 align-middle text-center">';
     html += '        <thead style="background: #0f4c81; color: white;">';
@@ -2089,7 +2193,7 @@ function renderAdminUserDetail(mssv, data) {
     html += '        </thead>';
     html += '        <tbody>';
 
-    if (data.tkb && data.tkb.length > 0) {
+   if (data.tkb && data.tkb.length > 0) {
         data.tkb.forEach(function(row) {
             let monHoc = row[5] || "Không rõ";
             let thu = row[0] ? (row[0] == 8 ? "Chủ nhật" : "Thứ " + row[0]) : "-";
@@ -2099,8 +2203,12 @@ function renderAdminUserDetail(mssv, data) {
             let phongHienThi = row[6] ? row[6] : (row[4] || "-");
             let sheetRowIndex = row[12] || ""; 
             let isSystem = String(sheetRowIndex).startsWith('SYS_');
+            
+            let ngayBatDau = row[9] || "";
+            let ngayKetThuc = row[10] || "";
 
-            html += '<tr>';
+            // Gắn data-start và data-end vào từng tr
+            html += `<tr class="user-tkb-row" data-start="${ngayBatDau}" data-end="${ngayKetThuc}">`;
             html += '    <td class="text-start fw-bold text-primary">' + monHoc + '</td>';
             html += '    <td>' + thu + ' <br><small class="text-muted">' + tietHienThi + '</small></td>';
             html += '    <td class="fw-bold">' + phongHienThi + '</td>';
@@ -2342,85 +2450,101 @@ function fetchAdminMasterTkb() {
         dataType: "json",
         success: function(data) {
             window.cachedMasterTkb = data; 
-            let html = '';
             
-            if(data.length === 0) {
-                html = '<tr><td colspan="7" class="text-center text-muted py-4">Chưa có học phần nào trong hệ thống.</td></tr>';
-            } else {
-                let groupedCourses = {};
-                
-                // Gom nhóm các lịch học theo Mã HP
-                data.forEach(course => {
-                    if (!groupedCourses[course.id]) {
-                        groupedCourses[course.id] = {
-                            id: course.id,
-                            mon: course.mon,
-                            namHoc: course.namHoc,
-                            hocKy: course.hocKy,
-                            items: []
-                        };
-                    }
-                    groupedCourses[course.id].items.push(course);
-                });
+            // Tự động nhận diện và trích xuất Năm học, Học kỳ từ dữ liệu gốc
+            let namHocs = [...new Set(data.map(item => item.namHoc).filter(Boolean))].sort().reverse();
+            let hocKys = [...new Set(data.map(item => item.hocKy).filter(Boolean))].sort();
 
-                // Vẽ giao diện
-                for (let id in groupedCourses) {
-                    let c = groupedCourses[id];
-                    let rowSpan = c.items.length; // Lấy số lượng lịch học để gộp ô (rowspan)
-                    
-                    c.items.forEach((item, index) => {
-                        let soTiet = parseInt(item.soTiet) || 1;
-                        let tietBd = parseInt(item.tietBd) || 1;
-                        let tietKt = tietBd + soTiet - 1;
+            let nhHtml = '<option value="">-- Tất cả Năm học --</option>';
+            namHocs.forEach(nh => nhHtml += `<option value="${nh}">${nh}</option>`);
+            $('#adminMasterTkbNamHoc').html(nhHtml);
 
-                        html += `<tr>`;
-                        
-                        // Cột 1 & 2: Gộp chung Mã HP và Tên môn
-                        if (index === 0) {
-                            html += `
-                            <td rowspan="${rowSpan}" class="text-center align-middle fw-bold text-secondary border-end">${c.id}</td>
-                            <td rowspan="${rowSpan}" class="align-middle fw-bold text-primary border-end">
-                                ${c.mon} <br>
-                                <small class="text-muted font-monospace fw-normal">${c.namHoc || ''} - ${c.hocKy || ''}</small>
-                            </td>`;
-                        }
-                        
-                        // Cột 3, 4, 5: Tách riêng từng chi tiết lịch học
-                        html += `
-                        <td class="text-center align-middle font-monospace bg-light">
-                            Thứ ${item.thu} <br><small class="text-muted">(Tiết ${tietBd} - ${tietKt})</small>
-                        </td>
-                        <td class="text-center align-middle bg-light">
-                            <b>${item.phong}</b> ${item.hinhThuc ? `<br><small class="text-muted">${item.hinhThuc}</small>` : ''}
-                        </td>
-                        <td class="text-center align-middle text-muted fw-bold bg-light">${item.gv || 'Đang cập nhật'}</td>`;
-                        
-                        // Cột 6: Nút Chỉ định sinh viên (Gộp chung vì dùng cho toàn bộ học phần)
-                        if (index === 0) {
-                            html += `
-                            <td rowspan="${rowSpan}" class="text-center align-middle border-start border-end">
-                                <button class="btn btn-sm btn-outline-success fw-bold py-1 px-2" onclick="openAssignStudentModal('${c.id}')">
-                                    <i class="fa-solid fa-user-plus"></i> Chỉ định
-                                </button>
-                            </td>`;
-                        }
-                        
-                        // Cột 7: Nút Sửa/Xóa tách riêng độc lập cho từng lịch học (Từng hàng)
-                        html += `
-                        <td class="text-center align-middle border-start">
-                            <div class="d-flex justify-content-center gap-1">
-                                <button class="btn btn-sm btn-warning" onclick="openEditMasterTkbModal(${item.rowIndex})" title="Sửa lịch này"><i class="fa-solid fa-pen"></i></button>
-                                <button class="btn btn-sm btn-danger" onclick="deleteMasterTkbRow(${item.rowIndex})" title="Xóa lịch này"><i class="fa-solid fa-trash"></i></button>
-                            </div>
-                        </td>
-                        </tr>`;
-                    });
-                }
-            }
-            $('#adminMasterTkbBody').html(html);
+            let hkHtml = '<option value="">-- Tất cả Học kỳ --</option>';
+            hocKys.forEach(hk => hkHtml += `<option value="${hk}">${hk}</option>`);
+            $('#adminMasterTkbHocKy').html(hkHtml);
+
+            // Bắt đầu vẽ bảng sau khi tải xong Select Box
+            renderAdminMasterTkbTable();
         }
     });
 }
+window.renderAdminMasterTkbTable = function() {
+    let data = window.cachedMasterTkb || [];
+    let filterNH = $('#adminMasterTkbNamHoc').val();
+    let filterHK = $('#adminMasterTkbHocKy').val();
+
+    // Tiến hành lọc dữ liệu
+    let filteredData = data.filter(c => {
+        let matchNH = filterNH === "" || c.namHoc === filterNH;
+        let matchHK = filterHK === "" || c.hocKy === filterHK;
+        return matchNH && matchHK;
+    });
+
+    let html = '';
+    if(filteredData.length === 0) {
+        html = '<tr><td colspan="7" class="text-center text-muted py-4">Chưa có học phần nào phù hợp điều kiện lọc.</td></tr>';
+    } else {
+        let groupedCourses = {};
+        
+        // Gom nhóm các lịch học theo Mã HP
+        filteredData.forEach(course => {
+            if (!groupedCourses[course.id]) {
+                groupedCourses[course.id] = { id: course.id, mon: course.mon, namHoc: course.namHoc, hocKy: course.hocKy, items: [] };
+            }
+            groupedCourses[course.id].items.push(course);
+        });
+
+        // Vẽ giao diện
+        for (let id in groupedCourses) {
+            let c = groupedCourses[id];
+            let rowSpan = c.items.length; 
+            
+            c.items.forEach((item, index) => {
+                let soTiet = parseInt(item.soTiet) || 1;
+                let tietBd = parseInt(item.tietBd) || 1;
+                let tietKt = tietBd + soTiet - 1;
+
+                html += `<tr>`;
+                if (index === 0) {
+                    html += `
+                    <td rowspan="${rowSpan}" class="text-center align-middle fw-bold text-secondary border-end">${c.id}</td>
+                    <td rowspan="${rowSpan}" class="align-middle fw-bold text-primary border-end">
+                        ${c.mon} <br>
+                        <small class="text-muted font-monospace fw-normal">${c.namHoc || ''} - ${c.hocKy || ''}</small>
+                    </td>`;
+                }
+                
+                html += `
+                <td class="text-center align-middle font-monospace bg-light">
+                    Thứ ${item.thu} <br><small class="text-muted">(Tiết ${tietBd} - ${tietKt})</small>
+                </td>
+                <td class="text-center align-middle bg-light">
+                    <b>${item.phong}</b> ${item.hinhThuc ? `<br><small class="text-muted">${item.hinhThuc}</small>` : ''}
+                </td>
+                <td class="text-center align-middle text-muted fw-bold bg-light">${item.gv || 'Đang cập nhật'}</td>`;
+                
+                if (index === 0) {
+                    html += `
+                    <td rowspan="${rowSpan}" class="text-center align-middle border-start border-end">
+                        <button class="btn btn-sm btn-outline-success fw-bold py-1 px-2" onclick="openAssignStudentModal('${c.id}')">
+                            <i class="fa-solid fa-user-plus"></i> Chỉ định
+                        </button>
+                    </td>`;
+                }
+                
+                html += `
+                <td class="text-center align-middle border-start">
+                    <div class="d-flex justify-content-center gap-1">
+                        <button class="btn btn-sm btn-warning" onclick="openEditMasterTkbModal(${item.rowIndex})" title="Sửa lịch này"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteMasterTkbRow(${item.rowIndex})" title="Xóa lịch này"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                </td>
+                </tr>`;
+            });
+        }
+    }
+    $('#adminMasterTkbBody').html(html);
+};
 
 function openAddMasterTkbModal() {
     currentEditMasterRowIndex = -1;
