@@ -725,7 +725,8 @@ $('#loadingStatus').addClass('d-none');
                 }
                 
                 let sheetRowIndex = rowIndex + 1;
-                let dragAttr = isAdmin ? ` draggable="true" ondragstart="handleDragStart(event, ${sheetRowIndex})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndex}, '${currentSheetName}')" style="cursor: grab;"` : '';
+                // Bổ sung thêm điều kiện window.innerWidth >= 992 để chỉ bật Kéo-Thả trên PC
+let dragAttr = (isAdmin && window.innerWidth >= 992) ? ` draggable="true" ondragstart="handleDragStart(event, ${sheetRowIndex})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndex}, '${currentSheetName}')" style="cursor: grab;"` : '';
                 
                 // Gắn Class child cho các dòng dữ liệu con, và gán sự kiện Click
                 let childClass = '';
