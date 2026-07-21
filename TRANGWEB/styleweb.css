@@ -1212,7 +1212,60 @@
         font-size: 18px;
     }
 }
+/* Fix đồng hồ và thanh chân trang trên Mobile */
+@media (max-width: 768px) {
+    .fixed-bottom-footer {
+        padding: 0 12px !important; /* Thu nhỏ khoảng cách 2 bên */
+    }
+    
+    .footer-info-left {
+        width: calc(100% - 130px); /* Giới hạn khung chữ online để chừa 130px cho đồng hồ */
+        overflow: hidden;
+    }
+    
+    #footerOnlineStatus {
+        display: block;
+        width: 100%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; /* Hiện dấu ... nếu danh sách online quá dài */
+    }
 
+    .clock-led-container {
+        padding: 0 8px !important;
+        gap: 4px !important;
+        min-width: fit-content;
+    }
+    
+    /* Ẩn bớt phần "Ngày/Tháng/Năm" trên điện thoại để tiết kiệm diện tích, chỉ hiện Giờ:Phút:Giây */
+    .clock-led-container .led-date,
+    .clock-led-container div[style*="width: 1px"] {
+        display: none !important;
+    }
+}
+/* Nút Copy Code đồng bộ màu Web */
+.btn-copy-code {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 10;
+    background-color: var(--primary-color);
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-copy-code:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    background-color: var(--primary-hover);
+}
 /* TIÊU ĐỀ PHÂN CHIA DANH MỤC THÔNG BÁO */
 .tb-section-heading {
     font-size: 16px;

@@ -32,15 +32,39 @@ function changeCodeLang() {
 }
 function formatCodeBlocks(text) {
     if (!text) return "";
-    // Bắt các đoạn code bọc trong 3 dấu ngoặc ngược (```) và loại bỏ chính nó
     return text.replace(/```(cpp|python|c\+\+|c)([\s\S]*?)```/gi, function(match, lang, code) {
         let escapedCode = code.replace(/</g, '&lt;').replace(/>/g, '&gt;').trim();
         let safeLang = (lang.toLowerCase() === 'c++' || lang.toLowerCase() === 'c') ? 'cpp' : lang.toLowerCase();
-        
-        // Trả về HTML chuẩn, không bao gồm ký tự ```
         return `<pre><code class="language-${safeLang}">${escapedCode}</code></pre>`;
     });
 }
+
+window.copyShareCodeDirect = function(index, btnElement) {
+    let item = window.shareCodeList[index];
+    
+    // Bóc tách Code thô từ Markdown (y hệt cách bóc tách của hàm Sửa Code)
+    let rawCode = item.codeContent.replace(/^```[a-zA-Z\+\#]*\n?/g, '').replace(/\n?```$/g, '');
+    
+    navigator.clipboard.writeText(rawCode).then(() => {
+        let originalHtml = btnElement.innerHTML;
+        let originalBg = btnElement.style.background;
+        let originalColor = btnElement.style.color;
+        
+        // Đổi giao diện sang trạng thái thành công (Nút xanh lá)
+        btnElement.innerHTML = '<i class="fa-solid fa-check"></i> Đã Copy';
+        btnElement.style.background = '#16a34a'; 
+        btnElement.style.color = '#ffffff';
+        
+        // Trả lại trạng thái ban đầu sau 2 giây
+        setTimeout(() => {
+            btnElement.innerHTML = originalHtml;
+            btnElement.style.background = originalBg;
+            btnElement.style.color = originalColor;
+        }, 2000);
+    }).catch(err => {
+        alert('Trình duyệt không hỗ trợ copy tự động!');
+    });
+};
 function checkNewQA() { $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) { 
             if (!data || data.length === 0) return; 
             if (data.some(row => (row[3] || '').trim() === '')) {
@@ -589,7 +613,6 @@ window.shareCodeList.push({
     }});
 }
 
-// 2. Hàm chuyển đổi từ Danh sách sang Xem Chi Tiết
 window.openShareCodeDetail = function(index) {
     let item = window.shareCodeList[index];
     if(!item) return;
@@ -605,17 +628,20 @@ window.openShareCodeDetail = function(index) {
         }
     }
 
-    // Nút Sửa Code chỉ được tạo ra nếu thoả mãn quyền
-let editBtnHtml = '';
+    // TẠO NHÓM NÚT THAO TÁC (COPY & SỬA CODE) Ở ĐÂY
+    let actionBtnsHtml = `<div class="d-flex align-items-center gap-2">
+        <button class="btn fw-bold shadow-sm" style="background: #e0f2fe; color: #0369a1; border-radius: 8px; transition: all 0.2s;" onclick="copyShareCodeDirect(${index}, this)">
+            <i class="fa-regular fa-copy"></i> Copy Code
+        </button>`;
+    
     if (canEdit) {
-        editBtnHtml = `
-        <button class="btn text-white fw-bold shadow-sm" style="background: var(--primary-color);" onclick="editShareCodeDirect(${index})">
+        actionBtnsHtml += `
+        <button class="btn text-white fw-bold shadow-sm" style="background: var(--primary-color); border-radius: 8px; transition: all 0.2s;" onclick="editShareCodeDirect(${index})">
             <i class="fa-solid fa-pen-to-square"></i> Sửa Code
         </button>`;
     }
+    actionBtnsHtml += `</div>`;
 
-    // Giao diện chi tiết thiết kế đồng bộ với trang "Thông báo"
-   // Giao diện chi tiết thiết kế đồng bộ với trang "Thông báo"
     let html = `
         <div class="tb-detail-box shadow-sm mb-4" style="border: 1px solid var(--primary-color);">
             <div class="tb-header-blue" style="cursor: pointer; background: linear-gradient(135deg, #0f4c81, #1664a8);" onclick="backToShareCodeList()">
@@ -623,12 +649,13 @@ let editBtnHtml = '';
             </div>
             
             <div class="tb-detail-body p-4 p-md-5">
-                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                <!-- Thêm flex-wrap và gap-3 để trên điện thoại các nút tự xuống dòng không bị đè chữ -->
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom flex-wrap gap-3">
                     <div>
                         <h4 class="text-primary fw-bold mb-2"><i class="fa-solid fa-hashtag me-2"></i>Mã bài: ${item.maBai}</h4>
                         <div class="qa-time m-0"><i class="fa-regular fa-clock"></i> ${item.time} <span class="mx-3">|</span> Tác giả: <strong class="text-secondary">${item.author}</strong></div>
                     </div>
-                    ${editBtnHtml}
+                    ${actionBtnsHtml}
                 </div>
                 
                 <div class="qa-question" style="font-size: 16px;">${questionFormatted}</div>
@@ -649,19 +676,14 @@ let editBtnHtml = '';
 
     $('#shareCodeDetailWrapper').html(html);
     
-    // Ẩn lưới danh sách, hiện khung chi tiết
     $('#shareCodeListWrapper').addClass('d-none');
     $('#shareCodeDetailWrapper').removeClass('d-none');
     
-    // Tự động cuộn trang lên đầu khung chi tiết
-window.scrollTo({ top: $('#shareCodeDetailWrapper').offset().top - 80, behavior: 'smooth' });
+    window.scrollTo({ top: $('#shareCodeDetailWrapper').offset().top - 80, behavior: 'smooth' });
     
-    // Highlight Code & Render Toán học
     if (window.Prism) {
         setTimeout(() => { 
             Prism.highlightAllUnder(document.getElementById('shareCodeDetailWrapper')); 
-            
-            // GỌI KATEX Ở ĐÂY CHO CHI TIẾT SHARE CODE
             applyKaTeX('shareCodeDetailWrapper');
         }, 50);
     }
