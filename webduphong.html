@@ -136,7 +136,7 @@
     <header class="top-header d-flex justify-content-between align-items-center">
         <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
         <!-- Đồng hồ LED ô 1 -->
-        <div class="d-flex align-items-center gap-3 px-3 clock-led-container" style="background: #ffffdf; border: 2px solid #365b82; height: 36px; border-radius: 4px; font-family: 'Chakra Petch', sans-serif; box-shadow: inset 0 0 4px rgba(0,0,0,0.15);">
+        <div class="d-none d-md-flex align-items-center gap-3 px-3 clock-led-container" style="background: #ffffdf; border: 2px solid #365b82; height: 36px; border-radius: 4px; font-family: 'Chakra Petch', sans-serif; box-shadow: inset 0 0 4px rgba(0,0,0,0.15);">
             <span class="led-date" style="font-size: 18px; color: #7e4d8c; font-weight: 700; letter-spacing: 0.5px;">--/--/----</span>
             <div style="width: 1px; height: 18px; background-color: #cbd5e1;"></div>
             <div class="d-flex align-items-center gap-1" style="font-size: 19px; font-weight: 700;">
@@ -1330,7 +1330,42 @@
         </div>
     </div>
 </div>
-
+<!-- MODAL XEM TÀI LIỆU TRỰC TIẾP (FULLSCREEN) -->
+<div class="modal fade" id="documentViewerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen"> <!-- Dùng class này để tràn 100% màn hình -->
+        <div class="modal-content border-0">
+            <!-- Header Modal -->
+            <div class="modal-header text-white" style="background-color: #0f4c81; padding: 12px 24px;">
+                <h6 class="modal-title m-0 fw-bold d-flex align-items-center" id="docViewerTitle" style="font-size: 16px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <i class="fa-solid fa-file-lines me-2"></i>Xem tài liệu
+                </h6>
+                
+                <!-- Nút mở tab mới (Sẽ được ẩn/hiện bằng JavaScript) -->
+                <button type="button" id="btnOpenInNewTab" class="btn btn-sm btn-outline-light me-3 d-none">
+                    <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Mở tab mới
+                </button>
+                
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <!-- Phần khung nhúng iFrame (Đổi nền sang màu xám đen để đồng bộ với màu của Google Drive) -->
+            <div class="modal-body p-0" style="background-color: #202124; position: relative;">
+                <div class="w-100 h-100 d-flex align-items-center justify-content-center" id="docLoading" style="position: absolute; z-index: 0;">
+                    <div class="text-center text-white opacity-75">
+                        <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải tài liệu...
+                    </div>
+                </div>
+                
+<iframe id="docViewerIframe" src="" 
+        style="width: 100%; height: 100%; border: none; position: relative; z-index: 1;" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        allowfullscreen
+        onload="document.getElementById('docLoading').style.display='none'">
+</iframe>
+            </div>
+        </div>
+    </div>
+</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
