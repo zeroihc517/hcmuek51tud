@@ -290,6 +290,29 @@ window.openDocumentViewer = function(url, title) {
     if (url.includes('drive.google.com/file/d/')) {
         embedUrl = url.replace(/\/view.*$/, '/preview');
     }
+else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let videoId = "";
+        
+        if (url.includes('youtu.be/')) {
+            videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
+        } else if (url.includes('youtube.com/shorts/')) {
+            videoId = url.split('youtube.com/shorts/')[1].split('?')[0].split('&')[0];
+        } else if (url.includes('youtube.com/watch')) {
+            try {
+                let urlObj = new URL(url);
+                videoId = urlObj.searchParams.get('v');
+            } catch(e) {
+                let match = url.match(/v=([^&]+)/);
+                if (match) videoId = match[1];
+            }
+        }
+        
+        if (videoId) {
+            // Thêm origin để xác thực tên miền tránh lỗi cấu hình Player 153
+            let currentOrigin = window.location.origin !== "null" ? window.location.origin : "";
+            embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1${currentOrigin ? '&origin=' + encodeURIComponent(currentOrigin) : ''}`;
+        }
+    }
     
     // Dọn dẹp HTML dư thừa nếu có trong tiêu đề
     let cleanTitle = $('<div>').html(title).text();
