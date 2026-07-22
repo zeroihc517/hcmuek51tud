@@ -2722,24 +2722,24 @@ window.toggleLesson = function(chapterId, lessonId, rowElement) {
         $(`.child-of-lesson-${chapterId}-${lessonId}`).addClass('d-none');
     }
 };
-// QUẢN LÝ BẬT / TẮT & TỰ ĐỘNG PHÁT NHẠC NỀN THEO DANH MỤC
+// QUẢN LÝ BẬT / TẮT & TỰ ĐỘNG PHÁT PLAYLIST YOUTUBE
 let isMusicPlaying = false;
-const youtubeMusicUrl = "https://www.youtube.com/embed/rJzJZavduqY?enablejsapi=1&autoplay=1&list=RDrJzJZavduqY";
 
-// Danh sách các mục CHO PHÉP bật nhạc
+// Mã Playlist YouTube mới của bạn
+const youtubePlaylistId = "PLR3lF7fH9sbA"; 
+
+// URL nhúng cấu hình phát tự động danh sách phát
+const youtubeMusicUrl = `https://www.youtube.com/embed?listType=playlist&list=${youtubePlaylistId}&enablejsapi=1&autoplay=1`;
+
+// Danh sách các danh mục CHO PHÉP bật nhạc
 const allowedMusicSections = ['Thông báo', 'Lịch học', 'Tổng hợp link'];
 
-// Hàm kiểm tra và bật nhạc (chỉ phát nếu thuộc các mục cho phép)
+// Hàm kiểm tra phân hệ và phát/dừng nhạc tương ứng
 function checkAndPlayMusic(sectionName) {
     let currentSection = sectionName || currentSheetName;
-    
-    // Nếu chuyển sang mục được cho phép -> Bật nhạc
     if (allowedMusicSections.includes(currentSection)) {
-        if (!isMusicPlaying) {
-            startMusic();
-        }
+        if (!isMusicPlaying) startMusic();
     } else {
-        // Nếu chuyển sang các mục khác (Q&A, GPA, Share Code...) -> Tắt nhạc
         stopMusic();
     }
 }
