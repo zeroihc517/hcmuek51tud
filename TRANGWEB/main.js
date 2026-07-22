@@ -2722,19 +2722,16 @@ window.toggleLesson = function(chapterId, lessonId, rowElement) {
         $(`.child-of-lesson-${chapterId}-${lessonId}`).addClass('d-none');
     }
 };
-// QUẢN LÝ BẬT / TẮT & TỰ ĐỘNG PHÁT PLAYLIST
+// QUẢN LÝ BẬT / TẮT NHẠC NỀN
 let isMusicPlaying = false;
 
-// Link playlist của bạn
-const youtubePlaylistLink = "https://youtube.com/playlist?list=PLR3lF7fH9sbA&si=qqJQGI6qICefrp-8"; 
+// ID Video YouTube: "Những Ngày Trời Bao La - 1 Hour"
+const youtubeVideoId = "wdvrz3LBpOY"; 
 
-// Tự động bóc tách ID playlist (PLR3lF7fH9sbA)
-const youtubePlaylistId = (youtubePlaylistLink.match(/[?&]list=([^&]+)/) || [])[1] || "PLR3lF7fH9sbA";
+// URL Embed tối ưu: autoplay + loop 1 hour
+const youtubeMusicUrl = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&loop=1&playlist=${youtubeVideoId}&enablejsapi=1`;
 
-// Sử dụng domain youtube-nocookie chính thức để chạy mượt mà trên mọi thiết bị
-const youtubeMusicUrl = `https://www.youtube-nocookie.com/embed/videoseries?list=${youtubePlaylistId}&autoplay=1&enablejsapi=1`;
-
-// Danh sách các phân hệ CHO PHÉP bật nhạc
+// Các danh mục được phép phát nhạc
 const allowedMusicSections = ['Thông báo', 'Lịch học', 'Tổng hợp link'];
 
 function checkAndPlayMusic(sectionName) {
@@ -2750,8 +2747,7 @@ function startMusic() {
     let player = document.getElementById('bgMusicPlayer');
     let icon = document.getElementById('musicIcon');
     if (player) {
-        // Chỉ gán lại src nếu iframe chưa có nhạc
-        if (!player.src || player.src === "about:blank" || window.location.href.includes("about:blank")) {
+        if (!player.src || player.src.includes("about:blank")) {
             player.src = youtubeMusicUrl;
         }
         if (icon) icon.classList.remove('music-paused');
@@ -2763,7 +2759,7 @@ function stopMusic() {
     let player = document.getElementById('bgMusicPlayer');
     let icon = document.getElementById('musicIcon');
     if (player) {
-        player.src = "";
+        player.src = "about:blank";
         if (icon) icon.classList.add('music-paused');
         isMusicPlaying = false;
     }
@@ -2778,7 +2774,7 @@ function toggleBgMusic() {
 }
 
 $(document).ready(function() {
-    // Kích hoạt phát nhạc ngay khi người dùng chạm/click lần đầu tiên vào trang
+    // Tự động phát nhạc ngay khi người dùng chạm/click lần đầu vào web
     $(document).one('click touchstart keydown', function() {
         if (!isMusicPlaying) {
             startMusic();
