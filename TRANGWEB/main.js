@@ -2722,32 +2722,53 @@ window.toggleLesson = function(chapterId, lessonId, rowElement) {
         $(`.child-of-lesson-${chapterId}-${lessonId}`).addClass('d-none');
     }
 };
-// QUẢN LÝ BẬT / TẮT & TỰ ĐỘNG PHÁT NHẠC NỀN YOUTUBE
+// QUẢN LÝ BẬT / TẮT & TỰ ĐỘNG PHÁT NHẠC NỀN THEO DANH MỤC
 let isMusicPlaying = false;
 const youtubeMusicUrl = "https://www.youtube.com/embed/rJzJZavduqY?enablejsapi=1&autoplay=1&list=RDrJzJZavduqY";
 
-function startMusic() {
-    if (!isMusicPlaying) {
-        let player = document.getElementById('bgMusicPlayer');
-        let icon = document.getElementById('musicIcon');
-        if (player) {
-            player.src = youtubeMusicUrl;
-            if (icon) icon.classList.remove('music-paused');
-            isMusicPlaying = true;
+// Danh sách các mục CHO PHÉP bật nhạc
+const allowedMusicSections = ['Thông báo', 'Lịch học', 'Tổng hợp link'];
+
+// Hàm kiểm tra và bật nhạc (chỉ phát nếu thuộc các mục cho phép)
+function checkAndPlayMusic(sectionName) {
+    let currentSection = sectionName || currentSheetName;
+    
+    // Nếu chuyển sang mục được cho phép -> Bật nhạc
+    if (allowedMusicSections.includes(currentSection)) {
+        if (!isMusicPlaying) {
+            startMusic();
         }
+    } else {
+        // Nếu chuyển sang các mục khác (Q&A, GPA, Share Code...) -> Tắt nhạc
+        stopMusic();
+    }
+}
+
+function startMusic() {
+    let player = document.getElementById('bgMusicPlayer');
+    let icon = document.getElementById('musicIcon');
+    if (player) {
+        player.src = youtubeMusicUrl;
+        if (icon) icon.classList.remove('music-paused');
+        isMusicPlaying = true;
+    }
+}
+
+function stopMusic() {
+    let player = document.getElementById('bgMusicPlayer');
+    let icon = document.getElementById('musicIcon');
+    if (player) {
+        player.src = "";
+        if (icon) icon.classList.add('music-paused');
+        isMusicPlaying = false;
     }
 }
 
 function toggleBgMusic() {
-    let player = document.getElementById('bgMusicPlayer');
-    let icon = document.getElementById('musicIcon');
-
     if (!isMusicPlaying) {
         startMusic();
     } else {
-        player.src = "";
-        if (icon) icon.classList.add('music-paused');
-        isMusicPlaying = false;
+        stopMusic();
     }
 }
 
