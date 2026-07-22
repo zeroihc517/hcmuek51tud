@@ -353,14 +353,28 @@ function openManageTkbListModal() {
                 else if (parseInt(c.thu) === 99) thuText = "-";
                 else thuText = "Thứ " + c.thu;
 
-                // Cập nhật màu nền đan xen
+                // Nền dòng đan xen
                 let rowBg = c.isDeadline ? "background-color: #fff5f6;" : `background-color: ${groupBgColor};`;
                 
-                // Ẩn thời gian nếu là VLE
+                // Ẩn cột thời gian nếu là VLE
                 let thoiGianHienThi = c.thoiGian || '-';
                 if ((c.hinhThuc || "").toLowerCase().includes("vle")) {
                     thoiGianHienThi = "";
                 }
+
+                // --- XỬ LÝ DỌN DẸP LINK Ở CỘT CƠ SỞ / HÌNH THỨC ---
+                let rawHinhThuc = c.hinhThuc || ""; 
+                let extLink = checkAndExtractUrl(rawHinhThuc);
+                let coSoDisplay = extLink ? rawHinhThuc.replace(extLink, '').trim() : rawHinhThuc.trim();
+                
+                if (coSoDisplay.toLowerCase().includes("tự học") || coSoDisplay === "") { 
+                    coSoDisplay = extLink ? "Truy cập" : "-"; 
+                }
+
+                // Nếu có link thì hiển thị dạng chữ màu xanh gạch chân
+                let coSoHtml = extLink 
+                    ? `<a href="${extLink}" target="_blank" class="fw-bold text-decoration-underline" style="color: #0284c7;" title="Mở liên kết">${coSoDisplay} <i class="fa-solid fa-up-right-from-square ms-1" style="font-size: 11px;"></i></a>`
+                    : `<span class="fw-bold">${coSoDisplay}</span>`;
 
                 tkbHtml += `<tr style="${rowBg}">`;
                 
@@ -372,7 +386,7 @@ function openManageTkbListModal() {
                     tkbHtml += `
                         <td class="text-center align-middle fw-bold text-dark">-</td>
                         <td class="text-center align-middle"><span class="badge bg-danger">DEADLINE</span></td>
-                        <td class="text-center align-middle fw-bold">${c.hinhThuc}</td>
+                        <td class="text-center align-middle">${coSoHtml}</td>
                         <td class="text-center fw-bold text-danger align-middle">${thoiGianHienThi}</td>
                         <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
                         <td class="text-center align-middle">-</td>
@@ -384,14 +398,11 @@ function openManageTkbListModal() {
                     </tr>`;
                 } else {
                     let noteBadge = getNoteFromSubject(c); 
-                    let rawHinhThuc = c.hinhThuc || ""; let extLink = checkAndExtractUrl(rawHinhThuc);
-                    let coSoDisplay = extLink ? rawHinhThuc.replace(extLink, '').trim() : rawHinhThuc.trim();
-                    if (coSoDisplay.toLowerCase().includes("tự học") || coSoDisplay === "") { coSoDisplay = ""; }
                     
                     tkbHtml += `
                         <td class="text-center align-middle fw-bold text-dark">${thuText}</td>
                         <td class="text-center align-middle">${noteBadge}</td>
-                        <td class="text-center align-middle fw-bold">${coSoDisplay}</td>
+                        <td class="text-center align-middle">${coSoHtml}</td>
                         <td class="text-center fw-bold text-danger align-middle">${thoiGianHienThi}</td>
                         <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
                         <td class="text-center align-middle">${c.phong || '-'}</td>
