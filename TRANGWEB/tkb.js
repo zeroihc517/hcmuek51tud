@@ -76,20 +76,38 @@ function renderDeadlines() {
     }
 
     container.innerHTML = filtered.map(item => {
+        // Lấy link từ Tiêu đề hoặc Tag
+        let extLinkTitle = checkAndExtractUrl(item.title);
+        let extLinkTag = checkAndExtractUrl(item.tag);
+        let extLink = extLinkTitle || extLinkTag;
+        
+        // Làm sạch hiển thị (Xóa link dài ra khỏi text hiển thị trên UI)
+        let displayTitle = item.title;
+        let displayTag = item.tag;
+        if (extLinkTitle) displayTitle = displayTitle.replace(extLinkTitle, '').trim();
+        if (extLinkTag) displayTag = displayTag.replace(extLinkTag, '').trim();
+        
+        // Nếu người dùng chỉ nhập mỗi link vào ô Tag mà không nhập chữ gì khác
+        if (displayTag === "") displayTag = "Truy cập Liên kết";
+        
+        // Thêm event.stopPropagation() vào nút Sửa/Xóa để khi bấm nút không bị nhảy Link
         let actionButtons = item.isSystem ? '' : `
             <div class="deadline-actions">
-                <button class="btn-dl-act text-warning shadow-sm" onclick="openEditDeadlineModal('${item.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn-dl-act text-danger shadow-sm" onclick="deletePersonalDeadline('${item.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                <button class="btn-dl-act text-warning shadow-sm" onclick="event.stopPropagation(); openEditDeadlineModal('${item.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn-dl-act text-danger shadow-sm" onclick="event.stopPropagation(); deletePersonalDeadline('${item.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
             </div>
         `;
         
+        let cardOnClick = extLink ? `onclick="window.open('${extLink}', '_blank')"` : "";
+        let cardStyle = extLink ? "cursor: pointer; transition: 0.2s; border: 1px dashed var(--primary-color);" : "";
+        
         return `
-            <div class="online-card">
+            <div class="online-card" ${cardOnClick} style="${cardStyle}" title="${extLink ? 'Bấm để mở liên kết' : ''}">
                 ${actionButtons}
                 <div class="icon-circle ${item.icon}">${item.emoji || '📌'}</div>
                 <h3 class="text-danger mb-2" style="font-size: 15px; font-weight: 800;">${item.duration}</h3>
-                <p class="desc text-dark mb-3" style="font-size: 16px; font-weight: 600;">${item.title}</p>
-                <span class="tag">${item.tag}</span>
+                <p class="desc text-dark mb-3" style="font-size: 16px; font-weight: 600;">${displayTitle}</p>
+                <span class="tag">${displayTag}</span>
             </div>
         `;
     }).join('');
@@ -301,11 +319,16 @@ function openManageTkbListModal() {
         groupOrder.sort((a, b) => a.minTime - b.minTime);
 
         // BƯỚC 4: Xuất HTML
+        let groupIndex = 0;
         for (let g of groupOrder) {
             let key = g.key;
             let items = groupedByMon[key];
             let rowCount = items.length;
             let baseNameDisplay = key;
+
+            // Xử lý đan xen màu xanh lá nhạt và xanh dương nhạt
+            let groupBgColor = (groupIndex % 2 === 0) ? "#dcfce7" : "#e0f2fe";
+            groupIndex++;
 
             // Sắp xếp các ca học bên trong cùng 1 môn theo Ngày bắt đầu -> Thứ -> Tiết
             items.sort((a, b) => {
@@ -330,11 +353,19 @@ function openManageTkbListModal() {
                 else if (parseInt(c.thu) === 99) thuText = "-";
                 else thuText = "Thứ " + c.thu;
 
-                let rowBg = c.isDeadline ? "background-color: #fff5f6;" : "background-color: #fff;";
+                // Cập nhật màu nền đan xen
+                let rowBg = c.isDeadline ? "background-color: #fff5f6;" : `background-color: ${groupBgColor};`;
+                
+                // Ẩn thời gian nếu là VLE
+                let thoiGianHienThi = c.thoiGian || '-';
+                if ((c.hinhThuc || "").toLowerCase().includes("vle")) {
+                    thoiGianHienThi = "";
+                }
+
                 tkbHtml += `<tr style="${rowBg}">`;
                 
                 if (index === 0) {
-                    tkbHtml += `<td rowspan="${rowCount}" class="text-start align-middle fw-bold text-primary" style="font-size: 15px; background-color: #f0f7ff; border-left: 3px solid var(--primary-color) !important;">${baseNameDisplay}</td>`;
+                    tkbHtml += `<td rowspan="${rowCount}" class="text-start align-middle fw-bold text-primary" style="font-size: 15px; background-color: ${groupBgColor}; border-left: 3px solid var(--primary-color) !important;">${baseNameDisplay}</td>`;
                 }
                 
                 if (c.isDeadline) {
@@ -342,7 +373,7 @@ function openManageTkbListModal() {
                         <td class="text-center align-middle fw-bold text-dark">-</td>
                         <td class="text-center align-middle"><span class="badge bg-danger">DEADLINE</span></td>
                         <td class="text-center align-middle fw-bold">${c.hinhThuc}</td>
-                        <td class="text-center fw-bold text-danger align-middle">${c.thoiGian || '-'}</td>
+                        <td class="text-center fw-bold text-danger align-middle">${thoiGianHienThi}</td>
                         <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
                         <td class="text-center align-middle">-</td>
                         <td class="align-middle">-</td>
@@ -361,7 +392,7 @@ function openManageTkbListModal() {
                         <td class="text-center align-middle fw-bold text-dark">${thuText}</td>
                         <td class="text-center align-middle">${noteBadge}</td>
                         <td class="text-center align-middle fw-bold">${coSoDisplay}</td>
-                        <td class="text-center fw-bold text-danger align-middle">${c.thoiGian || '-'}</td>
+                        <td class="text-center fw-bold text-danger align-middle">${thoiGianHienThi}</td>
                         <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
                         <td class="text-center align-middle">${c.phong || '-'}</td>
                         <td class="align-middle">${c.gv || '-'}</td>
@@ -456,7 +487,7 @@ function openManageDeadlineListModal() {
             return startB - startA;
         });
 
-        filteredDeadlines.forEach(c => {
+       filteredDeadlines.forEach(c => {
             let startT = getTimeFast(c.dateStart) || 0;
             let endT = getTimeFast(c.dateEnd) || startT;
             let isHappeningNow = (nowTime >= startT && nowTime <= endT);
@@ -465,11 +496,29 @@ function openManageDeadlineListModal() {
             let borderStyle = isHappeningNow ? "border-left: 4px solid #22c55e;" : "";
             let happeningBadge = isHappeningNow ? `<span class="badge bg-success text-white mb-1"><i class="fa-solid fa-bolt"></i> Đang diễn ra</span><br>` : '';
 
+            // Bóc tách và dọn dẹp link
+            let extLinkTitle = checkAndExtractUrl(c.title || "");
+            let extLinkTag = checkAndExtractUrl(c.tag || "");
+            let extLink = extLinkTitle || extLinkTag; // Gom link lại
+            
+            let displayTitle = c.title || "";
+            let displayTag = c.tag || "Khác";
+            
+            // Cắt bỏ phần link thừa khỏi chuỗi hiển thị
+            if (extLinkTitle) displayTitle = displayTitle.replace(extLinkTitle, '').trim();
+            if (extLinkTag) displayTag = displayTag.replace(extLinkTag, '').trim();
+            if (displayTag === "") displayTag = "Truy cập";
+
+            // Hiển thị chữ bình thường (không đóng khung badge)
+            let tagHtml = extLink 
+                ? `<a href="${extLink}" target="_blank" class="fw-bold text-decoration-underline" style="color: #0284c7;" title="Mở liên kết">${displayTag} <i class="fa-solid fa-up-right-from-square ms-1" style="font-size: 11px;"></i></a>` 
+                : `<span class="fw-bold text-dark">${displayTag}</span>`;
+
             dlHtml += `<tr>
                 <td class="text-center align-middle" style="${rowBgColor} ${borderStyle}">${happeningBadge}<span class="badge bg-primary">DEADLINE</span></td>
-                <td class="text-start align-middle fw-bold text-dark" style="${rowBgColor}">${c.title}</td>
+                <td class="text-start align-middle fw-bold text-dark" style="${rowBgColor}">${displayTitle}</td>
                 <td class="text-center align-middle fw-bold text-danger" style="${rowBgColor}">${c.duration || '-'}</td>
-                <td class="text-center align-middle" style="${rowBgColor}"><span class="badge" style="background-color: #0f4c81;">${c.tag || 'Khác'}</span></td>
+                <td class="text-center align-middle" style="${rowBgColor}">${tagHtml}</td>
                 <td class="text-center align-middle" style="${rowBgColor}">
                     <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
                     <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="deletePersonalDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>

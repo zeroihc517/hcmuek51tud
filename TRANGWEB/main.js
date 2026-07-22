@@ -171,7 +171,7 @@ function renderSidebarCategories() {
     
     // 1. Cấu hình phân nhóm danh mục (Bạn tự thêm tên Sheet thực tế vào mảng tương ứng)
     const categoryGroups = {
-	'HK1 - Năm 2': ['Hình học vi phân', 'Cấu trúc đại số', 'Cấu trúc dữ liệu', 'Lập trình hướng đối tượng', 'Tư tưởng Hồ Chí Minh'], 
+	'HK1 - Năm 2': ['Hình học vi phân', 'Cấu trúc đại số', 'Cấu trúc dữ liệu', 'Tư tưởng Hồ Chí Minh'], 
 	'Năm 1': ["Năm 1", "Đại số tuyến tính"],
 	'HK2 - Năm 2': ["Độ đo và tích phân", "Toán rời rạc", "Lập trình Python", "Phương trình vi phân và đạo hàm riêng", "Trí tuệ nhân tạo", "Lịch sử Đảng"],
     'Khác': [],
@@ -2726,7 +2726,7 @@ window.toggleLesson = function(chapterId, lessonId, rowElement) {
 let isMusicPlaying = false;
 
 // ID Video YouTube: "Những Ngày Trời Bao La - 1 Hour"
-const youtubeVideoId = "sfEYJrGh2YY"; 
+const youtubeVideoId = "wdvrz3LBpOY"; 
 
 // URL Embed tối ưu: autoplay + loop 1 hour
 const youtubeMusicUrl = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&loop=1&playlist=${youtubeVideoId}&enablejsapi=1`;
@@ -2774,10 +2774,5 @@ function toggleBgMusic() {
 }
 
 $(document).ready(function() {
-    // Tự động phát nhạc ngay khi người dùng chạm/click lần đầu vào web
-    $(document).one('click touchstart keydown', function() {
-        if (isMusicPlaying) {
-            startMusic();
-        }
-    });
+
 });
