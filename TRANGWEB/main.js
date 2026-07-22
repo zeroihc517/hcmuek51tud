@@ -2722,3 +2722,41 @@ window.toggleLesson = function(chapterId, lessonId, rowElement) {
         $(`.child-of-lesson-${chapterId}-${lessonId}`).addClass('d-none');
     }
 };
+// QUẢN LÝ BẬT / TẮT & TỰ ĐỘNG PHÁT NHẠC NỀN YOUTUBE
+let isMusicPlaying = false;
+const youtubeMusicUrl = "https://www.youtube.com/embed/q0tvU2MFyVA?enablejsapi=1&autoplay=1&list=RDq0tvU2MFyVA";
+
+function startMusic() {
+    if (!isMusicPlaying) {
+        let player = document.getElementById('bgMusicPlayer');
+        let icon = document.getElementById('musicIcon');
+        if (player) {
+            player.src = youtubeMusicUrl;
+            if (icon) icon.classList.remove('music-paused');
+            isMusicPlaying = true;
+        }
+    }
+}
+
+function toggleBgMusic() {
+    let player = document.getElementById('bgMusicPlayer');
+    let icon = document.getElementById('musicIcon');
+
+    if (!isMusicPlaying) {
+        startMusic();
+    } else {
+        player.src = "";
+        if (icon) icon.classList.add('music-paused');
+        isMusicPlaying = false;
+    }
+}
+
+$(document).ready(function() {
+    // 1. Nạp nhạc phát tự động khi vừa tải xong trang
+    startMusic();
+
+    // 2. Kích hoạt phát nhạc ngay chạm/click đầu tiên (vượt qua rào cản chặn Autoplay của trình duyệt)
+    $(document).one('click touchstart keydown', function() {
+        startMusic();
+    });
+});
