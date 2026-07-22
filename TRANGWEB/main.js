@@ -2776,7 +2776,7 @@ function toggleBgMusic() {
 $(document).ready(function() {
     // Tự động phát nhạc ngay khi người dùng chạm/click lần đầu vào web
     $(document).one('click touchstart keydown', function() {
-        if (!isMusicPlaying) {
+        if (isMusicPlaying) {
             startMusic();
         }
     });
