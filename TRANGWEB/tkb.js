@@ -165,15 +165,15 @@ function renderTkbToolBar() {
             <div>
                 <span class="badge bg-primary fs-6 me-2"><i class="fa-solid fa-user"></i> ${currentUser.name} (${currentUser.mssv})</span>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openSystemTkbModal()"><i class="fa-solid fa-cloud-arrow-down"></i> Đồng bộ học phần</button>
-                <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openManageTkbListModal()"><i class="fa-solid fa-list-check text-info"></i> Tổng hợp TKB</button>
+                <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openManageTkbListModal()"><i class="fa-solid fa-calendar-days text-info"></i> Lịch học</button>
+                <button class="btn btn-sm text-white fw-bold" style="background-color: #dc2626;" onclick="openManageDeadlineListModal()"><i class="fa-solid fa-thumbtack text-warning"></i> Deadline</button>
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openAddTkbModal(false)"><i class="fa-solid fa-plus"></i> Thêm lịch mới</button>
             </div>
         </div>`;
     $('.table-box').before(toolbarHtml);
 }
-
 function getBaseSubjectName(name) {
     if (!name) return "KHÁC";
     let base = name.toLowerCase()
@@ -199,8 +199,11 @@ function getNoteFromSubject(c) {
     return '<span class="text-muted small">Chính khóa</span>';
 }
 
+// ----------------------------------------------------
+// HÀM 1: MỞ BẢNG TỔNG HỢP TKB (Gộp ưu tiên theo Môn học)
+// ----------------------------------------------------
 function openManageTkbListModal() {
-    let html = ''; let selectedNH = $('#namHocSelect').val(); let selectedHK = $('#hocKySelect').val();
+    let selectedNH = $('#namHocSelect').val(); let selectedHK = $('#hocKySelect').val();
     let filteredTkbData = globalTkbData; let titleSuffix = '';
     let startMonTime = null; let endSunTime = null;
     const getTimeFast = (dateStr) => { let d = parseDateString(dateStr); return d ? d.getTime() : null; };
@@ -227,13 +230,19 @@ function openManageTkbListModal() {
         }
     }
 
-    $('#manageTkbListModal .modal-title').html(`<i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học & Deadline${titleSuffix}`);
+    // Lấy danh sách các môn học hiện có trong TKB để đối chiếu
+    let filteredTkbSubjectNames = new Set(filteredTkbData.map(c => getBaseSubjectName(c.mon)));
 
+    // Lọc lấy các Deadline VLE/Tiểu luận CÓ TRÙNG TÊN với môn học
     let pseudoDeadlines = [];
     if (globalDeadlineData && globalDeadlineData.length > 0) {
-        let filteredDeadlines = globalDeadlineData.filter(d => {
+        let vleDeadlines = globalDeadlineData.filter(d => {
             let searchStr = ((d.tag || "") + " " + (d.title || "")).toLowerCase();
             if (!(searchStr.includes('vle') || searchStr.includes('tiểu luận'))) return false;
+            
+            // NẾU KHÔNG TRÙNG MÔN HỌC THÌ LOẠI RA (Để dành cho bảng Deadline)
+            if (!filteredTkbSubjectNames.has(getBaseSubjectName(d.title))) return false;
+
             if (startMonTime && endSunTime) {
                 let dStartTime = getTimeFast(d.dateStart); let dEndTime = getTimeFast(d.dateEnd);
                 if (!dStartTime && !dEndTime) return true;
@@ -241,50 +250,217 @@ function openManageTkbListModal() {
                 if (dStartTime) return dStartTime <= endSunTime;
                 if (dEndTime) return dEndTime >= startMonTime;
                 return true;
-            } return true;
+            } 
+            return true;
         });
-        pseudoDeadlines = filteredDeadlines.map(d => ({ isDeadline: true, mon: d.title, hinhThuc: d.tag || "VLE", ngayBatDau: d.dateStart, ngayKetThuc: d.dateEnd, sheetRowIndex: d.sheetRowIndex, thu: "-", tietBd: "-", soTiet: "-", thoiGian: "-", phong: "-", gv: "-" }));
+        
+        pseudoDeadlines = vleDeadlines.map(d => ({ 
+            isDeadline: true, 
+            mon: d.title, 
+            hinhThuc: d.tag || "VLE", 
+            ngayBatDau: d.dateStart, 
+            ngayKetThuc: d.dateEnd, 
+            sheetRowIndex: d.sheetRowIndex, 
+            thu: 99, 
+            tietBd: 99, 
+            soTiet: "-", 
+            thoiGian: d.duration || "-", 
+            phong: "-", 
+            gv: "-" 
+        }));
     }
 
     let combinedData = [...filteredTkbData, ...pseudoDeadlines];
+    $('#manageTkbListModal .modal-title').html(`<i class="fa-solid fa-calendar-days me-2"></i>Bảng Tổng hợp Lịch học${titleSuffix}`);
 
+    let tkbHtml = '';
     if (combinedData.length === 0) {
-        let emptyMsg = (selectedNH && selectedHK) ? `Không có môn học/deadline nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có môn học lịch trình cá nhân nào được tạo!";
-        html += `<tr><td colspan="9" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
+        let emptyMsg = (selectedNH && selectedHK) ? `Không có môn học/sự kiện nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có môn học/sự kiện nào được tạo!";
+        tkbHtml += `<tr><td colspan="9" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
     } else {
-        let groupedData = {};
-        combinedData.forEach(c => { let baseName = getBaseSubjectName(c.mon); if (!groupedData[baseName]) { groupedData[baseName] = []; } groupedData[baseName].push(c); });
-        for (let baseName in groupedData) {
-            let groupItems = groupedData[baseName]; let rowCount = groupItems.length;
-            groupItems.sort((a, b) => (a.isDeadline === b.isDeadline) ? 0 : a.isDeadline ? 1 : -1);
-            groupItems.forEach((c, index) => {
+        // Thuật toán Sắp xếp:
+        // 1. Theo Tên Môn học
+        // 2. TKB thường lên trước, VLE xuống dưới cùng của môn đó (isDeadline)
+        // 3. Trong cùng một Thứ, sắp xếp theo Tiết bắt đầu
+        let sortedTkbData = [...combinedData].sort((a, b) => {
+            let nameA = getBaseSubjectName(a.mon);
+            let nameB = getBaseSubjectName(b.mon);
+            if (nameA !== nameB) return nameA.localeCompare(nameB);
+            
+            if (a.isDeadline !== b.isDeadline) return a.isDeadline ? 1 : -1;
+            
+            if (a.thu !== b.thu) return a.thu - b.thu;
+            return a.tietBd - b.tietBd;
+        });
+
+        // Gom nhóm theo Tên Môn học (Gộp chung TKB và VLE vào 1 môn)
+        let groupedByMon = {};
+        sortedTkbData.forEach(c => {
+            let groupKey = getBaseSubjectName(c.mon);
+            if (!groupedByMon[groupKey]) { groupedByMon[groupKey] = []; }
+            groupedByMon[groupKey].push(c);
+        });
+
+        for (let key in groupedByMon) {
+            let items = groupedByMon[key];
+            let rowCount = items.length;
+            let baseNameDisplay = key;
+
+            items.forEach((c, index) => {
                 let dateDisplay = '-';
                 if (c.ngayBatDau && c.ngayKetThuc) { 
                     dateDisplay = (c.ngayBatDau === c.ngayKetThuc) ? c.ngayBatDau : `Từ ${c.ngayBatDau}<br>đến ${c.ngayKetThuc}`; 
-                }
-                else if (c.ngayBatDau) { dateDisplay = c.ngayBatDau; } 
+                } else if (c.ngayBatDau) { dateDisplay = c.ngayBatDau; } 
                 else if (c.ngayKetThuc) { dateDisplay = c.ngayKetThuc; }
 
-                let rowBg = c.isDeadline ? 'background-color: #fff5f6;' : 'background-color: #fff;';
-                html += `<tr style="${rowBg}">`;
-                if (index === 0) { html += `<td rowspan="${rowCount}" class="fw-bold text-dark ps-3 border-start border-3 align-middle" style="border-left-color: var(--primary-color) !important; background-color: #fff;">${baseName}</td>`; }
+                let thuText = "";
+                if (parseInt(c.thu) === 8) thuText = "Chủ nhật";
+                else if (parseInt(c.thu) === 99) thuText = "-";
+                else thuText = "Thứ " + c.thu;
+
+                // Tô nền đỏ nhạt cho dòng Deadline/VLE
+                let rowBg = c.isDeadline ? "background-color: #fff5f6;" : "background-color: #fff;";
+                tkbHtml += `<tr style="${rowBg}">`;
+                
+                // Gộp ô Môn học (Cột đầu tiên)
+                if (index === 0) {
+                    tkbHtml += `<td rowspan="${rowCount}" class="text-start align-middle fw-bold text-primary" style="font-size: 15px; background-color: #f0f7ff; border-left: 3px solid var(--primary-color) !important;">${baseNameDisplay}</td>`;
+                }
+                
                 if (c.isDeadline) {
-                    html += `<td class="text-center align-middle"><span class="badge bg-danger">DEADLINE</span><br></td><td class="text-center align-middle">-</td><td class="text-center align-middle fw-bold text-danger">${c.hinhThuc}</td><td class="text-center fw-bold text-secondary align-middle">-</td><td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td><td class="text-center align-middle">-</td><td class="align-middle">-</td><td class="text-center align-middle"><button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditDeadline(${c.sheetRowIndex})"><i class="fa-solid fa-pen"></i> Sửa</button><button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="deletePersonalDeadline(${c.sheetRowIndex})"><i class="fa-solid fa-trash"></i> Xóa</button></td>`;
+                    tkbHtml += `
+                        <td class="text-center align-middle fw-bold text-dark">-</td>
+                        <td class="text-center align-middle"><span class="badge bg-danger">DEADLINE</span></td>
+                        <td class="text-center align-middle fw-bold">${c.hinhThuc}</td>
+                        <td class="text-center fw-bold text-danger align-middle">${c.thoiGian || '-'}</td>
+                        <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
+                        <td class="text-center align-middle">-</td>
+                        <td class="align-middle">-</td>
+                        <td class="text-center align-middle">
+                            <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
+                            <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="deletePersonalDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
+                        </td>
+                    </tr>`;
                 } else {
-                    let thuText = c.thu === 8 ? "Chủ nhật" : "Thứ " + c.thu; let noteBadge = getNoteFromSubject(c); 
+                    let noteBadge = getNoteFromSubject(c); 
                     let rawHinhThuc = c.hinhThuc || ""; let extLink = checkAndExtractUrl(rawHinhThuc);
                     let coSoDisplay = extLink ? rawHinhThuc.replace(extLink, '').trim() : rawHinhThuc.trim();
                     if (coSoDisplay.toLowerCase().includes("tự học") || coSoDisplay === "") { coSoDisplay = ""; }
-                    html += `<td class="text-center align-middle">${noteBadge}</td><td class="text-center align-middle">${thuText}</td><td class="text-center align-middle fw-bold">${coSoDisplay}</td><td class="text-center fw-bold text-danger align-middle">${c.thoiGian || '-'}</td><td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td><td class="text-center align-middle">${c.phong || '-'}</td><td class="align-middle">${c.gv || '-'}</td><td class="text-center align-middle"><button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button><button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="promptDeletePersonalTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button></td>`;
+                    
+                    tkbHtml += `
+                        <td class="text-center align-middle fw-bold text-dark">${thuText}</td>
+                        <td class="text-center align-middle">${noteBadge}</td>
+                        <td class="text-center align-middle fw-bold">${coSoDisplay}</td>
+                        <td class="text-center fw-bold text-danger align-middle">${c.thoiGian || '-'}</td>
+                        <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
+                        <td class="text-center align-middle">${c.phong || '-'}</td>
+                        <td class="align-middle">${c.gv || '-'}</td>
+                        <td class="text-center align-middle">
+                            <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
+                            <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="promptDeletePersonalTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
+                        </td>
+                    </tr>`;
                 }
-                html += `</tr>`;
             });
         }
     }
-    $('#tkbManagerListBody').html(html); $('#manageTkbListModal').modal('show');
-}       
+    $('#tkbManagerListBody').html(tkbHtml);
+    $('#manageTkbListModal').modal('show');
+}
+function openManageDeadlineListModal() {
+    let selectedNH = $('#namHocSelect').val(); let selectedHK = $('#hocKySelect').val();
+    let titleSuffix = '';
+    let startMonTime = null; let endSunTime = null;
+    let filteredTkbData = globalTkbData;
+    const getTimeFast = (dateStr) => { let d = parseDateString(dateStr); return d ? d.getTime() : null; };
 
-function closeAndOpenEditTkb(sheetRowIndex) { $('#manageTkbListModal').modal('hide'); setTimeout(() => { openEditTkbModal(sheetRowIndex); }, 400); }
+    if (selectedNH && selectedHK) {
+        let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+        if (config) {
+            let sDate = parseDateString(config[2]); let numAcademicWeeks = parseInt(config[3]); let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+            if (sDate && numAcademicWeeks) {
+                let startMon = getMondayOfDate(sDate); startMonTime = startMon.getTime();
+                let acadWk = 1; let calWk = 1;
+                while (acadWk <= numAcademicWeeks && calWk <= 52) { if (!breakWeeks.includes(calWk)) { acadWk++; } calWk++; }
+                let endSun = new Date(startMon); endSun.setDate(endSun.getDate() + ((calWk - 1) * 7) - 1); endSun.setHours(23, 59, 59, 999); endSunTime = endSun.getTime();
+                
+                filteredTkbData = globalTkbData.filter(c => {
+                    let cStartTime = getTimeFast(c.ngayBatDau); let cEndTime = getTimeFast(c.ngayKetThuc);
+                    if (!cStartTime && !cEndTime) return true; 
+                    if (cStartTime && cEndTime) return cStartTime <= endSunTime && cEndTime >= startMonTime;
+                    if (cStartTime) return cStartTime <= endSunTime;
+                    if (cEndTime) return cEndTime >= startMonTime;
+                    return true;
+                });
+                titleSuffix = ` - ${selectedHK} (${selectedNH})`;
+            }
+        }
+    }
+
+    // Lấy tập hợp tên môn học TKB để kiểm tra trùng
+    let filteredTkbSubjectNames = new Set(filteredTkbData.map(c => getBaseSubjectName(c.mon)));
+
+    $('#manageDeadlineListModal .modal-title').html(`<i class="fa-solid fa-thumbtack me-2"></i>Bảng Tổng hợp Deadline${titleSuffix}`);
+
+    let dlHtml = '';
+    let filteredDeadlines = [];
+    if (globalDeadlineData && globalDeadlineData.length > 0) {
+        filteredDeadlines = globalDeadlineData.filter(d => {
+            let searchStr = ((d.tag || "") + " " + (d.title || "")).toLowerCase();
+            let isVle = searchStr.includes('vle') || searchStr.includes('tiểu luận');
+            
+            // NẾU LÀ VLE MÀ TRÙNG TÊN MÔN HỌC THÌ ĐÃ NẰM BÊN BẢNG TKB RỒI -> BỎ QUA Ở ĐÂY
+            if (isVle && filteredTkbSubjectNames.has(getBaseSubjectName(d.title))) return false;
+            
+            if (startMonTime && endSunTime) {
+                let dStartTime = getTimeFast(d.dateStart); let dEndTime = getTimeFast(d.dateEnd);
+                if (!dStartTime && !dEndTime) return true;
+                if (dStartTime && dEndTime) return dStartTime <= endSunTime && dEndTime >= startMonTime;
+                if (dStartTime) return dStartTime <= endSunTime;
+                if (dEndTime) return dEndTime >= startMonTime;
+                return true;
+            } 
+            return true;
+        });
+    }
+
+    if (filteredDeadlines.length === 0) {
+        let emptyMsg = (selectedNH && selectedHK) ? `Không có Deadline nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có Deadline nào được tạo!";
+        dlHtml += `<tr><td colspan="6" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
+    } else {
+        filteredDeadlines.forEach(c => {
+            let dateDisplay = '-';
+            if (c.dateStart && c.dateEnd) { 
+                dateDisplay = (c.dateStart === c.dateEnd) ? c.dateStart : `Từ ${c.dateStart}<br>đến ${c.dateEnd}`; 
+            }
+            else if (c.dateStart) { dateDisplay = c.dateStart; } 
+            else if (c.dateEnd) { dateDisplay = c.dateEnd; }
+
+            dlHtml += `<tr style="background-color: #f8fafc;">
+                <td class="text-center align-middle"><span class="badge bg-primary">DEADLINE</span></td>
+                <td class="text-start align-middle fw-bold text-dark">${c.title}</td>
+                <td class="text-center align-middle fw-bold text-danger">${c.duration || '-'}</td>
+                <td class="text-center align-middle"><span class="badge" style="background-color: #0f4c81;">${c.tag || 'Khác'}</span></td>
+                <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
+                <td class="text-center align-middle">
+                    <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
+                    <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="deletePersonalDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
+                </td>
+            </tr>`;
+        });
+    }
+    $('#deadlineManagerListBody').html(dlHtml);
+    $('#manageDeadlineListModal').modal('show');
+}
+function closeAndOpenEditTkb(sheetRowIndex) { 
+    $('#manageTkbListModal').modal('hide'); 
+    setTimeout(() => { openEditTkbModal(sheetRowIndex); }, 400); 
+}
+
+function closeAndOpenEditDeadline(sheetRowIndex) { 
+    $('#manageDeadlineListModal').modal('hide'); 
+    setTimeout(() => { openEditDeadlineModal(sheetRowIndex); }, 400); 
+}
 
 function checkAndExtractUrl(text) { 
     let urlRegex = /(https?:\/\/[^\s]+)/g; let match = text.match(urlRegex); return match ? match[0] : null; 
