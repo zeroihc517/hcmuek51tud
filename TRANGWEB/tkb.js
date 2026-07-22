@@ -377,12 +377,17 @@ function openManageTkbListModal() {
     $('#tkbManagerListBody').html(tkbHtml);
     $('#manageTkbListModal').modal('show');
 }
+// ----------------------------------------------------
+// HÀM 2: MỞ BẢNG TỔNG HỢP DEADLINE (Tô màu xanh lá nhạt cho sự kiện đang diễn ra)
+// ----------------------------------------------------
 function openManageDeadlineListModal() {
     let selectedNH = $('#namHocSelect').val(); let selectedHK = $('#hocKySelect').val();
     let titleSuffix = '';
     let startMonTime = null; let endSunTime = null;
     let filteredTkbData = globalTkbData;
     const getTimeFast = (dateStr) => { let d = parseDateString(dateStr); return d ? d.getTime() : null; };
+
+    let nowTime = new Date().setHours(0, 0, 0, 0); 
 
     if (selectedNH && selectedHK) {
         let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
@@ -436,33 +441,47 @@ function openManageDeadlineListModal() {
         let emptyMsg = (selectedNH && selectedHK) ? `Không có Deadline nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có Deadline nào được tạo!";
         dlHtml += `<tr><td colspan="6" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
     } else {
-        // Sắp xếp: Sự kiện mới nhất (Ngày gần nhất hoặc được tạo gần nhất) lên đầu
         filteredDeadlines.sort((a, b) => {
-            let tA = getTimeFast(a.dateStart) || getTimeFast(a.dateEnd) || 0;
-            let tB = getTimeFast(b.dateStart) || getTimeFast(b.dateEnd) || 0;
-            if (tA !== tB) return tB - tA; // Ưu tiên ngày mới nhất (Thời gian lớn nhất) nổi lên trên
-            
-            // Nếu trùng ngày thì sự kiện nào vừa mới được thêm (ID/Row cao hơn) sẽ nổi lên trên
-            let rA = typeof a.sheetRowIndex === 'string' ? parseInt(a.sheetRowIndex.replace(/\D/g, '')) : (a.sheetRowIndex || 0);
-            let rB = typeof b.sheetRowIndex === 'string' ? parseInt(b.sheetRowIndex.replace(/\D/g, '')) : (b.sheetRowIndex || 0);
-            return rB - rA; 
+            let startA = getTimeFast(a.dateStart) || 0;
+            let endA = getTimeFast(a.dateEnd) || startA;
+            let startB = getTimeFast(b.dateStart) || 0;
+            let endB = getTimeFast(b.dateEnd) || startB;
+
+            let isHappeningA = (nowTime >= startA && nowTime <= endA) ? 1 : 0;
+            let isHappeningB = (nowTime >= startB && nowTime <= endB) ? 1 : 0;
+
+            if (isHappeningA !== isHappeningB) {
+                return isHappeningB - isHappeningA; 
+            }
+            return startB - startA;
         });
 
         filteredDeadlines.forEach(c => {
             let dateDisplay = '-';
+            let startT = getTimeFast(c.dateStart) || 0;
+            let endT = getTimeFast(c.dateEnd) || startT;
+            let isHappeningNow = (nowTime >= startT && nowTime <= endT);
+
+            // ĐÃ THAY ĐỔI: Tô màu xanh lá nhạt (#f0fdf4) và viền trái xanh lá đậm (#22c55e) khi đang diễn ra
+           // Thêm !important để ép trình duyệt nhận màu xanh lá nhạt (#f0fdf4) cho toàn bộ hàng
+            let rowBgColor = isHappeningNow ? "background-color: #f0fdf4 !important;" : "background-color: #f8fafc !important;";
+            let borderStyle = isHappeningNow ? "border-left: 4px solid #22c55e;" : "";
+            let happeningBadge = isHappeningNow ? `<span class="badge bg-success text-white mb-1"><i class="fa-solid fa-bolt"></i> Đang diễn ra</span><br>` : '';
+
             if (c.dateStart && c.dateEnd) { 
                 dateDisplay = (c.dateStart === c.dateEnd) ? c.dateStart : `Từ ${c.dateStart}<br>đến ${c.dateEnd}`; 
             }
             else if (c.dateStart) { dateDisplay = c.dateStart; } 
             else if (c.dateEnd) { dateDisplay = c.dateEnd; }
 
-            dlHtml += `<tr style="background-color: #f8fafc;">
-                <td class="text-center align-middle"><span class="badge bg-primary">DEADLINE</span></td>
-                <td class="text-start align-middle fw-bold text-dark">${c.title}</td>
-                <td class="text-center align-middle fw-bold text-danger">${c.duration || '-'}</td>
-                <td class="text-center align-middle"><span class="badge" style="background-color: #0f4c81;">${c.tag || 'Khác'}</span></td>
-                <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
-                <td class="text-center align-middle">
+            // Gán trực tiếp style nền vào từng ô <td> để không bị CSS của bảng ghi đè
+            dlHtml += `<tr>
+                <td class="text-center align-middle" style="${rowBgColor} ${borderStyle}">${happeningBadge}<span class="badge bg-primary">DEADLINE</span></td>
+                <td class="text-start align-middle fw-bold text-dark" style="${rowBgColor}">${c.title}</td>
+                <td class="text-center align-middle fw-bold text-danger" style="${rowBgColor}">${c.duration || '-'}</td>
+                <td class="text-center align-middle" style="${rowBgColor}"><span class="badge" style="background-color: #0f4c81;">${c.tag || 'Khác'}</span></td>
+                <td class="text-center align-middle" style="${rowBgColor} font-size: 13.5px;">${dateDisplay}</td>
+                <td class="text-center align-middle" style="${rowBgColor}">
                     <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
                     <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="deletePersonalDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
                 </td>
