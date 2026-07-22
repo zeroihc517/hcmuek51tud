@@ -2722,15 +2722,13 @@ window.toggleLesson = function(chapterId, lessonId, rowElement) {
         $(`.child-of-lesson-${chapterId}-${lessonId}`).addClass('d-none');
     }
 };
-// QUẢN LÝ BẬT / TẮT & TỰ ĐỘNG PHÁT PLAYLIST YOUTUBE
+// QUẢN LÝ BẬT / TẮT & TỰ ĐỘNG PHÁT PLAYLIST SẠCH QUẢNG CÁO
 let isMusicPlaying = false;
 
-// Mã Playlist YouTube mới của bạn
 const youtubePlaylistId = "PLR3lF7fH9sbA"; 
 
-// URL nhúng cấu hình phát tự động danh sách phát
-const youtubeMusicUrl = `https://www.youtube.com/embed?listType=playlist&list=${youtubePlaylistId}&enablejsapi=1&autoplay=1`;
-
+// Dùng server nhúng của Invidious thay cho YouTube (Không quảng cáo)
+const youtubeMusicUrl = `https://yewtu.be/embed/videoseries?list=${youtubePlaylistId}&autoplay=1`;
 // Danh sách các danh mục CHO PHÉP bật nhạc
 const allowedMusicSections = ['Thông báo', 'Lịch học', 'Tổng hợp link'];
 
