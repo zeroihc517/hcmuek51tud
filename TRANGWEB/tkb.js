@@ -200,7 +200,7 @@ function getNoteFromSubject(c) {
 }
 
 // ----------------------------------------------------
-// HÀM 1: MỞ BẢNG TỔNG HỢP TKB (Gộp ưu tiên theo Môn học)
+// HÀM 1: MỞ BẢNG TỔNG HỢP TKB (Sắp xếp theo Ngày thực tế diễn ra sớm nhất)
 // ----------------------------------------------------
 function openManageTkbListModal() {
     let selectedNH = $('#namHocSelect').val(); let selectedHK = $('#hocKySelect').val();
@@ -230,17 +230,14 @@ function openManageTkbListModal() {
         }
     }
 
-    // Lấy danh sách các môn học hiện có trong TKB để đối chiếu
     let filteredTkbSubjectNames = new Set(filteredTkbData.map(c => getBaseSubjectName(c.mon)));
 
-    // Lọc lấy các Deadline VLE/Tiểu luận CÓ TRÙNG TÊN với môn học
     let pseudoDeadlines = [];
     if (globalDeadlineData && globalDeadlineData.length > 0) {
         let vleDeadlines = globalDeadlineData.filter(d => {
             let searchStr = ((d.tag || "") + " " + (d.title || "")).toLowerCase();
             if (!(searchStr.includes('vle') || searchStr.includes('tiểu luận'))) return false;
             
-            // NẾU KHÔNG TRÙNG MÔN HỌC THÌ LOẠI RA (Để dành cho bảng Deadline)
             if (!filteredTkbSubjectNames.has(getBaseSubjectName(d.title))) return false;
 
             if (startMonTime && endSunTime) {
@@ -278,33 +275,48 @@ function openManageTkbListModal() {
         let emptyMsg = (selectedNH && selectedHK) ? `Không có môn học/sự kiện nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có môn học/sự kiện nào được tạo!";
         tkbHtml += `<tr><td colspan="9" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
     } else {
-        // Thuật toán Sắp xếp:
-        // 1. Theo Tên Môn học
-        // 2. TKB thường lên trước, VLE xuống dưới cùng của môn đó (isDeadline)
-        // 3. Trong cùng một Thứ, sắp xếp theo Tiết bắt đầu
-        let sortedTkbData = [...combinedData].sort((a, b) => {
-            let nameA = getBaseSubjectName(a.mon);
-            let nameB = getBaseSubjectName(b.mon);
-            if (nameA !== nameB) return nameA.localeCompare(nameB);
-            
-            if (a.isDeadline !== b.isDeadline) return a.isDeadline ? 1 : -1;
-            
-            if (a.thu !== b.thu) return a.thu - b.thu;
-            return a.tietBd - b.tietBd;
-        });
-
-        // Gom nhóm theo Tên Môn học (Gộp chung TKB và VLE vào 1 môn)
+        // BƯỚC 1: Gom nhóm theo Tên Môn học
         let groupedByMon = {};
-        sortedTkbData.forEach(c => {
+        combinedData.forEach(c => {
             let groupKey = getBaseSubjectName(c.mon);
             if (!groupedByMon[groupKey]) { groupedByMon[groupKey] = []; }
             groupedByMon[groupKey].push(c);
         });
 
+        // BƯỚC 2: Tìm mốc thời gian ngày bắt đầu (ngayBatDau) sớm nhất của từng môn để Sắp xếp
+        let groupOrder = [];
         for (let key in groupedByMon) {
+            let items = groupedByMon[key];
+            let minTime = Number.MAX_SAFE_INTEGER;
+            
+            items.forEach(c => {
+                let t = getTimeFast(c.ngayBatDau) || Number.MAX_SAFE_INTEGER;
+                if (t < minTime) minTime = t;
+            });
+            
+            groupOrder.push({ key: key, minTime: minTime });
+        }
+
+        // BƯỚC 3: Sắp xếp các môn học theo Ngày diễn ra sớm nhất lên đầu
+        groupOrder.sort((a, b) => a.minTime - b.minTime);
+
+        // BƯỚC 4: Xuất HTML
+        for (let g of groupOrder) {
+            let key = g.key;
             let items = groupedByMon[key];
             let rowCount = items.length;
             let baseNameDisplay = key;
+
+            // Sắp xếp các ca học bên trong cùng 1 môn theo Ngày bắt đầu -> Thứ -> Tiết
+            items.sort((a, b) => {
+                let tA = getTimeFast(a.ngayBatDau) || 0;
+                let tB = getTimeFast(b.ngayBatDau) || 0;
+                if (tA !== tB) return tA - tB;
+
+                if (a.isDeadline !== b.isDeadline) return a.isDeadline ? 1 : -1;
+                if (a.thu !== b.thu) return a.thu - b.thu;
+                return a.tietBd - b.tietBd;
+            });
 
             items.forEach((c, index) => {
                 let dateDisplay = '-';
@@ -318,11 +330,9 @@ function openManageTkbListModal() {
                 else if (parseInt(c.thu) === 99) thuText = "-";
                 else thuText = "Thứ " + c.thu;
 
-                // Tô nền đỏ nhạt cho dòng Deadline/VLE
                 let rowBg = c.isDeadline ? "background-color: #fff5f6;" : "background-color: #fff;";
                 tkbHtml += `<tr style="${rowBg}">`;
                 
-                // Gộp ô Môn học (Cột đầu tiên)
                 if (index === 0) {
                     tkbHtml += `<td rowspan="${rowCount}" class="text-start align-middle fw-bold text-primary" style="font-size: 15px; background-color: #f0f7ff; border-left: 3px solid var(--primary-color) !important;">${baseNameDisplay}</td>`;
                 }
@@ -397,7 +407,6 @@ function openManageDeadlineListModal() {
         }
     }
 
-    // Lấy tập hợp tên môn học TKB để kiểm tra trùng
     let filteredTkbSubjectNames = new Set(filteredTkbData.map(c => getBaseSubjectName(c.mon)));
 
     $('#manageDeadlineListModal .modal-title').html(`<i class="fa-solid fa-thumbtack me-2"></i>Bảng Tổng hợp Deadline${titleSuffix}`);
@@ -409,7 +418,6 @@ function openManageDeadlineListModal() {
             let searchStr = ((d.tag || "") + " " + (d.title || "")).toLowerCase();
             let isVle = searchStr.includes('vle') || searchStr.includes('tiểu luận');
             
-            // NẾU LÀ VLE MÀ TRÙNG TÊN MÔN HỌC THÌ ĐÃ NẰM BÊN BẢNG TKB RỒI -> BỎ QUA Ở ĐÂY
             if (isVle && filteredTkbSubjectNames.has(getBaseSubjectName(d.title))) return false;
             
             if (startMonTime && endSunTime) {
@@ -428,6 +436,18 @@ function openManageDeadlineListModal() {
         let emptyMsg = (selectedNH && selectedHK) ? `Không có Deadline nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có Deadline nào được tạo!";
         dlHtml += `<tr><td colspan="6" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
     } else {
+        // Sắp xếp: Sự kiện mới nhất (Ngày gần nhất hoặc được tạo gần nhất) lên đầu
+        filteredDeadlines.sort((a, b) => {
+            let tA = getTimeFast(a.dateStart) || getTimeFast(a.dateEnd) || 0;
+            let tB = getTimeFast(b.dateStart) || getTimeFast(b.dateEnd) || 0;
+            if (tA !== tB) return tB - tA; // Ưu tiên ngày mới nhất (Thời gian lớn nhất) nổi lên trên
+            
+            // Nếu trùng ngày thì sự kiện nào vừa mới được thêm (ID/Row cao hơn) sẽ nổi lên trên
+            let rA = typeof a.sheetRowIndex === 'string' ? parseInt(a.sheetRowIndex.replace(/\D/g, '')) : (a.sheetRowIndex || 0);
+            let rB = typeof b.sheetRowIndex === 'string' ? parseInt(b.sheetRowIndex.replace(/\D/g, '')) : (b.sheetRowIndex || 0);
+            return rB - rA; 
+        });
+
         filteredDeadlines.forEach(c => {
             let dateDisplay = '-';
             if (c.dateStart && c.dateEnd) { 
