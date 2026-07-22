@@ -2722,22 +2722,21 @@ window.toggleLesson = function(chapterId, lessonId, rowElement) {
         $(`.child-of-lesson-${chapterId}-${lessonId}`).addClass('d-none');
     }
 };
-// QUẢN LÝ BẬT / TẮT & TỰ ĐỘNG PHÁT PLAYLIST SẠCH QUẢNG CÁO
+// QUẢN LÝ BẬT / TẮT & TỰ ĐỘNG PHÁT PLAYLIST
 let isMusicPlaying = false;
 
-// Bạn có thể dán nguyên link YouTube vào biến này
-const youtubePlaylistLink = "https://youtube.com/playlist?list=PLR3lF7fH9sbA&si=R8J9ft1qz2gDz35O"; 
+// Link playlist của bạn
+const youtubePlaylistLink = "https://youtube.com/playlist?list=PLR3lF7fH9sbA&si=qqJQGI6qICefrp-8"; 
 
-// Tự động cắt lấy đoạn ID (PLR3lF7fH9sbA) từ link phía trên
-const youtubePlaylistId = (youtubePlaylistLink.match(/[?&]list=([^&]+)/) || [])[1] || youtubePlaylistLink;
+// Tự động bóc tách ID playlist (PLR3lF7fH9sbA)
+const youtubePlaylistId = (youtubePlaylistLink.match(/[?&]list=([^&]+)/) || [])[1] || "PLR3lF7fH9sbA";
 
-// Dùng server nhúng của Invidious thay cho YouTube (Không quảng cáo)
-const youtubeMusicUrl = `https://yewtu.be/embed/videoseries?list=${youtubePlaylistId}&autoplay=1`;
+// Sử dụng domain youtube-nocookie chính thức để chạy mượt mà trên mọi thiết bị
+const youtubeMusicUrl = `https://www.youtube-nocookie.com/embed/videoseries?list=${youtubePlaylistId}&autoplay=1&enablejsapi=1`;
 
-// Danh sách các danh mục CHO PHÉP bật nhạc
+// Danh sách các phân hệ CHO PHÉP bật nhạc
 const allowedMusicSections = ['Thông báo', 'Lịch học', 'Tổng hợp link'];
 
-// Hàm kiểm tra phân hệ và phát/dừng nhạc tương ứng
 function checkAndPlayMusic(sectionName) {
     let currentSection = sectionName || currentSheetName;
     if (allowedMusicSections.includes(currentSection)) {
@@ -2751,7 +2750,10 @@ function startMusic() {
     let player = document.getElementById('bgMusicPlayer');
     let icon = document.getElementById('musicIcon');
     if (player) {
-        player.src = youtubeMusicUrl;
+        // Chỉ gán lại src nếu iframe chưa có nhạc
+        if (!player.src || player.src === "about:blank" || window.location.href.includes("about:blank")) {
+            player.src = youtubeMusicUrl;
+        }
         if (icon) icon.classList.remove('music-paused');
         isMusicPlaying = true;
     }
@@ -2776,11 +2778,10 @@ function toggleBgMusic() {
 }
 
 $(document).ready(function() {
-    // 1. Nạp nhạc phát tự động khi vừa tải xong trang
-    startMusic();
-
-    // 2. Kích hoạt phát nhạc ngay chạm/click đầu tiên (vượt qua rào cản chặn Autoplay của trình duyệt)
+    // Kích hoạt phát nhạc ngay khi người dùng chạm/click lần đầu tiên vào trang
     $(document).one('click touchstart keydown', function() {
-        startMusic();
+        if (!isMusicPlaying) {
+            startMusic();
+        }
     });
 });
