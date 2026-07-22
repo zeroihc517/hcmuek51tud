@@ -2725,10 +2725,15 @@ window.toggleLesson = function(chapterId, lessonId, rowElement) {
 // QUẢN LÝ BẬT / TẮT & TỰ ĐỘNG PHÁT PLAYLIST SẠCH QUẢNG CÁO
 let isMusicPlaying = false;
 
-const youtubePlaylistId = "PLR3lF7fH9sbA"; 
+// Bạn có thể dán nguyên link YouTube vào biến này
+const youtubePlaylistLink = "https://youtube.com/playlist?list=PLR3lF7fH9sbA&si=R8J9ft1qz2gDz35O"; 
+
+// Tự động cắt lấy đoạn ID (PLR3lF7fH9sbA) từ link phía trên
+const youtubePlaylistId = (youtubePlaylistLink.match(/[?&]list=([^&]+)/) || [])[1] || youtubePlaylistLink;
 
 // Dùng server nhúng của Invidious thay cho YouTube (Không quảng cáo)
 const youtubeMusicUrl = `https://yewtu.be/embed/videoseries?list=${youtubePlaylistId}&autoplay=1`;
+
 // Danh sách các danh mục CHO PHÉP bật nhạc
 const allowedMusicSections = ['Thông báo', 'Lịch học', 'Tổng hợp link'];
 
