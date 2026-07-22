@@ -2724,7 +2724,7 @@ window.toggleLesson = function(chapterId, lessonId, rowElement) {
 };
 // QUẢN LÝ BẬT / TẮT & TỰ ĐỘNG PHÁT NHẠC NỀN YOUTUBE
 let isMusicPlaying = false;
-const youtubeMusicUrl = "https://www.youtube.com/embed/q0tvU2MFyVA?enablejsapi=1&autoplay=1&list=RDq0tvU2MFyVA";
+const youtubeMusicUrl = "https://www.youtube.com/embed/rJzJZavduqY?enablejsapi=1&autoplay=1&list=RDrJzJZavduqY";
 
 function startMusic() {
     if (!isMusicPlaying) {
