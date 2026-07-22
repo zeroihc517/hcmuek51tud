@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Học nhóm Năm 2 Khoa Toán</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -1011,36 +1011,67 @@
         </div>
     </div>
     
+<!-- BẢNG TỔNG HỢP LỊCH HỌC -->
+<!-- BẢNG TỔNG HỢP LỊCH HỌC -->
 <div class="modal fade" id="manageTkbListModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header text-white" style="background-color: #0f4c81;">
-                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-list-check me-2"></i>Bảng danh sách Lịch học - Sửa nhanh</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <div class="table-responsive">
-                        <table class="table table-bordered align-middle tkb-mgr-table m-0 bg-white">
-                            <thead class="text-center text-white">
-    <tr>
-        <th style="width: 12%;">Môn học</th>
-        <th style="width: 10%;">Ghi chú</th>
-        <th>Thứ</th>
-        <th style="width: 10%;">Cơ sở</th>
-        <th style="width: 11%;">Thời gian</th>
-        <th style="width: 14%;">Ngày học</th>
-        <th style="width: 12%;">Phòng</th>
-        <th>Giảng viên</th>
-        <th>Thao tác</th>
-    </tr>
-</thead>
-                            <tbody id="tkbManagerListBody"></tbody>
-                        </table>
-                    </div>
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-calendar-days me-2"></i>Bảng Tổng hợp Lịch học</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle tkb-mgr-table m-0 bg-white">
+                        <thead class="text-center text-white" style="background-color: #0f4c81;">
+                            <tr>
+                                <th style="width: 20%;">Môn học</th>
+                                <th style="width: 8%;">Thứ</th>
+                                <th style="width: 10%;">Ghi chú</th>
+                                <th style="width: 10%;">Cơ sở</th>
+                                <th style="width: 11%;">Thời gian</th>
+                                <th style="width: 14%;">Ngày học</th>
+                                <th style="width: 10%;">Phòng</th>
+                                <th>Giảng viên</th>
+                                <th style="width: 10%;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tkbManagerListBody"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
+</div>
+<!-- BẢNG TỔNG HỢP DEADLINE (NGOẠI TRỪ VLE) -->
+<div class="modal fade" id="manageDeadlineListModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-thumbtack me-2"></i>Bảng Tổng hợp Deadline</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle tkb-mgr-table m-0 bg-white">
+                        <thead class="text-center text-white" style="background-color: #0f4c81;">
+                            <tr>
+                                <th style="width: 10%;">Loại</th>
+                                <th style="width: 30%;">Tên công việc / Bài tập</th>
+                                <th style="width: 15%;">Thời gian / Hạn chót</th>
+                                <th style="width: 15%;">Phân loại (Tag)</th>
+                                <th style="width: 20%;">Ngày diễn ra</th>
+                                <th style="width: 10%;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deadlineManagerListBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div class="modal fade" id="tkbPersonalModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content border-0 shadow">
