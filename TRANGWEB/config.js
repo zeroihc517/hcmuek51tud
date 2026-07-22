@@ -285,13 +285,19 @@ $(document).ready(function() {
 // --- KẾT THÚC ĐOẠN CODE ---
 // HÀM MỞ TÀI LIỆU TRỰC TIẾP TRÊN WEB
 window.openDocumentViewer = function(url, title) {
+    // THÊM MỚI: Tự động nhảy tab mới và dừng lệnh ngay nếu là link Upcoder
+    if (url.includes('test.upcoder.xyz') || url.includes('upcoder.xyz')) {
+        window.open(url, '_blank');
+        return; 
+    }
+
     let embedUrl = url;
     
     // Tự động chuyển link Google Drive sang chế độ preview để xem trực tiếp
     if (url.includes('drive.google.com/file/d/')) {
         embedUrl = url.replace(/\/view.*$/, '/preview');
     }
-else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+    else if (url.includes('youtube.com') || url.includes('youtu.be')) {
         let videoId = "";
         
         if (url.includes('youtu.be/')) {

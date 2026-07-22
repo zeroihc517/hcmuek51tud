@@ -827,10 +827,12 @@ if (extractedUrl) {
     if (isUpdating && !isAdmin) {
         col2Html = `<span onclick="$('#updatingModal').modal('show'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Đang cập nhật">${lessonIcon}${col2Html || "Đang cập nhật"}</span>`;
     } else {
-        // Dùng Regex để loại bỏ các dấu nháy gây gãy chuỗi HTML
+        // Dùng Regex để loại bỏ các dấu nháy gây gãy chuỗi HTML cho Tiêu đề và Link
         let safeTitle = col2Html.replace(/'/g, "\\'").replace(/"/g, "&quot;"); 
-        // Thay window.open thành hàm gọi Modal
-        col2Html = `<span onclick="openDocumentViewer('${extractedUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem bài học trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;
+        let safeUrl = extractedUrl.replace(/'/g, "\\'"); // <-- Khử dấu nháy đơn trong link Upcoder
+
+        // Thay extractedUrl bằng safeUrl bên dưới
+        col2Html = `<span onclick="openDocumentViewer('${safeUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem bài học trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;
     }
 } else {
                         col2Html = `<span style="color: #0f4c81; font-weight: 700;">${lessonIcon}${col2Html}</span>`;
