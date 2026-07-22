@@ -2726,7 +2726,7 @@ window.toggleLesson = function(chapterId, lessonId, rowElement) {
 let isMusicPlaying = false;
 
 // ID Video YouTube: "Những Ngày Trời Bao La - 1 Hour"
-const youtubeVideoId = "wdvrz3LBpOY"; 
+const youtubeVideoId = "sfEYJrGh2YY"; 
 
 // URL Embed tối ưu: autoplay + loop 1 hour
 const youtubeMusicUrl = `https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&loop=1&playlist=${youtubeVideoId}&enablejsapi=1`;
