@@ -916,17 +916,37 @@ function initGlobalApp() {
     setTimeout(pingOnlineStatus, 1000); 
     setInterval(pingOnlineStatus, 25000);
     
-    // --- THÊM MỚI TỪ ĐÂY ---
-    // Gọi ngầm kiểm tra dữ liệu Q&A mỗi 12 giây (12000 ms)
-// Thay thế đoạn setInterval kiểm tra QA ngầm thành như sau:
-setInterval(function() {
-    if (!$('#qaSection').hasClass('d-none')) {
-        silentCheckNewQA();
-    } else {
-        checkNewQA(); 
+    // --- BẮT ĐẦU ĐOẠN CẦN CẬP NHẬT/THÊM MỚI ---
+    
+    // 1. Gọi ngầm kiểm tra dữ liệu Q&A mỗi 5 giây
+    setInterval(function() {
+        if (!$('#qaSection').hasClass('d-none')) {
+            silentCheckNewQA();
+        } else {
+            checkNewQA(); 
+        }
+    }, 5000); 
+
+    // 2. ĐỒNG BỘ TRẠNG THÁI DEADLINE TỪ SERVER VỀ MÁY KHI KHỞI ĐỘNG
+    if (currentUser && currentUser.mssv) {
+        $.ajax({ 
+            url: SCRIPT_URL + "?action=getCompletedDeadlines&mssv=" + currentUser.mssv, 
+            method: "GET", 
+            dataType: "json", 
+            success: function(res) {
+                if (res && !res.error) {
+                    let dataToSave = typeof res === 'string' ? res : JSON.stringify(res);
+                    localStorage.setItem('completed_deadlines_' + currentUser.mssv, dataToSave);
+                    
+                    // Cập nhật lại UI lập tức nếu người dùng đang mở sẵn tab Lịch học
+                    if (!$('#tkbSection').hasClass('d-none')) {
+                        renderDeadlines();
+                    }
+                }
+            }
+        });
     }
-}, 5000); // Rút ngắn xuống 5 giây để load nhanh như web Real-time
-    // --- KẾT THÚC THÊM MỚI ---
+    // --- KẾT THÚC ĐOẠN CẦN CẬP NHẬT/THÊM MỚI ---
 
     fetchSemesterConfig(); 
     loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
