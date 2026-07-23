@@ -49,11 +49,18 @@ function loginStudent() {
 $.ajax({ 
                 url: SCRIPT_URL + "?action=getCompletedDeadlines&mssv=" + currentUser.mssv, 
                 method: "GET", 
+                dataType: "json", // Bắt buộc phải có dòng này để nó hiểu dữ liệu
                 success: function(res) {
-                    if(res) {
-                        localStorage.setItem('completed_deadlines_' + currentUser.mssv, res);
-                        renderDeadlines(); // Vẽ lại màu xám mờ cho các thẻ đã tick
+                    // Kiểm tra đảm bảo không lưu cục báo lỗi vào máy
+                    if (res && !res.error) {
+                        // Nếu là mảng thì stringify, nếu đã là chuỗi thì giữ nguyên
+                        let dataToSave = typeof res === 'string' ? res : JSON.stringify(res);
+                        localStorage.setItem('completed_deadlines_' + currentUser.mssv, dataToSave);
+                        renderDeadlines(); // Cập nhật màu trên trang chủ
                     }
+                },
+                error: function(err) {
+                    console.error("Lỗi kéo dữ liệu Deadline:", err);
                 }
             });
             // Tải ngầm Bảng điểm GPA (và cấu hình song ngành)
