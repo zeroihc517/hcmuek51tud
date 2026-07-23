@@ -115,15 +115,35 @@ function renderDeadlines() {
 
 function openAddDeadlineModal() {
     $('#dlModalTitle').html('<i class="fa-solid fa-plus me-2"></i>Thêm Deadline');
-    $('#pDlRowIndex').val(''); $('#pDlTitle, #pDlTag, #pDlEmoji, #pDlStartDate, #pDlEndDate').val(''); $('#pDlIcon').val('fire');
+    $('#pDlRowIndex').val(''); 
+    $('#pDlTitle, #pDlTag, #pDlLink, #pDlEmoji, #pDlStartDate, #pDlEndDate').val(''); 
+    $('#pDlIcon').val('fire');
     $('#deadlinePersonalModal').modal('show');
 }
 
 function openEditDeadlineModal(rowIndex) {
-    let dl = globalDeadlineData.find(d => String(d.sheetRowIndex) === String(rowIndex)); if(!dl) return;
+    let dl = globalDeadlineData.find(d => String(d.sheetRowIndex) === String(rowIndex)); 
+    if(!dl) return;
+    
     $('#dlModalTitle').html('<i class="fa-solid fa-pen me-2"></i>Sửa Deadline');
-    $('#pDlRowIndex').val(rowIndex); $('#pDlTitle').val(dl.title); $('#pDlTag').val(dl.tag);
-    $('#pDlIcon').val(dl.icon); $('#pDlEmoji').val(dl.emoji); $('#pDlStartDate').val(dl.dateStart); $('#pDlEndDate').val(dl.dateEnd);
+    $('#pDlRowIndex').val(rowIndex); 
+    $('#pDlTitle').val(dl.title);
+    
+    // Bóc tách Hình thức và Link
+    let rawTag = dl.tag || "";
+    let extLink = checkAndExtractUrl(rawTag);
+    let displayTag = rawTag;
+    if (extLink) {
+        displayTag = rawTag.replace(extLink, '').trim();
+    }
+    
+    $('#pDlTag').val(displayTag);
+    $('#pDlLink').val(extLink || '');
+    
+    $('#pDlIcon').val(dl.icon); 
+    $('#pDlEmoji').val(dl.emoji); 
+    $('#pDlStartDate').val(dl.dateStart); 
+    $('#pDlEndDate').val(dl.dateEnd);
     $('#deadlinePersonalModal').modal('show');
 }
 
@@ -138,17 +158,23 @@ function savePersonalDeadline() {
         return; 
     }
     
-   let autoDuration = (startDate === endDate) ? startDate : "Từ " + startDate + " đến " + endDate;
+    let autoDuration = (startDate === endDate) ? startDate : "Từ " + startDate + " đến " + endDate;
     let isEditMode = (rowIndex !== null && rowIndex !== '');
 
-    // Đã sửa lại payload để gọi đúng action xử lý Deadline
+    // Ghép Hình thức và Link lại
+    let finalTag = $('#pDlTag').val().trim();
+    let linkVal = $('#pDlLink').val().trim();
+    if (linkVal) {
+        finalTag += " " + linkVal;
+    }
+
     let payload = {
         action: isEditMode ? "editDeadlineUser" : "addDeadlineUser",
         rowIndex: rowIndex,
         mssv: currentUser.mssv,
         title: title,
         duration: autoDuration,
-        tag: $('#pDlTag').val().trim(),
+        tag: finalTag, // Truyền biến đã ghép vào đây
         icon: $('#pDlIcon').val(),
         emoji: $('#pDlEmoji').val().trim(),
         startDate: startDate,
@@ -168,7 +194,6 @@ function savePersonalDeadline() {
         btn.html('Lưu Deadline').prop('disabled', false); 
     });
 }
-
 function deletePersonalDeadline(sheetRowIndex) {
     if(!confirm("Bạn có chắc chắn muốn xóa deadline cá nhân này không?")) return;
     postToGAS({ action: "deleteDeadlineUser", rowIndex: sheetRowIndex, mssv: currentUser.mssv }, function(res) {
