@@ -948,14 +948,15 @@ if (localStorage.getItem('isAdmin') === 'true') {
         renderSidebarCategories();
         $('#adminDatabaseLink').removeClass('d-none');
     }
-        $(document).ready(function() {
-            if (!currentUser) {
-                let authModal = new bootstrap.Modal(document.getElementById('userAuthModal'), { backdrop: 'static', keyboard: false });
-                $('#userAuthModal .btn-close').hide(); 
-                renderSavedAccounts(); 
-                authModal.show();
-            } else { initGlobalApp(); }
-        });
+$(document).ready(function() {
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    if (!currentUser) {
+        // Chưa đăng nhập -> Đá sang trang login.html riêng
+        window.location.href = "login.html";
+    } else { 
+        initGlobalApp(); 
+    }
+});
 
 // ==========================================
 // TÍNH NĂNG TÍNH ĐIỂM GPA (BẢN CHUẨN CUỐI CÙNG)
