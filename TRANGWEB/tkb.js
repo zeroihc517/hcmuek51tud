@@ -60,37 +60,104 @@ function renderDeadlines() {
     const container = document.getElementById('deadline-container');
     if (!container) return;
     
-    let weekStart = new Date(currentSelectedMonday); weekStart.setHours(0,0,0,0);
-    let weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
+    let selectedNH = $('#namHocSelect').val(); 
+    let selectedHK = $('#hocKySelect').val();
+    let selectedWeekVal = $('#weekSelect').val();
 
+    let startMonTime = null; 
+    let endSunTime = null;
+    const getTimeFast = (dateStr) => { let d = parseDateString(dateStr); return d ? d.getTime() : null; };
+
+    // 1. TÍNH TOÁN KHOẢNG THỜI GIAN THEO HỌC KỲ / TUẦN
+    if (selectedWeekVal && selectedWeekVal !== "") {
+        // Nếu đã chọn Tuần cụ thể -> Giới hạn theo Tuần đó
+        let weekStart = new Date(currentSelectedMonday); weekStart.setHours(0,0,0,0);
+        let weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
+        startMonTime = weekStart.getTime();
+        endSunTime = weekEnd.getTime();
+    } else if (selectedNH && selectedHK) {
+        // Nếu chọn Học kỳ & Năm học -> Giới hạn khoảng thời gian từ Tuần 1 đến Tuần cuối của Học kỳ đó
+        let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+        if (config) {
+            let sDate = parseDateString(config[2]); 
+            let numAcademicWeeks = parseInt(config[3]); 
+            let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+            
+            if (sDate && numAcademicWeeks) {
+                let startMon = getMondayOfDate(sDate); 
+                startMonTime = startMon.getTime();
+                let acadWk = 1; let calWk = 1;
+                while (acadWk <= numAcademicWeeks && calWk <= 52) { 
+                    if (!breakWeeks.includes(calWk)) { acadWk++; } 
+                    calWk++; 
+                }
+                let endSun = new Date(startMon); 
+                endSun.setDate(endSun.getDate() + ((calWk - 1) * 7) - 1); 
+                endSun.setHours(23, 59, 59, 999); 
+                endSunTime = endSun.getTime();
+            }
+        }
+    }
+
+    // 2. LỌC DANH SÁCH DEADLINE THEO KHOẢNG THỜI GIAN ĐÃ XÁC ĐỊNH
     let filtered = globalDeadlineData.filter(d => {
-        let sDate = parseDateString(d.dateStart); 
-        let eDate = parseDateString(d.dateEnd);
-        if(!sDate || !eDate) return true; 
-        return sDate <= weekEnd && eDate >= weekStart;
+        if (!startMonTime || !endSunTime) return true; // Nếu chưa chọn Học kỳ/Tuần thì hiện tất cả
+
+        let sDate = getTimeFast(d.dateStart); 
+        let eDate = getTimeFast(d.dateEnd);
+        
+        if (!sDate && !eDate) return true; 
+        if (sDate && eDate) return sDate <= endSunTime && eDate >= startMonTime;
+        if (sDate) return sDate <= endSunTime;
+        if (eDate) return eDate >= startMonTime;
+        return true;
     });
 
-    if(filtered.length === 0) {
-        container.innerHTML = "<div style='grid-column: 1 / -1; text-align:center; padding: 20px 0; color:#6b7280; font-weight:500;'><i class='fa-solid fa-mug-hot me-2'></i>Tuần này không có Deadline. Bạn có thể thư giãn!</div>"; 
+    if (filtered.length === 0) {
+        let emptyMsg = (selectedNH && selectedHK) ? `Không có Deadline nào trong ${selectedHK} (${selectedNH})!` : "Không có Deadline nào!";
+        container.innerHTML = `<div style='grid-column: 1 / -1; text-align:center; padding: 20px 0; color:#6b7280; font-weight:500;'><i class='fa-solid fa-mug-hot me-2'></i>${emptyMsg}</div>`; 
         return;
     }
 
+    let completedList = getCompletedDeadlines();
+    let nowTime = new Date().setHours(0, 0, 0, 0);
+
+    // 3. SẮP XẾP ƯU TIÊN: Chưa hoàn thành -> Đang diễn ra -> Đã xong -> Thời gian bắt đầu
+    filtered.sort((a, b) => {
+        let isDoneA = completedList.includes(String(a.sheetRowIndex)) ? 1 : 0;
+        let isDoneB = completedList.includes(String(b.sheetRowIndex)) ? 1 : 0;
+
+        // Đã xong đẩy xuống cuối
+        if (isDoneA !== isDoneB) return isDoneA - isDoneB;
+
+        let startA = getTimeFast(a.dateStart) || 0;
+        let endA = getTimeFast(a.dateEnd) || startA;
+        let startB = getTimeFast(b.dateStart) || 0;
+        let endB = getTimeFast(b.dateEnd) || startB;
+
+        let isHappeningA = (nowTime >= startA && nowTime <= endA) ? 1 : 0;
+        let isHappeningB = (nowTime >= startB && nowTime <= endB) ? 1 : 0;
+
+        // Sự kiện ĐANG DIỄN RA lên đầu tiên
+        if (isHappeningA !== isHappeningB) return isHappeningB - isHappeningA;
+
+        return startA - startB;
+    });
+
+    // 4. HIỂN THỊ RA GIAO DIỆN
     container.innerHTML = filtered.map(item => {
-        // Lấy link từ Tiêu đề hoặc Tag
+        let isDone = completedList.includes(String(item.sheetRowIndex));
+        
         let extLinkTitle = checkAndExtractUrl(item.title);
         let extLinkTag = checkAndExtractUrl(item.tag);
         let extLink = extLinkTitle || extLinkTag;
         
-        // Làm sạch hiển thị (Xóa link dài ra khỏi text hiển thị trên UI)
         let displayTitle = item.title;
         let displayTag = item.tag;
         if (extLinkTitle) displayTitle = displayTitle.replace(extLinkTitle, '').trim();
         if (extLinkTag) displayTag = displayTag.replace(extLinkTag, '').trim();
-        
-        // Nếu người dùng chỉ nhập mỗi link vào ô Tag mà không nhập chữ gì khác
         if (displayTag === "") displayTag = "Truy cập Liên kết";
         
-        // Thêm event.stopPropagation() vào nút Sửa/Xóa để khi bấm nút không bị nhảy Link
         let actionButtons = item.isSystem ? '' : `
             <div class="deadline-actions">
                 <button class="btn-dl-act text-warning shadow-sm" onclick="event.stopPropagation(); openEditDeadlineModal('${item.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
@@ -101,10 +168,17 @@ function renderDeadlines() {
         let cardOnClick = extLink ? `onclick="window.open('${extLink}', '_blank')"` : "";
         let cardStyle = extLink ? "cursor: pointer; transition: 0.2s; border: 1px dashed var(--primary-color);" : "";
         
+        let doneBtnHtml = `
+            <button class="btn-dl-done ${isDone ? 'is-done' : ''}" onclick="toggleDeadlineComplete('${item.sheetRowIndex}', event)" title="Đánh dấu trạng thái">
+                <i class="fa-solid ${isDone ? 'fa-circle-check' : 'fa-circle'} me-1"></i> ${isDone ? 'Đã xong' : 'Chưa xong'}
+            </button>
+        `;
+
         return `
-            <div class="online-card" ${cardOnClick} style="${cardStyle}" title="${extLink ? 'Bấm để mở liên kết' : ''}">
+            <div class="online-card ${isDone ? 'completed-dl' : ''}" ${cardOnClick} style="${cardStyle}" title="${extLink ? 'Bấm để mở liên kết' : ''}">
+                ${doneBtnHtml}
                 ${actionButtons}
-                <div class="icon-circle ${item.icon}">${item.emoji || '📌'}</div>
+                <div class="icon-circle ${item.icon}" style="margin-top: 15px;">${item.emoji || '📌'}</div>
                 <h3 class="text-danger mb-2" style="font-size: 15px; font-weight: 800;">${item.duration}</h3>
                 <p class="desc text-dark mb-3" style="font-size: 16px; font-weight: 600;">${displayTitle}</p>
                 <span class="tag">${displayTag}</span>
@@ -251,6 +325,9 @@ function openManageTkbListModal() {
     let startMonTime = null; let endSunTime = null;
     const getTimeFast = (dateStr) => { let d = parseDateString(dateStr); return d ? d.getTime() : null; };
 
+    // LẤY DANH SÁCH CHECKLIST DEADLINE
+    let completedList = getCompletedDeadlines();
+
     if (selectedNH && selectedHK) {
         let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
         if (config) {
@@ -311,14 +388,18 @@ function openManageTkbListModal() {
     }
 
     let combinedData = [...filteredTkbData, ...pseudoDeadlines];
-    $('#manageTkbListModal .modal-title').html(`<i class="fa-solid fa-calendar-days me-2"></i>Bảng Tổng hợp Lịch học${titleSuffix}`);
+    
+    // THÊM NÚT "THÊM LỊCH MỚI" TRÊN TIÊU ĐỀ
+    $('#manageTkbListModal .modal-title').html(`
+        <span class="me-3"><i class="fa-solid fa-calendar-days me-2"></i>Bảng Tổng hợp Lịch học${titleSuffix}</span>
+        <button class="btn btn-sm btn-light text-primary fw-bold" onclick="$('#manageTkbListModal').modal('hide'); setTimeout(() => openAddTkbModal(false), 400);"><i class="fa-solid fa-plus"></i> Thêm lịch mới</button>
+    `);
 
     let tkbHtml = '';
     if (combinedData.length === 0) {
         let emptyMsg = (selectedNH && selectedHK) ? `Không có môn học/sự kiện nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có môn học/sự kiện nào được tạo!";
         tkbHtml += `<tr><td colspan="9" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
     } else {
-        // BƯỚC 1: Gom nhóm theo Tên Môn học
         let groupedByMon = {};
         combinedData.forEach(c => {
             let groupKey = getBaseSubjectName(c.mon);
@@ -326,41 +407,32 @@ function openManageTkbListModal() {
             groupedByMon[groupKey].push(c);
         });
 
-        // BƯỚC 2: Tìm mốc thời gian ngày bắt đầu (ngayBatDau) sớm nhất của từng môn để Sắp xếp
         let groupOrder = [];
         for (let key in groupedByMon) {
             let items = groupedByMon[key];
             let minTime = Number.MAX_SAFE_INTEGER;
-            
             items.forEach(c => {
                 let t = getTimeFast(c.ngayBatDau) || Number.MAX_SAFE_INTEGER;
                 if (t < minTime) minTime = t;
             });
-            
             groupOrder.push({ key: key, minTime: minTime });
         }
 
-        // BƯỚC 3: Sắp xếp các môn học theo Ngày diễn ra sớm nhất lên đầu
         groupOrder.sort((a, b) => a.minTime - b.minTime);
 
-        // BƯỚC 4: Xuất HTML
         let groupIndex = 0;
         for (let g of groupOrder) {
             let key = g.key;
             let items = groupedByMon[key];
             let rowCount = items.length;
             let baseNameDisplay = key;
-
-            // Xử lý đan xen màu xanh lá nhạt và xanh dương nhạt
             let groupBgColor = (groupIndex % 2 === 0) ? "#dcfce7" : "#e0f2fe";
             groupIndex++;
 
-            // Sắp xếp các ca học bên trong cùng 1 môn theo Ngày bắt đầu -> Thứ -> Tiết
             items.sort((a, b) => {
                 let tA = getTimeFast(a.ngayBatDau) || 0;
                 let tB = getTimeFast(b.ngayBatDau) || 0;
                 if (tA !== tB) return tA - tB;
-
                 if (a.isDeadline !== b.isDeadline) return a.isDeadline ? 1 : -1;
                 if (a.thu !== b.thu) return a.thu - b.thu;
                 return a.tietBd - b.tietBd;
@@ -378,16 +450,12 @@ function openManageTkbListModal() {
                 else if (parseInt(c.thu) === 99) thuText = "-";
                 else thuText = "Thứ " + c.thu;
 
-                // Nền dòng đan xen
                 let rowBg = c.isDeadline ? "background-color: #fff5f6;" : `background-color: ${groupBgColor};`;
-                
-                // Ẩn cột thời gian nếu là VLE
                 let thoiGianHienThi = c.thoiGian || '-';
                 if ((c.hinhThuc || "").toLowerCase().includes("vle")) {
                     thoiGianHienThi = "";
                 }
 
-                // --- XỬ LÝ DỌN DẸP LINK Ở CỘT CƠ SỞ / HÌNH THỨC ---
                 let rawHinhThuc = c.hinhThuc || ""; 
                 let extLink = checkAndExtractUrl(rawHinhThuc);
                 let coSoDisplay = extLink ? rawHinhThuc.replace(extLink, '').trim() : rawHinhThuc.trim();
@@ -396,25 +464,27 @@ function openManageTkbListModal() {
                     coSoDisplay = extLink ? "Truy cập" : "-"; 
                 }
 
-                // Nếu có link thì hiển thị dạng chữ màu xanh gạch chân
                 let coSoHtml = extLink 
                     ? `<a href="${extLink}" target="_blank" class="fw-bold text-decoration-underline" style="color: #0284c7;" title="Mở liên kết">${coSoDisplay} <i class="fa-solid fa-up-right-from-square ms-1" style="font-size: 11px;"></i></a>`
                     : `<span class="fw-bold">${coSoDisplay}</span>`;
 
                 tkbHtml += `<tr style="${rowBg}">`;
-                
                 if (index === 0) {
                     tkbHtml += `<td rowspan="${rowCount}" class="text-start align-middle fw-bold text-primary" style="font-size: 15px; background-color: ${groupBgColor}; border-left: 3px solid var(--primary-color) !important;">${baseNameDisplay}</td>`;
                 }
                 
                 if (c.isDeadline) {
+                    // XỬ LÝ NÚT CHECKLIST "ĐÃ XONG" CHO CỘT PHÒNG
+                    let isDone = completedList.includes(String(c.sheetRowIndex));
+                    let doneBtnHtml = `<button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${c.sheetRowIndex}', event)"><i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}</button>`;
+
                     tkbHtml += `
                         <td class="text-center align-middle fw-bold text-dark">-</td>
                         <td class="text-center align-middle"><span class="badge bg-danger">DEADLINE</span></td>
                         <td class="text-center align-middle">${coSoHtml}</td>
                         <td class="text-center fw-bold text-danger align-middle">${thoiGianHienThi}</td>
                         <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
-                        <td class="text-center align-middle">-</td>
+                        <td class="text-center align-middle">${doneBtnHtml}</td>
                         <td class="align-middle">-</td>
                         <td class="text-center align-middle">
                             <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
@@ -444,6 +514,7 @@ function openManageTkbListModal() {
     $('#tkbManagerListBody').html(tkbHtml);
     $('#manageTkbListModal').modal('show');
 }
+
 // ----------------------------------------------------
 // HÀM 2: MỞ BẢNG TỔNG HỢP DEADLINE (Đã xóa cột Ngày diễn ra)
 // ----------------------------------------------------
@@ -455,6 +526,7 @@ function openManageDeadlineListModal() {
     const getTimeFast = (dateStr) => { let d = parseDateString(dateStr); return d ? d.getTime() : null; };
 
     let nowTime = new Date().setHours(0, 0, 0, 0); 
+    let completedList = getCompletedDeadlines();
 
     if (selectedNH && selectedHK) {
         let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
@@ -481,7 +553,10 @@ function openManageDeadlineListModal() {
 
     let filteredTkbSubjectNames = new Set(filteredTkbData.map(c => getBaseSubjectName(c.mon)));
 
-    $('#manageDeadlineListModal .modal-title').html(`<i class="fa-solid fa-thumbtack me-2"></i>Bảng Tổng hợp Deadline${titleSuffix}`);
+  $('#manageDeadlineListModal .modal-title').html(`
+    <span class="me-3"><i class="fa-solid fa-thumbtack me-2"></i>Bảng Tổng hợp Deadline${titleSuffix}</span>
+    <button class="btn btn-sm btn-light text-primary fw-bold" onclick="$('#manageDeadlineListModal').modal('hide'); setTimeout(() => openAddDeadlineModal(), 400);"><i class="fa-solid fa-plus"></i> Thêm Deadline</button>
+`);
 
     let dlHtml = '';
     let filteredDeadlines = [];
@@ -508,7 +583,14 @@ function openManageDeadlineListModal() {
         let emptyMsg = (selectedNH && selectedHK) ? `Không có Deadline nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có Deadline nào được tạo!";
         dlHtml += `<tr><td colspan="5" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
     } else {
+        // SẮP XẾP ƯU TIÊN: Đang diễn ra -> Chưa làm -> Đã xong
         filteredDeadlines.sort((a, b) => {
+            let isDoneA = completedList.includes(String(a.sheetRowIndex)) ? 1 : 0;
+            let isDoneB = completedList.includes(String(b.sheetRowIndex)) ? 1 : 0;
+
+            // 1. Đã xong đẩy xuống cuối
+            if (isDoneA !== isDoneB) return isDoneA - isDoneB;
+
             let startA = getTimeFast(a.dateStart) || 0;
             let endA = getTimeFast(a.dateEnd) || startA;
             let startB = getTimeFast(b.dateStart) || 0;
@@ -517,42 +599,44 @@ function openManageDeadlineListModal() {
             let isHappeningA = (nowTime >= startA && nowTime <= endA) ? 1 : 0;
             let isHappeningB = (nowTime >= startB && nowTime <= endB) ? 1 : 0;
 
-            if (isHappeningA !== isHappeningB) {
-                return isHappeningB - isHappeningA; 
-            }
-            return startB - startA;
+            // 2. Đang diễn ra lên đầu
+            if (isHappeningA !== isHappeningB) return isHappeningB - isHappeningA;
+
+            return startA - startB;
         });
 
-       filteredDeadlines.forEach(c => {
+        filteredDeadlines.forEach(c => {
+            let isDone = completedList.includes(String(c.sheetRowIndex));
             let startT = getTimeFast(c.dateStart) || 0;
             let endT = getTimeFast(c.dateEnd) || startT;
             let isHappeningNow = (nowTime >= startT && nowTime <= endT);
 
-            let rowBgColor = isHappeningNow ? "background-color: #f0fdf4 !important;" : "background-color: #f8fafc !important;";
-            let borderStyle = isHappeningNow ? "border-left: 4px solid #22c55e;" : "";
-            let happeningBadge = isHappeningNow ? `<span class="badge bg-success text-white mb-1"><i class="fa-solid fa-bolt"></i> Đang diễn ra</span><br>` : '';
+            let rowBgColor = isDone ? "background-color: #f1f5f9 !important; opacity: 0.6;" : (isHappeningNow ? "background-color: #f0fdf4 !important;" : "background-color: #f8fafc !important;");
+            let titleStyle = isDone ? "text-decoration: line-through; color: #64748b;" : "color: #1e293b;";
+            let happeningBadge = (!isDone && isHappeningNow) ? `<span class="badge bg-success text-white mb-1"><i class="fa-solid fa-bolt"></i> Đang diễn ra</span><br>` : '';
 
-            // Bóc tách và dọn dẹp link
             let extLinkTitle = checkAndExtractUrl(c.title || "");
             let extLinkTag = checkAndExtractUrl(c.tag || "");
-            let extLink = extLinkTitle || extLinkTag; // Gom link lại
+            let extLink = extLinkTitle || extLinkTag;
             
             let displayTitle = c.title || "";
             let displayTag = c.tag || "Khác";
             
-            // Cắt bỏ phần link thừa khỏi chuỗi hiển thị
             if (extLinkTitle) displayTitle = displayTitle.replace(extLinkTitle, '').trim();
             if (extLinkTag) displayTag = displayTag.replace(extLinkTag, '').trim();
             if (displayTag === "") displayTag = "Truy cập";
 
-            // Hiển thị chữ bình thường (không đóng khung badge)
             let tagHtml = extLink 
                 ? `<a href="${extLink}" target="_blank" class="fw-bold text-decoration-underline" style="color: #0284c7;" title="Mở liên kết">${displayTag} <i class="fa-solid fa-up-right-from-square ms-1" style="font-size: 11px;"></i></a>` 
                 : `<span class="fw-bold text-dark">${displayTag}</span>`;
 
             dlHtml += `<tr>
-                <td class="text-center align-middle" style="${rowBgColor} ${borderStyle}">${happeningBadge}<span class="badge bg-primary">DEADLINE</span></td>
-                <td class="text-start align-middle fw-bold text-dark" style="${rowBgColor}">${displayTitle}</td>
+                <td class="text-center align-middle" style="${rowBgColor}">
+                    <button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${c.sheetRowIndex}', event)">
+                        <i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}
+                    </button>
+                </td>
+                <td class="text-start align-middle fw-bold" style="${rowBgColor} ${titleStyle}">${happeningBadge}${displayTitle}</td>
                 <td class="text-center align-middle fw-bold text-danger" style="${rowBgColor}">${c.duration || '-'}</td>
                 <td class="text-center align-middle" style="${rowBgColor}">${tagHtml}</td>
                 <td class="text-center align-middle" style="${rowBgColor}">
@@ -565,6 +649,7 @@ function openManageDeadlineListModal() {
     $('#deadlineManagerListBody').html(dlHtml);
     $('#manageDeadlineListModal').modal('show');
 }
+
 function closeAndOpenEditTkb(sheetRowIndex) { 
     $('#manageTkbListModal').modal('hide'); 
     setTimeout(() => { openEditTkbModal(sheetRowIndex); }, 400); 
@@ -1112,4 +1197,41 @@ function saveSystemTkbSelection() {
         alert("Đã đồng bộ lịch học thành công!"); $('#systemTkbModal').modal('hide'); btn.html('Đồng bộ lịch học').prop('disabled', false); loadThoiGianBieu();
     }, function() { alert("Giao tiếp máy chủ thất bại! Không thể lưu thiết lập."); btn.html('Đồng bộ lịch học').prop('disabled', false); });
 }
+// Các hàm quản lý trạng thái Checklist Deadline
+function getCompletedDeadlinesKey() {
+    let mssv = currentUser ? currentUser.mssv : 'guest';
+    return 'completed_deadlines_' + mssv;
+}
 
+function getCompletedDeadlines() {
+    return JSON.parse(localStorage.getItem(getCompletedDeadlinesKey())) || [];
+}
+
+function toggleDeadlineComplete(sheetRowIndex, event) {
+    if (event) event.stopPropagation();
+    
+    let completedList = getCompletedDeadlines();
+    let strIdx = String(sheetRowIndex);
+    let pos = completedList.indexOf(strIdx);
+    
+    if (pos > -1) {
+        completedList.splice(pos, 1);
+    } else {
+        completedList.push(strIdx);
+    }
+    
+    localStorage.setItem(getCompletedDeadlinesKey(), JSON.stringify(completedList));
+    
+    // 1. Cập nhật các thẻ Deadline ngoài trang chủ
+    renderDeadlines();
+    
+    // 2. Cập nhật Bảng Tổng hợp Deadline (nếu đang mở)
+    if ($('#manageDeadlineListModal').is(':visible')) {
+        openManageDeadlineListModal();
+    }
+    
+    // 3. CẬP NHẬT BẢNG TỔNG HỢP LỊCH HỌC TKB (nếu đang mở)
+    if ($('#manageTkbListModal').is(':visible')) {
+        openManageTkbListModal();
+    }
+}

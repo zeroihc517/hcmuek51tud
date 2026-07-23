@@ -2228,3 +2228,67 @@ body.dark-mode .tb-detail-main-content table th {
         font-size: 17px;
     }
 }
+/* ==========================================
+   CSS DÀNH CHO CHECKLIST DEADLINE
+   ========================================== */
+.online-card.completed-dl {
+    opacity: 0.55;
+    background-color: #f8fafc !important;
+    border: 1px solid #cbd5e1 !important;
+    box-shadow: none !important;
+}
+
+.online-card.completed-dl .desc {
+    text-decoration: line-through;
+    color: #64748b !important;
+}
+
+.online-card.completed-dl .tag {
+    background-color: #e2e8f0 !important;
+    color: #64748b !important;
+}
+
+/* Nút tích chọn hoàn thành */
+.btn-dl-done {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.btn-dl-done:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+.btn-dl-done.is-done {
+    background: #dcfce7;
+    border-color: #22c55e;
+    color: #15803d;
+}
+
+body.dark-mode .online-card.completed-dl {
+    background-color: #0f172a !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .btn-dl-done {
+    background: #1e293b;
+    border-color: #475569;
+    color: #94a3b8;
+}
+
+body.dark-mode .btn-dl-done.is-done {
+    background: #064e3b;
+    border-color: #10b981;
+    color: #6ee7b7;
+}
