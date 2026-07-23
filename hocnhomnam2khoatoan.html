@@ -1179,72 +1179,111 @@
     <div class="modal fade" id="editRowModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa nội dung</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="editCol1" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="editCol2" class="form-control" rows="3"></textarea></div><div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="editCol3" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="editCol4" class="form-control"></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditRow()" id="btnSaveEditRow">Lưu thay đổi</button></div></div></div></div>
     <div class="modal fade" id="editQAModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa câu trả lời Q&A</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Nội dung câu trả lời</label><textarea id="editQAText" class="form-control" rows="6"></textarea></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditQA()" id="btnSaveEditQA">Lưu thay đổi</button></div></div></div></div>
 
-   <div class="modal fade" id="systemTkbModal" tabindex="-1" aria-hidden="true">
+  <!-- BẢNG ĐỒNG BỘ HỌC PHẦN HỆ THỐNG -->
+<div class="modal fade" id="systemTkbModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl"> 
         <div class="modal-content border-0 shadow">
             
-            <!-- Đổi màu Header trùng với TKB (màu xanh #0f4c81) -->
             <div class="modal-header text-white" style="background-color: #0f4c81;">
                 <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-cloud-arrow-down me-2"></i>Đăng ký Học phần từ Hệ thống</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             
             <div class="modal-body p-4">
-                <div class="alert alert-light border mb-3 d-flex align-items-start gap-3" style="border-color: #0f4c81 !important;">
-                    <i class="fa-solid fa-circle-info fs-4 mt-1" style="color: #0f4c81;"></i>
-                    <p class="m-0 small text-muted">
-                        <strong class="text-dark">Hướng dẫn:</strong> Tích chọn vào ô vuông ở cột đầu tiên để đăng ký các học phần bạn đang theo học. Bạn không thể chỉnh sửa lịch học của những học phần này. Muốn xóa thì vào đây tích không chọn nữa.
-                    </p>
-                </div>
                 
-                <div class="row g-3 mb-3">
-                    <div class="col-md-6">
-                        <div class="select-floating-box">
-                            <label>Năm học</label>
-                            <select class="form-select" id="sysNamHocFilter" onchange="renderSystemCoursesList()">
-                                <option value="">-- Tất cả năm học --</option>
-                            </select>
+                <!-- MÀN HÌNH 1: DANH SÁCH MÔN HỌC (GOM NHÓM) -->
+                <div id="sysScreen1">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="select-floating-box">
+                                <label>Năm học</label>
+                                <select class="form-select" id="sysNamHocFilter" onchange="renderSystemCoursesList()">
+                                    <option value="">-- Tất cả năm học --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="select-floating-box">
+                                <label>Học kỳ</label>
+                                <select class="form-select" id="sysHocKyFilter" onchange="renderSystemCoursesList()">
+                                    <option value="">-- Tất cả học kỳ --</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="select-floating-box">
-                            <label>Học kỳ</label>
-                            <select class="form-select" id="sysHocKyFilter" onchange="renderSystemCoursesList()">
-                                <option value="">-- Tất cả học kỳ --</option>
-                            </select>
-                        </div>
+                    
+                    <div class="table-responsive border rounded" style="max-height: 450px; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+                        <table class="table table-hover table-bordered align-middle m-0 bg-white system-tkb-table" style="font-size: 14.5px;">
+                            <thead class="text-center" style="position: sticky; top: 0; z-index: 10;">
+                                <tr>
+                                    <th>Tên Học Phần</th>
+                                    <th style="width: 15%;">Số lớp mở</th>
+                                    <th style="width: 15%;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="systemSubjectsContainer">
+                                <tr>
+                                    <td colspan="3" class="text-center py-5 text-muted">
+                                        <i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải dữ liệu hệ thống...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                
-                <div class="table-responsive border rounded" style="max-height: 450px; overflow-y: auto; -webkit-overflow-scrolling: touch;">
-                    <table class="table table-hover table-bordered align-middle m-0 bg-white system-tkb-table" style="font-size: 14px;">
-                        <thead class="text-center" style="position: sticky; top: 0; z-index: 10;">
-                            <tr>
-                                <th style="width: 50px;">Chọn</th>
-                                <th>Mã HP</th>
-                                <th style="width: 22%;">Tên Học Phần</th>
-                                <th>Cơ sở</th>
-                                <th>Phòng</th>
-                                <th>Thứ & Tiết</th>
-                                <th>Giảng Viên</th>
-                                <th>Ngày học</th>
-                            </tr>
-                        </thead>
-                        <tbody id="systemCoursesContainer">
-                            <tr>
-                                <td colspan="8" class="text-center py-5 text-muted">
-                                    <i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải dữ liệu hệ thống...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                <!-- MÀN HÌNH 2: DANH SÁCH CÁC LỚP TRONG 1 MÔN -->
+                <div id="sysScreen2" class="d-none">
+                    <div class="d-flex align-items-center mb-3 pb-2 border-bottom">
+                        <button class="btn btn-sm btn-light fw-bold shadow-sm me-3 border" onclick="backToSysScreen1()">
+                            <i class="fa-solid fa-arrow-left"></i> Trở lại
+                        </button>
+                        <h5 class="fw-bold m-0 text-primary" id="sysDetailSubjectName">Tên Môn Học</h5>
+                    </div>
+                    
+                    <div class="alert alert-light border mb-3 d-flex align-items-start gap-3" style="border-color: #0f4c81 !important;">
+                        <i class="fa-solid fa-circle-info fs-4 mt-1" style="color: #0f4c81;"></i>
+                        <p class="m-0 small text-muted" style="line-height: 1.5;">
+                            <strong class="text-dark">Hướng dẫn:</strong> Tích chọn lớp bạn muốn tham gia rồi nhấn Đăng ký ở dưới.<br>
+                            - <strong class="text-primary">Đồng bộ (Hệ thống):</strong> Khóa cứng lịch, tự cập nhật khi trường đổi lịch.<br>
+                            - <strong class="text-success">Sao chép (Cá nhân):</strong> Copy thành lịch riêng, có thể tự do sửa giờ, phòng.<br>
+                            - Nếu muốn bỏ chọn lịch cũ, hãy nhấn nút <strong class="text-danger"><i class="fa-solid fa-trash"></i> Hủy</strong> ở cột Trạng thái.
+                        </p>
+                    </div>
+
+                    <div class="table-responsive border rounded" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover table-bordered align-middle m-0 bg-white system-tkb-table" style="font-size: 14px;">
+                            <thead class="text-center" style="position: sticky; top: 0; z-index: 10;">
+                                <tr>
+                                    <th style="width: 50px;">Chọn</th>
+                                    <th>Mã HP</th>
+                                    <th>Cơ sở</th>
+                                    <th>Phòng</th>
+                                    <th>Thứ & Tiết</th>
+                                    <th>Giảng Viên</th>
+                                    <th>Ngày học</th>
+                                    <th style="width: 15%;">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody id="systemClassesContainer"></tbody>
+                        </table>
+                    </div>
                 </div>
+
             </div>
             
-            <div class="modal-footer border-0 bg-light">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <!-- Đổi màu nút bấm -->
-                <button type="button" class="btn text-white px-4 fw-bold" style="background-color: #0f4c81;" onclick="saveSystemTkbSelection()" id="btnSaveSystemTkb">Đồng bộ lịch học</button>
+            <!-- THANH ĐIỀU KHIỂN CHÂN TRANG -->
+            <div class="modal-footer border-0 bg-light d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng bảng</button>
+                
+                <div class="d-flex gap-2 d-none" id="sysFooterActions">
+                    <button type="button" class="btn btn-success px-3 fw-bold shadow-sm" onclick="saveSystemTkbSelection('personal')" id="btnSavePersonalTkbMode">
+                        <i class="fa-solid fa-copy me-1"></i> Sao chép (Cá nhân)
+                    </button>
+                    <button type="button" class="btn text-white px-3 fw-bold shadow-sm" style="background-color: #0f4c81;" onclick="saveSystemTkbSelection('system')" id="btnSaveSystemTkb">
+                        <i class="fa-solid fa-cloud-arrow-down me-1"></i> Đồng bộ (Hệ thống)
+                    </button>
+                </div>
             </div>
         </div>
     </div>
