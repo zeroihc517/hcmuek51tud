@@ -1220,18 +1220,29 @@ function toggleDeadlineComplete(sheetRowIndex, event) {
         completedList.push(strIdx);
     }
     
+    // 1. Lưu tạm ở Local Storage để giao diện cập nhật ngay lập tức mà không bị giật
     localStorage.setItem(getCompletedDeadlinesKey(), JSON.stringify(completedList));
     
-    // 1. Cập nhật các thẻ Deadline ngoài trang chủ
+    // 2. Cập nhật các UI đang mở
     renderDeadlines();
-    
-    // 2. Cập nhật Bảng Tổng hợp Deadline (nếu đang mở)
     if ($('#manageDeadlineListModal').is(':visible')) {
         openManageDeadlineListModal();
     }
-    
-    // 3. CẬP NHẬT BẢNG TỔNG HỢP LỊCH HỌC TKB (nếu đang mở)
     if ($('#manageTkbListModal').is(':visible')) {
         openManageTkbListModal();
+    }
+
+    // 3. ĐỒNG BỘ LÊN GOOGLE SHEETS BẰNG API MỚI
+    if (currentUser && currentUser.mssv) {
+        // Có thể chèn thêm nút loading tùy ý ở đây nếu cần UI/UX mượt hơn
+        postToGAS({
+            action: "saveCompletedDeadlines",
+            mssv: currentUser.mssv,
+            completedData: JSON.stringify(completedList)
+        }, function(res) {
+            console.log("Đồng bộ trạng thái Deadline thành công:", res);
+        }, function() {
+            console.error("Lỗi khi đồng bộ trạng thái Deadline lên máy chủ!");
+        });
     }
 }

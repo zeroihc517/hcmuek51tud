@@ -44,9 +44,18 @@ function loginStudent() {
             loadWebLinks();
 
             // Tải ngầm Lịch học TKB & Deadlines
-            $.ajax({ url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(data) { processTKBData(data); } });
+           $.ajax({ url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(data) { processTKBData(data); } });
             $.ajax({ url: SCRIPT_URL + "?action=getDeadlinesUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(data) { globalDeadlineData = data.map(r => ({ title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5], dateStart: r[6] || "", dateEnd: r[7] || "", sheetRowIndex: r[8] })); } });
-
+$.ajax({ 
+                url: SCRIPT_URL + "?action=getCompletedDeadlines&mssv=" + currentUser.mssv, 
+                method: "GET", 
+                success: function(res) {
+                    if(res) {
+                        localStorage.setItem('completed_deadlines_' + currentUser.mssv, res);
+                        renderDeadlines(); // Vẽ lại màu xám mờ cho các thẻ đã tick
+                    }
+                }
+            });
             // Tải ngầm Bảng điểm GPA (và cấu hình song ngành)
             $.ajax({ url: SCRIPT_URL + "?action=getGPAConfig&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(configRes) { if (configRes) { try { gpaConfig = typeof configRes === 'string' ? JSON.parse(configRes) : configRes; localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig)); } catch(e){} } } });
             $.ajax({ url: SCRIPT_URL + "?action=getGPAUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(res) { try { myGPADataset = typeof res === 'string' ? JSON.parse(res) : res; if(!Array.isArray(myGPADataset)) myGPADataset = []; } catch(e){ myGPADataset = []; } } });
