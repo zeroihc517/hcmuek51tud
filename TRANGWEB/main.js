@@ -679,7 +679,7 @@ if (typeof globalDeadlineData !== 'undefined' && globalDeadlineData.length > 0) 
 $('#tbItemsHeThong').html(heThongItemsHtml);
 $('#tbItemsHocThuat').html(hocThuatItemsHtml);
 $('#tbItemsRenLuyen').html(renLuyenItemsHtml);
-
+renderDeadlinesOnNoticePage();
 applyKaTeX('customViewWrapper');
 $('#loadingStatus').addClass('d-none');
                 return;
@@ -2866,21 +2866,17 @@ function fetchAndRenderDeadlinesForNotice() {
         dataType: "json",
         cache: false,
         success: function(data) {
-            // 1. Lưu dữ liệu Deadline vào biến toàn cục
             globalDeadlineData = data.map(r => ({
                 title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5],
                 dateStart: r[6] || "", dateEnd: r[7] || "", 
                 sheetRowIndex: r[8]
             }));
 
-            // 2. Nếu đang ở trang Thông báo thì render bổ sung ngay lập tức
-            if (currentSheetName.toLowerCase() === 'thông báo') {
-                renderDeadlinesOnNoticePage();
-            }
+            // >>> CHÈN THÊM DÒNG NÀY: Cập nhật ngay thẻ xinh xinh vào giao diện khi tải xong
+            renderDeadlinesOnNoticePage();
         }
     });
 }
-
 function renderDeadlinesOnNoticePage() {
     if (typeof globalDeadlineData === 'undefined' || globalDeadlineData.length === 0) return;
 
@@ -2900,50 +2896,97 @@ function renderDeadlinesOnNoticePage() {
     let deadlineHtml = '';
 
     globalDeadlineData.forEach(d => {
-        // Nếu đã hoàn thành -> Bỏ qua
+        // 1. Nếu đã hoàn thành -> Bỏ qua
         let isDone = completedList.includes(String(d.sheetRowIndex));
         if (isDone) return; 
 
-        // Kiểm tra thời gian diễn ra
+        // 2. Kiểm tra sự kiện đang diễn ra hôm nay
         let startT = getTimeFast(d.dateStart) || 0;
         let endT = getTimeFast(d.dateEnd) || startT;
         let isHappeningNow = (nowTime >= startT && nowTime <= endT);
 
         if (isHappeningNow) {
-            let dlLinkHtml = '';
             let urlRegex = /(https?:\/\/[^\s]+)/g;
-            let extLink = (d.tag && d.tag.match(urlRegex)) ? d.tag.match(urlRegex)[0] : ((d.title && d.title.match(urlRegex)) ? d.title.match(urlRegex)[0] : null);
-            
-            if(extLink) {
-                dlLinkHtml = `<div class="mt-2"><a href="${extLink}" target="_blank" class="btn btn-sm text-white fw-bold shadow-sm" style="background: #e61d4a; border-radius: 6px;"><i class="fa-solid fa-link me-1"></i> Truy cập liên kết</a></div>`;
-            }
+            let cleanTitle = d.title ? d.title.replace(urlRegex, '').trim() : 'Nhiệm vụ';
+            let emoji = d.emoji || '📌';
 
-            let displayTag = d.tag ? d.tag.replace(urlRegex, '').trim() : '';
-            let cleanTitle = d.title ? d.title.replace(urlRegex, '').trim() : 'Nhiệm vụ / Deadline';
-
+            // Khung Deadline nhỏ xinh
             deadlineHtml += `
-            <div class="border-animation mb-3">
-                <div class="alert shadow-sm border-0 position-relative m-0" role="alert" style="background: linear-gradient(to right, #fff5f5, #ffffff);">
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 44px; height: 44px;">
-                            <i class="fa-solid fa-clock fa-shake fs-5"></i>
-                        </div>
-                        <div class="flex-grow-1 mt-1">
-                            <div class="fw-bold text-danger mb-1" style="font-size: 16px; text-transform: uppercase;"><i class="fa-solid fa-triangle-exclamation me-1"></i> [DEADLINE ĐANG DIỄN RA] ${cleanTitle}</div>
-                            <div class="tb-item-dates d-flex align-items-center flex-wrap gap-2" style="font-size: 13px; color: #64748b;">
-                                <span class="tb-date-text text-danger fw-bold" style="background: #fee2e2;"><i class="fa-regular fa-calendar"></i> Hạn chót: ${d.duration || (d.dateStart + (d.dateEnd && d.dateEnd !== d.dateStart ? ' - ' + d.dateEnd : ''))}</span>
-                                ${displayTag ? `<span class="badge bg-secondary">${displayTag}</span>` : ''}
-                            </div>
-                            ${dlLinkHtml}
+            <div class="mini-dl-capsule mb-2" onclick="jumpToTKBFromNotice('${d.dateStart}')" title="Nhấn để xem Lịch học tuần này">
+                <div class="d-flex align-items-center justify-content-between gap-2 px-3 py-2">
+                    <div class="d-flex align-items-center gap-2 overflow-hidden">
+                        <span class="mini-dl-emoji">${emoji}</span>
+                        <div class="text-truncate">
+                            <span class="fw-bold mini-dl-title">${cleanTitle}</span>
+                            <small class="mini-dl-time ms-2"><i class="fa-regular fa-clock me-1"></i>${d.duration || d.dateStart}</small>
                         </div>
                     </div>
+                    
+                    <button class="btn btn-sm btn-mini-done flex-shrink-0" onclick="quickMarkDone('${d.sheetRowIndex}', event)" title="Đánh dấu đã hoàn thành">
+                        <i class="fa-solid fa-check me-1"></i>Xong
+                    </button>
                 </div>
             </div>`;
         }
     });
 
     if (deadlineHtml !== '') {
-        // Chèn HTML các Deadline đang diễn ra lên đầu vùng Thông báo hệ thống
+        // Xóa các capsule cũ (nếu có) để tránh bị lặp lại khi render lại
+        $('#tbItemsHeThong .mini-dl-capsule').remove();
+        
+        // Dùng .prepend() để chèn Deadline LÊN ĐẦU, giữ nguyên Thông báo hệ thống bên dưới!
         $('#tbItemsHeThong').removeClass('d-none').prepend(deadlineHtml);
     }
+}
+
+// HÀM CHUYỂN SANG TAB LỊCH HỌC VÀ TỰ DẪN TỚI TUẦN ĐÓ
+function jumpToTKBFromNotice(dateStartStr) {
+    // 1. Chuyển giao diện sang tab Lịch học
+    loadTKBView();
+
+    // 2. Tính toán để nhảy tới tuần chứa Deadline đó
+    if (dateStartStr) {
+        let targetDate = parseDateString(dateStartStr);
+        if (targetDate && typeof globalConfigHK !== 'undefined') {
+            let targetTime = targetDate.getTime();
+            let foundWeekTime = null;
+
+            // Tìm tuần phù hợp trong cấu hình Học kỳ
+            for (let conf of globalConfigHK) {
+                let sDate = parseDateString(conf[2]); 
+                let numWeeks = parseInt(conf[3]); 
+                let breakWeeks = (conf[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+                
+                if (sDate && numWeeks) {
+                    let startMon = getMondayOfDate(sDate);
+                    let acadWk = 1, calWk = 1;
+                    while (acadWk <= numWeeks && calWk <= 52) {
+                        let m = new Date(startMon); m.setDate(m.getDate() + ((calWk - 1) * 7));
+                        let nextM = new Date(m); nextM.setDate(nextM.getDate() + 7);
+                        
+                        if (targetTime >= m.getTime() && targetTime < nextM.getTime()) {
+                            $('#namHocSelect').val(conf[0]); 
+                            onNamHocChange(); 
+                            $('#hocKySelect').val(conf[1]); 
+                            onHocKyChange(); 
+                            $('#weekSelect').val(m.getTime().toString()); 
+                            onWeekChange();
+                            foundWeekTime = true;
+                            break;
+                        }
+                        if (!breakWeeks.includes(calWk)) acadWk++;
+                        calWk++;
+                    }
+                    if (foundWeekTime) break;
+                }
+            }
+        }
+    }
+}
+
+// HÀM ĐÁNH DẤU XONG NHANH NGAY TẠI TRANG THÔNG BÁO
+function quickMarkDone(sheetRowIndex, event) {
+    event.stopPropagation(); // Chặn không cho kích hoạt sự kiện bấm chuyển tab
+    toggleDeadlineComplete(sheetRowIndex, event);
+    renderDeadlinesOnNoticePage(); // Cập nhật biến mất ngay lập tức
 }
