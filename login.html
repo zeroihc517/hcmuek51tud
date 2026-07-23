@@ -3,36 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập | Học nhóm Năm 2 Khoa Toán</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Đăng nhập | Cổng Sinh Viên Khoa Toán</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="TRANGWEB/styleweb.css" rel="stylesheet">
-</head>
-<body class="d-flex align-items-center justify-content-center vh-100 bg-light" style="background: url('https://drive.google.com/thumbnail?id=1iibBgIr9XoEcOXusF-ckVA-SBPlR_tai&sz=w1920') center/cover no-repeat !important;">
+   <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            /* Thay thế bằng một link ảnh nền chất lượng cao (Unsplash HD/4K) hoặc giữ ảnh cũ nhưng tối ưu hiển thị */
+            background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.3)), 
+                              url('https://tintuc.dienthoaigiakho.vn/wp-content/uploads/2025/06/hinh-nen-ipad-16.jpg');
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
 
-    <div class="card border-0 shadow-lg auth-modal-content" style="max-width: 450px; width: 100%; border-radius: 24px; overflow: hidden;">
-        <div class="auth-header text-center p-4 text-white" style="background: linear-gradient(135deg, rgba(15, 76, 129, 0.85), rgba(32, 113, 179, 0.85));">
-            <div class="auth-header-icon fs-1 mb-2"><i class="fa-solid fa-graduation-cap"></i></div>
-            <h4 class="fw-bold mb-1">Cổng Sinh Viên</h4>
-            <p class="mb-0 small opacity-90">Đăng nhập để tiếp tục vào hệ thống</p>
+        .login-card-wrapper {
+            position: relative;
+            z-index: 2;
+            max-width: 520px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(15, 76, 129, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            animation: fadeInCard 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInCard {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-header-modern {
+            padding: 35px 30px 15px;
+            text-align: center;
+        }
+
+        .login-logo-circle {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #154c79, #0f4c81);
+            color: #ffffff;
+            font-size: 30px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+            box-shadow: 0 8px 20px rgba(21, 76, 121, 0.25);
+            animation: floatIcon 3.5s ease-in-out infinite;
+        }
+
+        @keyframes floatIcon {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .form-control-modern {
+            background: #f8fafc !important;
+            border: 1.5px solid #cbd5e1 !important;
+            color: #1e293b !important;
+            border-radius: 14px !important;
+            padding: 14px 16px 14px 48px !important;
+            font-size: 15px !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-modern::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-control-modern:focus {
+            border-color: #154c79 !important;
+            background: #ffffff !important;
+            box-shadow: 0 0 0 4px rgba(21, 76, 121, 0.1) !important;
+        }
+
+        .input-group-icon {
+            position: relative;
+        }
+
+        .input-group-icon i {
+            position: absolute;
+            top: 50%;
+            left: 18px;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 18px;
+            z-index: 10;
+            transition: color 0.3s;
+        }
+
+        .input-group-icon .form-control-modern:focus ~ i {
+            color: #154c79;
+        }
+
+        .btn-login-modern {
+            background: linear-gradient(135deg, #154c79, #0f4c81);
+            border: none;
+            border-radius: 14px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(21, 76, 121, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .btn-login-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(21, 76, 121, 0.35);
+            background: linear-gradient(135deg, #0f4c81, #0b365b);
+            color: #ffffff;
+        }
+
+        #savedAccountsContainer .saved-acc-item {
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 12px !important;
+            padding: 10px 14px;
+            transition: all 0.25s ease;
+            cursor: pointer;
+        }
+        #savedAccountsContainer .saved-acc-item:hover {
+            background: #f1f5f9 !important;
+            border-color: #154c79 !important;
+            transform: scale(1.01);
+        }
+    </style>
+</head>
+<body class="d-flex align-items-center justify-content-center vh-100 p-3">
+
+    <div class="login-card-wrapper">
+        <div class="login-header-modern">
+            <div class="login-logo-circle">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">Cổng Sinh Viên</h3>
+            <p class="text-primary small m-0 fw-bold opacity-85">Học nhóm Năm 2 - Khoa Toán Tin Học</p>
         </div>
-        <div class="card-body p-4 p-sm-5">
-            <!-- Nơi hiển thị tài khoản đã lưu gần đây -->
+
+        <div class="card-body px-4 pb-4 pt-0">
+            <!-- Nơi hiển thị tài khoản đã lưu kèm icon học thuật -->
             <div id="savedAccountsContainer" class="mb-3"></div>
 
-            <div class="input-icon-wrapper mb-3">
-                <input type="text" id="txtUserMSSV" class="form-control" placeholder="Mã số sinh viên (VD: 51.01.101.000)">
+            <div class="input-group-icon mb-3">
+                <input type="text" id="txtUserMSSV" class="form-control form-control-modern" placeholder="Mã số sinh viên (VD: 51.01...)">
                 <i class="fa-solid fa-id-card"></i>
             </div>
-            <div class="input-icon-wrapper mb-3">
-                <input type="password" id="txtUserPass" class="form-control" placeholder="Mật khẩu (Mặc định: 123)">
+            
+            <div class="input-group-icon mb-3">
+                <input type="password" id="txtUserPass" class="form-control form-control-modern" placeholder="Mật khẩu (Mặc định: 123)">
                 <i class="fa-solid fa-lock"></i>
             </div>
+            
             <small class="text-danger text-center d-block d-none mb-3 fw-bold" id="userAuthError"></small>
             
-            <button type="button" class="btn btn-primary w-100 btn-auth" onclick="loginStudentPage()" id="btnLoginStudent">
-                Đăng nhập ngay
+            <button type="button" class="btn w-100 btn-login-modern mt-2" onclick="loginStudentPage()" id="btnLoginStudent">
+                Đăng nhập hệ thống
             </button>
         </div>
     </div>
@@ -43,10 +182,38 @@
     <script src="TRANGWEB/config.js"></script>
     <script src="TRANGWEB/Xulyxacthuc.js"></script>
     <script>
-        // Hàm xử lý riêng cho trang Login độc lập
         $(document).ready(function() {
-            renderSavedAccounts();
+            renderSavedAccountsWithIcons();
         });
+
+        function renderSavedAccountsWithIcons() {
+            let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || []; 
+            let container = $('#savedAccountsContainer');
+            if (savedAccounts.length === 0) { container.hide(); return; }
+            container.show();
+            
+            let html = '<div class="text-muted small mb-2 fw-bold" style="font-size: 12px;"><i class="fa-solid fa-clock-rotate-left me-1"></i> Tài khoản đã truy cập gần đây:</div><div class="d-flex flex-column gap-2 mb-3">';
+            
+            savedAccounts.forEach((acc) => {
+                html += `
+                <div class="d-flex align-items-center justify-content-between saved-acc-item" onclick="selectSavedAccount('${acc.mssv}')">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 36px; height: 36px; background-color: #154c79; font-size: 15px;">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                        <div style="line-height: 1.3;">
+                            <div class="fw-bold text-dark" style="font-size: 14px;">${acc.name}</div>
+                            <div class="text-muted small" style="font-size: 11.5px;">${acc.mssv}</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-sm text-secondary hover-text-danger" onclick="removeSavedAccount('${acc.mssv}', event)" title="Xóa">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>`;
+            });
+            html += '</div><hr class="my-3 opacity-15" style="border-color: #cbd5e1;">'; 
+            container.html(html);
+        }
 
         function loginStudentPage() {
             let mssv = $('#txtUserMSSV').val().trim(); 
@@ -58,7 +225,7 @@
             }
 
             let btn = $('#btnLoginStudent'); 
-            btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang xử lý...').prop('disabled', true);
+            btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang xác thực...').prop('disabled', true);
             
             postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
                 let response = typeof res === 'string' ? JSON.parse(res) : res;
@@ -79,15 +246,14 @@
                     if (savedAccounts.length > 3) savedAccounts.pop(); 
                     localStorage.setItem('savedAccounts', JSON.stringify(savedAccounts));
 
-                    // Đăng nhập thành công -> Chuyển hướng về trang chủ chính (index.html)
                     window.location.href = "hocnhomnam2khoatoan.html";
                 } else { 
                     $('#userAuthError').removeClass('d-none').text(response.message); 
-                    btn.html('Đăng nhập ngay').prop('disabled', false); 
+                    btn.html('Đăng nhập hệ thống').prop('disabled', false); 
                 }
             }, function() { 
-                $('#userAuthError').removeClass('d-none').text("Lỗi kết nối!"); 
-                btn.html('Đăng nhập ngay').prop('disabled', false); 
+                $('#userAuthError').removeClass('d-none').text("Lỗi kết nối máy chủ!"); 
+                btn.html('Đăng nhập hệ thống').prop('disabled', false); 
             });
         }
     </script>
