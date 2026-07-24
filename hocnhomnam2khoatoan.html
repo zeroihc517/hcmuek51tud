@@ -1393,7 +1393,69 @@
         </div>
     </div>
 </div>
+<!-- MODAL XÁC NHẬN CHUYỂN ĐỔI LỚP HỌC (TÔNG MÀU ĐỎ NỔI BẬT) -->
+<div class="modal fade" id="confirmSwitchClassModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header text-white" style="background-color: #e61d4a;">
+                <h6 class="modal-title m-0 fw-bold text-uppercase"><i class="fa-solid fa-right-left me-2"></i>Xác nhận chuyển đổi lớp học</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle" style="width: 70px; height: 70px; background-color: #fff1f2; color: #e61d4a; font-size: 30px;">
+                        <i class="fa-solid fa-arrow-rotate-left fa-spin-pulse"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: #e61d4a; font-size: 18px;">Bạn muốn thay đổi lớp học?</h5>
+                <p class="text-secondary mb-3" id="confirmSwitchMessage" style="font-size: 15px; line-height: 1.6;">
+                    <!-- Nội dung lớp học sẽ chèn tự động -->
+                </p>
+                <div class="alert alert-danger border-0 p-2 small text-danger m-0" style="background-color: #fff5f5; border-radius: 10px;">
+                    <i class="fa-solid fa-circle-info me-1"></i> Lớp học cũ sẽ bị hủy khỏi Thời khóa biểu sau khi xác nhận.
+                </div>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-center gap-2 pb-4 bg-light">
+                <button type="button" class="btn btn-light fw-bold px-4 py-2" style="border-radius: 50px; border: 1.5px solid #cbd5e1;" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn text-white fw-bold px-4 py-2" id="btnConfirmSwitchClassAction" style="background-color: #e61d4a; border-radius: 50px; box-shadow: 0 4px 12px rgba(230, 29, 74, 0.25);">
+                    <i class="fa-solid fa-check me-1"></i> Đồng ý chuyển lớp
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- 2. MODAL XÁC NHẬN HỦY ĐỒNG BỘ / HỦY SAO CHÉP (ĐỒNG BỘ MÀU WEB) -->
+<div class="modal fade" id="confirmCancelSyncModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header text-white" style="background-color: #e61d4a;">
+                <h6 class="modal-title m-0 fw-bold text-uppercase"><i class="fa-solid fa-triangle-exclamation me-2"></i>Xác nhận hủy lớp học</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle" style="width: 70px; height: 70px; background-color: #fff1f2; color: #e61d4a; font-size: 30px;">
+                        <i class="fa-solid fa-trash-can fa-bounce"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2" style="color: #e61d4a; font-size: 18px;">Bạn có chắc chắn muốn hủy?</h5>
+                <p class="text-secondary mb-3" id="confirmCancelSyncMessage" style="font-size: 15px; line-height: 1.6;">
+                    <!-- Nội dung thông báo hủy sẽ chèn tự động -->
+                </p>
+                <div class="alert alert-danger border-0 p-2 small text-danger m-0" style="background-color: #fff5f5; border-radius: 10px;">
+                    <i class="fa-solid fa-circle-info me-1"></i> Thao tác này sẽ xóa vĩnh viễn các buổi học của lớp khỏi lịch của bạn.
+                </div>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-center gap-2 pb-4 bg-light">
+                <button type="button" class="btn btn-light fw-bold px-4 py-2" style="border-radius: 50px; border: 1.5px solid #cbd5e1;" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn text-white fw-bold px-4 py-2" id="btnConfirmCancelSyncAction" style="background-color: #e61d4a; border-radius: 50px; box-shadow: 0 4px 12px rgba(230, 29, 74, 0.25);">
+                    <i class="fa-solid fa-trash me-1"></i> Xác nhận Hủy
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>

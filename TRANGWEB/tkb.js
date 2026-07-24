@@ -1262,7 +1262,7 @@ c.rawSchedules.forEach(sch => {
     container.html(html);
 }
 
-// 2. HÀM MỞ MÀN HÌNH 2 (CHI TIẾT CÁC LỚP)
+// 1. HÀM MỞ MÀN HÌNH 2 (CHI TIẾT CÁC LỚP TRONG MÔN)
 window.openSubjectDetail = function(subjectKey) {
     currentSysSubjectKey = subjectKey;
     let subject = groupedSystemCourses[subjectKey];
@@ -1272,21 +1272,20 @@ window.openSubjectDetail = function(subjectKey) {
     subject.classes.forEach(c => {
         let isSynced = userRegisteredCourseIds.includes(c.id);
         
-      let copiedRowIndices = [];
-                c.rawSchedules.forEach(sch => {
-                    globalTkbData.forEach(tkb => {
-                        if (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon)) {
-                            // Bổ sung kiểm tra Ngày Bắt đầu và Ngày Kết thúc để phân biệt các giai đoạn
-                            let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
-                            let matchTime = isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd);
-                            let matchDate = (tkb.ngayBatDau === c.ngayBatDau) && (tkb.ngayKetThuc === c.ngayKetThuc);
-                            
-                            if (matchTime && matchDate) {
-                                if (!copiedRowIndices.includes(tkb.sheetRowIndex)) copiedRowIndices.push(tkb.sheetRowIndex);
-                            }
-                        }
-                    });
-                });
+        let copiedRowIndices = [];
+        c.rawSchedules.forEach(sch => {
+            globalTkbData.forEach(tkb => {
+                if (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon)) {
+                    let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
+                    let matchTime = isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd);
+                    let matchDate = (tkb.ngayBatDau === c.ngayBatDau) && (tkb.ngayKetThuc === c.ngayKetThuc);
+                    
+                    if (matchTime && matchDate) {
+                        if (!copiedRowIndices.includes(tkb.sheetRowIndex)) copiedRowIndices.push(tkb.sheetRowIndex);
+                    }
+                }
+            });
+        });
         let isCopied = copiedRowIndices.length > 0;
         let rowBg = (isSynced || isCopied) ? "background-color: #f8fafc;" : "background-color: #ffffff;";
         let dateDisplay = (c.ngayBatDau && c.ngayKetThuc) ? `<span class="fw-bold text-dark">${c.ngayBatDau}</span><br>đến <span class="fw-bold text-dark">${c.ngayKetThuc}</span>` : '-';
@@ -1307,12 +1306,12 @@ window.openSubjectDetail = function(subjectKey) {
                 <button class="btn btn-sm btn-outline-danger fw-bold w-100 shadow-sm" onclick="cancelPersonalCopyDirect('${copiedRowIndices.join(',')}', event)"><i class="fa-solid fa-trash me-1"></i> Hủy</button>
             `;
         } else {
-            checkboxHtml = `<input class="form-check-input system-course-checkbox shadow-sm border-secondary" type="checkbox" value="${c.id}" style="width: 22px; height: 22px; cursor: pointer;" onclick="event.stopPropagation();">`;
+            checkboxHtml = `<input class="form-check-input system-course-checkbox shadow-sm border-secondary" type="checkbox" value="${c.id}" style="width: 22px; height: 22px; cursor: pointer;" onclick="handleSelectClass('${c.id}', '${subjectKey}', event)">`;
             statusHtml = `<span class="text-muted small">Chưa đăng ký</span>`;
         }
 
         html += `
-        <tr style="cursor: pointer; ${rowBg}" onclick="if(!${isSynced} && !${isCopied}) $(this).find('.system-course-checkbox').prop('checked', function(i, v) { return !v; });">
+        <tr style="cursor: pointer; ${rowBg}" onclick="handleRowClick('${c.id}', '${subjectKey}', ${isSynced}, ${isCopied}, event)">
             <td class="text-center align-middle">${checkboxHtml}</td>
             <td class="text-center fw-bold text-secondary align-middle">${c.id}</td>
             <td class="text-center align-middle">${c.hinhThuc || '-'}</td>
@@ -1332,12 +1331,84 @@ window.openSubjectDetail = function(subjectKey) {
     $('#sysScreen1').addClass('d-none');
     $('#sysScreen2').removeClass('d-none');
     $('#sysFooterActions').removeClass('d-none');
-	if (subject.classes.length === 1) {
-        // Nếu chỉ có 1 lớp -> Hiện nút Đồng bộ (Hệ thống)
-        $('#btnSaveSystemTkb').removeClass('d-none');
+    
+    // Cập nhật trạng thái hiển thị ban đầu cho các nút bấm ở Chân trang
+    updateFooterActionButtons(subjectKey);
+};
+
+// 2. XỬ LÝ CLICK VÀO DÒNG ĐỂ TÍCH CHỌN LỚP
+window.handleRowClick = function(classId, subjectKey, isSynced, isCopied, event) {
+    if (isSynced || isCopied) return;
+    
+    let targetCheckbox = $(`.system-course-checkbox[value="${classId}"]`);
+    if (targetCheckbox.length) {
+        let currentChecked = targetCheckbox.is(':checked');
+        if (!currentChecked) {
+            handleSelectClass(classId, subjectKey, event);
+        } else {
+            targetCheckbox.prop('checked', false);
+            updateFooterActionButtons(subjectKey);
+        }
+    }
+};
+
+// 3. LOGIC CHỌN LỚP (CHỈ TÍCH CHỌN, CHƯA HỎI BẢNG XÁC NHẬN)
+window.handleSelectClass = function(newClassId, subjectKey, event) {
+    if (event) event.stopPropagation();
+
+    // Mỗi lần tích 1 lớp, tự động hủy bỏ dấu tích của tất cả các lớp khác trong môn
+    $('.system-course-checkbox').prop('checked', false);
+    $(`.system-course-checkbox[value="${newClassId}"]`).prop('checked', true);
+
+    // Cập nhật lại tên và màu sắc nút bấm ở Chân trang
+    updateFooterActionButtons(subjectKey);
+};
+
+// 4. HÀM CẬP NHẬT GIAO DIỆN NÚT CHÂN TRANG (TỰ ĐỔI THÀNH NÚT "CHUYỂN LỚP HỌC")
+function updateFooterActionButtons(subjectKey) {
+    let subject = groupedSystemCourses[subjectKey];
+    if (!subject) return;
+
+    // Kiểm tra xem môn này đã có lớp nào ĐỒNG BỘ hoặc SAO CHÉP từ trước chưa
+    let existingSyncedClass = subject.classes.find(c => userRegisteredCourseIds.includes(c.id));
+    let existingCopiedClass = subject.classes.find(c => {
+        let copiedRowIndices = [];
+        c.rawSchedules.forEach(sch => {
+            globalTkbData.forEach(tkb => {
+                if (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon)) {
+                    let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
+                    let matchTime = isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd);
+                    let matchDate = (tkb.ngayBatDau === c.ngayBatDau) && (tkb.ngayKetThuc === c.ngayKetThuc);
+                    if (matchTime && matchDate) copiedRowIndices.push(tkb.sheetRowIndex);
+                }
+            });
+        });
+        return copiedRowIndices.length > 0;
+    });
+
+    let existingRegisteredClass = existingSyncedClass || existingCopiedClass;
+    let selectedCheckbox = $('.system-course-checkbox:checked');
+
+    // Nếu ĐÃ CÓ LỚP ĐĂNG KÝ TRƯỚC ĐÓ + ĐANG TÍCH CHỌN 1 LỚP MỚI KHÁC
+    if (existingRegisteredClass && selectedCheckbox.length > 0 && selectedCheckbox.val() !== existingRegisteredClass.id) {
+        // Tạm ẩn các nút mặc định, chỉ hiện nút "Chuyển lớp học" màu cam
+        let switchBtnHtml = `
+            <button type="button" class="btn text-white px-4 fw-bold shadow-sm" style="background-color: #f97316;" onclick="saveSystemTkbSelection('switch_class')" id="btnSwitchClassMode">
+                <i class="fa-solid fa-right-left me-2"></i> Chuyển sang lớp này
+            </button>
+        `;
+        $('#sysFooterActions').html(switchBtnHtml);
     } else {
-        // Nếu có nhiều hơn 1 lớp -> Ẩn nút Đồng bộ (Hệ thống), chỉ cho phép copy
-        $('#btnSaveSystemTkb').addClass('d-none');
+        // Khôi phục lại cặp nút ban đầu
+        let defaultBtnsHtml = `
+            <button type="button" class="btn text-white px-3 fw-bold shadow-sm" style="background-color: #0f4c81;" onclick="saveSystemTkbSelection('personal')" id="btnSavePersonalTkbMode">
+                <i class="fa-solid fa-copy me-1"></i> Sao chép (Cá nhân)
+            </button>
+            <button type="button" class="btn text-white px-3 fw-bold shadow-sm ${subject.classes.length === 1 ? '' : 'd-none'}" style="background-color: #0f4c81; border: 1px solid #ffffff;" onclick="saveSystemTkbSelection('system')" id="btnSaveSystemTkb">
+                <i class="fa-solid fa-cloud-arrow-down me-1"></i> Đồng bộ (Hệ thống)
+            </button>
+        `;
+        $('#sysFooterActions').html(defaultBtnsHtml);
     }
 }
 
@@ -1350,77 +1421,189 @@ window.backToSysScreen1 = function() {
 }
 
 
-
-// 1. HÀM LƯU ĐĂNG KÝ / SAO CHÉP (CẬP NHẬT TRẠNG THÁI TỨC THÌ)
-// HÀM LƯU TÍCH CHỌN VÀ CẬP NHẬT TRẠNG THÁI NGAY LẬP TỨC
 window.saveSystemTkbSelection = function(syncType = 'system') {
     let selectedIds = []; 
     $('.system-course-checkbox:checked').each(function() { selectedIds.push($(this).val()); });
     
     if (selectedIds.length === 0) {
-        alert("Vui lòng tích chọn ít nhất 1 lớp chưa đăng ký để tiếp tục!");
+        alert("Vui lòng tích chọn 1 lớp để tiếp tục!");
         return;
     }
 
+    let selectedClassId = selectedIds[0];
+    let subject = groupedSystemCourses[currentSysSubjectKey];
+
+    // Hàm hiển thị trạng thái đang tải thực sự trên ô Trạng thái dòng lớp học
+    function showRowLoadingState(classId) {
+        let targetRow = $(`.system-course-checkbox[value="${classId}"]`).closest('tr');
+        if (targetRow.length) {
+            let statusCell = targetRow.find('td:last-child');
+            statusCell.html(`
+                <span class="badge bg-warning text-dark py-2 w-100 shadow-sm">
+                    <i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xử lý...
+                </span>
+            `);
+        }
+    }
+
+    // ==========================================================
+    // 1. CHẾ ĐỘ: CHUYỂN LỚP HỌC
+    // ==========================================================
+    if (syncType === 'switch_class') {
+        let existingSyncedClass = subject.classes.find(c => userRegisteredCourseIds.includes(c.id));
+        let existingCopiedClass = subject.classes.find(c => {
+            let copiedRowIndices = [];
+            c.rawSchedules.forEach(sch => {
+                globalTkbData.forEach(tkb => {
+                    if (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon)) {
+                        let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
+                        let matchTime = isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd);
+                        let matchDate = (tkb.ngayBatDau === c.ngayBatDau) && (tkb.ngayKetThuc === c.ngayKetThuc);
+                        if (matchTime && matchDate) copiedRowIndices.push(tkb.sheetRowIndex);
+                    }
+                });
+            });
+            return copiedRowIndices.length > 0;
+        });
+
+        let oldClassId = existingSyncedClass ? existingSyncedClass.id : (existingCopiedClass ? existingCopiedClass.id : "");
+
+        let msgHtml = `Bạn có chắc chắn muốn <strong class="text-danger">HỦY</strong> đăng ký lớp cũ <strong>(${oldClassId})</strong> và <strong class="text-success">CHUYỂN SANG</strong> lớp mới <strong>(${selectedClassId})</strong> không?`;
+        $('#confirmSwitchMessage').html(msgHtml);
+
+        $('#btnConfirmSwitchClassAction').off('click').on('click', function() {
+            $('#confirmSwitchClassModal').modal('hide');
+            
+            // Bật Spinner Loading trên cột trạng thái
+            showRowLoadingState(selectedClassId);
+
+            let btn = $('#btnSwitchClassMode');
+            if (btn.length) btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang chuyển lớp...').prop('disabled', true);
+
+            // 1. Chuẩn bị xử lý hủy lớp cũ
+            if (existingSyncedClass) {
+                userRegisteredCourseIds = userRegisteredCourseIds.filter(id => id !== existingSyncedClass.id);
+            } else if (existingCopiedClass) {
+                let indicesToDelete = [];
+                globalTkbData = globalTkbData.filter(tkb => {
+                    let isTarget = !tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(subject.displayName);
+                    if (isTarget && tkb.sheetRowIndex) {
+                        indicesToDelete.push(tkb.sheetRowIndex);
+                        return false;
+                    }
+                    return true;
+                });
+                if (indicesToDelete.length > 0) {
+                    postToGAS({ action: "deleteMultipleTKBRows", rowIndices: indicesToDelete.join(','), mssv: currentUser.mssv });
+                }
+            }
+
+            // 2. Chuẩn bị đăng ký lớp mới
+            let newCourseObj = globalSystemCourses.find(c => c.id === selectedClassId);
+            if (newCourseObj) {
+                let coursesToCopy = [{
+                    id: newCourseObj.id,
+                    mon: newCourseObj.mon,
+                    thu: newCourseObj.thu || 2,
+                    tietBd: newCourseObj.tietBd || 1,
+                    soTiet: newCourseObj.soTiet || 1,
+                    thoiGian: newCourseObj.thoiGian || "",
+                    hinhThuc: newCourseObj.hinhThuc || "",
+                    phong: newCourseObj.phong || "",
+                    gv: newCourseObj.gv || "",
+                    color: newCourseObj.color || "#e0f2fe",
+                    ngayBatDau: newCourseObj.ngayBatDau || "",
+                    ngayKetThuc: newCourseObj.ngayKetThuc || "",
+                    ngayNgoaiLe: newCourseObj.ngayNgoaiLe || ""
+                }];
+
+                // GỬI LỆNH ĐẾN SERVER VÀ CHỜ KẾT QUẢ THỰC TẾ
+                postToGAS({ action: "copySystemTkbToPersonal", mssv: currentUser.mssv, courses: coursesToCopy }, function(res) {
+                    // Cập nhật bộ nhớ TKB cục bộ
+                    coursesToCopy.forEach(c => {
+                        globalTkbData.push({
+                            mon: c.mon, thu: parseInt(c.thu), tietBd: parseInt(c.tietBd),
+                            soTiet: parseInt(c.soTiet), hinhThuc: c.hinhThuc, phong: c.phong,
+                            gv: c.gv, color: c.color, ngayBatDau: c.ngayBatDau,
+                            ngayKetThuc: c.ngayKetThuc, sheetRowIndex: "TEMP_" + Date.now(), isSystem: false
+                        });
+                    });
+
+                    // CHỜ SERVER PHẢN HỒI XONG MỚI ĐỔI TRẠNG THÁI TRÊN UI
+                    openSubjectDetail(currentSysSubjectKey);
+                    alert("Đã chuyển lớp học thành công!");
+                    loadThoiGianBieu();
+                    loadDeadlines();
+                }, function() {
+                    alert("Lỗi kết nối máy chủ khi chuyển lớp!");
+                    openSubjectDetail(currentSysSubjectKey);
+                });
+            }
+        });
+
+        $('#confirmSwitchClassModal').modal('show');
+        return;
+    }
+
+    // ==========================================================
+    // 2. CHẾ ĐỘ: ĐỒNG BỘ HỆ THỐNG
+    // ==========================================================
     if (syncType === 'system') {
         let btn = $('#btnSaveSystemTkb'); 
         let originalText = btn.html();
         btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xử lý...').prop('disabled', true);
         
+        // Bật Spinner Loading trên giao diện
+        showRowLoadingState(selectedClassId);
+
         let newArray = [...userRegisteredCourseIds];
         selectedIds.forEach(id => { if(!newArray.includes(id)) newArray.push(id); });
 
+        // GỬI REQUEST VÀ CHỜ PHẢN HỒI THỰC TẾ
         postToGAS({ action: "saveSystemTkbSelection", mssv: currentUser.mssv, courseIds: newArray.join(',') }, function(res) {
-            alert("Đã đồng bộ thành công! Các học phần VLE sẽ tự động xuất hiện ở bảng Deadline."); 
             userRegisteredCourseIds = newArray; 
             btn.html(originalText).prop('disabled', false); 
             
-            $.ajax({
-                url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv + "&_=" + new Date().getTime(),
-                method: "GET", dataType: "json", cache: false,
-                success: function(data) {
-                    processTKBData(data); 
-                    openSubjectDetail(currentSysSubjectKey); 
-                    loadThoiGianBieu(); 
-                    loadDeadlines();
-                }
-            });
-        }, function() { 
-            alert("Giao tiếp máy chủ thất bại!"); 
-            btn.html(originalText).prop('disabled', false); 
+            // SERVER PHẢN HỒI XONG MỚI ĐỔI TRẠNG THÁI "ĐÃ ĐỒNG BỘ"
+            openSubjectDetail(currentSysSubjectKey);
+            alert("Đã đồng bộ thành công!"); 
+            loadThoiGianBieu(); 
+            loadDeadlines();
+        }, function() {
+            alert("Lỗi kết nối máy chủ!");
+            btn.html(originalText).prop('disabled', false);
+            openSubjectDetail(currentSysSubjectKey);
         });
         
-    } else if (syncType === 'personal') {
+    } 
+    // ==========================================================
+    // 3. CHẾ ĐỘ: SAO CHÉP (CÁ NHÂN)
+    // ==========================================================
+    else if (syncType === 'personal') {
         let btn = $('#btnSavePersonalTkbMode'); 
         let originalText = btn.html();
         btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang chép...').prop('disabled', true);
         
-        // Chuẩn hóa dữ liệu môn VLE trước khi gửi về Google Sheets
-// Chuẩn hóa dữ liệu trước khi gửi về Google Sheets (Sửa lỗi ép cứng VLE)
+        // Bật Spinner Loading trên giao diện
+        showRowLoadingState(selectedClassId);
+
         let coursesToCopy = globalSystemCourses.filter(c => selectedIds.includes(c.id)).map(c => {
-            let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE') || (c.thoiGianList || []).some(t => t.includes('VLE'));
+            let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
             return {
-                id: c.id,
-                mon: c.mon,
+                id: c.id, mon: c.mon,
                 thu: c.thu || (isVle ? 99 : 2),
                 tietBd: c.tietBd || (isVle ? 99 : 1),
                 soTiet: c.soTiet || 1,
                 thoiGian: c.thoiGian || (isVle ? "VLE" : ""),
-                hinhThuc: c.hinhThuc || (isVle ? "VLE" : ""), // Giữ nguyên hình thức/cơ sở gốc, chỉ ép VLE nếu thực sự là VLE
+                hinhThuc: c.hinhThuc || (isVle ? "VLE" : ""),
                 phong: c.phong || (isVle ? "VLE" : ""),
-                gv: c.gv || "",
-                color: c.color || "#e0f2fe",
-                ngayBatDau: c.ngayBatDau || "",
-                ngayKetThuc: c.ngayKetThuc || "",
-                ngayNgoaiLe: c.ngayNgoaiLe || ""
+                gv: c.gv || "", color: c.color || "#e0f2fe",
+                ngayBatDau: c.ngayBatDau || "", ngayKetThuc: c.ngayKetThuc || "", ngayNgoaiLe: c.ngayNgoaiLe || ""
             };
         });
-        
-       postToGAS({ action: "copySystemTkbToPersonal", mssv: currentUser.mssv, courses: coursesToCopy }, function(res) {
-            alert("Đã sao chép thành công!");
-            btn.html(originalText).prop('disabled', false);
-            
-            // Cập nhật dữ liệu tạm vào mảng TKB cục bộ ngay lập tức
+
+        // CHỜ SERVER PHẢN HỒI HOÀN TẤT MỚI RENDER TRẠNG THÁI "ĐÃ SAO CHÉP"
+        postToGAS({ action: "copySystemTkbToPersonal", mssv: currentUser.mssv, courses: coursesToCopy }, function(res) {
             coursesToCopy.forEach(c => {
                 globalTkbData.push({
                     mon: c.mon, thu: parseInt(c.thu), tietBd: parseInt(c.tietBd),
@@ -1430,60 +1613,68 @@ window.saveSystemTkbSelection = function(syncType = 'system') {
                 });
             });
 
-            // Vẽ lại bảng Màn hình 2 ngay mà không cần chờ AJAX
-            if (typeof currentSysSubjectKey !== 'undefined' && currentSysSubjectKey) {
-                openSubjectDetail(currentSysSubjectKey);
-            }
-
-            // Tải lại ngầm dữ liệu chuẩn từ server
+            btn.html(originalText).prop('disabled', false);
+            openSubjectDetail(currentSysSubjectKey);
+            alert("Đã sao chép thành công!");
             loadThoiGianBieu(); 
             loadDeadlines();
-        }, function() { 
-            alert("Lỗi kết nối máy chủ! Sao chép thất bại.");
+        }, function() {
+            alert("Lỗi kết nối máy chủ!");
             btn.html(originalText).prop('disabled', false);
+            openSubjectDetail(currentSysSubjectKey);
         });
     }
 };
-// 1. HỦY ĐỒNG BỘ HỆ THỐNG
+
+// 1. HỦY ĐỒNG BỘ HỆ THỐNG (DÙNG MODAL CHUYÊN NGHIỆP)
 window.cancelSystemSyncDirect = function(courseId, event) {
-    event.stopPropagation();
-    if(!confirm("Bạn có chắc muốn Hủy đồng bộ toàn bộ các buổi học của lớp này khỏi lịch?")) return;
+    if (event) event.stopPropagation();
     
-    // 1. Lọc bỏ courseId ngay trên bộ nhớ trình duyệt
-    userRegisteredCourseIds = userRegisteredCourseIds.filter(id => id !== courseId);
+    $('#confirmCancelSyncMessage').html(`Bạn có chắc muốn <strong class="text-danger">HỦY ĐỒNG BỘ</strong> toàn bộ các buổi học của lớp <strong>(${courseId})</strong> khỏi Thời khóa biểu không?`);
     
-    // 2. Render lại Màn hình 2 NGAY LẬP TỨC (không chờ server)
-    if (typeof currentSysSubjectKey !== 'undefined' && currentSysSubjectKey) {
-        openSubjectDetail(currentSysSubjectKey);
-    }
-    
-    // 3. Gửi lệnh về Server xử lý ngầm
-    postToGAS({ action: "saveSystemTkbSelection", mssv: currentUser.mssv, courseIds: userRegisteredCourseIds.join(',') }, function(res) {
-        alert("Đã hủy đồng bộ!");
-        loadThoiGianBieu();
-        loadDeadlines();
-    }, function() {
-        alert("Lỗi kết nối máy chủ!"); 
+    $('#btnConfirmCancelSyncAction').off('click').on('click', function() {
+        $('#confirmCancelSyncModal').modal('hide');
+        
+        // Hiện Spinner Loading ở ô trạng thái dòng đó
+        let targetRow = $(`.system-course-checkbox[value="${courseId}"]`).closest('tr');
+        if (!targetRow.length) targetRow = $(`button[onclick*="${courseId}"]`).closest('tr');
+        if (targetRow.length) {
+            targetRow.find('td:last-child').html(`
+                <span class="badge bg-warning text-dark py-2 w-100 shadow-sm">
+                    <i class="fa-solid fa-spinner fa-spin me-1"></i> Đang hủy...
+                </span>
+            `);
+        }
+
+        userRegisteredCourseIds = userRegisteredCourseIds.filter(id => id !== courseId);
+        
+        postToGAS({ action: "saveSystemTkbSelection", mssv: currentUser.mssv, courseIds: userRegisteredCourseIds.join(',') }, function(res) {
+            openSubjectDetail(currentSysSubjectKey);
+            alert("Đã hủy đồng bộ!");
+            loadThoiGianBieu();
+            loadDeadlines();
+        }, function() {
+            alert("Lỗi kết nối máy chủ!"); 
+            openSubjectDetail(currentSysSubjectKey);
+        });
     });
+
+    $('#confirmCancelSyncModal').modal('show');
 };
 
-// 2. HỦY SAO CHÉP CÁ NHÂN
+// 2. HỦY SAO CHÉP CÁ NHÂN (DÙNG MODAL CHUYÊN NGHIỆP)
 window.cancelPersonalCopyDirect = function(rowIndicesStr, event) {
-    event.stopPropagation();
-    if(!confirm("Bạn có chắc muốn Xóa vĩnh viễn toàn bộ các buổi đã sao chép của lớp này?")) return;
+    if (event) event.stopPropagation();
     
     let subjectObj = groupedSystemCourses[currentSysSubjectKey];
     let indicesToDelete = [];
 
     if (subjectObj) {
-        // Lọc bỏ môn bị xóa ra khỏi mảng TKB trên máy lập tức
-        globalTkbData = globalTkbData.filter(tkb => {
+        globalTkbData.forEach(tkb => {
             let isTarget = !tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(subjectObj.displayName);
             if (isTarget && tkb.sheetRowIndex) {
                 indicesToDelete.push(tkb.sheetRowIndex);
-                return false; // Loại khỏi mảng globalTkbData
             }
-            return true;
         });
     }
 
@@ -1496,21 +1687,32 @@ window.cancelPersonalCopyDirect = function(rowIndicesStr, event) {
         return;
     }
 
-    // RENDER LẠI MÀN HÌNH 2 NGAY LẬP TỨC
-    openSubjectDetail(currentSysSubjectKey);
+    $('#confirmCancelSyncMessage').html(`Bạn có chắc muốn <strong class="text-danger">XÓA VĨNH VIỄN</strong> toàn bộ các buổi đã sao chép của môn <strong>${subjectObj ? subjectObj.displayName : ''}</strong> không?`);
 
-    // Gửi lệnh xóa ngầm về Server
-    postToGAS({ 
-        action: "deleteMultipleTKBRows", 
-        rowIndices: indicesToDelete.join(','), 
-        mssv: currentUser.mssv 
-    }, function(res) {
-        alert("Đã xóa sao chép!");
-        loadThoiGianBieu(); 
-        loadDeadlines();
-    }, function() {
-        alert("Lỗi kết nối máy chủ khi xóa!");
+    $('#btnConfirmCancelSyncAction').off('click').on('click', function() {
+        $('#confirmCancelSyncModal').modal('hide');
+
+        // Lọc bỏ môn trên bộ nhớ cục bộ
+        globalTkbData = globalTkbData.filter(tkb => !indicesToDelete.includes(tkb.sheetRowIndex));
+
+        // Bật Spinner Loading trên giao diện
+        openSubjectDetail(currentSysSubjectKey);
+
+        postToGAS({ 
+            action: "deleteMultipleTKBRows", 
+            rowIndices: indicesToDelete.join(','), 
+            mssv: currentUser.mssv 
+        }, function(res) {
+            alert("Đã xóa sao chép!");
+            loadThoiGianBieu(); 
+            loadDeadlines();
+        }, function() {
+            alert("Lỗi kết nối máy chủ khi xóa!");
+            loadThoiGianBieu();
+        });
     });
+
+    $('#confirmCancelSyncModal').modal('show');
 };
 // Các hàm quản lý trạng thái Checklist Deadline
 function getCompletedDeadlinesKey() {
