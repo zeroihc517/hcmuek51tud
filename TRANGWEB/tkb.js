@@ -1416,23 +1416,29 @@ window.saveSystemTkbSelection = function(syncType = 'system') {
             };
         });
         
-        postToGAS({ action: "copySystemTkbToPersonal", mssv: currentUser.mssv, courses: coursesToCopy }, function(res) {
-            alert("Đã sao chép thành công! Môn VLE sẽ tự động xuất hiện ở bảng Deadline.");
+       postToGAS({ action: "copySystemTkbToPersonal", mssv: currentUser.mssv, courses: coursesToCopy }, function(res) {
+            alert("Đã sao chép thành công!");
             btn.html(originalText).prop('disabled', false);
             
-            $.ajax({
-                url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv + "&_=" + new Date().getTime(),
-                method: "GET", dataType: "json", cache: false,
-                success: function(data) {
-                    processTKBData(data); 
-                    if (typeof currentSysSubjectKey !== 'undefined' && currentSysSubjectKey) {
-                        openSubjectDetail(currentSysSubjectKey); 
-                    }
-                    loadThoiGianBieu(); 
-                    loadDeadlines();
-                }
+            // Cập nhật dữ liệu tạm vào mảng TKB cục bộ ngay lập tức
+            coursesToCopy.forEach(c => {
+                globalTkbData.push({
+                    mon: c.mon, thu: parseInt(c.thu), tietBd: parseInt(c.tietBd),
+                    soTiet: parseInt(c.soTiet), hinhThuc: c.hinhThuc, phong: c.phong,
+                    gv: c.gv, color: c.color, ngayBatDau: c.ngayBatDau,
+                    ngayKetThuc: c.ngayKetThuc, sheetRowIndex: "TEMP_" + Date.now(), isSystem: false
+                });
             });
-        }, function() {
+
+            // Vẽ lại bảng Màn hình 2 ngay mà không cần chờ AJAX
+            if (typeof currentSysSubjectKey !== 'undefined' && currentSysSubjectKey) {
+                openSubjectDetail(currentSysSubjectKey);
+            }
+
+            // Tải lại ngầm dữ liệu chuẩn từ server
+            loadThoiGianBieu(); 
+            loadDeadlines();
+        }, function() { 
             alert("Lỗi kết nối máy chủ! Sao chép thất bại.");
             btn.html(originalText).prop('disabled', false);
         });
@@ -1443,18 +1449,21 @@ window.cancelSystemSyncDirect = function(courseId, event) {
     event.stopPropagation();
     if(!confirm("Bạn có chắc muốn Hủy đồng bộ toàn bộ các buổi học của lớp này khỏi lịch?")) return;
     
+    // 1. Lọc bỏ courseId ngay trên bộ nhớ trình duyệt
     userRegisteredCourseIds = userRegisteredCourseIds.filter(id => id !== courseId);
-    let btnText = $(event.target).html();
-    $(event.target).html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
     
-    postToGAS({ action: "saveSystemTkbSelection", mssv: currentUser.mssv, courseIds: userRegisteredCourseIds.join(',') }, function(res) {
-        alert("Đã hủy đồng bộ toàn bộ các buổi!");
-        loadThoiGianBieu();
-        loadDeadlines(); // <--- BỔ SUNG DÒNG NÀY ĐỂ RENDER LẠI BANG DEADLINE
+    // 2. Render lại Màn hình 2 NGAY LẬP TỨC (không chờ server)
+    if (typeof currentSysSubjectKey !== 'undefined' && currentSysSubjectKey) {
         openSubjectDetail(currentSysSubjectKey);
+    }
+    
+    // 3. Gửi lệnh về Server xử lý ngầm
+    postToGAS({ action: "saveSystemTkbSelection", mssv: currentUser.mssv, courseIds: userRegisteredCourseIds.join(',') }, function(res) {
+        alert("Đã hủy đồng bộ!");
+        loadThoiGianBieu();
+        loadDeadlines();
     }, function() {
         alert("Lỗi kết nối máy chủ!"); 
-        $(event.target).html(btnText).prop('disabled', false);
     });
 };
 
@@ -1467,12 +1476,14 @@ window.cancelPersonalCopyDirect = function(rowIndicesStr, event) {
     let indicesToDelete = [];
 
     if (subjectObj) {
-        globalTkbData.forEach(tkb => {
-            if (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(subjectObj.displayName)) {
-                if (tkb.sheetRowIndex && !indicesToDelete.includes(tkb.sheetRowIndex)) {
-                    indicesToDelete.push(tkb.sheetRowIndex);
-                }
+        // Lọc bỏ môn bị xóa ra khỏi mảng TKB trên máy lập tức
+        globalTkbData = globalTkbData.filter(tkb => {
+            let isTarget = !tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(subjectObj.displayName);
+            if (isTarget && tkb.sheetRowIndex) {
+                indicesToDelete.push(tkb.sheetRowIndex);
+                return false; // Loại khỏi mảng globalTkbData
             }
+            return true;
         });
     }
 
@@ -1485,31 +1496,20 @@ window.cancelPersonalCopyDirect = function(rowIndicesStr, event) {
         return;
     }
 
-    let $btn = $(event.target).closest('button');
-    let originalHtml = $btn.html();
-    $btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
+    // RENDER LẠI MÀN HÌNH 2 NGAY LẬP TỨC
+    openSubjectDetail(currentSysSubjectKey);
 
+    // Gửi lệnh xóa ngầm về Server
     postToGAS({ 
         action: "deleteMultipleTKBRows", 
         rowIndices: indicesToDelete.join(','), 
         mssv: currentUser.mssv 
     }, function(res) {
-        alert(res);
-        
-        // Tải lại dữ liệu TKB & Deadline mới nhất từ Server
-        $.ajax({
-            url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv + "&_=" + new Date().getTime(),
-            method: "GET", dataType: "json", cache: false,
-            success: function(data) {
-                processTKBData(data);
-                openSubjectDetail(currentSysSubjectKey);
-                loadThoiGianBieu(); 
-                loadDeadlines(); // <--- BỔ SUNG DÒNG NÀY ĐỂ LOAD LẠI BẢNG DEADLINE
-            }
-        });
+        alert("Đã xóa sao chép!");
+        loadThoiGianBieu(); 
+        loadDeadlines();
     }, function() {
         alert("Lỗi kết nối máy chủ khi xóa!");
-        $btn.html(originalHtml).prop('disabled', false);
     });
 };
 // Các hàm quản lý trạng thái Checklist Deadline
