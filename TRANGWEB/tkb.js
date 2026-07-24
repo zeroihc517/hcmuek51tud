@@ -1422,12 +1422,11 @@ window.saveSystemTkbSelection = function(syncType = 'system') {
         });
     }
 };
-// 1. HỦY ĐỒNG BỘ HỆ THỐNG (Xóa sạch toàn bộ các tiết/buổi của Mã HP này)
+// 1. HỦY ĐỒNG BỘ HỆ THỐNG
 window.cancelSystemSyncDirect = function(courseId, event) {
     event.stopPropagation();
     if(!confirm("Bạn có chắc muốn Hủy đồng bộ toàn bộ các buổi học của lớp này khỏi lịch?")) return;
     
-    // Lọc bỏ mã khóa học ra khỏi danh sách đăng ký hệ thống
     userRegisteredCourseIds = userRegisteredCourseIds.filter(id => id !== courseId);
     let btnText = $(event.target).html();
     $(event.target).html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
@@ -1435,6 +1434,7 @@ window.cancelSystemSyncDirect = function(courseId, event) {
     postToGAS({ action: "saveSystemTkbSelection", mssv: currentUser.mssv, courseIds: userRegisteredCourseIds.join(',') }, function(res) {
         alert("Đã hủy đồng bộ toàn bộ các buổi!");
         loadThoiGianBieu();
+        loadDeadlines(); // <--- BỔ SUNG DÒNG NÀY ĐỂ RENDER LẠI BANG DEADLINE
         openSubjectDetail(currentSysSubjectKey);
     }, function() {
         alert("Lỗi kết nối máy chủ!"); 
@@ -1442,7 +1442,7 @@ window.cancelSystemSyncDirect = function(courseId, event) {
     });
 };
 
-// 2. HỦY SAO CHÉP CÁ NHÂN (Quét và xóa sạch tất cả các hàng lịch cá nhân có liên quan đến môn này)
+// 2. HỦY SAO CHÉP CÁ NHÂN
 window.cancelPersonalCopyDirect = function(rowIndicesStr, event) {
     event.stopPropagation();
     if(!confirm("Bạn có chắc muốn Xóa vĩnh viễn toàn bộ các buổi đã sao chép của lớp này?")) return;
@@ -1450,7 +1450,6 @@ window.cancelPersonalCopyDirect = function(rowIndicesStr, event) {
     let subjectObj = groupedSystemCourses[currentSysSubjectKey];
     let indicesToDelete = [];
 
-    // Quét toàn bộ lịch cá nhân để tìm tất cả các dòng khớp với tên môn học
     if (subjectObj) {
         globalTkbData.forEach(tkb => {
             if (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(subjectObj.displayName)) {
@@ -1474,7 +1473,6 @@ window.cancelPersonalCopyDirect = function(rowIndicesStr, event) {
     let originalHtml = $btn.html();
     $btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
 
-    // Gửi yêu cầu xóa gộp tất cả các dòng trong 1 request duy nhất
     postToGAS({ 
         action: "deleteMultipleTKBRows", 
         rowIndices: indicesToDelete.join(','), 
@@ -1482,14 +1480,15 @@ window.cancelPersonalCopyDirect = function(rowIndicesStr, event) {
     }, function(res) {
         alert(res);
         
-        // Tải lại dữ liệu TKB mới nhất từ Server
+        // Tải lại dữ liệu TKB & Deadline mới nhất từ Server
         $.ajax({
             url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv + "&_=" + new Date().getTime(),
             method: "GET", dataType: "json", cache: false,
             success: function(data) {
                 processTKBData(data);
-                openSubjectDetail(currentSysSubjectKey); // Cập nhật lại giao diện nút bấm về [Chưa đăng ký] ngay lập tức
-                loadThoiGianBieu(); // Cập nhật lại bảng TKB bên ngoài
+                openSubjectDetail(currentSysSubjectKey);
+                loadThoiGianBieu(); 
+                loadDeadlines(); // <--- BỔ SUNG DÒNG NÀY ĐỂ LOAD LẠI BẢNG DEADLINE
             }
         });
     }, function() {
