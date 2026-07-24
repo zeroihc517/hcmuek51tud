@@ -1324,6 +1324,13 @@ window.openSubjectDetail = function(subjectKey) {
     $('#sysScreen1').addClass('d-none');
     $('#sysScreen2').removeClass('d-none');
     $('#sysFooterActions').removeClass('d-none');
+	if (subject.classes.length === 1) {
+        // Nếu chỉ có 1 lớp -> Hiện nút Đồng bộ (Hệ thống)
+        $('#btnSaveSystemTkb').removeClass('d-none');
+    } else {
+        // Nếu có nhiều hơn 1 lớp -> Ẩn nút Đồng bộ (Hệ thống), chỉ cho phép copy
+        $('#btnSaveSystemTkb').addClass('d-none');
+    }
 }
 
 // HÀM QUAY TRỞ LẠI
