@@ -1263,6 +1263,7 @@ c.rawSchedules.forEach(sch => {
 }
 
 // 1. HÀM MỞ MÀN HÌNH 2 (CHI TIẾT CÁC LỚP TRONG MÔN)
+// HÀM MỞ MÀN HÌNH 2 (CHI TIẾT CÁC LỚP TRONG 1 MÔN - ĐÃ FIX LỖI NHẬN NHẦM LỚP)
 window.openSubjectDetail = function(subjectKey) {
     currentSysSubjectKey = subjectKey;
     let subject = groupedSystemCourses[subjectKey];
@@ -1275,18 +1276,30 @@ window.openSubjectDetail = function(subjectKey) {
         let copiedRowIndices = [];
         c.rawSchedules.forEach(sch => {
             globalTkbData.forEach(tkb => {
+                // Kiểm tra cùng Tên môn học
                 if (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon)) {
                     let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
-                    let matchTime = isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd);
+                    
+                    // ĐÃ FIX: So sánh chính xác Thứ, Tiết Bắt Đầu VÀ Số Tiết (hoặc Giảng viên/Phòng)
+                    let matchThu = tkb.thu == sch.thu;
+                    let matchTietBd = tkb.tietBd == sch.tietBd;
+                    let matchSoTiet = parseInt(tkb.soTiet) == parseInt(sch.soTiet);
+                    
+                    let matchTime = isVle || (matchThu && matchTietBd && matchSoTiet);
                     let matchDate = (tkb.ngayBatDau === c.ngayBatDau) && (tkb.ngayKetThuc === c.ngayKetThuc);
                     
-                    if (matchTime && matchDate) {
+                    // So sánh thêm Giảng viên hoặc Phòng (nếu có) để phân biệt tuyệt đối 2 lớp cùng giờ
+                    let matchTeacher = !c.gv || !tkb.gv || tkb.gv.trim().toLowerCase() === c.gv.trim().toLowerCase();
+
+                    if (matchTime && matchDate && matchTeacher) {
                         if (!copiedRowIndices.includes(tkb.sheetRowIndex)) copiedRowIndices.push(tkb.sheetRowIndex);
                     }
                 }
             });
         });
-        let isCopied = copiedRowIndices.length > 0;
+
+        // Chỉ đánh dấu Đã sao chép nếu TẤT CẢ các buổi học của lớp đó đều khớp trong TKB
+        let isCopied = copiedRowIndices.length > 0 && copiedRowIndices.length >= c.rawSchedules.length;
         let rowBg = (isSynced || isCopied) ? "background-color: #f8fafc;" : "background-color: #ffffff;";
         let dateDisplay = (c.ngayBatDau && c.ngayKetThuc) ? `<span class="fw-bold text-dark">${c.ngayBatDau}</span><br>đến <span class="fw-bold text-dark">${c.ngayKetThuc}</span>` : '-';
 
@@ -1332,10 +1345,8 @@ window.openSubjectDetail = function(subjectKey) {
     $('#sysScreen2').removeClass('d-none');
     $('#sysFooterActions').removeClass('d-none');
     
-    // Cập nhật trạng thái hiển thị ban đầu cho các nút bấm ở Chân trang
     updateFooterActionButtons(subjectKey);
 };
-
 // 2. XỬ LÝ CLICK VÀO DÒNG ĐỂ TÍCH CHỌN LỚP
 window.handleRowClick = function(classId, subjectKey, isSynced, isCopied, event) {
     if (isSynced || isCopied) return;
@@ -1351,16 +1362,54 @@ window.handleRowClick = function(classId, subjectKey, isSynced, isCopied, event)
         }
     }
 };
+// BIẾN LƯU VẾT XÁC NHẬN BỎ QUA CẢNH BÁO TRÙNG
+let bypassOverlapCheck = false;
 
-// 3. LOGIC CHỌN LỚP (CHỈ TÍCH CHỌN, CHƯA HỎI BẢNG XÁC NHẬN)
+// 1. LOGIC CHỌN LỚP (CÓ CẢNH BÁO TRÙNG HỌC PHẦN)
 window.handleSelectClass = function(newClassId, subjectKey, event) {
     if (event) event.stopPropagation();
 
-    // Mỗi lần tích 1 lớp, tự động hủy bỏ dấu tích của tất cả các lớp khác trong môn
+    let subject = groupedSystemCourses[subjectKey];
+    let newCourseObj = globalSystemCourses.find(c => c.id === newClassId);
+
+    // Bỏ qua kiểm tra trùng nếu người dùng vừa chọn "Vẫn đăng ký"
+    if (newCourseObj && subject && !bypassOverlapCheck) {
+        let overlappedMon = checkClassOverlap(newCourseObj, subject.displayName);
+        if (overlappedMon) {
+            // Chuẩn bị thông báo trùng lịch
+            let thuText = newCourseObj.thu === 8 ? "Chủ nhật" : "Thứ " + newCourseObj.thu;
+            let tietText = `Tiết ${newCourseObj.tietBd}-${parseInt(newCourseObj.tietBd) + parseInt(newCourseObj.soTiet || 1) - 1}`;
+            
+            $('#overlapWarningMessage').html(`Lớp học <strong>(${newClassId})</strong> bị trùng lịch (${thuText}, ${tietText}) với học phần <strong class="text-danger">"${overlappedMon}"</strong> trong TKB cá nhân của bạn.`);
+
+            // Nút 1: "Đã hiểu" -> Hủy tích chọn
+            $('#btnCancelOverlapAction').off('click').on('click', function() {
+                $(`.system-course-checkbox[value="${newClassId}"]`).prop('checked', false);
+                updateFooterActionButtons(subjectKey);
+            });
+
+            // Nút 2: "Vẫn đăng ký" -> Tiếp tục giữ tích chọn
+            $('#btnForceRegisterAction').off('click').on('click', function() {
+                bypassOverlapCheck = true; // Bật cờ cho phép trùng
+                $('#overlapWarningModal').modal('hide');
+                
+                // Tích chọn lớp
+                $('.system-course-checkbox').prop('checked', false);
+                $(`.system-course-checkbox[value="${newClassId}"]`).prop('checked', true);
+                updateFooterActionButtons(subjectKey);
+                
+                // Reset cờ sau khi xử lý xong
+                setTimeout(() => { bypassOverlapCheck = false; }, 1000);
+            });
+
+            $('#overlapWarningModal').modal('show');
+            return;
+        }
+    }
+
+    // Nếu không trùng lịch hoặc người dùng đã nhấn "Vẫn đăng ký"
     $('.system-course-checkbox').prop('checked', false);
     $(`.system-course-checkbox[value="${newClassId}"]`).prop('checked', true);
-
-    // Cập nhật lại tên và màu sắc nút bấm ở Chân trang
     updateFooterActionButtons(subjectKey);
 };
 
@@ -1420,7 +1469,61 @@ window.backToSysScreen1 = function() {
     renderSystemCoursesList();
 }
 
+// HÀM KIỂM TRA TRÙNG LỊCH HỌC (LOẠI TRỪ LỚP VLE)
+function checkClassOverlap(newClassObj, subjectDisplayName) {
+    let isVle = (newClassObj.hinhThuc || '').toUpperCase().includes('VLE') || 
+                (newClassObj.thoiGianList || []).some(t => t.includes('VLE'));
+    
+    // Nếu là môn VLE -> Ngoại lệ, không xét trùng lịch!
+    if (isVle) return null;
 
+    let newThu = parseInt(newClassObj.thu);
+    let newTietBd = parseInt(newClassObj.tietBd);
+    let newSoTiet = parseInt(newClassObj.soTiet || 1);
+    let newTietKt = newTietBd + newSoTiet - 1;
+
+    let newStartDate = parseDateString(newClassObj.ngayBatDau);
+    let newEndDate = parseDateString(newClassObj.ngayKetThuc);
+
+    let overlapCourseName = null;
+
+    // Duyệt qua toàn bộ lịch học đang có trong TKB cá nhân
+    globalTkbData.forEach(existingCourse => {
+        // Bỏ qua chính môn đang xét trùng (đối với trường hợp chuyển lớp)
+        if (getBaseSubjectName(existingCourse.mon) === getBaseSubjectName(subjectDisplayName)) return;
+        
+        // Bỏ qua các môn VLE trong TKB
+        if ((existingCourse.hinhThuc || '').toUpperCase().includes('VLE')) return;
+
+        // 1. Kiểm tra trùng Thứ
+        if (existingCourse.thu === newThu) {
+            let existingTietBd = parseInt(existingCourse.tietBd);
+            let existingTietKt = existingTietBd + parseInt(existingCourse.soTiet || 1) - 1;
+
+            // 2. Kiểm tra giao/trùng Tiết học
+            let isTietOverlap = Math.max(newTietBd, existingTietBd) <= Math.min(newTietKt, existingTietKt);
+
+            if (isTietOverlap) {
+                // 3. Kiểm tra trùng khoảng Thời gian (Ngày Bắt đầu - Kết thúc)
+                let isDateOverlap = true;
+                if (newStartDate && newEndDate && existingCourse.ngayBatDau && existingCourse.ngayKetThuc) {
+                    let exStartDate = parseDateString(existingCourse.ngayBatDau);
+                    let exEndDate = parseDateString(existingCourse.ngayKetThuc);
+
+                    if (exStartDate && exEndDate) {
+                        isDateOverlap = (newStartDate <= exEndDate && newEndDate >= exStartDate);
+                    }
+                }
+
+                if (isDateOverlap) {
+                    overlapCourseName = existingCourse.mon;
+                }
+            }
+        }
+    });
+
+    return overlapCourseName; // Trả về tên môn bị trùng (nếu có)
+}
 window.saveSystemTkbSelection = function(syncType = 'system') {
     let selectedIds = []; 
     $('.system-course-checkbox:checked').each(function() { selectedIds.push($(this).val()); });
