@@ -70,38 +70,57 @@ function renderDeadlines() {
 
     // 1. TÍNH TOÁN KHOẢNG THỜI GIAN THEO HỌC KỲ / TUẦN
     if (selectedWeekVal && selectedWeekVal !== "") {
-        // Nếu đã chọn Tuần cụ thể -> Giới hạn theo Tuần đó
         let weekStart = new Date(currentSelectedMonday); weekStart.setHours(0,0,0,0);
         let weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
         startMonTime = weekStart.getTime();
         endSunTime = weekEnd.getTime();
     } else if (selectedNH && selectedHK) {
-        // Nếu chọn Học kỳ & Năm học -> Giới hạn khoảng thời gian từ Tuần 1 đến Tuần cuối của Học kỳ đó
         let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
         if (config) {
-            let sDate = parseDateString(config[2]); 
-            let numAcademicWeeks = parseInt(config[3]); 
-            let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
-            
+            let sDate = parseDateString(config[2]); let numAcademicWeeks = parseInt(config[3]); let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
             if (sDate && numAcademicWeeks) {
-                let startMon = getMondayOfDate(sDate); 
-                startMonTime = startMon.getTime();
+                let startMon = getMondayOfDate(sDate); startMonTime = startMon.getTime();
                 let acadWk = 1; let calWk = 1;
                 while (acadWk <= numAcademicWeeks && calWk <= 52) { 
                     if (!breakWeeks.includes(calWk)) { acadWk++; } 
                     calWk++; 
                 }
-                let endSun = new Date(startMon); 
-                endSun.setDate(endSun.getDate() + ((calWk - 1) * 7) - 1); 
-                endSun.setHours(23, 59, 59, 999); 
-                endSunTime = endSun.getTime();
+                let endSun = new Date(startMon); endSun.setDate(endSun.getDate() + ((calWk - 1) * 7) - 1); endSun.setHours(23, 59, 59, 999); endSunTime = endSun.getTime();
             }
         }
     }
 
-    // 2. LỌC DANH SÁCH DEADLINE THEO KHOẢNG THỜI GIAN ĐÃ XÁC ĐỊNH
-    let filtered = globalDeadlineData.filter(d => {
-        if (!startMonTime || !endSunTime) return true; // Nếu chưa chọn Học kỳ/Tuần thì hiện tất cả
+    // --- BẮT ĐẦU THÊM MỚI: TẠO DEADLINE ẢO TỪ MÔN VLE TRONG TKB ---
+    let virtualDeadlines = [];
+    if (typeof globalTkbData !== 'undefined') {
+        globalTkbData.forEach(c => {
+            if ((c.hinhThuc || '').toUpperCase().includes('VLE')) {
+                let durationStr = (c.ngayBatDau && c.ngayKetThuc && c.ngayBatDau !== c.ngayKetThuc) ? 
+                                  `Từ ${c.ngayBatDau} đến ${c.ngayKetThuc}` : (c.ngayBatDau || "Chưa rõ");
+                virtualDeadlines.push({
+                    title: c.mon,
+                    duration: durationStr,
+                    tag: c.hinhThuc,
+                    icon: "primary",
+                    emoji: "🌐",
+                    dateStart: c.ngayBatDau || "",
+                    dateEnd: c.ngayKetThuc || "",
+                    sheetRowIndex: c.sheetRowIndex,
+                    isSystem: c.isSystem,
+                    isVirtualVLE: true // Cờ nhận diện để ẩn nút Sửa/Xóa bên trong khung Deadline
+                });
+            }
+        });
+    }
+    let combinedDeadlineData = [...globalDeadlineData, ...virtualDeadlines];
+    // --- KẾT THÚC THÊM MỚI ---
+
+   // LỌC DANH SÁCH DEADLINE THEO KHOẢNG THỜI GIAN ĐÃ XÁC ĐỊNH
+    let filtered = combinedDeadlineData.filter(d => {
+        // Nếu là môn VLE ảo mà không có ngày thì luôn hiển thị
+        if (d.isVirtualVLE && (!d.dateStart || !d.dateEnd)) return true;
+
+        if (!startMonTime || !endSunTime) return true;
 
         let sDate = getTimeFast(d.dateStart); 
         let eDate = getTimeFast(d.dateEnd);
@@ -122,12 +141,10 @@ function renderDeadlines() {
     let completedList = getCompletedDeadlines();
     let nowTime = new Date().setHours(0, 0, 0, 0);
 
-    // 3. SẮP XẾP ƯU TIÊN: Chưa hoàn thành -> Đang diễn ra -> Đã xong -> Thời gian bắt đầu
+    // 3. SẮP XẾP ƯU TIÊN
     filtered.sort((a, b) => {
         let isDoneA = completedList.includes(String(a.sheetRowIndex)) ? 1 : 0;
         let isDoneB = completedList.includes(String(b.sheetRowIndex)) ? 1 : 0;
-
-        // Đã xong đẩy xuống cuối
         if (isDoneA !== isDoneB) return isDoneA - isDoneB;
 
         let startA = getTimeFast(a.dateStart) || 0;
@@ -137,8 +154,6 @@ function renderDeadlines() {
 
         let isHappeningA = (nowTime >= startA && nowTime <= endA) ? 1 : 0;
         let isHappeningB = (nowTime >= startB && nowTime <= endB) ? 1 : 0;
-
-        // Sự kiện ĐANG DIỄN RA lên đầu tiên
         if (isHappeningA !== isHappeningB) return isHappeningB - isHappeningA;
 
         return startA - startB;
@@ -158,12 +173,25 @@ function renderDeadlines() {
         if (extLinkTag) displayTag = displayTag.replace(extLinkTag, '').trim();
         if (displayTag === "") displayTag = "Truy cập Liên kết";
         
-        let actionButtons = item.isSystem ? '' : `
+        // --- CẬP NHẬT Ở ĐÂY: Ẩn thao tác nếu là VLE ---
+       let actionButtons = '';
+if (!item.isSystem) {
+    if (item.isVirtualVLE) {
+        actionButtons = `
+            <div class="deadline-actions">
+                <button class="btn-dl-act text-warning shadow-sm" onclick="event.stopPropagation(); openEditTkbModal('${item.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                <button class="btn-dl-act text-danger shadow-sm" onclick="event.stopPropagation(); promptDeletePersonalTkb('${item.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+            </div>
+        `;
+    } else {
+        actionButtons = `
             <div class="deadline-actions">
                 <button class="btn-dl-act text-warning shadow-sm" onclick="event.stopPropagation(); openEditDeadlineModal('${item.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
                 <button class="btn-dl-act text-danger shadow-sm" onclick="event.stopPropagation(); deletePersonalDeadline('${item.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
             </div>
         `;
+    }
+}
         
         let cardOnClick = extLink ? `onclick="window.open('${extLink}', '_blank')"` : "";
         let cardStyle = extLink ? "cursor: pointer; transition: 0.2s; border: 1px dashed var(--primary-color);" : "";
@@ -186,7 +214,6 @@ function renderDeadlines() {
         `;
     }).join('');
 }
-
 function openAddDeadlineModal() {
     $('#dlModalTitle').html('<i class="fa-solid fa-plus me-2"></i>Thêm Deadline');
     $('#pDlRowIndex').val(''); 
@@ -553,20 +580,33 @@ function openManageDeadlineListModal() {
 
     let filteredTkbSubjectNames = new Set(filteredTkbData.map(c => getBaseSubjectName(c.mon)));
 
-  $('#manageDeadlineListModal .modal-title').html(`
-    <span class="me-3"><i class="fa-solid fa-thumbtack me-2"></i>Bảng Tổng hợp Deadline${titleSuffix}</span>
-    <button class="btn btn-sm btn-light text-primary fw-bold" onclick="$('#manageDeadlineListModal').modal('hide'); setTimeout(() => openAddDeadlineModal(), 400);"><i class="fa-solid fa-plus"></i> Thêm Deadline</button>
-`);
-
-    let dlHtml = '';
+  let dlHtml = '';
     let filteredDeadlines = [];
-    if (globalDeadlineData && globalDeadlineData.length > 0) {
-        filteredDeadlines = globalDeadlineData.filter(d => {
+
+    // 1. Tạo danh sách Deadline ảo từ các môn VLE cá nhân VÀ hệ thống trong TKB
+    let virtualVleDeadlines = globalTkbData.filter(c => (c.hinhThuc || '').toUpperCase().includes('VLE')).map(c => ({
+        title: c.mon,
+        duration: (c.ngayBatDau && c.ngayKetThuc && c.ngayBatDau !== c.ngayKetThuc) ? `Từ ${c.ngayBatDau} đến ${c.ngayKetThuc}` : (c.ngayBatDau || "Chưa rõ"),
+        tag: c.hinhThuc,
+        dateStart: c.ngayBatDau || "", 
+        dateEnd: c.ngayKetThuc || "",
+        sheetRowIndex: c.sheetRowIndex, 
+        isSystem: c.isSystem, // <-- Nhận diện chuẩn xác môn hệ thống
+        isVirtualVLE: true
+    }));
+
+    // 2. Gộp chung Deadline gốc (từ data sheet) với VLE ảo
+    let combinedDeadlines = [...globalDeadlineData, ...virtualVleDeadlines];
+
+    // 3. Tiến hành lọc danh sách
+    if (combinedDeadlines && combinedDeadlines.length > 0) {
+        filteredDeadlines = combinedDeadlines.filter(d => {
             let searchStr = ((d.tag || "") + " " + (d.title || "")).toLowerCase();
             let isVle = searchStr.includes('vle') || searchStr.includes('tiểu luận');
             
-            if (isVle && filteredTkbSubjectNames.has(getBaseSubjectName(d.title))) return false;
-            
+            // ẨN môn VLE gốc (môn mà hệ thống load về nhưng bạn không đăng ký)
+            if (isVle && !d.isVirtualVLE && d.isSystem) return false;
+
             if (startMonTime && endSunTime) {
                 let dStartTime = getTimeFast(d.dateStart); let dEndTime = getTimeFast(d.dateEnd);
                 if (!dStartTime && !dEndTime) return true;
@@ -578,7 +618,6 @@ function openManageDeadlineListModal() {
             return true;
         });
     }
-
     if (filteredDeadlines.length === 0) {
         let emptyMsg = (selectedNH && selectedHK) ? `Không có Deadline nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có Deadline nào được tạo!";
         dlHtml += `<tr><td colspan="5" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
@@ -683,7 +722,8 @@ function processTKBData(data) {
             gv: row[7] || "", color: row[8] || "#e0f2fe", ngayBatDau: row[9] || "", ngayKetThuc: row[10] || "",
             ngayNgoaiLe: row[11] || "", sheetRowIndex: actualRowIndex, isSystem: isSystemFlag
         };
-    }).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
+    // BỔ SUNG Ở ĐÂY: Cho phép giữ lại nếu là môn VLE
+    }).filter(c => (c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1) || (c.hinhThuc || '').toUpperCase().includes('VLE'));
     
     filterAndRenderTKB();
 }
@@ -1045,6 +1085,7 @@ function jumpToCurrentWeek() {
 function filterAndRenderTKB() {
     let isBreakWeek = $('#weekSelect').find(':selected').data('is-break') === true;
     let filteredData = globalTkbData.filter(c => {
+	if ((c.hinhThuc || '').toUpperCase().includes('VLE')) return false;
         if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
         let classDateInThisWeek = new Date(currentSelectedMonday); classDateInThisWeek.setDate(classDateInThisWeek.getDate() + (c.thu - 2));
         let isRecurring = true; 
@@ -1154,7 +1195,14 @@ function renderSystemCoursesList() {
             if (newStart && (!currentStart || newStart < currentStart)) mergedClasses[course.id].ngayBatDau = course.ngayBatDau;
             if (newEnd && (!currentEnd || newEnd > currentEnd)) mergedClasses[course.id].ngayKetThuc = course.ngayKetThuc;
         }
-        let timeStr = `Thứ ${course.thu} (Tiết ${course.tietBd}-${course.tietBd + course.soTiet - 1})`;
+       // Bắt lỗi nếu môn VLE không có Thứ và Tiết
+        let timeStr = "";
+        if (!course.thu || !course.tietBd || isNaN(course.tietBd)) {
+            timeStr = "Thời gian tự do (VLE)";
+        } else {
+            timeStr = `Thứ ${course.thu} (Tiết ${course.tietBd}-${course.tietBd + course.soTiet - 1})`;
+        }
+        
         if (!mergedClasses[course.id].thoiGianList.includes(timeStr)) {
             mergedClasses[course.id].thoiGianList.push(timeStr);
             mergedClasses[course.id].rawSchedules.push({ thu: course.thu, tietBd: course.tietBd, soTiet: course.soTiet });
@@ -1180,10 +1228,14 @@ function renderSystemCoursesList() {
         subject.classes.forEach(c => {
             if (userRegisteredCourseIds.includes(c.id)) syncedCount++;
             let isCopied = false;
-            c.rawSchedules.forEach(sch => {
-                let hasCopy = globalTkbData.some(tkb => !tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon) && tkb.thu == sch.thu && tkb.tietBd == sch.tietBd);
-                if (hasCopy) isCopied = true;
-            });
+c.rawSchedules.forEach(sch => {
+    let hasCopy = globalTkbData.some(tkb => {
+        if (tkb.isSystem || getBaseSubjectName(tkb.mon) !== getBaseSubjectName(c.mon)) return false;
+        let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
+        return isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd);
+    });
+    if (hasCopy) isCopied = true;
+});
             if (isCopied) copiedCount++;
         });
 
@@ -1215,16 +1267,19 @@ window.openSubjectDetail = function(subjectKey) {
     subject.classes.forEach(c => {
         let isSynced = userRegisteredCourseIds.includes(c.id);
         
-        let copiedRowIndices = [];
+       let copiedRowIndices = [];
         c.rawSchedules.forEach(sch => {
             globalTkbData.forEach(tkb => {
-                if (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon) && tkb.thu == sch.thu && tkb.tietBd == sch.tietBd) {
-                    if (!copiedRowIndices.includes(tkb.sheetRowIndex)) copiedRowIndices.push(tkb.sheetRowIndex);
+                if (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon)) {
+                    // NẾU LÀ VLE THÌ BỎ QUA KIỂM TRA THỨ & TIẾT
+                    let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
+                    if (isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd)) {
+                        if (!copiedRowIndices.includes(tkb.sheetRowIndex)) copiedRowIndices.push(tkb.sheetRowIndex);
+                    }
                 }
             });
         });
         let isCopied = copiedRowIndices.length > 0;
-
         let rowBg = (isSynced || isCopied) ? "background-color: #f8fafc;" : "background-color: #ffffff;";
         let dateDisplay = (c.ngayBatDau && c.ngayKetThuc) ? `<span class="fw-bold text-dark">${c.ngayBatDau}</span><br>đến <span class="fw-bold text-dark">${c.ngayKetThuc}</span>` : '-';
 
@@ -1298,16 +1353,23 @@ window.saveSystemTkbSelection = function(syncType = 'system') {
         btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xử lý...').prop('disabled', true);
         
         let newArray = [...userRegisteredCourseIds];
-        selectedIds.forEach(id => { if(!newArray.includes(id)) newArray.path ? '' : newArray.push(id); });
+        selectedIds.forEach(id => { if(!newArray.includes(id)) newArray.push(id); });
 
         postToGAS({ action: "saveSystemTkbSelection", mssv: currentUser.mssv, courseIds: newArray.join(',') }, function(res) {
-            alert("Đã đồng bộ lớp mới thành công!"); 
-            userRegisteredCourseIds = newArray; // Cập nhật mảng ID hệ thống ngay lập tức
+            alert("Đã đồng bộ thành công! Các học phần VLE sẽ tự động xuất hiện ở bảng Deadline."); 
+            userRegisteredCourseIds = newArray; 
             btn.html(originalText).prop('disabled', false); 
             
-            // Cập nhật lại giao diện màn hình chi tiết môn học ngay lập tức
-            openSubjectDetail(currentSysSubjectKey);
-            loadThoiGianBieu(); // Tải ngầm lại TKB bên ngoài
+            $.ajax({
+                url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv + "&_=" + new Date().getTime(),
+                method: "GET", dataType: "json", cache: false,
+                success: function(data) {
+                    processTKBData(data); 
+                    openSubjectDetail(currentSysSubjectKey); 
+                    loadThoiGianBieu(); 
+                    loadDeadlines();
+                }
+            });
         }, function() { 
             alert("Giao tiếp máy chủ thất bại!"); 
             btn.html(originalText).prop('disabled', false); 
@@ -1317,20 +1379,41 @@ window.saveSystemTkbSelection = function(syncType = 'system') {
         let btn = $('#btnSavePersonalTkbMode'); 
         let originalText = btn.html();
         btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang chép...').prop('disabled', true);
-        let coursesToCopy = globalSystemCourses.filter(c => selectedIds.includes(c.id));
+        
+        // Chuẩn hóa dữ liệu môn VLE trước khi gửi về Google Sheets
+        let coursesToCopy = globalSystemCourses.filter(c => selectedIds.includes(c.id)).map(c => {
+            let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE') || (c.thoiGianList || []).some(t => t.includes('VLE'));
+            return {
+                id: c.id,
+                mon: c.mon,
+                thu: c.thu || (isVle ? 99 : 2),
+                tietBd: c.tietBd || (isVle ? 99 : 1),
+                soTiet: c.soTiet || 1,
+                thoiGian: c.thoiGian || "VLE",
+                hinhThuc: "VLE", // Ép cứng chữ VLE để bộ lọc đếm ngược nhận diện
+                phong: c.phong || "VLE",
+                gv: c.gv || "",
+                color: c.color || "#e0f2fe",
+                ngayBatDau: c.ngayBatDau || "",
+                ngayKetThuc: c.ngayKetThuc || "",
+                ngayNgoaiLe: c.ngayNgoaiLe || ""
+            };
+        });
         
         postToGAS({ action: "copySystemTkbToPersonal", mssv: currentUser.mssv, courses: coursesToCopy }, function(res) {
-            alert(res);
+            alert("Đã sao chép thành công! Môn VLE sẽ tự động xuất hiện ở bảng Deadline.");
             btn.html(originalText).prop('disabled', false);
             
-            // Gọi ngầm lấy lại dữ liệu TKB mới nhất để cập nhật dòng lịch cá nhân vừa được tạo
             $.ajax({
                 url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv + "&_=" + new Date().getTime(),
                 method: "GET", dataType: "json", cache: false,
                 success: function(data) {
-                    processTKBData(data); // Cập nhật lại biến globalTkbData của hệ thống
-                    openSubjectDetail(currentSysSubjectKey); // Refresh lại màn hình chi tiết để hiện nút Hủy ngay lập tức
-                    loadThoiGianBieu(); // Cập nhật TKB bên ngoài
+                    processTKBData(data); 
+                    if (typeof currentSysSubjectKey !== 'undefined' && currentSysSubjectKey) {
+                        openSubjectDetail(currentSysSubjectKey); 
+                    }
+                    loadThoiGianBieu(); 
+                    loadDeadlines();
                 }
             });
         }, function() {
