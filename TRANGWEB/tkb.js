@@ -1229,13 +1229,18 @@ function renderSystemCoursesList() {
             if (userRegisteredCourseIds.includes(c.id)) syncedCount++;
             let isCopied = false;
 c.rawSchedules.forEach(sch => {
-    let hasCopy = globalTkbData.some(tkb => {
-        if (tkb.isSystem || getBaseSubjectName(tkb.mon) !== getBaseSubjectName(c.mon)) return false;
-        let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
-        return isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd);
-    });
-    if (hasCopy) isCopied = true;
-});
+            let hasCopy = globalTkbData.some(tkb => {
+                if (tkb.isSystem || getBaseSubjectName(tkb.mon) !== getBaseSubjectName(c.mon)) return false;
+                
+                // Bổ sung so sánh Ngày để phân biệt Giai đoạn
+                let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
+                let matchTime = isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd);
+                let matchDate = (tkb.ngayBatDau === c.ngayBatDau) && (tkb.ngayKetThuc === c.ngayKetThuc);
+                
+                return matchTime && matchDate;
+            });
+            if (hasCopy) isCopied = true;
+        });
             if (isCopied) copiedCount++;
         });
 
@@ -1267,18 +1272,21 @@ window.openSubjectDetail = function(subjectKey) {
     subject.classes.forEach(c => {
         let isSynced = userRegisteredCourseIds.includes(c.id);
         
-       let copiedRowIndices = [];
-        c.rawSchedules.forEach(sch => {
-            globalTkbData.forEach(tkb => {
-                if (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon)) {
-                    // NẾU LÀ VLE THÌ BỎ QUA KIỂM TRA THỨ & TIẾT
-                    let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
-                    if (isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd)) {
-                        if (!copiedRowIndices.includes(tkb.sheetRowIndex)) copiedRowIndices.push(tkb.sheetRowIndex);
-                    }
-                }
-            });
-        });
+      let copiedRowIndices = [];
+                c.rawSchedules.forEach(sch => {
+                    globalTkbData.forEach(tkb => {
+                        if (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon)) {
+                            // Bổ sung kiểm tra Ngày Bắt đầu và Ngày Kết thúc để phân biệt các giai đoạn
+                            let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
+                            let matchTime = isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd);
+                            let matchDate = (tkb.ngayBatDau === c.ngayBatDau) && (tkb.ngayKetThuc === c.ngayKetThuc);
+                            
+                            if (matchTime && matchDate) {
+                                if (!copiedRowIndices.includes(tkb.sheetRowIndex)) copiedRowIndices.push(tkb.sheetRowIndex);
+                            }
+                        }
+                    });
+                });
         let isCopied = copiedRowIndices.length > 0;
         let rowBg = (isSynced || isCopied) ? "background-color: #f8fafc;" : "background-color: #ffffff;";
         let dateDisplay = (c.ngayBatDau && c.ngayKetThuc) ? `<span class="fw-bold text-dark">${c.ngayBatDau}</span><br>đến <span class="fw-bold text-dark">${c.ngayKetThuc}</span>` : '-';
@@ -1388,6 +1396,7 @@ window.saveSystemTkbSelection = function(syncType = 'system') {
         btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang chép...').prop('disabled', true);
         
         // Chuẩn hóa dữ liệu môn VLE trước khi gửi về Google Sheets
+// Chuẩn hóa dữ liệu trước khi gửi về Google Sheets (Sửa lỗi ép cứng VLE)
         let coursesToCopy = globalSystemCourses.filter(c => selectedIds.includes(c.id)).map(c => {
             let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE') || (c.thoiGianList || []).some(t => t.includes('VLE'));
             return {
@@ -1396,9 +1405,9 @@ window.saveSystemTkbSelection = function(syncType = 'system') {
                 thu: c.thu || (isVle ? 99 : 2),
                 tietBd: c.tietBd || (isVle ? 99 : 1),
                 soTiet: c.soTiet || 1,
-                thoiGian: c.thoiGian || "VLE",
-                hinhThuc: "VLE", // Ép cứng chữ VLE để bộ lọc đếm ngược nhận diện
-                phong: c.phong || "VLE",
+                thoiGian: c.thoiGian || (isVle ? "VLE" : ""),
+                hinhThuc: c.hinhThuc || (isVle ? "VLE" : ""), // Giữ nguyên hình thức/cơ sở gốc, chỉ ép VLE nếu thực sự là VLE
+                phong: c.phong || (isVle ? "VLE" : ""),
                 gv: c.gv || "",
                 color: c.color || "#e0f2fe",
                 ngayBatDau: c.ngayBatDau || "",
