@@ -114,7 +114,7 @@ function logoutStudent() {
     isAdmin = false;
     
     // 3. Tải lại trang để áp dụng thay đổi
-    location.reload(); 
+    window.location.href = "login.html";
 }
 
 function openChangePasswordModal() { 
