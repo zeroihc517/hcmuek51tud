@@ -501,7 +501,7 @@ function openManageTkbListModal() {
                 }
                 
                 if (c.isDeadline) {
-                    // XỬ LÝ NÚT CHECKLIST "ĐÃ XONG" CHO CỘT PHÒNG
+                    // XỬ LÝ NÚT CHECKLIST "ĐÃ XONG" CHO CỘT PHÒNG DÀNH CHO DEADLINE
                     let isDone = completedList.includes(String(c.sheetRowIndex));
                     let doneBtnHtml = `<button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${c.sheetRowIndex}', event)"><i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}</button>`;
 
@@ -515,23 +515,30 @@ function openManageTkbListModal() {
                         <td class="align-middle">-</td>
                         <td class="text-center align-middle">
                             <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
-                            <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="deletePersonalDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
+                            <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 me-1 mb-1" onclick="deletePersonalDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
                         </td>
                     </tr>`;
                 } else {
                     let noteBadge = getNoteFromSubject(c); 
                     
+                    // --- ĐÃ THÊM: HIỂN THỊ NÚT "ĐÃ XONG / CHƯA LÀM" TẠI CỘT PHÒNG NẾU LÀ MÔN VLE ---
+                    let phongDisplayHtml = c.phong || '-';
+                    if ((c.hinhThuc || '').toUpperCase().includes('VLE')) {
+                        let isDone = completedList.includes(String(c.sheetRowIndex));
+                        phongDisplayHtml = `<button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${c.sheetRowIndex}', event)"><i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}</button>`;
+                    }
+
                     tkbHtml += `
                         <td class="text-center align-middle fw-bold text-dark">${thuText}</td>
                         <td class="text-center align-middle">${noteBadge}</td>
                         <td class="text-center align-middle">${coSoHtml}</td>
                         <td class="text-center fw-bold text-danger align-middle">${thoiGianHienThi}</td>
                         <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
-                        <td class="text-center align-middle">${c.phong || '-'}</td>
+                        <td class="text-center align-middle">${phongDisplayHtml}</td>
                         <td class="align-middle">${c.gv || '-'}</td>
                         <td class="text-center align-middle">
                             <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
-                            <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="promptDeletePersonalTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
+                            <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 me-1 mb-1" onclick="promptDeletePersonalTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
                         </td>
                     </tr>`;
                 }
@@ -578,41 +585,18 @@ function openManageDeadlineListModal() {
         }
     }
 
-    let filteredTkbSubjectNames = new Set(filteredTkbData.map(c => getBaseSubjectName(c.mon)));
-
-  let dlHtml = '';
+    let dlHtml = '';
     let filteredDeadlines = [];
 
-    // 1. Tạo danh sách Deadline ảo từ các môn VLE cá nhân VÀ hệ thống trong TKB
-    let virtualVleDeadlines = globalTkbData.filter(c => (c.hinhThuc || '').toUpperCase().includes('VLE')).map(c => ({
-        title: c.mon,
-        duration: (c.ngayBatDau && c.ngayKetThuc && c.ngayBatDau !== c.ngayKetThuc) ? `Từ ${c.ngayBatDau} đến ${c.ngayKetThuc}` : (c.ngayBatDau || "Chưa rõ"),
-        tag: c.hinhThuc,
-        dateStart: c.ngayBatDau || "", 
-        dateEnd: c.ngayKetThuc || "",
-        sheetRowIndex: c.sheetRowIndex, 
-        isSystem: c.isSystem, // <-- Nhận diện chuẩn xác môn hệ thống
-        isVirtualVLE: true
-    }));
+    // --- ĐÃ TẠM ẨN CÁC MÔN VLE BẰNG CÁCH KHÔNG TẠO DEADLINE ẢO TỪ TKB VÀ LỌC BỎ CÁC DEADLINE CÓ CHỨA VLE ---
+    if (globalDeadlineData && globalDeadlineData.length > 0) {
+        filteredDeadlines = globalDeadlineData.filter(d => {
+            let searchStr = ((d.tag || "") + " " + (d.title || "")).toLowerCase();
+            
+            // ẨN tất cả môn hoặc tag có chứa VLE
+            if (searchStr.includes('vle')) return false;
 
-    // 2. Gộp chung Deadline gốc (từ data sheet) với VLE ảo
-    let combinedDeadlines = [...globalDeadlineData, ...virtualVleDeadlines];
-
-    // 3. Tiến hành lọc danh sách
-   // 3. Tiến hành lọc danh sách
-        if (combinedDeadlines && combinedDeadlines.length > 0) {
-            filteredDeadlines = combinedDeadlines.filter(d => {
-                let searchStr = ((d.tag || "") + " " + (d.title || "")).toLowerCase();
-                let isVle = searchStr.includes('vle') || searchStr.includes('tiểu luận');
-                
-                // ẨN môn VLE hệ thống HOẶC VLE không còn tồn tại trong TKB cá nhân
-                if (isVle && !d.isVirtualVLE) {
-                    if (d.isSystem || !filteredTkbSubjectNames.has(getBaseSubjectName(d.title))) {
-                        return false;
-                    }
-                }
-
-                if (startMonTime && endSunTime) {
+            if (startMonTime && endSunTime) {
                 let dStartTime = getTimeFast(d.dateStart); let dEndTime = getTimeFast(d.dateEnd);
                 if (!dStartTime && !dEndTime) return true;
                 if (dStartTime && dEndTime) return dStartTime <= endSunTime && dEndTime >= startMonTime;
@@ -623,6 +607,7 @@ function openManageDeadlineListModal() {
             return true;
         });
     }
+
     if (filteredDeadlines.length === 0) {
         let emptyMsg = (selectedNH && selectedHK) ? `Không có Deadline nào trong ${selectedHK} năm học ${selectedNH}!` : "Chưa có Deadline nào được tạo!";
         dlHtml += `<tr><td colspan="5" class="text-center text-muted py-4 bg-white">${emptyMsg}</td></tr>`;
@@ -674,21 +659,13 @@ function openManageDeadlineListModal() {
                 ? `<a href="${extLink}" target="_blank" class="fw-bold text-decoration-underline" style="color: #0284c7;" title="Mở liên kết">${displayTag} <i class="fa-solid fa-up-right-from-square ms-1" style="font-size: 11px;"></i></a>` 
                 : `<span class="fw-bold text-dark">${displayTag}</span>`;
 
-            // Xử lý hiển thị nút Sửa/Xóa chính xác theo loại dữ liệu
             let actionButtonsHtml = '';
             if (c.isSystem) {
                 actionButtonsHtml = `<span class="badge bg-secondary"><i class="fa-solid fa-lock"></i> Hệ thống</span>`;
-            } else if (c.isVirtualVLE) {
-                // Nhánh dành cho VLE kéo từ TKB sang (Sẽ gọi hàm chỉnh sửa/xóa của TKB)
-                actionButtonsHtml = `
-                    <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
-                    <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="promptDeletePersonalTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
-                `;
             } else {
-                // Nhánh dành cho Deadline tạo tay bình thường
                 actionButtonsHtml = `
                     <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
-                    <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 mb-1" onclick="deletePersonalDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
+                    <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 me-1 mb-1" onclick="deletePersonalDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
                 `;
             }
 
