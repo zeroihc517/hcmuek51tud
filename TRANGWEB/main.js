@@ -1030,14 +1030,16 @@ if (localStorage.getItem('isAdmin') === 'true') {
 $(document).ready(function() {
     let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
     if (!currentUser) {
-        // Kiểm tra xem trang hiện tại có Modal đăng nhập trực tiếp (như web dự phòng) hay không
-        let modalEl = document.getElementById('userAuthModal');
-        if (modalEl) {
-            let authModal = new bootstrap.Modal(modalEl);
-            authModal.show();
-            if (typeof renderSavedAccounts === 'function') renderSavedAccounts();
+        // Nếu là Web dự phòng thì mở Modal tại chỗ
+        if (window.location.pathname.includes("webduphong")) {
+            let modalEl = document.getElementById('userAuthModal');
+            if (modalEl) {
+                let authModal = new bootstrap.Modal(modalEl);
+                authModal.show();
+                if (typeof renderSavedAccounts === 'function') renderSavedAccounts();
+            }
         } else {
-            // Nếu là web chính không có Modal thì mới chuyển sang login.html
+            // Ngược lại (Web chính), chưa đăng nhập thì buộc chuyển về login.html
             window.location.href = "login.html";
         }
     } else { 
