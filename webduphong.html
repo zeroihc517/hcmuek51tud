@@ -1014,10 +1014,12 @@
 <div class="modal fade" id="manageDeadlineListModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" style="background-color: #0f4c81;">
-                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-thumbtack me-2"></i>Bảng Tổng hợp Deadline</h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
+           <div class="modal-header text-white d-flex justify-content-between align-items-center" style="background-color: #0f4c81;">
+    <h6 class="modal-title m-0 fw-bold d-flex align-items-center flex-wrap gap-2">
+        <i class="fa-solid fa-thumbtack me-2"></i>Bảng Tổng hợp Deadline
+    </h6>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+</div>
             <div class="modal-body p-4">
                 <div class="table-responsive">
                     <table class="table table-bordered align-middle tkb-mgr-table m-0 bg-white">
@@ -1191,27 +1193,33 @@
             </div>
             
             <div class="modal-body p-4">
-                
                 <!-- MÀN HÌNH 1: DANH SÁCH MÔN HỌC (GOM NHÓM) -->
-                <div id="sysScreen1">
-                    <div class="row g-3 mb-3">
-                        <div class="col-md-6">
-                            <div class="select-floating-box">
-                                <label>Năm học</label>
-                                <select class="form-select" id="sysNamHocFilter" onchange="renderSystemCoursesList()">
-                                    <option value="">-- Tất cả năm học --</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="select-floating-box">
-                                <label>Học kỳ</label>
-                                <select class="form-select" id="sysHocKyFilter" onchange="renderSystemCoursesList()">
-                                    <option value="">-- Tất cả học kỳ --</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+<div id="sysScreen1">
+    <div class="row g-3 mb-3 align-items-center">
+        <div class="col-md-5">
+            <div class="select-floating-box">
+                <label>Năm học</label>
+                <select class="form-select" id="sysNamHocFilter" onchange="renderSystemCoursesList()">
+                    <option value="">-- Tất cả năm học --</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="select-floating-box">
+                <label>Học kỳ</label>
+                <select class="form-select" id="sysHocKyFilter" onchange="renderSystemCoursesList()">
+                    <option value="">-- Tất cả học kỳ --</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-2 text-end" style="padding-top: 6px;">
+            <button class="btn btn-sm fw-bold d-inline-flex align-items-center justify-content-center gap-2 w-100" 
+                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; height: 44px; font-size: 14px; white-space: nowrap;" 
+                    onclick="openSystemTkbModal()">
+                <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
+            </button>
+        </div>
+    </div>
                     
                     <div class="table-responsive border rounded" style="max-height: calc(100vh - 230px); overflow-y: auto; -webkit-overflow-scrolling: touch;">
                         <table class="table table-hover table-bordered align-middle m-0 bg-white system-tkb-table" style="font-size: 14.5px;">

@@ -307,7 +307,11 @@ function renderTkbToolBar() {
     let toolbarHtml = `
         <div class="tkb-personal-toolbar d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 p-3 bg-white rounded border shadow-sm">
             <div>
-                <span class="badge bg-primary fs-6 me-2"><i class="fa-solid fa-user"></i> ${currentUser.name} (${currentUser.mssv})</span>
+                <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2" 
+                        style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
+                        onclick="loadThoiGianBieu(); loadDeadlines();">
+                    <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
+                </button>
             </div>
             <div class="d-flex gap-2 flex-wrap">
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openSystemTkbModal()"><i class="fa-solid fa-cloud-arrow-down"></i> Đồng bộ học phần</button>
@@ -584,20 +588,56 @@ function openManageDeadlineListModal() {
             }
         }
     }
-
+// Cập nhật tiêu đề bảng và chèn thêm nút Thêm Deadline mới
+    $('#manageDeadlineListModal .modal-title').html(`
+        <span class="me-3"><i class="fa-solid fa-thumbtack me-2"></i>Bảng Tổng hợp Deadline${titleSuffix}</span>
+        <button class="btn btn-sm btn-light text-danger fw-bold" onclick="$('#manageDeadlineListModal').modal('hide'); setTimeout(() => openAddDeadlineModal(), 400);"><i class="fa-solid fa-plus"></i> Thêm Deadline mới</button>
+    `);
     let dlHtml = '';
     let filteredDeadlines = [];
 
-    // --- ĐÃ TẠM ẨN CÁC MÔN VLE BẰNG CÁCH KHÔNG TẠO DEADLINE ẢO TỪ TKB VÀ LỌC BỎ CÁC DEADLINE CÓ CHỨA VLE ---
-    if (globalDeadlineData && globalDeadlineData.length > 0) {
-        filteredDeadlines = globalDeadlineData.filter(d => {
+    // 1. Lấy danh sách tên các Deadline thật đã có (để check trùng)
+    let existingDeadlineNames = (globalDeadlineData || []).map(d => getBaseSubjectName(d.title));
+
+    // 2. Tạo Deadline ảo từ các môn VLE TỰ NHẬP trong TKB
+    let virtualManualVLEs = [];
+    if (typeof globalTkbData !== 'undefined') {
+        globalTkbData.forEach(c => {
+            if (!c.isSystem && (c.hinhThuc || '').toUpperCase().includes('VLE')) {
+                // Chỉ hiển thị bên Deadline nếu CHƯA có học phần trùng tên
+                if (!existingDeadlineNames.includes(getBaseSubjectName(c.mon))) {
+                    let durationStr = (c.ngayBatDau && c.ngayKetThuc && c.ngayBatDau !== c.ngayKetThuc) ? 
+                                      `Từ ${c.ngayBatDau} đến ${c.ngayKetThuc}` : (c.ngayBatDau || "Chưa rõ");
+                    virtualManualVLEs.push({
+                        title: c.mon,
+                        duration: durationStr,
+                        tag: c.hinhThuc,
+                        icon: "primary",
+                        emoji: "🌐",
+                        dateStart: c.ngayBatDau || "",
+                        dateEnd: c.ngayKetThuc || "",
+                        sheetRowIndex: c.sheetRowIndex,
+                        isSystem: c.isSystem,
+                        isVirtualVLE: true // Gắn cờ để xử lý nút bấm
+                    });
+                }
+            }
+        });
+    }
+
+    // 3. Gộp data và tiến hành lọc theo thời gian
+    let combinedDeadlineData = [...(globalDeadlineData || []), ...virtualManualVLEs];
+
+    if (combinedDeadlineData.length > 0) {
+        filteredDeadlines = combinedDeadlineData.filter(d => {
             let searchStr = ((d.tag || "") + " " + (d.title || "")).toLowerCase();
             
-            // ẨN tất cả môn hoặc tag có chứa VLE
-            if (searchStr.includes('vle')) return false;
+            // Ẩn VLE nếu là của HỆ THỐNG (VLE tự nhập sẽ được đi tiếp)
+            if (d.isSystem && searchStr.includes('vle')) return false;
 
             if (startMonTime && endSunTime) {
-                let dStartTime = getTimeFast(d.dateStart); let dEndTime = getTimeFast(d.dateEnd);
+                let dStartTime = getTimeFast(d.dateStart); 
+                let dEndTime = getTimeFast(d.dateEnd);
                 if (!dStartTime && !dEndTime) return true;
                 if (dStartTime && dEndTime) return dStartTime <= endSunTime && dEndTime >= startMonTime;
                 if (dStartTime) return dStartTime <= endSunTime;
@@ -658,11 +698,18 @@ function openManageDeadlineListModal() {
             let tagHtml = extLink 
                 ? `<a href="${extLink}" target="_blank" class="fw-bold text-decoration-underline" style="color: #0284c7;" title="Mở liên kết">${displayTag} <i class="fa-solid fa-up-right-from-square ms-1" style="font-size: 11px;"></i></a>` 
                 : `<span class="fw-bold text-dark">${displayTag}</span>`;
-
+		
             let actionButtonsHtml = '';
             if (c.isSystem) {
                 actionButtonsHtml = `<span class="badge bg-secondary"><i class="fa-solid fa-lock"></i> Hệ thống</span>`;
+            } else if (c.isVirtualVLE) {
+                // Nút sửa/xóa điều hướng về TKB cho VLE tự nhập
+                actionButtonsHtml = `
+                    <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
+                    <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 me-1 mb-1" onclick="$('#manageDeadlineListModal').modal('hide'); setTimeout(() => { promptDeletePersonalTkb('${c.sheetRowIndex}'); }, 400);"><i class="fa-solid fa-trash"></i> Xóa</button>
+                `;
             } else {
+                // Nút sửa/xóa mặc định cho Deadline
                 actionButtonsHtml = `
                     <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
                     <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 me-1 mb-1" onclick="deletePersonalDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
@@ -715,8 +762,19 @@ function processTKBData(data) {
             actualRowIndex = parseInt(lastElement) || -1;
         }
 
-        // Bóc tách classId nếu có lưu dạng [MÃ_HP] trong tên môn hoặc trường dữ liệu
         let extractedClassId = row[12] || ""; 
+        let hinhThucRaw = row[4] || "";
+        
+        // BẢN VÁ: Cứu dữ liệu classId bị mất thông qua marker '#'
+        if (!extractedClassId && hinhThucRaw.includes("#")) {
+            let match = hinhThucRaw.match(/#([a-zA-Z0-9_]+)/);
+            if (match) {
+                extractedClassId = match[1];
+                // Xóa ID khỏi Hình thức để không hiển thị mã rác ra giao diện TKB
+                hinhThucRaw = hinhThucRaw.replace(match[0], '').trim();
+                row[4] = hinhThucRaw; 
+            }
+        }
 
         return {
             thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
@@ -728,6 +786,7 @@ function processTKBData(data) {
     
     filterAndRenderTKB();
 }
+
 function openAddTkbModal(triggerAuthModal = false) {
     if (triggerAuthModal) { $('#userAuthModal').modal('show'); return; }
     $('#tkbModalTitle').html('<i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân');
@@ -829,8 +888,8 @@ function executeSavePersonalTkb() {
     let targetRowIndex = $('#pTkbRowIndex').val().trim(); let isEditMode = targetRowIndex !== '';
     let thuVal = parseInt($('#pTkbThu').val()); let tietBdVal = parseInt($('#pTkbTiet').val()); let soTietVal = parseInt($('#pTkbSoTiet').val()); let monVal = $('#pTkbMon').val().trim();
     let ngayBdRaw = $('#pTkbNgayBD').val().trim(); let ngayKtRaw = $('#pTkbNgayKT').val().trim();
+    
     if(!thuVal || !tietBdVal || !monVal) { alert("Vui lòng nhập đầy đủ Thứ, Tiết và Tên môn học!"); return; }
-
     let tietKtVal = tietBdVal + soTietVal - 1; let isOverlap = false; let overlapCourseName = "";
     let newStartDate = parseDateString(ngayBdRaw); let newEndDate = parseDateString(ngayKtRaw);
 
@@ -871,8 +930,21 @@ function executeSavePersonalTkb() {
         alert(`Lỗi: Trùng lịch với môn ${overlapCourseName}! Không thể lưu.`); return; 
     }
 
-    let finalHinhThuc = $('#pTkbHinhThuc').val().trim(); let linkVal = $('#pTkbLink').val().trim();
+   let finalHinhThuc = $('#pTkbHinhThuc').val().trim(); 
+    let linkVal = $('#pTkbLink').val().trim();
     if (linkVal) finalHinhThuc += " " + linkVal;
+
+
+    let classIdToPreserve = "";
+    if (isEditMode) {
+        let existingCourse = globalTkbData.find(c => String(c.sheetRowIndex) === String(targetRowIndex));
+        if (existingCourse && existingCourse.classId) {
+            classIdToPreserve = existingCourse.classId;
+        }
+    }
+    if (classIdToPreserve && !finalHinhThuc.includes("#" + classIdToPreserve)) {
+        finalHinhThuc += " #" + classIdToPreserve;
+    }
 
     let pData = {
         action: isEditMode ? "editTKBUser" : "addTKBUser", 
@@ -1181,6 +1253,7 @@ function renderSystemCoursesList() {
     }
 
     let mergedClasses = {};
+    // ... (Đoạn gộp mergedClasses giữ nguyên như cũ) ...
     filteredCourses.forEach(course => {
         if (!mergedClasses[course.id]) {
             mergedClasses[course.id] = {
@@ -1219,26 +1292,31 @@ function renderSystemCoursesList() {
     }
 
     let html = '';
+    let globalClaimedTkbRows = []; // BẢN VÁ: Lưu vết các dòng đã được nhận diện
+
     for (let key in groupedSystemCourses) {
         let subject = groupedSystemCourses[key];
-        
         let syncedCount = 0; 
         let copiedCount = 0;
 
         subject.classes.forEach(c => {
             let cleanClassId = String(c.id).trim();
 
-            // 1. Kiểm tra Lớp Đồng bộ Hệ thống
             if (userRegisteredCourseIds.some(id => String(id).trim() === cleanClassId)) {
                 syncedCount++;
             } else {
-               // 2. Kiểm tra Lớp Sao chép Cá nhân
                 let isCopied = globalTkbData.some(tkb => {
                     if (tkb.isSystem) return false;
                     
                     let hasValidClassId = tkb.classId && String(tkb.classId).trim() !== "";
                     if (hasValidClassId) {
-                        return String(tkb.classId).trim() === cleanClassId;
+                        if (String(tkb.classId).trim() === cleanClassId) {
+                            if (!globalClaimedTkbRows.includes(tkb.sheetRowIndex)) {
+                                globalClaimedTkbRows.push(tkb.sheetRowIndex);
+                                return true;
+                            }
+                        }
+                        return false;
                     } else {
                         if (getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon)) {
                             return c.rawSchedules.some(sch => {
@@ -1246,16 +1324,19 @@ function renderSystemCoursesList() {
                                 let matchTime = isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd && tkb.soTiet == sch.soTiet);
                                 let matchDate = (tkb.ngayBatDau === c.ngayBatDau) && (tkb.ngayKetThuc === c.ngayKetThuc);
                                 
-                                // BỔ SUNG: Dùng Giảng viên làm tiêu chí phân định cuối cùng
+                                // BẢN VÁ: Không bỏ qua check Giảng viên cho VLE nữa
                                 let matchGv = true;
-                                if (!isVle) {
-                                    let tkbGv = String(tkb.gv || "").replace(/-/g, '').trim().toLowerCase();
-                                    let cGv = String(c.gv || "").replace(/-/g, '').trim().toLowerCase();
-                                    // Nếu 2 GV khác nhau hoàn toàn -> Chắc chắn là 2 lớp khác nhau
-                                    if (cGv !== "" && tkbGv !== "" && cGv !== tkbGv) matchGv = false;
-                                }
+                                let tkbGv = String(tkb.gv || "").replace(/-/g, '').trim().toLowerCase();
+                                let cGv = String(c.gv || "").replace(/-/g, '').trim().toLowerCase();
+                                if (cGv !== "" && tkbGv !== "" && cGv !== tkbGv) matchGv = false;
                                 
-                                return matchTime && matchDate && matchGv;
+                                if (matchTime && matchDate && matchGv) {
+                                    if (!globalClaimedTkbRows.includes(tkb.sheetRowIndex)) {
+                                        globalClaimedTkbRows.push(tkb.sheetRowIndex);
+                                        return true;
+                                    }
+                                }
+                                return false;
                             });
                         }
                         return false;
@@ -1265,7 +1346,6 @@ function renderSystemCoursesList() {
             }
         });
 
-        // HIỂN THỊ BIỂU TƯỢNG ĐÃ ĐĂNG KÝ / SAO CHÉP Ở BÊN NGOÀI MÀN HÌNH 1
         let badgeHtml = '';
         if (syncedCount > 0) badgeHtml += `<span class="badge bg-primary ms-2" title="Đã đồng bộ"><i class="fa-solid fa-link"></i> ${syncedCount}</span>`;
         if (copiedCount > 0) badgeHtml += `<span class="badge bg-success ms-2" title="Đã sao chép"><i class="fa-solid fa-copy"></i> ${copiedCount}</span>`;
@@ -1283,19 +1363,19 @@ function renderSystemCoursesList() {
     
     container.html(html);
 }
+
 window.openSubjectDetail = function(subjectKey) {
     currentSysSubjectKey = subjectKey;
     let subject = groupedSystemCourses[subjectKey];
     $('#sysDetailSubjectName').html(`<i class="fa-solid fa-book-open me-2"></i> ${subject.displayName}`);
     
     let html = '';
+    let localClaimedTkbRows = []; // BẢN VÁ: Tránh trùng lặp trong nội bộ Detail
+    
     subject.classes.forEach(c => {
         let cleanClassId = String(c.id).trim();
-
-        // 1. Chỉ tính là Đã đồng bộ nếu ID nằm trong mảng Đồng bộ Hệ thống
         let isSynced = userRegisteredCourseIds.some(id => String(id).trim() === cleanClassId);
         
-      // 2. Chỉ tính là Đã sao chép nếu tìm thấy trong TKB cá nhân (globalTkbData)
         let copiedRowIndices = [];
         c.rawSchedules.forEach(sch => {
             globalTkbData.forEach(tkb => {
@@ -1304,7 +1384,10 @@ window.openSubjectDetail = function(subjectKey) {
                     
                     if (hasValidClassId) {
                         if (String(tkb.classId).trim() === cleanClassId) {
-                            if (!copiedRowIndices.includes(tkb.sheetRowIndex)) copiedRowIndices.push(tkb.sheetRowIndex);
+                            if (!copiedRowIndices.includes(tkb.sheetRowIndex) && !localClaimedTkbRows.includes(tkb.sheetRowIndex)) {
+                                copiedRowIndices.push(tkb.sheetRowIndex);
+                                localClaimedTkbRows.push(tkb.sheetRowIndex);
+                            }
                         }
                     } else {
                         if (getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon)) {
@@ -1312,16 +1395,17 @@ window.openSubjectDetail = function(subjectKey) {
                             let matchTime = isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd && tkb.soTiet == sch.soTiet);
                             let matchDate = (tkb.ngayBatDau === c.ngayBatDau) && (tkb.ngayKetThuc === c.ngayKetThuc);
                             
-                            // BỔ SUNG: Dùng Giảng viên làm tiêu chí phân định cuối cùng
+                            // BẢN VÁ
                             let matchGv = true;
-                            if (!isVle) {
-                                let tkbGv = String(tkb.gv || "").replace(/-/g, '').trim().toLowerCase();
-                                let cGv = String(c.gv || "").replace(/-/g, '').trim().toLowerCase();
-                                if (cGv !== "" && tkbGv !== "" && cGv !== tkbGv) matchGv = false;
-                            }
+                            let tkbGv = String(tkb.gv || "").replace(/-/g, '').trim().toLowerCase();
+                            let cGv = String(c.gv || "").replace(/-/g, '').trim().toLowerCase();
+                            if (cGv !== "" && tkbGv !== "" && cGv !== tkbGv) matchGv = false;
                             
                             if (matchTime && matchDate && matchGv) {
-                                if (!copiedRowIndices.includes(tkb.sheetRowIndex)) copiedRowIndices.push(tkb.sheetRowIndex);
+                                if (!copiedRowIndices.includes(tkb.sheetRowIndex) && !localClaimedTkbRows.includes(tkb.sheetRowIndex)) {
+                                    copiedRowIndices.push(tkb.sheetRowIndex);
+                                    localClaimedTkbRows.push(tkb.sheetRowIndex);
+                                }
                             }
                         }
                     }
@@ -1329,9 +1413,7 @@ window.openSubjectDetail = function(subjectKey) {
             });
         });
 
-        // Nếu đã Đồng bộ Hệ thống thì ưu tiên hiển thị Badge Xanh Dương, nếu không thì hiển thị Badge Xanh Lá "Đã sao chép"
         let isCopied = !isSynced && (copiedRowIndices.length > 0);
-        
         let rowBg = (isSynced || isCopied) ? "background-color: #f8fafc;" : "background-color: #ffffff;";
         let dateDisplay = (c.ngayBatDau && c.ngayKetThuc) ? `<span class="fw-bold text-dark">${c.ngayBatDau}</span><br>đến <span class="fw-bold text-dark">${c.ngayKetThuc}</span>` : '-';
 
@@ -1451,9 +1533,10 @@ function updateFooterActionButtons(subjectKey) {
     let subject = groupedSystemCourses[subjectKey];
     if (!subject) return;
 
-    // Kiểm tra xem môn này đã có lớp nào ĐỒNG BỘ hoặc SAO CHÉP từ trước chưa
-    let existingSyncedClass = subject.classes.find(c => userRegisteredCourseIds.includes(c.id));
-   let existingCopiedClass = subject.classes.find(c => {
+    let localClaimedTkbRows = []; // BẢN VÁ
+
+    let existingSyncedClass = subject.classes.find(c => userRegisteredCourseIds.includes(String(c.id).trim()));
+    let existingCopiedClass = subject.classes.find(c => {
         let copiedRowIndices = [];
         c.rawSchedules.forEach(sch => {
             globalTkbData.forEach(tkb => {
@@ -1462,7 +1545,10 @@ function updateFooterActionButtons(subjectKey) {
                     
                     if (hasValidClassId) {
                         if (String(tkb.classId).trim() === String(c.id).trim()) {
-                            copiedRowIndices.push(tkb.sheetRowIndex);
+                            if (!copiedRowIndices.includes(tkb.sheetRowIndex) && !localClaimedTkbRows.includes(tkb.sheetRowIndex)) {
+                                copiedRowIndices.push(tkb.sheetRowIndex);
+                                localClaimedTkbRows.push(tkb.sheetRowIndex);
+                            }
                         }
                     } else {
                         if (getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon)) {
@@ -1470,15 +1556,18 @@ function updateFooterActionButtons(subjectKey) {
                             let matchTime = isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd && tkb.soTiet == sch.soTiet);
                             let matchDate = (tkb.ngayBatDau === c.ngayBatDau) && (tkb.ngayKetThuc === c.ngayKetThuc);
                             
-                            // BỔ SUNG: Dùng Giảng viên làm tiêu chí phân định cuối cùng
+                            // BẢN VÁ
                             let matchGv = true;
-                            if (!isVle) {
-                                let tkbGv = String(tkb.gv || "").replace(/-/g, '').trim().toLowerCase();
-                                let cGv = String(c.gv || "").replace(/-/g, '').trim().toLowerCase();
-                                if (cGv !== "" && tkbGv !== "" && cGv !== tkbGv) matchGv = false;
-                            }
+                            let tkbGv = String(tkb.gv || "").replace(/-/g, '').trim().toLowerCase();
+                            let cGv = String(c.gv || "").replace(/-/g, '').trim().toLowerCase();
+                            if (cGv !== "" && tkbGv !== "" && cGv !== tkbGv) matchGv = false;
                             
-                            if (matchTime && matchDate && matchGv) copiedRowIndices.push(tkb.sheetRowIndex);
+                            if (matchTime && matchDate && matchGv) {
+                                if (!copiedRowIndices.includes(tkb.sheetRowIndex) && !localClaimedTkbRows.includes(tkb.sheetRowIndex)) {
+                                    copiedRowIndices.push(tkb.sheetRowIndex);
+                                    localClaimedTkbRows.push(tkb.sheetRowIndex);
+                                }
+                            }
                         }
                     }
                 }
@@ -1490,9 +1579,7 @@ function updateFooterActionButtons(subjectKey) {
     let existingRegisteredClass = existingSyncedClass || existingCopiedClass;
     let selectedCheckbox = $('.system-course-checkbox:checked');
 
-    // Nếu ĐÃ CÓ LỚP ĐĂNG KÝ TRƯỚC ĐÓ + ĐANG TÍCH CHỌN 1 LỚP MỚI KHÁC
     if (existingRegisteredClass && selectedCheckbox.length > 0 && selectedCheckbox.val() !== existingRegisteredClass.id) {
-        // Tạm ẩn các nút mặc định, chỉ hiện nút "Chuyển lớp học" màu cam
         let switchBtnHtml = `
             <button type="button" class="btn text-white px-4 fw-bold shadow-sm" style="background-color: #f97316;" onclick="saveSystemTkbSelection('switch_class')" id="btnSwitchClassMode">
                 <i class="fa-solid fa-right-left me-2"></i> Chuyển sang lớp này
@@ -1500,7 +1587,6 @@ function updateFooterActionButtons(subjectKey) {
         `;
         $('#sysFooterActions').html(switchBtnHtml);
     } else {
-        // Khôi phục lại cặp nút ban đầu
         let defaultBtnsHtml = `
             <button type="button" class="btn text-white px-3 fw-bold shadow-sm" style="background-color: #0f4c81;" onclick="saveSystemTkbSelection('personal')" id="btnSavePersonalTkbMode">
                 <i class="fa-solid fa-copy me-1"></i> Sao chép (Cá nhân)
@@ -1623,6 +1709,7 @@ if (syncType === 'switch_class') {
         if (btn.length) btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang chuyển lớp...').prop('disabled', true);
 
         // BƯỚC 1: XÓA LỚP CŨ TRÊN MÁY CHỦ
+       // BƯỚC 1: XÓA LỚP CŨ TRÊN MÁY CHỦ (Bản vá: Căn chỉnh xóa chuẩn xác theo classId)
         let cleanupPromise = function(nextCallback) {
             if (existingSyncedClass) {
                 userRegisteredCourseIds = userRegisteredCourseIds.filter(id => String(id).trim() !== String(existingSyncedClass.id).trim());
@@ -1630,8 +1717,13 @@ if (syncType === 'switch_class') {
             } else if (existingCopiedClass) {
                 let indicesToDelete = [];
                 globalTkbData = globalTkbData.filter(tkb => {
-                    let isTarget = (String(tkb.classId).trim() === String(existingCopiedClass.id).trim()) || 
-                                   (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(subject.displayName));
+                    let isTarget = false;
+                    if (tkb.classId && String(tkb.classId).trim() !== "") {
+                        isTarget = (String(tkb.classId).trim() === String(existingCopiedClass.id).trim());
+                    } else {
+                        isTarget = (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(subject.displayName));
+                    }
+
                     if (isTarget && tkb.sheetRowIndex) {
                         indicesToDelete.push(tkb.sheetRowIndex);
                         return false;
@@ -1645,15 +1737,16 @@ if (syncType === 'switch_class') {
             } else { nextCallback(); }
         };
 
-        // BƯỚC 2: THÊM LỚP MỚI THEO DẠNG "SAO CHÉP CÁ NHÂN" (ĐỂ TRÁNH BỊ ĐỒNG BỘ CỨNG)
-        // BƯỚC 2: THÊM LỚP MỚI THEO DẠNG "SAO CHÉP CÁ NHÂN" (ĐỂ TRÁNH BỊ ĐỒNG BỘ CỨNG)
+        // BƯỚC 2: THÊM LỚP MỚI THEO DẠNG "SAO CHÉP CÁ NHÂN"
         cleanupPromise(function() {
-            // SỬA LỖI: Dùng filter thay vì find để lấy tất cả các dòng (Lý thuyết + VLE) của lớp mới
             let coursesToCopyRaw = globalSystemCourses.filter(c => String(c.id).trim() === String(selectedClassId).trim());
             
             if (coursesToCopyRaw.length > 0) {
                 let coursesToCopy = coursesToCopyRaw.map(newCourseObj => {
                     let isVle = (newCourseObj.hinhThuc || '').toUpperCase().includes('VLE');
+                    let baseHinhThuc = newCourseObj.hinhThuc || (isVle ? "VLE" : "");
+                    let cleanHinhThuc = baseHinhThuc.replace(/#[a-zA-Z0-9_]+/g, '').trim();
+                    
                     return {
                         id: newCourseObj.id,
                         classId: newCourseObj.id,
@@ -1662,7 +1755,7 @@ if (syncType === 'switch_class') {
                         tietBd: newCourseObj.tietBd || (isVle ? 99 : 1),
                         soTiet: newCourseObj.soTiet || 1,
                         thoiGian: newCourseObj.thoiGian || (isVle ? "VLE" : ""),
-                        hinhThuc: newCourseObj.hinhThuc || (isVle ? "VLE" : ""),
+                        hinhThuc: cleanHinhThuc + " #" + newCourseObj.id, // BẢN VÁ: Giấu classId vào hình thức
                         phong: newCourseObj.phong || (isVle ? "VLE" : ""),
                         gv: newCourseObj.gv || "",
                         color: newCourseObj.color || "#e0f2fe",
@@ -1671,6 +1764,7 @@ if (syncType === 'switch_class') {
                         ngayNgoaiLe: newCourseObj.ngayNgoaiLe || ""
                     };
                 });
+  
 
                 postToGAS({ action: "copySystemTkbToPersonal", mssv: currentUser.mssv, courses: coursesToCopy }, function(res) {
                     coursesToCopy.forEach(c => {
@@ -1742,20 +1836,24 @@ if (syncType === 'switch_class') {
 
         let coursesToCopy = globalSystemCourses.filter(c => selectedIds.includes(String(c.id))).map(c => {
             let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
+            let baseHinhThuc = c.hinhThuc || (isVle ? "VLE" : "");
+            let cleanHinhThuc = baseHinhThuc.replace(/#[a-zA-Z0-9_]+/g, '').trim();
+            
             return {
                 id: c.id, 
-                classId: c.id, // Gửi classId lên server
+                classId: c.id,
                 mon: c.mon,
                 thu: c.thu || (isVle ? 99 : 2),
                 tietBd: c.tietBd || (isVle ? 99 : 1),
                 soTiet: c.soTiet || 1,
                 thoiGian: c.thoiGian || (isVle ? "VLE" : ""),
-                hinhThuc: c.hinhThuc || (isVle ? "VLE" : ""),
+                hinhThuc: cleanHinhThuc + " #" + c.id, // BẢN VÁ: Giấu classId vào hình thức
                 phong: c.phong || (isVle ? "VLE" : ""),
                 gv: c.gv || "", color: c.color || "#e0f2fe",
                 ngayBatDau: c.ngayBatDau || "", ngayKetThuc: c.ngayKetThuc || "", ngayNgoaiLe: c.ngayNgoaiLe || ""
             };
         });
+
 
         postToGAS({ action: "copySystemTkbToPersonal", mssv: currentUser.mssv, courses: coursesToCopy }, function(res) {
             coursesToCopy.forEach(c => {
