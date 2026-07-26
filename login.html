@@ -9,19 +9,33 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="TRANGWEB/styleweb.css" rel="stylesheet">
    <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            /* Thay thế bằng một link ảnh nền chất lượng cao (Unsplash HD/4K) hoặc giữ ảnh cũ nhưng tối ưu hiển thị */
-            background-image: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.3)), 
-                              url('https://tintuc.dienthoaigiakho.vn/wp-content/uploads/2025/06/hinh-nen-ipad-16.jpg');
-            background-size: cover;
-            background-position: center center;
-            background-repeat: no-repeat;
-            background-attachment: fixed;
-            position: relative;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+
+    /* Nền chia đôi 50/50: Bên trái là Code (tối), Bên phải là Toán (sáng & rõ) */
+    background-image: 
+        /* Lớp phủ dải màu: Giảm độ mờ bên phải để ảnh Toán sáng đẹp */
+        linear-gradient(
+            to right, 
+            rgba(15, 23, 42, 0.65) 0%, 
+            rgba(15, 23, 42, 0.45) 48%, 
+            rgba(15, 23, 42, 0.10) 55%, 
+            rgba(255, 255, 255, 0.05) 100%
+        ),
+        /* Ảnh Code bên trái (Tin học / Lập trình) */
+        url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop'),
+        /* Ảnh Toán bên phải (Sáng rõ, công thức toán học sắc nét) */
+        url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop');
+    /* Thiết lập vị trí và kích thước chia đôi */
+    background-position: left center, left center, right center;
+    background-size: cover, 50% 100%, 50% 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
 
         .login-card-wrapper {
             position: relative;
