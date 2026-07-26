@@ -657,7 +657,10 @@ let tkbSubjectNames = new Set(filteredTkbData.map(c => getBaseSubjectName(c.mon)
             let searchStr = ((d.tag || "") + " " + (d.title || "")).toLowerCase();
             
             // Ẩn VLE nếu là của HỆ THỐNG (VLE tự nhập sẽ được đi tiếp)
-            if (d.isSystem && searchStr.includes('vle')) return false;
+           // Ẩn VLE/Tiểu luận nếu môn này ĐÃ XUẤT HIỆN bên bảng TKB
+if ((searchStr.includes('vle') || searchStr.includes('tiểu luận')) && tkbSubjectNames.has(getBaseSubjectName(d.title))) {
+    return false;
+}
 
             // ---> 2. THÊM ĐOẠN NÀY: Ẩn VLE/Tiểu luận nếu môn này ĐÃ XUẤT HIỆN bên bảng TKB <---
             if ((searchStr.includes('vle') || searchStr.includes('tiểu luận')) && tkbSubjectNames.has(getBaseSubjectName(d.title))) {
@@ -730,8 +733,8 @@ let tkbSubjectNames = new Set(filteredTkbData.map(c => getBaseSubjectName(c.mon)
 		
             let actionButtonsHtml = '';
             if (c.isSystem) {
-                actionButtonsHtml = `<span class="badge bg-secondary"><i class="fa-solid fa-lock"></i> Hệ thống</span>`;
-            } else if (c.isVirtualVLE) {
+    actionButtonsHtml = `<span class="badge bg-secondary"><i class="fa-solid fa-lock"></i> Hệ thống</span>`;
+} else if (c.isVirtualVLE) {
                 // Nút sửa/xóa điều hướng về TKB cho VLE tự nhập
                 actionButtonsHtml = `
                     <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
