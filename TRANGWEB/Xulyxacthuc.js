@@ -23,7 +23,7 @@ function loginStudent() {
                 nhom: response.nhom
             };
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            
+            localStorage.setItem('lastActiveTime', Date.now().toString());
             let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
             savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
             savedAccounts.unshift({ mssv: response.mssv, name: response.name });

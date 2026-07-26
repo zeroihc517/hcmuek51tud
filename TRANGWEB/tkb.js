@@ -452,102 +452,106 @@ function openManageTkbListModal() {
         groupOrder.sort((a, b) => a.minTime - b.minTime);
 
         let groupIndex = 0;
-        for (let g of groupOrder) {
-            let key = g.key;
-            let items = groupedByMon[key];
-            let rowCount = items.length;
-            let baseNameDisplay = key;
-            let groupBgColor = (groupIndex % 2 === 0) ? "#dcfce7" : "#e0f2fe";
-            groupIndex++;
+        // Trong vòng lặp render các nhóm môn học (groupOrder):
+for (let g of groupOrder) {
+    let key = g.key;
+    let items = groupedByMon[key];
+    let rowCount = items.length;
+    let groupBgColor = (groupIndex % 2 === 0) ? "#dcfce7" : "#e0f2fe";
+    groupIndex++;
 
-            items.sort((a, b) => {
-                let tA = getTimeFast(a.ngayBatDau) || 0;
-                let tB = getTimeFast(b.ngayBatDau) || 0;
-                if (tA !== tB) return tA - tB;
-                if (a.isDeadline !== b.isDeadline) return a.isDeadline ? 1 : -1;
-                if (a.thu !== b.thu) return a.thu - b.thu;
-                return a.tietBd - b.tietBd;
-            });
+    // Tự động tìm Mã lớp HP (classId) của môn học này trong nhóm (nếu có)
+    let foundClassId = items.find(item => item.classId && String(item.classId).trim() !== "")?.classId;
+    let baseNameDisplay = foundClassId ? `${foundClassId} - ${key}` : key;
 
-            items.forEach((c, index) => {
-                let dateDisplay = '-';
-                if (c.ngayBatDau && c.ngayKetThuc) { 
-                    dateDisplay = (c.ngayBatDau === c.ngayKetThuc) ? c.ngayBatDau : `Từ ${c.ngayBatDau}<br>đến ${c.ngayKetThuc}`; 
-                } else if (c.ngayBatDau) { dateDisplay = c.ngayBatDau; } 
-                else if (c.ngayKetThuc) { dateDisplay = c.ngayKetThuc; }
+    items.sort((a, b) => {
+        let tA = getTimeFast(a.ngayBatDau) || 0;
+        let tB = getTimeFast(b.ngayBatDau) || 0;
+        if (tA !== tB) return tA - tB;
+        if (a.isDeadline !== b.isDeadline) return a.isDeadline ? 1 : -1;
+        if (a.thu !== b.thu) return a.thu - b.thu;
+        return a.tietBd - b.tietBd;
+    });
 
-                let thuText = "";
-                if (parseInt(c.thu) === 8) thuText = "Chủ nhật";
-                else if (parseInt(c.thu) === 99) thuText = "-";
-                else thuText = "Thứ " + c.thu;
+    items.forEach((c, index) => {
+        let dateDisplay = '-';
+        if (c.ngayBatDau && c.ngayKetThuc) { 
+            dateDisplay = (c.ngayBatDau === c.ngayKetThuc) ? c.ngayBatDau : `Từ ${c.ngayBatDau}<br>đến ${c.ngayKetThuc}`; 
+        } else if (c.ngayBatDau) { dateDisplay = c.ngayBatDau; } 
+        else if (c.ngayKetThuc) { dateDisplay = c.ngayKetThuc; }
 
-                let rowBg = c.isDeadline ? "background-color: #fff5f6;" : `background-color: ${groupBgColor};`;
-                let thoiGianHienThi = c.thoiGian || '-';
-                if ((c.hinhThuc || "").toLowerCase().includes("vle")) {
-                    thoiGianHienThi = "";
-                }
+        let thuText = "";
+        if (parseInt(c.thu) === 8) thuText = "Chủ nhật";
+        else if (parseInt(c.thu) === 99) thuText = "-";
+        else thuText = "Thứ " + c.thu;
 
-                let rawHinhThuc = c.hinhThuc || ""; 
-                let extLink = checkAndExtractUrl(rawHinhThuc);
-                let coSoDisplay = extLink ? rawHinhThuc.replace(extLink, '').trim() : rawHinhThuc.trim();
-                
-                if (coSoDisplay.toLowerCase().includes("tự học") || coSoDisplay === "") { 
-                    coSoDisplay = extLink ? "Truy cập" : "-"; 
-                }
-
-                let coSoHtml = extLink 
-                    ? `<a href="${extLink}" target="_blank" class="fw-bold text-decoration-underline" style="color: #0284c7;" title="Mở liên kết">${coSoDisplay} <i class="fa-solid fa-up-right-from-square ms-1" style="font-size: 11px;"></i></a>`
-                    : `<span class="fw-bold">${coSoDisplay}</span>`;
-
-                tkbHtml += `<tr style="${rowBg}">`;
-                if (index === 0) {
-                    tkbHtml += `<td rowspan="${rowCount}" class="text-start align-middle fw-bold text-primary" style="font-size: 15px; background-color: ${groupBgColor}; border-left: 3px solid var(--primary-color) !important;">${baseNameDisplay}</td>`;
-                }
-                
-                if (c.isDeadline) {
-                    // XỬ LÝ NÚT CHECKLIST "ĐÃ XONG" CHO CỘT PHÒNG DÀNH CHO DEADLINE
-                    let isDone = completedList.includes(String(c.sheetRowIndex));
-                    let doneBtnHtml = `<button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${c.sheetRowIndex}', event)"><i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}</button>`;
-
-                    tkbHtml += `
-                        <td class="text-center align-middle fw-bold text-dark">-</td>
-                        <td class="text-center align-middle"><span class="badge bg-danger">DEADLINE</span></td>
-                        <td class="text-center align-middle">${coSoHtml}</td>
-                        <td class="text-center fw-bold text-danger align-middle">${thoiGianHienThi}</td>
-                        <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
-                        <td class="text-center align-middle">${doneBtnHtml}</td>
-                        <td class="align-middle">-</td>
-                        <td class="text-center align-middle">
-                            <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
-                            <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 me-1 mb-1" onclick="deletePersonalDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
-                        </td>
-                    </tr>`;
-                } else {
-                    let noteBadge = getNoteFromSubject(c); 
-                    
-                    // --- ĐÃ THÊM: HIỂN THỊ NÚT "ĐÃ XONG / CHƯA LÀM" TẠI CỘT PHÒNG NẾU LÀ MÔN VLE ---
-                    let phongDisplayHtml = c.phong || '-';
-                    if ((c.hinhThuc || '').toUpperCase().includes('VLE')) {
-                        let isDone = completedList.includes(String(c.sheetRowIndex));
-                        phongDisplayHtml = `<button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${c.sheetRowIndex}', event)"><i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}</button>`;
-                    }
-
-                    tkbHtml += `
-                        <td class="text-center align-middle fw-bold text-dark">${thuText}</td>
-                        <td class="text-center align-middle">${noteBadge}</td>
-                        <td class="text-center align-middle">${coSoHtml}</td>
-                        <td class="text-center fw-bold text-danger align-middle">${thoiGianHienThi}</td>
-                        <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
-                        <td class="text-center align-middle">${phongDisplayHtml}</td>
-                        <td class="align-middle">${c.gv || '-'}</td>
-                        <td class="text-center align-middle">
-                            <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
-                            <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 me-1 mb-1" onclick="promptDeletePersonalTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
-                        </td>
-                    </tr>`;
-                }
-            });
+        let rowBg = c.isDeadline ? "background-color: #fff5f6;" : `background-color: ${groupBgColor};`;
+        let thoiGianHienThi = c.thoiGian || '-';
+        if ((c.hinhThuc || "").toLowerCase().includes("vle")) {
+            thoiGianHienThi = "";
         }
+
+        let rawHinhThuc = c.hinhThuc || ""; 
+        let extLink = checkAndExtractUrl(rawHinhThuc);
+        let coSoDisplay = extLink ? rawHinhThuc.replace(extLink, '').trim() : rawHinhThuc.trim();
+        
+        if (coSoDisplay.toLowerCase().includes("tự học") || coSoDisplay === "") { 
+            coSoDisplay = extLink ? "Truy cập" : "-"; 
+        }
+
+        let coSoHtml = extLink 
+            ? `<a href="${extLink}" target="_blank" class="fw-bold text-decoration-underline" style="color: #0284c7;" title="Mở liên kết">${coSoDisplay} <i class="fa-solid fa-up-right-from-square ms-1" style="font-size: 11px;"></i></a>`
+            : `<span class="fw-bold">${coSoDisplay}</span>`;
+
+        tkbHtml += `<tr style="${rowBg}">`;
+        
+        // Ô Môn học hiển thị: Mã lớp HP - Tên môn (VD: MATH1234 - HÌNH HỌC VI PHÂN)
+        if (index === 0) {
+            tkbHtml += `<td rowspan="${rowCount}" class="text-start align-middle fw-bold text-primary" style="font-size: 14.5px; background-color: ${groupBgColor}; border-left: 3px solid var(--primary-color) !important;">${baseNameDisplay}</td>`;
+        }
+        
+        if (c.isDeadline) {
+            let isDone = completedList.includes(String(c.sheetRowIndex));
+            let doneBtnHtml = `<button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${c.sheetRowIndex}', event)"><i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}</button>`;
+
+            tkbHtml += `
+                <td class="text-center align-middle fw-bold text-dark">-</td>
+                <td class="text-center align-middle"><span class="badge bg-danger">DEADLINE</span></td>
+                <td class="text-center align-middle">${coSoHtml}</td>
+                <td class="text-center fw-bold text-danger align-middle">${thoiGianHienThi}</td>
+                <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
+                <td class="text-center align-middle">${doneBtnHtml}</td>
+                <td class="align-middle">-</td>
+                <td class="text-center align-middle">
+                    <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
+                    <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 me-1 mb-1" onclick="deletePersonalDeadline('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
+                </td>
+            </tr>`;
+        } else {
+            let noteBadge = getNoteFromSubject(c); 
+            
+            let phongDisplayHtml = c.phong || '-';
+            if ((c.hinhThuc || '').toUpperCase().includes('VLE')) {
+                let isDone = completedList.includes(String(c.sheetRowIndex));
+                phongDisplayHtml = `<button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${c.sheetRowIndex}', event)"><i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}</button>`;
+            }
+
+            tkbHtml += `
+                <td class="text-center align-middle fw-bold text-dark">${thuText}</td>
+                <td class="text-center align-middle">${noteBadge}</td>
+                <td class="text-center align-middle">${coSoHtml}</td>
+                <td class="text-center fw-bold text-danger align-middle">${thoiGianHienThi}</td>
+                <td class="text-center align-middle" style="font-size: 13.5px;">${dateDisplay}</td>
+                <td class="text-center align-middle">${phongDisplayHtml}</td>
+                <td class="align-middle">${c.gv || '-'}</td>
+                <td class="text-center align-middle">
+                    <button class="btn btn-sm btn-warning font-weight-bold py-1 px-2 me-1 mb-1" onclick="closeAndOpenEditTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-pen"></i> Sửa</button>
+                    <button class="btn btn-sm btn-danger font-weight-bold py-1 px-2 me-1 mb-1" onclick="promptDeletePersonalTkb('${c.sheetRowIndex}')"><i class="fa-solid fa-trash"></i> Xóa</button>
+                </td>
+            </tr>`;
+        }
+    });
+}
     }
     $('#tkbManagerListBody').html(tkbHtml);
     $('#manageTkbListModal').modal('show');
@@ -791,9 +795,9 @@ function openAddTkbModal(triggerAuthModal = false) {
     if (triggerAuthModal) { $('#userAuthModal').modal('show'); return; }
     $('#tkbModalTitle').html('<i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân');
     $('#pTkbRowIndex').val(''); 
-    $('#pTkbMon, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink, #pTkbNgoaiLe').val('');
+    $('#pTkbMaHP, #pTkbMon, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink, #pTkbNgoaiLe').val('');
     $('#pTkbThu').val(2); $('#pTkbTiet').val(1); $('#pTkbSoTiet').val(3); $('#pTkbColor').val('#e0f2fe');
-    $('#pTkbThu, #pTkbTiet, #pTkbSoTiet, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink').prop('readonly', false).css('background-color', '#fff');
+    $('#pTkbMaHP, #pTkbThu, #pTkbTiet, #pTkbSoTiet, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink').prop('readonly', false).css('background-color', '#fff');
     $('#tkbOverlapAlert').addClass('d-none');
     $('#tkbPersonalModal').modal('show');
 }
@@ -802,6 +806,7 @@ function openEditTkbModal(sheetRowIndex) {
     let course = globalTkbData.find(c => String(c.sheetRowIndex) === String(sheetRowIndex)); if (!course) return;
     $('#tkbModalTitle').html('<i class="fa-solid fa-calendar-check me-2"></i>Chỉnh Sửa Lịch Học');
     $('#pTkbRowIndex').val(sheetRowIndex); 
+    $('#pTkbMaHP').val(course.classId || ''); // Điền mã lớp HP đã có
     $('#pTkbThu').val(course.thu); $('#pTkbTiet').val(course.tietBd); $('#pTkbSoTiet').val(course.soTiet);
     $('#pTkbMon').val(course.mon); $('#pTkbPhong').val(course.phong); $('#pTkbThoiGian').val(course.thoiGian);
     
@@ -812,11 +817,11 @@ function openEditTkbModal(sheetRowIndex) {
     $('#pTkbNgayBD').val(course.ngayBatDau); $('#pTkbNgayKT').val(course.ngayKetThuc); $('#pTkbNgoaiLe').val(course.ngayNgoaiLe); 
     
     if (course.isSystem) {
-        $('#pTkbThu, #pTkbTiet, #pTkbSoTiet, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink').prop('readonly', true).css('background-color', '#e9ecef');
+        $('#pTkbMaHP, #pTkbThu, #pTkbTiet, #pTkbSoTiet, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink').prop('readonly', true).css('background-color', '#e9ecef');
         $('#tkbOverlapAlert').removeClass('d-none');
         $('#tkbOverlapMessage').html('Học phần hệ thống: Chỉ được phép thêm tiền tố "Kiểm tra...", không thay đổi thời gian/phòng học.');
     } else {
-        $('#pTkbThu, #pTkbTiet, #pTkbSoTiet, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink').prop('readonly', false).css('background-color', '#fff');
+        $('#pTkbMaHP, #pTkbThu, #pTkbTiet, #pTkbSoTiet, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink').prop('readonly', false).css('background-color', '#fff');
         $('#tkbOverlapAlert').addClass('d-none');
     }
     
@@ -887,6 +892,7 @@ if (scope === 'single' || scope === 'future') {
 function executeSavePersonalTkb() {
     let targetRowIndex = $('#pTkbRowIndex').val().trim(); let isEditMode = targetRowIndex !== '';
     let thuVal = parseInt($('#pTkbThu').val()); let tietBdVal = parseInt($('#pTkbTiet').val()); let soTietVal = parseInt($('#pTkbSoTiet').val()); let monVal = $('#pTkbMon').val().trim();
+    let maHpVal = $('#pTkbMaHP').val().trim();
     let ngayBdRaw = $('#pTkbNgayBD').val().trim(); let ngayKtRaw = $('#pTkbNgayKT').val().trim();
     
     if(!thuVal || !tietBdVal || !monVal) { alert("Vui lòng nhập đầy đủ Thứ, Tiết và Tên môn học!"); return; }
@@ -930,20 +936,16 @@ function executeSavePersonalTkb() {
         alert(`Lỗi: Trùng lịch với môn ${overlapCourseName}! Không thể lưu.`); return; 
     }
 
-   let finalHinhThuc = $('#pTkbHinhThuc').val().trim(); 
+    let finalHinhThuc = $('#pTkbHinhThuc').val().trim(); 
     let linkVal = $('#pTkbLink').val().trim();
     if (linkVal) finalHinhThuc += " " + linkVal;
 
-
-    let classIdToPreserve = "";
-    if (isEditMode) {
-        let existingCourse = globalTkbData.find(c => String(c.sheetRowIndex) === String(targetRowIndex));
-        if (existingCourse && existingCourse.classId) {
-            classIdToPreserve = existingCourse.classId;
-        }
-    }
-    if (classIdToPreserve && !finalHinhThuc.includes("#" + classIdToPreserve)) {
-        finalHinhThuc += " #" + classIdToPreserve;
+    // Tự động đính kèm mã lớp HP vào cuối hình thức dưới dạng `#MA_HP`
+    let cleanHinhThuc = finalHinhThuc.replace(/#[a-zA-Z0-9_]+/g, '').trim();
+    if (maHpVal !== "") {
+        finalHinhThuc = cleanHinhThuc + " #" + maHpVal;
+    } else {
+        finalHinhThuc = cleanHinhThuc;
     }
 
     let pData = {
@@ -961,7 +963,6 @@ function executeSavePersonalTkb() {
         loadThoiGianBieu(); if($('#manageTkbListModal').is(':visible')) { $('#manageTkbListModal').modal('hide'); }
     }, function() { alert("Giao tiếp máy chủ thất bại!"); btn.html('Lưu thông tin').prop('disabled', false); });
 }
-
 function executeDeletePersonalTkb() {
     let sheetRowIndex = pendingEventAction.rowIndex;
     postToGAS({ 

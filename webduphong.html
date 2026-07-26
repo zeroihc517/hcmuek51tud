@@ -132,12 +132,13 @@
 
         <main class="main-content">
             
+<!-- KHU VỰC TỔNG HỢP LINK -->
 <div id="tongHopSection" class="d-none">
     <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
         
-        <!-- THÊM NÚT NÀY: Nút gọi Modal thêm link cá nhân -->
-        <button class="btn text-white fw-bold shadow-sm d-none" id="btnAddPersonalLink" onclick="openAddWebLinkModal()" style="background-color: #16a34a; border-radius: 8px;">
+        <!-- Nút gọi Modal thêm link cá nhân (Đã đổi sang màu chủ đạo #0f4c81) -->
+        <button class="btn text-white fw-bold shadow-sm d-none" id="btnAddPersonalLink" onclick="openAddWebLinkModal()" style="background-color: #0f4c81; border-radius: 8px;">
             <i class="fa-solid fa-plus me-2"></i>Thêm Link Của Tôi
         </button>
     </header>
@@ -146,7 +147,8 @@
     <h6 class="fw-bold text-muted mb-3 mt-2" id="titleGlobalLinks" style="display:none;"><i class="fa-solid fa-globe me-2"></i>Liên kết từ Hệ thống</h6>
     <div class="row row-cols-2 row-cols-lg-5 g-4 mb-4" id="webLinksContainer"></div>
     
-    <h6 class="fw-bold text-success mb-3 mt-4 border-top pt-4" id="titlePersonalLinks" style="display:none;"><i class="fa-solid fa-star me-2"></i>Góc liên kết của tôi</h6>
+    <!-- Tiêu đề Góc liên kết của tôi (Đã đổi chữ sang màu xanh #0f4c81) -->
+    <h6 class="fw-bold mb-3 mt-4 border-top pt-4" id="titlePersonalLinks" style="display:none; color: #0f4c81;"><i class="fa-solid fa-star me-2"></i>Góc liên kết của tôi</h6>
     <div class="row row-cols-2 row-cols-lg-5 g-4" id="personalLinksContainer"></div>
 </div>
 
@@ -154,7 +156,8 @@
 <div class="modal fade" id="addWebLinkModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-header text-white" style="background-color: #16a34a;">
+            <!-- Header Modal đổi thành #0f4c81 -->
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
                 <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-link me-2"></i>Thêm Liên Kết Cá Nhân</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -180,7 +183,6 @@
                         <option value="fa-solid fa-book">📚 Sách / Giáo trình</option>
                         <option value="fa-solid fa-graduation-cap">🎓 Trường học / Học thuật</option>
                         <option value="fa-solid fa-calculator">🧮 Máy tính / Toán học</option>
-
                         <option value="fa-solid fa-file-pdf">📄 File Tài liệu PDF</option>
                         <option value="fa-brands fa-google-drive">📂 Google Drive</option>
                         <option value="fa-solid fa-folder-open">📁 Thư mục / Folder</option>
@@ -204,7 +206,8 @@
             </div>
             <div class="modal-footer border-0">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn text-white fw-bold px-4" style="background-color: #16a34a;" onclick="savePersonalWebLink()" id="btnSaveWebLink">Lưu liên kết</button>
+                <!-- Nút lưu đổi thành #0f4c81 -->
+                <button type="button" class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" onclick="savePersonalWebLink()" id="btnSaveWebLink">Lưu liên kết</button>
             </div>
         </div>
     </div>
@@ -214,7 +217,8 @@
 <div class="modal fade" id="editWebLinkModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-header text-white" style="background-color: #f59e0b;">
+            <!-- Header Modal đổi thành #0f4c81 -->
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
                 <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh Sửa Liên Kết Cá Nhân</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -254,7 +258,6 @@
                         <option value="fa-solid fa-video">🎥 Video Call / Zoom / Meet</option>
                         <option value="fa-brands fa-facebook-messenger">💬 Messenger / Chat</option>
                         <option value="fa-solid fa-comments">🗣️ Diễn đàn / Thảo luận</option>
-
                         <option value="fa-solid fa-bullhorn">📢 Thông báo / Tin tức</option>
                         <option value="fa-solid fa-calendar-days">📅 Lịch học / Thời khóa biểu</option>
                         <option value="fa-solid fa-clock">⏰ Thời gian / Deadline</option>
@@ -265,12 +268,12 @@
             </div>
             <div class="modal-footer border-0">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn text-white fw-bold px-4" style="background-color: #f59e0b;" onclick="saveEditPersonalWebLink()" id="btnSaveEditWebLink">Lưu thay đổi</button>
+                <!-- Nút lưu đổi thành #0f4c81 -->
+                <button type="button" class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" onclick="saveEditPersonalWebLink()" id="btnSaveEditWebLink">Lưu thay đổi</button>
             </div>
         </div>
     </div>
 </div>
-
 <div id="tkbSection" class="d-none">
     <header class="top-header d-flex justify-content-between align-items-center">
         <div class="page-title"><i class="fa-regular fa-calendar-days"></i> Thời gian biểu & Deadlines</div>
@@ -1171,51 +1174,58 @@
 </div>
 
     <div class="modal fade" id="tkbPersonalModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header text-white" id="tkbModalHeader" style="background-color: #0f4c81;">
-                    <h6 class="modal-title m-0 fw-bold" id="tkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-4">
-                    <input type="hidden" id="pTkbRowIndex" value="">
-                    <div class="row g-3">
-                        <div class="col-md-4"><label class="form-label fw-bold">Thứ (VD: 2, 4, 8)</label><input type="text" id="pTkbThu" class="form-control" value="2"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="pTkbTiet" class="form-control" min="1" max="15" value="1"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Số tiết</label><input type="number" id="pTkbSoTiet" class="form-control" min="1" max="5" value="3"></div>
-                        <div class="col-12 d-none" id="tkbOverlapAlert">
-                            <div class="alert alert-danger d-flex align-items-center m-0 py-2 px-3" style="border-radius: 8px; font-size: 14.5px; font-weight: 600;">
-                                <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
-                                <span id="tkbOverlapMessage"></span>
-                            </div>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" id="tkbModalHeader" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold" id="tkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="pTkbRowIndex" value="">
+                <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label fw-bold">Thứ (VD: 2, 4, 8)</label><input type="text" id="pTkbThu" class="form-control" value="2"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="pTkbTiet" class="form-control" min="1" max="15" value="1"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Số tiết</label><input type="number" id="pTkbSoTiet" class="form-control" min="1" max="5" value="3"></div>
+                    <div class="col-12 d-none" id="tkbOverlapAlert">
+                        <div class="alert alert-danger d-flex align-items-center m-0 py-2 px-3" style="border-radius: 8px; font-size: 14.5px; font-weight: 600;">
+                            <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
+                            <span id="tkbOverlapMessage"></span>
                         </div>
-                        <div class="col-md-12">
-                            <label class="form-label fw-bold">Tên học phần</label>
-                            <input type="text" id="pTkbMon" class="form-control" placeholder="VD: Hình học vi phân">
-                            <div class="mt-2 d-flex gap-2 flex-wrap">
-                                <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Quá trình')">Kiểm tra Quá trình</button>
-                                <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Giữa học phần')">Kiểm tra Giữa kỳ</button>
-                                <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Kết thúc học phần')">Kiểm tra Cuối kỳ</button>
-                            </div>
-                        </div>
-                        <div class="col-md-6"><label class="form-label fw-bold">Phòng học</label><input type="text" id="pTkbPhong" class="form-control" placeholder="VD: B.112"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Thời gian (Giờ)</label><input type="text" id="pTkbThoiGian" class="form-control" placeholder="VD: 6:30-9:00"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Cơ sở/Hình thức</label><input type="text" id="pTkbHinhThuc" class="form-control" placeholder="VD: An Dương Vương / Học online / ..."></div>
-                        <div class="col-md-4"><label class="form-label fw-bold text-primary">Đường link địa điểm (nếu có)</label><input type="text" id="pTkbLink" class="form-control" placeholder="https://..."></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Giảng viên</label><input type="text" id="pTkbGV" class="form-control" placeholder="VD: Nguyễn Văn A"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Màu nền lịch</label><input type="color" id="pTkbColor" class="form-control form-control-color w-100" value="#e0f2fe"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="pTkbNgayBD" class="form-control" placeholder="DD/MM/YYYY"></div>
-                        <div class="col-md-4"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="pTkbNgayKT" class="form-control" placeholder="DD/MM/YYYY"></div>
-                        <div class="col-md-8"><label class="form-label fw-bold text-danger">Ngày nghỉ / Ngoại lệ</label><input type="text" id="pTkbNgoaiLe" class="form-control" placeholder="VD: 15/04/2026, 01/05/2026"></div>
                     </div>
+                    
+                    <!-- BỔ SUNG Ô NHẬP MÃ LỚP HỌC PHẦN Ở ĐÂY -->
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Mã lớp học phần</label>
+                        <input type="text" id="pTkbMaHP" class="form-control" placeholder="VD: COMP1013">
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold">Tên học phần</label>
+                        <input type="text" id="pTkbMon" class="form-control" placeholder="VD: Hình học vi phân">
+                        <div class="mt-2 d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Quá trình')">Kiểm tra Quá trình</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Giữa học phần')">Kiểm tra Giữa kỳ</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Kết thúc học phần')">Kiểm tra Cuối kỳ</button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6"><label class="form-label fw-bold">Phòng học</label><input type="text" id="pTkbPhong" class="form-control" placeholder="VD: B.112"></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">Thời gian (Giờ)</label><input type="text" id="pTkbThoiGian" class="form-control" placeholder="VD: 6:30-9:00"></div>
+                    <div class="col-md-6"><label class="form-label fw-bold">Cơ sở/Hình thức</label><input type="text" id="pTkbHinhThuc" class="form-control" placeholder="VD: An Dương Vương / Học online / ..."></div>
+                    <div class="col-md-6"><label class="form-label fw-bold text-primary">Đường link địa điểm (nếu có)</label><input type="text" id="pTkbLink" class="form-control" placeholder="https://..."></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Giảng viên</label><input type="text" id="pTkbGV" class="form-control" placeholder="VD: Nguyễn Văn A"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Màu nền lịch</label><input type="color" id="pTkbColor" class="form-control form-control-color w-100" value="#e0f2fe"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="pTkbNgayBD" class="form-control" placeholder="DD/MM/YYYY"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="pTkbNgayKT" class="form-control" placeholder="DD/MM/YYYY"></div>
+                    <div class="col-md-8"><label class="form-label fw-bold text-danger">Ngày nghỉ / Ngoại lệ</label><input type="text" id="pTkbNgoaiLe" class="form-control" placeholder="VD: 15/04/2026, 01/05/2026"></div>
                 </div>
-                <div class="modal-footer border-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn text-white px-4 fw-bold" style="background-color: #0f4c81;" onclick="promptSavePersonalTkb()" id="btnSavePersonalTkb">Lưu thông tin</button>
-                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white px-4 fw-bold" style="background-color: #0f4c81;" onclick="promptSavePersonalTkb()" id="btnSavePersonalTkb">Lưu thông tin</button>
             </div>
         </div>
     </div>
+</div>
 
 <div class="modal fade" id="deadlinePersonalModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">

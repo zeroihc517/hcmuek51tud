@@ -278,26 +278,32 @@ body {
             btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang xác thực...').prop('disabled', true);
             
             postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
-                let response = typeof res === 'string' ? JSON.parse(res) : res;
-                if (response.success) {
-                    let currentUser = { 
-                        mssv: response.mssv, 
-                        name: response.name,
-                        chuyenNganh: response.chuyenNganh,
-                        khoa: response.khoa,
-                        khoaHoc: response.khoaHoc,
-                        nhom: response.nhom
-                    };
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    
-                    let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
-                    savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
-                    savedAccounts.unshift({ mssv: response.mssv, name: response.name });
-                    if (savedAccounts.length > 3) savedAccounts.pop(); 
-                    localStorage.setItem('savedAccounts', JSON.stringify(savedAccounts));
+    let response = typeof res === 'string' ? JSON.parse(res) : res;
+    if (response.success) {
+        let currentUser = { 
+            mssv: response.mssv, 
+            name: response.name,
+            chuyenNganh: response.chuyenNganh,
+            khoa: response.khoa,
+            khoaHoc: response.khoaHoc,
+            nhom: response.nhom
+        };
+        
+        // 1. Lưu thông tin đăng nhập
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        // --- THÊM DÒNG NÀY ĐỂ SỬA LỖI ---
+        localStorage.setItem('lastActiveTime', Date.now().toString()); 
+        // --------------------------------
 
-                    window.location.href = "appliedmathematics.html";
-                } else { 
+        let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
+        savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
+        savedAccounts.unshift({ mssv: response.mssv, name: response.name });
+        if (savedAccounts.length > 3) savedAccounts.pop(); 
+        localStorage.setItem('savedAccounts', JSON.stringify(savedAccounts));
+
+        window.location.href = "appliedmathematics.html";
+    } else {
                     $('#userAuthError').removeClass('d-none').text(response.message); 
                     btn.html('Đăng nhập hệ thống').prop('disabled', false); 
                 }
