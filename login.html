@@ -196,8 +196,25 @@
     <script src="TRANGWEB/Xulyxacthuc.js"></script>
     <script>
         $(document).ready(function() {
-            renderSavedAccountsWithIcons();
-        });
+    // 1. KIỂM TRẢ TỰ ĐỘNG ĐĂNG NHẬP
+    let currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+        try {
+            let userData = JSON.parse(currentUser);
+            // Nếu đã có dữ liệu MSSV hợp lệ, tự động chuyển sang trang ứng dụng
+            if (userData && userData.mssv) {
+                window.location.replace("appliedmathematics.html"); // hoặc "index.html" tùy tên file chính của bạn
+                return;
+            }
+        } catch (e) {
+            // Nếu dữ liệu localStorage bị lỗi, xóa bỏ để tránh lặp vô hạn
+            localStorage.removeItem('currentUser');
+        }
+    }
+
+    // 2. Render danh sách tài khoản đã lưu nếu chưa đăng nhập
+    renderSavedAccountsWithIcons();
+});
 
         function renderSavedAccountsWithIcons() {
             let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || []; 
