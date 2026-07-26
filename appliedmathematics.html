@@ -133,14 +133,143 @@
         <main class="main-content">
             
 <div id="tongHopSection" class="d-none">
-    <header class="top-header d-flex justify-content-between align-items-center">
+    <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
-
         
+        <!-- THÊM NÚT NÀY: Nút gọi Modal thêm link cá nhân -->
+        <button class="btn text-white fw-bold shadow-sm d-none" id="btnAddPersonalLink" onclick="openAddWebLinkModal()" style="background-color: #16a34a; border-radius: 8px;">
+            <i class="fa-solid fa-plus me-2"></i>Thêm Link Của Tôi
+        </button>
     </header>
-                <div class="row row-cols-2 row-cols-lg-5 g-4" id="webLinksContainer"></div>
-            </div>
+    
+    <!-- Phân chia khu vực Link Hệ thống và Link Cá nhân -->
+    <h6 class="fw-bold text-muted mb-3 mt-2" id="titleGlobalLinks" style="display:none;"><i class="fa-solid fa-globe me-2"></i>Liên kết từ Hệ thống</h6>
+    <div class="row row-cols-2 row-cols-lg-5 g-4 mb-4" id="webLinksContainer"></div>
+    
+    <h6 class="fw-bold text-success mb-3 mt-4 border-top pt-4" id="titlePersonalLinks" style="display:none;"><i class="fa-solid fa-star me-2"></i>Góc liên kết của tôi</h6>
+    <div class="row row-cols-2 row-cols-lg-5 g-4" id="personalLinksContainer"></div>
+</div>
 
+<!-- MODAL 1: THÊM LIÊN KẾT CÁ NHÂN -->
+<div class="modal fade" id="addWebLinkModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header text-white" style="background-color: #16a34a;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-link me-2"></i>Thêm Liên Kết Cá Nhân</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="form-floating mb-3">
+                    <input type="text" id="pWebLinkTitle" class="form-control fw-bold" placeholder="Tên liên kết">
+                    <label for="pWebLinkTitle">Tên liên kết ngắn gọn</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" id="pWebLinkUrl" class="form-control" placeholder="https://...">
+                    <label for="pWebLinkUrl">Đường dẫn URL (Bắt buộc)</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" id="pWebLinkDesc" class="form-control" placeholder="Mô tả">
+                    <label for="pWebLinkDesc">Mô tả ngắn (Không bắt buộc)</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select id="pWebLinkIcon" class="form-select">
+                        <option value="fa-solid fa-link">🔗 Biểu tượng Liên kết mặc định</option>
+                        <option value="fa-solid fa-globe">🌐 Trang Web / Portal</option>
+                        <option value="fa-solid fa-star">⭐ Yêu thích / Quan trọng</option>
+                        <option value="fa-solid fa-bookmark">🔖 Thẻ ghi nhớ / Bookmark</option>
+                        <option value="fa-solid fa-book">📚 Sách / Giáo trình</option>
+                        <option value="fa-solid fa-graduation-cap">🎓 Trường học / Học thuật</option>
+                        <option value="fa-solid fa-calculator">🧮 Máy tính / Toán học</option>
+
+                        <option value="fa-solid fa-file-pdf">📄 File Tài liệu PDF</option>
+                        <option value="fa-brands fa-google-drive">📂 Google Drive</option>
+                        <option value="fa-solid fa-folder-open">📁 Thư mục / Folder</option>
+                        <option value="fa-solid fa-cloud">☁️ Đám mây / Lưu trữ</option>
+                        <option value="fa-solid fa-code">💻 Lập trình / Code</option>
+                        <option value="fa-solid fa-laptop-code">🖥️ Công nghệ / Phần mềm</option>
+                        <option value="fa-brands fa-github">🐙 Github / Source Code</option>
+                        <option value="fa-brands fa-python">🐍 Ngôn ngữ Python</option>
+                        <option value="fa-solid fa-database">🗄️ Cơ sở dữ liệu</option>
+                        <option value="fa-brands fa-youtube">📺 YouTube / Video</option>
+                        <option value="fa-solid fa-video">🎥 Video Call / Zoom / Meet</option>
+                        <option value="fa-brands fa-facebook-messenger">💬 Messenger / Chat</option>
+                        <option value="fa-solid fa-comments">🗣️ Diễn đàn / Thảo luận</option>
+                        <option value="fa-solid fa-bullhorn">📢 Thông báo / Tin tức</option>
+                        <option value="fa-solid fa-calendar-days">📅 Lịch học / Thời khóa biểu</option>
+                        <option value="fa-solid fa-clock">⏰ Thời gian / Deadline</option>
+                        <option value="fa-solid fa-list-check">✅ Checklist / Công việc</option>
+                    </select>
+                    <label for="pWebLinkIcon">Chọn Biểu tượng đại diện</label>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white fw-bold px-4" style="background-color: #16a34a;" onclick="savePersonalWebLink()" id="btnSaveWebLink">Lưu liên kết</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2: CHỈNH SỬA LIÊN KẾT CÁ NHÂN -->
+<div class="modal fade" id="editWebLinkModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header text-white" style="background-color: #f59e0b;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh Sửa Liên Kết Cá Nhân</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="editPWebLinkRowIndex">
+                <div class="form-floating mb-3">
+                    <input type="text" id="editPWebLinkTitle" class="form-control fw-bold" placeholder="Tên liên kết">
+                    <label for="editPWebLinkTitle">Tên liên kết ngắn gọn</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" id="editPWebLinkUrl" class="form-control" placeholder="https://...">
+                    <label for="editPWebLinkUrl">Đường dẫn URL (Bắt buộc)</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" id="editPWebLinkDesc" class="form-control" placeholder="Mô tả">
+                    <label for="editPWebLinkDesc">Mô tả ngắn</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select id="editPWebLinkIcon" class="form-select">
+                        <option value="fa-solid fa-link">🔗 Biểu tượng Liên kết mặc định</option>
+                        <option value="fa-solid fa-globe">🌐 Trang Web / Portal</option>
+                        <option value="fa-solid fa-star">⭐ Yêu thích / Quan trọng</option>
+                        <option value="fa-solid fa-bookmark">🔖 Thẻ ghi nhớ / Bookmark</option>
+                        <option value="fa-solid fa-book">📚 Sách / Giáo trình</option>
+                        <option value="fa-solid fa-graduation-cap">🎓 Trường học / Học thuật</option>
+                        <option value="fa-solid fa-calculator">🧮 Máy tính / Toán học</option>
+                        <option value="fa-solid fa-file-pdf">📄 File Tài liệu PDF</option>
+                        <option value="fa-brands fa-google-drive">📂 Google Drive</option>
+                        <option value="fa-solid fa-folder-open">📁 Thư mục / Folder</option>
+                        <option value="fa-solid fa-cloud">☁️ Đám mây / Lưu trữ</option>
+                        <option value="fa-solid fa-code">💻 Lập trình / Code</option>
+                        <option value="fa-solid fa-laptop-code">🖥️ Công nghệ / Phần mềm</option>
+                        <option value="fa-brands fa-github">🐙 Github / Source Code</option>
+                        <option value="fa-brands fa-python">🐍 Ngôn ngữ Python</option>
+                        <option value="fa-solid fa-database">🗄️ Cơ sở dữ liệu</option>
+                        <option value="fa-brands fa-youtube">📺 YouTube / Video</option>
+                        <option value="fa-solid fa-video">🎥 Video Call / Zoom / Meet</option>
+                        <option value="fa-brands fa-facebook-messenger">💬 Messenger / Chat</option>
+                        <option value="fa-solid fa-comments">🗣️ Diễn đàn / Thảo luận</option>
+
+                        <option value="fa-solid fa-bullhorn">📢 Thông báo / Tin tức</option>
+                        <option value="fa-solid fa-calendar-days">📅 Lịch học / Thời khóa biểu</option>
+                        <option value="fa-solid fa-clock">⏰ Thời gian / Deadline</option>
+                        <option value="fa-solid fa-list-check">✅ Checklist / Công việc</option>
+                    </select>
+                    <label for="editPWebLinkIcon">Chọn Biểu tượng</label>
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white fw-bold px-4" style="background-color: #f59e0b;" onclick="saveEditPersonalWebLink()" id="btnSaveEditWebLink">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
 <div id="tkbSection" class="d-none">
     <header class="top-header d-flex justify-content-between align-items-center">
         <div class="page-title"><i class="fa-regular fa-calendar-days"></i> Thời gian biểu & Deadlines</div>

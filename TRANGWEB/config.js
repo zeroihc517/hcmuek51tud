@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwXT-72pMO_NWAVFjHNaW1VRNKkV-VrRb3-STZeWeUzjAU3KLAYBfgH9AL98RkvWBa9/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxL-29N3K9sl9fAY7n9NCjluE4xi2VhJ1hzeubISPUyxzLSWbvFuCnwOSxjlbbz31mr/exec'; 
 
      let isAdmin = localStorage.getItem('isAdmin') === 'true';
         let currentSheetName = "";
