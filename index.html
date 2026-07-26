@@ -289,29 +289,55 @@
             dataType: "json",
             success: function(data) {
                 let globalData = data?.global || (Array.isArray(data) ? data : []);
+                let html = '';
 
-                if (!globalData || globalData.length === 0) {
+                // KIỂM TRA NẾU LA ADMIN -> HIỂN THỊ CƠ SỞ DỮ LIỆU & MS TEAMS
+                let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+                let isSystemAdmin = currentUser && (String(currentUser.mssv).trim() === "51.01.108.008" || String(currentUser.mssv).trim() === "5101108008");
+
+                if (isSystemAdmin) {
+                    html += `
+                    <div class="platform-card" onclick="window.open('https://docs.google.com/spreadsheets/d/13bQ6y0fn8n9Ah4OKQeQ9xOVJxXXnXRLjaIxTQPx-eGo/edit?usp=sharing', '_blank')" style="border-bottom: 4px solid #16a34a;">
+                        <div class="icon">
+                            <i class="fa-solid fa-database" style="color: #16a34a;"></i>
+                        </div>
+                        <h4 style="color: #16a34a;">Cơ sở dữ liệu</h4>
+                        <p style="font-size: 12px; color: #e61d4a; font-weight: 700; margin-top: 4px;">[ADMIN ONLY]</p>
+                    </div>
+
+                    <div class="platform-card" onclick="window.open('https://teams.cloud.microsoft/l/team/19%3AG3AZ0si8ueyRMaXW3zI-siWOxk1cyIA9Aol3zliL8Sw1%40thread.tacv2/conversations?groupId=d88461ae-d3dd-44d2-aae0-e8d021da1e68&tenantId=b1a9fdc0-1d56-4c3d-a481-809fff8a26db', '_blank')" style="border-bottom: 4px solid #464eb8;">
+                        <div class="icon">
+                            <i class="fa-brands fa-microsoft" style="color: #464eb8;"></i>
+                        </div>
+                        <h4 style="color: #464eb8;">MS Teams</h4>
+                        <p style="font-size: 12px; color: #e61d4a; font-weight: 700; margin-top: 4px;">[ADMIN ONLY]</p>
+                    </div>`;
+                }
+
+                // DUYỆT TẤT CẢ CÁC LINK HỆ THỐNG
+                if (globalData && globalData.length > 0) {
+                    globalData.forEach(item => {
+                        let title = item.title || item[0] || 'Liên kết';
+                        let url = item.url || item[2] || '#';
+                        let iconClass = item.icon || item[3] || 'fa-solid fa-link';
+                        let desc = item.desc || item[1] || '';
+
+                        html += `
+                            <div class="platform-card" onclick="window.open('${url}', '_blank')">
+                                <div class="icon">
+                                    <i class="${iconClass}" style="color: #0f4c81;"></i>
+                                </div>
+                                <h4>${title}</h4>
+                                ${desc ? `<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">${desc}</p>` : ''}
+                            </div>
+                        `;
+                    });
+                }
+
+                if (!html) {
                     container.html('<div style="grid-column: 1 / -1; text-align: center; color: #6b7280;">Chưa có dữ liệu hệ thống.</div>');
                     return;
                 }
-
-                let html = '';
-                globalData.forEach(item => {
-                    let title = item.title || item[0] || 'Liên kết';
-                    let url = item.url || item[2] || '#';
-                    let iconClass = item.icon || item[3] || 'fa-solid fa-link';
-                    let desc = item.desc || item[1] || '';
-
-                    html += `
-                        <div class="platform-card" onclick="window.open('${url}', '_blank')">
-                            <div class="icon">
-                                <i class="${iconClass}" style="color: #0f4c81;"></i>
-                            </div>
-                            <h4>${title}</h4>
-                            ${desc ? `<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">${desc}</p>` : ''}
-                        </div>
-                    `;
-                });
 
                 container.html(html);
             },
@@ -330,7 +356,6 @@
         const container = $('#ungdung .platform-grid');
         if (!container.length) return;
 
-        // Lấy thông tin user đăng nhập
         let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
         let mssvParam = currentUser ? currentUser.mssv : "";
 
