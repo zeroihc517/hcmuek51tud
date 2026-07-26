@@ -266,10 +266,144 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<script src="nentang.js"></script>
-<script src="ungdung.js"></script>
 <script src="scriptindex.js"></script>
+<script>
+    // URL Google Apps Script lấy dữ liệu Web Links từ hệ thống
+    const SCRIPT_URL_WEBLINKS = 'https://script.google.com/macros/s/AKfycbxL-29N3K9sl9fAY7n9NCjluE4xi2VhJ1hzeubISPUyxzLSWbvFuCnwOSxjlbbz31mr/exec';
 
+    // 1. HÀM TẢI LINK HỆ THỐNG (HCMUE)
+    function loadHcmueLinks() {
+        const container = $('#nentang .platform-grid');
+        if (!container.length) return;
+
+        container.html(`
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280; font-weight: 500;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+                Đang tải danh sách liên kết hệ thống HCMUE...
+            </div>
+        `);
+
+        $.ajax({
+            url: SCRIPT_URL_WEBLINKS + "?action=getWebLinks",
+            method: "GET",
+            dataType: "json",
+            success: function(data) {
+                let globalData = data?.global || (Array.isArray(data) ? data : []);
+
+                if (!globalData || globalData.length === 0) {
+                    container.html('<div style="grid-column: 1 / -1; text-align: center; color: #6b7280;">Chưa có dữ liệu hệ thống.</div>');
+                    return;
+                }
+
+                let html = '';
+                globalData.forEach(item => {
+                    let title = item.title || item[0] || 'Liên kết';
+                    let url = item.url || item[2] || '#';
+                    let iconClass = item.icon || item[3] || 'fa-solid fa-link';
+                    let desc = item.desc || item[1] || '';
+
+                    html += `
+                        <div class="platform-card" onclick="window.open('${url}', '_blank')">
+                            <div class="icon">
+                                <i class="${iconClass}" style="color: #0f4c81;"></i>
+                            </div>
+                            <h4>${title}</h4>
+                            ${desc ? `<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">${desc}</p>` : ''}
+                        </div>
+                    `;
+                });
+
+                container.html(html);
+            },
+            error: function() {
+                container.html(`
+                    <div style="grid-column: 1 / -1; text-align: center; color: #dc2626;">
+                        <i class="fa-solid fa-triangle-exclamation fs-3 mb-2"></i><br>Lỗi tải liên kết hệ thống!
+                    </div>
+                `);
+            }
+        });
+    }
+
+    // 2. HÀM TẢI LINK CÁ NHÂN (DO BẠN TỰ TẠO)
+    function loadPersonalLinks() {
+        const container = $('#ungdung .platform-grid');
+        if (!container.length) return;
+
+        // Lấy thông tin user đăng nhập
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+        let mssvParam = currentUser ? currentUser.mssv : "";
+
+        if (!mssvParam) {
+            container.html(`
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280;">
+                    <i class="fa-solid fa-lock" style="font-size: 32px; margin-bottom: 10px; color: #94a3b8;"></i><br>
+                    Vui lòng đăng nhập để xem danh sách liên kết cá nhân của bạn.
+                </div>
+            `);
+            return;
+        }
+
+        container.html(`
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280; font-weight: 500;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+                Đang tải góc liên kết cá nhân...
+            </div>
+        `);
+
+        $.ajax({
+            url: SCRIPT_URL_WEBLINKS + "?action=getWebLinks&mssv=" + encodeURIComponent(mssvParam),
+            method: "GET",
+            dataType: "json",
+            success: function(data) {
+                let personalData = data?.personal || [];
+
+                if (!personalData || personalData.length === 0) {
+                    container.html(`
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280;">
+                            <i class="fa-solid fa-folder-open" style="font-size: 32px; margin-bottom: 10px; color: #cbd5e1;"></i><br>
+                            Bạn chưa tạo liên kết cá nhân nào trong ứng dụng.
+                        </div>
+                    `);
+                    return;
+                }
+
+                let html = '';
+                personalData.forEach(item => {
+                    let title = item.title || 'Liên kết cá nhân';
+                    let url = item.url || '#';
+                    let iconClass = item.icon || 'fa-solid fa-star';
+                    let desc = item.desc || '';
+
+                    html += `
+                        <div class="platform-card" onclick="window.open('${url}', '_blank')">
+                            <div class="icon">
+                                <i class="${iconClass}" style="color: #16a34a;"></i>
+                            </div>
+                            <h4 style="color: #16a34a;">${title}</h4>
+                            ${desc ? `<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">${desc}</p>` : ''}
+                        </div>
+                    `;
+                });
+
+                container.html(html);
+            },
+            error: function() {
+                container.html(`
+                    <div style="grid-column: 1 / -1; text-align: center; color: #dc2626;">
+                        <i class="fa-solid fa-triangle-exclamation fs-3 mb-2"></i><br>Lỗi tải liên kết cá nhân!
+                    </div>
+                `);
+            }
+        });
+    }
+
+    // 3. TỰ ĐỘNG CHẠY KHI TRANG TẢI XONG
+    $(document).ready(function() {
+        loadHcmueLinks();
+        loadPersonalLinks();
+    });
+</script>
 <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwFrdlU4Y-v7gdqmwrUK550KU-Dnn4_wArqSNxyxsZ5AGFvmWeC4id_YP8_Lfpo25Am/exec';
     const ADMIN_MSSV = "51.01.108.008"; 
