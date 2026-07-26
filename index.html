@@ -352,76 +352,68 @@
     }
 
     // 2. HÀM TẢI LINK CÁ NHÂN (ĐỒNG BỘ MÀU #0f4c81)
-    function loadPersonalLinks() {
-        const container = $('#ungdung .platform-grid');
-        if (!container.length) return;
+   // 2. HÀM TẢI LINK CÁ NHÂN (TỰ ĐỘNG HIỂN THỊ KHÔNG CẦN ĐĂNG NHẬP)
+function loadPersonalLinks() {
+    const container = $('#ungdung .platform-grid');
+    if (!container.length) return;
 
-        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-        let mssvParam = currentUser ? currentUser.mssv : "";
+    // Lấy thông tin user nếu có, nếu chưa có thì gán mặc định MSSV admin
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    let mssvParam = (currentUser && currentUser.mssv) ? currentUser.mssv : "51.01.108.008"; 
 
-        if (!mssvParam) {
-            container.html(`
-                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280;">
-                    <i class="fa-solid fa-lock" style="font-size: 32px; margin-bottom: 10px; color: #94a3b8;"></i><br>
-                    Vui lòng đăng nhập để xem danh sách liên kết cá nhân của bạn.
-                </div>
-            `);
-            return;
-        }
+    container.html(`
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280; font-weight: 500;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+            Đang tải góc liên kết cá nhân...
+        </div>
+    `);
 
-        container.html(`
-            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280; font-weight: 500;">
-                <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>
-                Đang tải góc liên kết cá nhân...
-            </div>
-        `);
+    $.ajax({
+        url: SCRIPT_URL_WEBLINKS + "?action=getWebLinks&mssv=" + encodeURIComponent(mssvParam),
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            let personalData = data?.personal || [];
 
-        $.ajax({
-            url: SCRIPT_URL_WEBLINKS + "?action=getWebLinks&mssv=" + encodeURIComponent(mssvParam),
-            method: "GET",
-            dataType: "json",
-            success: function(data) {
-                let personalData = data?.personal || [];
-
-                if (!personalData || personalData.length === 0) {
-                    container.html(`
-                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280;">
-                            <i class="fa-solid fa-folder-open" style="font-size: 32px; margin-bottom: 10px; color: #cbd5e1;"></i><br>
-                            Bạn chưa tạo liên kết cá nhân nào trong ứng dụng.
-                        </div>
-                    `);
-                    return;
-                }
-
-                let html = '';
-                personalData.forEach(item => {
-                    let title = item.title || 'Liên kết cá nhân';
-                    let url = item.url || '#';
-                    let iconClass = item.icon || 'fa-solid fa-link';
-                    let desc = item.desc || '';
-
-                    html += `
-                        <div class="platform-card" onclick="window.open('${url}', '_blank')" style="border-bottom: 4px solid #0f4c81;">
-                            <div class="icon">
-                                <i class="${iconClass}" style="color: #0f4c81;"></i>
-                            </div>
-                            <h4 style="color: #0f4c81;">${title}</h4>
-                            ${desc ? `<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">${desc}</p>` : ''}
-                        </div>
-                    `;
-                });
-
-                container.html(html);
-            },
-            error: function() {
+            if (!personalData || personalData.length === 0) {
                 container.html(`
-                    <div style="grid-column: 1 / -1; text-align: center; color: #dc2626;">
-                        <i class="fa-solid fa-triangle-exclamation fs-3 mb-2"></i><br>Lỗi tải liên kết cá nhân!
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280;">
+                        <i class="fa-solid fa-folder-open" style="font-size: 32px; margin-bottom: 10px; color: #cbd5e1;"></i><br>
+                        Chưa có dữ liệu liên kết cá nhân.
                     </div>
                 `);
+                return;
             }
-        });
-    }
+
+            let html = '';
+            personalData.forEach(item => {
+                let title = item.title || 'Liên kết cá nhân';
+                let url = item.url || '#';
+                let iconClass = item.icon || 'fa-solid fa-link';
+                let desc = item.desc || '';
+
+                html += `
+                    <div class="platform-card" onclick="window.open('${url}', '_blank')" style="border-bottom: 4px solid #0f4c81;">
+                        <div class="icon">
+                            <i class="${iconClass}" style="color: #0f4c81;"></i>
+                        </div>
+                        <h4 style="color: #0f4c81;">${title}</h4>
+                        ${desc ? `<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">${desc}</p>` : ''}
+                    </div>
+                `;
+            });
+
+            container.html(html);
+        },
+        error: function() {
+            container.html(`
+                <div style="grid-column: 1 / -1; text-align: center; color: #dc2626;">
+                    <i class="fa-solid fa-triangle-exclamation fs-3 mb-2"></i><br>Lỗi tải liên kết cá nhân!
+                </div>
+            `);
+        }
+    });
+}
 
     // 3. TỰ ĐỘNG CHẠY KHI TRANG TẢI XONG
     $(document).ready(function() {
