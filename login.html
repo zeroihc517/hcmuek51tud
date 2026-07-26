@@ -15,9 +15,9 @@ body {
     position: relative;
     overflow-x: hidden;
 
-    /* Nền chia đôi 50/50: Bên trái là Code (tối), Bên phải là Toán (sáng & rõ) */
+    /* Thêm 3 lớp ảnh background: 2 ảnh bên trái (trên & dưới) + 1 ảnh bên phải */
     background-image: 
-        /* Lớp phủ dải màu: Giảm độ mờ bên phải để ảnh Toán sáng đẹp */
+        /* 1. Lớp phủ dải màu làm dịu nền */
         linear-gradient(
             to right, 
             rgba(15, 23, 42, 0.65) 0%, 
@@ -25,13 +25,19 @@ body {
             rgba(15, 23, 42, 0.10) 55%, 
             rgba(255, 255, 255, 0.05) 100%
         ),
-        /* Ảnh Code bên trái (Tin học / Lập trình) */
+        /* 2. Ảnh góc TRÊN - TRÁI */
         url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop'),
-        /* Ảnh Toán bên phải (Sáng rõ, công thức toán học sắc nét) */
-        url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop');
-    /* Thiết lập vị trí và kích thước chia đôi */
-    background-position: left center, left center, right center;
-    background-size: cover, 50% 100%, 50% 100%;
+        /* 3. Ảnh góc DƯỚI - TRÁI (Thay link nếu muốn ảnh khác) */
+        url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop'),
+        /* 4. Ảnh BÊN PHẢI (Google Drive) */
+        url('https://lh3.googleusercontent.com/d/17akZmGaju-Rt_UnRJ2zfZPTJpNIlOAZ8');
+
+    /* Vị trí tương ứng: Lớp phủ, Trái Trên, Trái Dưới, Phải */
+    background-position: left center, left top, left bottom, right center;
+
+    /* Kích thước tương ứng: Lớp phủ full, Trái Trên (50% x 50%), Trái Dưới (50% x 50%), Phải (50% x 100%) */
+    background-size: cover, 50% 50%, 50% 50%, 50% 100%;
+
     background-repeat: no-repeat;
     background-attachment: fixed;
 }
