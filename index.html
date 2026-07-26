@@ -291,21 +291,21 @@
                 let globalData = data?.global || (Array.isArray(data) ? data : []);
                 let html = '';
 
-                // KIỂM TRA NẾU LA ADMIN -> HIỂN THỊ CƠ SỞ DỮ LIỆU & MS TEAMS
+                // KIỂM TRA NẾU LÀ ADMIN -> HIỂN THỊ CƠ SỞ DỮ LIỆU & MS TEAMS
                 let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
                 let isSystemAdmin = currentUser && (String(currentUser.mssv).trim() === "51.01.108.008" || String(currentUser.mssv).trim() === "5101108008");
 
                 if (isSystemAdmin) {
                     html += `
-                    <div class="platform-card" onclick="window.open('https://docs.google.com/spreadsheets/d/13bQ6y0fn8n9Ah4OKQeQ9xOVJxXXnXRLjaIxTQPx-eGo/edit?usp=sharing', '_blank')" style="border-bottom: 4px solid #16a34a;">
+                    <div class="platform-card" onclick="window.open('https://docs.google.com/spreadsheets/d/13bQ6y0fn8n9Ah4OKQeQ9xOVJxXXnXRLjaIxTQPx-eGo/edit?usp=sharing', '_blank')" style="border-bottom: 4px solid #0f4c81; background: #ffffff;">
                         <div class="icon">
-                            <i class="fa-solid fa-database" style="color: #16a34a;"></i>
+                            <i class="fa-solid fa-database" style="color: #0f4c81;"></i>
                         </div>
-                        <h4 style="color: #16a34a;">Cơ sở dữ liệu</h4>
+                        <h4 style="color: #0f4c81;">Cơ sở dữ liệu</h4>
                         <p style="font-size: 12px; color: #e61d4a; font-weight: 700; margin-top: 4px;">[ADMIN ONLY]</p>
                     </div>
 
-                    <div class="platform-card" onclick="window.open('https://teams.cloud.microsoft/l/team/19%3AG3AZ0si8ueyRMaXW3zI-siWOxk1cyIA9Aol3zliL8Sw1%40thread.tacv2/conversations?groupId=d88461ae-d3dd-44d2-aae0-e8d021da1e68&tenantId=b1a9fdc0-1d56-4c3d-a481-809fff8a26db', '_blank')" style="border-bottom: 4px solid #464eb8;">
+                    <div class="platform-card" onclick="window.open('https://teams.cloud.microsoft/l/team/19%3AG3AZ0si8ueyRMaXW3zI-siWOxk1cyIA9Aol3zliL8Sw1%40thread.tacv2/conversations?groupId=d88461ae-d3dd-44d2-aae0-e8d021da1e68&tenantId=b1a9fdc0-1d56-4c3d-a481-809fff8a26db', '_blank')" style="border-bottom: 4px solid #464eb8; background: #ffffff;">
                         <div class="icon">
                             <i class="fa-brands fa-microsoft" style="color: #464eb8;"></i>
                         </div>
@@ -314,7 +314,7 @@
                     </div>`;
                 }
 
-                // DUYỆT TẤT CẢ CÁC LINK HỆ THỐNG
+                // DUYỆT TẤT CẢ CÁC LINK HỆ THỐNG (ĐỒNG BỘ MÀU #0f4c81)
                 if (globalData && globalData.length > 0) {
                     globalData.forEach(item => {
                         let title = item.title || item[0] || 'Liên kết';
@@ -323,11 +323,11 @@
                         let desc = item.desc || item[1] || '';
 
                         html += `
-                            <div class="platform-card" onclick="window.open('${url}', '_blank')">
+                            <div class="platform-card" onclick="window.open('${url}', '_blank')" style="border-bottom: 4px solid #0f4c81;">
                                 <div class="icon">
                                     <i class="${iconClass}" style="color: #0f4c81;"></i>
                                 </div>
-                                <h4>${title}</h4>
+                                <h4 style="color: #0f4c81;">${title}</h4>
                                 ${desc ? `<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">${desc}</p>` : ''}
                             </div>
                         `;
@@ -351,7 +351,7 @@
         });
     }
 
-    // 2. HÀM TẢI LINK CÁ NHÂN (DO BẠN TỰ TẠO)
+    // 2. HÀM TẢI LINK CÁ NHÂN (ĐỒNG BỘ MÀU #0f4c81)
     function loadPersonalLinks() {
         const container = $('#ungdung .platform-grid');
         if (!container.length) return;
@@ -397,15 +397,15 @@
                 personalData.forEach(item => {
                     let title = item.title || 'Liên kết cá nhân';
                     let url = item.url || '#';
-                    let iconClass = item.icon || 'fa-solid fa-star';
+                    let iconClass = item.icon || 'fa-solid fa-link';
                     let desc = item.desc || '';
 
                     html += `
-                        <div class="platform-card" onclick="window.open('${url}', '_blank')">
+                        <div class="platform-card" onclick="window.open('${url}', '_blank')" style="border-bottom: 4px solid #0f4c81;">
                             <div class="icon">
-                                <i class="${iconClass}" style="color: #16a34a;"></i>
+                                <i class="${iconClass}" style="color: #0f4c81;"></i>
                             </div>
-                            <h4 style="color: #16a34a;">${title}</h4>
+                            <h4 style="color: #0f4c81;">${title}</h4>
                             ${desc ? `<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">${desc}</p>` : ''}
                         </div>
                     `;
@@ -626,36 +626,75 @@
     }
 
     function renderDeadlines() {
-        const container = document.getElementById('deadline-container');
-        if (!container) return;
-        
-        let weekStart = new Date(currentSelectedMonday);
-        weekStart.setHours(0,0,0,0);
-        
-        let weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        weekEnd.setHours(23,59,59,999);
+    const container = document.getElementById('deadline-container');
+    if (!container) return;
+    
+    let weekStart = new Date(currentSelectedMonday);
+    weekStart.setHours(0,0,0,0);
+    
+    let weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23,59,59,999);
 
-        let filtered = globalDeadlineData.filter(d => {
-            let sDate = parseDateString(d.dateStart);
-            let eDate = parseDateString(d.dateEnd);
-            if(!sDate || !eDate) return false;
-            return sDate <= weekEnd && eDate >= weekStart;
-        });
+    let filtered = globalDeadlineData.filter(d => {
+        let sDate = parseDateString(d.dateStart);
+        let eDate = parseDateString(d.dateEnd);
+        if(!sDate || !eDate) return false;
+        return sDate <= weekEnd && eDate >= weekStart;
+    });
 
-        if(filtered.length === 0) {
-            container.innerHTML = "<p style='text-align:center; width:100%; grid-column: 1 / -1; color:#666;'>Tuần này không có deadline.</p>";
-            return;
+    if(filtered.length === 0) {
+        container.innerHTML = "<p style='text-align:center; width:100%; grid-column: 1 / -1; color:#666;'>Tuần này không có deadline.</p>";
+        return;
+    }
+
+    container.innerHTML = filtered.map(item => {
+        let rawTitle = item.title || "";
+        let rawTag = item.tag || "";
+        
+        // Trích xuất link từ title hoặc tag
+        let linkFromTitle = checkAndExtractUrl(rawTitle);
+        let linkFromTag = checkAndExtractUrl(rawTag);
+        let targetLink = linkFromTitle || linkFromTag;
+
+        // Xử lý tiêu đề (Xóa link thô nếu có)
+        let displayTitle = rawTitle;
+        if (linkFromTitle) {
+            displayTitle = rawTitle.replace(linkFromTitle, '').trim();
         }
 
-        container.innerHTML = filtered.map(item => `
-            <div class="online-card">
-                <div class="icon-circle ${item.icon}">${item.emoji || '📌'}</div>
-                <h3>${item.duration}</h3>
-                <p class="desc">${item.title}</p>
-                <span class="tag">${item.tag}</span>
-            </div>`).join('');
-    }
+        // Xử lý Tag/Hình thức (Xóa link thô nếu có)
+        let displayTag = rawTag;
+        if (linkFromTag) {
+            displayTag = rawTag.replace(linkFromTag, '').trim();
+        }
+
+        // Tạo nút Link ẩn đẹp mắt chuẩn web Apple ID
+        let linkHtml = '';
+        if (targetLink) {
+            let labelText = displayTag || "Xem tài liệu / Liên kết";
+            linkHtml = `
+                <div style="margin-top: 10px;">
+                    <a href="${targetLink}" target="_blank" rel="noopener noreferrer" 
+                       style="display: inline-block; padding: 6px 16px; background: #dbeafe; color: #1e40af; font-weight: 600; border-radius: 999px; font-size: 13px; text-decoration: none; transition: all 0.2s;">
+                        <i class="fa-solid fa-link me-1"></i> ${labelText} <i class="fa-solid fa-arrow-up-right-from-square ms-1" style="font-size: 11px;"></i>
+                    </a>
+                </div>
+            `;
+        } else if (displayTag) {
+            linkHtml = `<span class="tag" style="margin-top: 8px;">${displayTag}</span>`;
+        }
+
+        return `
+        <div class="online-card">
+            <div class="icon-circle ${item.icon}">${item.emoji || '📌'}</div>
+            <!-- DÒNG NGÀY THÁNG ĐÃ ĐƯỢC ĐỔI SANG MÀU ĐỎ NỔI BẬT -->
+            <h3 style="color: #b91c1c; font-weight: 800;">${item.duration}</h3>
+            <p class="desc" style="font-weight: 600; color: #1f2937; margin-bottom: 6px;">${displayTitle}</p>
+            ${linkHtml}
+        </div>`;
+    }).join('');
+}
 
     function loadThoiGianBieuAdmin() {
         $.ajax({

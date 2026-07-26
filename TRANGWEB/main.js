@@ -3000,9 +3000,9 @@ function renderWebLinks(data) {
     if (isSystemAdmin) {
         globalHtml += `
         <div class="col mb-3">
-            <a href="https://docs.google.com/spreadsheets/d/13bQ6y0fn8n9Ah4OKQeQ9xOVJxXXnXRLjaIxTQPx-eGo/edit?usp=sharing" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #16a34a; background: #f8fafc;">
+            <a href="https://docs.google.com/spreadsheets/d/13bQ6y0fn8n9Ah4OKQeQ9xOVJxXXnXRLjaIxTQPx-eGo/edit?usp=sharing" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #0f4c81; background: #f8fafc;">
                 <div class="link-card-badge bg-danger shadow-sm">ADMIN ONLY</div>
-                <div class="icon-box"><i class="fa-solid fa-database" style="color: #16a34a;"></i></div>
+                <div class="icon-box"><i class="fa-solid fa-database" style="color: #0f4c81;"></i></div>
                 <div class="card-text-wrapper">
                     <h5>Cơ sở dữ liệu</h5>
                     <p class="card-desc">Quản lý hệ thống toàn diện</p>
@@ -3044,7 +3044,7 @@ function renderWebLinks(data) {
     }
     $('#webLinksContainer').html(globalHtml); 
 
-    // Link Cá Nhân
+    // Link Cá Nhân (Đã đồng bộ màu viền, icon và chữ sang #0f4c81)
     if (currentUser) {
         $('#titlePersonalLinks').show();
         let personalHtml = '';
@@ -3059,7 +3059,6 @@ function renderWebLinks(data) {
 
                 personalHtml += `
                 <div class="col mb-3 position-relative"> 
-                    <!-- Nút bấm gọi hàm thông qua CHỈ SỐ INDEX thay vì truyền chuỗi -->
                     <div class="position-absolute d-flex gap-1" style="top: 8px; right: 12px; z-index: 20;">
                         <button type="button" class="btn btn-sm btn-warning text-white shadow-sm" style="border-radius: 50%; width: 28px; height: 28px; padding: 0;" onclick="openEditPersonalLinkByIndex(${index}, event)" title="Chỉnh sửa liên kết">
                             <i class="fa-solid fa-pen" style="font-size: 11px;"></i>
@@ -3069,10 +3068,10 @@ function renderWebLinks(data) {
                         </button>
                     </div>
                     
-                    <a href="${url}" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #16a34a;">
-                        <div class="icon-box"><i class="${iconClass}" style="color: #16a34a;"></i></div>
+                    <a href="${url}" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #0f4c81;">
+                        <div class="icon-box"><i class="${iconClass}" style="color: #0f4c81;"></i></div>
                         <div class="card-text-wrapper">
-                            <h5 style="color: #16a34a;">${title}</h5>
+                            <h5 style="color: #0f4c81;">${title}</h5>
                             ${descHtml} 
                         </div>
                     </a>
