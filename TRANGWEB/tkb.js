@@ -1293,7 +1293,8 @@ function renderSystemCoursesList() {
             mergedClasses[course.id] = {
                 id: course.id, mon: course.mon, gv: course.gv,
                 phongList: [], thoiGianList: [], rawSchedules: [],
-                hinhThuc: course.hinhThuc, ngayBatDau: course.ngayBatDau, ngayKetThuc: course.ngayKetThuc
+                hinhThuc: course.hinhThuc, ngayBatDau: course.ngayBatDau, ngayKetThuc: course.ngayKetThuc,
+		ngayNgoaiLe: course.ngayNgoaiLe || ""
             };
         } else {
             let currentStart = parseDateString(mergedClasses[course.id].ngayBatDau);
@@ -1807,7 +1808,9 @@ if (syncType === 'switch_class') {
                             mon: c.mon, thu: parseInt(c.thu), tietBd: parseInt(c.tietBd),
                             soTiet: parseInt(c.soTiet), hinhThuc: c.hinhThuc, phong: c.phong,
                             gv: c.gv, color: c.color, ngayBatDau: c.ngayBatDau,
-                            ngayKetThuc: c.ngayKetThuc, sheetRowIndex: "TEMP_" + Date.now() + Math.random(), isSystem: false
+                            ngayKetThuc: c.ngayKetThuc, 
+ngayNgoaiLe: c.ngayNgoaiLe || "",
+				sheetRowIndex: "TEMP_" + Date.now() + Math.random(), isSystem: false
                         });
                     });
 
@@ -1896,7 +1899,9 @@ if (syncType === 'switch_class') {
                     mon: c.mon, thu: parseInt(c.thu), tietBd: parseInt(c.tietBd),
                     soTiet: parseInt(c.soTiet), hinhThuc: c.hinhThuc, phong: c.phong,
                     gv: c.gv, color: c.color, ngayBatDau: c.ngayBatDau,
-                    ngayKetThuc: c.ngayKetThuc, sheetRowIndex: "TEMP_" + Date.now(), isSystem: false
+                    ngayKetThuc: c.ngayKetThuc, 
+ngayNgoaiLe: c.ngayNgoaiLe || "",
+	sheetRowIndex: "TEMP_" + Date.now(), isSystem: false
                 });
             });
 
