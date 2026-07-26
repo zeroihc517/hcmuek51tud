@@ -1229,94 +1229,97 @@
 
 <div class="modal fade" id="deadlinePersonalModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-                <div class="modal-header text-white" id="dlModalHeader" style="background-color: #0f4c81; border-top-left-radius: 20px; border-top-right-radius: 20px; position: relative;">
-                    <h6 class="modal-title m-0 fw-bold text-center w-100 text-uppercase" id="dlModalTitle"><i class="fa-solid fa-plus me-2"></i>Thêm Deadline</h6>
-                    <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header text-white" id="dlModalHeader" style="background-color: #0f4c81; border-top-left-radius: 20px; border-top-right-radius: 20px; position: relative;">
+                <h6 class="modal-title m-0 fw-bold text-center w-100 text-uppercase" id="dlModalTitle"><i class="fa-solid fa-plus me-2"></i>Thêm Deadline</h6>
+                <button type="button" class="btn-close btn-close-white position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 p-md-5">
+                <input type="hidden" id="pDlRowIndex" value="">
+                
+                <!-- BỔ SUNG Ô NHẬP MÃ LỚP HỌC PHẦN -->
+                <div class="form-floating form-floating-custom mb-3">
+                    <input type="text" id="pDlMaHP" class="form-control" placeholder="Mã lớp học phần (nếu có)">
+                    <label for="pDlMaHP">Mã lớp học phần (Ví dụ: COMP1013)</label>
                 </div>
-                <div class="modal-body p-4 p-md-5">
-                    <input type="hidden" id="pDlRowIndex" value="">
-                    
-<div class="form-floating form-floating-custom mb-4">
-    <textarea id="pDlTitle" class="form-control" placeholder="Tên công việc / Bài tập" style="height: 100px; border-radius: 20px;"></textarea>
-    <label for="pDlTitle">Tên công việc / Bài tập</label>
-</div>
-                    
-<div class="row g-3 mb-4">
-    <div class="col-6">
-        <div class="form-floating form-floating-custom">
-            <input type="text" id="pDlTag" class="form-control" placeholder="Hình thức (VD: VLE)">
-            <label for="pDlTag">Hình thức (VD: VLE)</label>
-        </div>
-    </div>
-    <div class="col-6">
-        <div class="form-floating form-floating-custom">
-            <input type="text" id="pDlLink" class="form-control" placeholder="Link đính kèm (nếu có)">
-            <label for="pDlLink">Địa chỉ / Link liên kết</label>
-        </div>
-    </div>
-</div>
-                    
-                    <div class="row g-3 mb-4">
-                        <div class="col-6">
-                            <div class="form-floating form-floating-custom">
-                                <select id="pDlIcon" class="form-select" style="border-radius: 50px !important; padding-left: 1.5rem; height: 58px;">
-                                    <option value="fire">Đỏ (Gấp)</option>
-                                    <option value="alert">Vàng</option>
-                                    <option value="success">Xanh lá</option>
-                                    <option value="primary">Xanh dương</option>
-                                    <option value="secondary">Tím</option>
-                                </select>
-                                <label for="pDlIcon" style="padding-left: 1.5rem;">Màu nền</label>
-                            </div>
-                        </div>
-<div class="col-6">
-    <div class="form-floating form-floating-custom">
-        <!-- Đổi thành input kết nối với datalist qua id "emojiOptions" -->
-        <input type="text" list="emojiOptions" id="pDlEmoji" class="form-control" placeholder="Biểu tượng" autocomplete="off">
-        <label for="pDlEmoji">Biểu tượng</label>
-        
-        <!-- Danh sách gợi ý thả xuống -->
-        <datalist id="emojiOptions">
-            <option value="⏰">Việc cá nhân</option>
-            <option value="🚨">Khẩn cấp</option>
-            <option value="📚">Bài tập</option>
-            <option value="💻">Lập trình / C++</option>
-            <option value="✍️">Kiểm tra</option>
-            <option value="🎯">Mục tiêu</option>
-            <option value="👥">Họp nhóm</option>
-            <option value="📢">Thuyết trình</option>
-            <option value="📝">Báo cáo</option>
-	    <option value="📣">Sự kiện</option>
-            <option value="🌐">Hệ thống VLE</option>
-        </datalist>
-    </div>
-</div>
-</div>
-                    
-                    <div class="row g-3 mb-2">
-                        <div class="col-6">
-                            <div class="form-floating form-floating-custom">
-                                <input type="text" id="pDlStartDate" class="form-control" placeholder="Từ ngày (DD/MM/YYYY)">
-                                <label for="pDlStartDate">Từ ngày</label>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="form-floating form-floating-custom">
-                                <input type="text" id="pDlEndDate" class="form-control" placeholder="Đến ngày (DD/MM/YYYY)">
-                                <label for="pDlEndDate">Đến ngày</label>
-                            </div>
+
+                <div class="form-floating form-floating-custom mb-4">
+                    <textarea id="pDlTitle" class="form-control" placeholder="Tên công việc / Bài tập" style="height: 100px; border-radius: 20px;"></textarea>
+                    <label for="pDlTitle">Tên công việc / Bài tập</label>
+                </div>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <div class="form-floating form-floating-custom">
+                            <input type="text" id="pDlTag" class="form-control" placeholder="Hình thức (VD: VLE)">
+                            <label for="pDlTag">Hình thức (VD: VLE)</label>
                         </div>
                     </div>
-                    <div class="text-center"><small class="text-muted" style="font-size: 12px;">Định dạng ngày chuẩn: <b>DD/MM/YYYY</b> (Ví dụ: 15/10/2026)</small></div>
+                    <div class="col-6">
+                        <div class="form-floating form-floating-custom">
+                            <input type="text" id="pDlLink" class="form-control" placeholder="Link đính kèm (nếu có)">
+                            <label for="pDlLink">Địa chỉ / Link liên kết</label>
+                        </div>
+                    </div>
                 </div>
-                <div class="modal-footer border-0 d-flex justify-content-center pb-4">
-                    <button type="button" class="btn text-white fw-bold w-100 mx-3" style="background-color: #0f4c81; border-radius: 50px; height: 50px; font-size: 16px;" onclick="savePersonalDeadline()" id="btnSaveDeadline">Lưu Deadline</button>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <div class="form-floating form-floating-custom">
+                            <select id="pDlIcon" class="form-select" style="border-radius: 50px !important; padding-left: 1.5rem; height: 58px;">
+                                <option value="fire">Đỏ (Gấp)</option>
+                                <option value="alert">Vàng</option>
+                                <option value="success">Xanh lá</option>
+                                <option value="primary">Xanh dương</option>
+                                <option value="secondary">Tím</option>
+                            </select>
+                            <label for="pDlIcon" style="padding-left: 1.5rem;">Màu nền</label>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-floating form-floating-custom">
+                            <input type="text" list="emojiOptions" id="pDlEmoji" class="form-control" placeholder="Biểu tượng" autocomplete="off">
+                            <label for="pDlEmoji">Biểu tượng</label>
+                            
+                            <datalist id="emojiOptions">
+                                <option value="⏰">Việc cá nhân</option>
+                                <option value="🚨">Khẩn cấp</option>
+                                <option value="📚">Bài tập</option>
+                                <option value="💻">Lập trình / C++</option>
+                                <option value="✍️">Kiểm tra</option>
+                                <option value="🎯">Mục tiêu</option>
+                                <option value="👥">Họp nhóm</option>
+                                <option value="📢">Thuyết trình</option>
+                                <option value="📝">Báo cáo</option>
+                                <option value="📣">Sự kiện</option>
+                                <option value="🌐">Hệ thống VLE</option>
+                            </datalist>
+                        </div>
+                    </div>
                 </div>
+                
+                <div class="row g-3 mb-2">
+                    <div class="col-6">
+                        <div class="form-floating form-floating-custom">
+                            <input type="text" id="pDlStartDate" class="form-control" placeholder="Từ ngày (DD/MM/YYYY)">
+                            <label for="pDlStartDate">Từ ngày</label>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="form-floating form-floating-custom">
+                            <input type="text" id="pDlEndDate" class="form-control" placeholder="Đến ngày (DD/MM/YYYY)">
+                            <label for="pDlEndDate">Đến ngày</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center"><small class="text-muted" style="font-size: 12px;">Định dạng ngày chuẩn: <b>DD/MM/YYYY</b> (Ví dụ: 15/10/2026)</small></div>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-center pb-4">
+                <button type="button" class="btn text-white fw-bold w-100 mx-3" style="background-color: #0f4c81; border-radius: 50px; height: 50px; font-size: 16px;" onclick="savePersonalDeadline()" id="btnSaveDeadline">Lưu Deadline</button>
             </div>
         </div>
     </div>
-
+</div>
     <div class="modal fade" id="adminLoginModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow"><div class="modal-header bg-primary text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-user-shield me-2"></i>Xác thực Quản trị viên</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><label class="form-label fw-bold">Mật khẩu truy cập</label><input type="password" id="txtAdminPass" class="form-control"><small class="text-danger d-none mt-2 fw-bold" id="adminLoginError">Mật khẩu không chính xác!</small></div><div class="modal-footer border-0"><button type="button" class="btn btn-primary px-4 fw-bold" onclick="verifyAdmin()">Đăng nhập</button></div></div></div></div>
     <div class="modal fade" id="insertRowModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-success text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-plus me-2"></i>Chèn nội dung xuống dưới hàng này</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="insertCol1" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="insertCol2" class="form-control" rows="3"></textarea></div><div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="insertCol3" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="insertCol4" class="form-control"></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-success px-4 fw-bold" onclick="saveInsertRow()" id="btnSaveInsertRow">Chèn nội dung</button></div></div></div></div>
     <div class="modal fade" id="editRowModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa nội dung</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="editCol1" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="editCol2" class="form-control" rows="3"></textarea></div><div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="editCol3" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="editCol4" class="form-control"></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditRow()" id="btnSaveEditRow">Lưu thay đổi</button></div></div></div></div>

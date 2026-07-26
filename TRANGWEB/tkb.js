@@ -172,7 +172,7 @@ function renderDeadlines() {
         if (extLinkTitle) displayTitle = displayTitle.replace(extLinkTitle, '').trim();
         if (extLinkTag) displayTag = displayTag.replace(extLinkTag, '').trim();
         if (displayTag === "") displayTag = "Truy cập Liên kết";
-        
+        displayTitle = displayTitle.replace(/^([a-zA-Z0-9_\.]+)\s*-\s*/, '').trim();
         // --- CẬP NHẬT Ở ĐÂY: Ẩn thao tác nếu là VLE ---
        let actionButtons = '';
 if (!item.isSystem) {
@@ -217,7 +217,7 @@ if (!item.isSystem) {
 function openAddDeadlineModal() {
     $('#dlModalTitle').html('<i class="fa-solid fa-plus me-2"></i>Thêm Deadline');
     $('#pDlRowIndex').val(''); 
-    $('#pDlTitle, #pDlTag, #pDlLink, #pDlEmoji, #pDlStartDate, #pDlEndDate').val(''); 
+    $('#pDlMaHP, #pDlTitle, #pDlTag, #pDlLink, #pDlEmoji, #pDlStartDate, #pDlEndDate').val(''); 
     $('#pDlIcon').val('fire');
     $('#deadlinePersonalModal').modal('show');
 }
@@ -228,7 +228,17 @@ function openEditDeadlineModal(rowIndex) {
     
     $('#dlModalTitle').html('<i class="fa-solid fa-pen me-2"></i>Sửa Deadline');
     $('#pDlRowIndex').val(rowIndex); 
-    $('#pDlTitle').val(dl.title);
+    
+    // Tách Mã HP nếu tiêu đề có dạng "MÃ_HP - Tiêu đề"
+    let rawTitle = dl.title || "";
+    let maHpMatch = rawTitle.match(/^([a-zA-Z0-9_\.]+)\s*-\s*(.*)$/);
+    if (maHpMatch) {
+        $('#pDlMaHP').val(maHpMatch[1]);
+        $('#pDlTitle').val(maHpMatch[2]);
+    } else {
+        $('#pDlMaHP').val('');
+        $('#pDlTitle').val(rawTitle);
+    }
     
     // Bóc tách Hình thức và Link
     let rawTag = dl.tag || "";
@@ -247,22 +257,25 @@ function openEditDeadlineModal(rowIndex) {
     $('#pDlEndDate').val(dl.dateEnd);
     $('#deadlinePersonalModal').modal('show');
 }
-
 function savePersonalDeadline() {
     let rowIndex = $('#pDlRowIndex').val(); 
     let startDate = $('#pDlStartDate').val().trim(); 
     let endDate = $('#pDlEndDate').val().trim();
-    let title = $('#pDlTitle').val().trim();
+    let maHpVal = $('#pDlMaHP').val().trim();
+    let rawTitle = $('#pDlTitle').val().trim();
 
-    if (!title || !startDate || !endDate) { 
+    if (!rawTitle || !startDate || !endDate) { 
         alert("Vui lòng nhập Tên công việc và Ngày bắt đầu/Kết thúc!"); 
         return; 
     }
     
+    // Tự động ghép Mã lớp học phần vào trước Tên tiêu đề (VD: COMP1013 - Nộp bài tập C++)
+    let cleanTitle = rawTitle.replace(/^([a-zA-Z0-9_\.]+)\s*-\s*/, '').trim();
+    let finalTitle = maHpVal ? `${maHpVal} - ${cleanTitle}` : cleanTitle;
+
     let autoDuration = (startDate === endDate) ? startDate : "Từ " + startDate + " đến " + endDate;
     let isEditMode = (rowIndex !== null && rowIndex !== '');
 
-    // Ghép Hình thức và Link lại
     let finalTag = $('#pDlTag').val().trim();
     let linkVal = $('#pDlLink').val().trim();
     if (linkVal) {
@@ -273,9 +286,9 @@ function savePersonalDeadline() {
         action: isEditMode ? "editDeadlineUser" : "addDeadlineUser",
         rowIndex: rowIndex,
         mssv: currentUser.mssv,
-        title: title,
+        title: finalTitle,
         duration: autoDuration,
-        tag: finalTag, // Truyền biến đã ghép vào đây
+        tag: finalTag,
         icon: $('#pDlIcon').val(),
         emoji: $('#pDlEmoji').val().trim(),
         startDate: startDate,
@@ -324,10 +337,15 @@ function renderTkbToolBar() {
 }
 function getBaseSubjectName(name) {
     if (!name) return "KHÁC";
-    let base = name.toLowerCase()
+    
+    // ĐÃ THÊM: Loại bỏ phần "MÃ_HP - " ở đầu chuỗi (nếu có) trước khi xử lý tiếp
+    let cleanName = name.replace(/^([a-zA-Z0-9_\.]+)\s*-\s*/, '');
+    
+    let base = cleanName.toLowerCase()
         .replace(/\(.*?\)/g, "") 
         .replace(/(tiểu luận kết thúc học phần|tiểu luận|kiểm tra quá trình|kiểm tra giữa học phần|kiểm tra kết thúc học phần|kiểm tra|học bù|tự học)/g, "")
         .replace(/^[\s-:]+/, '').replace(/[\s-:]+$/, '').replace(/\s+/g, ' ').trim();
+        
     if (base.endsWith("vecto")) { base = base.slice(0, -5) + "vector"; }
     return base.toUpperCase() || "KHÁC";
 }
@@ -592,11 +610,13 @@ function openManageDeadlineListModal() {
             }
         }
     }
+let tkbSubjectNames = new Set(filteredTkbData.map(c => getBaseSubjectName(c.mon)));
 // Cập nhật tiêu đề bảng và chèn thêm nút Thêm Deadline mới
-    $('#manageDeadlineListModal .modal-title').html(`
+   $('#manageDeadlineListModal .modal-title').html(`
         <span class="me-3"><i class="fa-solid fa-thumbtack me-2"></i>Bảng Tổng hợp Deadline${titleSuffix}</span>
         <button class="btn btn-sm btn-light text-danger fw-bold" onclick="$('#manageDeadlineListModal').modal('hide'); setTimeout(() => openAddDeadlineModal(), 400);"><i class="fa-solid fa-plus"></i> Thêm Deadline mới</button>
     `);
+    
     let dlHtml = '';
     let filteredDeadlines = [];
 
@@ -630,7 +650,7 @@ function openManageDeadlineListModal() {
     }
 
     // 3. Gộp data và tiến hành lọc theo thời gian
-    let combinedDeadlineData = [...(globalDeadlineData || []), ...virtualManualVLEs];
+   let combinedDeadlineData = [...(globalDeadlineData || []), ...virtualManualVLEs];
 
     if (combinedDeadlineData.length > 0) {
         filteredDeadlines = combinedDeadlineData.filter(d => {
@@ -638,6 +658,11 @@ function openManageDeadlineListModal() {
             
             // Ẩn VLE nếu là của HỆ THỐNG (VLE tự nhập sẽ được đi tiếp)
             if (d.isSystem && searchStr.includes('vle')) return false;
+
+            // ---> 2. THÊM ĐOẠN NÀY: Ẩn VLE/Tiểu luận nếu môn này ĐÃ XUẤT HIỆN bên bảng TKB <---
+            if ((searchStr.includes('vle') || searchStr.includes('tiểu luận')) && tkbSubjectNames.has(getBaseSubjectName(d.title))) {
+                return false;
+            }
 
             if (startMonTime && endSunTime) {
                 let dStartTime = getTimeFast(d.dateStart); 
@@ -769,16 +794,25 @@ function processTKBData(data) {
         let extractedClassId = row[12] || ""; 
         let hinhThucRaw = row[4] || "";
         
-        // BẢN VÁ: Cứu dữ liệu classId bị mất thông qua marker '#'
+        // BẢN VÁ CŨ: Cứu dữ liệu classId bị mất thông qua marker '#'
         if (!extractedClassId && hinhThucRaw.includes("#")) {
             let match = hinhThucRaw.match(/#([a-zA-Z0-9_]+)/);
             if (match) {
                 extractedClassId = match[1];
-                // Xóa ID khỏi Hình thức để không hiển thị mã rác ra giao diện TKB
                 hinhThucRaw = hinhThucRaw.replace(match[0], '').trim();
                 row[4] = hinhThucRaw; 
             }
         }
+
+        // ---> THÊM MỚI Ở ĐÂY: Khôi phục classId cho học phần Hệ thống (SYS) <---
+        if (isSystemFlag && !extractedClassId) {
+            // actualRowIndex có dạng "SYS_MÃHP" (VD: SYS_COMP1013)
+            let parts = actualRowIndex.split('_'); 
+            if (parts.length >= 2) {
+                extractedClassId = parts[1]; // Lấy phần MÃHP
+            }
+        }
+        // -----------------------------------------------------------------------
 
         return {
             thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
@@ -790,7 +824,6 @@ function processTKBData(data) {
     
     filterAndRenderTKB();
 }
-
 function openAddTkbModal(triggerAuthModal = false) {
     if (triggerAuthModal) { $('#userAuthModal').modal('show'); return; }
     $('#tkbModalTitle').html('<i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân');
