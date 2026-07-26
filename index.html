@@ -797,12 +797,15 @@ function loadPersonalLinks() {
                 }
                 
                 let rawHinhThuc = course.hinhThuc || "";
-                let customLink = checkAndExtractUrl(rawHinhThuc);
-                let displayHinhThuc = rawHinhThuc;
-                
-                if (customLink) {
-                    displayHinhThuc = rawHinhThuc.replace(customLink, '').trim();
-                }
+let customLink = checkAndExtractUrl(rawHinhThuc);
+let displayHinhThuc = rawHinhThuc;
+
+if (customLink) {
+    displayHinhThuc = rawHinhThuc.replace(customLink, '').trim();
+}
+
+// Lọc bỏ mã học phần dạng #XXXXXX khỏi dòng Địa điểm / Hình thức
+displayHinhThuc = displayHinhThuc.replace(/#\S+/g, '').trim();
                 
                 let autoColor = course.color;
                 const locU = displayHinhThuc.toUpperCase();
