@@ -304,27 +304,33 @@ function initInactivityTracker() {
 }
 
 $(document).ready(function() {
-    // 1. Check hạn sử dụng của phiên đăng nhập ngay khi load trang
-    checkSessionExpiryOnLoad();
-    
-    // 2. Kích hoạt theo dõi hoạt động
-    initInactivityTracker();
+    // Nếu có màn hình loading toàn trang thì bắt đầu kiểm tra
+    if ($('#globalScreenLoader').length) {
+        let checkInitialLoad = setInterval(function() {
+            // Kiểm tra các phân hệ chính đã tải xong chưa (dựa vào cấu trúc hiện tại của web)
+            let isTableLoaded = $('#loadingStatus').hasClass('d-none');
+            // Kiểm tra sidebar đã có danh sách học phần chưa
+            let isCategoriesLoaded = $('#dynamicCourseList').text().indexOf('Đang tải') === -1;
+            
+            // Nếu các điều kiện tải trang hoàn tất
+            if (isTableLoaded && isCategoriesLoaded) {
+                clearInterval(checkInitialLoad); // Dừng vòng lặp kiểm tra
+                
+                // Mờ dần màn hình loading và xóa luôn khỏi giao diện để web mượt hơn
+                $('#globalScreenLoader').fadeOut(600, function() {
+                    $(this).remove();
+                });
+            }
+        }, 300); // Kiểm tra mỗi 300ms
+
+        // Đề phòng trường hợp lỗi mạng bị kẹt loading mãi mãi, tự động đóng sau 10 giây
+        setTimeout(function() {
+            clearInterval(checkInitialLoad);
+            if ($('#globalScreenLoader').length) {
+                $('#globalScreenLoader').fadeOut(600, function() {
+                    $(this).remove();
+                });
+            }
+        }, 10000); 
+    }
 });
-function loadProfileView() {
-    document.title = "Hồ sơ cá nhân | Học nhóm Năm 2 Khoa Toán";
-    resetNavActive();
-    
-    // Đóng dropdown popover nếu đang mở
-    let dropdownMenu = document.querySelector('#sidebarUserInfo .dropdown-menu');
-    if(dropdownMenu) {
-        dropdownMenu.classList.remove('show');
-    }
-    
-    $('#profileSection').removeClass('d-none');
-    
-    // Đóng sidebar nếu đang trên điện thoại
-    if(window.innerWidth < 992) { 
-        sidebar.classList.remove('show'); 
-        overlay.classList.remove('show'); 
-    }
-}
