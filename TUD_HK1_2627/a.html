@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Xếp Thời Khóa Biểu THPT</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #f4f6f9; color: #333; }
+        .container { max-width: 1250px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #1a365d; margin-bottom: 20px; }
+        .btn { background: #2b6cb0; color: white; padding: 10px 18px; border: none; border-radius: 5px; cursor: pointer; font-size: 14px; margin-right: 10px; font-weight: bold; }
+        .btn:hover { background: #2c5282; }
+        .btn:disabled { background: #cbd5e0; cursor: not-allowed; }
+        .status { margin-left: 10px; font-weight: bold; }
+        
+        /* Filter Controls */
+        .filter-panel { margin-top: 20px; padding: 15px; background: #ebf8ff; border-radius: 6px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        .filter-group { display: flex; align-items: center; gap: 8px; }
+        .filter-group label { font-weight: bold; color: #2c5282; font-size: 14px; }
+        .filter-group select { padding: 8px 12px; border-radius: 4px; border: 1px solid #cbd5e0; font-size: 14px; outline: none; }
+
+        /* Schedule Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; background: #fff; }
+        th, td { border: 1px solid #cbd5e0; padding: 8px; text-align: center; vertical-align: middle; }
+        th { background: #ebf8ff; color: #2c5282; font-weight: bold; }
+        .section-title { background: #f7fafc; font-weight: bold; text-align: left; padding: 6px 12px; color: #4a5568; }
+        
+        /* Formating contents inside cell */
+        .subject-name { font-weight: bold; color: #2b6cb0; font-size: 13px; margin-bottom: 2px; }
+        .teacher-name { font-size: 11px; color: #4a5568; margin-bottom: 2px; }
+        .room-name { font-size: 11px; color: #718096; font-style: italic; }
+        .group-tag { font-size: 10px; color: #319795; margin-top: 2px; display: block; }
+        .off-text { color: #a0aec0; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Hệ Thống Thời Khóa Biểu THPT Tự Động</h1>
+    
+    <div>
+        <button class="btn" onclick="loadData()">1. Tải Phân Công Giảng Dạy</button>
+        <button class="btn" id="btnRun" onclick="generateTHPTSchedule()" disabled>2. Chạy Xếp TKB THPT</button>
+        <span id="status" class="status">Chưa tải dữ liệu...</span>
+    </div>
+
+    <!-- Thanh bộ lọc xem TKB theo Lớp / Giáo Viên / Phòng -->
+    <div class="filter-panel" id="filterPanel" style="display: none;">
+        <div class="filter-group">
+            <label for="viewMode">Xem theo:</label>
+            <select id="viewMode" onchange="onViewModeChange()">
+                <option value="CLASS">Từng Lớp Học</option>
+                <option value="TEACHER">Từng Giáo Viên</option>
+                <option value="ROOM">Từng Phòng Học</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label id="targetLabel" for="targetSelect">Chọn Lớp:</label>
+            <select id="targetSelect" onchange="renderCurrentView()">
+                <!-- Dynamic options -->
+            </select>
+        </div>
+    </div>
+
+    <div id="scheduleContainer" style="margin-top: 25px;">
+        <!-- Bảng TKB sẽ render tại đây -->
+    </div>
+</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbydB3vSITCBbhSHaJ9VTppwiQT_jC8lLMeFUWzYyb-5tfiv9OqOAWwMK7LTtgxmxgvUJg/exec";
+
+    let db = { classes: [], assignments: [], specialRooms: [] };
+    let globalScheduleData = {}; // Lưu trữ toàn bộ kết quả TKB sau khi chạy xong
+    const DAYS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+
+    async function loadData() {
+        const status = document.getElementById('status');
+        try {
+            status.innerText = "Đang kết nối Google Sheets...";
+            status.style.color = "#3182ce";
+            
+            const response = await fetch(API_URL);
+            const res = await response.json();
+            
+            if (res.status === "success") {
+                db = res.data;
+                status.innerText = `Đã tải ${db.classes.length} lớp & ${db.assignments.length} phân công môn học!`;
+                status.style.color = "#38a169";
+                document.getElementById('btnRun').disabled = false;
+            }
+        } catch (err) {
+            status.innerText = "Lỗi tải dữ liệu từ Google Sheets!";
+            status.style.color = "#e53e3e";
+        }
+    }
+
+    function isStrictDoubleSlotSubject(subjectName) {
+        let name = String(subjectName || '').toUpperCase();
+        return name.includes('GDTC') || name.includes('THỂ DỤC');
+    }
+
+    function isPhysicalEducation(subjectName) {
+        let name = String(subjectName || '').toUpperCase();
+        return isStrictDoubleSlotSubject(subjectName) || name.includes('GDQP') || name.includes('QUỐC PHÒNG');
+    }
+
+    // --- THUẬT TOÁN XẾP TKB ---
+    function generateTHPTSchedule() {
+        let busyTeachers = {};      
+        let busySpecialRooms = {};  
+        let scheduleResult = {};    
+
+        // 1. Khởi tạo TKB
+        db.classes.forEach(c => {
+            scheduleResult[c.MaLop] = {};
+            
+            // Cố định Chào cờ (Không màu ô)
+            scheduleResult[c.MaLop]['Thứ 2_Sáng_1'] = {
+                subject: 'Chào cờ',
+                teacher: 'BGH / BTV',
+                room: c.PhongHocCoDinh || 'Sân trường',
+                isFlag: true
+            };
+
+            // Nghỉ chiều Thứ 5 (Không màu ô)
+            for (let slot = 1; slot <= 3; slot++) {
+                scheduleResult[c.MaLop][`Thứ 5_Chiều_${slot}`] = {
+                    subject: 'NGHỈ CHIỀU T5',
+                    teacher: '',
+                    room: '',
+                    isOff: true
+                };
+            }
+        });
+
+        // 2. Ưu tiên: Lớp ghép -> GDTC -> Môn nhiều tiết
+        let assignments = [...db.assignments].sort((a, b) => {
+            let isGroupA = a.LopGhep && a.LopGhep.trim() !== '' ? 1 : 0;
+            let isGroupB = b.LopGhep && b.LopGhep.trim() !== '' ? 1 : 0;
+            if (isGroupA !== isGroupB) return isGroupB - isGroupA;
+
+            let isGDTCA = isStrictDoubleSlotSubject(a.TenMon) ? 1 : 0;
+            let isGDTCB = isStrictDoubleSlotSubject(b.TenMon) ? 1 : 0;
+            if (isGDTCA !== isGDTCB) return isGDTCB - isGDTCA;
+
+            let tA = parseInt(a.SoTietTuan || 1, 10);
+            let tB = parseInt(b.SoTietTuan || 1, 10);
+            return tB - tA; 
+        });
+
+        // 3. Tiến hành xếp lịch
+        assignments.forEach(assign => {
+            let totalLessons = parseInt(assign.SoTietTuan || 1, 10);
+            let teacher = assign.GiangVien;
+            let reqRoom = assign.YeuCauPhongDacThu || 'Không';
+            let subjectName = String(assign.TenMon || '').trim();
+            let isGDTC = isStrictDoubleSlotSubject(subjectName);
+
+            let targetClasses = [];
+            let isGroup = assign.LopGhep && assign.LopGhep.trim() !== '';
+
+            if (isGroup) {
+                targetClasses = assign.LopGhep.split(',').map(s => s.trim());
+            } else {
+                targetClasses = [assign.MaLop];
+            }
+
+            // Xác định phòng học cụ thể cho tiết này
+            let finalRoom = '';
+            if (reqRoom !== 'Không' && reqRoom !== '') {
+                finalRoom = reqRoom;
+            } else if (isGroup && targetClasses.length > 0) {
+                let firstClassObj = db.classes.find(c => c.MaLop === targetClasses[0]);
+                finalRoom = firstClassObj ? firstClassObj.PhongHocCoDinh : '';
+            } else {
+                let currentClassObj = db.classes.find(c => c.MaLop === assign.MaLop);
+                finalRoom = currentClassObj ? currentClassObj.PhongHocCoDinh : '';
+            }
+
+            if (!busyTeachers[teacher]) busyTeachers[teacher] = {};
+
+            let classSubjectDayCount = {};
+            let placedCount = 0;
+            let targetDays = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+
+            for (let day of targetDays) {
+                if (placedCount >= totalLessons) break;
+
+                const sessions = [
+                    { name: 'Sáng', maxSlots: 5 },
+                    { name: 'Chiều', maxSlots: 3 }
+                ];
+
+                for (let session of sessions) {
+                    if (placedCount >= totalLessons) break;
+
+                    if (day === 'Thứ 2' && session.name === 'Sáng' && isPhysicalEducation(subjectName)) {
+                        continue; 
+                    }
+
+                    let remaining = totalLessons - placedCount;
+                    let currentDayCount = classSubjectDayCount[day] || 0;
+
+                    if (currentDayCount >= 2) continue; 
+
+                    // Tiết đôi
+                    if (remaining >= 2 && currentDayCount === 0) {
+                        let doublePlaced = false;
+
+                        for (let k1 = 1; k1 < session.maxSlots; k1++) {
+                            let k2 = k1 + 1;
+                            let key1 = `${day}_${session.name}_${k1}`;
+                            let key2 = `${day}_${session.name}_${k2}`;
+
+                            if (canPlaceSlotForGroup(targetClasses, teacher, reqRoom, key1, scheduleResult, busyTeachers, busySpecialRooms) &&
+                                canPlaceSlotForGroup(targetClasses, teacher, reqRoom, key2, scheduleResult, busyTeachers, busySpecialRooms)) {
+                                
+                                placeSlotForGroup(targetClasses, teacher, reqRoom, finalRoom, key1, subjectName, scheduleResult, busyTeachers, busySpecialRooms, assign.LopGhep);
+                                placeSlotForGroup(targetClasses, teacher, reqRoom, finalRoom, key2, subjectName, scheduleResult, busyTeachers, busySpecialRooms, assign.LopGhep);
+                                
+                                placedCount += 2;
+                                classSubjectDayCount[day] = 2;
+                                doublePlaced = true;
+                                break;
+                            }
+                        }
+
+                        if (doublePlaced) continue; 
+                    }
+
+                    if (isGDTC) continue;
+
+                    // Tiết lẻ
+                    if (placedCount < totalLessons && currentDayCount < 2) {
+                        for (let slot = 1; slot <= session.maxSlots; slot++) {
+                            let key = `${day}_${session.name}_${slot}`;
+
+                            if (canPlaceSlotForGroup(targetClasses, teacher, reqRoom, key, scheduleResult, busyTeachers, busySpecialRooms)) {
+                                placeSlotForGroup(targetClasses, teacher, reqRoom, finalRoom, key, subjectName, scheduleResult, busyTeachers, busySpecialRooms, assign.LopGhep);
+                                placedCount++;
+                                classSubjectDayCount[day] = (classSubjectDayCount[day] || 0) + 1;
+                                break; 
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        globalScheduleData = scheduleResult;
+        
+        // Hiện thanh bộ lọc và hiển thị chế độ mặc định (Xem theo Lớp đầu tiên)
+        document.getElementById('filterPanel').style.display = 'flex';
+        onViewModeChange();
+    }
+
+    function canPlaceSlotForGroup(classList, teacher, reqRoom, timeKey, scheduleResult, busyTeachers, busySpecialRooms) {
+        for (let classId of classList) {
+            if (scheduleResult[classId] && scheduleResult[classId][timeKey]) return false; 
+        }
+
+        if (busyTeachers[teacher] && busyTeachers[teacher][timeKey]) return false;   
+
+        if (reqRoom !== 'Không' && reqRoom !== '') {
+            let roomUsage = busySpecialRooms[`${reqRoom}_${timeKey}`] || 0;
+            if (roomUsage >= 1) return false; 
+        }
+
+        return true;
+    }
+
+    function placeSlotForGroup(classList, teacher, reqRoom, assignedRoom, timeKey, subjectName, scheduleResult, busyTeachers, busySpecialRooms, lopGhepInfo) {
+        classList.forEach(classId => {
+            if (!scheduleResult[classId]) scheduleResult[classId] = {};
+            
+            scheduleResult[classId][timeKey] = {
+                subject: subjectName,
+                teacher: teacher,
+                room: assignedRoom,
+                classId: classId,
+                isGroup: lopGhepInfo && lopGhepInfo.trim() !== '',
+                groupMembers: lopGhepInfo
+            };
+        });
+
+        busyTeachers[teacher][timeKey] = true;
+
+        if (reqRoom !== 'Không' && reqRoom !== '') {
+            let roomKey = `${reqRoom}_${timeKey}`;
+            busySpecialRooms[roomKey] = (busySpecialRooms[roomKey] || 0) + 1;
+        }
+    }
+
+    // --- XỬ LÝ GIAO DIỆN XEM TKB THEO BỘ LỌC ---
+
+    function onViewModeChange() {
+        const mode = document.getElementById('viewMode').value;
+        const targetSelect = document.getElementById('targetSelect');
+        const targetLabel = document.getElementById('targetLabel');
+        targetSelect.innerHTML = '';
+
+        if (mode === 'CLASS') {
+            targetLabel.innerText = "Chọn Lớp:";
+            db.classes.forEach(c => {
+                targetSelect.innerHTML += `<option value="${c.MaLop}">${c.MaLop}</option>`;
+            });
+        } else if (mode === 'TEACHER') {
+            targetLabel.innerText = "Chọn Giáo viên:";
+            // Lấy danh sách tất cả GV duy nhất có phân công
+            let teachers = [...new Set(db.assignments.map(a => a.GiangVien))].filter(Boolean);
+            teachers.forEach(t => {
+                targetSelect.innerHTML += `<option value="${t}">${t}</option>`;
+            });
+        } else if (mode === 'ROOM') {
+            targetLabel.innerText = "Chọn Phòng học:";
+            // Gom tất cả phòng cố định + phòng đặc thù
+            let rooms = [...new Set([
+                ...db.classes.map(c => c.PhongHocCoDinh),
+                ...db.specialRooms.map(r => r.MaPhong)
+            ])].filter(Boolean);
+            
+            rooms.forEach(r => {
+                targetSelect.innerHTML += `<option value="${r}">${r}</option>`;
+            });
+        }
+
+        renderCurrentView();
+    }
+
+    function renderCurrentView() {
+        const mode = document.getElementById('viewMode').value;
+        const target = document.getElementById('targetSelect').value;
+        const container = document.getElementById('scheduleContainer');
+        container.innerHTML = '';
+
+        if (!target) return;
+
+        let displayData = {}; // Chứa dữ liệu hiển thị theo timeKey
+
+        if (mode === 'CLASS') {
+            displayData = globalScheduleData[target] || {};
+            let classInfo = db.classes.find(c => c.MaLop === target) || {};
+            container.innerHTML = `<h3>Thời Khóa Biểu Lớp: ${target} (Phòng cố định: ${classInfo.PhongHocCoDinh || 'N/A'})</h3>`;
+        } 
+        else if (mode === 'TEACHER') {
+            container.innerHTML = `<h3>Thời Khóa Biểu Giáo Viên: ${target}</h3>`;
+            // Quét lịch của tất cả các lớp để lọc ra các tiết của giáo viên này dạy
+            Object.keys(globalScheduleData).forEach(classId => {
+                Object.keys(globalScheduleData[classId]).forEach(timeKey => {
+                    let cell = globalScheduleData[classId][timeKey];
+                    if (cell && cell.teacher === target) {
+                        displayData[timeKey] = cell;
+                    }
+                });
+            });
+        } 
+        else if (mode === 'ROOM') {
+            container.innerHTML = `<h3>Thời Khóa Biểu Phòng Học: ${target}</h3>`;
+            // Quét lịch của tất cả các lớp để lọc ra các tiết học tại phòng này
+            Object.keys(globalScheduleData).forEach(classId => {
+                Object.keys(globalScheduleData[classId]).forEach(timeKey => {
+                    let cell = globalScheduleData[classId][timeKey];
+                    if (cell && cell.room === target) {
+                        displayData[timeKey] = cell;
+                    }
+                });
+            });
+        }
+
+        renderSingleGrid(displayData, mode);
+    }
+
+    function renderSingleGrid(dataMap, mode) {
+        const container = document.getElementById('scheduleContainer');
+        
+        let html = `<table>
+            <thead>
+                <tr>
+                    <th width="80">Buổi</th>
+                    <th width="60">Tiết</th>`;
+        DAYS.forEach(d => html += `<th>${d}</th>`);
+        html += `</tr></thead><tbody>`;
+
+        // Render Sáng (5 Tiết)
+        for (let slot = 1; slot <= 5; slot++) {
+            html += `<tr>`;
+            if (slot === 1) html += `<td rowspan="5" class="section-title"><b>SÁNG</b></td>`;
+            html += `<td><b>Tiết ${slot}</b></td>`;
+
+            DAYS.forEach(day => {
+                let key = `${day}_Sáng_${slot}`;
+                let cell = dataMap[key];
+                html += renderCellHtml(cell, mode);
+            });
+            html += `</tr>`;
+        }
+
+        // Render Chiều (3 Tiết)
+        for (let slot = 1; slot <= 3; slot++) {
+            html += `<tr>`;
+            if (slot === 1) html += `<td rowspan="3" class="section-title"><b>CHIỀU</b></td>`;
+            html += `<td><b>Tiết ${slot}</b></td>`;
+
+            DAYS.forEach(day => {
+                let key = `${day}_Chiều_${slot}`;
+                let cell = dataMap[key];
+                html += renderCellHtml(cell, mode);
+            });
+            html += `</tr>`;
+        }
+
+        html += `</tbody></table>`;
+        container.innerHTML += html;
+    }
+
+    // Render từng ô: KHÔNG MÀU Ô, Hiển thị chuẩn Môn -> GV -> Phòng
+    function renderCellHtml(cell, mode) {
+        if (!cell) return `<td>-</td>`;
+
+        if (cell.isOff) {
+            return `<td><div class="off-text">${cell.subject}</div></td>`;
+        }
+
+        let subjectStr = `<div class="subject-name">${cell.subject}</div>`;
+        
+        // Nếu xem theo chế độ Giáo viên, hiển thị Tên Lớp thay cho tên GV
+        let teacherStr = mode === 'TEACHER' 
+            ? `<div class="teacher-name">Lớp: ${cell.classId}</div>`
+            : `<div class="teacher-name">${cell.teacher}</div>`;
+
+        let roomStr = cell.room ? `<div class="room-name">${cell.room}</div>` : '';
+        let groupStr = cell.isGroup ? `<span class="group-tag">Lớp ghép (${cell.groupMembers})</span>` : '';
+
+        return `<td>
+            ${subjectStr}
+            ${teacherStr}
+            ${roomStr}
+            ${groupStr}
+        </td>`;
+    }
+</script>
+
+</body>
+</html>
