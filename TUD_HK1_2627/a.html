@@ -72,7 +72,7 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbydB3vSITCBbhSHaJ9VTppwiQT_jC8lLMeFUWzYyb-5tfiv9OqOAWwMK7LTtgxmxgvUJg/exec";
 
     let db = { classes: [], assignments: [], specialRooms: [] };
-    let globalScheduleData = {}; // Lưu trữ toàn bộ kết quả TKB sau khi chạy xong
+    let globalScheduleData = {}; 
     const DAYS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
 
     async function loadData() {
@@ -106,40 +106,45 @@
         return isStrictDoubleSlotSubject(subjectName) || name.includes('GDQP') || name.includes('QUỐC PHÒNG');
     }
 
-    // --- THUẬT TOÁN XẾP TKB ---
+    // --- THUẬT TOÁN XẾP TKB CÓ HỖ TRỢ DẠY SONG SONG ---
     function generateTHPTSchedule() {
         let busyTeachers = {};      
         let busySpecialRooms = {};  
         let scheduleResult = {};    
 
-        // 1. Khởi tạo TKB
+        // 1. Khởi tạo TKB dạng mảng cho từng ô thời gian
         db.classes.forEach(c => {
             scheduleResult[c.MaLop] = {};
             
-            // Cố định Chào cờ (Không màu ô)
-            scheduleResult[c.MaLop]['Thứ 2_Sáng_1'] = {
+            // Cố định Chào cờ
+            scheduleResult[c.MaLop]['Thứ 2_Sáng_1'] = [{
                 subject: 'Chào cờ',
                 teacher: 'BGH / BTV',
                 room: c.PhongHocCoDinh || 'Sân trường',
                 isFlag: true
-            };
+            }];
 
-            // Nghỉ chiều Thứ 5 (Không màu ô)
+            // Nghỉ chiều Thứ 5
             for (let slot = 1; slot <= 3; slot++) {
-                scheduleResult[c.MaLop][`Thứ 5_Chiều_${slot}`] = {
+                scheduleResult[c.MaLop][`Thứ 5_Chiều_${slot}`] = [{
                     subject: 'NGHỈ CHIỀU T5',
                     teacher: '',
                     room: '',
                     isOff: true
-                };
+                }];
             }
         });
 
-        // 2. Ưu tiên: Lớp ghép -> GDTC -> Môn nhiều tiết
+        // 2. Ưu tiên: Lớp ghép -> Môn tổ hợp -> GDTC -> Môn nhiều tiết
         let assignments = [...db.assignments].sort((a, b) => {
             let isGroupA = a.LopGhep && a.LopGhep.trim() !== '' ? 1 : 0;
             let isGroupB = b.LopGhep && b.LopGhep.trim() !== '' ? 1 : 0;
             if (isGroupA !== isGroupB) return isGroupB - isGroupA;
+
+            // Môn song song/tổ hợp xếp ưu tiên hơn môn thường
+            let isParallelA = (a.ToHop || a.NhomMon) ? 1 : 0;
+            let isParallelB = (b.ToHop || b.NhomMon) ? 1 : 0;
+            if (isParallelA !== isParallelB) return isParallelB - isParallelA;
 
             let isGDTCA = isStrictDoubleSlotSubject(a.TenMon) ? 1 : 0;
             let isGDTCB = isStrictDoubleSlotSubject(b.TenMon) ? 1 : 0;
@@ -157,6 +162,7 @@
             let reqRoom = assign.YeuCauPhongDacThu || 'Không';
             let subjectName = String(assign.TenMon || '').trim();
             let isGDTC = isStrictDoubleSlotSubject(subjectName);
+            let toHopGroup = assign.ToHop || assign.NhomMon || null; // Tên nhóm tổ hợp (VD: "TH_TU_NHIEN")
 
             let targetClasses = [];
             let isGroup = assign.LopGhep && assign.LopGhep.trim() !== '';
@@ -167,7 +173,6 @@
                 targetClasses = [assign.MaLop];
             }
 
-            // Xác định phòng học cụ thể cho tiết này
             let finalRoom = '';
             if (reqRoom !== 'Không' && reqRoom !== '') {
                 finalRoom = reqRoom;
@@ -205,7 +210,7 @@
 
                     if (currentDayCount >= 2) continue; 
 
-                    // Tiết đôi
+                    // --- TIẾT ĐÔI ---
                     if (remaining >= 2 && currentDayCount === 0) {
                         let doublePlaced = false;
 
@@ -214,11 +219,11 @@
                             let key1 = `${day}_${session.name}_${k1}`;
                             let key2 = `${day}_${session.name}_${k2}`;
 
-                            if (canPlaceSlotForGroup(targetClasses, teacher, reqRoom, key1, scheduleResult, busyTeachers, busySpecialRooms) &&
-                                canPlaceSlotForGroup(targetClasses, teacher, reqRoom, key2, scheduleResult, busyTeachers, busySpecialRooms)) {
+                            if (canPlaceSlot(targetClasses, teacher, reqRoom, key1, scheduleResult, busyTeachers, busySpecialRooms, toHopGroup) &&
+                                canPlaceSlot(targetClasses, teacher, reqRoom, key2, scheduleResult, busyTeachers, busySpecialRooms, toHopGroup)) {
                                 
-                                placeSlotForGroup(targetClasses, teacher, reqRoom, finalRoom, key1, subjectName, scheduleResult, busyTeachers, busySpecialRooms, assign.LopGhep);
-                                placeSlotForGroup(targetClasses, teacher, reqRoom, finalRoom, key2, subjectName, scheduleResult, busyTeachers, busySpecialRooms, assign.LopGhep);
+                                placeSlot(targetClasses, teacher, reqRoom, finalRoom, key1, subjectName, scheduleResult, busyTeachers, busySpecialRooms, assign.LopGhep, toHopGroup);
+                                placeSlot(targetClasses, teacher, reqRoom, finalRoom, key2, subjectName, scheduleResult, busyTeachers, busySpecialRooms, assign.LopGhep, toHopGroup);
                                 
                                 placedCount += 2;
                                 classSubjectDayCount[day] = 2;
@@ -232,13 +237,13 @@
 
                     if (isGDTC) continue;
 
-                    // Tiết lẻ
+                    // --- TIẾT LẺ ---
                     if (placedCount < totalLessons && currentDayCount < 2) {
                         for (let slot = 1; slot <= session.maxSlots; slot++) {
                             let key = `${day}_${session.name}_${slot}`;
 
-                            if (canPlaceSlotForGroup(targetClasses, teacher, reqRoom, key, scheduleResult, busyTeachers, busySpecialRooms)) {
-                                placeSlotForGroup(targetClasses, teacher, reqRoom, finalRoom, key, subjectName, scheduleResult, busyTeachers, busySpecialRooms, assign.LopGhep);
+                            if (canPlaceSlot(targetClasses, teacher, reqRoom, key, scheduleResult, busyTeachers, busySpecialRooms, toHopGroup)) {
+                                placeSlot(targetClasses, teacher, reqRoom, finalRoom, key, subjectName, scheduleResult, busyTeachers, busySpecialRooms, assign.LopGhep, toHopGroup);
                                 placedCount++;
                                 classSubjectDayCount[day] = (classSubjectDayCount[day] || 0) + 1;
                                 break; 
@@ -251,38 +256,56 @@
 
         globalScheduleData = scheduleResult;
         
-        // Hiện thanh bộ lọc và hiển thị chế độ mặc định (Xem theo Lớp đầu tiên)
         document.getElementById('filterPanel').style.display = 'flex';
         onViewModeChange();
     }
 
-    function canPlaceSlotForGroup(classList, teacher, reqRoom, timeKey, scheduleResult, busyTeachers, busySpecialRooms) {
-        for (let classId of classList) {
-            if (scheduleResult[classId] && scheduleResult[classId][timeKey]) return false; 
-        }
+    // Kiểm tra điều kiện có thể chèn tiết (có tính đến môn song song)
+    function canPlaceSlot(classList, teacher, reqRoom, timeKey, scheduleResult, busyTeachers, busySpecialRooms, toHopGroup) {
+        // 1. Kiểm tra Giáo viên bận
+        if (busyTeachers[teacher] && busyTeachers[teacher][timeKey]) return false;
 
-        if (busyTeachers[teacher] && busyTeachers[teacher][timeKey]) return false;   
-
+        // 2. Kiểm tra Phòng đặc thù bận
         if (reqRoom !== 'Không' && reqRoom !== '') {
             let roomUsage = busySpecialRooms[`${reqRoom}_${timeKey}`] || 0;
-            if (roomUsage >= 1) return false; 
+            if (roomUsage >= 1) return false;
+        }
+
+        // 3. Kiểm tra Lớp học
+        for (let classId of classList) {
+            let existingSlots = scheduleResult[classId] ? scheduleResult[classId][timeKey] : null;
+
+            if (existingSlots && existingSlots.length > 0) {
+                // Nếu là tiết cố định (Chào cờ, nghỉ chiều) -> Không chèn
+                if (existingSlots[0].isFlag || existingSlots[0].isOff) return false;
+
+                // Nếu không có thông tin Tổ hợp -> Không cho chèn trùng
+                if (!toHopGroup) return false;
+
+                // Nếu ô đó đã có môn, kiểm tra xem môn đã có thuộc CÙNG NHÓM TỔ HỢP không
+                let isSameGroup = existingSlots.every(item => item.toHopGroup === toHopGroup);
+                if (!isSameGroup) return false; 
+            }
         }
 
         return true;
     }
 
-    function placeSlotForGroup(classList, teacher, reqRoom, assignedRoom, timeKey, subjectName, scheduleResult, busyTeachers, busySpecialRooms, lopGhepInfo) {
+    // Xếp tiết vào hệ thống
+    function placeSlot(classList, teacher, reqRoom, assignedRoom, timeKey, subjectName, scheduleResult, busyTeachers, busySpecialRooms, lopGhepInfo, toHopGroup) {
         classList.forEach(classId => {
             if (!scheduleResult[classId]) scheduleResult[classId] = {};
-            
-            scheduleResult[classId][timeKey] = {
+            if (!scheduleResult[classId][timeKey]) scheduleResult[classId][timeKey] = [];
+
+            scheduleResult[classId][timeKey].push({
                 subject: subjectName,
                 teacher: teacher,
                 room: assignedRoom,
                 classId: classId,
                 isGroup: lopGhepInfo && lopGhepInfo.trim() !== '',
-                groupMembers: lopGhepInfo
-            };
+                groupMembers: lopGhepInfo,
+                toHopGroup: toHopGroup
+            });
         });
 
         busyTeachers[teacher][timeKey] = true;
@@ -293,7 +316,7 @@
         }
     }
 
-    // --- XỬ LÝ GIAO DIỆN XEM TKB THEO BỘ LỌC ---
+    // --- HIỂN THỊ THỜI KHÓA BIỂU ---
 
     function onViewModeChange() {
         const mode = document.getElementById('viewMode').value;
@@ -308,14 +331,12 @@
             });
         } else if (mode === 'TEACHER') {
             targetLabel.innerText = "Chọn Giáo viên:";
-            // Lấy danh sách tất cả GV duy nhất có phân công
             let teachers = [...new Set(db.assignments.map(a => a.GiangVien))].filter(Boolean);
             teachers.forEach(t => {
                 targetSelect.innerHTML += `<option value="${t}">${t}</option>`;
             });
         } else if (mode === 'ROOM') {
             targetLabel.innerText = "Chọn Phòng học:";
-            // Gom tất cả phòng cố định + phòng đặc thù
             let rooms = [...new Set([
                 ...db.classes.map(c => c.PhongHocCoDinh),
                 ...db.specialRooms.map(r => r.MaPhong)
@@ -337,7 +358,7 @@
 
         if (!target) return;
 
-        let displayData = {}; // Chứa dữ liệu hiển thị theo timeKey
+        let displayData = {}; 
 
         if (mode === 'CLASS') {
             displayData = globalScheduleData[target] || {};
@@ -346,24 +367,26 @@
         } 
         else if (mode === 'TEACHER') {
             container.innerHTML = `<h3>Thời Khóa Biểu Giáo Viên: ${target}</h3>`;
-            // Quét lịch của tất cả các lớp để lọc ra các tiết của giáo viên này dạy
             Object.keys(globalScheduleData).forEach(classId => {
                 Object.keys(globalScheduleData[classId]).forEach(timeKey => {
-                    let cell = globalScheduleData[classId][timeKey];
-                    if (cell && cell.teacher === target) {
-                        displayData[timeKey] = cell;
+                    let cellList = globalScheduleData[classId][timeKey] || [];
+                    let matched = cellList.filter(c => c.teacher === target);
+                    if (matched.length > 0) {
+                        if (!displayData[timeKey]) displayData[timeKey] = [];
+                        displayData[timeKey].push(...matched);
                     }
                 });
             });
         } 
         else if (mode === 'ROOM') {
             container.innerHTML = `<h3>Thời Khóa Biểu Phòng Học: ${target}</h3>`;
-            // Quét lịch của tất cả các lớp để lọc ra các tiết học tại phòng này
             Object.keys(globalScheduleData).forEach(classId => {
                 Object.keys(globalScheduleData[classId]).forEach(timeKey => {
-                    let cell = globalScheduleData[classId][timeKey];
-                    if (cell && cell.room === target) {
-                        displayData[timeKey] = cell;
+                    let cellList = globalScheduleData[classId][timeKey] || [];
+                    let matched = cellList.filter(c => c.room === target);
+                    if (matched.length > 0) {
+                        if (!displayData[timeKey]) displayData[timeKey] = [];
+                        displayData[timeKey].push(...matched);
                     }
                 });
             });
@@ -383,7 +406,7 @@
         DAYS.forEach(d => html += `<th>${d}</th>`);
         html += `</tr></thead><tbody>`;
 
-        // Render Sáng (5 Tiết)
+        // Sáng (5 Tiết)
         for (let slot = 1; slot <= 5; slot++) {
             html += `<tr>`;
             if (slot === 1) html += `<td rowspan="5" class="section-title"><b>SÁNG</b></td>`;
@@ -391,13 +414,13 @@
 
             DAYS.forEach(day => {
                 let key = `${day}_Sáng_${slot}`;
-                let cell = dataMap[key];
-                html += renderCellHtml(cell, mode);
+                let cellList = dataMap[key];
+                html += renderCellHtml(cellList, mode);
             });
             html += `</tr>`;
         }
 
-        // Render Chiều (3 Tiết)
+        // Chiều (3 Tiết)
         for (let slot = 1; slot <= 3; slot++) {
             html += `<tr>`;
             if (slot === 1) html += `<td rowspan="3" class="section-title"><b>CHIỀU</b></td>`;
@@ -405,8 +428,8 @@
 
             DAYS.forEach(day => {
                 let key = `${day}_Chiều_${slot}`;
-                let cell = dataMap[key];
-                html += renderCellHtml(cell, mode);
+                let cellList = dataMap[key];
+                html += renderCellHtml(cellList, mode);
             });
             html += `</tr>`;
         }
@@ -415,30 +438,33 @@
         container.innerHTML += html;
     }
 
-    // Render từng ô: KHÔNG MÀU Ô, Hiển thị chuẩn Môn -> GV -> Phòng
-    function renderCellHtml(cell, mode) {
-        if (!cell) return `<td>-</td>`;
+    // Render ô chứa 1 hoặc NỰA (nhiều) môn song song
+    function renderCellHtml(cellList, mode) {
+        if (!cellList || cellList.length === 0) return `<td>-</td>`;
 
-        if (cell.isOff) {
-            return `<td><div class="off-text">${cell.subject}</div></td>`;
-        }
+        let html = `<td>`;
+        cellList.forEach((cell, idx) => {
+            if (idx > 0) html += `<hr style="border: 0; border-top: 1px dashed #cbd5e0; margin: 4px 0;">`;
 
-        let subjectStr = `<div class="subject-name">${cell.subject}</div>`;
-        
-        // Nếu xem theo chế độ Giáo viên, hiển thị Tên Lớp thay cho tên GV
-        let teacherStr = mode === 'TEACHER' 
-            ? `<div class="teacher-name">Lớp: ${cell.classId}</div>`
-            : `<div class="teacher-name">${cell.teacher}</div>`;
+            if (cell.isOff) {
+                html += `<div class="off-text">${cell.subject}</div>`;
+                return;
+            }
 
-        let roomStr = cell.room ? `<div class="room-name">${cell.room}</div>` : '';
-        let groupStr = cell.isGroup ? `<span class="group-tag">Lớp ghép (${cell.groupMembers})</span>` : '';
+            let subjectStr = `<div class="subject-name">${cell.subject}</div>`;
+            let teacherStr = mode === 'TEACHER' 
+                ? `<div class="teacher-name">Lớp: ${cell.classId}</div>`
+                : `<div class="teacher-name">${cell.teacher}</div>`;
 
-        return `<td>
-            ${subjectStr}
-            ${teacherStr}
-            ${roomStr}
-            ${groupStr}
-        </td>`;
+            let roomStr = cell.room ? `<div class="room-name">${cell.room}</div>` : '';
+            let groupStr = cell.isGroup ? `<span class="group-tag">Lớp ghép (${cell.groupMembers})</span>` : '';
+            let toHopTag = cell.toHopGroup ? `<span class="group-tag" style="color:#d69e2e;">[Tổ hợp: ${cell.toHopGroup}]</span>` : '';
+
+            html += `${subjectStr}${teacherStr}${roomStr}${groupStr}${toHopTag}`;
+        });
+
+        html += `</td>`;
+        return html;
     }
 </script>
 
