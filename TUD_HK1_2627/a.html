@@ -106,7 +106,26 @@
         return isStrictDoubleSlotSubject(subjectName) || name.includes('GDQP') || name.includes('QUỐC PHÒNG');
     }
 
-    // --- THUẬT TOÁN XẾP TKB CÓ HỖ TRỢ DẠY SONG SONG ---
+    // Kiểm tra xem một ngày cụ thể lớp có tiết học chiều nào không
+    function classHasAfternoonLesson(classId, day, scheduleResult) {
+        for (let slot = 1; slot <= 3; slot++) {
+            let key = `${day}_Chiều_${slot}`;
+            let slots = scheduleResult[classId] ? scheduleResult[classId][key] : null;
+            if (slots && slots.length > 0 && !slots[0].isOff) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Kiểm tra xem một ngày cụ thể lớp có học Tiết 5 Sáng không
+    function classHasMorningSlot5(classId, day, scheduleResult) {
+        let key = `${day}_Sáng_5`;
+        let slots = scheduleResult[classId] ? scheduleResult[classId][key] : null;
+        return (slots && slots.length > 0 && !slots[0].isOff);
+    }
+
+    // --- THUẬT TOÁN XẾP TKB NÂNG CẤP ---
     function generateTHPTSchedule() {
         let busyTeachers = {};      
         let busySpecialRooms = {};  
@@ -135,16 +154,20 @@
             }
         });
 
-        // 2. Ưu tiên: Lớp ghép -> Môn tổ hợp -> GDTC -> Môn nhiều tiết
+        // 2. Ưu tiên: Lớp ghép -> Môn tổ hợp -> Môn học Buổi Chiều -> GDTC -> Môn nhiều tiết
         let assignments = [...db.assignments].sort((a, b) => {
             let isGroupA = a.LopGhep && a.LopGhep.trim() !== '' ? 1 : 0;
             let isGroupB = b.LopGhep && b.LopGhep.trim() !== '' ? 1 : 0;
             if (isGroupA !== isGroupB) return isGroupB - isGroupA;
 
-            // Môn song song/tổ hợp xếp ưu tiên hơn môn thường
             let isParallelA = (a.ToHop || a.NhomMon) ? 1 : 0;
             let isParallelB = (b.ToHop || b.NhomMon) ? 1 : 0;
             if (isParallelA !== isParallelB) return isParallelB - isParallelA;
+
+            // Môn quy định học buổi chiều (vd: Chuyên đề, Tin học chuyên đề) xếp trước để gom gọn buổi chiều
+            let isAfternoonOnlyA = String(a.TenMon || '').toUpperCase().includes('CHUYÊN ĐỀ') ? 1 : 0;
+            let isAfternoonOnlyB = String(b.TenMon || '').toUpperCase().includes('CHUYÊN ĐỀ') ? 1 : 0;
+            if (isAfternoonOnlyA !== isAfternoonOnlyB) return isAfternoonOnlyB - isAfternoonOnlyA;
 
             let isGDTCA = isStrictDoubleSlotSubject(a.TenMon) ? 1 : 0;
             let isGDTCB = isStrictDoubleSlotSubject(b.TenMon) ? 1 : 0;
@@ -162,7 +185,7 @@
             let reqRoom = assign.YeuCauPhongDacThu || 'Không';
             let subjectName = String(assign.TenMon || '').trim();
             let isGDTC = isStrictDoubleSlotSubject(subjectName);
-            let toHopGroup = assign.ToHop || assign.NhomMon || null; // Tên nhóm tổ hợp (VD: "TH_TU_NHIEN")
+            let toHopGroup = assign.ToHop || assign.NhomMon || null;
 
             let targetClasses = [];
             let isGroup = assign.LopGhep && assign.LopGhep.trim() !== '';
@@ -219,8 +242,9 @@
                             let key1 = `${day}_${session.name}_${k1}`;
                             let key2 = `${day}_${session.name}_${k2}`;
 
-                            if (canPlaceSlot(targetClasses, teacher, reqRoom, key1, scheduleResult, busyTeachers, busySpecialRooms, toHopGroup) &&
-                                canPlaceSlot(targetClasses, teacher, reqRoom, key2, scheduleResult, busyTeachers, busySpecialRooms, toHopGroup)) {
+                            // THÊM THAM SỐ: Tiết đôi k2 đánh dấu là isSecondSlot = true để bỏ qua việc check trống của chính k1
+                            if (canPlaceSlot(targetClasses, teacher, reqRoom, key1, scheduleResult, busyTeachers, busySpecialRooms, toHopGroup, subjectName, false) &&
+                                canPlaceSlot(targetClasses, teacher, reqRoom, key2, scheduleResult, busyTeachers, busySpecialRooms, toHopGroup, subjectName, true)) {
                                 
                                 placeSlot(targetClasses, teacher, reqRoom, finalRoom, key1, subjectName, scheduleResult, busyTeachers, busySpecialRooms, assign.LopGhep, toHopGroup);
                                 placeSlot(targetClasses, teacher, reqRoom, finalRoom, key2, subjectName, scheduleResult, busyTeachers, busySpecialRooms, assign.LopGhep, toHopGroup);
@@ -242,7 +266,8 @@
                         for (let slot = 1; slot <= session.maxSlots; slot++) {
                             let key = `${day}_${session.name}_${slot}`;
 
-                            if (canPlaceSlot(targetClasses, teacher, reqRoom, key, scheduleResult, busyTeachers, busySpecialRooms, toHopGroup)) {
+                            // THÊM THAM SỐ: Tiết lẻ mặc định isSecondSlot = false
+                            if (canPlaceSlot(targetClasses, teacher, reqRoom, key, scheduleResult, busyTeachers, busySpecialRooms, toHopGroup, subjectName, false)) {
                                 placeSlot(targetClasses, teacher, reqRoom, finalRoom, key, subjectName, scheduleResult, busyTeachers, busySpecialRooms, assign.LopGhep, toHopGroup);
                                 placedCount++;
                                 classSubjectDayCount[day] = (classSubjectDayCount[day] || 0) + 1;
@@ -260,29 +285,59 @@
         onViewModeChange();
     }
 
-    // Kiểm tra điều kiện có thể chèn tiết (có tính đến môn song song)
-    function canPlaceSlot(classList, teacher, reqRoom, timeKey, scheduleResult, busyTeachers, busySpecialRooms, toHopGroup) {
-        // 1. Kiểm tra Giáo viên bận
+    // Hàm kiểm tra điều kiện (Đã bổ sung ràng buộc Cấm Trống Tiết giữa buổi)
+    function canPlaceSlot(classList, teacher, reqRoom, timeKey, scheduleResult, busyTeachers, busySpecialRooms, toHopGroup, subjectName, isSecondSlot = false) {
+        let parts = timeKey.split('_'); 
+        let day = parts[0];
+        let session = parts[1];
+        let slot = parseInt(parts[2], 10);
+
+        // 1. RÀNG BUỘC GDTC: Không học Tiết 5 Sáng
+        if (session === 'Sáng' && slot === 5 && isStrictDoubleSlotSubject(subjectName)) {
+            return false;
+        }
+
+        // 2. RÀNG BUỘC CHIỀU <-> TIẾT 5 SÁNG:
+        if (session === 'Sáng' && slot === 5) {
+            for (let classId of classList) {
+                if (classHasAfternoonLesson(classId, day, scheduleResult)) return false;
+            }
+        }
+        if (session === 'Chiều') {
+            for (let classId of classList) {
+                if (classHasMorningSlot5(classId, day, scheduleResult)) return false;
+            }
+        }
+
+        // 3. RÀNG BUỘC LIÊN TỤC: Chỉ cho phép xếp nếu các tiết trước đó không bị trống
+        if (slot > 1 && !isSecondSlot) {
+            for (let classId of classList) {
+                let prevKey = `${day}_${session}_${slot - 1}`;
+                let prevSlots = scheduleResult[classId] ? scheduleResult[classId][prevKey] : null;
+                // Nếu tiết ngay trước đó của lớp bị trống -> Dừng, không cho phép học cách tiết!
+                if (!prevSlots || prevSlots.length === 0) {
+                    return false;
+                }
+            }
+        }
+
+        // 4. Kiểm tra Giáo viên bận
         if (busyTeachers[teacher] && busyTeachers[teacher][timeKey]) return false;
 
-        // 2. Kiểm tra Phòng đặc thù bận
+        // 5. Kiểm tra Phòng đặc thù bận
         if (reqRoom !== 'Không' && reqRoom !== '') {
             let roomUsage = busySpecialRooms[`${reqRoom}_${timeKey}`] || 0;
             if (roomUsage >= 1) return false;
         }
 
-        // 3. Kiểm tra Lớp học
+        // 6. Kiểm tra trùng tiết Lớp học
         for (let classId of classList) {
             let existingSlots = scheduleResult[classId] ? scheduleResult[classId][timeKey] : null;
 
             if (existingSlots && existingSlots.length > 0) {
-                // Nếu là tiết cố định (Chào cờ, nghỉ chiều) -> Không chèn
                 if (existingSlots[0].isFlag || existingSlots[0].isOff) return false;
-
-                // Nếu không có thông tin Tổ hợp -> Không cho chèn trùng
                 if (!toHopGroup) return false;
 
-                // Nếu ô đó đã có môn, kiểm tra xem môn đã có thuộc CÙNG NHÓM TỔ HỢP không
                 let isSameGroup = existingSlots.every(item => item.toHopGroup === toHopGroup);
                 if (!isSameGroup) return false; 
             }
@@ -438,7 +493,6 @@
         container.innerHTML += html;
     }
 
-    // Render ô chứa 1 hoặc NỰA (nhiều) môn song song
     function renderCellHtml(cellList, mode) {
         if (!cellList || cellList.length === 0) return `<td>-</td>`;
 
