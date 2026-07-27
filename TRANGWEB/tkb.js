@@ -1,10 +1,24 @@
 function loadTKBView() {
-	document.title = "Thời gian biểu | Học nhóm Năm 2 Khoa Toán";
+    document.title = "Thời gian biểu | Học nhóm Năm 2 Khoa Toán";
     resetNavActive(); $('#btnNavTKB').addClass('active'); $('#tkbSection').removeClass('d-none');
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
-    loadThoiGianBieu(); loadDeadlines();
-}
 
+    // Kiểm tra: Nếu dữ liệu đã tải ngầm xong thì lấy ra vẽ luôn (0 giây)
+    if (typeof globalTkbData !== 'undefined' && globalTkbData.length > 0) {
+        filterAndRenderTKB();
+        renderTkbToolBar();
+    } else {
+        loadThoiGianBieu(); // Dự phòng mạng lag chưa tải xong
+    }
+
+    // Tương tự với Deadline
+    if (typeof globalDeadlineData !== 'undefined' && globalDeadlineData.length > 0) {
+        renderDeadlines();
+        $('#deadlineBox').removeClass('d-none');
+    } else {
+        loadDeadlines();
+    }
+}
 function loadThoiGianBieu() {
     $('.tkb-personal-toolbar').remove();
     if (!currentUser) {

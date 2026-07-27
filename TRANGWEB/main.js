@@ -21,11 +21,17 @@ function resetNavActive() {
     $('#profileSection').addClass('d-none'); // <--- Ẩn trang hồ sơ
 }
 
-        function loadTongHopView() {
-            document.title = "Tổng hợp Link | Học nhóm Năm 2 Khoa Toán";
-			resetNavActive(); $('#btnNavTongHop').addClass('active'); $('#tongHopSection').removeClass('d-none');
-            if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
-        }
+// Thay đổi hàm loadTongHopView để không gọi lại dữ liệu nếu đã có
+function loadTongHopView() {
+    document.title = "Tổng hợp Link | Học nhóm Năm 2 Khoa Toán";
+    resetNavActive(); 
+    $('#btnNavTongHop').addClass('active'); 
+    $('#tongHopSection').removeClass('d-none');
+    
+    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
+    
+    // Link đã được tải ngầm trong hàm initGlobalApp nên không cần làm gì thêm ở đây
+}
 function pingOnlineStatus() {
             let savedUser = localStorage.getItem('currentUser');
             let mssvParam = "Khách"; 
@@ -3255,3 +3261,63 @@ window.openEditPersonalLinkByIndex = function(index, event) {
     
     $('#editWebLinkModal').modal('show');
 };
+// --- CHIẾN DỊCH TẢI NGẦM TOÀN BỘ DANH MỤC (PRE-FETCHING) ---
+$(document).ready(function() {
+    window.boNhoDemHocPhan = {};
+
+    // 1. CHẶN KẾT NỐI MẠNG: Ép web dùng dữ liệu tải sẵn nếu có
+    const originalAjax = $.ajax;
+    $.ajax = function(settings) {
+        if (settings.url && settings.url.includes("action=getHocPhanData")) {
+            let match = settings.url.match(/sheetName=([^&]+)/);
+            let sheet = match ? decodeURIComponent(match[1]) : null;
+            
+            // Nếu sinh viên click và dữ liệu đã có sẵn trong kho -> Hiện ngay lập tức
+            if (sheet && window.boNhoDemHocPhan[sheet] && typeof isAdmin !== 'undefined' && !isAdmin) {
+                // Nhả dữ liệu ra lập tức với độ trễ 10ms để giao diện không bị giật
+                setTimeout(() => { if (settings.success) settings.success(window.boNhoDemHocPhan[sheet]); }, 10);
+                return; // Cắt đứt kết nối mạng, không chờ Google nữa
+            }
+            
+            // Lần đầu tải (chưa có sẵn) -> Lưu lại vào kho sau khi tải xong
+            let oldSuccess = settings.success;
+            settings.success = function(data) {
+                if (sheet) window.boNhoDemHocPhan[sheet] = data;
+                if (oldSuccess) oldSuccess(data);
+            };
+        }
+        return originalAjax.apply(this, arguments);
+    };
+
+    // 2. TỰ ĐỘNG KÉO NGẦM TẤT CẢ DỮ LIỆU VỀ MÁY
+    function batDauTaiNgam() {
+        // Chỉ chạy cho Sinh viên (Admin luôn cần dữ liệu thực tế) và danh mục đã load xong
+        if (typeof globalCategories !== 'undefined' && globalCategories.length > 0 && typeof isAdmin !== 'undefined' && !isAdmin) {
+            globalCategories.forEach((sheetName, index) => {
+                let lower = sheetName.toLowerCase();
+                // Bỏ qua các sheet không phải môn học
+                if (lower === 'thông báo' || lower === 'users' || lower === 'cauhinhhocky' || lower === 'mastertkb') return;
+
+                // Xếp hàng tải ngầm từng môn, cách nhau 0.8 giây để không làm quá tải máy chủ Google
+                setTimeout(() => {
+                    if (!window.boNhoDemHocPhan[sheetName]) {
+                        originalAjax({
+                            url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
+                            method: "GET",
+                            dataType: "json",
+                            success: function(data) {
+                                window.boNhoDemHocPhan[sheetName] = data; // Tải xong giấu vào kho
+                            }
+                        });
+                    }
+                }, index * 800); 
+            });
+        } else {
+            // Nếu danh sách môn chưa tải xong, đợi 2 giây rồi thử lại
+            setTimeout(batDauTaiNgam, 2000);
+        }
+    }
+
+    // Khởi động chiến dịch tải ngầm sau khi trang hiện lên 3 giây (để máy tập trung load mượt giao diện chính trước)
+    setTimeout(batDauTaiNgam, 3000);
+});
