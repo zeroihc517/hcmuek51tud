@@ -2136,7 +2136,7 @@ function processExportCalendar() {
 
     let events = [];
 
-    // 1. LẤY DỮ LIỆU THỜI KHÓA BIỂU (Lịch học cụ thể theo giờ)
+    // 1. LẤY DỮ LIỆU THỜI KHÓA BIỂU
     if ((option === 'both' || option === 'tkb') && typeof globalTkbData !== 'undefined') {
         globalTkbData.forEach(c => {
             if ((c.hinhThuc || '').toUpperCase().includes('VLE')) return; 
@@ -2150,48 +2150,42 @@ function processExportCalendar() {
             let targetDayOfWeek = c.thu === 8 ? 0 : c.thu - 1; 
             let skipDates = (c.ngayNgoaiLe || "").split(',').map(d => d.trim());
 
-            // --- XỬ LÝ BÓC TÁCH GIỜ HỌC RÕ RÀNG VÀ CHÍNH XÁC ---
-            let startTimeStr = "07:00", endTimeStr = "09:30";
-            
+            // --- BÓC TÁCH GIỜ THÔNG MINH (CHÍNH XÁC AM/PM & GIỜ TỐI) ---
+            let sH = 7, sM = 0, eH = 9, eM = 30;
+
             if (c.thoiGian && c.thoiGian.includes('-')) {
-                // Chuẩn hóa dạng "12h30", "12g30" thành "12:30"
-                let cleanTime = c.thoiGian.replace(/[hgG]/g, ':').replace(/\s+/g, '');
+                let isPM = /PM/i.test(c.thoiGian);
+                let cleanTime = c.thoiGian.replace(/PM|AM/gi, '').replace(/[hgG]/g, ':').replace(/\s+/g, '');
                 let times = cleanTime.split('-');
-                
-                const parseTimePart = (tStr) => {
+
+                const parseTimeStr = (tStr) => {
                     let parts = tStr.split(':');
                     let h = parseInt(parts[0]) || 0;
                     let m = parseInt(parts[1]) || 0;
                     return [h, m];
                 };
 
-                let [sH, sM] = parseTimePart(times[0]);
-                let [eH, eM] = parseTimePart(times[1]);
+                [sH, sM] = parseTimeStr(times[0]);
+                [eH, eM] = parseTimeStr(times[1]);
 
-                startTimeStr = `${String(sH).padStart(2, '0')}:${String(sM).padStart(2, '0')}`;
-                endTimeStr = `${String(eH).padStart(2, '0')}:${String(eM).padStart(2, '0')}`;
+                // Nếu có chữ PM hoặc giờ từ 1 đến 5 -> Quy đổi sang hệ 24 giờ
+                if (isPM || (sH >= 1 && sH <= 5)) sH += 12;
+                if (isPM || (eH >= 1 && eH <= 5) || (eH < sH)) eH += 12;
+
             } else if (c.tietBd) {
-                // Quy đổi tiết mặc định nếu không ghi giờ cụ thể
-                // Tiết 1 bắt đầu 6:30
                 let startMinsTotal = 390 + (c.tietBd - 1) * 50; 
                 let endMinsTotal = startMinsTotal + (c.soTiet || 1) * 50;
 
-                let sH = Math.floor(startMinsTotal / 60);
-                let sM = startMinsTotal % 60;
-                let eH = Math.floor(endMinsTotal / 60);
-                let eM = endMinsTotal % 60;
-
-                startTimeStr = `${String(sH).padStart(2, '0')}:${String(sM).padStart(2, '0')}`;
-                endTimeStr = `${String(eH).padStart(2, '0')}:${String(eM).padStart(2, '0')}`;
+                sH = Math.floor(startMinsTotal / 60);
+                sM = startMinsTotal % 60;
+                eH = Math.floor(endMinsTotal / 60);
+                eM = endMinsTotal % 60;
             }
 
             while (curDate <= lastDate) {
                 if (curDate.getDay() === targetDayOfWeek) {
                     let formattedDateStr = formatDateDDMMYYYY(curDate);
                     if (!skipDates.includes(formattedDateStr)) {
-                        let [sH, sM] = startTimeStr.split(':').map(Number);
-                        let [eH, eM] = endTimeStr.split(':').map(Number);
-
                         let startDT = new Date(curDate); startDT.setHours(sH, sM, 0, 0);
                         let endDT = new Date(curDate); endDT.setHours(eH, eM, 0, 0);
 
@@ -2225,7 +2219,7 @@ function processExportCalendar() {
 
                     events.push({
                         type: 'ALLDAY',
-                        title: `[DEADLINE] ${cleanTitle}`,
+                        title: `${cleanTitle}`,
                         startDate: startDateObj,
                         endDate: endDateObj,
                         location: d.tag || '',
@@ -2241,10 +2235,42 @@ function processExportCalendar() {
         return;
     }
 
-    // 3. TẠO FILE ICS CÓ KHAI BÁO MÚI GIỜ VIỆT NAM (ASIA/HO_CHI_MINH)
-    let icsContent = buildICSContent(events);
+    // --- PHÂN TÍCH CA HỌC SÁNG / CHIỀU CỦA TỪNG NGÀY (LOẠI TRỪ DEADLINE ALLDAY) ---
+    let dayScheduleSummary = {}; 
 
-    // 4. TẢI FILE `.ics` VỀ MÁY NGƯỜI DÙNG
+    events.forEach(evt => {
+        if (evt.type === 'TIMED') {
+            let dateKey = `${evt.start.getFullYear()}-${evt.start.getMonth() + 1}-${evt.start.getDate()}`;
+            if (!dayScheduleSummary[dateKey]) {
+                dayScheduleSummary[dateKey] = {
+                    hasMorning: false,
+                    hasAfternoon: false,
+                    morningEnd: null,   
+                    afternoonEnd: null  
+                };
+            }
+
+            let startH = evt.start.getHours();
+
+            // Phân loại: Sáng (< 12:00), Chiều (12:00 -> 17:00)
+            if (startH < 12) {
+                dayScheduleSummary[dateKey].hasMorning = true;
+                if (!dayScheduleSummary[dateKey].morningEnd || evt.end > dayScheduleSummary[dateKey].morningEnd) {
+                    dayScheduleSummary[dateKey].morningEnd = new Date(evt.end);
+                }
+            } else if (startH >= 12 && startH < 17) {
+                dayScheduleSummary[dateKey].hasAfternoon = true;
+                if (!dayScheduleSummary[dateKey].afternoonEnd || evt.end > dayScheduleSummary[dateKey].afternoonEnd) {
+                    dayScheduleSummary[dateKey].afternoonEnd = new Date(evt.end);
+                }
+            }
+        }
+    });
+
+    // 3. TẠO FILE ICS
+    let icsContent = buildICSContent(events, dayScheduleSummary);
+
+    // 4. TẢI FILE `.ics` VỀ MÁY
     let blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
     let link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
@@ -2254,13 +2280,12 @@ function processExportCalendar() {
     document.body.removeChild(link);
 
     $('#exportCalendarModal').modal('hide');
-    alert(`Đã xuất thành công ${events.length} sự kiện! Giờ học đã được đồng bộ chính xác.`);
+    alert(`Đã xuất thành công ${events.length} sự kiện! Giờ học và thông báo đã được căn chỉnh chính xác.`);
 }
 
-function buildICSContent(events) {
+function buildICSContent(events, dayScheduleSummary) {
     let pad = (n) => String(n).padStart(2, '0');
 
-    // Định dạng YYYYMMDDTHHMMSS cho giờ địa phương
     const formatLocalICS = (date) => {
         return date.getFullYear() +
             pad(date.getMonth() + 1) +
@@ -2270,11 +2295,24 @@ function buildICSContent(events) {
             pad(date.getSeconds());
     };
 
-    // Định dạng YYYYMMDD cho sự kiện cả ngày
     const formatDateOnlyICS = (date) => {
         return date.getFullYear() +
             pad(date.getMonth() + 1) +
             pad(date.getDate());
+    };
+
+    // Hàm chuyển mốc Date thành chuỗi đếm ngược tương đối `-PT...` cho VALARM TRIGGER
+    const calculateTriggerOffset = (eventStartDT, alarmTargetDT) => {
+        let diffMs = eventStartDT.getTime() - alarmTargetDT.getTime();
+        if (diffMs <= 0) return "-PT0M"; 
+
+        let diffMins = Math.floor(diffMs / (1000 * 60));
+        let hours = Math.floor(diffMins / 60);
+        let mins = diffMins % 60;
+
+        let str = `-PT${hours}H`;
+        if (mins > 0) str += `${mins}M`;
+        return str;
     };
 
     let icsLines = [
@@ -2304,9 +2342,8 @@ function buildICSContent(events) {
         if (evt.description) icsLines.push(`DESCRIPTION:${evt.description}`);
 
         if (evt.type === 'ALLDAY') {
-            // --- 1. DEADLINE (SỰ KIỆN CẢ NGÀY) ---
+            // --- 1. DEADLINE (SỰ KIỆN CẢ NGÀY - TÍNH TỪ 00:00) ---
             let dtStartStr = formatDateOnlyICS(evt.startDate);
-
             let nextDayAfterEnd = new Date(evt.endDate);
             nextDayAfterEnd.setDate(nextDayAfterEnd.getDate() + 1);
             let dtEndStr = formatDateOnlyICS(nextDayAfterEnd);
@@ -2314,33 +2351,90 @@ function buildICSContent(events) {
             icsLines.push(`DTSTART;VALUE=DATE:${dtStartStr}`);
             icsLines.push(`DTEND;VALUE=DATE:${dtEndStr}`);
 
-            // BÁO THỨC DEADLINE: 18:00 hôm trước = Đếm ngược 6 tiếng trước 00:00 ngày diễn ra
+            // THÔNG BÁO DUY NHẤT: 5:30 AM ngày đầu tiên (PT5H30M tính từ gốc 00:00 ngày diễn ra)
             icsLines.push('BEGIN:VALARM');
             icsLines.push('ACTION:DISPLAY');
             icsLines.push(`DESCRIPTION:Nhắc nhở Deadline: ${evt.title}`);
-            icsLines.push('TRIGGER:-PT6H'); 
+            icsLines.push('TRIGGER;RELATED=START:PT5H30M'); 
             icsLines.push('END:VALARM');
 
         } else {
-            // --- 2. THỜI KHÓA BIỂU (SỰ KIỆN CÓ GIỜ CỤ THỂ) ---
+            // --- 2. THỜI KHÓA BIỂU (SỰ KIỆN THEO GIỜ) ---
             icsLines.push(`DTSTART;TZID=Asia/Ho_Chi_Minh:${formatLocalICS(evt.start)}`);
             icsLines.push(`DTEND;TZID=Asia/Ho_Chi_Minh:${formatLocalICS(evt.end)}`);
 
-            // BÁO THỨC TKB: Tính chính xác khoảng thời gian lùi về 18:00 ngày hôm trước
-            let startHour = evt.start.getHours();
-            let startMin = evt.start.getMinutes();
+            let startH = evt.start.getHours();
+            let dateKey = `${evt.start.getFullYear()}-${evt.start.getMonth() + 1}-${evt.start.getDate()}`;
+            let dayInfo = dayScheduleSummary[dateKey] || { hasMorning: false, hasAfternoon: false };
 
-            let triggerHours = 6 + startHour; // 6 tiếng (từ 18h->24h) + số giờ của buổi học
-            let triggerStr = `-PT${triggerHours}H`;
-            if (startMin > 0) {
-                triggerStr += `${startMin}M`;
+            if (startH < 12) {
+                // ==================== A. BUỔI SÁNG (< 12:00) ====================
+                let alarmTarget1 = new Date(evt.start);
+                alarmTarget1.setDate(alarmTarget1.getDate() - 1);
+                alarmTarget1.setHours(18, 0, 0, 0); // 18:00 ngày hôm trước
+
+                let alarmTarget2 = new Date(evt.start);
+                alarmTarget2.setHours(5, 30, 0, 0); // 05:30 AM cùng ngày
+
+                icsLines.push('BEGIN:VALARM');
+                icsLines.push('ACTION:DISPLAY');
+                icsLines.push(`DESCRIPTION:Nhắc trước lịch học sáng: ${evt.title}`);
+                icsLines.push(`TRIGGER:${calculateTriggerOffset(evt.start, alarmTarget1)}`);
+                icsLines.push('END:VALARM');
+
+                icsLines.push('BEGIN:VALARM');
+                icsLines.push('ACTION:DISPLAY');
+                icsLines.push(`DESCRIPTION:Nhắc trong ngày lịch học sáng: ${evt.title}`);
+                icsLines.push(`TRIGGER:${calculateTriggerOffset(evt.start, alarmTarget2)}`);
+                icsLines.push('END:VALARM');
+
+            } else if (startH >= 12 && startH < 17) {
+                // ==================== B. BUỔI CHIỀU (12:00 -> 17:00) ====================
+                let alarmTarget1 = new Date(evt.start);
+                if (!dayInfo.hasMorning) {
+                    alarmTarget1.setHours(7, 0, 0, 0); // Sáng KHÔNG học -> 07:00 AM cùng ngày
+                } else {
+                    alarmTarget1.setDate(alarmTarget1.getDate() - 1);
+                    alarmTarget1.setHours(18, 0, 0, 0); // Sáng CÓ học -> 18:00 hôm trước
+                }
+
+                let alarmTarget2 = new Date(evt.start);
+                if (dayInfo.hasMorning && dayInfo.morningEnd) {
+                    alarmTarget2 = new Date(dayInfo.morningEnd.getTime() + 10 * 60000); // Kết thúc ca sáng + 10p
+                } else {
+                    alarmTarget2.setHours(11, 40, 0, 0);
+                }
+
+                icsLines.push('BEGIN:VALARM');
+                icsLines.push('ACTION:DISPLAY');
+                icsLines.push(`DESCRIPTION:Nhắc trước lịch học chiều: ${evt.title}`);
+                icsLines.push(`TRIGGER:${calculateTriggerOffset(evt.start, alarmTarget1)}`);
+                icsLines.push('END:VALARM');
+
+                icsLines.push('BEGIN:VALARM');
+                icsLines.push('ACTION:DISPLAY');
+                icsLines.push(`DESCRIPTION:Nhắc trong ngày lịch học chiều: ${evt.title}`);
+                icsLines.push(`TRIGGER:${calculateTriggerOffset(evt.start, alarmTarget2)}`);
+                icsLines.push('END:VALARM');
+
+            } else {
+                // ==================== C. BUỔI TỐI (>= 17:00) (DUY NHẤT 1 THÔNG BÁO) ====================
+                let alarmTargetNight = new Date(evt.start);
+
+                if (dayInfo.hasAfternoon && dayInfo.afternoonEnd) {
+                    // CÓ ca chiều -> [Kết thúc ca chiều] + 5 phút
+                    alarmTargetNight = new Date(dayInfo.afternoonEnd.getTime() + 5 * 60000);
+                } else {
+                    // KHÔNG có ca chiều -> 15:00 PM (3:00 PM) cùng ngày
+                    alarmTargetNight.setHours(15, 0, 0, 0);
+                }
+
+                icsLines.push('BEGIN:VALARM');
+                icsLines.push('ACTION:DISPLAY');
+                icsLines.push(`DESCRIPTION:Nhắc lịch học tối: ${evt.title}`);
+                icsLines.push(`TRIGGER:${calculateTriggerOffset(evt.start, alarmTargetNight)}`);
+                icsLines.push('END:VALARM');
             }
-
-            icsLines.push('BEGIN:VALARM');
-            icsLines.push('ACTION:DISPLAY');
-            icsLines.push(`DESCRIPTION:Nhắc nhở lịch học: ${evt.title}`);
-            icsLines.push(`TRIGGER:${triggerStr}`);
-            icsLines.push('END:VALARM');
         }
 
         icsLines.push('END:VEVENT');
