@@ -1311,7 +1311,8 @@ function renderSystemCoursesList() {
                 id: course.id, mon: course.mon, gv: course.gv,
                 phongList: [], thoiGianList: [], rawSchedules: [],
                 hinhThuc: course.hinhThuc, ngayBatDau: course.ngayBatDau, ngayKetThuc: course.ngayKetThuc,
-		ngayNgoaiLe: course.ngayNgoaiLe || ""
+		ngayNgoaiLe: course.ngayNgoaiLe || "",
+		ghiChu: course.ghiChu || ""
             };
         } else {
             let currentStart = parseDateString(mergedClasses[course.id].ngayBatDau);
@@ -1468,7 +1469,15 @@ window.openSubjectDetail = function(subjectKey) {
         let isCopied = !isSynced && (copiedRowIndices.length > 0);
         let rowBg = (isSynced || isCopied) ? "background-color: #f8fafc;" : "background-color: #ffffff;";
         let dateDisplay = (c.ngayBatDau && c.ngayKetThuc) ? `<span class="fw-bold text-dark">${c.ngayBatDau}</span><br>đến <span class="fw-bold text-dark">${c.ngayKetThuc}</span>` : '-';
-
+// --- XỬ LÝ NỘI DUNG CỘT GHI CHÚ ---
+        let ghiChuParts = [];
+        if (c.ngayNgoaiLe && c.ngayNgoaiLe.trim() !== "") {
+            ghiChuParts.push(`<span class="text-danger fw-bold"><i class="fa-solid fa-calendar-xmark me-1"></i>Nghỉ: ${c.ngayNgoaiLe}</span>`);
+        }
+        if (c.ghiChu && c.ghiChu.trim() !== "") {
+            ghiChuParts.push(`<span class="text-muted small">${c.ghiChu}</span>`);
+        }
+        let ghiChuDisplay = ghiChuParts.length > 0 ? ghiChuParts.join('<br>') : '-';
         let checkboxHtml = '';
         let statusHtml = '';
 
@@ -1500,6 +1509,7 @@ window.openSubjectDetail = function(subjectKey) {
             </td>
             <td class="text-center text-warning-emphasis fw-bold align-middle">${c.gv || '-'}</td>
             <td class="text-center align-middle" style="font-size: 13px;">${dateDisplay}</td>
+		<td class="text-center align-middle" style="font-size: 13px;">${ghiChuDisplay}</td> <!-- CỘT GHI CHÚ MỚI -->
             <td class="text-center align-middle">${statusHtml}</td>
         </tr>
         `;
