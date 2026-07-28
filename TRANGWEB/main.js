@@ -3412,7 +3412,7 @@ function saveAvatar() {
         khoa: $('#profKhoa').val() || currentUser.khoa || '',
         khoaHoc: $('#profKhoaHoc').val() || currentUser.khoaHoc || '',
         nhom: $('#profNhom').val() || currentUser.nhom || '',
-        avatar: currentUser.avatar || ""
+        avatar: url
     }, function(res) {
         alert("Đã cập nhật ảnh đại diện thành công!");
         
