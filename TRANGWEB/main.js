@@ -3321,3 +3321,18 @@ $(document).ready(function() {
     // Khởi động chiến dịch tải ngầm sau khi trang hiện lên 3 giây (để máy tập trung load mượt giao diện chính trước)
     setTimeout(batDauTaiNgam, 3000);
 });
+function loadProfileView() {
+    document.title = "Hồ sơ cá nhân | Học nhóm Năm 2 Khoa Toán";
+    resetNavActive(); // Ẩn các phân hệ khác
+    $('#profileSection').removeClass('d-none'); // Hiển thị khung Hồ sơ
+    
+    // Đóng Menu Popover/Dropdown
+    let dropdownMenu = document.querySelector('#sidebarUserInfo .dropdown-menu');
+    if (dropdownMenu) dropdownMenu.classList.remove('show');
+    
+    // Đóng Sidebar trên điện thoại
+    if (window.innerWidth < 992) { 
+        if (typeof sidebar !== 'undefined') sidebar.classList.remove('show'); 
+        if (typeof overlay !== 'undefined') overlay.classList.remove('show'); 
+    }
+}
