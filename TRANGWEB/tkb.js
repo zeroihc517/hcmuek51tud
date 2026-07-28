@@ -345,6 +345,7 @@ function renderTkbToolBar() {
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openManageTkbListModal()"><i class="fa-solid fa-calendar-days text-info"></i> Lịch học</button>
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #dc2626;" onclick="openManageDeadlineListModal()"><i class="fa-solid fa-thumbtack text-warning"></i> Deadline</button>
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openAddTkbModal(false)"><i class="fa-solid fa-plus"></i> Thêm lịch mới</button>
+<button class="btn btn-sm text-white fw-bold" style="background-color: #16a34a;" onclick="openExportCalendarModal()"><i class="fa-solid fa-calendar-plus"></i> Xuất Google Lịch</button>
             </div>
         </div>`;
     $('.table-box').before(toolbarHtml);
@@ -2082,4 +2083,269 @@ function toggleDeadlineComplete(sheetRowIndex, event) {
             console.error("Lỗi khi đồng bộ trạng thái Deadline lên máy chủ!");
         });
     }
+}
+// =========================================================================
+// TÍNH NĂNG: XUẤT THỜI KHÓA BIỂU & DEADLINE SANG GOOGLE CALENDAR (.ICS)
+// =========================================================================
+
+function openExportCalendarModal() {
+    if (!currentUser) {
+        alert("Vui lòng đăng nhập để sử dụng tính năng xuất lịch!");
+        return;
+    }
+
+    // Mặc định thiết lập khoảng thời gian là tuần hiện tại + 4 tuần tiếp theo
+    let now = new Date();
+    let defaultStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let defaultEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 30);
+
+    const formatISODate = (d) => {
+        let month = String(d.getMonth() + 1).padStart(2, '0');
+        let day = String(d.getDate()).padStart(2, '0');
+        return `${d.getFullYear()}-${month}-${day}`;
+    };
+
+    $('#expFromDate').val(formatISODate(defaultStart));
+    $('#expToDate').val(formatISODate(defaultEnd));
+
+    $('#exportCalendarModal').modal('show');
+}
+
+// =========================================================================
+// TÍNH NĂNG: XUẤT THỜI KHÓA BIỂU & DEADLINE SANG GOOGLE CALENDAR (.ICS)
+// (ĐÃ FIX LỖI MÚI GIỜ BỊ LỆCH VÀ BÓC TÁCH GIỜ CHÍNH XÁC)
+// =========================================================================
+
+function processExportCalendar() {
+    let option = $('input[name="exportDataOption"]:checked').val();
+    let fromDateStr = $('#expFromDate').val();
+    let toDateStr = $('#expToDate').val();
+
+    if (!fromDateStr || !toDateStr) {
+        alert("Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc!");
+        return;
+    }
+
+    let fromDate = new Date(fromDateStr + "T00:00:00");
+    let toDate = new Date(toDateStr + "T23:59:59");
+
+    if (fromDate > toDate) {
+        alert("Ngày bắt đầu không được lớn hơn ngày kết thúc!");
+        return;
+    }
+
+    let events = [];
+
+    // 1. LẤY DỮ LIỆU THỜI KHÓA BIỂU (Lịch học cụ thể theo giờ)
+    if ((option === 'both' || option === 'tkb') && typeof globalTkbData !== 'undefined') {
+        globalTkbData.forEach(c => {
+            if ((c.hinhThuc || '').toUpperCase().includes('VLE')) return; 
+
+            let startRange = parseDateString(c.ngayBatDau) || fromDate;
+            let endRange = parseDateString(c.ngayKetThuc) || toDate;
+
+            let curDate = new Date(Math.max(fromDate.getTime(), startRange.getTime()));
+            let lastDate = new Date(Math.min(toDate.getTime(), endRange.getTime()));
+
+            let targetDayOfWeek = c.thu === 8 ? 0 : c.thu - 1; 
+            let skipDates = (c.ngayNgoaiLe || "").split(',').map(d => d.trim());
+
+            // --- XỬ LÝ BÓC TÁCH GIỜ HỌC RÕ RÀNG VÀ CHÍNH XÁC ---
+            let startTimeStr = "07:00", endTimeStr = "09:30";
+            
+            if (c.thoiGian && c.thoiGian.includes('-')) {
+                // Chuẩn hóa dạng "12h30", "12g30" thành "12:30"
+                let cleanTime = c.thoiGian.replace(/[hgG]/g, ':').replace(/\s+/g, '');
+                let times = cleanTime.split('-');
+                
+                const parseTimePart = (tStr) => {
+                    let parts = tStr.split(':');
+                    let h = parseInt(parts[0]) || 0;
+                    let m = parseInt(parts[1]) || 0;
+                    return [h, m];
+                };
+
+                let [sH, sM] = parseTimePart(times[0]);
+                let [eH, eM] = parseTimePart(times[1]);
+
+                startTimeStr = `${String(sH).padStart(2, '0')}:${String(sM).padStart(2, '0')}`;
+                endTimeStr = `${String(eH).padStart(2, '0')}:${String(eM).padStart(2, '0')}`;
+            } else if (c.tietBd) {
+                // Quy đổi tiết mặc định nếu không ghi giờ cụ thể
+                // Tiết 1 bắt đầu 6:30
+                let startMinsTotal = 390 + (c.tietBd - 1) * 50; 
+                let endMinsTotal = startMinsTotal + (c.soTiet || 1) * 50;
+
+                let sH = Math.floor(startMinsTotal / 60);
+                let sM = startMinsTotal % 60;
+                let eH = Math.floor(endMinsTotal / 60);
+                let eM = endMinsTotal % 60;
+
+                startTimeStr = `${String(sH).padStart(2, '0')}:${String(sM).padStart(2, '0')}`;
+                endTimeStr = `${String(eH).padStart(2, '0')}:${String(eM).padStart(2, '0')}`;
+            }
+
+            while (curDate <= lastDate) {
+                if (curDate.getDay() === targetDayOfWeek) {
+                    let formattedDateStr = formatDateDDMMYYYY(curDate);
+                    if (!skipDates.includes(formattedDateStr)) {
+                        let [sH, sM] = startTimeStr.split(':').map(Number);
+                        let [eH, eM] = endTimeStr.split(':').map(Number);
+
+                        let startDT = new Date(curDate); startDT.setHours(sH, sM, 0, 0);
+                        let endDT = new Date(curDate); endDT.setHours(eH, eM, 0, 0);
+
+                        let location = c.phong ? `Phòng ${c.phong} (${c.hinhThuc || ''})` : (c.hinhThuc || '');
+                        let description = `Môn học: ${c.mon}\\nGiảng viên: ${c.gv || 'Chưa cập nhật'}\\nHình thức: ${c.hinhThuc || ''}`;
+
+                        events.push({
+                            type: 'TIMED',
+                            title: `[LỊCH HỌC] ${c.mon}`,
+                            start: startDT,
+                            end: endDT,
+                            location: location,
+                            description: description
+                        });
+                    }
+                }
+                curDate.setDate(curDate.getDate() + 1);
+            }
+        });
+    }
+
+    // 2. LẤY DỮ LIỆU DEADLINE (SỰ KIỆN CẢ NGÀY)
+    if ((option === 'both' || option === 'deadline') && typeof globalDeadlineData !== 'undefined') {
+        globalDeadlineData.forEach(d => {
+            let startDateObj = parseDateString(d.dateStart);
+            let endDateObj = parseDateString(d.dateEnd) || startDateObj;
+
+            if (startDateObj) {
+                if (endDateObj >= fromDate && startDateObj <= toDate) {
+                    let cleanTitle = d.title ? d.title.replace(/(https?:\/\/[^\s]+)/g, '').trim() : 'Nhiệm vụ / Deadline';
+
+                    events.push({
+                        type: 'ALLDAY',
+                        title: `[DEADLINE] ${cleanTitle}`,
+                        startDate: startDateObj,
+                        endDate: endDateObj,
+                        location: d.tag || '',
+                        description: `Hạn chót/Thời gian: ${d.duration || d.dateStart}\\nHình thức: ${d.tag || ''}`
+                    });
+                }
+            }
+        });
+    }
+
+    if (events.length === 0) {
+        alert("Không tìm thấy Thời khóa biểu hoặc Deadline nào trong khoảng thời gian đã chọn!");
+        return;
+    }
+
+    // 3. TẠO FILE ICS CÓ KHAI BÁO MÚI GIỜ VIỆT NAM (ASIA/HO_CHI_MINH)
+    let icsContent = buildICSContent(events);
+
+    // 4. TẢI FILE `.ics` VỀ MÁY NGƯỜI DÙNG
+    let blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
+    let link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.setAttribute('download', `Lich_Hoc_Deadline_${currentUser.mssv}.ics`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    $('#exportCalendarModal').modal('hide');
+    alert(`Đã xuất thành công ${events.length} sự kiện! Giờ học đã được đồng bộ chính xác.`);
+}
+
+function buildICSContent(events) {
+    let pad = (n) => String(n).padStart(2, '0');
+
+    // Hàm định dạng YYYYMMDDTHHMMSS theo đúng giờ địa phương (Không dùng UTC / Z)
+    const formatLocalICS = (date) => {
+        return date.getFullYear() +
+            pad(date.getMonth() + 1) +
+            pad(date.getDate()) + 'T' +
+            pad(date.getHours()) +
+            pad(date.getMinutes()) +
+            pad(date.getSeconds());
+    };
+
+    // Định dạng YYYYMMDD cho sự kiện cả ngày
+    const formatDateOnlyICS = (date) => {
+        return date.getFullYear() +
+            pad(date.getMonth() + 1) +
+            pad(date.getDate());
+    };
+
+    let icsLines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//HocNhomKhoaToan//VN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'X-WR-TIMEZONE:Asia/Ho_Chi_Minh',
+        // Định nghĩa Múi giờ Asia/Ho_Chi_Minh chuẩn để Google Calendar không nhảy giờ
+        'BEGIN:VTIMEZONE',
+        'TZID:Asia/Ho_Chi_Minh',
+        'BEGIN:STANDARD',
+        'TZOFFSETFROM:+0700',
+        'TZOFFSETTO:+0700',
+        'TZNAME:+07',
+        'DTSTART:19700101T000000',
+        'END:STANDARD',
+        'END:VTIMEZONE'
+    ];
+
+    events.forEach((evt, idx) => {
+        icsLines.push('BEGIN:VEVENT');
+        icsLines.push(`UID:evt-${Date.now()}-${idx}@hocnhomtoan.edu.vn`);
+        icsLines.push(`DTSTAMP:${formatLocalICS(new Date())}`);
+        icsLines.push(`SUMMARY:${evt.title}`);
+        if (evt.location) icsLines.push(`LOCATION:${evt.location}`);
+        if (evt.description) icsLines.push(`DESCRIPTION:${evt.description}`);
+
+        if (evt.type === 'ALLDAY') {
+            // --- SỰ KIỆN CẢ NGÀY (DEADLINE) ---
+            let dtStartStr = formatDateOnlyICS(evt.startDate);
+
+            let nextDayAfterEnd = new Date(evt.endDate);
+            nextDayAfterEnd.setDate(nextDayAfterEnd.getDate() + 1);
+            let dtEndStr = formatDateOnlyICS(nextDayAfterEnd);
+
+            icsLines.push(`DTSTART;VALUE=DATE:${dtStartStr}`);
+            icsLines.push(`DTEND;VALUE=DATE:${dtEndStr}`);
+
+            // Nhắc nhở 18:00 ngày hôm trước ngày bắt đầu
+            let alarmTime = new Date(evt.startDate);
+            alarmTime.setDate(alarmTime.getDate() - 1);
+            alarmTime.setHours(18, 0, 0, 0);
+
+            icsLines.push('BEGIN:VALARM');
+            icsLines.push('ACTION:DISPLAY');
+            icsLines.push(`DESCRIPTION:Nhắc nhở Deadline: ${evt.title}`);
+            icsLines.push(`TRIGGER;TZID=Asia/Ho_Chi_Minh:${formatLocalICS(alarmTime)}`);
+            icsLines.push('END:VALARM');
+
+        } else {
+            // --- SỰ KIỆN THEO GIỜ (THỜI KHÓA BIỂU) ---
+            icsLines.push(`DTSTART;TZID=Asia/Ho_Chi_Minh:${formatLocalICS(evt.start)}`);
+            icsLines.push(`DTEND;TZID=Asia/Ho_Chi_Minh:${formatLocalICS(evt.end)}`);
+
+            // Nhắc nhở 18:00 ngày hôm trước
+            let prevDay18 = new Date(evt.start);
+            prevDay18.setDate(prevDay18.getDate() - 1);
+            prevDay18.setHours(18, 0, 0, 0);
+
+            icsLines.push('BEGIN:VALARM');
+            icsLines.push('ACTION:DISPLAY');
+            icsLines.push(`DESCRIPTION:Nhắc nhở lịch học: ${evt.title}`);
+            icsLines.push(`TRIGGER;TZID=Asia/Ho_Chi_Minh:${formatLocalICS(prevDay18)}`);
+            icsLines.push('END:VALARM');
+        }
+
+        icsLines.push('END:VEVENT');
+    });
+
+    icsLines.push('END:VCALENDAR');
+    return icsLines.join('\r\n');
 }
