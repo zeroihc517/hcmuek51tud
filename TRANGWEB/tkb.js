@@ -2200,7 +2200,7 @@ function processExportCalendar() {
 
                         events.push({
                             type: 'TIMED',
-                            title: `[LỊCH HỌC] ${c.mon}`,
+                            title: `${c.mon}`,
                             start: startDT,
                             end: endDT,
                             location: location,
@@ -2260,7 +2260,7 @@ function processExportCalendar() {
 function buildICSContent(events) {
     let pad = (n) => String(n).padStart(2, '0');
 
-    // Hàm định dạng YYYYMMDDTHHMMSS theo đúng giờ địa phương (Không dùng UTC / Z)
+    // Định dạng YYYYMMDDTHHMMSS cho giờ địa phương
     const formatLocalICS = (date) => {
         return date.getFullYear() +
             pad(date.getMonth() + 1) +
@@ -2284,7 +2284,6 @@ function buildICSContent(events) {
         'CALSCALE:GREGORIAN',
         'METHOD:PUBLISH',
         'X-WR-TIMEZONE:Asia/Ho_Chi_Minh',
-        // Định nghĩa Múi giờ Asia/Ho_Chi_Minh chuẩn để Google Calendar không nhảy giờ
         'BEGIN:VTIMEZONE',
         'TZID:Asia/Ho_Chi_Minh',
         'BEGIN:STANDARD',
@@ -2305,7 +2304,7 @@ function buildICSContent(events) {
         if (evt.description) icsLines.push(`DESCRIPTION:${evt.description}`);
 
         if (evt.type === 'ALLDAY') {
-            // --- SỰ KIỆN CẢ NGÀY (DEADLINE) ---
+            // --- 1. DEADLINE (SỰ KIỆN CẢ NGÀY) ---
             let dtStartStr = formatDateOnlyICS(evt.startDate);
 
             let nextDayAfterEnd = new Date(evt.endDate);
@@ -2315,31 +2314,32 @@ function buildICSContent(events) {
             icsLines.push(`DTSTART;VALUE=DATE:${dtStartStr}`);
             icsLines.push(`DTEND;VALUE=DATE:${dtEndStr}`);
 
-            // Nhắc nhở 18:00 ngày hôm trước ngày bắt đầu
-            let alarmTime = new Date(evt.startDate);
-            alarmTime.setDate(alarmTime.getDate() - 1);
-            alarmTime.setHours(18, 0, 0, 0);
-
+            // BÁO THỨC DEADLINE: 18:00 hôm trước = Đếm ngược 6 tiếng trước 00:00 ngày diễn ra
             icsLines.push('BEGIN:VALARM');
             icsLines.push('ACTION:DISPLAY');
             icsLines.push(`DESCRIPTION:Nhắc nhở Deadline: ${evt.title}`);
-            icsLines.push(`TRIGGER;TZID=Asia/Ho_Chi_Minh:${formatLocalICS(alarmTime)}`);
+            icsLines.push('TRIGGER:-PT6H'); 
             icsLines.push('END:VALARM');
 
         } else {
-            // --- SỰ KIỆN THEO GIỜ (THỜI KHÓA BIỂU) ---
+            // --- 2. THỜI KHÓA BIỂU (SỰ KIỆN CÓ GIỜ CỤ THỂ) ---
             icsLines.push(`DTSTART;TZID=Asia/Ho_Chi_Minh:${formatLocalICS(evt.start)}`);
             icsLines.push(`DTEND;TZID=Asia/Ho_Chi_Minh:${formatLocalICS(evt.end)}`);
 
-            // Nhắc nhở 18:00 ngày hôm trước
-            let prevDay18 = new Date(evt.start);
-            prevDay18.setDate(prevDay18.getDate() - 1);
-            prevDay18.setHours(18, 0, 0, 0);
+            // BÁO THỨC TKB: Tính chính xác khoảng thời gian lùi về 18:00 ngày hôm trước
+            let startHour = evt.start.getHours();
+            let startMin = evt.start.getMinutes();
+
+            let triggerHours = 6 + startHour; // 6 tiếng (từ 18h->24h) + số giờ của buổi học
+            let triggerStr = `-PT${triggerHours}H`;
+            if (startMin > 0) {
+                triggerStr += `${startMin}M`;
+            }
 
             icsLines.push('BEGIN:VALARM');
             icsLines.push('ACTION:DISPLAY');
             icsLines.push(`DESCRIPTION:Nhắc nhở lịch học: ${evt.title}`);
-            icsLines.push(`TRIGGER;TZID=Asia/Ho_Chi_Minh:${formatLocalICS(prevDay18)}`);
+            icsLines.push(`TRIGGER:${triggerStr}`);
             icsLines.push('END:VALARM');
         }
 
