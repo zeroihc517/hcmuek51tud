@@ -1770,14 +1770,23 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <div class="mb-3">
-                    <label class="form-label fw-bold small text-muted">Nhập đường dẫn URL hình ảnh (Drive / Imgur / Pinterest...):</label>
-                    <input type="text" id="txtAvatarUrl" class="form-control p-2.5" placeholder="https://example.com/avatar.jpg">
-                    <small class="text-muted d-block mt-2" style="font-size: 12px;">
-                        <i class="fa-solid fa-lightbulb text-warning me-1"></i> Mẹo: Bạn có thể dùng dán link ảnh từ Google Drive, Imgur, Facebook hoặc bất kỳ nguồn public nào.
-                    </small>
-                </div>
-            </div>
+    <!-- Lựa chọn 1: Tải tệp từ thiết bị -->
+    <div class="mb-4">
+        <label class="form-label fw-bold text-primary"><i class="fa-solid fa-upload me-1"></i> Tải ảnh từ thiết bị:</label>
+        <input type="file" id="fileAvatarInput" class="form-control" accept="image/*">
+        <small class="text-muted d-block mt-1" style="font-size: 12px;">Hỗ trợ JPG, PNG, WEBP (Tối đa 5MB)</small>
+    </div>
+
+    <div class="d-flex align-items-center my-3 text-muted">
+        <hr class="flex-grow-1 m-0"><span class="px-2 small fw-bold">HOẶC</span><hr class="flex-grow-1 m-0">
+    </div>
+
+    <!-- Lựa chọn 2: Dán URL công khai -->
+    <div class="mb-2">
+        <label class="form-label fw-bold small text-muted"><i class="fa-solid fa-link me-1"></i> Nhập đường dẫn URL ảnh công khai:</label>
+        <input type="text" id="txtAvatarUrl" class="form-control p-2.5" placeholder="https://example.com/avatar.jpg">
+    </div>
+</div>
             <div class="modal-footer border-0 pb-4">
                 <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn text-white fw-bold px-4" style="background-color: #0f4c81; border-radius: 8px;" onclick="saveAvatar()" id="btnSaveAvatar">Lưu ảnh đại diện</button>

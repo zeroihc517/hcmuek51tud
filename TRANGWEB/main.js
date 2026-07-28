@@ -3399,34 +3399,99 @@ function openChangeAvatarModal() {
 // Lưu Avatar về Google Apps Script & LocalStorage
 function saveAvatar() {
     if (!currentUser) return;
-    let url = $('#txtAvatarUrl').val().trim();
-
+    
+    let fileInput = document.getElementById('fileAvatarInput');
+    let file = fileInput ? fileInput.files[0] : null;
+    let urlInput = $('#txtAvatarUrl').val().trim();
     let btn = $('#btnSaveAvatar');
     let originalHtml = btn.html();
-    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang lưu...').prop('disabled', true);
 
-    postToGAS({
-        action: "updateUserProfile",
-        mssv: currentUser.mssv,
-        chuyenNganh: $('#profChuyenNganh').val() || currentUser.chuyenNganh || '',
-        khoa: $('#profKhoa').val() || currentUser.khoa || '',
-        khoaHoc: $('#profKhoaHoc').val() || currentUser.khoaHoc || '',
-        nhom: $('#profNhom').val() || currentUser.nhom || '',
-        avatar: url
-    }, function(res) {
-        alert("Đã cập nhật ảnh đại diện thành công!");
-        
-        // Cập nhật bộ nhớ LocalStorage tại chỗ
-        currentUser.avatar = url;
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
-        // Đổi ảnh trên giao diện
-        updateAvatarDisplay(url);
-        
-        $('#changeAvatarModal').modal('hide');
-        btn.html(originalHtml).prop('disabled', false);
-    }, function() {
-        alert("Lỗi kết nối máy chủ! Không thể lưu ảnh.");
-        btn.html(originalHtml).prop('disabled', false);
-    });
+    if (file) {
+        btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang nén & tải ảnh...').prop('disabled', true);
+
+        let reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function(e) {
+            let img = new Image();
+            img.src = e.target.result;
+            
+            img.onload = function() {
+                // Tạo Canvas nén độ phân giải ảnh về tối đa 600x600px
+                let canvas = document.createElement("canvas");
+                let MAX_SIZE = 600;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_SIZE) {
+                        height *= MAX_SIZE / width;
+                        width = MAX_SIZE;
+                    }
+                } else {
+                    if (height > MAX_SIZE) {
+                        width *= MAX_SIZE / height;
+                        height = MAX_SIZE;
+                    }
+                }
+                
+                canvas.width = width;
+                canvas.height = height;
+                let ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // Nén chất lượng ảnh xuống 70%
+                let compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7);
+                let rawBase64 = compressedDataUrl.split(',')[1];
+                
+                postToGAS({
+                    action: "uploadAvatarFile",
+                    mssv: currentUser.mssv,
+                    base64Data: rawBase64,
+                    mimeType: "image/jpeg",
+                    fileName: "avatar_" + currentUser.mssv + ".jpg"
+                }, function(res) {
+                    let response = typeof res === 'string' ? JSON.parse(res) : res;
+                    if (response.success) {
+                        alert("Đã cập nhật ảnh đại diện thành công!");
+                        currentUser.avatar = response.avatarUrl;
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        
+                        updateAvatarDisplay(response.avatarUrl);
+                        $('#changeAvatarModal').modal('hide');
+                        $('#fileAvatarInput').val(''); 
+                    } else {
+                        alert("Lỗi từ máy chủ: " + response.message);
+                    }
+                    btn.html(originalHtml).prop('disabled', false);
+                }, function() {
+                    alert("Lỗi kết nối máy chủ khi upload ảnh!");
+                    btn.html(originalHtml).prop('disabled', false);
+                });
+            };
+        };
+    } else if (urlInput !== "") {
+        btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang lưu...').prop('disabled', true);
+
+        postToGAS({
+            action: "updateUserProfile",
+            mssv: currentUser.mssv,
+            chuyenNganh: $('#profChuyenNganh').val() || currentUser.chuyenNganh || '',
+            khoa: $('#profKhoa').val() || currentUser.khoa || '',
+            khoaHoc: $('#profKhoaHoc').val() || currentUser.khoaHoc || '',
+            nhom: $('#profNhom').val() || currentUser.nhom || '',
+            avatar: urlInput
+        }, function(res) {
+            alert("Đã cập nhật ảnh đại diện!");
+            currentUser.avatar = urlInput;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            updateAvatarDisplay(urlInput);
+            $('#changeAvatarModal').modal('hide');
+            btn.html(originalHtml).prop('disabled', false);
+        }, function() {
+            alert("Lỗi kết nối máy chủ!");
+            btn.html(originalHtml).prop('disabled', false);
+        });
+    } else {
+        alert("Vui lòng chọn 1 tệp ảnh từ máy HOẶC dán đường dẫn URL!");
+    }
 }
