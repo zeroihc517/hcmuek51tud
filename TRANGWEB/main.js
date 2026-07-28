@@ -962,6 +962,30 @@ function initGlobalApp() {
     checkNewQA(); 
     fetchAndRenderCategories();
     renderUserInfo();
+	if (currentUser && currentUser.mssv) {
+        $.ajax({
+            url: SCRIPT_URL + "?action=getUserProfile&mssv=" + currentUser.mssv,
+            method: "GET",
+            dataType: "json",
+            success: function(res) {
+                if (res && res.success) {
+                    // Cập nhật lại bộ nhớ đệm nội bộ với dữ liệu mới nhất
+                    currentUser.chuyenNganh = res.chuyenNganh;
+                    currentUser.khoa = res.khoa;
+                    currentUser.khoaHoc = res.khoaHoc;
+                    currentUser.nhom = res.nhom;
+                    currentUser.avatar = res.avatar;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    // Cập nhật lại giao diện (Ảnh, tên, v.v.)
+                    renderUserInfo();
+                    if (typeof updateAvatarDisplay === 'function') {
+                        updateAvatarDisplay(currentUser.avatar);
+                    }
+                }
+            }
+        });
+    }
     fetchAndRenderDeadlinesForNotice();
     if (currentUser && currentUser.mssv === "51.01.108.008") {
         $('#adminDatabaseLink').removeClass('d-none');
@@ -3335,4 +3359,74 @@ function loadProfileView() {
         if (typeof sidebar !== 'undefined') sidebar.classList.remove('show'); 
         if (typeof overlay !== 'undefined') overlay.classList.remove('show'); 
     }
+}
+// Hàm hiển thị Avatar ở Sidebar & Trang Hồ Sơ
+function updateAvatarDisplay(avatarUrl) {
+    if (avatarUrl && avatarUrl.trim() !== '') {
+        let cleanUrl = avatarUrl.trim();
+        
+        // Tự động xử lý đường dẫn Google Drive thành Thumbnail
+        if (cleanUrl.includes("drive.google.com/file/d/")) {
+            let matchId = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (matchId && matchId[1]) {
+                cleanUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w400`;
+            }
+        }
+
+        // Cập nhật Sidebar
+        $('#sidebarAvatarIcon').addClass('d-none');
+        $('#sidebarAvatarImg').attr('src', cleanUrl).removeClass('d-none');
+
+        // Cập nhật Profile Page
+        $('#profileAvatarIcon').addClass('d-none');
+        $('#profileAvatarImg').attr('src', cleanUrl).removeClass('d-none');
+    } else {
+        // Nếu chưa có ảnh, trả về Icon mặc định
+        $('#sidebarAvatarIcon').removeClass('d-none');
+        $('#sidebarAvatarImg').addClass('d-none');
+
+        $('#profileAvatarIcon').removeClass('d-none');
+        $('#profileAvatarImg').addClass('d-none');
+    }
+}
+
+// Mở Modal đổi Avatar
+function openChangeAvatarModal() {
+    $('#txtAvatarUrl').val(currentUser ? (currentUser.avatar || '') : '');
+    $('#changeAvatarModal').modal('show');
+}
+
+// Lưu Avatar về Google Apps Script & LocalStorage
+function saveAvatar() {
+    if (!currentUser) return;
+    let url = $('#txtAvatarUrl').val().trim();
+
+    let btn = $('#btnSaveAvatar');
+    let originalHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang lưu...').prop('disabled', true);
+
+    postToGAS({
+        action: "updateUserProfile",
+        mssv: currentUser.mssv,
+        chuyenNganh: $('#profChuyenNganh').val() || currentUser.chuyenNganh || '',
+        khoa: $('#profKhoa').val() || currentUser.khoa || '',
+        khoaHoc: $('#profKhoaHoc').val() || currentUser.khoaHoc || '',
+        nhom: $('#profNhom').val() || currentUser.nhom || '',
+        avatar: currentUser.avatar || ""
+    }, function(res) {
+        alert("Đã cập nhật ảnh đại diện thành công!");
+        
+        // Cập nhật bộ nhớ LocalStorage tại chỗ
+        currentUser.avatar = url;
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        
+        // Đổi ảnh trên giao diện
+        updateAvatarDisplay(url);
+        
+        $('#changeAvatarModal').modal('hide');
+        btn.html(originalHtml).prop('disabled', false);
+    }, function() {
+        alert("Lỗi kết nối máy chủ! Không thể lưu ảnh.");
+        btn.html(originalHtml).prop('disabled', false);
+    });
 }

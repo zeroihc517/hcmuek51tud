@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyuhWi9nldIP-57Nxo1w-7qvnLEZNl5wh9J_6lo-rzdvGIpR4qOkXnchZnrFO_z20h2/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyujh4f8vjhZxDqI48V2AJAuLCYxZuyJ0VnoF-3ia7V4B5Jheh0wjpRxtAIRCX7M5Sd/exec'; 
 
      let isAdmin = localStorage.getItem('isAdmin') === 'true';
         let currentSheetName = "";
@@ -185,6 +185,7 @@ function renderUserInfo() {
         $('#sidebarUserName').text(currentUser.name);
         $('#sidebarUserMSSV').text(currentUser.mssv);
         $('#popoverUserTitle').text(currentUser.name + " - " + currentUser.mssv);
+	updateAvatarDisplay(currentUser.avatar);
         // Tìm bên trong hàm renderUserInfo() và thêm 4 dòng này vào khối if (currentUser)
 $('#profChuyenNganh').val(currentUser.chuyenNganh || '');
 $('#profKhoa').val(currentUser.khoa || '');

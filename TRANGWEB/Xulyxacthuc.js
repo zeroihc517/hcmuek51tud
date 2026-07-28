@@ -20,7 +20,8 @@ function loginStudent() {
                 chuyenNganh: response.chuyenNganh,
                 khoa: response.khoa,
                 khoaHoc: response.khoaHoc,
-                nhom: response.nhom
+                nhom: response.nhom,
+		avatar: response.avatar || ""
             };
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
             localStorage.setItem('lastActiveTime', Date.now().toString());
@@ -36,6 +37,10 @@ function loginStudent() {
             // 3. KÍCH HOẠT TẢI NGẦM TẤT CẢ CÁC PHÂN HỆ CÙNG MỘT LÚC (PARALLEL LOADING)
             pingOnlineStatus();
             renderUserInfo();
+
+		if (typeof updateAvatarDisplay === 'function') {
+                updateAvatarDisplay(response.avatar);
+            }
             initGlobalApp();
             
             // Tải ngầm Thông báo & Danh mục học phần (Mặc định trang đầu)
