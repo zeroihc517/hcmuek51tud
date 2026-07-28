@@ -2471,3 +2471,55 @@ body.dark-mode .mini-dl-title {
     border-radius: 10px !important;
     border: 2px solid #f1f5f9 !important;
 }
+/* =========================================================
+   FIX: TẠO THANH TRƯỢT NGANG CHO BẢNG TRONG THÔNG BÁO (MOBILE)
+   ========================================================= */
+@media (max-width: 991.98px) {
+    /* Ép bảng thông báo thành một khối có thể vuốt ngang */
+    .tb-detail-main-content table {
+        display: block !important;
+        width: 100% !important;
+        overflow-x: auto !important; 
+        -webkit-overflow-scrolling: touch !important; /* Vuốt mượt trên iPhone/iPad */
+        border-bottom: 1px solid #cbd5e1; /* Bù lại viền dưới khi chuyển sang block */
+        margin-bottom: 15px !important; /* Chừa khoảng trống cho thanh kéo */
+    }
+
+    /* Đặt kích thước tối thiểu cho các ô để không bị ép rớt dòng chữ quá mức */
+    .tb-detail-main-content table th,
+    .tb-detail-main-content table td {
+        min-width: 140px !important; /* Cột rộng ít nhất 140px */
+        white-space: normal !important;
+    }
+
+    /* Style thanh kéo (scrollbar) cho bảng thông báo (đồng bộ với TKB) */
+    .tb-detail-main-content table::-webkit-scrollbar {
+        height: 10px !important; 
+        display: block !important;
+    }
+    .tb-detail-main-content table::-webkit-scrollbar-track {
+        background: #f1f5f9 !important;
+        border-radius: 8px !important;
+    }
+    .tb-detail-main-content table::-webkit-scrollbar-thumb {
+        background: #0f4c81 !important; /* Thanh trượt màu xanh chủ đạo */
+        border-radius: 8px !important;
+        border: 2px solid #f1f5f9 !important;
+    }
+}
+@media (max-width: 991.98px) {
+    /* Ép bảng bung hết chiều cao, tắt thanh trượt dọc thừa thãi */
+    .tb-detail-main-content table {
+        height: auto !important;
+        max-height: none !important;
+        overflow-y: visible !important; 
+    }
+    
+    /* Xóa bỏ mọi giới hạn chiều cao bị dán từ Word/Excel vào từng hàng/ô */
+    .tb-detail-main-content table tr,
+    .tb-detail-main-content table td,
+    .tb-detail-main-content table th {
+        height: auto !important;
+        min-height: 40px !important; /* Đảm bảo ô không bị ép quá dẹt */
+    }
+}
