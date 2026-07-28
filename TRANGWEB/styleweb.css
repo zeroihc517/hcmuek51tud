@@ -2360,3 +2360,114 @@ body.dark-mode .mini-dl-capsule {
 body.dark-mode .mini-dl-title {
     color: #fecdd3 !important;
 }
+/* CSS Dành riêng cho màn hình điện thoại / thiết bị di động (< 992px) */
+/* =========================================================
+   FIX TRIỆT ĐỂ LỖI THÔNG BÁO KHÔNG XUỐNG DÒNG TRÊN MOBILE
+   ========================================================= */
+@media (max-width: 991.98px) {
+
+    /* 1. Mở khóa min-width cho Flexbox để cho phép co dãn theo màn hình */
+    .tb-list-item,
+    .tb-item-info,
+    .tb-list-body .flex-grow-1 {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    /* 2. Ép tiêu đề Thông báo (Cả thường & Hệ thống) tự động ngắt chữ xuống dòng */
+    .tb-item-title,
+    .border-animation .fw-bold,
+    .tb-list-item .fw-bold {
+        white-space: normal !important;
+        word-break: break-word !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    /* 3. Thu gọn Padding 2 bên của khung chứa thông báo để vừa vặn màn hình điện thoại */
+    .tb-list-body {
+        padding: 10px 12px !important;
+    }
+    
+    .tb-icon-wrapper {
+        margin-right: 12px !important; /* Thu nhỏ khoảng cách icon chuông */
+    }
+}
+/* =========================================================
+   FIX KHẨN CẤP: ÉP XUỐNG DÒNG & BẬT THANH TRƯỢT MOBILE
+   ========================================================= */
+@media (max-width: 991.98px) {
+    /* 1. Mở khóa giới hạn chiều ngang để thẻ cha không bị phình to */
+    .main-content, #tkbSection {
+        min-width: 0 !important;
+        width: 100% !important;
+        overflow-x: hidden !important; 
+    }
+
+    /* 2. Ép 3 nút Năm học, Học kỳ, Tuần xếp thành cột dọc */
+    .nav-week-container {
+        display: block !important; 
+        height: auto !important;
+        padding: 16px !important;
+    }
+    .nav-week-container .row {
+        display: flex !important;
+        flex-direction: column !important; /* Xếp dọc hoàn toàn */
+        gap: 12px !important;
+        margin: 0 !important;
+    }
+    .nav-week-container .row > div {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+
+    /* 3. Ép hàng nút Làm mới, Đồng bộ học phần... rớt xuống dòng */
+    .d-flex, .tkb-personal-toolbar, .justify-content-end {
+        flex-wrap: wrap !important; /* Cho phép rớt dòng khi hết chỗ */
+    }
+    .btn-hientai, .btn-nav-square {
+        flex: 1 1 auto !important; /* Nút tự động co giãn */
+    }
+
+    /* 4. Ép Bảng Deadline co lại thành 1 cột */
+    .online-grid {
+        display: grid !important;
+        grid-template-columns: 1fr !important; /* Ép cứng 1 cột duy nhất */
+        width: 100% !important;
+        gap: 15px !important;
+    }
+    .online-box {
+        padding: 16px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 5. Cứu thanh trượt ngang của bảng TKB */
+.table-box {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        overflow-x: auto !important; 
+        -webkit-overflow-scrolling: touch !important; 
+        padding-bottom: 15px !important; 
+    }
+    .sched {
+        min-width: 1500px !important; /* Đã tăng từ 850px lên 1200px */
+        width: 1200px !important;
+    }
+}
+
+/* 6. Làm thanh kéo (scrollbar) nổi bật, to và dễ vuốt cho TKB */
+.table-box::-webkit-scrollbar {
+    height: 12px !important; /* Làm thanh kéo dày hơn */
+    display: block !important;
+}
+.table-box::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+    border-radius: 10px !important;
+}
+.table-box::-webkit-scrollbar-thumb {
+    background: #0f4c81 !important; /* Màu xanh đậm dễ nhìn */
+    border-radius: 10px !important;
+    border: 2px solid #f1f5f9 !important;
+}
