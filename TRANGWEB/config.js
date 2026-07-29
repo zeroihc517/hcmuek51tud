@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyMQkVeGQkl15emX1nmfhYKTDnWk2hx4GpcHm8nPZWEST6ywdv7r4qSF959Z48F-EUJ/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRenuDHprfV_wZ3MEGhZEC3CtCXIE0ECU0rEzc_CaEroNB6NcLwDHMAXur2RuPTua_/exec'; 
 
      let isAdmin = localStorage.getItem('isAdmin') === 'true';
         let currentSheetName = "";
@@ -355,3 +355,55 @@ $(document).ready(function() {
     checkSessionExpiryOnLoad();  // Kiểm tra phiên đăng nhập ngay khi mở trang[cite: 1]
     initInactivityTracker();     // Lắng nghe thao tác để tính thời gian chờ 1 tiếng[cite: 1]
 });
+// Hàm gọi API lấy danh sách Lịch sử truy cập cho Admin
+function fetchUserAccessHistory() {
+    let tbody = $('#accessHistoryTableBody');
+    tbody.html('<tr><td colspan="5" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải lịch sử truy cập...</td></tr>');
+
+    $.ajax({
+        url: SCRIPT_URL + "?action=getAllUsersAccessHistory",
+        method: "GET",
+        dataType: "json",
+        success: function(users) {
+            if (!users || users.length === 0) {
+                tbody.html('<tr><td colspan="5" class="text-center text-muted py-3">Chưa có dữ liệu thành viên.</td></tr>');
+                return;
+            }
+
+            // Sắp xếp người mới truy cập gần nhất lên đầu
+            users.sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive));
+
+            let html = '';
+            users.forEach((u, index) => {
+                let statusBadge = '<span class="badge bg-secondary">Ngoại tuyến</span>';
+                
+                // Nếu lần cuối truy cập cách đây dưới 5 phút -> Hiển thị Đang Online
+                if (u.lastActive && u.lastActive !== "Chưa từng truy cập") {
+                    let lastTime = new Date(u.lastActive).getTime();
+                    let nowTime = new Date().getTime();
+                    let diffMinutes = (nowTime - lastTime) / (1000 * 60);
+
+                    if (diffMinutes <= 5) {
+                        statusBadge = '<span class="badge bg-success"><i class="fa-solid fa-circle fa-beat me-1" style="font-size: 8px;"></i> Đang hoạt động</span>';
+                    } else if (diffMinutes <= 60) {
+                        statusBadge = `<span class="badge bg-warning text-dark">${Math.floor(diffMinutes)} phút trước</span>`;
+                    }
+                }
+
+                html += `
+                <tr>
+                    <td class="fw-bold text-muted">${index + 1}</td>
+                    <td class="fw-bold text-primary">${u.mssv}</td>
+                    <td class="text-start fw-bold">${u.name}</td>
+                    <td class="font-monospace">${u.lastActive || 'Chưa từng truy cập'}</td>
+                    <td>${statusBadge}</td>
+                </tr>`;
+            });
+
+            tbody.html(html);
+        },
+        error: function() {
+            tbody.html('<tr><td colspan="5" class="text-center text-danger py-3"><i class="fa-solid fa-triangle-exclamation me-1"></i> Không thể tải dữ liệu!</td></tr>');
+        }
+    });
+}
