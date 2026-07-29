@@ -3372,7 +3372,17 @@ function updateAvatarDisplay(avatarUrl) {
                 cleanUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w400`;
             }
         }
+	// 2. Xử lý link Google Photos thô (lh3.googleusercontent.com)
+        else if (cleanUrl.includes("googleusercontent.com")) {
+            cleanUrl = cleanUrl.replace(/=w\d+|-h\d+|-p|-no|-k/g, '').replace(/=s\d+/g, '');
+            cleanUrl = cleanUrl + "=w400-h400-p";
+        }
 
+        // 3. TỰ ĐỘNG BẮT LINK CHIA SẺ GOOGLE PHOTOS (photos.google.com / photos.app.goo.gl)
+        else if (cleanUrl.includes("photos.google.com") || cleanUrl.includes("photos.app.goo.gl")) {
+            // Dùng Image Proxy wsrv.nl để bóc tách lấy ảnh thô trực tiếp từ trang chia sẻ
+            cleanUrl = `https://wsrv.nl/?url=${encodeURIComponent(cleanUrl)}&w=400&h=400&fit=cover`;
+        }
         // Cập nhật Sidebar
         $('#sidebarAvatarIcon').addClass('d-none');
         $('#sidebarAvatarImg').attr('src', cleanUrl).removeClass('d-none');
@@ -3494,4 +3504,18 @@ function saveAvatar() {
     } else {
         alert("Vui lòng chọn 1 tệp ảnh từ máy HOẶC dán đường dẫn URL!");
     }
+}
+// Hàm làm mới dữ liệu cho Thông báo và các Danh mục học phần
+function refreshCurrentCourseData() {
+    if (!currentSheetName) {
+        currentSheetName = 'Thông báo';
+    }
+    
+    // Xóa cache cục bộ của sheet hiện tại (nếu có) để bắt buộc gọi dữ liệu mới từ Apps Script
+    if (window.boNhoDemHocPhan && window.boNhoDemHocPhan[currentSheetName]) {
+        delete window.boNhoDemHocPhan[currentSheetName];
+    }
+    
+    // Gọi tải lại dữ liệu học phần/thông báo hiện tại
+    loadDataByHocPhan(currentSheetName);
 }

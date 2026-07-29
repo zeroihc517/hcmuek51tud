@@ -136,12 +136,18 @@
 <!-- KHU VỰC TỔNG HỢP LINK -->
 <div id="tongHopSection" class="d-none">
     <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
-        
+                <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
+<div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
+                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
+                    onclick="loadWebLinks()">
+                <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
+            </button>
         <!-- Nút gọi Modal thêm link cá nhân (Đã đổi sang màu chủ đạo #0f4c81) -->
         <button class="btn text-white fw-bold shadow-sm d-none" id="btnAddPersonalLink" onclick="openAddWebLinkModal()" style="background-color: #0f4c81; border-radius: 8px;">
             <i class="fa-solid fa-plus me-2"></i>Thêm Link Của Tôi
         </button>
+</div>
     </header>
     
     <!-- Phân chia khu vực Link Hệ thống và Link Cá nhân -->
@@ -667,11 +673,16 @@
     </div>
 </div>
 <div id="courseSection">
-    <header class="top-header d-flex justify-content-between align-items-center">
+        <header class="top-header d-flex justify-content-between align-items-center">
         <!-- Đã thêm id="courseHeaderTitle" vào thẻ div bên dưới -->
         <div class="page-title" id="courseHeaderTitle">
-            <i class="fa-solid fa-book-open"></i> Học nhóm - Năm 2 - Khoa Toán-Tin học
+            <i class="fa-solid fa-book-open"></i> Học nhóm APMA - Khoa Toán-Tin học
         </div>
+<button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
+                style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
+                onclick="refreshCurrentCourseData()">
+            <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
+        </button>
     </header>
 <div id="adminAddRowArea" class="instructor-card d-none mb-3" style="border-left-color: var(--accent-red); padding: 24px;">
     <h6 class="mb-3" style="color: var(--accent-red);"><i class="fa-solid fa-bullhorn"></i> Ban Quản Trị - Thêm Nội Dung Mới</h6>
