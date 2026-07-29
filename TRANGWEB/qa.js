@@ -76,7 +76,7 @@ function checkNewQA() { $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: 
             } 
         }}); }
 function openQASection() { 
-    document.title = "Hỗ trợ & Giải đáp | Học nhóm Năm 2 Khoa Toán";
+    document.title = "Hỗ trợ & Giải đáp | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
     
     // ĐỔI #btnNavQA THÀNH #btnNavShareCode TẠI ĐÂY
@@ -448,7 +448,7 @@ $(document).ready(function() {
 });
 
 function openShareCodeSection() { 
-    document.title = "Share Code | Học nhóm Năm 2 Khoa Toán";
+    document.title = "Share Code | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
     $('#btnNavShareCode').addClass('active'); 
     $('#shareCodeSection').removeClass('d-none'); 

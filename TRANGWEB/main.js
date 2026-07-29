@@ -23,7 +23,7 @@ function resetNavActive() {
 
 // Thay đổi hàm loadTongHopView để không gọi lại dữ liệu nếu đã có
 function loadTongHopView() {
-    document.title = "Tổng hợp Link | Học nhóm Năm 2 Khoa Toán";
+    document.title = "Tổng hợp Link | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
     $('#btnNavTongHop').addClass('active'); 
     $('#tongHopSection').removeClass('d-none');
@@ -191,7 +191,7 @@ for (const [groupName, html] of Object.entries(groupHtml)) {
         }
 function loadDataByHocPhan(sheetName, element) {
     if(!sheetName) return; 
-    document.title = sheetName + " | Học nhóm Năm 2 Khoa Toán";
+    document.title = sheetName + " | Học nhóm APMA Khoa Toán";
     currentSheetName = sheetName; 
     resetNavActive(); 
     if(element) $(element).addClass('active');
@@ -1025,7 +1025,7 @@ $(document).ready(function() {
 // ==========================================
 let myGPADataset = JSON.parse(localStorage.getItem('myGPADataset')) || [];
 function loadGPAView() {
-    document.title = "Tính điểm GPA | Học nhóm Năm 2 Khoa Toán";
+    document.title = "Tính điểm GPA | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
     $('#btnNavGPA').addClass('active'); 
     $('#gpaSection').removeClass('d-none');
@@ -3346,7 +3346,7 @@ $(document).ready(function() {
     setTimeout(batDauTaiNgam, 3000);
 });
 function loadProfileView() {
-    document.title = "Hồ sơ cá nhân | Học nhóm Năm 2 Khoa Toán";
+    document.title = "Hồ sơ cá nhân | Học nhóm APMA Khoa Toán";
     resetNavActive(); // Ẩn các phân hệ khác
     $('#profileSection').removeClass('d-none'); // Hiển thị khung Hồ sơ
     

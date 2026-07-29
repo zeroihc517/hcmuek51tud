@@ -1,5 +1,5 @@
 function loadTKBView() {
-    document.title = "Thời gian biểu | Học nhóm Năm 2 Khoa Toán";
+    document.title = "Thời gian biểu | Học nhóm APMA Khoa Toán";
     resetNavActive(); $('#btnNavTKB').addClass('active'); $('#tkbSection').removeClass('d-none');
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
 
