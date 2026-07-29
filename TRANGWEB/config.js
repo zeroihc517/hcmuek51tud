@@ -351,3 +351,7 @@ $(document).ready(function() {
         $('#docViewerIframe').attr('src', '');
     });
 });
+$(document).ready(function() {
+    checkSessionExpiryOnLoad();  // Kiểm tra phiên đăng nhập ngay khi mở trang[cite: 1]
+    initInactivityTracker();     // Lắng nghe thao tác để tính thời gian chờ 1 tiếng[cite: 1]
+});
