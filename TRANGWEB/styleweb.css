@@ -1957,23 +1957,75 @@ code[class*="language-"] {
    CSS THẺ SHARE CODE (Dạng khung lưới - Đã đồng bộ màu Web)
    ========================================== */
 .card-sharecode-box {
-    background-color: #ffffff;
-    border: 2px solid var(--primary-color); 
-    border-radius: 12px;       
-    padding: 20px 10px; 
-    text-align: center;
-    cursor: pointer;
+    position: relative;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px 12px 12px 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    transition: all 0.25s ease;
+    justify-content: space-between;
     height: 100%;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+    min-height: 185px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(15, 76, 129, 0.04);
 }
 .card-sharecode-box:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(15, 76, 129, 0.15); /* Bóng đổ tông xanh primary */
+    transform: translateY(-5px);
+    border-color: #0f4c81;
+    box-shadow: 0 12px 24px rgba(15, 76, 129, 0.12);
+}
+.card-sharecode-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    background: #f0f9ff;
+    color: #0284c7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: all 0.3s;
+}
+
+.card-sharecode-box:hover .card-sharecode-badge {
+    background: #0f4c81;
+    color: #ffffff;
+}
+.card-sharecode-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+    color: #0369a1;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-top: 4px;
+    margin-bottom: 10px;
+    transition: transform 0.3s ease;
+}
+.card-sharecode-box:hover .card-sharecode-icon {
+    transform: scale(1.1) rotate(-5deg);
+    background: linear-gradient(135deg, #0f4c81 0%, #1d4ed8 100%);
+    color: #ffffff;
+}
+
+/* Thân Card */
+.card-sharecode-body {
+    width: 100%;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 .card-sharecode-img {
     width: 70px;
@@ -1993,12 +2045,62 @@ code[class*="language-"] {
     transition: transform 0.3s;
 }
 .card-sharecode-title {
-    font-size: 15px;
-    font-weight: 800;
-    color: var(--primary-color);
-    margin-bottom: 8px;
-
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 6px;
+    line-height: 1.35;
+    /* Giới hạn hiển thị tối đa 2 dòng, tự thêm dấu ... */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
 }
+.card-sharecode-box:hover .card-sharecode-title {
+    color: #0f4c81;
+}
+.card-sharecode-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 11.5px;
+    color: #64748b;
+}
+
+.meta-author {
+    font-weight: 600;
+    color: #475569;
+}
+
+.meta-time {
+    font-size: 10.5px;
+    color: #94a3b8;
+}
+
+/* Nút Chân card khi di chuột vào */
+.card-sharecode-footer {
+    width: 100%;
+    margin-top: 10px;
+    padding-top: 6px;
+    border-top: 1px dashed #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #0f4c81;
+    opacity: 0.7;
+    transition: all 0.3s;
+}
+
+.card-sharecode-box:hover .card-sharecode-footer {
+    opacity: 1;
+    gap: 8px; /* Đẩy nhẹ mũi tên sang phải khi hover */
+}
+
 .card-sharecode-info {
     font-size: 13px;
     font-weight: 600;

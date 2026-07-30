@@ -601,17 +601,28 @@ window.shareCodeList.push({
 });
 
             // Vẽ thẻ Card ra giao diện lưới
-            gridHtml += `
-            <div class="col-6 col-md-4 col-lg-3">
-                <div class="card-sharecode-box" onclick="openShareCodeDetail(${arrayIndex})">
-                    <div class="card-sharecode-img">
-                        <i class="fa-solid fa-file-code"></i>
-                    </div>
-                    <div class="card-sharecode-title">${maBaiValue}</div>
-                    <div class="card-sharecode-info"><i class="fa-solid fa-user me-1"></i> ${displayMssv}</div>
-                    <div class="card-sharecode-time"><i class="fa-regular fa-clock me-1"></i> ${time}</div>
-                </div>
-            </div>`;
+gridHtml += `
+<div class="col-6 col-md-4 col-lg-2">
+    <div class="card-sharecode-box" onclick="openShareCodeDetail(${arrayIndex})">
+        <div class="card-sharecode-badge">
+            <i class="fa-solid fa-code"></i>
+        </div>
+        <div class="card-sharecode-icon">
+            <i class="fa-solid fa-file-code"></i>
+        </div>
+        <div class="card-sharecode-body">
+            <h6 class="card-sharecode-title" title="${maBaiValue}">${maBaiValue}</h6>
+            <div class="card-sharecode-meta">
+                <span class="meta-author"><i class="fa-solid fa-user-circle me-1"></i>${displayMssv}</span>
+                <span class="meta-time"><i class="fa-regular fa-clock me-1"></i>${time}</span>
+            </div>
+        </div>
+        <div class="card-sharecode-footer">
+            <span>Xem chi tiết</span>
+            <i class="fa-solid fa-arrow-right"></i>
+        </div>
+    </div>
+</div>`;
         });
         
         gridHtml += '</div>';
