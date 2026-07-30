@@ -214,7 +214,7 @@
         .btn-reply-toggle:hover { color: var(--accent-red); text-decoration-color: var(--accent-red); }
         .reply-box { background: #f9fafb; border: 1px dashed var(--border-color); border-radius: 6px; padding: 12px; margin-top: 12px; }
         
-        .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 40px 40px 80px 40px; transition: all 0.3s ease; display: flex; flex-direction: column; min-height: 100vh; }
+        .main-content { flex: 1; margin-left: var(--sidebar-width); padding: 40px 40px 80px 40px; transition: all 0.3s ease; display: flex; flex-direction: column; min-height: 100vh; max-width: 100%; }
 
         .top-header { background: var(--card-bg); border-radius: var(--card-border-radius); padding: 24px 32px; margin-bottom: 32px; box-shadow: var(--shadow-md); display: flex; justify-content: space-between; align-items: center; border-top: 4px solid var(--accent-red); }
         .page-title { font-size: 24px; font-weight: 700; color: var(--primary-color); margin: 0; display: flex; align-items: center; }
@@ -2521,5 +2521,97 @@ body.dark-mode .mini-dl-title {
     .tb-detail-main-content table th {
         height: auto !important;
         min-height: 40px !important; /* Đảm bảo ô không bị ép quá dẹt */
+    }
+}
+/* =========================================================
+   TỐI ƯU GIAO DIỆN CHO MÀN HÌNH IPAD & TABLET (768px - 1199px)
+   ========================================================= */
+@media (min-width: 768px) and (max-width: 1199.98px) {
+
+    /* 1. Nới rộng không gian hiển thị nội dung chính */
+    .main-content {
+        padding: 24px 20px 70px 20px !important; /* Giảm padding lề thừa của PC */
+        width: calc(100% - var(--sidebar-width)) !important;
+    }
+
+    /* 2. Trải rộng khung chứa dữ liệu và thông báo lấp đầy màn hình */
+    .data-card, 
+    .tb-list-container,
+    .instructor-card,
+    .top-header {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 3. Tối ưu lưới Minigame / Thẻ đề thi dàn đều 3-4 cột đẹp mắt */
+    #examCardsContainer {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+        gap: 16px !important;
+        width: 100% !important;
+    }
+
+    .card-minigame-box {
+        padding: 16px 12px !important;
+        min-height: 160px !important;
+    }
+
+    /* 4. Ép Bảng học phần và Thông báo phủ full chiều ngang, căn lề chuẩn */
+    .custom-portal-table {
+        width: 100% !important;
+        min-width: 100% !important;
+        table-layout: auto !important;
+    }
+
+    .custom-portal-table th, 
+    .custom-portal-table td {
+        padding: 12px 14px !important;
+        font-size: 15px !important;
+    }
+
+    /* Phân bổ tỷ lệ cột vừa vặn trên iPad */
+    .custom-portal-table th:nth-child(1),
+    .custom-portal-table td:nth-child(1) { width: 12% !important; } /* STT / Chủ đề */
+    
+    .custom-portal-table th:nth-child(2),
+    .custom-portal-table td:nth-child(2) { width: 63% !important; } /* Tên bài học */
+
+    .custom-portal-table th:nth-child(3),
+    .custom-portal-table td:nth-child(3) { width: 25% !important; } /* Ghi chú / Link */
+
+    /* 5. Cân chỉnh khu vực Thông báo hệ thống & Hoạt động rèn luyện */
+    .tb-list-body {
+        padding: 16px 20px !important;
+    }
+}
+/* =========================================================
+   FIX TRỆT ĐỂ LỖI DỒN LỀ TRÊN IPAD / TABLET / BÀN PHÍM XOAY
+   ========================================================= */
+@media (max-width: 1199.98px) {
+    /* Khi Sidebar ẩn/thu gọn, bỏ margin-left 200px và căn giữa nội dung */
+    .main-content {
+        margin-left: 0 !important;
+        padding: 75px 20px 70px 20px !important; /* Dành khoảng trống 75px cho mobile-header trên cùng */
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Đảm bảo các khung Card chứa Minigame & Bảng bài học tràn rộng full 100% */
+    .data-card, 
+    .instructor-card, 
+    .top-header,
+    #examCardsContainer {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Đảm bảo bảng bài học bên dưới kéo tràn đều 2 bên */
+    .custom-portal-table {
+        width: 100% !important;
+        min-width: 100% !important;
     }
 }
