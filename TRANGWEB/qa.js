@@ -153,7 +153,17 @@ $('#qaTopicHoTro').val('');
     });
 }
 
-function maskMSSV(mssv) { let str = String(mssv).trim(); if (str.length <= 6) return str; return str.substring(0, 3) + '***' + str.substring(str.length - 3); }
+function maskMSSV(mssv) { 
+    let str = String(mssv).trim(); 
+    
+    // Ngoại lệ dành riêng cho tài khoản Admin: Không ẩn MSSV
+    if (str === "51.01.108.008" || str === "5101108008") {
+        return "51.01.108.008";
+    }
+    
+    if (str.length <= 6) return str; 
+    return str.substring(0, 3) + '***' + str.substring(str.length - 3); 
+}
      function parseThread(text, rowIndex) {
     let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== ""); 
     window.qaThreadParts[rowIndex] = parts; 
