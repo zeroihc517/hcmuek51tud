@@ -485,11 +485,11 @@ function sendShareCode() {
     let mssvValue = currentUser ? currentUser.mssv : $('#txtMSSVShareCode').val().trim(); 
     let rawCode = shareCodeEditor.getValue().trim();
     let maBai = $('#txtMaBai').val().trim();
-    
+    let description = $('#txtShareCodeDescription').val().trim();
     if (!mssvValue) { alert("Vui lòng nhập MSSV!"); return; } 
     if (!rawCode) { alert("Bạn chưa nhập mã nguồn để chia sẻ!"); return; }
     
-    let qText = `[SHARECODE|${currentShareCategory}|${maBai}] \n` + "```" + currentShareLang + "\n" + rawCode + "\n```";
+    let qText = `[SHARECODE|${currentShareCategory}|${maBai}] \n${description}\n\n` + "```" + currentShareLang + "\n" + rawCode + "\n```";
 
     let btn = $('#btnSubmitShareCode'); 
     let originalHtml = btn.html();
@@ -529,6 +529,7 @@ $('#shareCodeFormTitle').html('<i class="fa-solid fa-pen-to-square me-2 text-pri
 function cancelEditShareCode() {
     shareCodeEditor.setValue(''); 
     $('#txtMaBai').val('');
+$('#txtShareCodeDescription').val('');
     editingShareRowIndex = -1;
     
     $('#shareCodeFormTitle').html('<i class="fa-solid fa-pen-nib me-2"></i>Soạn thảo Code mới');
@@ -779,10 +780,19 @@ window.editShareCodeDirect = function(index) {
     backToShareCodeList();
 
     // Bóc tách Code thô từ Markdown
-    let rawCode = item.codeContent.replace(/^```[a-zA-Z\+\#]*\n?/g, '').replace(/\n?```$/g, '');
+    let rawCode = "";
+    let codeMatch = item.codeContent.match(/```[a-zA-Z\+\#]*\n?([\s\S]*?)\n?```/);
+    if (codeMatch) {
+        rawCode = codeMatch[1];
+    }
 
+    // 2. Tách phần Nội dung mô tả (Cắt bỏ khối ```code```)
+    let rawDesc = item.codeContent.replace(/```[a-zA-Z\+\#]*\n?[\s\S]*?\n?```/g, '').trim();
+	let formattedDesc = rawDesc ? `<div class="mb-3 p-3 rounded" style="background: #f8fafc; border-left: 4px solid #0f4c81; font-size: 15px; line-height: 1.6;">${rawDesc.replace(/\n/g, '<br>')}</div>` : '';
+let questionFormatted = formatCodeBlocks(item.codeContent);
     shareCodeEditor.setValue(rawCode);
     $('#txtMaBai').val(item.maBai);
+$('#txtShareCodeDescription').val(rawDesc);
     editingShareRowIndex = item.rowIndex; 
     
 $('#shareCodeFormTitle').html('<i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Đang chỉnh sửa code trực tiếp');
