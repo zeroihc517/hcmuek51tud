@@ -3749,8 +3749,8 @@ function addSelectedGpaCoursesToDataset() {
                 credits: courseTemplate.credits,
                 type: courseTemplate.type,
                 columns: [
-                    { name: "Quá trình", percent1: 30, score1: "", percent2: 30, score2: "", percent3: 30, score3: "" },
-                    { name: "Cuối kỳ", percent1: 70, score1: "", percent2: 70, score2: "", percent3: 70, score3: "" }
+                    { name: "Quá trình", percent1: 40, score1: "", percent2: 40, score2: "", percent3: 40, score3: "" },
+                    { name: "Cuối kỳ", percent1: 60, score1: "", percent2: 60, score2: "", percent3: 60, score3: "" }
                 ],
                 majors: ['1']
             };
