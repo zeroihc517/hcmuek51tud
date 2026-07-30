@@ -155,12 +155,17 @@ $('#qaTopicHoTro').val('');
 
 function maskMSSV(mssv) { 
     let str = String(mssv).trim(); 
+    if (!str) return "";
+
+    // Lấy thông tin người dùng đang đăng nhập trên trình duyệt
+    let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
     
-    // Ngoại lệ dành riêng cho tài khoản Admin: Không ẩn MSSV
-    if (str === "51.01.108.008" || str === "5101108008") {
-        return "51.01.108.008";
+    // Nếu người xem là Admin (51.01.108.008) -> Giữ nguyên MSSV gốc, không che
+    if (activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008")) {
+        return str;
     }
-    
+
+    // Nếu người xem là sinh viên thường -> Tiến hành che MSSV
     if (str.length <= 6) return str; 
     return str.substring(0, 3) + '***' + str.substring(str.length - 3); 
 }
