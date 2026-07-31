@@ -64,16 +64,30 @@
                     </div>
 
                     <!-- Ô NHẬP NHANH (SMART PASTE) -->
-                    <div class="input-group" style="background: #eef2ff; padding: 14px; border-radius: 12px; border: 1px solid #c7d2fe; margin-bottom: 20px;">
-                        <label style="color: #4338ca; font-weight: 700;">⚡ Nhập Nhanh Khối Văn Bản (Smart Paste)</label>
-                        <textarea id="smart-paste-input" rows="4" placeholder="Dán văn bản câu hỏi vào đây, ví dụ:
-Theo định nghĩa của Đại hội XI, tư tưởng Hồ Chí Minh là:
-A. Hệ thống các quan điểm về cách mạng thế giới.
-B. Hệ thống quan điểm toàn diện và sâu sắc về cách mạng Việt Nam.
-C. Hệ thống các quan điểm về xây dựng Đảng.
-D. Hệ thống quan điểm về phát triển kinh tế." oninput="parseSmartPaste()"></textarea>
-                        <small style="color: #6366f1; margin-top: 4px;">Tự động tách đề bài & 4 lựa chọn A, B, C, D xuống bên dưới.</small>
-                    </div>
+                   <!-- Ô NHẬP HÀNG LOẠT (BULK PASTE) -->
+<div class="input-group" style="background: #f0fdf4; padding: 14px; border-radius: 12px; border: 1px solid #bbf7d0; margin-bottom: 20px;">
+    <label style="color: #15803d; font-weight: 700;">🚀 Nhập Nhiều Câu Hỏi Cùng Lúc (Bulk Import)</label>
+    <textarea id="bulk-paste-input" rows="8" placeholder="Thêm '*' vào trước đáp án đúng. Ví dụ:
+
+Câu 1: Thủ đô của Việt Nam là?
+*A. Hà Nội
+B. Đà Nẵng
+C. TP. Hồ Chí Minh
+D. Cần Thơ
+
+Câu 2: 1 + 1 bằng bao nhiêu?
+A. 1
+*B. 2
+C. 3
+D. 4"
+oninput="previewBulkQuestions()">
+></textarea>
+    <div style="display: flex; gap: 10px; margin-top: 8px;">
+        <button type="button" onclick="parseAndSaveBatchQuestions()" style="background: #16a34a; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+            💾 Tải Lên Tất Cả Câu Hỏi
+        </button>
+    </div>
+</div>
 <div class="input-group">
                                 <label>Đáp án đúng *</label>
                                 <select id="correct-p1" onchange="renderPreview()">

@@ -667,3 +667,173 @@ function generateAndExportRandomExamPDF() {
     printWindow.document.write(html);
     printWindow.document.close();
 }
+async function parseAndSaveBatchQuestions() {
+    const rawText = document.getElementById('bulk-paste-input').value;
+    const examName = document.getElementById('q-exam-name').value.trim();
+    let defaultSetNum = parseInt(document.getElementById('set-num').value) || 1;
+
+    if (!rawText.trim()) {
+        alert("Vui lòng nhập nội dung các câu hỏi!");
+        return;
+    }
+    if (!examName) {
+        alert("Vui lòng nhập hoặc chọn Đợt Thi / Kỳ Thi trước khi tải lên!");
+        return;
+    }
+
+    // Tách khối văn bản thành từng đoạn câu hỏi dựa trên từ khóa "Câu X:" hoặc khoảng trắng kép
+    const rawBlocks = rawText.split(/(?=(?:Câu|Câu hỏi)\s*\d+[:\.]?)/i).filter(b => b.trim() !== '');
+
+    let parsedQuestions = [];
+
+    rawBlocks.forEach((block, index) => {
+        const lines = block.split('\n').map(l => l.trim()).filter(l => l !== '');
+        
+        let questionLines = [];
+        let optA = '', optB = '', optC = '', optD = '';
+        let correct = 'A'; // Mặc định nếu không đánh dấu *
+
+        lines.forEach(line => {
+            // Kiểm tra các dòng phương án A, B, C, D (có hoặc không có dấu *)
+            const matchOpt = line.match(/^(\*)?\s*([A-Da-d])\s*[\.\:\)\/]\s*(.*)$/);
+
+            if (matchOpt) {
+                const isCorrect = !!matchOpt[1]; // Có dấu * hay không
+                const optionLabel = matchOpt[2].toUpperCase();
+                const optionText = matchOpt[3];
+
+                if (isCorrect) correct = optionLabel;
+
+                if (optionLabel === 'A') optA = optionText;
+                if (optionLabel === 'B') optB = optionText;
+                if (optionLabel === 'C') optC = optionText;
+                if (optionLabel === 'D') optD = optionText;
+            } else {
+                questionLines.push(line);
+            }
+        });
+
+        let content = questionLines.join('\n').replace(/^(?:Câu|Câu hỏi)\s*\d+[\.\:\s]*/i, '').trim();
+
+        if (content) {
+            parsedQuestions.push({
+                examName: examName,
+                part: 1, // Mặc định Phần I
+                setNum: defaultSetNum,
+                content: content,
+                imageUrl: '',
+                optA: optA,
+                optB: optB,
+                optC: optC,
+                optD: optD,
+                correct: correct
+            });
+        }
+    });
+
+    if (parsedQuestions.length === 0) {
+        alert("Không thể phân tích định dạng câu hỏi. Vui lòng kiểm tra lại cấu trúc văn bản!");
+        return;
+    }
+
+    if (!confirm(`Hệ thống đã nhận diện ${parsedQuestions.length} câu hỏi. Bạn có muốn lưu tất cả vào Ngân hàng câu hỏi?`)) {
+        return;
+    }
+
+    // Gửi dữ liệu hàng loạt lên Google Apps Script
+    try {
+        const res = await fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            body: JSON.stringify({
+                action: "addBatchQuestions",
+                questions: parsedQuestions
+            }),
+            headers: { "Content-Type": "text/plain;charset=utf-8" }
+        });
+
+        const result = await res.json();
+        if (result.status === "success") {
+            alert(`🎉 Đã thêm thành công ${parsedQuestions.length} câu hỏi!`);
+            document.getElementById('bulk-paste-input').value = '';
+            loadExamSuggestions();
+            loadBankList();
+        } else {
+            alert("❌ Lỗi: " + result.message);
+        }
+    } catch (err) {
+        console.error(err);
+        alert("❌ Lỗi kết nối khi lưu dữ liệu hàng loạt!");
+    }
+}
+// HÀM XEM TRƯỚC HÀNG LOẠT CÂU HỎI KHI DÁN VÀO KHỐI BULK IMPORT
+function previewBulkQuestions() {
+    const rawText = document.getElementById('bulk-paste-input').value;
+    const previewBox = document.getElementById('preview-box');
+
+    if (!rawText.trim()) {
+        renderPreview(); // Nếu ô trống, quay lại hiển thị xem trước câu đơn lẻ gốc
+        return;
+    }
+
+    // Tách các câu hỏi dựa trên từ khóa "Câu X:" hoặc "Câu X."
+    const rawBlocks = rawText.split(/(?=(?:Câu|Câu hỏi)\s*\d+[:\.]?)/i).filter(b => b.trim() !== '');
+
+    let htmlOutput = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid #e2e8f0; padding-bottom:8px;">
+        <strong style="color:#16a34a;">📋 Danh sách xem trước (${rawBlocks.length} câu):</strong>
+    </div>`;
+
+    rawBlocks.forEach((block, index) => {
+        const lines = block.split('\n').map(l => l.trim()).filter(l => l !== '');
+        
+        let questionLines = [];
+        let opts = { A: '', B: '', C: '', D: '' };
+        let correctLabel = '';
+
+        lines.forEach(line => {
+            // Nhận diện lựa chọn A, B, C, D (có hoặc không có dấu *)
+            const matchOpt = line.match(/^(\*)?\s*([A-Da-d])\s*[\.\:\)\/]\s*(.*)$/);
+
+            if (matchOpt) {
+                const isCorrect = !!matchOpt[1];
+                const label = matchOpt[2].toUpperCase();
+                const text = matchOpt[3];
+
+                opts[label] = text;
+                if (isCorrect) correctLabel = label;
+            } else {
+                questionLines.push(line);
+            }
+        });
+
+        let content = questionLines.join('<br>').replace(/^(?:Câu|Câu hỏi)\s*\d+[\.\:\s]*/i, '').trim();
+
+        htmlOutput += `
+            <div style="background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; padding:12px; margin-bottom:12px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                <div style="font-weight:bold; color:#1e293b; margin-bottom:6px;">
+                    Câu ${index + 1}: ${content}
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; font-size:0.9rem;">
+                    <div style="${correctLabel === 'A' ? 'color:#16a34a; font-weight:bold; background:#dcfce7; padding:2px 6px; border-radius:4px;' : 'color:#475569;'}">
+                        A. ${opts.A || '...'} ${correctLabel === 'A' ? '✔️' : ''}
+                    </div>
+                    <div style="${correctLabel === 'B' ? 'color:#16a34a; font-weight:bold; background:#dcfce7; padding:2px 6px; border-radius:4px;' : 'color:#475569;'}">
+                        B. ${opts.B || '...'} ${correctLabel === 'B' ? '✔️' : ''}
+                    </div>
+                    <div style="${correctLabel === 'C' ? 'color:#16a34a; font-weight:bold; background:#dcfce7; padding:2px 6px; border-radius:4px;' : 'color:#475569;'}">
+                        C. ${opts.C || '...'} ${correctLabel === 'C' ? '✔️' : ''}
+                    </div>
+                    <div style="${correctLabel === 'D' ? 'color:#16a34a; font-weight:bold; background:#dcfce7; padding:2px 6px; border-radius:4px;' : 'color:#475569;'}">
+                        D. ${opts.D || '...'} ${correctLabel === 'D' ? '✔️' : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    previewBox.innerHTML = htmlOutput;
+
+    // Render công thức MathJax nếu có
+    if (window.MathJax && window.MathJax.typesetPromise) {
+        window.MathJax.typesetPromise([previewBox]).catch((err) => console.log(err));
+    }
+}
