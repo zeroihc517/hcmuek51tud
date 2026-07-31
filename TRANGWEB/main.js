@@ -330,10 +330,29 @@ data.forEach((row, rowIndex) => {
     let isHeThong = c7_raw.toLowerCase().includes('hệ thống');
     let isRenLuyen = c7_raw.toLowerCase().includes('rèn luyện');
     
- // 1. Dùng cho ĐỒNG HỒ ĐẾM NGƯỢC: CHỈ quét lấy từ Nội dung (c3)
+    // 1. Dùng cho ĐỒNG HỒ ĐẾM NGƯỢC & ẨN CHỮ "NEW": CHỈ quét lấy từ Nội dung (c3)
     let deadlineTime = extractDeadline(c3);
 
-    // 2. Dùng để ẨN THÔNG BÁO: CHỈ quét lấy từ Ghi chú (c7)
+    // TÍNH NĂNG MỚI: Tự động gỡ nhãn "Mới" (New)
+    if (isNew) {
+        if (deadlineTime) {
+            // Nếu Nội dung CÓ DEADLINE: Qua thời hạn -> Mất chữ New
+            if (now.getTime() > deadlineTime) {
+                isNew = false;
+            }
+        } else {
+            // Nếu Nội dung KHÔNG CÓ DEADLINE: Sau 15 ngày kể từ ngày đăng -> Mất chữ New
+            if (publishDate) {
+                let diffTimeMs = now.getTime() - publishDate.getTime();
+                let diffDays = diffTimeMs / (1000 * 60 * 60 * 24);
+                if (diffDays > 15) {
+                    isNew = false;
+                }
+            }
+        }
+    }
+
+    // 2. Dùng để ẨN THÔNG BÁO HOÀN TOÀN: CHỈ quét lấy từ Ghi chú (c7_raw)
     let hideTime = extractDeadline(c7_raw);
 
     // KIỂM TRA ĐIỀU KIỆN ẨN: Nếu cột Ghi chú có hẹn giờ và đã lố giờ -> Ẩn hoàn toàn (trừ Admin)
