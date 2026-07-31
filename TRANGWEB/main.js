@@ -1440,7 +1440,7 @@ const groups = [
         // GỘP CHUNG TOÀN BỘ GDTC & GDQP VÀO NĂM MỘT NHÓM
         { 
             type: 'gdtc_group', 
-            title: 'Giáo dục Thể chất & Giáo dục Quốc phòng-An ninh', 
+            title: 'Giáo dục Thể chất & Giáo dục Quốc phòng-côAn ninh', 
             icon: 'fa-person-running', 
             color: 'secondary',
             match: (t) => t.startsWith('gdtc_') || t === 'ngoai_le'
@@ -3669,6 +3669,7 @@ function openGpaSystemSelectModal() {
 }
 
 // RENDER BẢNG MÔN HỌC GOM NHÓM THEO HỌC KỲ VÀ PHÂN LOẠI (BẮT BUỘC/TỰ CHỌN)
+// RENDER BẢNG MÔN HỌC GOM NHÓM THEO HỌC KỲ VÀ PHÂN LOẠI (BẮT BUỘC/TỰ CHỌN)
 function renderGpaSystemCoursesTable(dataset) {
     let tbody = $('#gpaSystemCoursesTableBody');
     if (!dataset || dataset.length === 0) {
@@ -3685,12 +3686,9 @@ function renderGpaSystemCoursesTable(dataset) {
         }
 
         let t = course.type || '';
-        // Phân loại môn Tự chọn (_tc hoặc tu_chon)
         if (t.endsWith('_tc') || t === 'tu_chon') {
             groupedData[groupKey].tu_chon.push(course);
-        } 
-        // Phân loại môn Bắt buộc (_bb, bat_buoc hoặc hệ thống cũ)
-        else if (t.endsWith('_bb') || t === 'bat_buoc' || t === 'chuyen_nganh' || t === 'mon_chung' || t === 'ngoai_le') {
+        } else if (t.endsWith('_bb') || t === 'bat_buoc' || t === 'chuyen_nganh' || t === 'mon_chung' || t === 'ngoai_le') {
             groupedData[groupKey].bat_buoc.push(course);
         } else {
             groupedData[groupKey].khac.push(course);
@@ -3702,7 +3700,7 @@ function renderGpaSystemCoursesTable(dataset) {
     for (let groupKey in groupedData) {
         let safeGroupId = groupKey.replace(/[^a-zA-Z0-9]/g, '_');
 
-        // --- DÒNG CẤP 1: HỌC KỲ (Thanh màu xanh xám) ---
+        // --- DÒNG CẤP 1: HỌC KỲ ---
         html += `
         <tr style="background-color: #aebfd1; border-bottom: 1px solid #154c79;">
             <td colspan="5" class="py-2 px-3">
@@ -3715,11 +3713,11 @@ function renderGpaSystemCoursesTable(dataset) {
             </td>
         </tr>`;
 
-        // Hàm cục bộ vẽ từng nhóm Bắt buộc / Tự chọn
+        // Hàm vẽ từng nhóm Bắt buộc / Tự chọn
         const renderSubGroup = (coursesArr, titleText, bgColor) => {
             if (!coursesArr || coursesArr.length === 0) return; 
 
-            // --- DÒNG CẤP 2: TIÊU ĐỀ BẮT BUỘC / TỰ CHỌN (Thanh màu hồng cam) ---
+            // --- DÒNG CẤP 2: BẮT BUỘC / TỰ CHỌN ---
             html += `
             <tr style="background-color: ${bgColor}; border-bottom: 1px solid #154c79;">
                 <td colspan="5" class="py-2 px-3 fw-bold text-dark" style="font-size: 14.5px;">${titleText}</td>
@@ -3731,25 +3729,32 @@ function renderGpaSystemCoursesTable(dataset) {
                 
                 if (t.startsWith('cn_') || t === 'chuyen_nganh') typeBadge = '<span class="badge bg-primary">Chuyên ngành</span>';
                 else if (t.startsWith('mc_') || t === 'mon_chung') typeBadge = '<span class="badge bg-success">Môn chung</span>';
-                else if (t.startsWith('gdtc_') || t === 'ngoai_le') typeBadge = '<span class="badge bg-secondary">GDTC + GDQP</span>';
+                else if (t.startsWith('gdtc_') || t === 'ngoai_le') typeBadge = '<span class="badge bg-secondary">GDTC & GDQP</span>';
                 else typeBadge = '<span class="badge bg-dark">Khác</span>';
 
+                // Kiểm tra xem môn đã được thêm vào GPA hay chưa
                 let isAlreadyAdded = myGPADataset.some(c => c.code === course.code || c.name.toLowerCase() === course.name.toLowerCase());
-                let disabledAttr = isAlreadyAdded ? 'disabled' : '';
-                let rowStyle = isAlreadyAdded ? 'background-color: #f8fafc; opacity: 0.6;' : 'cursor: pointer;';
-                let alreadyLabel = isAlreadyAdded ? ' <span class="badge bg-light text-dark border ms-1"><i class="fa-solid fa-check text-success"></i> Đã thêm</span>' : '';
+                
+                // Hiển thị ô Checkbox hoặc Dấu tít xanh ở CỘT ĐẦU TIÊN
+                let firstColHtml = '';
+                if (isAlreadyAdded) {
+                    firstColHtml = `<i class="fa-solid fa-circle-check text-success fs-5" title="Môn này đã có trong bảng điểm GPA"></i>`;
+                } else {
+                    firstColHtml = `<input type="checkbox" class="form-check-input cb-gpa-sys-item" value="${course.code}" onchange="updateGpaSelectedCount()" onclick="event.stopPropagation();">`;
+                }
 
-                // Hiển thị ghi chú nhóm bên dưới Tên môn học nếu có
+                let rowStyle = isAlreadyAdded ? 'background-color: #f1f5f9; opacity: 0.65;' : 'cursor: pointer;';
                 let groupBadge = course.groupNote ? `<br><small class="text-info fw-bold" style="font-size: 11.5px;"><i class="fa-solid fa-layer-group me-1"></i>Nhóm: ${course.groupNote}</small>` : '';
 
                 html += `
                 <tr class="semester-row-${safeGroupId}" style="${rowStyle}" onclick="toggleGpaSysRowCheckbox(this, event, ${isAlreadyAdded})">
+                    <!-- CỘT ĐẦU TIÊN: HIỂN THỊ CHECKBOX HOẶC DẤU TÍT XANH -->
                     <td class="text-center align-middle" style="width: 60px;">
-                        <input type="checkbox" class="form-check-input cb-gpa-sys-item" value="${course.code}" ${disabledAttr} onchange="updateGpaSelectedCount()" onclick="event.stopPropagation();">
+                        ${firstColHtml}
                     </td>
                     <td class="text-center font-monospace fw-bold text-secondary align-middle" style="width: 15%;">${course.code}</td>
                     <td class="fw-bold text-dark align-middle">
-                        ${course.name} ${alreadyLabel}
+                        ${course.name}
                         ${groupBadge}
                     </td>
                     <td class="text-center fw-bold text-primary align-middle" style="width: 12%;">${course.credits}</td>
@@ -3758,7 +3763,6 @@ function renderGpaSystemCoursesTable(dataset) {
             });
         };
 
-        // Render đúng 2 phân nhóm
         renderSubGroup(groupedData[groupKey].bat_buoc, 'Bắt buộc', '#fca5a5');
         renderSubGroup(groupedData[groupKey].tu_chon, 'Tự chọn', '#fca5a5');
         renderSubGroup(groupedData[groupKey].khac, 'Các môn khác', '#e2e8f0');
