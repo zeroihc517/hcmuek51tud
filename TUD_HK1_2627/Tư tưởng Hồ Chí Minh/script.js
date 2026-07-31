@@ -26,8 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupAntiCopyAndSecurity();
 });
 
-// TÍNH NĂNG CHẶN COPY, CUT, PASTE, CHUỘT PHẢI & PHÍM TẮT DUYỆT
+// TÍNH NĂNG CHẶN XEM NGUỒN TRANG (VIEW-SOURCE), DEVTOOLS, COPY & MỘT SỐ PHÍM TẮT BẢO MẬT
 function setupAntiCopyAndSecurity() {
+    // 1. Chận thao tác copy / cut / paste
     document.addEventListener('copy', (e) => {
         e.preventDefault();
         alert("⚠️ Bảo mật bài thi: Hệ thống đã chặn thao tác SAO CHÉP (COPY)!");
@@ -37,18 +38,45 @@ function setupAntiCopyAndSecurity() {
         e.preventDefault();
     });
 
+    // 2. Chặn chuột phải (Context Menu)
     document.addEventListener('contextmenu', (e) => {
-        e.preventDefault(); // Chặn chuột phải
+        e.preventDefault();
+        alert("⚠️ Bảo mật bài thi: Hệ thống đã chặn MENU CHUỘT PHẢI!");
     });
 
+    // 3. Chặn các phím tắt mở Developer Tools (F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C) 
+    // và phím tắt xem nguồn trang (Ctrl+U), Lưu trang (Ctrl+S), In ấn (Ctrl+P)
     document.addEventListener('keydown', (e) => {
-        // Chặn phím tắt F12, Ctrl+Shift+I, Ctrl+U, Ctrl+C, Ctrl+X, Ctrl+S
-        if (
-            e.keyCode === 123 || 
-            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
-            (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 67 || e.keyCode === 88 || e.keyCode === 83 || e.keyCode === 65))
-        ) {
+        const key = e.key.toLowerCase();
+        
+        // Chặn F12
+        if (e.keyCode === 123 || key === 'f12') {
             e.preventDefault();
+            e.stopPropagation();
+            alert("⚠️ Bảo mật bài thi: Đã chặn phím F12 (Developer Tools)!");
+            return false;
+        }
+
+        // Chặn Ctrl+U (Xem nguồn trang - View Page Source)
+        if (e.ctrlKey && key === 'u') {
+            e.preventDefault();
+            e.stopPropagation();
+            alert("⚠️ Bảo mật bài thi: Đã chặn xem NGUỒN TRANG (View Source)!");
+            return false;
+        }
+
+        // Chặn Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C (Mở F12 Console/Inspect Element)
+        if (e.ctrlKey && e.shiftKey && (key === 'i' || key === 'j' || key === 'c')) {
+            e.preventDefault();
+            e.stopPropagation();
+            alert("⚠️ Bảo mật bài thi: Đã chặn công cụ kiểm tra phần tử (Inspect Element)!");
+            return false;
+        }
+
+        // Chặn Ctrl+S (Lưu trang), Ctrl+P (In trang), Ctrl+A (Chọn tất cả)
+        if (e.ctrlKey && (key === 's' || key === 'p' || key === 'a')) {
+            e.preventDefault();
+            e.stopPropagation();
             return false;
         }
     });
