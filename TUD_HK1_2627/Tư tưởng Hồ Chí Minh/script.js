@@ -6,7 +6,7 @@ let countdown;
 let violationCount = 0;
 let isExamActive = false;
 
-// TỰ ĐỘNG LẤY TÊN ĐỢT THI TỪ FILE HTML (Nếu không có sẽ dùng giá trị mặc định)
+// TỰ ĐỘNG LẤY TÊN ĐỢT THI TỪ FILE HTML
 const currentExamName = window.FIXED_EXAM_NAME;
 
 function convertDriveUrl(url) {
@@ -23,7 +23,36 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('login-screen').classList.add('active');
     initSystem();
     setupFullscreenAndAntiCheat();
+    setupAntiCopyAndSecurity();
 });
+
+// TÍNH NĂNG CHẶN COPY, CUT, PASTE, CHUỘT PHẢI & PHÍM TẮT DUYỆT
+function setupAntiCopyAndSecurity() {
+    document.addEventListener('copy', (e) => {
+        e.preventDefault();
+        alert("⚠️ Bảo mật bài thi: Hệ thống đã chặn thao tác SAO CHÉP (COPY)!");
+    });
+
+    document.addEventListener('cut', (e) => {
+        e.preventDefault();
+    });
+
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault(); // Chặn chuột phải
+    });
+
+    document.addEventListener('keydown', (e) => {
+        // Chặn phím tắt F12, Ctrl+Shift+I, Ctrl+U, Ctrl+C, Ctrl+X, Ctrl+S
+        if (
+            e.keyCode === 123 || 
+            (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) ||
+            (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 67 || e.keyCode === 88 || e.keyCode === 83 || e.keyCode === 65))
+        ) {
+            e.preventDefault();
+            return false;
+        }
+    });
+}
 
 function initSystem() {
     const savedUser = JSON.parse(localStorage.getItem('currentUser'));
@@ -181,13 +210,6 @@ function toggleFlag(qIndex) {
         document.getElementById(`q-block-${targetIndex}`)?.classList.add('flagged');
     }
     updateDotStatus(targetIndex);
-}
-
-function changeZoom(delta) {
-    currentZoom += delta;
-    if (currentZoom < 0.8) currentZoom = 0.8;
-    if (currentZoom > 1.5) currentZoom = 1.5;
-    document.getElementById('main-container').style.setProperty('font-size', `${currentZoom}rem`, 'important');
 }
 
 function requestFullscreenMode() {
@@ -399,14 +421,16 @@ function executeSubmission() {
 
     if (document.exitFullscreen) document.exitFullscreen().catch(err => console.log(err));
 
+    // Hiển thị màn hình kết quả
     document.getElementById('exam-screen').classList.remove('active');
     document.getElementById('result-screen').classList.add('active');
     document.getElementById('res-done').innerText = soCauDaLam;
     document.getElementById('res-score').innerText = `${finalScore}/10`;
 
-    localStorage.removeItem('userAnswers');
-    localStorage.removeItem('examTimeLeft');
+    // Render xem lại câu hỏi chi tiết
+    renderStudentReview();
 
+    // Đồng bộ kết quả lên Google Sheets
     const payload = {
         username: studentMSSV,
         studentName: studentName,
@@ -424,6 +448,123 @@ function executeSubmission() {
         body: JSON.stringify(payload),
         headers: { "Content-Type": "text/plain;charset=utf-8" } 
     }).catch(err => console.error("Lỗi đồng bộ bài làm:", err));
+
+    localStorage.removeItem('userAnswers');
+    localStorage.removeItem('examTimeLeft');
+}
+
+// HÀM RENDER ĐÁP ÁN ĐÚNG VÀ BÀI LÀM CỦA SINH VIÊN
+function renderStudentReview() {
+    const reviewContainer = document.getElementById('review-questions-container');
+    if (!reviewContainer) return;
+    reviewContainer.innerHTML = '';
+
+    examData.forEach((qData, index) => {
+        const qIndex = index + 1;
+        const imgUrl = convertDriveUrl(qData.image);
+        const imgHtml = imgUrl ? `<img src="${imgUrl}" alt="Hình ảnh câu hỏi" style="max-width:80%; border-radius:6px; margin:10px auto; display:block;">` : '';
+        
+        let isCorrect = false;
+        let contentHtml = '';
+
+        if (qData.part === 1) {
+            const userVal = userAnswers[`q${qIndex}`] || "";
+            isCorrect = (userVal === qData.correct);
+            
+            contentHtml = `
+                <div class="review-item ${isCorrect ? 'correct-answer' : 'incorrect-answer'}">
+                    <span class="review-badge ${isCorrect ? 'badge-success' : 'badge-danger'}">
+                        ${isCorrect ? '✓ ĐÚNG (+0.25đ)' : '✗ SAI / CHƯA LÀM'}
+                    </span>
+                    <p><strong>Câu ${qIndex}.</strong> ${qData.question}</p>
+                    ${imgHtml}
+                    <div class="review-options">
+                        ${['A', 'B', 'C', 'D'].map((opt, i) => {
+                            let optionClass = '';
+                            let tagHtml = '';
+
+                            if (opt === qData.correct && opt === userVal) {
+                                optionClass = 'correct-choice';
+                                tagHtml = '<span class="choice-tag tag-correct">✓ Bạn chọn đúng</span>';
+                            } else if (opt === qData.correct) {
+                                optionClass = 'correct-choice';
+                                tagHtml = '<span class="choice-tag tag-correct">★ Đáp án chuẩn</span>';
+                            } else if (opt === userVal) {
+                                optionClass = 'wrong-user-choice';
+                                tagHtml = '<span class="choice-tag tag-wrong">✗ Bài làm của bạn</span>';
+                            }
+
+                            return `<label class="${optionClass}">${opt}. ${qData.options[i]} ${tagHtml}</label>`;
+                        }).join('')}
+                    </div>
+                </div>`;
+        } else if (qData.part === 2) {
+            let correctSubCount = 0;
+            qData.subQuestions.forEach(sub => {
+                if (userAnswers[`q${qIndex}${sub.id}`] === sub.correct) correctSubCount++;
+            });
+
+            contentHtml = `
+                <div class="review-item ${correctSubCount > 0 ? 'correct-answer' : 'incorrect-answer'}">
+                    <span class="review-badge ${correctSubCount === 4 ? 'badge-success' : 'badge-danger'}">
+                        Kết quả: Đã đúng ${correctSubCount}/4 ý
+                    </span>
+                    <p><strong>Câu ${qIndex}.</strong> ${qData.question}</p>
+                    ${qData.reading ? `<div style="background:#f8fafc; padding:12px; margin-bottom:12px; border-left:4px solid #1e3a8a; font-style:italic;">${qData.reading}</div>` : ''}
+                    ${imgHtml}
+                    <table class="tf-table">
+                        <tr>
+                            <th>Ý hỏi</th>
+                            <th>Bài làm của sinh viên</th>
+                            <th>Đáp án chuẩn</th>
+                        </tr>
+                        ${qData.subQuestions.map(sub => {
+                            const uVal = userAnswers[`q${qIndex}${sub.id}`] || "Chưa chọn";
+                            const cVal = sub.correct;
+                            const subMatch = (uVal === cVal);
+                            return `<tr>
+                                <td style="text-align:left;">${sub.id}) ${sub.text}</td>
+                                <td style="color: ${subMatch ? '#16a34a' : '#dc2626'}; font-weight:bold;">
+                                    ${uVal === 'D' ? 'Đúng' : (uVal === 'S' ? 'Sai' : 'Chưa chọn')}
+                                    ${subMatch ? ' ✓' : ' ✗'}
+                                </td>
+                                <td style="font-weight:bold; color: #16a34a;">${cVal === 'D' ? 'Đúng' : 'Sai'}</td>
+                            </tr>`;
+                        }).join('')}
+                    </table>
+                </div>`;
+        } else if (qData.part === 3) {
+            const userVal = (userAnswers[`q${qIndex}`] || "").toString().trim();
+            const correctVal = (qData.correct || "").toString().trim();
+            
+            let userNumStr = userVal.replace(/,/g, '.');
+            let correctNumStr = correctVal.replace(/,/g, '.');
+
+            if (!isNaN(userNumStr) && !isNaN(correctNumStr) && userNumStr !== "" && correctNumStr !== "") {
+                isCorrect = (parseFloat(userNumStr) === parseFloat(correctNumStr));
+            } else {
+                isCorrect = (userVal.toLowerCase() === correctVal.toLowerCase());
+            }
+
+            contentHtml = `
+                <div class="review-item ${isCorrect ? 'correct-answer' : 'incorrect-answer'}">
+                    <span class="review-badge ${isCorrect ? 'badge-success' : 'badge-danger'}">
+                        ${isCorrect ? '✓ ĐÚNG (+0.5đ)' : '✗ SAI / CHƯA LÀM'}
+                    </span>
+                    <p><strong>Câu ${qIndex}.</strong> ${qData.question}</p>
+                    ${imgHtml}
+                    <div style="background:#f8fafc; padding:12px; border-radius:6px; margin-top:10px;">
+                        <p style="margin:5px 0;"><strong>Bài làm của bạn:</strong> <span style="color: ${isCorrect ? '#16a34a' : '#dc2626'}; font-weight:bold;">${userVal || '(Chưa trả lời)'}</span></p>
+                        <p style="margin:5px 0;"><strong>Đáp án đúng:</strong> <span style="color: #16a34a; font-weight:bold;">${correctVal}</span></p>
+                    </div>
+                </div>`;
+        }
+        reviewContainer.innerHTML += contentHtml;
+    });
+
+    if (window.MathJax) {
+        setTimeout(() => window.MathJax.typesetPromise(), 100);
+    }
 }
 
 function finishExam() {

@@ -101,6 +101,7 @@ function extractImage(text) {
 }
 // 3. Hàm lấy câu hỏi và format lại cho đúng chuẩn giao diện
 // 3. Hàm lấy câu hỏi 40 câu trắc nghiệm ABCD (Bỏ Đúng/Sai & Trả lời ngắn)
+// 3. Hàm lấy câu hỏi 40 câu trắc nghiệm ABCD (Tự động đảo phương án & xáo trộn câu)
 function getQuestions(examName) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Bank');
   const data = sheet.getDataRange().getValues();
@@ -112,19 +113,42 @@ function getQuestions(examName) {
   data.forEach((row, index) => {
     let rowExam = row[0] ? row[0].toString().trim() : "";
     
-    // Lọc theo đợt thi và chỉ lấy Phần 1 (Trắc nghiệm ABCD)
+    // Lọc theo đợt thi và lấy Phần 1 (Trắc nghiệm ABCD)
     if ((!examName || rowExam === examName.trim()) && (row[1] == 1 || row[1] == "1")) {
-      let setNum = parseInt(row[2]) || 0; // Bộ câu hỏi (Nếu 0 là trộn lộn xộn)
-      let parsed = extractImage(row[3]);   // Tách ảnh và nội dung câu hỏi
+      let setNum = parseInt(row[2]) || 0; 
+      let parsed = extractImage(row[3]);
       
+      let rawCorrectStr = row[8] ? row[8].toString().trim().toUpperCase() : "A";
+      let origOptions = [row[4], row[5], row[6], row[7]]; // [A, B, C, D]
+      
+      // Xác định chỉ số của đáp án đúng ban đầu (A=0, B=1, C=2, D=3)
+      let correctIdx = 0;
+      if (rawCorrectStr === 'B') correctIdx = 1;
+      else if (rawCorrectStr === 'C') correctIdx = 2;
+      else if (rawCorrectStr === 'D') correctIdx = 3;
+      
+      let correctText = origOptions[correctIdx]; // Lấy nội dung văn bản của đáp án đúng
+
+      // --- BƯỚC 1: ĐẢO THỨ TỰ PHƯƠNG ÁN NỔI NỘI TRONG CÂU HỎI ---
+      let mappedOptions = origOptions.map((text) => ({ text: text }));
+      // Xáo trộn ngẫu nhiên 4 phương án
+      mappedOptions.sort(() => Math.random() - 0.5);
+
+      let shuffledOptions = mappedOptions.map(item => item.text);
+      
+      // Tìm vị trí mới của đáp án đúng sau khi đã đảo
+      let newCorrectIdx = shuffledOptions.indexOf(correctText);
+      let labels = ['A', 'B', 'C', 'D'];
+      let newCorrectLabel = labels[newCorrectIdx !== -1 ? newCorrectIdx : 0];
+
       let qObj = {
         rowIndex: index + 2,
         part: 1,
         setNum: setNum,
         question: parsed.cleanText,
         image: parsed.imgUrl,
-        options: [row[4], row[5], row[6], row[7]], // Option A, B, C, D
-        correct: row[8] ? row[8].toString().trim().toUpperCase() : ""
+        options: shuffledOptions, // Phương án đã đảo ngẫu nhiên
+        correct: newCorrectLabel  // Đáp án đúng tương ứng với vị trí mới (A/B/C/D)
       };
 
       rawList.push(qObj);
@@ -140,32 +164,32 @@ function getQuestions(examName) {
   const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
 
   let finalQuestions = [];
+  let availableSets = Object.keys(setGrouped);
 
-  // TRƯỜNG HỢP 1: Lấy theo từng Bộ (1, 2, 3...)
-  let hasSetNumbers = Object.keys(setGrouped).length > 0;
+  // --- BƯỚC 2: XÁO TRỘN CÂU HỎI THEO BỘ HOẶC TOÀN BỘ ĐỢT THI ---
   
-  if (hasSetNumbers) {
-    // Lấy mỗi bộ đúng 1 câu (Tối đa 40 bộ)
+  // Nếu đợt thi chia nhiều Bộ (ví dụ: Bộ 1 đến Bộ 40)
+  if (availableSets.length > 1) {
     for (let setIdx = 1; setIdx <= 40; setIdx++) {
       if (setGrouped[setIdx] && setGrouped[setIdx].length > 0) {
         finalQuestions.push(pickRandom(setGrouped[setIdx]));
       }
     }
+    // Xáo trộn thứ tự xuất hiện giữa các bộ
+    finalQuestions = shuffleArray(finalQuestions);
   } 
-  
-  // TRƯỜNG HỢP 2: Nếu để Bộ 0 (hoặc không đủ 40 câu từ các Bộ), xáo trộn toàn bộ ngân hàng lấy 40 câu
-  if (finalQuestions.length === 0) {
+  // Nếu đợt thi chỉ có 1 Bộ duy nhất hoặc không chia Bộ (SetNum = 0)
+  else {
     let shuffled = shuffleArray([...rawList]);
-    finalQuestions = shuffled.slice(0, 40); // Lấy tối đa 40 câu lộn xộn
+    finalQuestions = shuffled.slice(0, 40); // Lấy ngẫu nhiên tối đa 40 câu và xáo trộn vị trí
   }
 
-  // Đánh lại ID câu hỏi từ 1 đến N cho đề thi
+  // Đánh lại ID câu hỏi từ 1 đến N
   return finalQuestions.map((q, idx) => {
     q.id = idx + 1;
     return q;
   });
 }
-
 // 4. Lưu kết quả bài làm theo form giao diện mới nhất
 function submitExamV2(payload) {
   const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Results');

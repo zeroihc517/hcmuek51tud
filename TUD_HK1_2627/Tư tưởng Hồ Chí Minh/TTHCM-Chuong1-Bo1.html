@@ -6,7 +6,6 @@
     <title>Bài Thi Trắc Nghiệm TTHCM - Chương 1 Bộ 1</title>
     <link rel="stylesheet" href="style.css">
     
-    <!-- KHAI BÁO TÊN ĐỢT THI RIÊNG CHO FILE HTML NÀY -->
     <script>
       window.FIXED_EXAM_NAME = "TTHCM-Chuong1-Bo1";
 
@@ -63,8 +62,6 @@
             <div class="answer-count">Đã làm: <span id="answered-count">0/40</span></div>
             <div class="action-right">
                 <div class="icon-tools">
-                   
-                    
                 </div>
             </div>
         </div>
@@ -114,17 +111,38 @@
         </div>
     </div>
 
-    <!-- 6. Màn hình Kết Quả -->
+    <!-- 6. Màn hình Kết Quả RỘNG RÃI & CHI TIẾT BÀI LÀM -->
     <div id="result-screen" class="screen">
-        <div class="result-card">
-            <h3>KẾT QUẢ BÀI THI</h3>
-            <div class="result-content">
-                <div class="success-msg">🎉 Đã nộp bài thành công!</div>
-                <div class="result-stats">
-                    <p>Số câu đã làm: <strong id="res-done">0/40</strong></p>
-                    <p>Điểm số đạt được: <span id="res-score" class="highlight">0/10</span></p>
+        <div class="result-card wide-result-card">
+            <div class="result-header">
+                <h3>KẾT QUẢ BÀI THI & XEM LẠI ĐÁP ÁN</h3>
+            </div>
+            
+            <div class="result-summary-bar">
+                <div class="summary-item">
+                    <span class="summary-label">Trạng thái:</span>
+                    <span class="summary-val success-text">🎉 Đã nộp thành công</span>
                 </div>
-                <button class="btn-finish" onclick="finishExam()">HOÀN THÀNH</button>
+                <div class="summary-item">
+                    <span class="summary-label">Số câu completed:</span>
+                    <span class="summary-val" id="res-done">0/40</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Điểm số:</span>
+                    <span class="summary-val score-highlight" id="res-score">0/10</span>
+                </div>
+                <button class="btn-finish-top" onclick="finishExam()">HOÀN THÀNH / THOÁT</button>
+            </div>
+
+            <div class="review-scroll-area">
+                <h4 class="review-title">📌 BÀI LÀM CHI TIẾT VÀ ĐÁP ÁN ĐÚNG</h4>
+                <div id="review-questions-container">
+                    <!-- Javascript sẽ đổ bài làm xem lại vào đây -->
+                </div>
+            </div>
+
+            <div class="result-footer">
+                <button class="btn-finish" onclick="finishExam()">XÁC NHẬN VÀ THOÁT KHỎI HỆ THỐNG</button>
             </div>
         </div>
     </div>
