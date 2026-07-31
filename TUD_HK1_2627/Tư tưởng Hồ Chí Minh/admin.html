@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Ngân Hàng Câu Hỏi</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="admin.css">
+    <script>
+      window.MathJax = {
+        tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+        startup: { typeset: false } 
+      };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h2>⚙️ QUẢN LÝ NGÂN HÀNG CÂU HỎI</h2>
+            <div class="nav-links">
+                <a href="results.html" class="btn-link">📊 Xem kết quả</a>
+                <a href="cauhoi.html" class="btn-link">📄 Sang trang thi</a>
+            </div>
+        </header>
+
+        <main class="admin-main">
+            <!-- CỘT TRÁI: Form Nhập & Danh Sách Câu Hỏi -->
+            <div class="left-column" style="display: flex; flex-direction: column; gap: 24px;">
+                
+                <!-- Khối 1: Form Nhập & Chỉnh Sửa Dữ Liệu -->
+                <form id="question-form" class="admin-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 id="form-title" style="margin: 0;">✏️ Thêm Câu Hỏi Mới</h3>
+                        <button type="button" id="btn-cancel-edit" onclick="resetFormToCreate()" style="display:none; background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">❌ Hủy sửa</button>
+                    </div>
+
+                    <!-- Ẩn biến lưu dòng cần sửa -->
+                    <input type="hidden" id="edit-row-index" value="">
+
+                    <!-- Ô ĐỢT THI -->
+                    <div class="input-group">
+                        <label for="q-exam-name">Đợt Thi / Kỳ Thi *</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="q-exam-name" placeholder="Chọn hoặc nhập tên đợt thi mới..." required list="exam-suggestions">
+                            <button type="button" onclick="addNewExamPrompt()" style="background:#4f46e5; color:white; border:none; padding:0 12px; border-radius:8px; font-weight:bold; cursor:pointer; white-space:nowrap;">+ Đợt mới</button>
+                        </div>
+                        <datalist id="exam-suggestions"></datalist>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label for="part-select">Loại Phần Thi *</label>
+                            <select id="part-select" onchange="handlePartChange()" required>
+                                <option value="1">Phần I: Trắc nghiệm 4 lựa chọn (A, B, C, D)</option>
+                                <option value="2">Phần II: Đúng / Sai (4 ý a, b, c, d)</option>
+                                <option value="3">Phần III: Trả lời ngắn</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label for="set-num">Bộ/Vị trí câu hỏi *</label>
+                            <input type="number" id="set-num" min="1" max="50" value="1" required>
+                        </div>
+                    </div>
+
+                    <!-- Ô NHẬP NHANH (SMART PASTE) -->
+                    <div class="input-group" style="background: #eef2ff; padding: 14px; border-radius: 12px; border: 1px solid #c7d2fe; margin-bottom: 20px;">
+                        <label style="color: #4338ca; font-weight: 700;">⚡ Nhập Nhanh Khối Văn Bản (Smart Paste)</label>
+                        <textarea id="smart-paste-input" rows="4" placeholder="Dán văn bản câu hỏi vào đây, ví dụ:
+Theo định nghĩa của Đại hội XI, tư tưởng Hồ Chí Minh là:
+A. Hệ thống các quan điểm về cách mạng thế giới.
+B. Hệ thống quan điểm toàn diện và sâu sắc về cách mạng Việt Nam.
+C. Hệ thống các quan điểm về xây dựng Đảng.
+D. Hệ thống quan điểm về phát triển kinh tế." oninput="parseSmartPaste()"></textarea>
+                        <small style="color: #6366f1; margin-top: 4px;">Tự động tách đề bài & 4 lựa chọn A, B, C, D xuống bên dưới.</small>
+                    </div>
+<div class="input-group">
+                                <label>Đáp án đúng *</label>
+                                <select id="correct-p1" onchange="renderPreview()">
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="D">D</option>
+                                </select>
+                            </div>
+                    <button type="submit" id="btn-submit" class="btn-primary-admin">💾 Lưu Vào Ngân Hàng Câu Hỏi</button>
+                    <div class="input-group">
+                        <label for="q-content">Nội dung câu hỏi / Đề bài * (Hỗ trợ công thức MathJax: $x^2 + y^2 = 1$)</label>
+                        <textarea id="q-content" rows="3" placeholder="Nhập nội dung câu hỏi..." required oninput="renderPreview()"></textarea>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="q-image">Đường dẫn hình ảnh (URL - nếu có)</label>
+                        <input type="url" id="q-image" placeholder="https://example.com/image.png" oninput="renderPreview()">
+                    </div>
+
+                    <!-- Khu vực tùy chỉnh theo Phần thi -->
+                    <div id="dynamic-inputs">
+                        <!-- Phần I Dynamic Input -->
+                        <div id="inputs-part-1" class="part-fields">
+                            <div class="options-grid">
+                                <div class="input-group"><label>Lựa chọn A</label><input type="text" id="opt-a" class="p1-opt" oninput="renderPreview()"></div>
+                                <div class="input-group"><label>Lựa chọn B</label><input type="text" id="opt-b" class="p1-opt" oninput="renderPreview()"></div>
+                                <div class="input-group"><label>Lựa chọn C</label><input type="text" id="opt-c" class="p1-opt" oninput="renderPreview()"></div>
+                                <div class="input-group"><label>Lựa chọn D</label><input type="text" id="opt-d" class="p1-opt" oninput="renderPreview()"></div>
+                            </div>
+                            
+                        </div>
+
+                        <!-- Phần II Dynamic Input -->
+                        <div id="inputs-part-2" class="part-fields" style="display: none;">
+                            <label class="input-group" style="font-weight:600; color:var(--text-muted); margin-bottom:8px;">Các ý khẳng định (Đọc thông tin đề bài bên trên):</label>
+                            <div class="tf-input-row"><input type="text" id="tf-a" placeholder="Ý a)..." oninput="renderPreview()"><select id="tf-ans-a" onchange="renderPreview()"><option value="D">Đúng</option><option value="S">Sai</option></select></div>
+                            <div class="tf-input-row"><input type="text" id="tf-b" placeholder="Ý b)..." oninput="renderPreview()"><select id="tf-ans-b" onchange="renderPreview()"><option value="D">Đúng</option><option value="S">Sai</option></select></div>
+                            <div class="tf-input-row"><input type="text" id="tf-c" placeholder="Ý c)..." oninput="renderPreview()"><select id="tf-ans-c" onchange="renderPreview()"><option value="D">Đúng</option><option value="S">Sai</option></select></div>
+                            <div class="tf-input-row"><input type="text" id="tf-d" placeholder="Ý d)..." oninput="renderPreview()"><select id="tf-ans-d" onchange="renderPreview()"><option value="D">Đúng</option><option value="S">Sai</option></select></div>
+                        </div>
+
+                        <!-- Phần III Dynamic Input -->
+                        <div id="inputs-part-3" class="part-fields" style="display: none;">
+                            <div class="input-group">
+                                <label for="correct-p3">Đáp án đúng (Số hoặc Chữ) *</label>
+                                <input type="text" id="correct-p3" placeholder="Ví dụ: 3.14 hoặc 1/2 hoặc Vô nghiệm" oninput="renderPreview()">
+                            </div>
+                        </div>
+                    </div>
+
+
+                </form>
+
+                <!-- Khối 2: Card Danh Sách Câu Hỏi Trong Ngân Hàng -->
+                <div class="admin-card">
+                    <div class="bank-header">
+                        <div class="bank-title-bar">
+                            <h3 style="margin:0;">📚 Các Câu Hỏi Đã Có</h3>
+                            <span id="bank-count-badge" style="font-size:0.8rem; background:#e2e8f0; color:#475569; padding:2px 8px; border-radius:12px; font-weight:600;">0 câu</span>
+                        </div>
+                        
+                        <!-- Bộ lọc & Tìm kiếm -->
+                        <div class="bank-controls">
+                            <input type="text" id="search-bank-input" class="bank-search-input" placeholder="🔍 Tìm nhanh nội dung..." oninput="filterAndRenderBank()">
+                            <select id="filter-admin-exam" class="bank-filter-select" onchange="loadBankList()">
+                                <option value="">-- Tất cả đợt thi --</option>
+                            </select>
+                            <button class="btn-primary-admin" onclick="generateAndExportRandomExamPDF()" style="margin-top: 0; background: #8b5cf6;">🎲 Tạo Đề Thi PDF (22 câu)</button>
+                        </div>
+                    </div>
+
+                    <div id="bank-list-loading" style="display:none; text-align:center; color:#64748b; padding:16px; font-size:0.9rem;">
+                        ⏳ Đang tải danh sách câu hỏi...
+                    </div>
+
+                    <div id="bank-list-container" class="bank-list-container">
+                        <!-- Danh sách render ở đây -->
+                    </div>
+                </div>
+            </div> <!-- Kết thúc cột trái -->
+
+            <!-- CỘT PHẢI: Khung Xem Trước -->
+            <div class="right-column">
+                <div class="admin-card preview-card">
+                    <h3>👁️ Xem Trước Hiển Thị (Live Preview)</h3>
+                    <div id="preview-box" class="question-item">
+                        <!-- Nội dung Render Xem Trước -->
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="admin.js"></script>
+    <script>
+    function convertDriveUrl(url) {
+        if (!url) return "";
+        const driveMatch = url.trim().match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]+)/i);
+        if (driveMatch && driveMatch[1]) {
+            return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
+        }
+        return url.trim();
+    }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</body>
+</html>

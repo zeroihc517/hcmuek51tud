@@ -1,0 +1,529 @@
+let examData = [];
+const userAnswers = {};
+const flaggedQuestions = new Set();
+let currentZoom = 1.0;
+let countdown;
+let violationCount = 0;
+let isExamActive = false;
+
+// ĐỢT THI CỐ ĐỊNH THEO YÊU CẦU
+const FIXED_EXAM_NAME = "TTHCM-Chuong1-Bo1";
+
+function convertDriveUrl(url) {
+    if (!url) return "";
+    const driveMatch = url.trim().match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]+)/i);
+    if (driveMatch && driveMatch[1]) {
+        return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
+    }
+    return url.trim();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('init-loading').classList.remove('active');
+    document.getElementById('login-screen').classList.add('active');
+    initSystem();
+    setupFullscreenAndAntiCheat();
+});
+
+function initSystem() {
+    const savedUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (savedUser) {
+        document.getElementById('login-fullname').value = savedUser.name || savedUser.fullName || '';
+        document.getElementById('login-sbd').value = savedUser.mssv || savedUser.sbd || '';
+    }
+
+    const loginForm = document.getElementById('login-form');
+    loginForm.onsubmit = (e) => {
+        e.preventDefault();
+        const fullName = document.getElementById('login-fullname').value.trim();
+        const sbd = document.getElementById('login-sbd').value.trim();
+        
+        localStorage.setItem('currentUser', JSON.stringify({
+            name: fullName, fullName: fullName, mssv: sbd, sbd: sbd, examName: FIXED_EXAM_NAME
+        }));
+
+        requestFullscreenMode();
+
+        document.getElementById('login-screen').classList.remove('active');
+        document.getElementById('init-loading').classList.add('active');
+
+        loadExamDataAndStart(FIXED_EXAM_NAME, fullName, sbd);
+    };
+
+    const container = document.getElementById('questions-container');
+    
+    // Lắng nghe chọn đáp án Radio
+    container.addEventListener('change', (e) => {
+        if (e.target.type === 'radio') {
+            userAnswers[e.target.name] = e.target.value;
+            localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
+            const match = e.target.name.match(/\d+/);
+            if (match) {
+                updateDotStatus(match[0]);
+            }
+            updateAnswerCount();
+        }
+    });
+
+    // Lắng nghe nhập đáp án ngắn
+    container.addEventListener('input', (e) => {
+        if (e.target.type === 'text') {
+            userAnswers[e.target.name] = e.target.value;
+            localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
+            const match = e.target.name.match(/\d+/);
+            if (match) {
+                updateDotStatus(match[0]);
+            }
+            updateAnswerCount();
+        }
+    });
+
+    const savedAnswers = JSON.parse(localStorage.getItem('userAnswers'));
+    const examTimeLeft = localStorage.getItem('examTimeLeft');
+    
+    if (savedUser && (examTimeLeft !== null || savedAnswers !== null)) {
+        if (savedAnswers) Object.assign(userAnswers, savedAnswers);
+        
+        const userName = savedUser.name || savedUser.fullName;
+        const userSbd = savedUser.mssv || savedUser.sbd;
+        
+        document.getElementById('login-screen').classList.remove('active');
+        document.getElementById('init-loading').classList.add('active');
+        
+        loadExamDataAndStart(FIXED_EXAM_NAME, userName, userSbd);
+    }
+}
+
+function loadExamDataAndStart(selectedExam, fullName, sbd) {
+    fetch(`${GOOGLE_SCRIPT_URL}?examName=${encodeURIComponent(selectedExam)}`)
+        .then(res => res.json())
+        .then(data => {
+            examData = data;
+            document.getElementById('init-loading').classList.remove('active');
+            showExamScreen(fullName, sbd);
+            renderAllQuestions();
+            buildNavDots();
+            
+            // Cập nhật trạng thái các ô số sau khi tải lại
+            for (let i = 1; i <= examData.length; i++) {
+                updateDotStatus(i);
+            }
+            updateAnswerCount();
+            isExamActive = true;
+        })
+        .catch(err => {
+            console.error("Lỗi tải đề thi:", err);
+            alert("Lỗi tải đề thi. Vui lòng kiểm tra lại kết nối mạng!");
+        });
+}
+
+// XÂY DỰNG THANH ĐIỀU HƯỚNG CÁC Ô SỐ
+function buildNavDots() {
+    const navDots = document.getElementById('navDots');
+    if (!navDots) return;
+    navDots.innerHTML = '';
+    
+    for (let i = 1; i <= examData.length; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.id = `dot-${i}`;
+        dot.innerText = i;
+        dot.onclick = () => scrollToQuestion(i);
+        navDots.appendChild(dot);
+    }
+}
+
+// CUỘN ĐẾN CÂU HỎI KHI BẤM VÀO Ô SỐ
+function scrollToQuestion(index) {
+    const targetEl = document.getElementById(`q-block-${index}`);
+    if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+// CẬP NHẬT TRẠNG THÁI Ô SỐ (ĐÃ LÀM / ĐÁNH DẤU CỜ)
+function updateDotStatus(qIndex) {
+    const dot = document.getElementById(`dot-${qIndex}`);
+    if (!dot) return;
+
+    // Kiểm tra câu đó đã được làm chưa
+    let isDone = false;
+    const qData = examData[qIndex - 1];
+    
+    if (qData) {
+        if (qData.part === 1 || qData.part === 3) {
+            if (userAnswers[`q${qIndex}`] && userAnswers[`q${qIndex}`].trim() !== '') isDone = true;
+        } else if (qData.part === 2) {
+            // Phần đúng sai cần kiểm tra ít nhất 1 ý đã chọn
+            if (['a','b','c','d'].some(sub => userAnswers[`q${qIndex}${sub}`])) isDone = true;
+        }
+    }
+
+    if (isDone) dot.classList.add('done');
+    else dot.classList.remove('done');
+
+    if (flaggedQuestions.has(parseInt(qIndex))) dot.classList.add('flagged');
+    else dot.classList.remove('flagged');
+}
+
+// TÍNH NĂNG ĐÁNH DẤU CỜ CHO CÂU HỎI HIỆN TẠI HOẶC TẤT CẢ
+function toggleFlag(qIndex) {
+    if (flaggedQuestions.has(qIndex)) {
+        flaggedQuestions.delete(qIndex);
+        document.getElementById(`q-block-${qIndex}`)?.classList.remove('flagged');
+    } else {
+        flaggedQuestions.add(qIndex);
+        document.getElementById(`q-block-${qIndex}`)?.classList.add('flagged');
+    }
+    updateDotStatus(qIndex);
+}
+
+// TÍNH NĂNG PHÓNG TO / THU NHỎ
+function changeZoom(delta) {
+    currentZoom += delta;
+    if (currentZoom < 0.8) currentZoom = 0.8;
+    if (currentZoom > 1.5) currentZoom = 1.5;
+    document.getElementById('main-container').style.setProperty('font-size', `${currentZoom}rem`, 'important');
+}
+
+function requestFullscreenMode() {
+    const docEl = document.documentElement;
+    if (docEl.requestFullscreen) docEl.requestFullscreen().catch(err => console.log(err));
+    else if (docEl.mozRequestFullScreen) docEl.mozRequestFullScreen();
+    else if (docEl.webkitRequestFullscreen) docEl.webkitRequestFullscreen();
+    else if (docEl.msRequestFullscreen) docEl.msRequestFullscreen();
+}
+
+function setupFullscreenAndAntiCheat() {
+    // 1. Xử lý thoát toàn màn hình hoặc chuyển tab
+    const handleFs = () => {
+        const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement;
+        if (!isFullscreen && isExamActive) triggerViolationWarning();
+    };
+    document.addEventListener('fullscreenchange', handleFs);
+    document.addEventListener('webkitfullscreenchange', handleFs);
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden && isExamActive) triggerViolationWarning();
+    });
+
+    // =========================================================
+    // 2. CHẶN CHỤP MÀN HÌNH, COPY, PASTE, CHUỘT PHẢI
+    // =========================================================
+
+    // Chặn chuột phải (Context Menu)
+    document.addEventListener('contextmenu', (e) => {
+        if (isExamActive) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Chặn bôi đen / chọn văn bản (Select Start)
+    document.addEventListener('selectstart', (e) => {
+        if (isExamActive) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Chặn Sao chép (Copy)
+    document.addEventListener('copy', (e) => {
+        if (isExamActive) {
+            e.preventDefault();
+            alert("⚠️ Hành vi Copy bị cấm trong lúc làm bài thi!");
+            triggerViolationWarning(); // Báo vi phạm nếu cố tình copy
+            return false;
+        }
+    });
+
+    // Chặn Dán (Paste) - trừ các ô nhập câu hỏi ngắn nếu cần
+    document.addEventListener('paste', (e) => {
+        if (isExamActive) {
+            e.preventDefault();
+            alert("⚠️ Hành vi Paste bị cấm trong lúc làm bài thi!");
+            return false;
+        }
+    });
+
+    // Chặn Cắt (Cut)
+    document.addEventListener('cut', (e) => {
+        if (isExamActive) {
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Chặn các phím tắt Chụp màn hình & Phím công cụ (PrintScreen, F12, Ctrl+C, Ctrl+V, Windows+Shift+S...)
+    document.addEventListener('keydown', (e) => {
+        if (!isExamActive) return;
+
+        // Chặn phím PrintScreen (Chụp màn hình)
+        if (e.key === 'PrintScreen' || e.keyCode === 44) {
+            e.preventDefault();
+            // Xóa bộ nhớ Clipboard tạm thời để tránh lưu ảnh màn hình
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText('');
+            }
+            alert("⚠️ Hành vi chụp màn hình bị cấm!");
+            triggerViolationWarning();
+            return false;
+        }
+
+        // Chặn Ctrl+C, Ctrl+V, Ctrl+U (Xem nguồn), Ctrl+S (Lưu), Ctrl+P (In bài)
+        if (e.ctrlKey || e.metaKey) {
+            const key = e.key.toLowerCase();
+            if (['c', 'v', 'u', 's', 'p', 'a', 'x'].includes(key)) {
+                e.preventDefault();
+                return false;
+            }
+        }
+
+        // Chặn phím tắt chụp màn hình Windows Snipping Tool (Windows + Shift + S)
+        if (e.key === 'S' && e.shiftKey && (e.metaKey || e.key === 'Meta')) {
+            e.preventDefault();
+            alert("⚠️ Hành vi chụp màn hình bị cấm!");
+            triggerViolationWarning();
+            return false;
+        }
+
+        // Chặn F12 (Developer Tools) và Ctrl+Shift+I / Ctrl+Shift+J
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key.toUpperCase()))) {
+            e.preventDefault();
+            return false;
+        }
+    });
+}
+function triggerViolationWarning() {
+    violationCount++;
+    document.getElementById('violation-count').innerText = violationCount;
+    document.getElementById('warning-modal').classList.add('active');
+}
+
+function forceFullscreenAndResume() {
+    requestFullscreenMode();
+    document.getElementById('warning-modal').classList.remove('active');
+}
+
+function showExamScreen(fullName, sbd) {
+    document.getElementById('login-screen').classList.remove('active');
+    document.getElementById('exam-screen').classList.add('active');
+
+    const now = new Date();
+    document.getElementById('display-fullname').innerText = fullName;
+    document.getElementById('display-sbd').innerText = sbd;
+    document.getElementById('display-date').innerText = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+
+    startTimer(90 * 60);
+}
+
+function startTimer(duration) {
+    const savedTime = localStorage.getItem('examTimeLeft');
+    let timeLeft = (savedTime !== null) ? parseInt(savedTime) : duration;
+    const timerElement = document.getElementById('timer');
+    
+    if (countdown) clearInterval(countdown);
+    
+    countdown = setInterval(() => {
+        let m = Math.floor(timeLeft / 60);
+        let s = timeLeft % 60;
+        timerElement.innerText = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        
+        localStorage.setItem('examTimeLeft', timeLeft);
+
+        if (timeLeft <= 0) { 
+            clearInterval(countdown); 
+            localStorage.removeItem('examTimeLeft');
+            alert("Đã hết thời gian làm bài! Hệ thống tự động thu bài.");
+            executeSubmission(); 
+        }
+        timeLeft--;
+    }, 1000);
+}
+
+// HIỂN THỊ CẢ 40 CÂU CÙNG NÚT CỜ TƯƠNG ỨNG MỖI CÂU
+function renderAllQuestions() {
+    const container = document.getElementById('questions-container');
+    container.innerHTML = '';
+
+    examData.forEach((qData, index) => {
+        const qIndex = index + 1;
+        const imgUrl = convertDriveUrl(qData.image);
+        const imgHtml = imgUrl ? `<img src="${imgUrl}" alt="Hình ảnh câu hỏi">` : '';
+        const isFlagged = flaggedQuestions.has(qIndex) ? 'flagged' : '';
+        
+        const itemDiv = document.createElement('div');
+        itemDiv.className = `question-item ${isFlagged}`;
+        itemDiv.id = `q-block-${qIndex}`;
+
+        let contentHtml = '';
+
+        if (qData.part === 1) {
+            contentHtml = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <p><strong>Câu ${qIndex}.</strong> ${qData.question}</p>
+                    <button class="icon-btn" onclick="toggleFlag(${qIndex})" title="Đánh dấu cờ">🚩 Cờ</button>
+                </div>
+                ${imgHtml}
+                <div class="options">
+                    ${['A', 'B', 'C', 'D'].map((opt, i) => {
+                        const isChecked = userAnswers[`q${qIndex}`] === opt ? 'checked' : '';
+                        return `<label><input type="radio" name="q${qIndex}" value="${opt}" ${isChecked}> ${opt}. ${qData.options[i]}</label>`;
+                    }).join('')}
+                </div>`;
+        } else if (qData.part === 2) {
+            contentHtml = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <p><strong>Câu ${qIndex}.</strong> ${qData.question}</p>
+                    <button class="icon-btn" onclick="toggleFlag(${qIndex})" title="Đánh dấu cờ">🚩 Cờ</button>
+                </div>
+                <div style="background:#f1f5f9; padding:12px; margin-bottom:12px; border-left:4px solid #1e3a8a; font-style:italic;">${qData.reading || ''}</div>
+                ${imgHtml}
+                <table class="tf-table">
+                    <tr><th>Lệnh/Ý hỏi</th><th>Đúng</th><th>Sai</th></tr>
+                    ${qData.subQuestions.map(sub => {
+                        const val = userAnswers[`q${qIndex}${sub.id}`];
+                        return `<tr>
+                            <td>${sub.id}) ${sub.text}</td>
+                            <td><input type="radio" name="q${qIndex}${sub.id}" value="D" ${val === 'D' ? 'checked' : ''}></td>
+                            <td><input type="radio" name="q${qIndex}${sub.id}" value="S" ${val === 'S' ? 'checked' : ''}></td>
+                        </tr>`;
+                    }).join('')}
+                </table>`;
+        } else {
+            const savedValue = userAnswers[`q${qIndex}`] || '';
+            contentHtml = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                    <p><strong>Câu ${qIndex}.</strong> ${qData.question}</p>
+                    <button class="icon-btn" onclick="toggleFlag(${qIndex})" title="Đánh dấu cờ">🚩 Cờ</button>
+                </div>
+                ${imgHtml} 
+                <input type="text" class="short-answer-input" name="q${qIndex}" value="${savedValue}" placeholder="Nhập đáp án...">`;
+        }
+
+        itemDiv.innerHTML = contentHtml;
+        container.appendChild(itemDiv);
+    });
+
+    if (window.MathJax) setTimeout(() => window.MathJax.typesetPromise(), 100);
+}
+
+function updateAnswerCount() {
+    const answeredSet = new Set();
+    Object.keys(userAnswers).forEach(key => {
+        const match = key.match(/\d+/);
+        if (match) answeredSet.add(match[0]);
+    });
+    document.getElementById('answered-count').innerText = `${answeredSet.size}/${examData.length}`;
+}
+
+function confirmSubmit() {
+    const answeredSet = new Set();
+    Object.keys(userAnswers).forEach(key => {
+        const match = key.match(/\d+/);
+        if (match) answeredSet.add(match[0]);
+    });
+    
+    document.getElementById('confirm-answered-count').innerText = `${answeredSet.size}/${examData.length}`;
+    document.getElementById('confirm-time-left').innerText = document.getElementById('timer').innerText;
+    document.getElementById('confirm-modal').classList.add('active');
+}
+
+function closeConfirmModal() {
+    document.getElementById('confirm-modal').classList.remove('active');
+}
+
+function calculateScore() {
+    let totalScore = 0;
+    examData.forEach((q, idx) => {
+        const qId = idx + 1;
+        if (q.part === 1) {
+            if (userAnswers[`q${qId}`] === q.correct) totalScore += 0.25;
+        } else if (q.part === 2) {
+            let correctSub = 0;
+            q.subQuestions.forEach(sub => {
+                if (userAnswers[`q${qId}${sub.id}`] === sub.correct) correctSub++;
+            });
+            if (correctSub === 4) totalScore += 1.0;
+            else if (correctSub === 3) totalScore += 0.5;
+            else if (correctSub === 2) totalScore += 0.25;
+            else if (correctSub === 1) totalScore += 0.1;
+        } else if (q.part === 3) {
+            let userVal = (userAnswers[`q${qId}`] || "").toString().trim().toLowerCase();
+            let correctVal = (q.correct || "").toString().trim().toLowerCase();
+
+            let userNumStr = userVal.replace(/,/g, '.');
+            let correctNumStr = correctVal.replace(/,/g, '.');
+
+            if (!isNaN(userNumStr) && !isNaN(correctNumStr) && userNumStr !== "" && correctNumStr !== "") {
+                if (parseFloat(userNumStr) === parseFloat(correctNumStr)) totalScore += 0.5;
+            } else {
+                if (userVal === correctVal) totalScore += 0.5;
+            }
+        }
+    });
+    return totalScore.toFixed(2);
+}
+
+function executeSubmission() {
+    isExamActive = false;
+    closeConfirmModal();
+    if (countdown) clearInterval(countdown);
+    
+    const finalScore = calculateScore();
+    const answeredSet = new Set();
+    Object.keys(userAnswers).forEach(key => {
+        const match = key.match(/\d+/);
+        if (match) answeredSet.add(match[0]);
+    });
+    const soCauDaLam = `${answeredSet.size}/${examData.length}`;
+
+    const savedUser = JSON.parse(localStorage.getItem('currentUser'));
+    const studentName = savedUser ? (savedUser.name || savedUser.fullName) : "Ẩn danh";
+    const studentMSSV = savedUser ? (savedUser.mssv || savedUser.sbd) : "000";
+
+    if (document.exitFullscreen) document.exitFullscreen().catch(err => console.log(err));
+
+    document.getElementById('exam-screen').classList.remove('active');
+    document.getElementById('result-screen').classList.add('active');
+    document.getElementById('res-done').innerText = soCauDaLam;
+    document.getElementById('res-score').innerText = `${finalScore}/10`;
+
+    localStorage.removeItem('userAnswers');
+    localStorage.removeItem('examTimeLeft');
+
+    const payload = {
+        username: studentMSSV,
+        studentName: studentName,
+        examName: FIXED_EXAM_NAME,
+        score: `${finalScore}/10`,
+        extraData: `${soCauDaLam} (Vi phạm: ${violationCount} lần)`,
+        userAnswersText: JSON.stringify({ 
+            answers: userAnswers, 
+            questions: examData 
+        })
+    };
+
+    fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: { "Content-Type": "text/plain;charset=utf-8" } 
+    }).catch(err => console.error("Lỗi đồng bộ bài làm:", err));
+}
+
+function finishExam() {
+    localStorage.removeItem('userAnswers');
+    localStorage.removeItem('examTimeLeft');
+    
+    for (let prop in userAnswers) delete userAnswers[prop];
+    flaggedQuestions.clear();
+    violationCount = 0;
+    
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) loginForm.reset();
+
+    document.getElementById('result-screen').classList.remove('active');
+    document.getElementById('login-screen').classList.add('active');
+    
+    initSystem(); 
+    window.scrollTo(0, 0);
+}

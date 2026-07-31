@@ -1,0 +1,468 @@
+/* =========================================================
+   GIAO DIỆN QUẢN LÝ NHẬP CÂU HỎI (ADMIN.CSS - MODERN DESIGN)
+   ========================================================= */
+
+:root {
+    --primary-indigo: #4f46e5;
+    --primary-hover: #4338ca;
+    --bg-slate: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #0f172a;
+    --text-muted: #64748b;
+    --border-subtle: #e2e8f0;
+}
+
+body {
+    background-color: #f1f5f9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: var(--text-main);
+}
+
+.admin-container {
+    max-width: 1600px;
+    margin: 24px auto;
+    padding: 0 20px;
+}
+
+/* =========================================================
+   1. HEADER & NAVIGATION
+   ========================================================= */
+.admin-header {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+    color: #ffffff;
+    padding: 20px 28px;
+    border-radius: 16px;
+    box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.25);
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-header h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+}
+
+.nav-links {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-link {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-link:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   2. LAYOUT MAIN GRID
+   ========================================================= */
+.admin-main {
+    display: grid;
+    /* Cột trái chiếm 55%, cột phải (Preview) chiếm 45% */
+    grid-template-columns: 55% 45%; 
+    gap: 24px;
+    align-items: start;
+}
+
+.admin-main > div, .admin-card {
+    min-width: 0; 
+}
+
+.admin-card {
+    background: var(--card-bg);
+    padding: 28px;
+    border-radius: 16px;
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+}
+
+.admin-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* =========================================================
+   3. FORM STYLES & INPUTS
+   ========================================================= */
+.form-row {
+    display: flex;
+    gap: 16px;
+}
+
+.form-row .input-group {
+    flex: 1;
+}
+
+.input-group {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.input-group > div {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+}
+
+.input-group > div input {
+    flex: 1;
+    min-width: 0;
+}
+
+.input-group input, 
+.input-group select, 
+.input-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--border-subtle);
+    background-color: var(--bg-slate);
+    border-radius: 10px;
+    font-size: 0.92rem;
+    color: var(--text-main);
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.input-group input:focus, 
+.input-group select:focus, 
+.input-group textarea:focus {
+    border-color: var(--primary-indigo);
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+/* Lưới lựa chọn trắc nghiệm (Phần 1) */
+.options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 6px;
+    row-gap: 6px;
+}
+
+.options-grid.layout-1-row .opt-item { flex: 0 0 25%; max-width: 25%; }
+.options-grid.layout-2-rows .opt-item { flex: 0 0 50%; max-width: 50%; }
+.options-grid.layout-4-rows .opt-item { flex: 0 0 100%; max-width: 100%; }
+
+.opt-item {
+    display: flex;
+    align-items: baseline;
+    padding-right: 8px;
+    box-sizing: border-box;
+    font-size: 11pt;
+    line-height: 1.3;
+    white-space: nowrap; 
+}
+
+.opt-label {
+    font-weight: bold;
+    margin-right: 5px;
+    white-space: nowrap;
+}
+
+/* Lưới True/False (Phần 2) */
+.tf-input-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.tf-input-row input {
+    flex: 1;
+}
+
+.tf-input-row select {
+    width: 100px;
+    font-weight: 600;
+}
+
+/* Button Primary */
+.btn-primary-admin {
+    width: 100%;
+    background: #10b981;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+    transition: all 0.2s ease;
+}
+
+.btn-primary-admin:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+}
+
+/* =========================================================
+   4. LIVE PREVIEW SECTION (GIAO DIỆN BO GÓC SẠCH SẼ NHƯ CŨ)
+   ========================================================= */
+.preview-card {
+    position: sticky;
+    top: 24px;
+    background: var(--card-bg);
+    padding: 28px;
+    border-radius: 16px;
+    border: 1px solid var(--border-subtle);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+}
+
+.preview-card h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: none; 
+}
+
+#preview-box {
+    background: #f8fafc; 
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px; 
+    padding: 20px;
+    min-height: 200px;
+    box-shadow: none; 
+    font-family: inherit; 
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
+
+/* =========================================================
+   5. DANH SÁCH NGÂN HÀNG CÂU HỎI ĐÃ CÓ
+   ========================================================= */
+.bank-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.bank-title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bank-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.bank-search-input, .bank-filter-select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    font-size: 0.88rem;
+    background: var(--bg-slate);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.bank-search-input:focus, .bank-filter-select:focus {
+    border-color: var(--primary-indigo);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.bank-list-container {
+    max-height: 600px; 
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px; 
+    padding-right: 4px;
+}
+
+/* Scrollbar */
+.bank-list-container::-webkit-scrollbar { width: 6px; }
+.bank-list-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+/* Item Câu Hỏi */
+.bank-item {
+    align-items: flex-start;
+    padding: 16px;
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    border-left: 4px solid var(--primary-indigo);
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    transition: all 0.2s ease;
+}
+
+.bank-item:hover {
+    border-color: var(--primary-indigo);
+    box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.1);
+    transform: translateY(-1px);
+}
+
+.bank-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    flex: 1;
+}
+
+.bank-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+}
+
+.badge-exam { background: #e0e7ff; color: #3730a3; }
+.badge-part { background: #f1f5f9; color: #475569; }
+.badge-set  { background: #fef3c7; color: #92400e; }
+
+.bank-item-content {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-top: 8px;
+    color: #334155;
+    font-weight: 500;
+}
+
+/* Nút thao tác của câu hỏi */
+.bank-item-actions {
+    display: flex;
+    flex-direction: column; 
+    gap: 8px;
+    margin-left: auto;
+}
+
+.btn-edit-q {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.2);
+}
+
+.btn-edit-q:hover {
+    opacity: 0.9;
+    transform: scale(1.03);
+}
+
+.btn-print-q {
+    background: linear-gradient(135deg, #0284c7, #0369a1);
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.2);
+}
+
+.btn-print-q:hover {
+    opacity: 0.9;
+    transform: scale(1.03);
+}
+
+/* =========================================================
+   6. RESPONSIVE DESIGN
+   ========================================================= */
+@media (max-width: 1024px) {
+    .admin-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .preview-card {
+        position: static;
+    }
+}
+
+/* =========================================================
+   7. STYLES CƠ BẢN DÀNH CHO XUẤT PDF / IN ẤN
+   ========================================================= */
+@page { size: A4; margin: 12mm 15mm; } 
+
+.header { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1.5px solid #000; padding-bottom: 6px; }
+.header-left, .header-right { width: 48%; text-align: center; }
+.header-title { font-size: 10pt; font-weight: bold; text-transform: uppercase; margin: 0; }
+.header-exam { font-size: 11pt; font-weight: bold; margin-top: 3px; }
+.exam-code { font-weight: bold; border: 1px solid #000; display: inline-block; padding: 1px 6px; margin-top: 3px; font-size: 9.5pt; }
+
+.student-info { margin-bottom: 12px; font-size: 10pt; }
+.part-title { font-weight: bold; margin-top: 10px; margin-bottom: 6px; font-size: 10.5pt; text-transform: uppercase; background: #eafeea; padding: 3px 6px; border-left: 3px solid #10b981; }
+
+.q-block { margin-top: 8px; page-break-inside: avoid; }
+
+.opt-table { width: 100%; border-collapse: collapse; margin-top: 3px; margin-bottom: 5px; }
+.opt-table td { padding: 2px 4px; vertical-align: top; font-size: 10.5pt; }
+
+img { max-width: 45%; max-height: 160px; display: block; margin: 6px auto; }
+
+.tf-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+.tf-table th, .tf-table td { border: 1px solid #000; padding: 4px; text-align: left; font-size: 10pt; }
+.tf-table th { background: #f8fafc; text-align: center; }
+.short-ans { display: inline-block; width: 100%; border-bottom: 1px dotted #000; margin-top: 10px; height: 18px; }

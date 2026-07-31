@@ -1,0 +1,268 @@
+const SPREADSHEET_ID = '11ajSd9o3f1ak1qZTht3-MB5RKz-97fhAkX8nPw6B1aA'; 
+
+// 1. HÀM GET: Trả về dữ liệu đề thi dưới dạng JSON cho GitHub
+function doGet(e) {
+  try {
+    let action = e && e.parameter ? e.parameter.action : "";
+    let examName = e && e.parameter ? e.parameter.examName : "";
+    
+    // A. Lấy danh sách đợt thi cho dropdown
+    if (action === "getExamList") {
+      let examList = getExamList();
+      return ContentService.createTextOutput(JSON.stringify(examList))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // B. Lấy danh sách kết quả bài làm
+    if (action === "getResults") {
+      let resultsData = getResults();
+      return ContentService.createTextOutput(JSON.stringify(resultsData))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // C. Admin lấy ngân hàng câu hỏi (có lọc theo đợt thi)
+    if (action === "getAllBank") {
+      let bankData = getAllBankQuestions(examName);
+      return ContentService.createTextOutput(JSON.stringify(bankData))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // D. Mặc định: Thí sinh lấy đề thi theo Đợt thi
+    let examData = getQuestions(examName);
+    return ContentService.createTextOutput(JSON.stringify(examData))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ error: error.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
+  try {
+    let payload = JSON.parse(e.postData.contents);
+    
+    if (payload.action === "addQuestion") {
+      saveNewQuestion(payload);
+      return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    } 
+    
+    if (payload.action === "updateQuestion") {
+      updateQuestion(payload);
+      return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    submitExamV2(payload);
+    return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+      
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: error.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+function getExamList() {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Bank');
+  const data = sheet.getDataRange().getValues();
+  data.shift();
+  let list = [];
+  data.forEach(row => {
+    if (row[0] && !list.includes(row[0].toString().trim())) {
+      list.push(row[0].toString().trim());
+    }
+  });
+  return list;
+}
+// HÀM TÁCH VÀ TỰ ĐỘNG CHUYỂN ĐỔI LINK GOOGLE DRIVE THÀNH LINK ẢNH TRỰC TIẾP
+function extractImage(text) {
+  let imgUrl = "";
+  let cleanText = text || "";
+  if (text) {
+    const imgRegex = /\[img\](.*?)\[\/img\]/i;
+    const match = text.toString().match(imgRegex);
+    if (match) {
+      let rawUrl = match[1].trim();
+      
+      // Kiểm tra và chuyển đổi link Google Drive nếu có
+      const driveMatch = rawUrl.match(/(?:drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?id=)|lh3\.googleusercontent\.com\/d\/)([a-zA-Z0-9_-]+)/i);
+      if (driveMatch && driveMatch[1]) {
+        // Biến ID ảnh thành link trực tiếp
+        imgUrl = `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
+      } else {
+        imgUrl = rawUrl;
+      }
+      
+      cleanText = text.toString().replace(imgRegex, '').trim();
+    }
+  }
+  return { cleanText, imgUrl };
+}
+// 3. Hàm lấy câu hỏi và format lại cho đúng chuẩn giao diện
+// 3. Hàm lấy câu hỏi 40 câu trắc nghiệm ABCD (Bỏ Đúng/Sai & Trả lời ngắn)
+function getQuestions(examName) {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Bank');
+  const data = sheet.getDataRange().getValues();
+  data.shift(); // Bỏ hàng tiêu đề
+  
+  let rawList = [];
+  let setGrouped = {}; // Nhóm theo Bộ
+
+  data.forEach((row, index) => {
+    let rowExam = row[0] ? row[0].toString().trim() : "";
+    
+    // Lọc theo đợt thi và chỉ lấy Phần 1 (Trắc nghiệm ABCD)
+    if ((!examName || rowExam === examName.trim()) && (row[1] == 1 || row[1] == "1")) {
+      let setNum = parseInt(row[2]) || 0; // Bộ câu hỏi (Nếu 0 là trộn lộn xộn)
+      let parsed = extractImage(row[3]);   // Tách ảnh và nội dung câu hỏi
+      
+      let qObj = {
+        rowIndex: index + 2,
+        part: 1,
+        setNum: setNum,
+        question: parsed.cleanText,
+        image: parsed.imgUrl,
+        options: [row[4], row[5], row[6], row[7]], // Option A, B, C, D
+        correct: row[8] ? row[8].toString().trim().toUpperCase() : ""
+      };
+
+      rawList.push(qObj);
+
+      if (setNum > 0) {
+        if (!setGrouped[setNum]) setGrouped[setNum] = [];
+        setGrouped[setNum].push(qObj);
+      }
+    }
+  });
+
+  const pickRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+  const shuffleArray = (arr) => arr.sort(() => Math.random() - 0.5);
+
+  let finalQuestions = [];
+
+  // TRƯỜNG HỢP 1: Lấy theo từng Bộ (1, 2, 3...)
+  let hasSetNumbers = Object.keys(setGrouped).length > 0;
+  
+  if (hasSetNumbers) {
+    // Lấy mỗi bộ đúng 1 câu (Tối đa 40 bộ)
+    for (let setIdx = 1; setIdx <= 40; setIdx++) {
+      if (setGrouped[setIdx] && setGrouped[setIdx].length > 0) {
+        finalQuestions.push(pickRandom(setGrouped[setIdx]));
+      }
+    }
+  } 
+  
+  // TRƯỜNG HỢP 2: Nếu để Bộ 0 (hoặc không đủ 40 câu từ các Bộ), xáo trộn toàn bộ ngân hàng lấy 40 câu
+  if (finalQuestions.length === 0) {
+    let shuffled = shuffleArray([...rawList]);
+    finalQuestions = shuffled.slice(0, 40); // Lấy tối đa 40 câu lộn xộn
+  }
+
+  // Đánh lại ID câu hỏi từ 1 đến N cho đề thi
+  return finalQuestions.map((q, idx) => {
+    q.id = idx + 1;
+    return q;
+  });
+}
+
+// 4. Lưu kết quả bài làm theo form giao diện mới nhất
+function submitExamV2(payload) {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Results');
+  sheet.appendRow([
+    new Date(), payload.studentName, payload.username, payload.examName,
+    payload.score, payload.extraData, payload.userAnswersText
+  ]);
+  return true;
+}
+
+function saveNewQuestion(payload) {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Bank');
+  let contentWithImg = payload.content;
+  if (payload.imageUrl && payload.imageUrl.trim() !== '') {
+    contentWithImg = `[img]${payload.imageUrl.trim()}[/img] ${payload.content}`;
+  }
+
+  sheet.appendRow([
+    payload.examName, payload.part, payload.setNum, contentWithImg,
+    payload.optA || '', payload.optB || '', payload.optC || '', payload.optD || '',
+    payload.correct || ''
+  ]);
+  return true;
+}
+// CẬP NHẬT LẠI HÀM getResults TRONG CODE.GS
+function getResults() {
+  const sheetResults = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Results');
+  if (!sheetResults) return { results: [], bank: [] };
+  
+  const dataResults = sheetResults.getDataRange().getValues();
+  if (dataResults.length <= 1) return { results: [], bank: [] };
+  dataResults.shift();
+  
+  let resultsList = dataResults.map((row, index) => ({
+    id: index + 1,
+    timestamp: row[0] ? Utilities.formatDate(new Date(row[0]), "GMT+7", "dd/MM/yyyy HH:mm:ss") : "",
+    studentName: row[1] || "", username: row[2] || "", examName: row[3] || "",
+    score: row[4] || "", extraData: row[5] || "", userAnswersText: row[6] || "{}"
+  }));
+
+  const sheetBank = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Bank');
+  const dataBank = sheetBank.getDataRange().getValues();
+  dataBank.shift();
+
+  let bankList = dataBank.map(row => ({
+    examName: row[0], part: row[1], setNum: row[2], content: row[3],
+    optA: row[4], optB: row[5], optC: row[6], optD: row[7],
+    correct: row[8] ? row[8].toString().trim() : ""
+  }));
+
+  return { results: resultsList, bank: bankList };
+}
+
+function getAllBankQuestions(filterExam) {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Bank');
+  const data = sheet.getDataRange().getValues();
+  data.shift();
+
+  let list = [];
+  data.forEach((row, index) => {
+    let rowExam = row[0] ? row[0].toString().trim() : "";
+    if (!filterExam || rowExam === filterExam.trim()) {
+      let text = row[3] ? row[3].toString() : "";
+      let imgUrl = "", cleanText = text;
+      const match = text.match(/\[img\](.*?)\[\/img\]/i);
+      if (match) {
+        imgUrl = match[1];
+        cleanText = text.replace(/\[img\](.*?)\[\/img\]/i, '').trim();
+      }
+
+      list.push({
+        rowIndex: index + 2,
+        examName: row[0],
+        part: row[1],
+        setNum: row[2],
+        content: cleanText,
+        imageUrl: imgUrl,
+        optA: row[4] || '', optB: row[5] || '', optC: row[6] || '', optD: row[7] || '',
+        correct: row[8] ? row[8].toString().trim() : ''
+      });
+    }
+  });
+  return list;
+}
+
+// 4. HÀM CẬP NHẬT CÂU HỎI THEO DÒNG SHEET
+function updateQuestion(payload) {
+  const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('Bank');
+  let contentWithImg = payload.content;
+  if (payload.imageUrl && payload.imageUrl.trim() !== '') {
+    contentWithImg = `[img]${payload.imageUrl.trim()}[/img] ${payload.content}`;
+  }
+
+  sheet.getRange(payload.rowIndex, 1, 1, 9).setValues([[
+    payload.examName, payload.part, payload.setNum, contentWithImg,
+    payload.optA || '', payload.optB || '', payload.optC || '', payload.optD || '',
+    payload.correct || ''
+  ]]);
+  return true;
+}
