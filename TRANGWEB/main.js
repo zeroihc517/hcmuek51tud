@@ -1436,19 +1436,32 @@ const groups = [
         { type: 'cn_tc', title: 'Chuyên ngành - Tự chọn', icon: 'fa-book-open', color: 'info' },
         { type: 'mc_bb', title: 'Môn chung - Bắt buộc', icon: 'fa-layer-group', color: 'success' },
         { type: 'mc_tc', title: 'Môn chung - Tự chọn', icon: 'fa-layer-group', color: 'warning' },
-        { type: 'gdtc_bb', title: 'GDTC & GDQP - Bắt buộc', icon: 'fa-person-running', color: 'secondary' },
-        { type: 'gdtc_tc', title: 'GDTC & GDQP - Tự chọn', icon: 'fa-person-running', color: 'secondary' },
-        // Các mục cũ để tương thích với dữ liệu đã lưu
+        
+        // GỘP CHUNG TOÀN BỘ GDTC & GDQP VÀO NĂM MỘT NHÓM
+        { 
+            type: 'gdtc_group', 
+            title: 'Giáo dục Thể chất & Giáo dục Quốc phòng-An ninh', 
+            icon: 'fa-person-running', 
+            color: 'secondary',
+            match: (t) => t.startsWith('gdtc_') || t === 'ngoai_le'
+        },
+        
+        // Các mục cũ hệ thống
         { type: 'chuyen_nganh', title: 'Chuyên ngành (Hệ thống cũ)', icon: 'fa-book-open', color: 'primary' },
-        { type: 'mon_chung', title: 'Môn chung (Hệ thống cũ)', icon: 'fa-layer-group', color: 'success' },
-        { type: 'ngoai_le', title: 'GDTC & GDQP (Hệ thống cũ)', icon: 'fa-person-running', color: 'secondary' }
+        { type: 'mon_chung', title: 'Môn chung (Hệ thống cũ)', icon: 'fa-layer-group', color: 'success' }
     ];
 
-    let html = '<div class="table-responsive border-0"><table class="gpa-main-table w-100" style="border-collapse: collapse; background: #fff;">';
+let html = '<div class="table-responsive border-0"><table class="gpa-main-table w-100" style="border-collapse: collapse; background: #fff;">';
     let globalIndex = 1;
     
     groups.forEach(group => {
-        let coursesInGroup = displayDataset.filter(c => c.type === group.type);
+        // Kiểm tra môn thuộc nhóm (hỗ trợ hàm match gộp GDTC)
+        let coursesInGroup = displayDataset.filter(c => {
+            if (typeof group.match === 'function') {
+                return group.match(c.type || '');
+            }
+            return c.type === group.type;
+        });
         
         if (coursesInGroup.length > 0) {
             html += `
