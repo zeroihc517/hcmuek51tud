@@ -1080,8 +1080,8 @@ resetNavActive = function() {
 };
 
 function convertGradeToSystem(score10, type) {
-    // FIX: Làm tròn chính xác đến 1 chữ số thập phân trước khi đối chiếu
-   let roundedScore = parseFloat((Math.round((score10 + Number.EPSILON) * 100) / 100).toFixed(1));
+    // Làm tròn chính xác đến 1 chữ số thập phân trước khi đối chiếu
+    let roundedScore = parseFloat((Math.round((score10 + Number.EPSILON) * 100) / 100).toFixed(1));
     
     let scale4 = 0, letter = "F";
     if (roundedScore >= 8.5) { scale4 = 4.0; letter = "A"; }
@@ -1094,19 +1094,23 @@ function convertGradeToSystem(score10, type) {
     else if (roundedScore >= 3.0) { scale4 = 0.0; letter = "F+"; }
     else { scale4 = 0.0; letter = "F"; }
 
-    // Mức qua môn chuẩn (>= 4.0 là D). Các môn ngoại lệ có thể yêu cầu >= 5.0
+    // SỬA LỖI: Đồng bộ hóa biến type và t
+    let t = type || ''; 
     let passed = false;
+    
+    // Mức qua môn chuẩn
     if (t.startsWith('cn_') || t === 'chuyen_nganh') {
         passed = roundedScore >= 5.5; 
     } else if (t.startsWith('mc_') || t === 'mon_chung') {
         passed = roundedScore >= 4.0; 
     } else if (t.startsWith('gdtc_') || t === 'ngoai_le') {
         passed = roundedScore >= 5.0; 
+    } else {
+        passed = roundedScore >= 4.0; // Mặc định nếu không thuộc các loại trên
     }
 
     return { scale4, letter, passed, roundedScore };
 }
-
 // 1. HÀM TÍNH TOÁN ĐIỂM SỐ ĐỘC LẬP
 function computeStatsForDataset(dataset) {
     let totalAttemptedCredits = 0; 
@@ -1135,14 +1139,15 @@ course.columns.forEach(col => {
         percentVal = parseFloat(col.percent) || 0;
     }
 
-    if(isNaN(val) || col['score' + i] === '') { 
-        hasAllScores = false; 
+   if(isNaN(val) || col['score' + i] === '') { 
+        hasAllScores = false; // Chỉ cần 1 ô điểm trống là bỏ qua không tính môn này
     } else {
         currentScore10 += (val * percentVal) / 100;
     }
 });
 
-            if(hasAllScores && hasAnyColumn) {
+           if(hasAllScores && hasAnyColumn) {
+                // Sửa chữ 't' thành 'type' để tránh lỗi ReferenceError
                 let conv = convertGradeToSystem(currentScore10, course.type);
                 if(conv.scale4 > maxScore4 || (conv.scale4 === maxScore4 && conv.roundedScore > maxScore10)) {
                     maxScore4 = conv.scale4; 
