@@ -633,15 +633,27 @@
                         <label class="form-label fw-bold">Tín chỉ</label>
                         <input type="number" id="gpaCourseCredits" class="form-control" min="0" value="3">
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label fw-bold">Phân loại</label>
-                        <select id="gpaCourseType" class="form-select">
-                            <option value="chuyen_nganh">Học phần chuyên ngành</option>
-                            <option value="mon_chung">Môn chung</option>
-                            <option value="ngoai_le">GDTC + GDQP (Không tính GPA)</option>
-                        </select>
-                    </div>
-                </div>
+<div class="col-md-3">
+    <label class="form-label fw-bold">Phân loại</label>
+    <select id="gpaCourseType" class="form-select" onchange="toggleElectiveNote()">
+        <option value="cn_bb">Chuyên ngành - Bắt buộc</option>
+        <option value="cn_tc">Chuyên ngành - Tự chọn</option>
+        <option value="mc_bb">Môn chung - Bắt buộc</option>
+        <option value="mc_tc">Môn chung - Tự chọn</option>
+        <option value="gdtc_bb">GDTC/GDQP - Bắt buộc</option>
+        <option value="gdtc_tc">GDTC/GDQP - Tự chọn</option>
+        <!-- Giữ các tùy chọn cũ (ẩn đi) để không bị lỗi dữ liệu đã lưu trước đây -->
+        <option value="chuyen_nganh" style="display: none;">Chuyên ngành (Cũ)</option>
+        <option value="mon_chung" style="display: none;">Môn chung (Cũ)</option>
+        <option value="ngoai_le" style="display: none;">Ngoại lệ (Cũ)</option>
+    </select>
+</div>
+
+<!-- Khối nhập Ghi chú nhóm môn Tự chọn (Ẩn mặc định) -->
+<div class="col-md-12 d-none" id="gpaElectiveNoteGroup">
+    <label class="form-label fw-bold text-info"><i class="fa-solid fa-layer-group me-1"></i> Nhóm môn Tự chọn / Ghi chú</label>
+    <input type="text" id="gpaCourseNote" class="form-control border-info bg-light" placeholder="VD: Nhóm kỹ năng mềm, Định hướng ứng dụng...">
+</div>                </div>
                 
                 <div class="row g-3 mb-3" id="gpaMajorSelectionGroup" style="display: none;">
                     <div class="col-12">
@@ -1935,7 +1947,8 @@
             </div>
         </div>
     </div>
-</div>    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
 <script src="TRANGWEB/config.js"></script>

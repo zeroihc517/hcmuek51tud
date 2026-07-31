@@ -1096,11 +1096,11 @@ function convertGradeToSystem(score10, type) {
 
     // Mức qua môn chuẩn (>= 4.0 là D). Các môn ngoại lệ có thể yêu cầu >= 5.0
     let passed = false;
-    if (type === 'chuyen_nganh') { 
+    if (t.startsWith('cn_') || t === 'chuyen_nganh') {
         passed = roundedScore >= 5.5; 
-    } else if (type === 'mon_chung') {
+    } else if (t.startsWith('mc_') || t === 'mon_chung') {
         passed = roundedScore >= 4.0; 
-    } else if (type === 'ngoai_le') { 
+    } else if (t.startsWith('gdtc_') || t === 'ngoai_le') {
         passed = roundedScore >= 5.0; 
     }
 
@@ -1169,7 +1169,7 @@ course.columns.forEach(col => {
         course.bestAttempt = maxScore10 >= 0 ? bestAttempt : 1;
         let creds = parseInt(course.credits) || 0;
 
-        if (course.type !== 'ngoai_le') {
+       if (course.type !== 'ngoai_le' && !(course.type || '').startsWith('gdtc_')) {
             if (maxScore10 >= 0) { 
                 // Cộng dồn để chia trung bình GPA (Bao gồm cả môn Rớt)
                 totalAttemptedCredits += creds; 
@@ -1426,10 +1426,17 @@ function renderGPAList(syncToServer = true) {
     }
 
     // (Phần vẽ bảng chi tiết ở dưới giữ nguyên như cũ của bạn)
-    const groups = [
-        { type: 'chuyen_nganh', title: 'Học phần Chuyên ngành', icon: 'fa-book-open', color: 'primary' },
-        { type: 'mon_chung', title: 'Môn học Chung', icon: 'fa-layer-group', color: 'success' },
-        { type: 'ngoai_le', title: 'GDTC & GDQP (Không tính GPA)', icon: 'fa-person-running', color: 'secondary' }
+const groups = [
+        { type: 'cn_bb', title: 'Chuyên ngành - Bắt buộc', icon: 'fa-book-open', color: 'primary' },
+        { type: 'cn_tc', title: 'Chuyên ngành - Tự chọn', icon: 'fa-book-open', color: 'info' },
+        { type: 'mc_bb', title: 'Môn chung - Bắt buộc', icon: 'fa-layer-group', color: 'success' },
+        { type: 'mc_tc', title: 'Môn chung - Tự chọn', icon: 'fa-layer-group', color: 'warning' },
+        { type: 'gdtc_bb', title: 'GDTC & GDQP - Bắt buộc', icon: 'fa-person-running', color: 'secondary' },
+        { type: 'gdtc_tc', title: 'GDTC & GDQP - Tự chọn', icon: 'fa-person-running', color: 'secondary' },
+        // Các mục cũ để tương thích với dữ liệu đã lưu
+        { type: 'chuyen_nganh', title: 'Chuyên ngành (Hệ thống cũ)', icon: 'fa-book-open', color: 'primary' },
+        { type: 'mon_chung', title: 'Môn chung (Hệ thống cũ)', icon: 'fa-layer-group', color: 'success' },
+        { type: 'ngoai_le', title: 'GDTC & GDQP (Hệ thống cũ)', icon: 'fa-person-running', color: 'secondary' }
     ];
 
     let html = '<div class="table-responsive border-0"><table class="gpa-main-table w-100" style="border-collapse: collapse; background: #fff;">';
@@ -1510,13 +1517,16 @@ c.columns.forEach((col, i) => {
                     if (cMajors.includes('2')) badgeHtml += `<span class="badge bg-success ms-2 shadow-sm" style="font-size: 10px; opacity: 0.9;">${gpaConfig.name2}</span>`;
                 }
 
-                html += `
-                    <tr class="main-row" data-bs-toggle="collapse" data-bs-target="#detail-${c.id}" onclick="$(this).find('.btn-expand').toggleClass('open')" style="border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
-                        <td class="text-center text-muted fw-bold" style="padding: 18px 10px;">${globalIndex++}</td>
-                        <td class="text-center fw-bold text-secondary" style="padding: 18px 10px;">${courseCode}</td>
-                        <td class="text-start fw-bold" style="padding: 18px 10px; color: #334155;">
-                            ${c.name} ${badgeHtml}
-                        </td>
+               let electiveBadge = ((c.type || '').endsWith('_tc') && c.note) ? `<br><span class="badge bg-info text-dark mt-2 shadow-sm border border-info" style="font-size: 11px;"><i class="fa-solid fa-tag me-1"></i> Nhóm: ${c.note}</span>` : '';
+
+html += `
+    <tr class="main-row" data-bs-toggle="collapse" data-bs-target="#detail-${c.id}" onclick="$(this).find('.btn-expand').toggleClass('open')" style="border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+        <td class="text-center text-muted fw-bold" style="padding: 18px 10px;">${globalIndex++}</td>
+        <td class="text-center fw-bold text-secondary" style="padding: 18px 10px;">${courseCode}</td>
+        <td class="text-start fw-bold" style="padding: 18px 10px; color: #334155;">
+            ${c.name} ${badgeHtml}
+            ${electiveBadge} <!-- Chèn huy hiệu ghi chú vào dưới tên môn -->
+        </td>
                         <td class="text-center" style="padding: 18px 10px;">${c.credits}</td>
                         <td class="text-center text-dark fw-bold" style="padding: 18px 10px;">${c.finalScore10}</td>
                         <td class="text-center text-primary fw-bold" style="padding: 18px 10px;">${c.finalScore4}</td>
@@ -1620,9 +1630,21 @@ function addGPAColumnInput(name = '', p1 = '', p2 = '', p3 = '', s1 = '', s2 = '
     </div>`;
     $('#gpaColumnsContainer').append(html);
 }
+function toggleElectiveNote() {
+    let type = $('#gpaCourseType').val() || '';
+    // Bất kỳ môn nào có hậu tố _tc (tự chọn) thì mở ô ghi chú
+    if (type.endsWith('_tc')) {
+        $('#gpaElectiveNoteGroup').removeClass('d-none');
+    } else {
+        $('#gpaElectiveNoteGroup').addClass('d-none');
+    }
+}
+
+// 1. Cập nhật hàm mở Modal thêm mới
 function openAddCourseGPAModal() {
     $('#gpaEditId').val(''); $('#gpaCourseCode').val(''); $('#gpaCourseName').val('');
-    $('#gpaCourseCredits').val(3); $('#gpaCourseType').val('chuyen_nganh');
+    $('#gpaCourseCredits').val(3); $('#gpaCourseType').val('bat_buoc');
+    $('#gpaCourseNote').val(''); // Reset ghi chú
     $('#gpaIsRetake').prop('checked', false);
     
     $('#gpaBelongsToMajor1').prop('checked', true).prop('disabled', false);
@@ -1632,7 +1654,8 @@ function openAddCourseGPAModal() {
     addGPAColumnInput();
     $('#gpaPercentWarning').addClass('d-none'); 
     
-    handleGpaCourseTypeChange(); // Thêm dòng này
+    handleGpaCourseTypeChange();
+    toggleElectiveNote(); // Chạy kiểm tra ẩn/hiện
     $('#gpaCourseModal').modal('show');
 }
 
@@ -1640,6 +1663,7 @@ function editGPACourse(id) {
     let course = myGPADataset.find(c => c.id === id); if(!course) return;
     $('#gpaEditId').val(course.id); $('#gpaCourseCode').val(course.code || ''); $('#gpaCourseName').val(course.name);
     $('#gpaCourseCredits').val(course.credits); $('#gpaCourseType').val(course.type);
+    $('#gpaCourseNote').val(course.note || ''); // Đổ dữ liệu ghi chú cũ vào form
     
     let courseMajors = course.majors || ['1']; 
     $('#gpaBelongsToMajor1').prop('checked', courseMajors.includes('1')).prop('disabled', false);
@@ -1649,28 +1673,16 @@ function editGPACourse(id) {
     $('#gpaIsRetake').prop('checked', hasRetake);
     
     $('#gpaColumnsContainer').html('');
-// Tìm dòng này trong hàm editGPACourse(id):
-// course.columns.forEach(col => { addGPAColumnInput(col.name, col.percent, col.score1 || '', col.score2 || '', col.score3 || ''); });
-
-// VÀ THAY THẾ BẰNG ĐOẠN NÀY:
-course.columns.forEach(col => { 
-    // Lấy phần trăm mới, nếu là dữ liệu cũ thì dùng lại 'col.percent' mặc định
-    let p1 = col.percent1 !== undefined ? col.percent1 : (col.percent || '');
-    let p2 = col.percent2 !== undefined ? col.percent2 : (col.percent || '');
-    let p3 = col.percent3 !== undefined ? col.percent3 : (col.percent || '');
-    
-    // Truyền tham số đúng thứ tự: Tên, %L1, %L2, %L3, Điểm L1, Điểm L2, Điểm L3
-    addGPAColumnInput(
-        col.name, 
-        p1, p2, p3, 
-        col.score1 || '', 
-        col.score2 || '', 
-        col.score3 || ''
-    ); 
-});
+    course.columns.forEach(col => { 
+        let p1 = col.percent1 !== undefined ? col.percent1 : (col.percent || '');
+        let p2 = col.percent2 !== undefined ? col.percent2 : (col.percent || '');
+        let p3 = col.percent3 !== undefined ? col.percent3 : (col.percent || '');
+        addGPAColumnInput(col.name, p1, p2, p3, col.score1 || '', col.score2 || '', col.score3 || ''); 
+    });
     $('#gpaPercentWarning').addClass('d-none'); 
     
-    handleGpaCourseTypeChange(); // Thêm dòng này
+    handleGpaCourseTypeChange();
+    toggleElectiveNote(); // Chạy kiểm tra ẩn/hiện
     $('#gpaCourseModal').modal('show');
 }
 function saveGPACourse() {
@@ -1679,7 +1691,7 @@ function saveGPACourse() {
     let name = $('#gpaCourseName').val().trim();
     let credits = $('#gpaCourseCredits').val();
     let type = $('#gpaCourseType').val();
-    
+    let note = $('#gpaCourseNote').val().trim();
     // Lấy danh sách ngành được chọn
     let selectedMajors = [];
     if (gpaConfig.isDoubleMajor) {
@@ -1752,7 +1764,7 @@ if (s3 !== undefined && s3 !== '') hasL3 = true;
         $('#gpaPercentWarning').addClass('d-none');
     }
     
-    let courseObj = { id, code, name, credits, type, columns, majors: selectedMajors };
+    let courseObj = { id, code, name, credits, type, columns, majors: selectedMajors, note };
     
     let existingIndex = myGPADataset.findIndex(c => c.id === id);
     if(existingIndex >= 0) { 
@@ -3517,60 +3529,94 @@ function refreshCurrentCourseData() {
 }
 // 1. CƠ SỞ DỮ LIỆU CÁC MÔN HỌC MẪU (ĐÃ PHÂN CHIA NĂM HỌC VÀ HỌC KỲ)
 const SYSTEM_COURSE_DATABASE = [
-    { code: 'APMA1801', name: 'Đại số tuyến tính', credits: 2, type: 'chuyen_nganh', namHoc: '2025-2026', hocKy: 'Học kì 1' },
-    { code: 'APMA1804', name: 'Giải tích hàm một biến', credits: 3, type: 'chuyen_nganh', namHoc: '2025-2026', hocKy: 'Học kì 1' },
-    { code: 'APMA1806', name: 'Giải tích vector', credits: 2, type: 'chuyen_nganh', namHoc: '2025-2026', hocKy: 'Học kì 1' },
-    { code: 'COMP1010', name: 'Lập trình cơ bản', credits: 3, type: 'chuyen_nganh', namHoc: '2025-2026', hocKy: 'Học kì 1' },
-    { code: 'MILI2701', name: 'Đường lối quốc phòng và an ninh của Đảng Cộng sản Việt Nam', credits: 3, type: 'ngoai_le', namHoc: '2025-2026', hocKy: 'Học kì 1' },
-    { code: 'POLI1903', name: 'Pháp luật đại cương', credits: 2, type: 'mon_chung', namHoc: '2025-2026', hocKy: 'Học kì 1' },
-    { code: 'POLI2001', name: 'Triết học Mác – Lênin', credits: 3, type: 'mon_chung', namHoc: '2025-2026', hocKy: 'Học kì 1' },
-    { code: 'PSYC1001', name: 'Tâm lý học đại cương', credits: 2, type: 'mon_chung', namHoc: '2025-2026', hocKy: 'Học kì 1' },
-    { code: 'PHYL2401', name: 'Giáo dục thể chất 1 (Thể dục - Điền kinh)', credits: 1, type: 'ngoai_le', namHoc: '2025-2026', hocKy: 'Học kì 1' },
-    { code: 'APMA1802', name: 'Không gian tuyến tính', credits: 2, type: 'chuyen_nganh', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'APMA1805', name: '	Giải tích hàm nhiều biến', credits: 3, type: 'chuyen_nganh', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'APMA1807', name: 'Hình học cao cấp hai chiều và ba chiều', credits: 2, type: 'chuyen_nganh', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'COMP1013', name: 'Lập trình nâng cao', credits: 3, type: 'chuyen_nganh', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'MILI2702', name: 'Công tác quốc phòng và an ninh', credits: 2, type: 'ngoai_le', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'POLI2002', name: '	Kinh tế chính trị học Mác - Lênin', credits: 2, type: 'mon_chung', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'POLI2003', name: 'Chủ nghĩa xã hội khoa học', credits: 2, type: 'mon_chung', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'EDUC2801', name: 'Phương pháp học tập hiệu quả', credits: 2, type: 'mon_chung', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'PSYC1493', name: 'Kỹ năng thích ứng và giải quyết vấn đề', credits: 2, type: 'mon_chung', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'PHYL2402', name: 'Giáo dục Thể chất 2 - Bóng chuyền cơ bản', credits: 1, type: 'ngoai_le', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'PHYL2403', name: 'Giáo dục Thể chất 2 - Cầu lông cơ bản', credits: 1, type: 'ngoai_le', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'PHYL2404', name: 'Giáo dục Thể chất 2 - Đá cầu cơ bản', credits: 1, type: 'ngoai_le', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'PHYL2405', name: 'Giáo dục Thể chất 2 - Aerobic cơ bản', credits: 1, type: 'ngoai_le', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'PHYL2406', name: 'Giáo dục Thể chất 2 - Bơi lội cơ bản', credits: 1, type: 'ngoai_le', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'PHYL2407', name: 'Giáo dục Thể chất 2 - Bóng rổ cơ bản', credits: 1, type: 'ngoai_le', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'PHYL2408', name: 'Giáo dục Thể chất 2 - Bóng đá cơ bản', credits: 1, type: 'ngoai_le', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'PHYL2409', name: 'Giáo dục Thể chất 2 - Teakwondo cơ bản', credits: 1, type: 'ngoai_le', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'PHYL2410', name: 'Giáo dục Thể chất 2 - Khiêu vũ thể thao cơ bản', credits: 1, type: 'ngoai_le', namHoc: '2025-2026', hocKy: 'Học kì 2' },
-    { code: 'APMA1803', name: 'Cấu trúc đại số và ứng dụng', credits: 2, type: 'chuyen_nganh', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'COMP1016', name: 'Cấu trúc dữ liệu', credits: 3, type: 'chuyen_nganh', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'COMP1017', name: 'Lập trình hướng đối tượng', credits: 3, type: 'chuyen_nganh', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'MATH1417', name: 'Hình học vi phân', credits: 3, type: 'chuyen_nganh', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'MILI2703', name: 'Quân sự chung', credits: 2, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'POLI2005', name: 'Tư tưởng Hồ Chí Minh', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'PSYC2801', name: 'Kỹ năng làm việc nhóm và tư duy sáng tạo', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'EDUC1410', name: 'Giáo dục vì sự phát triển bền vững', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'DOMS2801', name: 'Kỹ thuật chế biến món ăn đãi tiệc', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'DOMS2802', name: 'Kỹ thuật làm bánh Âu', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'DOMS2803', name: 'Kỹ thuật làm hoa giấy nhún', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'DOMS2804', name: 'Kỹ thuật làm hoa giấy nhún 2', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'DOMS2805', name: 'Kỹ thuật cắt may trang phục nữ thường ngày', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'DOMS2806', name: 'Kỹ thuật cắt may đầm nữ căn bản', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'DOMS2807', name: 'Kỹ thuật trang điểm ứng dụng', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'DOMS2808', name: 'Kỹ thuật cắt tỉa rau củ trang trí món ăn', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'DOMS2809', name: 'Kỹ thuật làm hoa từ vải voan', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'DOMS2810', name: 'Kỹ thuật pha chế thức uống không cồn', credits: 2, type: 'mon_chung', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'PHYL2411', name: 'Giáo dục Thể chất 2 - Bóng chuyền nâng cao', credits: 1, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'PHYL2412', name: 'Giáo dục Thể chất 2 - Cầu lông nâng cao', credits: 1, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'PHYL2413', name: 'Giáo dục Thể chất 3 - Aerobic nâng cao', credits: 1, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'PHYL2414', name: 'Giáo dục Thể chất 3 - Bóng rổ nâng cao', credits: 1, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'PHYL2415', name: 'iáo dục Thể chất 3 - Bơi lội nâng cao', credits: 1, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'PHYL2416', name: 'Giáo dục Thể chất 3 - Đá cầu nâng cao', credits: 1, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'PHYL2417', name: 'Giáo dục Thể chất 3 - Bóng đá nâng cao', credits: 1, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'PHYL2418', name: 'Giáo dục Thể chất 3 - Teakwondo nâng cao', credits: 1, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 1' },
-    { code: 'PHYL2419', name: 'Giáo dục Thể chất 3 - Khiêu vũ thể thao nâng cao', credits: 1, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 1' },
+    { code: 'APMA1801', name: 'Đại số tuyến tính', credits: 2, type: 'cn_bb', namHoc: '2025-2026', hocKy: 'Học kì 1' },
+    { code: 'APMA1804', name: 'Giải tích hàm một biến', credits: 3, type: 'cn_bb', namHoc: '2025-2026', hocKy: 'Học kì 1' },
+    { code: 'APMA1806', name: 'Giải tích vector', credits: 2, type: 'cn_bb', namHoc: '2025-2026', hocKy: 'Học kì 1' },
+    { code: 'COMP1010', name: 'Lập trình cơ bản', credits: 3, type: 'cn_bb', namHoc: '2025-2026', hocKy: 'Học kì 1' },
+    { code: 'POLI1903', name: 'Pháp luật đại cương', credits: 2, type: 'mc_bb', namHoc: '2025-2026', hocKy: 'Học kì 1' },
+    { code: 'POLI2001', name: 'Triết học Mác – Lênin', credits: 3, type: 'mc_bb', namHoc: '2025-2026', hocKy: 'Học kì 1' },
+    { code: 'PSYC1001', name: 'Tâm lý học đại cương', credits: 2, type: 'mc_bb', namHoc: '2025-2026', hocKy: 'Học kì 1' },
+    { code: 'PHYL2401', name: 'Giáo dục thể chất 1 (Thể dục - Điền kinh)', credits: 1, type: 'gdtc_bb', namHoc: '2025-2026', hocKy: 'Học kì 1' },
+    { code: 'APMA1802', name: 'Không gian tuyến tính', credits: 2, type: 'cn_bb', namHoc: '2025-2026', hocKy: 'Học kì 2' },
+    { code: 'APMA1805', name: '	Giải tích hàm nhiều biến', credits: 3, type: 'cn_bb', namHoc: '2025-2026', hocKy: 'Học kì 2' },
+    { code: 'APMA1807', name: 'Hình học cao cấp hai chiều và ba chiều', credits: 2, type: 'cn_bb', namHoc: '2025-2026', hocKy: 'Học kì 2' },
+    { code: 'COMP1013', name: 'Lập trình nâng cao', credits: 3, type: 'cn_bb', namHoc: '2025-2026', hocKy: 'Học kì 2' },
+    { code: 'POLI2002', name: '	Kinh tế chính trị học Mác - Lênin', credits: 2, type: 'mc_bb', namHoc: '2025-2026', hocKy: 'Học kì 2' },
+    { code: 'POLI2003', name: 'Chủ nghĩa xã hội khoa học', credits: 2, type: 'mc_bb', namHoc: '2025-2026', hocKy: 'Học kì 2' },
+    { code: 'EDUC2801', name: 'Phương pháp học tập hiệu quả', credits: 2, type: 'mc_tc', namHoc: '2025-2026', hocKy: 'Học kì 2' },
+    { code: 'PSYC1493', name: 'Kỹ năng thích ứng và giải quyết vấn đề', credits: 2, type: 'mc_tc', namHoc: '2025-2026', hocKy: 'Học kì 2' },
+    { code: 'PHYL2402', name: 'Giáo dục Thể chất 2 - Bóng chuyền cơ bản', credits: 1, type: 'gdtc_tc', namHoc: '2025-2026', hocKy: 'Học kì 2', groupNote: 'Giáo dục Thể chất 2' },
+    { code: 'PHYL2403', name: 'Giáo dục Thể chất 2 - Cầu lông cơ bản', credits: 1, type: 'gdtc_tc', namHoc: '2025-2026', hocKy: 'Học kì 2', groupNote: 'Giáo dục Thể chất 2' },
+    { code: 'PHYL2404', name: 'Giáo dục Thể chất 2 - Đá cầu cơ bản', credits: 1, type: 'gdtc_tc', namHoc: '2025-2026', hocKy: 'Học kì 2', groupNote: 'Giáo dục Thể chất 2' },
+    { code: 'PHYL2405', name: 'Giáo dục Thể chất 2 - Aerobic cơ bản', credits: 1, type: 'gdtc_tc', namHoc: '2025-2026', hocKy: 'Học kì 2', groupNote: 'Giáo dục Thể chất 2' },
+    { code: 'PHYL2406', name: 'Giáo dục Thể chất 2 - Bơi lội cơ bản', credits: 1, type: 'gdtc_tc', namHoc: '2025-2026', hocKy: 'Học kì 2', groupNote: 'Giáo dục Thể chất 2' },
+    { code: 'PHYL2407', name: 'Giáo dục Thể chất 2 - Bóng rổ cơ bản', credits: 1, type: 'gdtc_tc', namHoc: '2025-2026', hocKy: 'Học kì 2', groupNote: 'Giáo dục Thể chất 2' },
+    { code: 'PHYL2408', name: 'Giáo dục Thể chất 2 - Bóng đá cơ bản', credits: 1, type: 'gdtc_tc', namHoc: '2025-2026', hocKy: 'Học kì 2', groupNote: 'Giáo dục Thể chất 2' },
+    { code: 'PHYL2409', name: 'Giáo dục Thể chất 2 - Teakwondo cơ bản', credits: 1, type: 'gdtc_tc', namHoc: '2025-2026', hocKy: 'Học kì 2', groupNote: 'Giáo dục Thể chất 2' },
+    { code: 'PHYL2410', name: 'Giáo dục Thể chất 2 - Khiêu vũ thể thao cơ bản', credits: 1, type: 'gdtc_tc', namHoc: '2025-2026', hocKy: 'Học kì 2', groupNote: 'Giáo dục Thể chất 2' },
+    { code: 'APMA1803', name: 'Cấu trúc đại số và ứng dụng', credits: 2, type: 'cn_bb', namHoc: '2026-2027', hocKy: 'Học kì 1' },
+    { code: 'COMP1016', name: 'Cấu trúc dữ liệu', credits: 3, type: 'cn_bb', namHoc: '2026-2027', hocKy: 'Học kì 1' },
+    { code: 'COMP1017', name: 'Lập trình hướng đối tượng', credits: 3, type: 'cn_bb', namHoc: '2026-2027', hocKy: 'Học kì 1' },
+    { code: 'MATH1417', name: 'Hình học vi phân', credits: 3, type: 'cn_bb', namHoc: '2026-2027', hocKy: 'Học kì 1' },
+    { code: 'POLI2005', name: 'Tư tưởng Hồ Chí Minh', credits: 2, type: 'mc_bb', namHoc: '2026-2027', hocKy: 'Học kì 1' },
+    { code: 'PSYC2801', name: 'Kỹ năng làm việc nhóm và tư duy sáng tạo', credits: 2, type: 'mc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1' },
+    { code: 'EDUC1410', name: 'Giáo dục vì sự phát triển bền vững', credits: 2, type: 'mc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1' },
+    { code: 'DOMS2801', name: 'Kỹ thuật chế biến món ăn đãi tiệc', credits: 2, type: 'mc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục đời sống' },
+    { code: 'DOMS2802', name: 'Kỹ thuật làm bánh Âu', credits: 2, type: 'mc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục đời sống' },
+    { code: 'DOMS2803', name: 'Kỹ thuật làm hoa giấy nhún', credits: 2, type: 'mc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục đời sống' },
+    { code: 'DOMS2804', name: 'Kỹ thuật làm hoa giấy nhún 2', credits: 2, type: 'mc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục đời sống' },
+    { code: 'DOMS2805', name: 'Kỹ thuật cắt may trang phục nữ thường ngày', credits: 2, type: 'mc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục đời sống' },
+    { code: 'DOMS2806', name: 'Kỹ thuật cắt may đầm nữ căn bản', credits: 2, type: 'mc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục đời sống' },
+    { code: 'DOMS2807', name: 'Kỹ thuật trang điểm ứng dụng', credits: 2, type: 'mc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục đời sống' },
+    { code: 'DOMS2808', name: 'Kỹ thuật cắt tỉa rau củ trang trí món ăn', credits: 2, type: 'mc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục đời sống' },
+    { code: 'DOMS2809', name: 'Kỹ thuật làm hoa từ vải voan', credits: 2, type: 'mc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục đời sống' },
+    { code: 'DOMS2810', name: 'Kỹ thuật pha chế thức uống không cồn', credits: 2, type: 'mc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục đời sống' },
+    { code: 'PHYL2411', name: 'Giáo dục Thể chất 3 - Bóng chuyền nâng cao', credits: 1, type: 'gdtc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục Thể chất 3' },
+    { code: 'PHYL2412', name: 'Giáo dục Thể chất 3 - Cầu lông nâng cao', credits: 1, type: 'gdtc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục Thể chất 3' },
+    { code: 'PHYL2413', name: 'Giáo dục Thể chất 3 - Aerobic nâng cao', credits: 1, type: 'gdtc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục Thể chất 3' },
+    { code: 'PHYL2414', name: 'Giáo dục Thể chất 3 - Bóng rổ nâng cao', credits: 1, type: 'gdtc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục Thể chất 3' },
+    { code: 'PHYL2415', name: 'Giáo dục Thể chất 3 - Bơi lội nâng cao', credits: 1, type: 'gdtc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục Thể chất 3' },
+    { code: 'PHYL2416', name: 'Giáo dục Thể chất 3 - Đá cầu nâng cao', credits: 1, type: 'gdtc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục Thể chất 3' },
+    { code: 'PHYL2417', name: 'Giáo dục Thể chất 3 - Bóng đá nâng cao', credits: 1, type: 'gdtc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục Thể chất 3' },
+    { code: 'PHYL2418', name: 'Giáo dục Thể chất 3 - Teakwondo nâng cao', credits: 1, type: 'gdtc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục Thể chất 3' },
+    { code: 'PHYL2419', name: 'Giáo dục Thể chất 3 - Khiêu vũ thể thao nâng cao', credits: 1, type: 'gdtc_tc', namHoc: '2026-2027', hocKy: 'Học kì 1', groupNote: 'Giáo dục Thể chất 3' },
+    { code: 'APMA1817', name: 'Toán rời rạc', credits: 2, type: 'cn_bb', namHoc: '2026-2027', hocKy: 'Học kì 2' },
+    { code: 'COMP1314', name: 'Trí tuệ nhân tạo', credits: 3, type: 'cn_bb', namHoc: '2026-2027', hocKy: 'Học kì 2' },
+    { code: 'COMP1804', name: 'Lập trình Python', credits: 3, type: 'cn_bb', namHoc: '2026-2027', hocKy: 'Học kì 2' },
+    { code: 'MATH1413', name: 'Độ đo và tích phân', credits: 3, type: 'cn_bb', namHoc: '2026-2027', hocKy: 'Học kì 2' },
+    { code: 'MATH1817', name: 'Phương trình vi phân và đạo hàm riêng', credits: 3, type: 'cn_bb', namHoc: '2026-2027', hocKy: 'Học kì 2' },
+    { code: 'POLI2004', name: 'Lịch sử Đảng cộng sản Việt Nam', credits: 3, type: 'mc_bb', namHoc: '2026-2027', hocKy: 'Học kì 2' },
+    { code: 'MILI2701', name: 'Đường lối quốc phòng và an ninh của Đảng Cộng sản Việt Nam', credits: 3, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 2' },
+    { code: 'MILI2702', name: 'Công tác quốc phòng và an ninh', credits: 2, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 2' },
+    { code: 'MILI2703', name: 'Quân sự chung', credits: 2, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 2' },
+    { code: 'MILI2704', name: 'Kỹ thuật chiến đấu bộ binh và chiến thuật', credits: 4, type: 'ngoai_le', namHoc: '2026-2027', hocKy: 'Học kì 2' },
+    { code: 'APMA1818', name: 'Lý thuyết đồ thị', credits: 3, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 1' },
+    { code: 'COMP1018', name: 'Cơ sở dữ liệu', credits: 3, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 1' },
+    { code: 'COMP1712', name: 'Học máy', credits: 3, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 1' },
+    { code: 'MATH1408', name: 'Lý thuyết tối ưu tuyến tính', credits: 3, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 1' },
+    { code: 'MATH1703', name: 'Xác suất thống kê', credits: 2, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 1' },
+    { code: 'MATH1816', name: 'Giải tích hàm', credits: 2, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 1' },
+    { code: 'APMA1810', name: 'Mô hình thống kê', credits: 2, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 2' },
+    { code: 'APMA1811', name: 'Thực hành nghề nghiệp', credits: 2, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 2' },
+    { code: 'COMP1015', name: 'Nhập môn mạng máy tính', credits: 3, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 2' },
+    { code: 'COMP1829', name: 'Quản lý công việc hiệu quả theo Agile', credits: 2, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 2' },
+    { code: 'MATH1421', name: 'Đại cương về phương pháp tính', credits: 2, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 2' },
+    { code: 'MATH1804', name: 'Lý thuyết tối ưu phi tuyến', credits: 2, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 2' },
+    { code: 'PSYC2804', name: 'Phương pháp nghiên cứu khoa học', credits: 2, type: 'chuyen_nganh', namHoc: '2027-2028', hocKy: 'Học kì 2' },
+    { code: 'APMA1812', name: 'Thực hành nghề nghiệp 1', credits: 2, type: 'chuyen_nganh', namHoc: '2028-2029', hocKy: 'Học kì 1' },
+    { code: 'COMP1313', name: 'Điện toán đám mây', credits: 3, type: 'chuyen_nganh', namHoc: '2028-2029', hocKy: 'Học kì 1' },
+    { code: 'MATH1825', name: 'Nhập môn phân tích dữ liệu tôpô', credits: 2, type: 'chuyen_nganh', namHoc: '2028-2029', hocKy: 'Học kì 1' },
+    { code: 'PSYC2803', name: '	Khởi nghiệp', credits: 2, type: 'mon_chung', namHoc: '2028-2029', hocKy: 'Học kì 1' },
+    { code: 'APMA1808', name: 'Lý thuyết tối ưu đa mục tiêu', credits: 2, type: 'cn_tc', namHoc: '2028-2029', hocKy: 'Học kì 1' },
+    { code: 'APMA1809', name: 'Lý thuyết hồi quy và ứng dụng', credits: 2, type: 'cn_tc', namHoc: '2028-2029', hocKy: 'Học kì 1' },
+    { code: 'MATH1707', name: 'Xác suất thống kê nâng cao', credits: 2, type: 'cn_tc', namHoc: '2028-2029', hocKy: 'Học kì 1' },
+    { code: 'COMP1315', name: 'Khai thác dữ liệu và ứng dụng', credits: 3, type: 'cn_tc', namHoc: '2028-2029', hocKy: 'Học kì 1' },
+    { code: 'COMP1504', name: 'Thị giác máy tính và ứng dụng', credits: 3, type: 'cn_tc', namHoc: '2028-2029', hocKy: 'Học kì 1' },
+    { code: 'COMP1715', name: 'Xử lý ngôn ngữ tự nhiên', credits: 3, type: 'cn_tc', namHoc: '2028-2029', hocKy: 'Học kì 1' },
+    { code: 'APMA1813', name: 'Thực tập nghề nghiệp 2', credits: 6, type: 'chuyen_nganh', namHoc: '2028-2029', hocKy: 'Học kì 2' },
+    { code: 'APMA1814', name: 'Khóa luận tốt nghiệp', credits: 6, type: 'cn_tc', namHoc: '2028-2029', hocKy: 'Học kì 2' },
+    { code: 'APMA1815', name: 'Hồ sơ tốt nghiệp', credits: 3, type: 'cn_tc', namHoc: '2028-2029', hocKy: 'Học kì 2' },
+    { code: 'APMA1816', name: 'Sản phẩm nghiên cứu', credits: 3, type: 'cn_tc', namHoc: '2028-2029', hocKy: 'Học kì 2' },
 ];
 
 let currentFilteredSysCourses = [];
@@ -3604,7 +3650,7 @@ function openGpaSystemSelectModal() {
     $('#gpaSystemSelectModal').modal('show');
 }
 
-// 4. RENDER BẢNG MÔN HỌC GOM NHÓM THEO HỌC KỲ KÈM NÚT CHỌN THEO HỌC KỲ
+// RENDER BẢNG MÔN HỌC GOM NHÓM THEO HỌC KỲ VÀ PHÂN LOẠI (BẮT BUỘC/TỰ CHỌN)
 function renderGpaSystemCoursesTable(dataset) {
     let tbody = $('#gpaSystemCoursesTableBody');
     if (!dataset || dataset.length === 0) {
@@ -3614,52 +3660,90 @@ function renderGpaSystemCoursesTable(dataset) {
 
     let groupedData = {};
     dataset.forEach((course) => {
-        let groupKey = `${course.namHoc} - ${course.hocKy}`;
-        if (!groupedData[groupKey]) groupedData[groupKey] = [];
-        groupedData[groupKey].push(course);
+        let groupKey = `${course.namHoc} - ${course.hocKy}`; 
+        
+        if (!groupedData[groupKey]) {
+            groupedData[groupKey] = { bat_buoc: [], tu_chon: [], khac: [] };
+        }
+
+        let t = course.type || '';
+        // Phân loại môn Tự chọn (_tc hoặc tu_chon)
+        if (t.endsWith('_tc') || t === 'tu_chon') {
+            groupedData[groupKey].tu_chon.push(course);
+        } 
+        // Phân loại môn Bắt buộc (_bb, bat_buoc hoặc hệ thống cũ)
+        else if (t.endsWith('_bb') || t === 'bat_buoc' || t === 'chuyen_nganh' || t === 'mon_chung' || t === 'ngoai_le') {
+            groupedData[groupKey].bat_buoc.push(course);
+        } else {
+            groupedData[groupKey].khac.push(course);
+        }
     });
 
     let html = '';
+    
     for (let groupKey in groupedData) {
         let safeGroupId = groupKey.replace(/[^a-zA-Z0-9]/g, '_');
 
-        // Dùng colspan="5" để dòng tiêu đề trải rộng toàn bộ bảng, không bị bó hẹp vào cột checkbox
+        // --- DÒNG CẤP 1: HỌC KỲ (Thanh màu xanh xám) ---
         html += `
-        <tr style="background-color: #f1f5f9;">
-            <td colspan="5" class="py-3 px-3">
+        <tr style="background-color: #aebfd1; border-bottom: 1px solid #154c79;">
+            <td colspan="5" class="py-2 px-3">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <span class="fw-bold text-primary" style="font-size: 15px;">
-                        <i class="fa-solid fa-layer-group me-2"></i>${groupKey}
-                    </span>
-                    <button type="button" class="btn btn-sm btn-outline-primary fw-bold px-3 py-1 shadow-sm" style="font-size: 13px; border-radius: 50px; background-color: #fff;" onclick="toggleSelectSemesterGroup('${safeGroupId}')">
-                        <i class="fa-solid fa-check-double me-1"></i> Chọn tất cả học kỳ này
+                    <span class="fw-bold text-dark" style="font-size: 15px;">${groupKey}</span>
+                    <button type="button" class="btn btn-sm fw-bold px-3 py-1 shadow-sm" style="font-size: 12px; border-radius: 50px; background-color: rgba(255,255,255,0.6); color: #154c79; border: 1px solid #154c79;" onclick="toggleSelectSemesterGroup('${safeGroupId}')">
+                        <i class="fa-solid fa-check-double me-1"></i> Chọn tất cả
                     </button>
                 </div>
             </td>
         </tr>`;
 
-        groupedData[groupKey].forEach((course) => {
-            let typeBadge = '';
-            if (course.type === 'chuyen_nganh') typeBadge = '<span class="badge bg-primary">Chuyên ngành</span>';
-            else if (course.type === 'mon_chung') typeBadge = '<span class="badge bg-success">Môn chung</span>';
-            else typeBadge = '<span class="badge bg-secondary">GDTC + GDQP</span>';
+        // Hàm cục bộ vẽ từng nhóm Bắt buộc / Tự chọn
+        const renderSubGroup = (coursesArr, titleText, bgColor) => {
+            if (!coursesArr || coursesArr.length === 0) return; 
 
-            let isAlreadyAdded = myGPADataset.some(c => c.code === course.code || c.name.toLowerCase() === course.name.toLowerCase());
-            let disabledAttr = isAlreadyAdded ? 'disabled' : '';
-            let rowStyle = isAlreadyAdded ? 'background-color: #f8fafc; opacity: 0.6;' : 'cursor: pointer;';
-            let alreadyLabel = isAlreadyAdded ? ' <span class="badge bg-light text-dark border ms-1"><i class="fa-solid fa-check text-success"></i> Đã thêm</span>' : '';
-
+            // --- DÒNG CẤP 2: TIÊU ĐỀ BẮT BUỘC / TỰ CHỌN (Thanh màu hồng cam) ---
             html += `
-            <tr class="semester-row-${safeGroupId}" style="${rowStyle}" onclick="toggleGpaSysRowCheckbox(this, event, ${isAlreadyAdded})">
-                <td class="text-center align-middle" style="width: 60px;">
-                    <input type="checkbox" class="form-check-input cb-gpa-sys-item" value="${course.code}" ${disabledAttr} onchange="updateGpaSelectedCount()" onclick="event.stopPropagation();">
-                </td>
-                <td class="text-center font-monospace fw-bold text-secondary align-middle" style="width: 15%;">${course.code}</td>
-                <td class="fw-bold text-dark align-middle">${course.name}${alreadyLabel}</td>
-                <td class="text-center fw-bold text-primary align-middle" style="width: 12%;">${course.credits}</td>
-                <td class="text-center align-middle" style="width: 20%;">${typeBadge}</td>
+            <tr style="background-color: ${bgColor}; border-bottom: 1px solid #154c79;">
+                <td colspan="5" class="py-2 px-3 fw-bold text-dark" style="font-size: 14.5px;">${titleText}</td>
             </tr>`;
-        });
+
+            coursesArr.forEach((course) => {
+                let typeBadge = '';
+                let t = course.type || '';
+                
+                if (t.startsWith('cn_') || t === 'chuyen_nganh') typeBadge = '<span class="badge bg-primary">Chuyên ngành</span>';
+                else if (t.startsWith('mc_') || t === 'mon_chung') typeBadge = '<span class="badge bg-success">Môn chung</span>';
+                else if (t.startsWith('gdtc_') || t === 'ngoai_le') typeBadge = '<span class="badge bg-secondary">GDTC + GDQP</span>';
+                else typeBadge = '<span class="badge bg-dark">Khác</span>';
+
+                let isAlreadyAdded = myGPADataset.some(c => c.code === course.code || c.name.toLowerCase() === course.name.toLowerCase());
+                let disabledAttr = isAlreadyAdded ? 'disabled' : '';
+                let rowStyle = isAlreadyAdded ? 'background-color: #f8fafc; opacity: 0.6;' : 'cursor: pointer;';
+                let alreadyLabel = isAlreadyAdded ? ' <span class="badge bg-light text-dark border ms-1"><i class="fa-solid fa-check text-success"></i> Đã thêm</span>' : '';
+
+                // Hiển thị ghi chú nhóm bên dưới Tên môn học nếu có
+                let groupBadge = course.groupNote ? `<br><small class="text-info fw-bold" style="font-size: 11.5px;"><i class="fa-solid fa-layer-group me-1"></i>Nhóm: ${course.groupNote}</small>` : '';
+
+                html += `
+                <tr class="semester-row-${safeGroupId}" style="${rowStyle}" onclick="toggleGpaSysRowCheckbox(this, event, ${isAlreadyAdded})">
+                    <td class="text-center align-middle" style="width: 60px;">
+                        <input type="checkbox" class="form-check-input cb-gpa-sys-item" value="${course.code}" ${disabledAttr} onchange="updateGpaSelectedCount()" onclick="event.stopPropagation();">
+                    </td>
+                    <td class="text-center font-monospace fw-bold text-secondary align-middle" style="width: 15%;">${course.code}</td>
+                    <td class="fw-bold text-dark align-middle">
+                        ${course.name} ${alreadyLabel}
+                        ${groupBadge}
+                    </td>
+                    <td class="text-center fw-bold text-primary align-middle" style="width: 12%;">${course.credits}</td>
+                    <td class="text-center align-middle" style="width: 20%;">${typeBadge}</td>
+                </tr>`;
+            });
+        };
+
+        // Render đúng 2 phân nhóm
+        renderSubGroup(groupedData[groupKey].bat_buoc, 'Bắt buộc', '#fca5a5');
+        renderSubGroup(groupedData[groupKey].tu_chon, 'Tự chọn', '#fca5a5');
+        renderSubGroup(groupedData[groupKey].khac, 'Các môn khác', '#e2e8f0');
     }
 
     tbody.html(html);
@@ -3748,9 +3832,10 @@ function addSelectedGpaCoursesToDataset() {
                 name: courseTemplate.name,
                 credits: courseTemplate.credits,
                 type: courseTemplate.type,
+                note: courseTemplate.groupNote || "", // TỰ ĐỘNG GÁN GHI CHÚ NHÓM
                 columns: [
-                    { name: "Quá trình", percent1: 40, score1: "", percent2: 40, score2: "", percent3: 40, score3: "" },
-                    { name: "Cuối kỳ", percent1: 60, score1: "", percent2: 60, score2: "", percent3: 60, score3: "" }
+                    { name: "Cột 1", percent1: "", score1: "", percent2: "", score2: "", percent3: "", score3: "" },
+                    { name: "Cột 2", percent1: "", score1: "", percent2: "", score2: "", percent3: "", score3: "" }
                 ],
                 majors: ['1']
             };
