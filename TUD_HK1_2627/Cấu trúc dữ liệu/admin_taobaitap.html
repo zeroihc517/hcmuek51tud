@@ -3,65 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Tạo bài tập</title>
+    <title>Admin - Tạo bài tập & Xem trước</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
         .card-custom { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+
+        /* Định dạng khung Xem Trước chuẩn Ace Code View */
+        .question-ace-view {
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            background-color: #f8fafc;
+            font-family: 'Consolas', 'Fira Code', 'Courier New', monospace !important;
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 12px 0;
+            overflow-x: auto;
+            margin-top: 12px;
+            margin-bottom: 12px;
+        }
+        .ace-line-row {
+            display: flex;
+            white-space: pre;
+            width: 100%;
+        }
+        .ace-gutter-cell {
+            width: 44px;
+            text-align: right;
+            padding-right: 12px;
+            color: #0284c7;             
+            background-color: #f0f9ff;  
+            user-select: none;
+            border-right: 2px solid #bae6fd; 
+            margin-right: 12px;
+            font-weight: 600;
+        }
+        .ace-code-content { flex: 1; }
+
+        /* Bảng màu Cú pháp C++ */
+        .ace_keyword { color: #0000ff; font-weight: 600; }        
+        .ace_keyword.ace_operator { color: #0000ff; }             
+        .ace_identifier { color: #001080; }                       
+        .ace_function { color: #005a9e; font-weight: 600; }       
+        .ace_constant.ace_numeric { color: #098658; }            
+        .ace_boolean { color: #0000ff; font-weight: bold; }       
+        .ace_type { color: #008080; font-weight: 600; }          
+        .ace_comment { color: #008000; font-style: italic; }      
+        .ace_string { color: #0070c0; }                           
     </style>
 </head>
 <body>
-    <div class="container py-5" style="max-width: 900px;">
-        <div class="card card-custom">
-            <div class="card-header text-white p-4" style="background-color: #0f4c81; border-radius: 16px 16px 0 0;">
-                <h4 class="m-0 fw-bold"><i class="fa-solid fa-laptop-code me-2"></i>Tạo Đề Bài Lập Trình</h4>
-                <p class="m-0 mt-1 opacity-75 small">Dữ liệu sẽ tự động đồng bộ sang trang làm bài của Sinh viên</p>
+    <div class="container-fluid px-4 py-4">
+        
+        <!-- HEADER -->
+        <div class="card card-custom mb-4">
+            <div class="card-header text-white p-4 d-flex justify-content-between align-items-center" style="background-color: #0f4c81; border-radius: 16px;">
+                <div>
+                    <h4 class="m-0 fw-bold"><i class="fa-solid fa-laptop-code me-2"></i>Soạn Thảo Đề Bài & Xem Trước (Live Preview)</h4>
+                    <p class="m-0 mt-1 opacity-75 small">Nội dung xem trước bên phải sẽ khớp 100% với giao diện làm bài của Sinh viên</p>
+                </div>
+                <span class="badge bg-warning text-dark px-3 py-2 fw-bold"><i class="fa-solid fa-eye me-1"></i> ADMIN MODE</span>
             </div>
-            <div class="card-body p-4 p-md-5">
-                <div class="row g-3 mb-4">
-                    <div class="col-md-6">
-                        <label class="fw-bold mb-1">Môn học</label>
-                        <input type="text" id="txtCourse" class="form-control fw-bold text-primary" value="Cấu trúc dữ liệu">
+        </div>
+
+        <!-- BỐ CỤC 2 CỘT: TRÁI (NHẬP LIỆU) - PHẢI (XEM TRƯỚC) -->
+        <div class="row g-4">
+            
+            <!-- CỘT TRÁI: KHUNG SOẠN THẢO ĐỀ BÀI -->
+            <div class="col-lg-6">
+                <div class="card card-custom h-100">
+                    <div class="card-header bg-light border-0 pt-3 px-4 fw-bold text-primary fs-5">
+                        <i class="fa-solid fa-pen-to-square me-2"></i>1. Nhập thông tin đề bài
                     </div>
-                    <div class="col-md-6">
-                        <label class="fw-bold mb-1">Mã bài (VD: B08)</label>
-                        <input type="text" id="txtMaBai" class="form-control fw-bold text-danger" placeholder="B08">
+                    <div class="card-body p-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="fw-bold mb-1">Môn học</label>
+                                <input type="text" id="txtCourse" class="form-control fw-bold text-primary" value="Minigame CTDL đề 01" oninput="updatePreview()">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="fw-bold mb-1">Mã bài (VD: B08)</label>
+                                <input type="text" id="txtMaBai" class="form-control fw-bold text-danger" placeholder="B08" oninput="updatePreview()">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold mb-1">Tiêu đề bài học (Hiển thị ở Tabs)</label>
+                            <input type="text" id="txtTabTitle" class="form-control" placeholder="VD: Câu 8. Thuật toán Tìm kiếm nhị phân" oninput="updatePreview()">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold mb-1">Câu dẫn đề bài</label>
+                            <input type="text" id="txtIntro" class="form-control" value="Cho đoạn chương trình C++ sau:" oninput="updatePreview()">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold mb-1 text-success d-flex justify-content-between align-items-center">
+                                <span><i class="fa-solid fa-code me-1"></i> Mã nguồn Code đề bài (C++)</span>
+                                <span class="small text-muted font-monospace">Bỏ trống nếu là đề tự luận hoàn toàn</span>
+                            </label>
+                            <div id="codeEditor" style="height: 220px; border: 1px solid #cbd5e1; border-radius: 8px;"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="fw-bold mb-1 text-primary"><i class="fa-solid fa-list-ol me-1"></i> Các câu hỏi phụ (Có dọn dẹp rác LaTeX)</label>
+                            <textarea id="txtSubQuestions" class="form-control font-monospace" rows="5" placeholder="\item[a)] \textbf{(0,75 điểm)...}&#10;\item[b)] ..." oninput="updatePreview()"></textarea>
+                        </div>
+
+                        <button class="btn text-white fw-bold w-100 py-3 mt-2" style="background-color: #e61d4a; font-size: 16px; border-radius: 12px;" onclick="submitNewQuestion()" id="btnSubmit">
+                            <i class="fa-solid fa-cloud-arrow-up me-2"></i> Lưu và Phát hành câu hỏi
+                        </button>
                     </div>
                 </div>
-
-                <div class="mb-4">
-                    <label class="fw-bold mb-1">Tiêu đề bài học (Hiển thị ở Tabs)</label>
-                    <input type="text" id="txtTabTitle" class="form-control" placeholder="VD: Câu 8. Thuật toán Tìm kiếm nhị phân giảm dần">
-                </div>
-
-                <div class="mb-4">
-                    <label class="fw-bold mb-1">Câu dẫn đề bài</label>
-                    <input type="text" id="txtIntro" class="form-control" value="Cho đoạn chương trình C++ sau:">
-                </div>
-
-                <div class="mb-4">
-                    <label class="fw-bold mb-1 text-success"><i class="fa-solid fa-code"></i> Mã nguồn Code đề bài (C++)</label>
-                    <div id="codeEditor" style="height: 250px; border: 1px solid #cbd5e1; border-radius: 8px;"></div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="fw-bold mb-1 text-primary"><i class="fa-solid fa-list-ol"></i> Các câu hỏi phụ (a, b, c...)</label>
-                    <div class="alert alert-info py-2 small m-0 mb-2">Mỗi ý hỏi bạn hãy gõ trên 1 dòng. Hệ thống sẽ tự động gắn chữ <b>a), b), c)</b> vào đầu mỗi dòng cho bạn.</div>
-                    <textarea id="txtSubQuestions" class="form-control" rows="5" placeholder="Hàm SearchDes trả về giá trị gì...&#10;Cho dãy số giảm dần..."></textarea>
-                </div>
-
-                <hr class="my-4">
-                
-                <button class="btn text-white fw-bold w-100 py-3" style="background-color: #e61d4a; font-size: 16px; border-radius: 12px;" onclick="submitNewQuestion()" id="btnSubmit">
-                    <i class="fa-solid fa-cloud-arrow-up me-2"></i> Lưu và Phát hành câu hỏi
-                </button>
             </div>
+
+            <!-- CỘT PHẢI: KHUNG XEM TRƯỚC BÊN SINH VIÊN (LIVE PREVIEW) -->
+            <div class="col-lg-6">
+                <div class="card card-custom h-100 style-preview-card">
+                    <div class="card-header bg-dark text-white pt-3 px-4 d-flex justify-content-between align-items-center">
+                        <span class="fw-bold"><i class="fa-solid fa-desktop me-2 text-info"></i>2. Giao diện Đề bài phía Sinh viên xem</span>
+                        <span class="badge bg-danger px-3 py-1" id="previewMaBai" style="font-size: 12px;">Mã bài: B--</span>
+                    </div>
+                    <div class="card-body p-4 fs-6 text-secondary" style="line-height: 1.6; background-color: #ffffff; border-radius: 0 0 16px 16px;">
+                        <h5 class="fw-bold text-dark mb-3" id="previewTitle">Bài tập: ---</h5>
+                        
+                        <!-- VÙNG HIỂN THỊ NỘI DUNG XEM TRƯỚC -->
+                        <div id="previewContentArea" class="border p-3 rounded-3 bg-light" style="min-height: 350px;">
+                            <i class="text-muted">Nhập thông tin bên trái để xem trước hiển thị...</i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- Toast Thông báo nổi của hệ thống -->
+    <!-- Toast Thông báo nổi -->
     <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
         <div id="autoToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
@@ -76,8 +155,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
     <script src="../../TRANGWEB/config.js"></script> 
     
+    <!-- Cấu hình MathJax cho công thức Toán -->
     <script>
-        // Hỗ trợ hiển thị thông báo Toast chuẩn của web
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <script>
         window.alert = function(message) {
             let toastEl = document.getElementById('autoToast'); 
             let toastBody = document.getElementById('autoToastMessage');
@@ -99,37 +188,157 @@
             editor.setTheme("ace/theme/textmate");
             editor.session.setMode("ace/mode/c_cpp");
             editor.setOptions({ fontSize: "15px", showPrintMargin: false });
+
+            // Lắng nghe sự thay đổi code để cập nhật xem trước ngay lập tức
+            editor.session.on('change', function() {
+                updatePreview();
+            });
+
+            updatePreview();
         });
 
-        function submitNewQuestion() {
-            let course = $('#txtCourse').val().trim();
+        // HÀM TẠO NỘI DUNG HTML ĐÃ TỐI ƯU & DỌN DẸP LATEX
+        function buildGeneratedHtml() {
             let maBai = $('#txtMaBai').val().trim();
             let tabTitle = $('#txtTabTitle').val().trim();
             let intro = $('#txtIntro').val().trim();
             let rawCode = editor.getValue();
-            let subQs = $('#txtSubQuestions').val().split('\n');
+            let rawSubQuestions = $('#txtSubQuestions').val().trim();
+
+            let escapedCode = escapeHtml(rawCode);
+
+            let htmlContent = `<p><b>${tabTitle ? tabTitle.split('.')[0] : 'Câu'}.</b> ${intro}</p>`;
+
+            if (escapedCode.trim() !== "") {
+                htmlContent += `<div class="question-code-block" style="background:#f8fafc; border:1px solid #cbd5e1; padding:12px; border-radius:8px; font-family:monospace; margin-bottom:12px; white-space: pre-wrap;">${escapedCode}</div>`;
+            } else {
+                htmlContent += `<!-- NO_CODE -->`;
+            }
+
+            if (rawSubQuestions !== "") {
+                let processedSubQ = rawSubQuestions
+                    // Dọn dẹp rác LaTeX
+                    .replace(/\\\\\[\d+pt\]/g, '<br>')
+                    .replace(/\\\\/g, '<br>')
+                    .replace(/\[\d+pt\]/g, '')
+                    .replace(/\\vspace\{.*?\}/g, '')
+                    .replace(/\\hspace\{.*?\}/g, '')
+                    .replace(/\\begin\{enumerate\}/g, '')
+                    .replace(/\\end\{enumerate\}/g, '')
+                    .replace(/\\begin\{center\}/g, '<div class="my-3">')
+                    .replace(/\\end\{center\}/g, '</div>')
+                    .replace(/\\small/g, '')
+
+                    // Bảng Input / Output LaTeX
+                    .replace(/\\begin\{tabular\}\{.*?\}/g, '<table class="table table-bordered align-middle my-3" style="width:100%; border-color:#cbd5e1;"><thead class="table-light"><tr><th style="width:40%;">Input</th><th style="width:60%;">Output</th></tr></thead><tbody><tr><td>')
+                    .replace(/\\end\{tabular\}/g, '</td></tr></tbody></table>')
+                    .replace(/\\begin\{minipage\}\[.*?\]\{.*?\}/g, '<div>')
+                    .replace(/\\end\{minipage\}/g, '</div>')
+                    .replace(/\\hline/g, '')
+                    .replace(/\\textbf\{Input\}\s*&\s*\\textbf\{Output\}/gi, '')
+                    .replace(/Input\s*&\s*Output/gi, '')
+                    .replace(/&/g, '</td><td>')
+
+                    // Định dạng chữ & danh sách
+                    .replace(/\\textbf\{(.*?)\}/g, '<b>$1</b>')
+                    .replace(/\\texttt\{(.*?)\}/g, '<code>$1</code>')
+                    .replace(/\\item\[(.*?)\]/g, '<br><b>$1</b> ')
+                    .replace(/\\item/g, '<br>• ');
+
+                htmlContent += `<div class="sub-questions mt-3">${processedSubQ}</div>`;
+            }
+
+            return htmlContent;
+        }
+
+        // HÀM RENDER XEM TRƯỚC (LIVE PREVIEW)
+        function updatePreview() {
+            let maBai = $('#txtMaBai').val().trim() || 'B--';
+            let tabTitle = $('#txtTabTitle').val().trim() || 'Tên bài tập chưa nhập...';
+            let rawContent = buildGeneratedHtml();
+
+            $('#previewMaBai').text(`Mã bài: ${maBai}`);
+            $('#previewTitle').text(`Bài tập: ${tabTitle}`);
+
+            // Xử lý bọc Khung Code Ace View có số dòng
+            let tempDiv = document.createElement('div');
+            tempDiv.innerHTML = rawContent;
+
+            let codeBlocks = tempDiv.querySelectorAll('div.question-code-block');
+
+            codeBlocks.forEach(blockEl => {
+                let rawCodeText = blockEl.innerText || blockEl.textContent || '';
+                
+                if (rawCodeText.trim() !== '' && rawCodeText.includes('\n')) {
+                    let lines = rawCodeText.split(/\r?\n/);
+                    let renderedLinesHtml = '';
+                    
+                    let tokenizer = null;
+                    try {
+                        let HighlightRules = ace.require("ace/mode/c_cpp").Mode;
+                        if (HighlightRules) tokenizer = new HighlightRules().getTokenizer();
+                    } catch (e) { }
+
+                    lines.forEach((lineText, lineIdx) => {
+                        if (lineIdx === lines.length - 1 && lineText.trim() === '') return;
+                        
+                        let coloredLineText = escapeHtml(lineText);
+                        if (tokenizer) {
+                            try {
+                                let tokens = tokenizer.getLineTokens(lineText, "start");
+                                coloredLineText = tokens.tokens.map(t => {
+                                    let className = "ace_" + t.type.replace(/\./g, " ace_");
+                                    return `<span class="${className}">${escapeHtml(t.value)}</span>`;
+                                }).join('');
+                            } catch (err) {}
+                        }
+
+                        renderedLinesHtml += `
+                            <div class="ace-line-row">
+                                <div class="ace-gutter-cell">${lineIdx + 1}</div>
+                                <div class="ace-code-content">${coloredLineText}</div>
+                            </div>
+                        `;
+                    });
+
+                    let wrapperDiv = document.createElement('div');
+                    wrapperDiv.className = "question-ace-view";
+                    wrapperDiv.innerHTML = renderedLinesHtml;
+                    
+                    blockEl.parentNode.replaceChild(wrapperDiv, blockEl);
+                }
+            });
+
+            $('#previewContentArea').html(tempDiv.innerHTML);
+
+            // Quét lại công thức Toán MathJax
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise([document.getElementById('previewContentArea')]).catch(function (err) {
+                    console.log('MathJax error: ' + err.message);
+                });
+            }
+        }
+
+        function escapeHtml(text) {
+            return text
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        // HÀM LƯU VÀ PHÁT HÀNH
+        function submitNewQuestion() {
+            let course = $('#txtCourse').val().trim();
+            let maBai = $('#txtMaBai').val().trim();
+            let tabTitle = $('#txtTabTitle').val().trim();
+            let htmlContent = buildGeneratedHtml();
 
             if (!maBai || !tabTitle) {
                 alert("Vui lòng nhập đầy đủ Mã bài và Tiêu đề!");
                 return;
             }
-
-            let escapedCode = rawCode.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            
-            let htmlContent = `<p><b>${tabTitle.split('.')[0]}.</b> ${intro}</p>`;
-            
-            if (escapedCode.trim() !== "") {
-                htmlContent += `<div style="background:#f8fafc; border:1px solid #cbd5e1; padding:12px; border-radius:8px; font-family:monospace; margin-bottom:12px; white-space: pre-wrap;">${escapedCode}</div>`;
-            }
-
-            let chars = 'abcdefghijklmnopqrstuvwxyz';
-            let qIndex = 0;
-            subQs.forEach(line => {
-                if (line.trim() !== '') {
-                    htmlContent += `<p><b>${chars[qIndex]})</b> ${line.trim()}</p>`;
-                    qIndex++;
-                }
-            });
 
             let btn = $('#btnSubmit');
             let originalHtml = btn.html();
@@ -153,9 +362,9 @@
                     btn.html(originalHtml).prop('disabled', false);
                     alert("✅ Tải và lưu câu hỏi thành công! Sinh viên đã có thể làm bài.");
                     
-                    // Reset form
                     $('#txtMaBai, #txtTabTitle, #txtSubQuestions').val('');
                     editor.setValue('');
+                    updatePreview();
                 },
                 error: function() {
                     btn.html(originalHtml).prop('disabled', false);
