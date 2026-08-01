@@ -4030,56 +4030,6 @@ window.copyTBLink = function(url) {
         alert("Đã sao chép đường link thông báo thành công!");
     });
 };
-function checkUrlAndOpenThongBao() {
-    let urlParams = new URLSearchParams(window.location.search);
-    let tbCode = urlParams.get('tb');
-
-    if (tbCode) {
-        let checkInterval = setInterval(() => {
-            if (window.thongBaoData && Object.keys(window.thongBaoData).length > 0) {
-                clearInterval(checkInterval);
-                for (let key in window.thongBaoData) {
-                    if (window.thongBaoData[key] && window.thongBaoData[key].tbCode === tbCode) {
-                        viewThongBaoDetail(key);
-                        break;
-                    }
-                }
-            }
-        }, 200);
-    }
-}
-
-// Bắt sự kiện người dùng nhấn nút "Back" trên trình duyệt
-window.onpopstate = function() {
-    let urlParams = new URLSearchParams(window.location.search);
-    if (!urlParams.get('tb')) {
-        if ($('#tbDetailContainer').length && !$('#tbDetailContainer').hasClass('d-none')) {
-            $('#tbDetailContainer').addClass('d-none');
-            $('#tbMainView').removeClass('d-none');
-        }
-    }
-};
-
-// Tự động kiểm tra URL khi mới truy cập trang web
-function checkUrlAndOpenThongBao() {
-    let urlParams = new URLSearchParams(window.location.search);
-    let tbCode = urlParams.get('tb');
-
-    if (tbCode) {
-        let checkInterval = setInterval(() => {
-            if (window.thongBaoData && Object.keys(window.thongBaoData).length > 0) {
-                clearInterval(checkInterval);
-                for (let key in window.thongBaoData) {
-                    if (window.thongBaoData[key] && window.thongBaoData[key].tbCode === tbCode) {
-                        viewThongBaoDetail(key);
-                        break;
-                    }
-                }
-            }
-        }, 300);
-    }
-}
-
 $(document).ready(function() {
     setTimeout(checkUrlAndOpenThongBao, 1000);
 });
