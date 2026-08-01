@@ -31,54 +31,110 @@ function loadTongHopView() {
     updateSystemUrl('view', 'weblinks'); // Đổi URL thành ?view=weblinks
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
 }
+// 1. Biến lưu bộ nhớ đệm (Cache) và chế độ hiển thị
+let adminDisplayMode = 0; // 0: Che, 1: MSSV, 2: Tên, 3: Full
+let cachedOnlineList = []; // Lưu danh sách user từ server
+let cachedOnlineCount = 0;
+
+// 2. Hàm che chuỗi bắt buộc (Bất kể Admin hay Sinh viên)
+function maskMSSVStrict(nameOrMssv) {
+    if (!nameOrMssv || nameOrMssv.toLowerCase() === "khách") return nameOrMssv;
+    let str = String(nameOrMssv).trim();
+    if (str.length <= 6) return str.substring(0, 1) + "***";
+    return str.substring(0, 2) + "***" + str.substring(str.length - 3);
+}
+
+// 3. Hàm kích hoạt chuyển chế độ (CHẠY SIÊU TỐC - KHÔNG GỌI LẠI AJAX)
+function toggleAdminNameDisplay() {
+    adminDisplayMode = (adminDisplayMode + 1) % 4; // Xoay vòng 0 -> 1 -> 2 -> 3 -> 0
+    renderOnlineFooterUI(); // Render lại ngay từ RAM (0ms)
+}
+
+// 4. Hàm vẽ giao diện Footer từ dữ liệu trong RAM
+function renderOnlineFooterUI() {
+    if (!cachedOnlineList || cachedOnlineList.length === 0) return;
+
+    let currentIsAdmin = isAdmin || (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008"));
+
+    let processedList = cachedOnlineList.map(userStr => {
+        let str = String(userStr).trim();
+        if (str.toLowerCase() === "khách" || !str.includes("|")) return str;
+        
+        let parts = str.split("|");
+        let userMssv = parts[0]; 
+        let userName = parts[1];
+
+        // --- A. CỐ ĐỊNH CHỮ "ADMIN" CHO TÀI KHOẢN ADMIN (51.01.108.008) ---
+        if (userMssv === "51.01.108.008" || userMssv === "5101108008") {
+            return `<span class="fw-bold" style="color: #facc15; text-transform: uppercase;"><i class="fa-solid fa-user-shield me-1"></i>ADMIN</span>`;
+        }
+
+        // --- B. XỬ LÝ 4 NẤC HIỂN THỊ CHO SINH VIÊN KHÁC ---
+        if (currentIsAdmin) {
+            if (adminDisplayMode === 1) {
+                // Lần 1: Chỉ MSSV đầy đủ
+                return userMssv;
+            } else if (adminDisplayMode === 2) {
+                // Lần 2: Chỉ Tên
+                return userName;
+            } else if (adminDisplayMode === 3) {
+                // Lần 3: Full Họ tên (MSSV)
+                return `${userName} (${userMssv})`;
+            }
+        }
+        
+        // Mặc định (mode = 0) hoặc không phải Admin: Che dạng 51***042, lhc***517
+        return maskMSSVStrict(userMssv);
+    });
+
+    let displayList = processedList.join(", ");
+
+    $('#footerOnlineStatus').html(`
+        <i class="fa-solid fa-users me-2" onclick="toggleAdminNameDisplay()" style="cursor: pointer;" title="Bấm để xoay vòng chế độ hiển thị danh sách"></i> 
+        ${cachedOnlineCount} người: <strong>${displayList}</strong>
+    `);
+}
+
+// 5. Hàm gửi request lấy dữ liệu mới từ Server (chạy ngầm định kỳ)
 function pingOnlineStatus() {
-            let savedUser = localStorage.getItem('currentUser');
-            let mssvParam = "Khách"; 
-            if (savedUser) {
-                try {
-                    let userObj = JSON.parse(savedUser);
-                    mssvParam = userObj.mssv + "|" + userObj.name; 
-			
-                } catch(e) { mssvParam = "Khách"; }
-		if (savedUser) {
+    let savedUser = localStorage.getItem('currentUser');
+    let mssvParam = "Khách"; 
+    
+    if (savedUser) {
         try {
-           
-               $('#gpaNavContainer').removeClass('d-none');
-            
-        } catch(e) {
+            let userObj = JSON.parse(savedUser);
+            mssvParam = userObj.mssv + "|" + userObj.name; 
+            $('#gpaNavContainer').removeClass('d-none');
+        } catch(e) { 
+            mssvParam = "Khách"; 
             $('#gpaNavContainer').addClass('d-none');
         }
     } else {
-        // Chưa đăng nhập thì ẩn
         $('#gpaNavContainer').addClass('d-none');
     }
-$(document).ready(function() {
-    checkGPAAccessPermission();
-});
-            }
-            if (mssvParam === "Khách" && currentUser && currentUser.mssv) { mssvParam = currentUser.mssv + "|" + currentUser.name; }
 
-            $.ajax({ 
-                url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID + "&mssv=" + encodeURIComponent(mssvParam), 
-                method: "GET", dataType: "json", cache: false,
-                success: function(res) { 
-                    if (res && res.list) { 
-                        let currentIsAdmin = isAdmin || (currentUser && currentUser.mssv === "51.01.108.008");
-                        let processedList = res.list.map(userStr => {
-                            let str = String(userStr).trim();
-                            if (str.toLowerCase() === "khách" || !str.includes("|")) return str;
-                            let parts = str.split("|");
-                            let userMssv = parts[0]; let userName = parts[1];
-                            if (userMssv === "51.01.108.008") return '<span class="fw-bold" style="color: #facc15; text-transform: uppercase;"><i class="fa-solid fa-user-shield me-1"></i>Admin</span>';
-                            if (currentIsAdmin) return userName + " (" + userMssv + ")";
-                            return maskMSSV(userMssv);
-                        });
-                        let displayList = processedList.join(", ");
-                        $('#footerOnlineStatus').html(`<i class="fa-solid fa-users me-2"></i> ${res.count} người: <strong>${displayList}</strong>`);
-                    } 
-                } 
-            });
-        }
+    if (mssvParam === "Khách" && currentUser && currentUser.mssv) { 
+        mssvParam = currentUser.mssv + "|" + currentUser.name; 
+    }
+
+    $.ajax({ 
+        url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID + "&mssv=" + encodeURIComponent(mssvParam), 
+        method: "GET", 
+        dataType: "json", 
+        cache: false,
+        success: function(res) { 
+            if (res && res.list) { 
+                // Cập nhật dữ liệu mới vào RAM
+                cachedOnlineList = res.list;
+                cachedOnlineCount = res.count;
+                
+                // Vẽ lại UI
+                renderOnlineFooterUI();
+            } 
+        } 
+    });
+}
+
 function loadWebLinks() { 
     $('#webLinksContainer').html(`
         <div class="col-12 w-100">
