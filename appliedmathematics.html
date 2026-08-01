@@ -1989,5 +1989,118 @@
         }
     })();
 </script>
+<script>
+// Hàm đổi URL linh hoạt
+function updateSystemUrl(paramKey, paramValue) {
+    let cleanPath = window.location.pathname;
+    let newUrl = cleanPath;
+    
+    if (paramKey && paramValue) {
+        let cleanValue = paramValue.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "");
+        newUrl += `?${paramKey}=${cleanValue}`;
+    }
+    
+    window.history.pushState({ path: newUrl }, '', newUrl);
+}
+
+// Hàm khôi phục URL về mặc định
+function resetUrlToDefault() {
+    let cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+}
+
+// PROMISE: Lắng nghe và chờ API tải danh sách học phần hoàn tất thay vì dùng setInterval
+function waitForCategories() {
+    return new Promise((resolve) => {
+        // Nếu dữ liệu đã có sẵn thì trả về ngay lập tức (Zero lag)
+        if (typeof globalCategories !== 'undefined' && globalCategories.length > 0) {
+            resolve(globalCategories);
+        } else {
+            // Nếu chưa có, lắng nghe sự kiện hoàn thành AJAX của jQuery
+            $(document).ajaxSuccess(function(event, xhr, settings) {
+                if (settings.url.includes("action=getHocPhanList")) {
+                    // Chờ 10ms để callback của thẻ AJAX gốc gán dữ liệu vào biến globalCategories
+                    setTimeout(() => {
+                        resolve(globalCategories);
+                    }, 10);
+                }
+            });
+        }
+    });
+}
+
+// BỘ ĐỊNH TUYẾN ROUTER BẰNG ASYNC/AWAIT
+async function initSystemUrlRouter() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let viewParam = urlParams.get('view');
+    let courseParam = urlParams.get('course');
+    let categoryParam = urlParams.get('category');
+    let tbParam = urlParams.get('tb');
+
+    // 1. Mở bài viết Thông báo chi tiết
+    if (tbParam) {
+        if (typeof checkUrlAndOpenThongBao === 'function') {
+            checkUrlAndOpenThongBao();
+        }
+        return;
+    }
+
+    // 2. Mở các phân hệ Trang cá nhân
+    if (viewParam) {
+        if (viewParam === 'weblinks') loadTongHopView();
+        else if (viewParam === 'tkb') loadTKBView();
+        else if (viewParam === 'gpa') loadGPAView();
+        else if (viewParam === 'profile') loadProfileView();
+        else if (viewParam === 'qa') openQASection();
+        else if (viewParam === 'sharecode') {
+            openShareCodeSection();
+            
+            // Khung ShareCode là DOM tĩnh đã tồn tại ngay lập tức, loại bỏ hoàn toàn setInterval chờ đợi
+            if (categoryParam) {
+                let targetCat = categoryParam.toLowerCase();
+                if (targetCat.includes('python')) openShareCategory('Lập trình Python', 'python');
+                else if (targetCat.includes('huongdoituong')) openShareCategory('Lập trình hướng đối tượng', 'cpp');
+                else if (targetCat.includes('cautrucdulieu')) openShareCategory('Cấu trúc dữ liệu', 'cpp');
+                else if (targetCat.includes('nangcao')) openShareCategory('Lập trình nâng cao', 'cpp');
+            }
+        }
+        return;
+    } 
+    
+    // 3. Mở trang Học phần môn học
+    if (courseParam) {
+        try {
+            // Tạm ngưng tiến trình (await) cho đến khi sự kiện tải danh sách học phần báo hoàn tất
+            let categories = await waitForCategories();
+            
+            let matchedCourse = categories.find(name => 
+                name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase() === courseParam.toLowerCase()
+            );
+            
+            if (matchedCourse) {
+                loadDataByHocPhan(matchedCourse);
+            }
+        } catch (error) {
+            console.error("Lỗi khi định tuyến học phần:", error);
+        }
+    }
+}
+
+// Bắt sự kiện khi người dùng bấm nút Back / Forward trên trình duyệt
+window.addEventListener('popstate', function() {
+    let urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.get('tb') && $('#tbDetailContainer').length && !$('#tbDetailContainer').hasClass('d-none')) {
+        $('#tbDetailContainer').addClass('d-none');
+        $('#tbMainView').removeClass('d-none');
+    } else {
+        initSystemUrlRouter();
+    }
+});
+
+// Kích hoạt Router ngay khi DOM đã load (không cần setTimeout 500ms như trước)
+$(document).ready(function() {
+    initSystemUrlRouter();
+});
+</script>
 </body>
 </html>
