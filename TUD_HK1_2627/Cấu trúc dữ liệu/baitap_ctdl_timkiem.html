@@ -548,38 +548,53 @@
                 }
 
                 let codeHtml = sub.code ? `
-                    <div class="history-code-container">
-                        <button class="btn-copy-code-sample" onclick="copyHistoryCode('${codeContainerId}', this)">
-                            <i class="fa-regular fa-copy"></i> Copy Code
-                        </button>
-                        <div class="history-code-title">
-                            <i class="fa-solid fa-code"></i> Mã nguồn (${sub.lang}):
-                        </div>
-                        <pre class="history-code-text"><code id="${codeContainerId}">${highlightedCode}</code></pre>
-                    </div>
-                ` : '';
+            <div class="history-code-container">
+                <button class="btn-copy-code-sample" onclick="copyHistoryCode('${codeContainerId}', this)">
+                    <i class="fa-regular fa-copy"></i> Copy Code
+                </button>
+                <div class="history-code-title">
+                    <i class="fa-solid fa-code"></i> Mã nguồn (${sub.lang}):
+                </div>
+                <pre class="history-code-text"><code id="${codeContainerId}">${highlightedCode}</code></pre>
+            </div>
+        ` : '';
 
-                historyHtml += `
-                    <div class="history-card">
-                        <div class="history-header">
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="badge bg-success px-3 py-1.5" style="font-size: 12px;"><i class="fa-solid fa-check-circle me-1"></i> Lần nộp #${submissionNumber}</span>
-                                <span class="text-muted small fw-bold"><i class="fa-regular fa-clock me-1"></i> ${sub.time}</span>
-                            </div>
-                            <button class="btn btn-sm btn-edit-submission" onclick="editSubmissionToForm(${idx})" title="Chỉnh sửa lại bài nộp này">
-                                <i class="fa-solid fa-pen-to-square me-1"></i> Sửa bài này
-                            </button>
-                        </div>
-                        <div class="history-body">
-                            ${theoryHtml}
-                            ${codeHtml}
-                        </div>
-                    </div>
-                `;
-            });
+        // =========================================================
+        // CHÈN ĐOẠN NÀY VÀO ĐÂY:
+        // =========================================================
+        let commentsHtml = (sub.answerThread && sub.answerThread.trim() !== "") 
+            ? parseThread(sub.answerThread, sub.rowIndex) 
+            : '<div class="text-muted small italic mt-2"><i class="fa-regular fa-comment"></i> Chưa có bình luận/góp ý nào.</div>';
 
-            $('#submissionHistoryContainer').html(historyHtml);
-        }
+        historyHtml += `
+            <div class="history-card">
+                <div class="history-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-success px-3 py-1.5" style="font-size: 12px;"><i class="fa-solid fa-check-circle me-1"></i> Lần nộp #${submissionNumber}</span>
+                        <span class="text-muted small fw-bold"><i class="fa-regular fa-clock me-1"></i> ${sub.time}</span>
+                    </div>
+                    <button class="btn btn-sm btn-edit-submission" onclick="editSubmissionToForm(${idx})" title="Chỉnh sửa lại bài nộp này">
+                        <i class="fa-solid fa-pen-to-square me-1"></i> Sửa bài này
+                    </button>
+                </div>
+                <div class="history-body">
+                    ${theoryHtml}
+                    ${codeHtml}
+
+                    <!-- Bổ sung hiển thị bình luận vào cuối thẻ lịch sử -->
+                    <div class="history-comments-box mt-3 pt-3 border-top">
+                        <div class="fw-bold text-primary mb-2" style="font-size: 14px;">
+                            <i class="fa-solid fa-comments me-1"></i> Phản hồi / Bình luận:
+                        </div>
+                        ${commentsHtml}
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+
+    $('#submissionHistoryContainer').html(historyHtml);
+}
 
         // BÓC TÁCH NỘI DUNG & ĐẨY LÊN KHUNG SOẠN THẢO
         function editSubmissionToForm(subIndex) {
@@ -664,7 +679,7 @@
                         let rowMssv = row[1] || '';
                         let contentRaw = row[2] || '';
                         let rowIndex = row[6];
-
+			let answerThread = row[3] || '';
                         if (rowMssv.trim().toLowerCase() === mssv.toLowerCase() && contentRaw.startsWith(targetTag)) {
                             let cleanContent = contentRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '').trim();
                             
@@ -692,7 +707,8 @@
                                 time: time,
                                 theory: theoryPart,
                                 code: codePart,
-                                lang: langMatch
+                                lang: langMatch,
+				answerThread: answerThread
                             });
                         }
                     });
@@ -826,5 +842,6 @@
             });
         }
     </script>
+<script src="../../TRANGWEB/qa.js"></script>
 </body>
 </html>
