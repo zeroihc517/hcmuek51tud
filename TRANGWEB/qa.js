@@ -509,6 +509,12 @@ function openShareCategory(categoryName, lang) {
     shareCodeEditor.resize(); 
     cancelEditShareCode(); 
     loadShareCodeData();
+	// Thêm đoạn này vào cuối hàm openShareCodeSection() trong qa.js
+let urlParams = new URLSearchParams(window.location.search);
+let catParam = urlParams.get('category');
+if (catParam === 'CauTrucDuLieu' || catParam === 'Cấu trúc dữ liệu') {
+    openShareCategory('Cấu trúc dữ liệu', 'cpp');
+}
 }
 function sendShareCode() {
     let mssvValue = currentUser ? currentUser.mssv : $('#txtMSSVShareCode').val().trim(); 
@@ -572,86 +578,103 @@ function loadShareCodeData() {
     $('#shareCodeListArea').html(''); 
     $('#shareCodeLoadingStatus').removeClass('d-none');
     
-    $.ajax({ url: SCRIPT_URL + "?action=getShareCodeData", method: "GET", dataType: "json", success: function(data) {
-        $('#shareCodeLoadingStatus').addClass('d-none');
-        if (!data || data.length === 0) {
-            $('#shareCodeListArea').html(`<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có bài chia sẻ nào.</div>`);
-            return;
-        }
-        
-        window.shareCodeList = []; 
-        let gridHtml = '<div class="row g-3">'; 
-        
-        data.forEach(row => {
-            let questionRaw = row[2] || '';
-            let targetTag = `[SHARECODE|${currentShareCategory}`;
-            if (!questionRaw.startsWith(targetTag)) return;
-            
-            let time = row[0] || ''; 
-            let displayMssv = maskMSSV(row[1] || ''); 
-            let answer = row[3] || ''; 
-            let rowIndex = row[6];       
-            
-            let categoryMatch = questionRaw.match(/^\[SHARECODE\|(.*?)(?:\|(.*))?\]/);
-            let maBaiValue = 'CODE KHÔNG TÊN';
-            
-            if (categoryMatch) {
-                if (categoryMatch[2] && categoryMatch[2].trim() !== "undefined") {
-                    maBaiValue = categoryMatch[2].trim();
-                }
-                questionRaw = questionRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '');
+    $.ajax({ 
+        url: SCRIPT_URL + "?action=getShareCodeData", 
+        method: "GET", 
+        dataType: "json", 
+        success: function(data) {
+            $('#shareCodeLoadingStatus').addClass('d-none');
+            if (!data || data.length === 0) {
+                $('#shareCodeListArea').html(`<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có bài chia sẻ nào.</div>`);
+                return;
             }
+            
+            window.shareCodeList = []; 
+            let rawList = [];
 
-            // Ghi dữ liệu vào mảng
-           let arrayIndex = window.shareCodeList.length;
-window.shareCodeList.push({
-    time: time,
-    author: displayMssv,
-    rawAuthor: row[1] || '', // Thêm dòng này để lưu trữ MSSV gốc của tác giả
-    maBai: maBaiValue,
-    codeContent: questionRaw,
-    answer: answer,
-    rowIndex: rowIndex
-});
+            // Bóc tách dữ liệu từ Google Sheets
+            data.forEach(row => {
+                let questionRaw = row[2] || '';
+                let targetTag = `[SHARECODE|${currentShareCategory}`;
+                if (!questionRaw.startsWith(targetTag)) return;
+                
+                let time = row[0] || ''; 
+                let rawAuthor = row[1] || '';
+                let displayMssv = maskMSSV(rawAuthor); 
+                let answer = row[3] || ''; 
+                let rowIndex = row[6];       
+                
+                let categoryMatch = questionRaw.match(/^\[SHARECODE\|(.*?)(?:\|(.*))?\]/);
+                let maBaiValue = 'CODE KHÔNG TÊN';
+                
+                if (categoryMatch) {
+                    if (categoryMatch[2] && categoryMatch[2].trim() !== "undefined") {
+                        maBaiValue = categoryMatch[2].trim();
+                    }
+                    questionRaw = questionRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '');
+                }
 
-            // Vẽ thẻ Card ra giao diện lưới
-gridHtml += `
-<div class="col-6 col-md-4 col-lg-2">
-    <div class="card-sharecode-box" onclick="openShareCodeDetail(${arrayIndex})">
-        <div class="card-sharecode-badge">
-            <i class="fa-solid fa-code"></i>
-        </div>
-        <div class="card-sharecode-icon">
-            <i class="fa-solid fa-file-code"></i>
-        </div>
-        <div class="card-sharecode-body">
-            <h6 class="card-sharecode-title" title="${maBaiValue}">${maBaiValue}</h6>
-            <div class="card-sharecode-meta">
-                <span class="meta-author"><i class="fa-solid fa-user-circle me-1"></i>${displayMssv}</span>
-                <span class="meta-time"><i class="fa-regular fa-clock me-1"></i>${time}</span>
-            </div>
-        </div>
-        <div class="card-sharecode-footer">
-            <span>Xem chi tiết</span>
-            <i class="fa-solid fa-arrow-right"></i>
-        </div>
-    </div>
-</div>`;
-        });
-        
-        gridHtml += '</div>';
-        
-        if(window.shareCodeList.length === 0) {
-            gridHtml = `<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có code nào. Hãy chia sẻ!</div>`;
+                rawList.push({
+                    time: time, author: displayMssv, rawAuthor: rawAuthor, 
+                    maBai: maBaiValue, codeContent: questionRaw, answer: answer, rowIndex: rowIndex
+                });
+            });
+
+            // LỌC GỘP BẢN SAO: Gom nhóm theo (Tác giả + Mã bài), chỉ giữ lại bản nộp mới nhất
+            let uniqueMap = {};
+            rawList.forEach(item => {
+                let uniqueKey = `${item.rawAuthor.trim().toLowerCase()}_${item.maBai.trim().toLowerCase()}`;
+                
+                // Do data từ GAS trả về mảng đã đảo ngược (mới nhất nằm trên cùng), 
+                // nên bản ghi được duyệt đầu tiên chính là BẢN MỚI NHẤT
+                if (!uniqueMap[uniqueKey]) {
+                    uniqueMap[uniqueKey] = item;
+                }
+            });
+
+            // Chuyển Object về lại mảng để render
+            window.shareCodeList = Object.values(uniqueMap);
+
+            let gridHtml = '<div class="row g-3">'; 
+            
+            window.shareCodeList.forEach((item, arrayIndex) => {
+                gridHtml += `
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="card-sharecode-box" onclick="openShareCodeDetail(${arrayIndex})">
+                        <div class="card-sharecode-badge">
+                            <i class="fa-solid fa-code"></i>
+                        </div>
+                        <div class="card-sharecode-icon">
+                            <i class="fa-solid fa-file-code"></i>
+                        </div>
+                        <div class="card-sharecode-body">
+                            <h6 class="card-sharecode-title" title="${item.maBai}">${item.maBai}</h6>
+                            <div class="card-sharecode-meta">
+                                <span class="meta-author"><i class="fa-solid fa-user-circle me-1"></i>${item.author}</span>
+                                <span class="meta-time"><i class="fa-regular fa-clock me-1"></i>${item.time}</span>
+                            </div>
+                        </div>
+                        <div class="card-sharecode-footer">
+                            <span>Xem chi tiết</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            
+            gridHtml += '</div>';
+            
+            if (window.shareCodeList.length === 0) {
+                gridHtml = `<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có code nào. Hãy chia sẻ!</div>`;
+            }
+            
+            let finalHtml = `
+                <div id="shareCodeListWrapper">${gridHtml}</div>
+                <div id="shareCodeDetailWrapper" class="d-none"></div>
+            `;
+            $('#shareCodeListArea').html(finalHtml); 
         }
-        
-        // Tạo cấu trúc: 1 khung chứa lưới danh sách, 1 khung chứa chi tiết (ẩn mặc định)
-        let finalHtml = `
-            <div id="shareCodeListWrapper">${gridHtml}</div>
-            <div id="shareCodeDetailWrapper" class="d-none"></div>
-        `;
-        $('#shareCodeListArea').html(finalHtml); 
-    }});
+    });
 }
 
 window.openShareCodeDetail = function(index) {

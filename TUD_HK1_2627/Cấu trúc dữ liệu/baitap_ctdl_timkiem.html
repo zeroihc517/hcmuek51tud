@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Làm bài tập Lý thuyết & Lập trình | Học nhóm APMA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Đường dẫn CSS lùi 2 cấp thư mục -->
+    <link href="../../TRANGWEB/styleweb.css" rel="stylesheet">
+    
+    <style>
+        .question-nav-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scroll-behavior: smooth;
+        }
+        .question-nav-container::-webkit-scrollbar {
+            height: 4px;
+        }
+        .question-nav-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .btn-question-tab {
+            background-color: #ffffff;
+            color: #475569;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-question-tab:hover {
+            border-color: #0f4c81;
+            color: #0f4c81;
+            background-color: #f0f7ff;
+        }
+        .btn-question-tab.active {
+            background-color: #0f4c81 !important;
+            color: #ffffff !important;
+            border-color: #0f4c81 !important;
+            box-shadow: 0 4px 10px rgba(15, 76, 129, 0.2);
+        }
+        .btn-question-tab .badge-code {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.08);
+            color: inherit;
+        }
+        .btn-question-tab.active .badge-code {
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+        }
+
+        /* GIAO DIỆN LỊCH SỬ NỀN TRẮNG SÁNG */
+        .history-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .history-header {
+            background: #f8fafc;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-body {
+            padding: 20px;
+        }
+        .history-theory-box {
+            background: #f0f7ff;
+            border-left: 5px solid #0f4c81;
+            padding: 14px 18px;
+            border-radius: 0 12px 12px 0;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #1e293b;
+            margin-bottom: 18px;
+        }
+        .history-code-container {
+            position: relative;
+            background-color: #ffffff; 
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 10px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .history-code-title {
+            color: #0f4c81;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-copy-code-sample {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-copy-code-sample:hover {
+            background: #0f4c81;
+            color: #ffffff;
+            border-color: #0f4c81;
+        }
+        .history-code-text {
+            color: #0f172a;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px;
+            font-family: 'Consolas', 'Fira Code', 'Courier New', monospace !important;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0;
+            white-space: pre;
+            overflow-x: auto;
+            tab-size: 4;
+        }
+        .btn-edit-submission {
+            background-color: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: 4px 12px;
+            font-size: 12.5px;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .btn-edit-submission:hover {
+            background-color: #d97706;
+            color: #ffffff;
+            border-color: #d97706;
+        }
+    </style>
+</head>
+<body style="background-color: #f8fafc; font-family: 'Inter', sans-serif;">
+
+    <div class="container-fluid px-3 px-md-5 py-4">
+        
+        <!-- Header Định vị Học phần & Nút Trang chủ -->
+        <div class="card border-0 shadow-sm mb-3" style="border-radius: 16px; border-left: 6px solid #0f4c81 !important;">
+            <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <span class="badge bg-primary mb-2 px-3 py-1.5" style="font-size: 13px; background-color: #0f4c81 !important;" id="badgeCourse">Đang tải học phần...</span>
+                    <h3 class="fw-bold text-dark m-0" id="titleMaBai">Bài tập: ---</h3>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="../../appliedmathematics.html" class="btn btn-sm btn-outline-secondary fw-bold px-3 py-2 me-2" style="border-radius: 8px;">
+                        <i class="fa-solid fa-house me-1"></i> Trang chủ
+                    </a>
+                    <label class="fw-bold small text-muted text-nowrap m-0 d-none d-sm-block"><i class="fa-solid fa-list-check me-1"></i>Chọn nhanh:</label>
+                    <select id="selectQuestionIndex" class="form-select fw-bold border-primary" style="width: auto; border-radius: 8px;" onchange="switchQuestion(this.value)">
+                        <!-- Danh sách câu hỏi tự động nạp vào đây -->
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- DẢI THANH NÚT BẤM CHỌN CÂU HỎI (TAB BAR) -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 14px; background: #ffffff;">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fw-bold text-uppercase small text-muted" style="letter-spacing: 0.5px;">
+                        <i class="fa-solid fa-layer-group text-primary me-1"></i> Danh sách câu hỏi:
+                    </span>
+                    <span class="badge bg-light text-dark border fw-normal" id="labelTotalQuestions">0 câu</span>
+                </div>
+                <div class="question-nav-container" id="questionTabsContainer">
+                    <!-- Tự động sinh ra các nút Câu 1 (B01), Câu 2 (B02)... -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Khung hiển thị Đề bài chi tiết -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; background-color: #ffffff;">
+            <div class="card-header bg-light border-0 pt-3 px-4 d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold text-primary m-0"><i class="fa-solid fa-circle-question me-2"></i>Đề bài chi tiết</h6>
+                <span class="badge bg-danger px-3 py-1" id="labelCurrentMaBai" style="font-size: 12px;">Mã bài: ---</span>
+            </div>
+            <div class="card-body p-4 fs-6 text-secondary" id="questionContentArea" style="line-height: 1.6;">
+                Đang tải đề bài...
+            </div>
+        </div>
+
+        <!-- Khung Soạn thảo Lý thuyết & Mã nguồn Code -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden;" id="mainSubmissionCard">
+            <div class="card-header text-white d-flex justify-content-between align-items-center py-3 px-4" style="background-color: #0f4c81;">
+                <h6 class="m-0 fw-bold" id="formSubmissionTitle"><i class="fa-solid fa-pen-to-square me-2"></i>Bài làm của sinh viên</h6>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small opacity-75">MSSV:</span>
+                    <input type="text" id="txtExerciseMSSV" class="form-control form-control-sm fw-bold border-0 text-center" style="width: 120px; background: rgba(255,255,255,0.2); color: #fff;" readonly>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- 1. SOẠN THẢO LÝ THUYẾT -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-dark" style="font-size: 15px;">
+                        <i class="fa-solid fa-align-left text-primary me-2"></i>1. LỜI GIẢI LÝ THUYẾT:
+                    </label>
+                    <textarea id="theoryEditor" class="form-control" rows="8" placeholder="Trình bày lời giải bài tập lý thuyết..."></textarea>
+                </div>
+
+                <!-- 2. KHUNG CODE -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-bold text-dark m-0" style="font-size: 15px;">
+                            <i class="fa-solid fa-code text-success me-2"></i>2. MÃ NGUỒN CHƯƠNG TRÌNH (CODE):
+                        </label>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small text-muted">Ngôn ngữ:</span>
+                            <select id="selectLang" class="form-select form-select-sm fw-bold" style="width: 120px;" onchange="changeEditorLang()">
+                                <option value="cpp">C / C++</option>
+                                <option value="python">Python</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="exerciseCodeEditor" style="height: 380px; border: 1px solid #cbd5e1; border-radius: 8px;"></div>
+                </div>
+
+                <!-- NÚT NỘP BÀI -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small"><i class="fa-solid fa-circle-info me-1"></i>Bài làm sẽ được lưu trực tiếp vào Thảo luận.</span>
+                        <button type="button" class="btn btn-sm btn-outline-danger fw-bold d-none" id="btnCancelEditMode" onclick="cancelEditMode()">
+                            <i class="fa-solid fa-xmark me-1"></i> Hủy sửa
+                        </button>
+                    </div>
+                    <button type="button" class="btn text-white fw-bold px-5 py-2.5 shadow-sm" style="background-color: #0f4c81; border-radius: 12px; font-size: 15px;" onclick="submitExerciseSolution()" id="btnSubmitExercise">
+                        <i class="fa-solid fa-paper-plane me-2"></i> Nộp bài & Đăng lên Thảo luận
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MỤC LỊCH SỬ BÀI NỘP CỦA TÔI -->
+        <div class="card border-0 shadow-sm" style="border-radius: 16px; background-color: #ffffff;">
+            <div class="card-header bg-light border-0 pt-3 px-4 d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold text-success m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử bài nộp của tôi</h6>
+                <button class="btn btn-sm btn-outline-success fw-bold" onclick="loadSubmissionHistory()" style="border-radius: 8px;">
+                    <i class="fa-solid fa-rotate-right me-1"></i> Làm mới lịch sử
+                </button>
+            </div>
+            <div class="card-body p-4" id="submissionHistoryContainer">
+                <div class="text-center text-muted py-3">
+                    <i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải lịch sử bài nộp...
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Thư viện JS -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
+    <!-- Đường dẫn JS config lùi 2 cấp thư mục -->
+    <script src="../../TRANGWEB/config.js"></script>
+
+    <script>
+        let exerciseEditor;
+        let urlParams = new URLSearchParams(window.location.search);
+        let courseName = urlParams.get('course') || "Cấu trúc dữ liệu";
+        let maBaiParam = urlParams.get('mabai') || "B01";
+        let langParam = urlParams.get('lang') || "cpp";
+
+        let questionsList = [];
+        let currentQuestionIndex = 0;
+        let currentSubmissionsList = [];
+        let editingSubIndex = -1; // Biến lưu chỉ số mảng đang sửa (-1 là nộp mới)
+
+        $(document).ready(function() {
+            let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+            if (currentUser && currentUser.mssv) {
+                $('#txtExerciseMSSV').val(currentUser.mssv);
+            } else {
+                $('#txtExerciseMSSV').val("Khách");
+            }
+
+            if ($('#exerciseCodeEditor').length) {
+                exerciseEditor = ace.edit("exerciseCodeEditor");
+                exerciseEditor.setTheme("ace/theme/textmate");
+                exerciseEditor.session.setMode(langParam === 'python' ? "ace/mode/python" : "ace/mode/c_cpp");
+                exerciseEditor.setOptions({ fontSize: "15px", showPrintMargin: false });
+            }
+
+            tinymce.init({
+                selector: '#theoryEditor',
+                height: 320,
+                menubar: false,
+                plugins: 'lists link table code',
+                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | table link',
+                content_style: 'body { font-family:Inter,sans-serif; font-size:15px }',
+                setup: function(editor) {
+                    editor.on('init', function() {
+                        loadQuestionsData();
+                    });
+                    editor.on('change', function() { editor.save(); });
+                }
+            });
+        });
+
+        // 1. NẠP DANH SÁCH CÂU HỎI
+        // 1. NẠP DANH SÁCH CÂU HỎI TỰ ĐỘNG TỪ GOOGLE SHEETS
+        function loadQuestionsData() {
+            $('#questionContentArea').html('<div class="text-center py-4 text-primary"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải đề bài từ hệ thống...</div>');
+            
+            $.ajax({
+                url: SCRIPT_URL + "?action=getExerciseQuestions&course=" + encodeURIComponent(courseName),
+                method: "GET",
+                dataType: "json",
+                cache: false,
+                success: function(data) {
+                    if (data && data.length > 0) {
+                        questionsList = data; // Lấy dữ liệu động từ Google Sheets
+                    } else {
+                        // Nếu trang tính trống, hiển thị thông báo
+                        $('#questionContentArea').html('<div class="text-danger fw-bold py-3"><i class="fa-solid fa-triangle-exclamation"></i> Chưa có đề bài nào được giáo viên phát hành.</div>');
+                        return;
+                    }
+
+                    let selectHtml = "";
+                    let tabsHtml = "";
+
+                    questionsList.forEach((q, idx) => {
+                        selectHtml += `<option value="${idx}">Câu ${idx + 1} (${q.maBai})</option>`;
+                        
+                        tabsHtml += `
+                            <button class="btn-question-tab ${idx === 0 ? 'active' : ''}" id="tabBtnQuestion_${idx}" onclick="switchQuestion(${idx})">
+                                <i class="fa-solid fa-file-code"></i> Câu ${idx + 1}
+                                <span class="badge-code">${q.maBai}</span>
+                            </button>
+                        `;
+                    });
+
+                    $('#selectQuestionIndex').html(selectHtml);
+                    $('#questionTabsContainer').html(tabsHtml);
+                    $('#labelTotalQuestions').text(`Tổng: ${questionsList.length} câu`);
+
+                    renderQuestion(0); // Tự động load câu số 1
+                },
+                error: function() {
+                    $('#questionContentArea').html('<div class="text-danger fw-bold py-3">Lỗi kết nối khi tải đề bài!</div>');
+                }
+            });
+        }
+
+        // 2. HIỂN THỊ CÂU HỎI ĐƯỢC CHỌN
+        function renderQuestion(index) {
+            index = parseInt(index);
+            currentQuestionIndex = index;
+            let q = questionsList[index];
+            if (!q) return;
+
+            cancelEditMode();
+
+            $('#badgeCourse').text(courseName);
+            $('#titleMaBai').text(`Bài tập: ${q.title}`);
+            $('#labelCurrentMaBai').text(`Mã bài: ${q.maBai}`);
+            $('#questionContentArea').html(q.content);
+            document.title = `${q.maBai} - ${courseName} | Làm bài tập`;
+
+            $('.btn-question-tab').removeClass('active');
+            $(`#tabBtnQuestion_${index}`).addClass('active');
+            $('#selectQuestionIndex').val(index);
+
+            loadSubmissionHistory();
+        }
+
+        function switchQuestion(index) {
+            renderQuestion(index);
+        }
+
+        function changeEditorLang() {
+            let selectedLang = $('#selectLang').val();
+            if (exerciseEditor) {
+                exerciseEditor.session.setMode(selectedLang === 'python' ? "ace/mode/python" : "ace/mode/c_cpp");
+            }
+        }
+
+        // 3. RENDER LỊCH SỬ BÀI NỘP
+        function renderHistoryUI() {
+            if (!currentSubmissionsList || currentSubmissionsList.length === 0) {
+                let q = questionsList[currentQuestionIndex];
+                $('#submissionHistoryContainer').html(`<div class="text-center text-muted py-3">Bạn chưa nộp bài lần nào cho câu hỏi <b>${q ? q.maBai : ''}</b>.</div>`);
+                return;
+            }
+
+            let historyHtml = "";
+            currentSubmissionsList.forEach((sub, idx) => {
+                let submissionNumber = currentSubmissionsList.length - idx;
+                let codeContainerId = `historyCode_${idx}_${Date.now()}`;
+
+                let theoryHtml = sub.theory ? `
+                    <div class="history-theory-box">
+                        <div class="fw-bold text-primary mb-2" style="font-size: 15px;">
+                            <i class="fa-solid fa-align-left me-1"></i> LỜI GIẢI LÝ THUYẾT:
+                        </div>
+                        <div>${sub.theory}</div>
+                    </div>
+                ` : '';
+
+                let codeHtml = sub.code ? `
+                    <div class="history-code-container">
+                        <button class="btn-copy-code-sample" onclick="copyHistoryCode('${codeContainerId}', this)">
+                            <i class="fa-regular fa-copy"></i> Copy Code
+                        </button>
+                        <div class="history-code-title">
+                            <i class="fa-solid fa-code"></i> Mã nguồn (${sub.lang}):
+                        </div>
+                        <pre class="history-code-text"><code id="${codeContainerId}">${escapeHtml(sub.code)}</code></pre>
+                    </div>
+                ` : '';
+
+                historyHtml += `
+                    <div class="history-card">
+                        <div class="history-header">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-success px-3 py-1.5" style="font-size: 12px;"><i class="fa-solid fa-check-circle me-1"></i> Lần nộp #${submissionNumber}</span>
+                                <span class="text-muted small fw-bold"><i class="fa-regular fa-clock me-1"></i> ${sub.time}</span>
+                            </div>
+                            <button class="btn btn-sm btn-edit-submission" onclick="editSubmissionToForm(${idx})" title="Chỉnh sửa lại bài nộp này">
+                                <i class="fa-solid fa-pen-to-square me-1"></i> Sửa bài này
+                            </button>
+                        </div>
+                        <div class="history-body">
+                            ${theoryHtml}
+                            ${codeHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            $('#submissionHistoryContainer').html(historyHtml);
+        }
+
+        // BÓC TÁCH NỘI DUNG & ĐẨY LÊN KHUNG SOẠN THẢO
+        function editSubmissionToForm(subIndex) {
+            let sub = currentSubmissionsList[subIndex];
+            if (!sub) return;
+
+            editingSubIndex = subIndex; // Lưu chỉ số dòng đang sửa
+
+            if (typeof tinymce !== 'undefined' && tinymce.get('theoryEditor')) {
+                tinymce.get('theoryEditor').setContent(sub.theory || '');
+            }
+
+            if (exerciseEditor) {
+                let targetLang = (sub.lang || '').toLowerCase() === 'python' ? 'python' : 'cpp';
+                $('#selectLang').val(targetLang);
+                changeEditorLang();
+                exerciseEditor.setValue(sub.code || '');
+                exerciseEditor.clearSelection();
+            }
+
+            $('#formSubmissionTitle').html('<i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Đang chỉnh sửa lần nộp #' + (currentSubmissionsList.length - subIndex));
+            $('#btnSubmitExercise').html('<i class="fa-solid fa-floppy-disk me-2"></i> Lưu cập nhật bài làm').css('background-color', '#d97706');
+            $('#btnCancelEditMode').removeClass('d-none');
+
+            $('html, body').animate({
+                scrollTop: $("#mainSubmissionCard").offset().top - 80
+            }, 400);
+        }
+
+        function cancelEditMode() {
+            editingSubIndex = -1;
+            $('#formSubmissionTitle').html('<i class="fa-solid fa-pen-to-square me-2"></i>Bài làm của sinh viên');
+            $('#btnSubmitExercise').html('<i class="fa-solid fa-paper-plane me-2"></i> Nộp bài & Đăng lên Thảo luận').css('background-color', '#0f4c81');
+            $('#btnCancelEditMode').addClass('d-none');
+
+            if (typeof tinymce !== 'undefined' && tinymce.get('theoryEditor')) {
+                tinymce.get('theoryEditor').setContent('');
+            }
+            if (exerciseEditor) {
+                let q = questionsList[currentQuestionIndex];
+                exerciseEditor.setValue($('#selectLang').val() === 'python' ? `# Mã bài: ${q ? q.maBai : ''}\n` : `#include <iostream>\nusing namespace std;\n\nint main() {\n    // Mã bài: ${q ? q.maBai : ''}\n    return 0;\n}`);
+                exerciseEditor.clearSelection();
+            }
+        }
+
+        // TẢI LỊCH SỬ TỪ GOOGLE SHEETS
+        function loadSubmissionHistory() {
+            let mssv = $('#txtExerciseMSSV').val().trim();
+            let q = questionsList[currentQuestionIndex];
+            
+            if (!q || !mssv || mssv === "Khách") {
+                $('#submissionHistoryContainer').html(`
+                    <div class="text-center text-muted py-3">
+                        <i class="fa-solid fa-lock text-secondary fs-4 mb-2 d-block"></i>
+                        Vui lòng đăng nhập tài khoản để xem lịch sử nộp bài cá nhân.
+                    </div>
+                `);
+                return;
+            }
+
+            $('#submissionHistoryContainer').html(`
+                <div class="text-center text-muted py-3">
+                    <i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải danh sách bài nộp của mã <b>${q.maBai}</b>...
+                </div>
+            `);
+
+            $.ajax({
+                url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
+                method: "GET",
+                dataType: "json",
+                cache: false,
+                success: function(data) {
+                    currentSubmissionsList = [];
+                    if (!data || data.length === 0) {
+                        renderHistoryUI();
+                        return;
+                    }
+
+                    let targetTag = `[SHARECODE|${courseName}|${q.maBai}]`;
+
+                    data.forEach(row => {
+                        let time = row[0] || '';
+                        let rowMssv = row[1] || '';
+                        let contentRaw = row[2] || '';
+                        let rowIndex = row[6]; // Lưu số hàng thực tế trong Google Sheets
+
+                        if (rowMssv.trim().toLowerCase() === mssv.toLowerCase() && contentRaw.startsWith(targetTag)) {
+                            let cleanContent = contentRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '').trim();
+                            
+                            let theoryPart = "";
+                            let codePart = "";
+                            let langMatch = "CPP";
+
+                            let codeMatch = cleanContent.match(/```(cpp|python|c\+\+|c)?([\s\S]*?)```/i);
+                            if (codeMatch) {
+                                let rawLang = (codeMatch[1] || "cpp").toLowerCase();
+                                langMatch = (rawLang === 'python') ? 'PYTHON' : 'CPP';
+                                codePart = codeMatch[2].trim();
+                                theoryPart = cleanContent.replace(codeMatch[0], '').trim();
+                            } else {
+                                theoryPart = cleanContent;
+                            }
+
+                            theoryPart = theoryPart.replace(/<div class="mb-3"><strong>Lời giải lý thuyết:<\/strong><br>/g, '')
+                                                   .replace(/<\/div>$/g, '')
+                                                   .replace(/<p><\/p>/g, '')
+                                                   .trim();
+
+                            currentSubmissionsList.push({
+                                rowIndex: rowIndex,
+                                time: time,
+                                theory: theoryPart,
+                                code: codePart,
+                                lang: langMatch
+                            });
+                        }
+                    });
+
+                    renderHistoryUI();
+                },
+                error: function() {
+                    $('#submissionHistoryContainer').html(`<div class="text-center text-danger py-3">Lỗi kết nối khi tải lịch sử bài nộp!</div>`);
+                }
+            });
+        }
+
+        function escapeHtml(text) {
+            return text
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
+        function copyHistoryCode(elementId, btnEl) {
+            let codeText = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                let originalHtml = $(btnEl).html();
+                $(btnEl).html('<i class="fa-solid fa-check text-success"></i> Đã Copy').css('background', '#dcfce7').css('color', '#166534');
+                setTimeout(() => {
+                    $(btnEl).html(originalHtml).css('background', '#f1f5f9').css('color', '#334155');
+                }, 2000);
+            });
+        }
+
+        // 4. HÀM NỘP BÀI / CẬP NHẬT GHI ĐÈ BÀI CŨ - TỰ ĐỘNG LÀM MỚI LỊCH SỬ NGAY TỨC THÌ
+        function submitExerciseSolution() {
+            let mssv = $('#txtExerciseMSSV').val().trim();
+            let theoryText = (typeof tinymce !== 'undefined' && tinymce.get('theoryEditor')) 
+                ? tinymce.get('theoryEditor').getContent().trim() 
+                : $('#theoryEditor').val().trim();
+            let rawCode = exerciseEditor ? exerciseEditor.getValue().trim() : "";
+            let lang = $('#selectLang').val();
+            let q = questionsList[currentQuestionIndex];
+
+            if (typeof SCRIPT_URL === 'undefined') {
+                alert("Lỗi: Không tìm thấy đường dẫn cấu hình SCRIPT_URL trong file config.js.");
+                return;
+            }
+
+            if (!mssv || mssv === "Khách") {
+                alert("Vui lòng đăng nhập tài khoản trước khi nộp bài!");
+                return;
+            }
+            if (!theoryText && !rawCode) {
+                alert("Bạn chưa nhập Bài làm Lý thuyết hoặc Mã nguồn (Code)!");
+                return;
+            }
+
+            let formattedContent = "";
+            if (theoryText) {
+                formattedContent += `<div class="mb-3"><strong>Lời giải lý thuyết:</strong><br>${theoryText}</div>`;
+            }
+            if (rawCode) {
+                formattedContent += `\n\n\`\`\`${lang}\n${rawCode}\n\`\`\``;
+            }
+
+            let formattedPayload = `[SHARECODE|${courseName}|${q.maBai}] \n${formattedContent}`;
+
+            let btn = $('#btnSubmitExercise');
+            let originalHtml = btn.html();
+
+            btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang gửi bài...').prop('disabled', true);
+
+            let now = new Date();
+            let pad = (n) => String(n).padStart(2, '0');
+            let currentTimeStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+
+            let isUpdating = editingSubIndex !== -1;
+            let targetRowIndex = isUpdating ? (currentSubmissionsList[editingSubIndex] ? currentSubmissionsList[editingSubIndex].rowIndex : -1) : -1;
+            let actionType = (isUpdating && targetRowIndex !== -1) ? "updateShareCodeSubmission" : "submitShareCode";
+
+            let postDataObj = {
+                action: actionType,
+                mssv: mssv,
+                codeData: formattedPayload
+            };
+            if (isUpdating && targetRowIndex !== -1) {
+                postDataObj.rowIndex = targetRowIndex;
+            }
+
+            let updatedObj = {
+                rowIndex: targetRowIndex,
+                time: currentTimeStr + " (Vừa cập nhật)",
+                theory: theoryText,
+                code: rawCode,
+                lang: lang.toUpperCase()
+            };
+
+            $.ajax({
+                url: SCRIPT_URL,
+                type: "POST",
+                data: JSON.stringify(postDataObj),
+                contentType: "text/plain;charset=utf-8",
+                dataType: "text",
+                success: function(res) {
+                    btn.html(originalHtml).prop('disabled', false);
+
+                    // 1. CẬP NHẬT MẢNG LỊCH SỬ NGAY TỨC THÌ TRÊN GIAO DIỆN
+                    if (isUpdating) {
+                        currentSubmissionsList[editingSubIndex] = updatedObj; // Ghi đè bài cũ
+                    } else {
+                        currentSubmissionsList.unshift(updatedObj); // Thêm bài nộp mới lên đầu
+                    }
+
+                    // 2. VẼ LẠI GIAO DIỆN LỊCH SỬ LẬP TỨC
+                    renderHistoryUI();
+
+                    // 3. HỦY CHẾ ĐỘ SỬA
+                    cancelEditMode();
+
+                    alert(isUpdating ? `✅ CẬP NHẬT BÀI NỘP THÀNH CÔNG!\n\nBài làm cũ đã được ghi đè bằng bài mới trong Lịch sử.` : `✅ NỘP BÀI THÀNH CÔNG!\n\nBài làm mới của bạn đã xuất hiện trong Lịch sử bài nộp bên dưới.`);
+                },
+                error: function(xhr, status, err) {
+                    btn.html(originalHtml).prop('disabled', false);
+
+                    if (isUpdating) {
+                        currentSubmissionsList[editingSubIndex] = updatedObj;
+                    } else {
+                        currentSubmissionsList.unshift(updatedObj);
+                    }
+
+                    renderHistoryUI();
+                    cancelEditMode();
+
+                    alert(isUpdating ? `✅ CẬP NHẬT BÀI NỘP THÀNH CÔNG!` : `✅ NỘP BÀI THÀNH CÔNG!`);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

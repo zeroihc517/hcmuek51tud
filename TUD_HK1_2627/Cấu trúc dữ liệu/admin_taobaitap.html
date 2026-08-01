@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Tạo bài tập</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .card-custom { border: none; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body>
+    <div class="container py-5" style="max-width: 900px;">
+        <div class="card card-custom">
+            <div class="card-header text-white p-4" style="background-color: #0f4c81; border-radius: 16px 16px 0 0;">
+                <h4 class="m-0 fw-bold"><i class="fa-solid fa-laptop-code me-2"></i>Tạo Đề Bài Lập Trình</h4>
+                <p class="m-0 mt-1 opacity-75 small">Dữ liệu sẽ tự động đồng bộ sang trang làm bài của Sinh viên</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="fw-bold mb-1">Môn học</label>
+                        <input type="text" id="txtCourse" class="form-control fw-bold text-primary" value="Cấu trúc dữ liệu">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="fw-bold mb-1">Mã bài (VD: B08)</label>
+                        <input type="text" id="txtMaBai" class="form-control fw-bold text-danger" placeholder="B08">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="fw-bold mb-1">Tiêu đề bài học (Hiển thị ở Tabs)</label>
+                    <input type="text" id="txtTabTitle" class="form-control" placeholder="VD: Câu 8. Thuật toán Tìm kiếm nhị phân giảm dần">
+                </div>
+
+                <div class="mb-4">
+                    <label class="fw-bold mb-1">Câu dẫn đề bài</label>
+                    <input type="text" id="txtIntro" class="form-control" value="Cho đoạn chương trình C++ sau:">
+                </div>
+
+                <div class="mb-4">
+                    <label class="fw-bold mb-1 text-success"><i class="fa-solid fa-code"></i> Mã nguồn Code đề bài (C++)</label>
+                    <div id="codeEditor" style="height: 250px; border: 1px solid #cbd5e1; border-radius: 8px;"></div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="fw-bold mb-1 text-primary"><i class="fa-solid fa-list-ol"></i> Các câu hỏi phụ (a, b, c...)</label>
+                    <div class="alert alert-info py-2 small m-0 mb-2">Mỗi ý hỏi bạn hãy gõ trên 1 dòng. Hệ thống sẽ tự động gắn chữ <b>a), b), c)</b> vào đầu mỗi dòng cho bạn.</div>
+                    <textarea id="txtSubQuestions" class="form-control" rows="5" placeholder="Hàm SearchDes trả về giá trị gì...&#10;Cho dãy số giảm dần..."></textarea>
+                </div>
+
+                <hr class="my-4">
+                
+                <button class="btn text-white fw-bold w-100 py-3" style="background-color: #e61d4a; font-size: 16px; border-radius: 12px;" onclick="submitNewQuestion()" id="btnSubmit">
+                    <i class="fa-solid fa-cloud-arrow-up me-2"></i> Lưu và Phát hành câu hỏi
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Thông báo nổi của hệ thống -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        <div id="autoToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-bold" id="autoToastMessage" style="font-size: 15px;"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
+    <script src="../../TRANGWEB/config.js"></script> 
+    
+    <script>
+        // Hỗ trợ hiển thị thông báo Toast chuẩn của web
+        window.alert = function(message) {
+            let toastEl = document.getElementById('autoToast'); 
+            let toastBody = document.getElementById('autoToastMessage');
+            toastBody.innerText = message;
+            if (message.toLowerCase().includes('lỗi') || message.toLowerCase().includes('không')) { 
+                toastEl.classList.remove('bg-success', 'bg-primary'); 
+                toastEl.classList.add('bg-danger'); 
+            } else { 
+                toastEl.classList.remove('bg-danger', 'bg-primary'); 
+                toastEl.classList.add('bg-success'); 
+            }
+            let toast = new bootstrap.Toast(toastEl, { delay: 3000 }); 
+            toast.show();
+        };
+
+        let editor;
+        $(document).ready(function() {
+            editor = ace.edit("codeEditor");
+            editor.setTheme("ace/theme/textmate");
+            editor.session.setMode("ace/mode/c_cpp");
+            editor.setOptions({ fontSize: "15px", showPrintMargin: false });
+        });
+
+        function submitNewQuestion() {
+            let course = $('#txtCourse').val().trim();
+            let maBai = $('#txtMaBai').val().trim();
+            let tabTitle = $('#txtTabTitle').val().trim();
+            let intro = $('#txtIntro').val().trim();
+            let rawCode = editor.getValue();
+            let subQs = $('#txtSubQuestions').val().split('\n');
+
+            if (!maBai || !tabTitle) {
+                alert("Vui lòng nhập đầy đủ Mã bài và Tiêu đề!");
+                return;
+            }
+
+            let escapedCode = rawCode.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            
+            let htmlContent = `<p><b>${tabTitle.split('.')[0]}.</b> ${intro}</p>`;
+            
+            if (escapedCode.trim() !== "") {
+                htmlContent += `<div style="background:#f8fafc; border:1px solid #cbd5e1; padding:12px; border-radius:8px; font-family:monospace; margin-bottom:12px; white-space: pre-wrap;">${escapedCode}</div>`;
+            }
+
+            let chars = 'abcdefghijklmnopqrstuvwxyz';
+            let qIndex = 0;
+            subQs.forEach(line => {
+                if (line.trim() !== '') {
+                    htmlContent += `<p><b>${chars[qIndex]})</b> ${line.trim()}</p>`;
+                    qIndex++;
+                }
+            });
+
+            let btn = $('#btnSubmit');
+            let originalHtml = btn.html();
+            btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang lưu và tải lên...').prop('disabled', true);
+
+            let payload = {
+                action: "addExerciseQuestion",
+                course: course,
+                maBai: maBai,
+                title: tabTitle,
+                content: htmlContent
+            };
+
+            $.ajax({
+                url: SCRIPT_URL,
+                type: "POST",
+                data: JSON.stringify(payload),
+                contentType: "text/plain;charset=utf-8",
+                dataType: "text",
+                success: function(res) {
+                    btn.html(originalHtml).prop('disabled', false);
+                    alert("✅ Tải và lưu câu hỏi thành công! Sinh viên đã có thể làm bài.");
+                    
+                    // Reset form
+                    $('#txtMaBai, #txtTabTitle, #txtSubQuestions').val('');
+                    editor.setValue('');
+                },
+                error: function() {
+                    btn.html(originalHtml).prop('disabled', false);
+                    alert("❌ Lỗi kết nối máy chủ! Không thể tải lên câu hỏi.");
+                }
+            });
+        }
+    </script>
+</body>
+</html>

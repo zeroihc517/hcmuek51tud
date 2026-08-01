@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwW3-TD_Z0pUAsB4ssD1UFHANmnapNTnK2z26tIxwvXzE9nwszvApo10sgD3Mwor0BX/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbycgo3zOM9t5XlE44Wvt3rTFPGpfZX6Limxo0L6K_PHxCH-huFNsxHzPqReOoUsxs6-/exec'; 
 
      let isAdmin = localStorage.getItem('isAdmin') === 'true';
         let currentSheetName = "";
@@ -327,17 +327,12 @@ window.openDocumentViewer = function(url, title) {
     $('#docViewerTitle').html(`<i class="fa-solid fa-file-lines me-2"></i> ${cleanTitle || 'Xem tài liệu'}`);
     
     // KIỂM TRA QUYỀN VÀ HIỂN THỊ NÚT "MỞ TAB MỚI" CHỈ CHO ADMIN (51.01.108.008)
-    if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
-        $('#btnOpenInNewTab')
-            .removeClass('d-none')
-            .off('click') // Xóa rác sự kiện cũ
-            .on('click', function() { 
-                window.open(url, '_blank'); 
-            });
-    } else {
-        // Sinh viên thường sẽ bị ẩn đi
-        $('#btnOpenInNewTab').addClass('d-none');
-    }
+$('#btnOpenInNewTab')
+        .removeClass('d-none')
+        .off('click') // Xóa rác sự kiện cũ
+        .on('click', function() { 
+            window.open(url, '_blank'); 
+        });
     
     // Bật trạng thái Loading
     $('#docLoading').show(); 
