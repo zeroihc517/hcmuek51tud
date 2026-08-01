@@ -78,12 +78,11 @@ function checkNewQA() { $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: 
 function openQASection() { 
     document.title = "Hỗ trợ & Giải đáp | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
-    
-    // ĐỔI #btnNavQA THÀNH #btnNavShareCode TẠI ĐÂY
     $('#btnNavShareCode').addClass('active'); 
-    
     $('#qaSection').removeClass('d-none'); 
-    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); } 
+    
+    updateSystemUrl('view', 'qa'); // Đổi URL thành ?view=qa
+    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
     if (currentUser) { $('#txtMSSV').val(currentUser.mssv).prop('readonly', true).css({ 'background-color': '#e9ecef', 'cursor': 'not-allowed' }); } 
     else { $('#txtMSSV').val('').prop('readonly', false).css({ 'background-color': '#ffffff', 'cursor': 'text' }); }
     loadQAData(); 
@@ -462,24 +461,34 @@ $(document).ready(function() {
     }
 });
 
+// 1. Mở màn hình Thảo luận chung
 function openShareCodeSection() { 
-    document.title = "Share Code | Học nhóm APMA Khoa Toán";
+    document.title = "Thảo luận | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
     $('#btnNavShareCode').addClass('active'); 
     $('#shareCodeSection').removeClass('d-none'); 
     
-    backToShareCategories();
+    // Nếu không có tham số category trên URL thì mới trở về danh mục Thảo luận tổng
+    let urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.get('category')) {
+        backToShareCategories();
+    }
     
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); } 
     if (currentUser) { $('#txtMSSVShareCode').val(currentUser.mssv).prop('readonly', true).css({ 'background-color': '#e9ecef', 'cursor': 'not-allowed' }); } 
     else { $('#txtMSSVShareCode').val('').prop('readonly', false).css({ 'background-color': '#ffffff', 'cursor': 'text' }); }
 }
 
+// 2. Thoát khỏi môn Code -> Trở về danh mục Thảo luận tổng & Phục hồi URL về ?view=sharecode
 function backToShareCategories() {
     $('#shareContentView').addClass('d-none');
     $('#shareCategoryView').removeClass('d-none');
+    
+    // Phục hồi lại đường link Thảo luận chung (?view=thaoluan)
+    updateSystemUrl('view', 'thaoluan');
 }
 
+// 3. Mở môn Code cụ thể -> Đổi URL thành ?view=sharecode&category=...
 function openShareCategory(categoryName, lang) {
     currentShareCategory = categoryName;
     currentShareLang = lang;
@@ -488,14 +497,19 @@ function openShareCategory(categoryName, lang) {
     $('#shareCategoryView').addClass('d-none');
     $('#shareContentView').removeClass('d-none');
     
+    // Tạo link dạng ?view=sharecode&category=LapTrinhPython
+    let cleanCategory = categoryName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "");
+    let cleanPath = window.location.pathname;
+    let newUrl = cleanPath + `?view=sharecode&category=${cleanCategory}`;
+    window.history.pushState({ path: newUrl }, '', newUrl);
+
     if(lang === 'python') shareCodeEditor.session.setMode("ace/mode/python");
     else shareCodeEditor.session.setMode("ace/mode/c_cpp");
     
     shareCodeEditor.resize(); 
-    cancelEditShareCode(); // Reset form cho sạch sẽ
+    cancelEditShareCode(); 
     loadShareCodeData();
 }
-
 function sendShareCode() {
     let mssvValue = currentUser ? currentUser.mssv : $('#txtMSSVShareCode').val().trim(); 
     let rawCode = shareCodeEditor.getValue().trim();

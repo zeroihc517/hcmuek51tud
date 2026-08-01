@@ -28,9 +28,8 @@ function loadTongHopView() {
     $('#btnNavTongHop').addClass('active'); 
     $('#tongHopSection').removeClass('d-none');
     
+    updateSystemUrl('view', 'weblinks'); // Đổi URL thành ?view=weblinks
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
-    
-    // Link đã được tải ngầm trong hàm initGlobalApp nên không cần làm gì thêm ở đây
 }
 function pingOnlineStatus() {
             let savedUser = localStorage.getItem('currentUser');
@@ -201,7 +200,14 @@ function loadDataByHocPhan(sheetName, element) {
     
     if ($('#customViewWrapper').length > 0) $('#customViewWrapper').addClass('d-none');
     $('#examCardsContainer').addClass('d-none').html(''); 
-
+if (sheetName.toLowerCase() !== 'thông báo') {
+    updateSystemUrl('course', sheetName); 
+} else {
+    // Chỉ reset URL về mặc định nếu người dùng thực sự click bấm chọn vào nút "Thông báo" trên Sidebar
+    if (element) {
+        resetUrlToDefault();
+    }
+}
    // Hiển thị form thêm dữ liệu nếu là Admin và Đổi nhãn thông minh
     if (isAdmin) {
         $('#adminAddRowArea').removeClass('d-none');
@@ -260,6 +266,9 @@ function loadDataByHocPhan(sheetName, element) {
             // ==========================================
             // XỬ LÝ RIÊNG: GIAO DIỆN THÔNG BÁO (HỌC THUẬT & RÈN LUYỆN)
             // ==========================================
+           // ==========================================
+            // XỬ LÝ RIÊNG: GIAO DIỆN THÔNG BÁO (HỌC THUẬT & RÈN LUYỆN)
+            // ==========================================
             if (sheetName.toLowerCase() === 'thông báo') {
               let mainHtml = `
 <div class="tb-list-container shadow-sm mb-4">
@@ -291,9 +300,36 @@ function loadDataByHocPhan(sheetName, element) {
 `;
 
                let detailData = [];
-let hocThuatItemsHtml = '';
-let renLuyenItemsHtml = '';
-let heThongItemsHtml = ''; // Biến mới chứa HTML cho Hệ thống
+               let hocThuatItemsHtml = '';
+               let renLuyenItemsHtml = '';
+               let heThongItemsHtml = '';
+
+               // --- TÍNH MÃ ĐỊNH DANH ĐỘC LẬP TỪ DƯỚI LÊN (CŨ NHẤT BẮT ĐẦU TỪ 0001) ---
+               let yearPrefix = new Date().getFullYear().toString().slice(-2); // "26" cho năm 2026
+               let htCounter = 0;
+               let rlCounter = 0;
+               let adCounter = 0; // Bộ đếm riêng cho HỆ THỐNG (Admin)
+               let tbCodesMap = {};
+
+               // Duyệt từ dưới lên trên bảng dữ liệu Google Sheets để đếm số thứ tự tăng dần từ 0001
+               for (let i = data.length - 1; i >= 1; i--) {
+                   let rowC7 = String(data[i][6] || '').toLowerCase();
+                   let isHeThong = rowC7.includes('hệ thống');
+                   let isRenLuyen = rowC7.includes('rèn luyện');
+                   let code = "";
+                   
+                   if (isHeThong) {
+                       adCounter++;
+                       code = `${yearPrefix}AD${String(adCounter).padStart(4, '0')}`; // Mã AD260001 cho Hệ thống
+                   } else if (isRenLuyen) {
+                       rlCounter++;
+                       code = `${yearPrefix}RL${String(rlCounter).padStart(4, '0')}`; // Mã RL260001 cho Rèn luyện
+                   } else {
+                       htCounter++;
+                       code = `${yearPrefix}HT${String(htCounter).padStart(4, '0')}`; // Mã HT260001 cho Học thuật
+                   }
+                   tbCodesMap[i] = code;
+               }
 
 data.forEach((row, rowIndex) => {
     if (rowIndex === 0) return; 
@@ -307,7 +343,6 @@ data.forEach((row, rowIndex) => {
     let c7 = String(row[6] || '').trim();
     let c7_raw = c7; 
 
-    // Logic Hẹn giờ đăng bài (Ngày X) giữ nguyên...
     let publishDate = null;
     let c4_display = c4_raw; 
     let dateMatch = c4_raw.match(/(?:(\d{1,2}):(\d{2}))?\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
@@ -329,14 +364,11 @@ data.forEach((row, rowIndex) => {
     let c4 = c4_display; 
     let isNew = /^new$/i.test(c1) || c1.toLowerCase().includes('new');
     
-    // TÍNH NĂNG MỚI: Nhận diện Thông báo Hệ thống và Rèn luyện
     let isHeThong = c7_raw.toLowerCase().includes('hệ thống');
     let isRenLuyen = c7_raw.toLowerCase().includes('rèn luyện');
     
-   // 1. Dùng cho ĐỒNG HỒ ĐẾM NGƯỢC
     let deadlineTime = extractDeadline(c3);
 
-    // TÍNH NĂNG MỚI: Tự động gỡ nhãn "Mới" (New)
     if (isNew) {
         if (deadlineTime) {
             if (now.getTime() > deadlineTime) isNew = false;
@@ -348,39 +380,23 @@ data.forEach((row, rowIndex) => {
         }
     }
 
-    // 2. Dùng để ẨN THÔNG BÁO HOÀN TOÀN: CHỈ quét lấy từ Ghi chú (c7_raw)
     let hideTime = extractDeadline(c7_raw);
 
-    // KIỂM TRA ĐIỀU KIỆN ẨN (Ẩn với sinh viên, Admin vẫn thấy để sửa)
     if (hideTime && now.getTime() > hideTime && !isAdmin) {
         return; 
     }
 
-    // 3. DỌN DẸP: ẨN HOÀN TOÀN CHỮ "DEADLINE = ..." Ở GIAO DIỆN
     let dlStrRegex = /(?:DEADLINE\s*=\s*|Hết hạn(?: lúc\s*)?)\d{1,2}:\d{2}\s*(?:Ngày\s*)?\d{1,2}\/\d{1,2}\/\d{2,4}/ig;
-    
-    // Xóa chữ khỏi Nội dung và dọn sạch các thẻ HTML bị rỗng (do TinyMCE tạo ra)
-    // Xóa chữ khỏi Nội dung và dọn sạch các thẻ HTML bị rỗng (Chỉnh sửa regex để không xóa nhầm thẻ đóng)
-c3 = c3.replace(dlStrRegex, '').replace(/<[^\/>][^>]*>\s*<\/[^>]+>/g, '').trim();
+    c3 = c3.replace(dlStrRegex, '').replace(/<[^\/>][^>]*>\s*<\/[^>]+>/g, '').trim();
 
-    // Xóa chữ khỏi Ghi chú
     c7 = c7_raw.replace(dlStrRegex, '').trim();
     if (isHeThong) c7 = c7.replace(/hệ thống/ig, '').trim();
     else if (isRenLuyen) c7 = c7.replace(/rèn luyện/ig, '').trim();
     c7 = c7.replace(/^[:\-,\s|]+/, '').replace(/[:\-,\s|]+$/, '').trim();
 
-    if (isHeThong) {
-        c7 = c7.replace(/hệ thống/ig, '').trim();
-    } else if (isRenLuyen) {
-        c7 = c7.replace(/rèn luyện/ig, '').trim();
-    }
-    
-    // Xóa các dấu câu dư thừa ở đầu và cuối chuỗi sau khi cắt chữ
-    c7 = c7.replace(/^[:\-,\s|]+/, '').replace(/[:\-,\s|]+$/, '').trim();
-    
-    detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew };
+    let assignedTbCode = tbCodesMap[rowIndex] || "";
+    detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew, tbCode: assignedTbCode };
 
-    // Khởi tạo dateDisplay, countdownHtml, adminHtml giữ nguyên như cũ...
     let dateDisplay = `
     <div class="d-inline-flex gap-2 flex-wrap">
         <span class="tb-date-text"><i class="fa-regular fa-calendar"></i> Ngày đăng: ${c4 || 'Gần đây'}</span>
@@ -413,7 +429,6 @@ c3 = c3.replace(dlStrRegex, '').replace(/<[^\/>][^>]*>\s*<\/[^>]+>/g, '').trim()
         </div>`;
     }
 
-   // Thay đoạn render thông báo hệ thống cũ bằng đoạn này:
 if (isHeThong) {
     heThongItemsHtml += `
     <div class="border-animation mb-4">
@@ -476,72 +491,84 @@ else {
                         let data = window.thongBaoData[index];
                         if(!data) return;
                         
+                        // Cập nhật đường dẫn thanh địa chỉ tự động mà KHÔNG làm tải lại trang
+                        let currentCode = data.tbCode || "";
+                        if (currentCode) {
+                            let newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?tb=' + currentCode;
+                            window.history.pushState({ path: newUrl }, '', newUrl);
+                        }
+
                         let dateDisplay = `<span class="tb-date-text"><i class="fa-regular fa-calendar text-primary"></i> Ngày đăng: ${data.c4 || 'Gần đây'}</span>`;
                         if (data.c5) dateDisplay += `<span class="tb-date-text"><i class="fa-solid fa-clock-rotate-left text-success"></i> Ngày cập nhật: ${data.c5}</span>`;
 
                         let linkHtml = data.c6 ? `<div class="mt-4"><a href="${data.c6}" target="_blank" class="btn fw-bold text-white shadow-sm px-4" style="background: #0f4c81; border-radius: 8px;"><i class="fa-solid fa-link me-2"></i>Truy cập liên kết đính kèm</a></div>` : '';
                         let noteHtml = data.c7 ? `<div class="mt-4 p-3 border-start border-4 border-warning rounded text-dark" style="background: #fffbeb;"><strong><i class="fa-solid fa-paperclip me-1"></i> Ghi chú:</strong> ${data.c7}</div>` : '';
-let detailDeadlineTime = extractDeadline(data.c3) || extractDeadline(data.c7);
-let detailCountdownHtml = '';
-if (detailDeadlineTime) {
-    detailCountdownHtml = `
-    <div class="tb-countdown" data-deadline="${detailDeadlineTime}" style="font-size: 14px; padding: 6px 14px; border-width: 2px;">
-        <i class="fa-solid fa-spinner fa-spin"></i> Đang tính toán...
-    </div>`;
-}
+                        let detailDeadlineTime = extractDeadline(data.c3) || extractDeadline(data.c7);
+                        let detailCountdownHtml = '';
+                        if (detailDeadlineTime) {
+                            detailCountdownHtml = `
+                            <div class="tb-countdown" data-deadline="${detailDeadlineTime}" style="font-size: 14px; padding: 6px 14px; border-width: 2px;">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Đang tính toán...
+                            </div>`;
+                        }
 
-                       // Xử lý xuống dòng và tự động chuyển đổi [IMG] thành hình ảnh (kèm hiệu ứng bo góc, đổ bóng mượt mà)
-// Xử lý xuống dòng
-// Xử lý xuống dòng
-let processedContent = data.c3;
-if (!/(<p>|<table>|<br>|<br\s*\/>)/i.test(processedContent)) {
-    processedContent = processedContent.replace(/\n/g, '<br>');
-}
+                        let processedContent = data.c3;
+                        if (!/(<p>|<table>|<br>|<br\s*\/?>)/i.test(processedContent)) {
+                            processedContent = processedContent.replace(/\n/g, '<br>');
+                        }
 
-// 1. Tự động nhận diện Link thành chữ gạch chân (Bảo vệ an toàn cho cú pháp [IMG])
-processedContent = processedContent.replace(/(\[IMG(?:=.*?)?\].*?\[\/IMG\])|(https?:\/\/[^\s<]+)/gi, function(match, isImg, isUrl) {
-    if (isImg) {
-        return isImg; // Nếu là thẻ hình ảnh [IMG] thì giữ nguyên không đụng tới
-    }
-    if (isUrl) {
-        // Cắt bỏ dấu câu (chấm, phẩy...) ở cuối link nếu người dùng lỡ gõ dính vào
-        let cleanUrl = isUrl.replace(/[.,;!?]+$/, ''); 
-        let trailing = isUrl.slice(cleanUrl.length);
-        
-        // Tạo chữ gạch chân đơn giản, màu xanh lam nhạt cho hài hòa giao diện
-        return `<a href="${cleanUrl}" target="_blank" style="color: #0284c7; text-decoration: underline; font-weight: 600;">${cleanUrl}</a>${trailing}`;
-    }
-    return match;
-});
+                        processedContent = processedContent.replace(/(\[IMG(?:=.*?)?\].*?\[\/IMG\])|(https?:\/\/[^\s<]+)/gi, function(match, isImg, isUrl) {
+                            if (isImg) return isImg;
+                            if (isUrl) {
+                                let cleanUrl = isUrl.replace(/[.,;!?]+$/, ''); 
+                                let trailing = isUrl.slice(cleanUrl.length);
+                                return `<a href="${cleanUrl}" target="_blank" style="color: #0284c7; text-decoration: underline; font-weight: 600;">${cleanUrl}</a>${trailing}`;
+                            }
+                            return match;
+                        });
 
-// 2. Xử lý ảnh có kích thước tùy chỉnh (Ví dụ: [IMG=500px]link[/IMG] hoặc [IMG=50%]link[/IMG])
-processedContent = processedContent.replace(/\[IMG=(.*?)\](.*?)\[\/IMG\]/gi, '<div class="text-center my-3"><a href="$2" target="_blank" title="Bấm để xem ảnh gốc"><img src="$2" style="width: $1; max-width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); object-fit: contain;"></a></div>');
+                        processedContent = processedContent.replace(/\[IMG=(.*?)\](.*?)\[\/IMG\]/gi, '<div class="text-center my-3"><a href="$2" target="_blank" title="Bấm để xem ảnh gốc"><img src="$2" style="width: $1; max-width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); object-fit: contain;"></a></div>');
+                        processedContent = processedContent.replace(/\[IMG\](.*?)\[\/IMG\]/gi, '<div class="text-center my-3"><a href="$1" target="_blank" title="Bấm để xem ảnh gốc"><img src="$1" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);"></a></div>');
 
-// 3. Xử lý ảnh mặc định to full màn hình (Ví dụ: [IMG]link[/IMG])
-processedContent = processedContent.replace(/\[IMG\](.*?)\[\/IMG\]/gi, '<div class="text-center my-3"><a href="$1" target="_blank" title="Bấm để xem ảnh gốc"><img src="$1" style="max-width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);"></a></div>');
+                        let fullShareUrl = window.location.href;
 
-let html = `
-<div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">${data.c2}</div>
-    <div class="tb-detail-dates mb-2 d-flex align-items-center flex-wrap gap-3" style="font-size: 15px; padding-bottom: 8px; border-bottom: none;">
-        ${dateDisplay}
-        ${detailCountdownHtml}
-    </div>
-    <div class="tb-detail-main-content" style="font-size: 16px; font-weight: normal; line-height: 1.6; border-top: 2px solid #f3f4f6; padding-top: 16px;">
-        ${processedContent}
-    </div>
-    ${noteHtml}
-    ${linkHtml}
-`;                        
-$('#tbDetailContent').html(html);
+                        let html = `
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">
+                                [${currentCode}] ${data.c2}
+                            </div>
+                        
+                        </div>
+                        <div class="tb-detail-dates mb-2 d-flex align-items-center flex-wrap gap-3" style="font-size: 15px; padding-bottom: 8px; border-bottom: none;">
+                            ${dateDisplay}
+                            ${detailCountdownHtml}
+                        </div>
+                        <div class="tb-detail-main-content" style="font-size: 16px; font-weight: normal; line-height: 1.6; border-top: 2px solid #f3f4f6; padding-top: 16px;">
+                            ${processedContent}
+                        </div>
+                        ${noteHtml}
+                        ${linkHtml}
+                        `;                        
+                        $('#tbDetailContent').html(html);
                         $('#tbMainView').addClass('d-none');
                         $('#tbDetailContainer').removeClass('d-none');
                         window.scrollTo({ top: 0, behavior: 'smooth' });
-			applyKaTeX('tbDetailContent');
+                        applyKaTeX('tbDetailContent');
                     };
 
+                    // HÀM TRỞ LẠI -> TỰ ĐỘNG XOÁ BỎ THAM SỐ ?tb= TRÊN BIA ĐỊA CHỈ
                     window.backToThongBaoList = function() {
                         $('#tbDetailContainer').addClass('d-none');
                         $('#tbMainView').removeClass('d-none');
+                        resetUrlToDefault();
+                        let cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                        window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+                    };
+
+                    window.copyTBLink = function(url) {
+                        navigator.clipboard.writeText(url).then(() => {
+                            alert("Đã sao chép liên kết thông báo thành công!");
+                        });
                     };
 
                     window.searchThongBao = function() {
@@ -555,7 +582,6 @@ $('#tbDetailContent').html(html);
                             }
                         });
 
-                        // Tự động ẩn danh mục nếu không tìm thấy item nào phù hợp bên trong
                         ['HocThuat', 'RenLuyen'].forEach(type => {
                             let visibleCount = $(`#tbItems${type} .tb-list-item:not(.d-none)`).length;
                             if (visibleCount === 0 && keyword !== '') {
@@ -582,6 +608,7 @@ $('#tbDetailContent').html(html);
 
                 if ($('#customViewWrapper').length === 0) $('#tableWrapper').before('<div id="customViewWrapper" class="w-100"></div>');
                 $('#customViewWrapper').html(customViewHtml).removeClass('d-none');
+
 if (typeof globalDeadlineData !== 'undefined' && globalDeadlineData.length > 0) {
                     let completedList = [];
                     // Lấy danh sách các Deadline đã hoàn thành từ LocalStorage
@@ -978,8 +1005,14 @@ function initGlobalApp() {
     // --- KẾT THÚC ĐOẠN CẦN CẬP NHẬT/THÊM MỚI ---
 
     fetchSemesterConfig(); 
-    loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
-    loadWebLinks(); 
+    
+    // FIX LỖI: Chỉ tự động nạp trang "Thông báo" NẾU trên URL không có link chuyển hướng
+    let urlParamsCheck = new URLSearchParams(window.location.search);
+    if (!urlParamsCheck.get('view') && !urlParamsCheck.get('course') && !urlParamsCheck.get('tb')) {
+        loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao')); 
+    }
+
+    loadWebLinks();
     checkNewQA(); 
     fetchAndRenderCategories();
     renderUserInfo();
@@ -1050,8 +1083,9 @@ function loadGPAView() {
     resetNavActive(); 
     $('#btnNavGPA').addClass('active'); 
     $('#gpaSection').removeClass('d-none');
-    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
     
+    updateSystemUrl('view', 'gpa'); // Đổi URL thành ?view=gpa
+    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }    
     if (currentUser) {
         $('#gpaCourseList').html('<div class="text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang đồng bộ dữ liệu điểm và cấu hình...</div>');
         
@@ -2537,6 +2571,24 @@ function loadAdminMasterTkbView() {
     
     fetchAdminMasterTkb();
 }
+function resetNavActive() {
+    // Tự động khôi phục URL về mặc định khi chuyển sang danh mục khác
+    resetUrlToDefault();
+
+    $('.btn-course').removeClass('active'); 
+    $('#btnNavQA').removeClass('active'); 
+    $('#btnNavTKB').removeClass('active');
+    $('#btnNavShareCode').removeClass('active');
+    $('#btnNavGPA').removeClass('active');
+    
+    $('#tongHopSection').addClass('d-none'); 
+    $('#courseSection').addClass('d-none');
+    $('#qaSection').addClass('d-none'); 
+    $('#tkbSection').addClass('d-none');
+    $('#shareCodeSection').addClass('d-none'); 
+    $('#gpaSection').addClass('d-none');
+    $('#profileSection').addClass('d-none');
+}
 
 // Chèn lệnh ẩn vào hàm reset mặc định
 const originalResetNavMaster = resetNavActive;
@@ -3400,8 +3452,10 @@ $(document).ready(function() {
 });
 function loadProfileView() {
     document.title = "Hồ sơ cá nhân | Học nhóm APMA Khoa Toán";
-    resetNavActive(); // Ẩn các phân hệ khác
-    $('#profileSection').removeClass('d-none'); // Hiển thị khung Hồ sơ
+    resetNavActive(); 
+    $('#profileSection').removeClass('d-none');
+    
+    updateSystemUrl('view', 'profile'); // Đổi URL thành ?view=profile
     
     // Đóng Menu Popover/Dropdown
     let dropdownMenu = document.querySelector('#sidebarUserInfo .dropdown-menu');
@@ -3971,3 +4025,77 @@ window.applyQuickDeadline = function(targetCol, applyBtn, event) {
     
     pickerDiv.remove(); // Chèn xong tự động tắt popup
 };
+window.copyTBLink = function(url) {
+    navigator.clipboard.writeText(url).then(() => {
+        alert("Đã sao chép đường link thông báo thành công!");
+    });
+};
+function checkUrlAndOpenThongBao() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let tbCode = urlParams.get('tb');
+
+    if (tbCode) {
+        let checkInterval = setInterval(() => {
+            if (window.thongBaoData && Object.keys(window.thongBaoData).length > 0) {
+                clearInterval(checkInterval);
+                for (let key in window.thongBaoData) {
+                    if (window.thongBaoData[key] && window.thongBaoData[key].tbCode === tbCode) {
+                        viewThongBaoDetail(key);
+                        break;
+                    }
+                }
+            }
+        }, 200);
+    }
+}
+
+// Bắt sự kiện người dùng nhấn nút "Back" trên trình duyệt
+window.onpopstate = function() {
+    let urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.get('tb')) {
+        if ($('#tbDetailContainer').length && !$('#tbDetailContainer').hasClass('d-none')) {
+            $('#tbDetailContainer').addClass('d-none');
+            $('#tbMainView').removeClass('d-none');
+        }
+    }
+};
+
+// Tự động kiểm tra URL khi mới truy cập trang web
+function checkUrlAndOpenThongBao() {
+    let urlParams = new URLSearchParams(window.location.search);
+    let tbCode = urlParams.get('tb');
+
+    if (tbCode) {
+        let checkInterval = setInterval(() => {
+            if (window.thongBaoData && Object.keys(window.thongBaoData).length > 0) {
+                clearInterval(checkInterval);
+                for (let key in window.thongBaoData) {
+                    if (window.thongBaoData[key] && window.thongBaoData[key].tbCode === tbCode) {
+                        viewThongBaoDetail(key);
+                        break;
+                    }
+                }
+            }
+        }, 300);
+    }
+}
+
+$(document).ready(function() {
+    setTimeout(checkUrlAndOpenThongBao, 1000);
+});
+
+function generateThongBaoID(rowIndex, totalRows, isRenLuyen) {
+    let yearPrefix = new Date().getFullYear().toString().slice(-2); // Lấy "26" cho năm 2026
+    let typePrefix = isRenLuyen ? "RL" : "HT"; // Rèn luyện = RL, Học thuật/Hệ thống = HT
+    
+    // Tính số thứ tự đếm từ dưới lên: Hàng dưới cùng (rowIndex lớn nhất) sẽ mang số 1
+    let orderNumber = totalRows - rowIndex; 
+    let numberFormatted = String(orderNumber).padStart(4, '0');
+    
+    return `${yearPrefix}${typePrefix}${numberFormatted}`; // VD: 26HT0001, 26RL0001
+}
+// Hàm trả đường dẫn URL trên thanh địa chỉ về trạng thái mặc định (xoá ?tb=...)
+function resetUrlToDefault() {
+    let cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+    window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+}

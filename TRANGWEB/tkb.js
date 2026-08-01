@@ -1,6 +1,10 @@
 function loadTKBView() {
     document.title = "Thời gian biểu | Học nhóm APMA Khoa Toán";
-    resetNavActive(); $('#btnNavTKB').addClass('active'); $('#tkbSection').removeClass('d-none');
+    resetNavActive(); 
+    $('#btnNavTKB').addClass('active'); 
+    $('#tkbSection').removeClass('d-none');
+    
+    updateSystemUrl('view', 'tkb'); // Đổi URL thành ?view=tkb
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
 
     // Kiểm tra: Nếu dữ liệu đã tải ngầm xong thì lấy ra vẽ luôn (0 giây)

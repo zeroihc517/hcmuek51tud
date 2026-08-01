@@ -43,8 +43,8 @@ function loginStudent() {
             }
             initGlobalApp();
             
-            // Tải ngầm Thông báo & Danh mục học phần (Mặc định trang đầu)
-            loadDataByHocPhan('Thông báo');
+            // Xóa bỏ lệnh loadDataByHocPhan('Thông báo') vô điều kiện ở đây
+            // vì hàm initGlobalApp() ở trên đã tự động phân luồng URL thông minh rồi!
             fetchAndRenderCategories();
             loadWebLinks();
 
@@ -339,3 +339,8 @@ $(document).ready(function() {
         }, 10000); 
     }
 });
+function generateThongBaoID(index) {
+    let yearPrefix = new Date().getFullYear().toString().slice(-2); // Lấy "26" cho năm 2026
+    let numberFormatted = String(index).padStart(4, '0'); // Đảm bảo đủ 4 chữ số (0001, 0002...)
+    return `TB${yearPrefix}${numberFormatted}`; // Kết quả: TB260001
+}
