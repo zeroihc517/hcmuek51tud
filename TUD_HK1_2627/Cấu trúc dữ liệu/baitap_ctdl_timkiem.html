@@ -339,8 +339,9 @@
 
         // 1. NẠP DANH SÁCH CÂU HỎI
         // 1. NẠP DANH SÁCH CÂU HỎI TỰ ĐỘNG TỪ GOOGLE SHEETS
+        // 1. NẠP DANH SÁCH CÂU HỎI (CHỈ LẤY TIÊU ĐỀ "THUẬT TOÁN TÌM KIẾM")
         function loadQuestionsData() {
-            $('#questionContentArea').html('<div class="text-center py-4 text-primary"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải đề bài từ hệ thống...</div>');
+            $('#questionContentArea').html('<div class="text-center py-4 text-primary"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang lọc đề bài "Thuật toán tìm kiếm"...</div>');
             
             $.ajax({
                 url: SCRIPT_URL + "?action=getExerciseQuestions&course=" + encodeURIComponent(courseName),
@@ -349,10 +350,15 @@
                 cache: false,
                 success: function(data) {
                     if (data && data.length > 0) {
-                        questionsList = data; // Lấy dữ liệu động từ Google Sheets
-                    } else {
-                        // Nếu trang tính trống, hiển thị thông báo
-                        $('#questionContentArea').html('<div class="text-danger fw-bold py-3"><i class="fa-solid fa-triangle-exclamation"></i> Chưa có đề bài nào được giáo viên phát hành.</div>');
+                        // Lọc chặt chẽ một lần nữa ở phía client để đảm bảo chuẩn xác tuyệt đối 100%
+                        questionsList = data.filter(q => q.title && q.title.toLowerCase().includes("thuật toán tìm kiếm"));
+                    } 
+                    
+                    if (!questionsList || questionsList.length === 0) {
+                        $('#questionContentArea').html('<div class="text-danger fw-bold py-3"><i class="fa-solid fa-triangle-exclamation"></i> Không tìm thấy câu hỏi nào có tiêu đề "Thuật toán tìm kiếm".</div>');
+                        $('#questionTabsContainer').html('');
+                        $('#selectQuestionIndex').html('');
+                        $('#labelTotalQuestions').text('0 câu');
                         return;
                     }
 
@@ -374,7 +380,7 @@
                     $('#questionTabsContainer').html(tabsHtml);
                     $('#labelTotalQuestions').text(`Tổng: ${questionsList.length} câu`);
 
-                    renderQuestion(0); // Tự động load câu số 1
+                    renderQuestion(0);
                 },
                 error: function() {
                     $('#questionContentArea').html('<div class="text-danger fw-bold py-3">Lỗi kết nối khi tải đề bài!</div>');
