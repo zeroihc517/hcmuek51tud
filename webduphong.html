@@ -1949,23 +1949,32 @@ function resetUrlToDefault() {
     window.history.pushState({ path: cleanUrl }, '', cleanUrl);
 }
 
-// PROMISE: Lắng nghe và chờ API tải danh sách học phần hoàn tất thay vì dùng setInterval
+// PROMISE: Chờ Danh sách Học phần
 function waitForCategories() {
     return new Promise((resolve) => {
-        // Nếu dữ liệu đã có sẵn thì trả về ngay lập tức (Zero lag)
         if (typeof globalCategories !== 'undefined' && globalCategories.length > 0) {
             resolve(globalCategories);
         } else {
-            // Nếu chưa có, lắng nghe sự kiện hoàn thành AJAX của jQuery
             $(document).ajaxSuccess(function(event, xhr, settings) {
                 if (settings.url.includes("action=getHocPhanList")) {
-                    // Chờ 10ms để callback của thẻ AJAX gốc gán dữ liệu vào biến globalCategories
-                    setTimeout(() => {
-                        resolve(globalCategories);
-                    }, 10);
+                    setTimeout(() => resolve(globalCategories), 10);
                 }
             });
         }
+    });
+}
+
+// PROMISE: Giám sát siêu tốc dữ liệu Thông báo (Dùng requestAnimationFrame để quét 60 khung hình/giây thay vì setInterval)
+function waitForThongBaoData() {
+    return new Promise((resolve) => {
+        const checkData = () => {
+            if (window.thongBaoData && Object.keys(window.thongBaoData).length > 0) {
+                resolve(window.thongBaoData);
+            } else {
+                requestAnimationFrame(checkData);
+            }
+        };
+        checkData();
     });
 }
 
@@ -1979,8 +1988,19 @@ async function initSystemUrlRouter() {
 
     // 1. Mở bài viết Thông báo chi tiết
     if (tbParam) {
-        if (typeof checkUrlAndOpenThongBao === 'function') {
-            checkUrlAndOpenThongBao();
+        // Cứu cánh vòng lặp: Buộc hệ thống kéo dữ liệu Thông báo về
+        loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
+        
+        // Chờ dữ liệu đổ vào biến window.thongBaoData
+        let tbData = await waitForThongBaoData();
+        
+        // Duyệt tìm mã thông báo trùng khớp và kích hoạt hàm mở chi tiết
+        for (let key in tbData) {
+            if (tbData[key] && tbData[key].tbCode === tbParam) {
+                // Trì hoãn 50ms để bảng DOM nền vẽ xong, giúp hiệu ứng bật Popup đè lên mượt hơn
+                setTimeout(() => viewThongBaoDetail(key), 50);
+                break;
+            }
         }
         return;
     }
@@ -1994,8 +2014,6 @@ async function initSystemUrlRouter() {
         else if (viewParam === 'qa') openQASection();
         else if (viewParam === 'sharecode') {
             openShareCodeSection();
-            
-            // Khung ShareCode là DOM tĩnh đã tồn tại ngay lập tức, loại bỏ hoàn toàn setInterval chờ đợi
             if (categoryParam) {
                 let targetCat = categoryParam.toLowerCase();
                 if (targetCat.includes('python')) openShareCategory('Lập trình Python', 'python');
@@ -2010,9 +2028,7 @@ async function initSystemUrlRouter() {
     // 3. Mở trang Học phần môn học
     if (courseParam) {
         try {
-            // Tạm ngưng tiến trình (await) cho đến khi sự kiện tải danh sách học phần báo hoàn tất
             let categories = await waitForCategories();
-            
             let matchedCourse = categories.find(name => 
                 name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase() === courseParam.toLowerCase()
             );
@@ -2037,7 +2053,7 @@ window.addEventListener('popstate', function() {
     }
 });
 
-// Kích hoạt Router ngay khi DOM đã load (không cần setTimeout 500ms như trước)
+// Kích hoạt Router ngay khi DOM đã load
 $(document).ready(function() {
     initSystemUrlRouter();
 });
