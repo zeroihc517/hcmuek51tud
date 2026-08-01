@@ -240,7 +240,7 @@ function selectSavedAccount(mssv) { $('#txtUserMSSV').val(mssv); $('#txtUserPass
 
 // Thiết lập thời gian timeout: 1 tiếng = 60 phút * 60 giây * 1000 mili-giây
 // Thiết lập thời gian timeout: 1 tiếng = 60 phút * 60 giây * 1000 mili-giây
-const IDLE_TIMEOUT_MS = 3600000; 
+const IDLE_TIMEOUT_MS = 14400000; 
 let inactivityTimer;
 
 // Hàm xử lý tự động đăng xuất
