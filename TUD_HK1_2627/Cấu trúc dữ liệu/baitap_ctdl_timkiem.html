@@ -510,7 +510,7 @@
             }
             if (exerciseEditor) {
                 let q = questionsList[currentQuestionIndex];
-                exerciseEditor.setValue($('#selectLang').val() === 'python' ? `# Mã bài: ${q ? q.maBai : ''}\n` : `#include <iostream>\nusing namespace std;\n\nint main() {\n    // Mã bài: ${q ? q.maBai : ''}\n    return 0;\n}`);
+                exerciseEditor.setValue($('#selectLang').val() === 'python' ? `` : ``);
                 exerciseEditor.clearSelection();
             }
         }
