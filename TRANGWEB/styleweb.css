@@ -154,7 +154,56 @@
     display: block; 
     letter-spacing: 0.5px;
 }
+/* --- FIX LỖI GIÃN DÒNG KHI DÁN HTML TỪ WEB/WORD KHÁC --- */
+/* Vô hiệu hóa pre-wrap cho các thẻ HTML cấu trúc để tránh nhận diện sai dấu Enter */
+.qa-question p,
+.qa-question ul,
+.qa-question ol,
+.qa-question li,
+.qa-question table,
+.qa-question div {
+    white-space: normal !important; 
+    margin-top: 0 !important;
+    margin-bottom: 6px !important;
+    line-height: 1.5 !important;
+}
 
+/* Ép thẻ <p> nằm trong danh sách hoặc bảng biến thành chữ cùng dòng, xóa margin thừa */
+.qa-question li p,
+.qa-question td p {
+    display: inline !important;
+    margin: 0 !important;
+}
+
+/* Định dạng gọn gàng cho danh sách */
+.qa-question ul, .qa-question ol {
+    padding-left: 24px !important;
+    margin-bottom: 12px !important;
+}
+
+/* Đóng khung viền rõ ràng cho bảng dán từ ngoài vào */
+.qa-question table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+    margin: 12px 0 !important;
+    background-color: #ffffff !important;
+}
+
+.qa-question table th, 
+.qa-question table td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px 12px !important;
+    vertical-align: middle !important;
+}
+
+/* Tương thích chế độ Dark Mode */
+body.dark-mode .qa-question table {
+    background-color: #131c30 !important;
+}
+body.dark-mode .qa-question table th, 
+body.dark-mode .qa-question table td {
+    border-color: #334155 !important;
+}
         .course-list { display: flex; flex-direction: column; gap: 8px; }
 .btn-course { 
     background: transparent !important; 

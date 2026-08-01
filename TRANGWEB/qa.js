@@ -211,7 +211,12 @@ if (svTextRaw.includes(":::")) {
         svMsg = splitData.slice(1).join(":::").trim();
     }
 }
-            let svFormattedMsg = formatCodeBlocks(svMsg).replace(/(?:\r\n|\r|\n)(?!(?:[^<]*<\/pre>))/g, '<br>'); 
+            // Dòng mới thông minh:
+let formattedContent = formatCodeBlocks(svMsg);
+if (!/(<p>|<table>|<ul>|<li>|<div>|<br\s*\/?>)/i.test(formattedContent)) {
+    formattedContent = formattedContent.replace(/\n/g, '<br>');
+}
+let svFormattedMsg = formattedContent;
             
             html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>${svName}</strong>${timeHtml}:<br>${svFormattedMsg}`; 
             
@@ -229,6 +234,21 @@ if (svTextRaw.includes(":::")) {
         }
     }); 
     return html;
+}
+// Hàm tự động tẩy rác HTML dán từ web khác về
+function cleanExternalHTML(html) {
+    if (!html) return "";
+    return html
+        // Xóa thuộc tính dir, role, align, style của editor khác
+        .replace(/\s*(dir|role|align|aria-level|colgroup)="[^"]*"/gi, "")
+        // Xóa thẻ colgroup rác
+        .replace(/<colgroup>[\s\S]*?<\/colgroup>/gi, "")
+        // Thay thế các khoảng trắng rác &nbsp; thành khoảng trắng thường
+        .replace(/&nbsp;/g, " ")
+        // Xóa các thẻ p nằm lồng vô lý bên trong li
+        .replace(/<li[^>]*>\s*<p[^>]*>([\s\S]*?)<\/p>\s*<\/li>/gi, "<li>$1</li>")
+        // Xóa các thẻ p nằm lồng bên trong td của bảng
+        .replace(/<td[^>]*>\s*<p[^>]*>([\s\S]*?)<\/p>\s*<\/td>/gi, "<td>$1<\/td>");
 }
        function loadQAData() {
     $('#qaListArea').html(''); 
@@ -675,6 +695,18 @@ function loadShareCodeData() {
             $('#shareCodeListArea').html(finalHtml); 
         }
     });
+}
+// Cập nhật hàm xử lý xuống dòng thông minh
+function processFormattedText(text) {
+    if (!text) return "";
+    
+    // Nếu trong văn bản đã chứa các thẻ HTML cấu trúc (p, table, div, br), giữ nguyên không chèn thêm <br>
+    if (/(<p>|<table>|<div>|<br\s*\/?>)/i.test(text)) {
+        return text;
+    }
+    
+    // Nếu là văn bản thuần (plain text), chuyển \n thành <br>
+    return text.replace(/\n/g, '<br>');
 }
 
 window.openShareCodeDetail = function(index) {
