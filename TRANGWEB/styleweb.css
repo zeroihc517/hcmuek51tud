@@ -2593,7 +2593,14 @@ body.dark-mode .mini-dl-title {
         min-width: 140px !important; /* Cột rộng ít nhất 140px */
         white-space: normal !important;
     }
-
+.tb-detail-main-content {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.8;
+    color: #374151;
+    text-align: justify;
+    font-weight: 400 !important; /* <--- SỬA THÀNH 400 HOẶC normal ĐỂ CHỮ KHÔNG BỊ IN ĐẬM */
+}
     /* Style thanh kéo (scrollbar) cho bảng thông báo (đồng bộ với TKB) */
     .tb-detail-main-content table::-webkit-scrollbar {
         height: 10px !important; 
@@ -2716,4 +2723,21 @@ body.dark-mode .mini-dl-title {
         width: 100% !important;
         min-width: 100% !important;
     }
+}
+/* Ép toàn bộ thẻ con (p, span, div) bên trong khung chi tiết thông báo về chữ thường mặc định */
+.tb-detail-main-content,
+.tb-detail-main-content *,
+.tb-detail-main-content p,
+.tb-detail-main-content span,
+.tb-detail-main-content div {
+    font-weight: 400 !important; /* Đưa về chữ thường thanh mảnh */
+}
+
+/* Chỉ cho phép in đậm khi trong code CÓ THẺ <strong>, <b> HOẶC CLASS .fw-bold */
+.tb-detail-main-content strong,
+.tb-detail-main-content strong *,
+.tb-detail-main-content b,
+.tb-detail-main-content b *,
+.tb-detail-main-content .fw-bold {
+    font-weight: 700 !important; /* Giữ lại in đậm cho những chỗ bạn CHỦ ĐỘNG bôi đậm */
 }

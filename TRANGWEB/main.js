@@ -360,7 +360,8 @@ data.forEach((row, rowIndex) => {
     let dlStrRegex = /(?:DEADLINE\s*=\s*|Hết hạn(?: lúc\s*)?)\d{1,2}:\d{2}\s*(?:Ngày\s*)?\d{1,2}\/\d{1,2}\/\d{2,4}/ig;
     
     // Xóa chữ khỏi Nội dung và dọn sạch các thẻ HTML bị rỗng (do TinyMCE tạo ra)
-    c3 = c3.replace(dlStrRegex, '').replace(/<[^>]+>\s*<\/[^>]+>/g, '').trim();
+    // Xóa chữ khỏi Nội dung và dọn sạch các thẻ HTML bị rỗng (Chỉnh sửa regex để không xóa nhầm thẻ đóng)
+c3 = c3.replace(dlStrRegex, '').replace(/<[^\/>][^>]*>\s*<\/[^>]+>/g, '').trim();
 
     // Xóa chữ khỏi Ghi chú
     c7 = c7_raw.replace(dlStrRegex, '').trim();
@@ -525,7 +526,7 @@ let html = `
         ${dateDisplay}
         ${detailCountdownHtml}
     </div>
-    <div class="tb-detail-main-content" style="font-size: 18px; line-height: 1.6; border-top: 2px solid #f3f4f6; padding-top: 16px;">
+    <div class="tb-detail-main-content" style="font-size: 16px; font-weight: normal; line-height: 1.6; border-top: 2px solid #f3f4f6; padding-top: 16px;">
         ${processedContent}
     </div>
     ${noteHtml}
@@ -2050,15 +2051,17 @@ $(document).ready(function() {
 });
 
 tinymce.init({
-    selector: '#txtCol3, #insertCol3, #editCol3', // Gắn trình soạn thảo vào 3 ô nhập nội dung này
-    plugins: 'table lists link textcolor colorpicker',
-    toolbar: 'undo redo | formatselect fontfamily fontsize | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | table | bullist numlist',
-    menubar: false,
-    height: 300,
-    branding: false,
+   selector: '#txtCol3, #insertCol3, #editCol3',
+    entity_encoding: 'raw',
+    plugins: 'table lists link advlist',
+    toolbar: 'undo redo | blocks fontfamily fontsize lineheight | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | table | bullist numlist | link',
+    
+    // --- THÊM 2 DÒNG NÀY VÀO ---
+    paste_as_text: false,
+    paste_remove_styles_if_resembling_styles: true,
     setup: function (editor) {
         editor.on('change', function () {
-            editor.save(); // Tự động đồng bộ nội dung vào thẻ textarea gốc khi có thay đổi
+            editor.save(); 
         });
     }
 });
