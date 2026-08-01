@@ -380,11 +380,9 @@ data.forEach((row, rowIndex) => {
         }
     }
 
+    // Kiểm tra trạng thái ẩn bài
     let hideTime = extractDeadline(c7_raw);
-
-    if (hideTime && now.getTime() > hideTime && !isAdmin) {
-        return; 
-    }
+    let isHidden = (hideTime && now.getTime() > hideTime);
 
     let dlStrRegex = /(?:DEADLINE\s*=\s*|Hết hạn(?: lúc\s*)?)\d{1,2}:\d{2}\s*(?:Ngày\s*)?\d{1,2}\/\d{1,2}\/\d{2,4}/ig;
     c3 = c3.replace(dlStrRegex, '').replace(/<[^\/>][^>]*>\s*<\/[^>]+>/g, '').trim();
@@ -395,7 +393,14 @@ data.forEach((row, rowIndex) => {
     c7 = c7.replace(/^[:\-,\s|]+/, '').replace(/[:\-,\s|]+$/, '').trim();
 
     let assignedTbCode = tbCodesMap[rowIndex] || "";
-    detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew, tbCode: assignedTbCode };
+    
+    // Ghi nhớ dữ liệu vào detailData KỂ CẢ KHI BÀI ĐÃ BỊ ẨN để dán link mở được
+    detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew, isHidden, tbCode: assignedTbCode };
+
+    // Bỏ qua không vẽ ra danh sách bên ngoài nếu bài bị ẩn và không phải Admin
+    if (isHidden && !isAdmin) {
+        return; 
+    }
 
     let dateDisplay = `
     <div class="d-inline-flex gap-2 flex-wrap">
@@ -532,10 +537,12 @@ else {
 
                         let fullShareUrl = window.location.href;
 
+                        let hiddenNoticeBadge = data.isHidden ? `<span class="badge bg-secondary ms-2" style="font-size: 12px;"></span>` : '';
+
                         let html = `
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">
-                                [${currentCode}] ${data.c2}
+                                [${currentCode}] ${data.c2} ${hiddenNoticeBadge}
                             </div>
                         
                         </div>
