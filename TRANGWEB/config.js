@@ -326,19 +326,22 @@ window.openDocumentViewer = function(url, title) {
     let cleanTitle = $('<div>').html(title).text();
     $('#docViewerTitle').html(`<i class="fa-solid fa-file-lines me-2"></i> ${cleanTitle || 'Xem tài liệu'}`);
     
-    // KIỂM TRA QUYỀN VÀ HIỂN THỊ NÚT "MỞ TAB MỚI" CHỈ CHO ADMIN (51.01.108.008)
-$('#btnOpenInNewTab')
-        .removeClass('d-none')
-        .off('click') // Xóa rác sự kiện cũ
-        .on('click', function() { 
-            window.open(url, '_blank'); 
-        });
-    
+if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
+        $('#btnOpenInNewTab')
+            .removeClass('d-none')
+            .off('click') // Xóa rác sự kiện cũ
+            .on('click', function() { 
+                window.open(url, '_blank'); 
+            });
+    } else {
+        // Sinh viên thường sẽ bị ẩn đi
+        $('#btnOpenInNewTab').addClass('d-none');
+    }
     // Bật trạng thái Loading
     $('#docLoading').show(); 
     $('#docViewerIframe').attr('src', embedUrl);
     $('#documentViewerModal').modal('show');
-};
+}
 
 // Dọn dẹp iframe khi đóng để tránh rò rỉ bộ nhớ
 $(document).ready(function() {
