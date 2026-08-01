@@ -217,8 +217,11 @@ function loadDataByHocPhan(sheetName, element) {
 
             $('#txtCol1, #insertCol1, #editCol1').prev('label').text('STT / Trạng thái (Cột 1)');
             $('#txtCol2, #insertCol2, #editCol2').prev('label').text('Tiêu đề (Cột 2)');
-            $('#txtCol3, #insertCol3, #editCol3').prev('label').text('Nội dung chi tiết (Cột 3)');
+            
+            // Thêm nút Hẹn giờ vào Cột 3 và Cột 7
+            $('#txtCol3, #insertCol3, #editCol3').prev('label').html('Nội dung chi tiết (Cột 3) <button type="button" class="btn btn-sm text-white py-0 px-2 ms-2 shadow-sm" style="background:#e61d4a; font-size:11px; border-radius: 12px;" onclick="insertDeadlineTag(\'c3\', this, event)"><i class="fa-solid fa-clock"></i> Hẹn giờ Đếm ngược</button>');
             $('#txtCol4, #insertCol4, #editCol4').prev('label').text('Ngày đăng (Cột 4)');
+            $('#txtCol7, #insertCol7, #editCol7').prev('label').html('Ghi chú (Cột 7) <button type="button" class="btn btn-sm text-white py-0 px-2 ms-2 shadow-sm" style="background:#64748b; font-size:11px; border-radius: 12px;" onclick="insertDeadlineTag(\'c7\', this, event)"><i class="fa-solid fa-clock"></i> Hẹn giờ Ẩn bài</button>');
         } else {
             $('#txtCol5, #txtCol6, #txtCol7').parent().hide();
             $('#insertCol5, #insertCol6, #insertCol7').parent().hide();
@@ -330,24 +333,17 @@ data.forEach((row, rowIndex) => {
     let isHeThong = c7_raw.toLowerCase().includes('hệ thống');
     let isRenLuyen = c7_raw.toLowerCase().includes('rèn luyện');
     
-    // 1. Dùng cho ĐỒNG HỒ ĐẾM NGƯỢC & ẨN CHỮ "NEW": CHỈ quét lấy từ Nội dung (c3)
+   // 1. Dùng cho ĐỒNG HỒ ĐẾM NGƯỢC
     let deadlineTime = extractDeadline(c3);
 
     // TÍNH NĂNG MỚI: Tự động gỡ nhãn "Mới" (New)
     if (isNew) {
         if (deadlineTime) {
-            // Nếu Nội dung CÓ DEADLINE: Qua thời hạn -> Mất chữ New
-            if (now.getTime() > deadlineTime) {
-                isNew = false;
-            }
+            if (now.getTime() > deadlineTime) isNew = false;
         } else {
-            // Nếu Nội dung KHÔNG CÓ DEADLINE: Sau 15 ngày kể từ ngày đăng -> Mất chữ New
             if (publishDate) {
-                let diffTimeMs = now.getTime() - publishDate.getTime();
-                let diffDays = diffTimeMs / (1000 * 60 * 60 * 24);
-                if (diffDays > 15) {
-                    isNew = false;
-                }
+                let diffDays = (now.getTime() - publishDate.getTime()) / (1000 * 60 * 60 * 24);
+                if (diffDays > 15) isNew = false;
             }
         }
     }
@@ -355,13 +351,22 @@ data.forEach((row, rowIndex) => {
     // 2. Dùng để ẨN THÔNG BÁO HOÀN TOÀN: CHỈ quét lấy từ Ghi chú (c7_raw)
     let hideTime = extractDeadline(c7_raw);
 
-    // KIỂM TRA ĐIỀU KIỆN ẨN: Nếu cột Ghi chú có hẹn giờ và đã lố giờ -> Ẩn hoàn toàn (trừ Admin)
+    // KIỂM TRA ĐIỀU KIỆN ẨN (Ẩn với sinh viên, Admin vẫn thấy để sửa)
     if (hideTime && now.getTime() > hideTime && !isAdmin) {
         return; 
     }
 
-    // 3. Dọn dẹp chữ "Hết hạn..." ở cột Ghi chú để giao diện sạch đẹp
-    c7 = c7.replace(/DEADLINE(?: = \d{1,2}:\d{2})? (?:Ngày )?\d{1,2}\/\d{1,2}\/\d{4}/ig, '').trim();
+    // 3. DỌN DẸP: ẨN HOÀN TOÀN CHỮ "DEADLINE = ..." Ở GIAO DIỆN
+    let dlStrRegex = /(?:DEADLINE\s*=\s*|Hết hạn(?: lúc\s*)?)\d{1,2}:\d{2}\s*(?:Ngày\s*)?\d{1,2}\/\d{1,2}\/\d{2,4}/ig;
+    
+    // Xóa chữ khỏi Nội dung và dọn sạch các thẻ HTML bị rỗng (do TinyMCE tạo ra)
+    c3 = c3.replace(dlStrRegex, '').replace(/<[^>]+>\s*<\/[^>]+>/g, '').trim();
+
+    // Xóa chữ khỏi Ghi chú
+    c7 = c7_raw.replace(dlStrRegex, '').trim();
+    if (isHeThong) c7 = c7.replace(/hệ thống/ig, '').trim();
+    else if (isRenLuyen) c7 = c7.replace(/rèn luyện/ig, '').trim();
+    c7 = c7.replace(/^[:\-,\s|]+/, '').replace(/[:\-,\s|]+$/, '').trim();
 
     if (isHeThong) {
         c7 = c7.replace(/hệ thống/ig, '').trim();
@@ -3890,3 +3895,76 @@ function addSelectedGpaCoursesToDataset() {
     renderGPAList(true);
     alert(`Đã thêm thành công ${addedCount} môn học vào Bảng tính GPA của bạn!`);
 }
+// --- BỘ CÔNG CỤ HỖ TRỢ ADMIN TẠO DEADLINE (CÓ NHẬP TAY + CHỌN LỊCH) ---
+window.insertDeadlineTag = function(targetCol, btnEl, event) {
+    if (event) event.preventDefault();
+    
+    // Xóa popup cũ nếu nhấn lại nút
+    let existingPicker = $(btnEl).next('.quick-dl-picker');
+    if (existingPicker.length) {
+        existingPicker.remove();
+        return;
+    }
+    
+    $('.quick-dl-picker').remove(); // Đóng các popup ở ô khác (nếu có)
+    
+    // Render khung Popup thông minh (Có 2 tùy chọn nhập)
+    let pickerHtml = `
+        <div class="quick-dl-picker mt-2 p-3 border rounded bg-white shadow-lg" style="position: absolute; z-index: 9999; border: 2px solid var(--primary-color) !important; width: 300px;">
+            <label class="small fw-bold text-muted mb-1"><i class="fa-solid fa-keyboard me-1"></i> Nhập thủ công:</label>
+            <input type="text" class="form-control form-control-sm mb-3 manual-dl" placeholder="VD: 23:59 01/01/2026">
+            
+            <label class="small fw-bold text-muted mb-1"><i class="fa-regular fa-calendar-days me-1"></i> Hoặc chọn từ lịch:</label>
+            <input type="datetime-local" class="form-control form-control-sm mb-3 picker-dl" style="cursor: pointer;">
+            
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-sm btn-light border fw-bold" onclick="$(this).closest('.quick-dl-picker').remove()">Hủy</button>
+                <button type="button" class="btn btn-sm text-white fw-bold" style="background: var(--primary-color);" onclick="applyQuickDeadline('${targetCol}', this, event)">Chèn ngay</button>
+            </div>
+        </div>
+    `;
+    $(btnEl).after(pickerHtml);
+};
+
+window.applyQuickDeadline = function(targetCol, applyBtn, event) {
+    if (event) event.preventDefault();
+    let pickerDiv = $(applyBtn).closest('.quick-dl-picker');
+    
+    let manualVal = pickerDiv.find('.manual-dl').val().trim();
+    let dtVal = pickerDiv.find('.picker-dl').val();
+    
+    let str = "";
+    
+    // Ưu tiên lấy ô Nhập tay nếu có dữ liệu, không thì lấy ô Chọn lịch
+    if (manualVal) {
+        str = `DEADLINE = ${manualVal}`;
+    } else if (dtVal) {
+        let d = new Date(dtVal);
+        let pad = n => String(n).padStart(2, '0');
+        str = `DEADLINE = ${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    } else {
+        alert("Vui lòng nhập tay hoặc chọn ngày giờ từ lịch!");
+        return;
+    }
+    
+    // Tìm ô Input/Textarea gốc nằm dưới cái Label
+    let actualInput = pickerDiv.closest('label').nextAll('textarea, input').first();
+    let inputId = actualInput.attr('id');
+    
+    if (targetCol === 'c3') {
+        // Cột Nội dung (Xử lý chèn vào khung soạn thảo nâng cao TinyMCE)
+        if (tinymce.get(inputId)) {
+            let currentContent = tinymce.get(inputId).getContent();
+            tinymce.get(inputId).setContent(currentContent + `<p><strong>${str}</strong></p>`);
+        } else {
+            let currentVal = actualInput.val();
+            actualInput.val(currentVal + (currentVal ? "\n" : "") + str);
+        }
+    } else {
+        // Cột Ghi chú (Ô input bình thường)
+        let currentVal = actualInput.val();
+        actualInput.val(currentVal + (currentVal ? " | " : "") + str);
+    }
+    
+    pickerDiv.remove(); // Chèn xong tự động tắt popup
+};
