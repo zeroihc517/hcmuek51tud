@@ -134,7 +134,8 @@ function checkNewShareCodeGlobal() {
                 let categoryMatch = questionRaw.match(/^\[SHARECODE\|(.*?)(?:\|(.*))?\]/);
                 if (categoryMatch) {
                     let category = categoryMatch[1].trim();
-                    let cleanCat = category.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+                    // Thay đoạn cũ bằng:
+let cleanCat = category.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
                     // Bóc tách ngày giờ thông minh, bao trọn mọi định dạng
                     let postDate = null;
@@ -616,7 +617,8 @@ function openShareCategory(categoryName, lang) {
     $('#shareContentView').removeClass('d-none');
     
     // Tạo link dạng ?view=sharecode&category=LapTrinhPython
-    let cleanCategory = categoryName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "");
+   // Thay đoạn cũ bằng:
+let cleanCategory = categoryName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "");
     let cleanPath = window.location.pathname;
     let newUrl = cleanPath + `?view=sharecode&category=${cleanCategory}`;
     window.history.pushState({ path: newUrl }, '', newUrl);
