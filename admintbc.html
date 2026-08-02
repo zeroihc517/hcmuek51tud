@@ -176,10 +176,13 @@
 
   <div class="sidebar">
       <h3>Nền tảng</h3>
+      <a class="active" onclick="showTab('nentang',this)">HCMUE</a>
+      <a onclick="showTab('ungdung',this)">Cá nhân</a>
       <a href="appliedmathematics.html" target="_self" onclick="showTab('ungdung', this)">Học nhóm Năm 2</a>
 	  <a href="webduphong.html" target="_self" onclick="showTab('ungdung', this)">Học nhóm (Dự phòng)</a>
       
-
+      <h3>Thời khóa biểu</h3>
+      <a onclick="showTab('hk2',this)">TKB Cá nhân</a>
   </div>
 
   <div class="main">
@@ -192,7 +195,73 @@
           <div class="platform-grid"></div>
       </div>
 
-     
+      <div id="hk2" class="content">
+          <div class="card">
+              <div class="card-header">Thời khóa biểu cá nhân</div>
+              
+              <div class="form-row-custom">
+                  <div class="input-group">
+                      <label>Năm học</label>
+                      <select id="apiNamHoc" onchange="onNamHocChange()">
+                          <option value="">-- Đang tải... --</option>
+                      </select>
+                  </div>
+
+                  <div class="input-group">
+                      <label>Học kỳ</label>
+                      <select id="apiHocKy" onchange="onHocKyChange()">
+                          <option value="">-- Chọn học kỳ --</option>
+                      </select>
+                  </div>
+
+                  <div class="input-group" style="flex: 1.5;">
+                      <label>Tuần</label>
+                      <select id="apiWeek" onchange="onWeekChange()">
+                          <option value="">-- Chọn tuần --</option>
+                      </select>
+                  </div>
+
+                  <div class="button-group">
+                      <div class="nav-btns">
+                          <button class="btn-nav" onclick="changeWeekBtn(-1)">⏮</button>
+                          <button class="btn-nav" onclick="changeWeekBtn(1)">⏭</button>
+                      </div>
+                      <button class="btn-blue" onclick="jumpToCurrentWeek()">
+                          <span>📅</span> Hiện tại
+                      </button>
+                  </div>
+              </div>
+
+              <div class="table-box" style="padding: 0 20px;">
+                  <table class="sched">
+                      <thead>
+                          <tr id="header-row">
+                              <th>Buổi</th>
+                              <th>Tiết</th>
+                              <th id="th-day-2">Thứ 2</th>
+                              <th id="th-day-3">Thứ 3</th>
+                              <th id="th-day-4">Thứ 4</th>
+                              <th id="th-day-5">Thứ 5</th>
+                              <th id="th-day-6">Thứ 6</th>
+                              <th id="th-day-7">Thứ 7</th>
+                              <th id="th-day-8">Chủ nhật</th>
+                          </tr>
+                      </thead>
+                      <tbody id="tkb-body">
+                          <tr><td colspan="9" style="padding: 40px; color: #6b7280; font-weight: 500;">Đang đồng bộ dữ liệu TKB...</td></tr>
+                      </tbody>
+                  </table>
+              </div>
+
+              <div class="online-box" id="deadlineBox" style="display: none;">
+                  <h2 class="online-title">📌 DEADLINE</h2>
+                  <div class="online-grid" id="deadline-container">
+                      </div>
+              </div>
+
+          </div>
+      </div>
+
   </div>
 </div>
 
@@ -203,7 +272,148 @@
     const SCRIPT_URL_WEBLINKS = 'https://script.google.com/macros/s/AKfycbxL-29N3K9sl9fAY7n9NCjluE4xi2VhJ1hzeubISPUyxzLSWbvFuCnwOSxjlbbz31mr/exec';
 
     // 1. HÀM TẢI LINK HỆ THỐNG (HCMUE)
-  
+    function loadHcmueLinks() {
+        const container = $('#nentang .platform-grid');
+        if (!container.length) return;
+
+        container.html(`
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280; font-weight: 500;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+                Đang tải danh sách liên kết hệ thống HCMUE...
+            </div>
+        `);
+
+        $.ajax({
+            url: SCRIPT_URL_WEBLINKS + "?action=getWebLinks",
+            method: "GET",
+            dataType: "json",
+            success: function(data) {
+                let globalData = data?.global || (Array.isArray(data) ? data : []);
+                let html = '';
+
+                // KIỂM TRA NẾU LÀ ADMIN -> HIỂN THỊ CƠ SỞ DỮ LIỆU & MS TEAMS
+                let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+                let isSystemAdmin = currentUser && (String(currentUser.mssv).trim() === "51.01.108.008" || String(currentUser.mssv).trim() === "5101108008");
+
+                if (isSystemAdmin) {
+                    html += `
+                    <div class="platform-card" onclick="window.open('https://docs.google.com/spreadsheets/d/13bQ6y0fn8n9Ah4OKQeQ9xOVJxXXnXRLjaIxTQPx-eGo/edit?usp=sharing', '_blank')" style="border-bottom: 4px solid #0f4c81; background: #ffffff;">
+                        <div class="icon">
+                            <i class="fa-solid fa-database" style="color: #0f4c81;"></i>
+                        </div>
+                        <h4 style="color: #0f4c81;">Cơ sở dữ liệu</h4>
+                        <p style="font-size: 12px; color: #e61d4a; font-weight: 700; margin-top: 4px;">[ADMIN ONLY]</p>
+                    </div>
+
+                    <div class="platform-card" onclick="window.open('https://teams.cloud.microsoft/l/team/19%3AG3AZ0si8ueyRMaXW3zI-siWOxk1cyIA9Aol3zliL8Sw1%40thread.tacv2/conversations?groupId=d88461ae-d3dd-44d2-aae0-e8d021da1e68&tenantId=b1a9fdc0-1d56-4c3d-a481-809fff8a26db', '_blank')" style="border-bottom: 4px solid #464eb8; background: #ffffff;">
+                        <div class="icon">
+                            <i class="fa-brands fa-microsoft" style="color: #464eb8;"></i>
+                        </div>
+                        <h4 style="color: #464eb8;">MS Teams</h4>
+                        <p style="font-size: 12px; color: #e61d4a; font-weight: 700; margin-top: 4px;">[ADMIN ONLY]</p>
+                    </div>`;
+                }
+
+                // DUYỆT TẤT CẢ CÁC LINK HỆ THỐNG (ĐỒNG BỘ MÀU #0f4c81)
+                if (globalData && globalData.length > 0) {
+                    globalData.forEach(item => {
+                        let title = item.title || item[0] || 'Liên kết';
+                        let url = item.url || item[2] || '#';
+                        let iconClass = item.icon || item[3] || 'fa-solid fa-link';
+                        let desc = item.desc || item[1] || '';
+
+                        html += `
+                            <div class="platform-card" onclick="window.open('${url}', '_blank')" style="border-bottom: 4px solid #0f4c81;">
+                                <div class="icon">
+                                    <i class="${iconClass}" style="color: #0f4c81;"></i>
+                                </div>
+                                <h4 style="color: #0f4c81;">${title}</h4>
+                                ${desc ? `<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">${desc}</p>` : ''}
+                            </div>
+                        `;
+                    });
+                }
+
+                if (!html) {
+                    container.html('<div style="grid-column: 1 / -1; text-align: center; color: #6b7280;">Chưa có dữ liệu hệ thống.</div>');
+                    return;
+                }
+
+                container.html(html);
+            },
+            error: function() {
+                container.html(`
+                    <div style="grid-column: 1 / -1; text-align: center; color: #dc2626;">
+                        <i class="fa-solid fa-triangle-exclamation fs-3 mb-2"></i><br>Lỗi tải liên kết hệ thống!
+                    </div>
+                `);
+            }
+        });
+    }
+
+    // 2. HÀM TẢI LINK CÁ NHÂN (ĐỒNG BỘ MÀU #0f4c81)
+   // 2. HÀM TẢI LINK CÁ NHÂN (TỰ ĐỘNG HIỂN THỊ KHÔNG CẦN ĐĂNG NHẬP)
+function loadPersonalLinks() {
+    const container = $('#ungdung .platform-grid');
+    if (!container.length) return;
+
+    // Lấy thông tin user nếu có, nếu chưa có thì gán mặc định MSSV admin
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    let mssvParam = (currentUser && currentUser.mssv) ? currentUser.mssv : "51.01.108.008"; 
+
+    container.html(`
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280; font-weight: 500;">
+            <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i><br>
+            Đang tải góc liên kết cá nhân...
+        </div>
+    `);
+
+    $.ajax({
+        url: SCRIPT_URL_WEBLINKS + "?action=getWebLinks&mssv=" + encodeURIComponent(mssvParam),
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            let personalData = data?.personal || [];
+
+            if (!personalData || personalData.length === 0) {
+                container.html(`
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #6b7280;">
+                        <i class="fa-solid fa-folder-open" style="font-size: 32px; margin-bottom: 10px; color: #cbd5e1;"></i><br>
+                        Chưa có dữ liệu liên kết cá nhân.
+                    </div>
+                `);
+                return;
+            }
+
+            let html = '';
+            personalData.forEach(item => {
+                let title = item.title || 'Liên kết cá nhân';
+                let url = item.url || '#';
+                let iconClass = item.icon || 'fa-solid fa-link';
+                let desc = item.desc || '';
+
+                html += `
+                    <div class="platform-card" onclick="window.open('${url}', '_blank')" style="border-bottom: 4px solid #0f4c81;">
+                        <div class="icon">
+                            <i class="${iconClass}" style="color: #0f4c81;"></i>
+                        </div>
+                        <h4 style="color: #0f4c81;">${title}</h4>
+                        ${desc ? `<p style="font-size: 12px; color: #6b7280; margin-top: 4px;">${desc}</p>` : ''}
+                    </div>
+                `;
+            });
+
+            container.html(html);
+        },
+        error: function() {
+            container.html(`
+                <div style="grid-column: 1 / -1; text-align: center; color: #dc2626;">
+                    <i class="fa-solid fa-triangle-exclamation fs-3 mb-2"></i><br>Lỗi tải liên kết cá nhân!
+                </div>
+            `);
+        }
+    });
+}
 
     // 3. TỰ ĐỘNG CHẠY KHI TRANG TẢI XONG
     $(document).ready(function() {
