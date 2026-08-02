@@ -165,3 +165,6 @@
             margin-right: 12px;
             font-weight: 600;
         }
+.tox-statusbar__branding {
+    display: none !important;
+}
