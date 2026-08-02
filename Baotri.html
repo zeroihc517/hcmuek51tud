@@ -6,7 +6,8 @@
     <title>Bảo trì hệ thống</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-    *{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,sans-serif;height:100vh;overflow:hidden;background:#050816;color:#fff;display:flex;align-items:center;justify-content:center}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Inter,sans-serif;height:100vh;overflow:hidden;background:#050816;color:#fff;display:flex;align-items:center;justify-content:center}
     .bg:before,.bg:after{content:"";position:absolute;width:45vw;height:45vw;border-radius:50%;filter:blur(90px);animation:float 12s ease-in-out infinite}
     .bg:before{background:#3b82f6;left:-10%;top:-10%}.bg:after{background:#7c3aed;right:-10%;bottom:-10%;animation-delay:-6s}
     @keyframes float{50%{transform:translateY(40px) translateX(30px) scale(1.15)}}
@@ -14,8 +15,8 @@
     .card:before{content:"";position:absolute;inset:-2px;border-radius:30px;padding:2px;background:linear-gradient(90deg,#06b6d4,#8b5cf6,#06b6d4);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:spin 5s linear infinite}
     @keyframes spin{to{filter:hue-rotate(360deg)}}
     .gear{font-size:90px;display:inline-block;animation:r 8s linear infinite;filter:drop-shadow(0 0 20px #60a5fa)}@keyframes r{to{transform:rotate(360deg)}}
-    h1{font-size:42px;margin:18px 0}.sub{opacity:.8;font-size:18px;line-height:1.7}
-    .count{margin:25px 0;font-size:30px;font-weight:800;color:#67e8f9}
+    h1{font-size:38px;margin:18px 0}.sub{opacity:.8;font-size:16px;line-height:1.7}
+    .count{margin:20px 0;font-size:32px;font-weight:800;color:#67e8f9;letter-spacing:1px}
     a{display:inline-block;padding:15px 34px;border-radius:15px;background:linear-gradient(90deg,#2563eb,#7c3aed);color:#fff;text-decoration:none;font-weight:700;transition:.3s}
     a:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 0 35px rgba(99,102,241,.6)}
     small{display:block;margin-top:20px;opacity:.65}
@@ -28,9 +29,12 @@
     <div class="card">
         <div class="gear">⚙️</div>
         <h1>Hệ thống đang bảo trì</h1>
-        <div class="sub">Chúng tôi đang nâng cấp hệ thống để mang đến trải nghiệm tốt hơn.</div>
+        <div class="sub">Hệ thống sẽ bảo trì từ 00:00 đến 05:00 sáng hàng ngày để mang lại trải nghiệm tốt nhất.</div>
+        
+        <!-- Ô hiển thị bộ đếm ngược -->
         <div class="count" id="c"></div>
-        <a href="appliedmathematics.html">Vui lòng quay lại sau</a>
+        
+        <a href="appliedmathematics.html" id="btnReturn">Vui lòng quay lại sau</a>
         <small>© 2026 Applied Mathematics</small>
     </div>
 
@@ -52,33 +56,65 @@
         };
     </script>
 
-    <!-- 3. Script Kiểm tra bảo trì & Đẩy về trang chủ khi hết hạn -->
+    <!-- 3. Script Tự động đếm ngược & Đẩy về trang chủ lúc 6h00 AM -->
     <script>
-        const configStr = localStorage.getItem("maintenanceConfig");
-        const config = configStr ? JSON.parse(configStr) : null;
         const mainPage = "appliedmathematics.html"; 
+        const pad = (n) => n.toString().padStart(2, '0');
 
-        function checkAndRender() {
+        function getTargetEndTime() {
+            let configStr = localStorage.getItem("maintenanceConfig");
+            if (configStr) {
+                try {
+                    let parsed = JSON.parse(configStr);
+                    if (parsed.end > Date.now()) return parsed;
+                } catch(e){}
+            }
+
+            // Nếu không có config (truy cập thẳng link), tự tạo mốc 6h00 AM gần nhất
+            let now = new Date();
+            let target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0, 0, 0);
+            
+            // Nếu thời điểm hiện tại đã qua 6h sáng -> Đặt mốc 6h sáng ngày hôm sau
+            if (now >= target) {
+                target.setDate(target.getDate() + 1);
+            }
+
+            let textShow = `05:00 Ngày ${pad(target.getDate())}/${pad(target.getMonth() + 1)}/${target.getFullYear()}`;
+            let newConfig = { end: target.getTime(), textShow: textShow };
+            localStorage.setItem("maintenanceConfig", JSON.stringify(newConfig));
+            return newConfig;
+        }
+
+        function updateCountdown() {
+            const config = getTargetEndTime();
             const now = Date.now();
+            const diff = config.end - now;
 
-            // Nếu người dùng vô tình vào từ Lịch sử (mà không có lịch bảo trì hoặc đã quá giờ)
-            if (!config || now >= config.end) {
+            // ĐÃ HẾT GIỜ BẢO TRÌ -> Xóa cấu hình và tự động chuyển về Trang Chủ
+            if (diff <= 0) {
                 localStorage.removeItem("maintenanceConfig");
                 location.replace(mainPage);
                 return;
             }
 
-            // Chèn ngày giờ vào nút bấm bằng thẻ <span> để không bị lỗi CSS
-            const btnReturn = document.querySelector('a'); 
-            if (btnReturn && config.textShow && !btnReturn.innerHTML.includes(config.textShow)) {
-                btnReturn.innerHTML = `Vui lòng quay lại sau<br><span style="display: block; margin-top: 8px; font-size: 13px; font-weight: normal; opacity: 0.9; text-transform: none;">Dự kiến xong lúc: ${config.textShow}</span>`;
+            // Tính Toán Giờ, Phút, Giây
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+
+            // Cập Nhật Nhãn Dự Kiến Cho Nút Bấm
+            const btnReturn = document.getElementById('btnReturn');
+            if (btnReturn) {
+                btnReturn.innerHTML = `Vui lòng quay lại sau<br><span style="display: block; margin-top: 8px; font-size: 13px; font-weight: normal; opacity: 0.9; text-transform: none;">Hệ thống mở lại: ${config.textShow}</span>`;
             }
         }
 
-        // Chạy ngay khi tải xong
-        checkAndRender();
-        // Quét tự động ngầm mỗi 30 giây để đẩy về trang chủ khi vừa hết giờ
-        setInterval(checkAndRender, 30000);
+        // Chạy cập nhật ngay khi mở trang
+        updateCountdown();
+
+        // Chạy bộ đếm ngược liên tục mỗi 1 giây
+        setInterval(updateCountdown, 1000);
     </script>
 </body>
 </html>

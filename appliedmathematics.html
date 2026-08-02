@@ -1964,6 +1964,7 @@
         </div>
     </div>
 </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
@@ -1989,7 +1990,7 @@
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
 
-        const maintenancePage = "Baotri.html"; 
+        const maintenancePage = "webduphong.html"; 
         const now = new Date();
 
         if (now >= startMaintenance && now <= endMaintenance) {
@@ -2156,6 +2157,53 @@ window.addEventListener('popstate', function() {
 $(document).ready(function() {
     initSystemUrlRouter();
 });
+</script>
+<script>
+    (function() {
+        const maintenancePage = "Baotri.html"; 
+
+        // Kiểm tra xem hiện tại có đang ở trang Baotri.html hay không để tránh lặp vô tận
+        const isMaintenancePage = window.location.pathname.endsWith(maintenancePage);
+
+        function checkMaintenanceTime() {
+            const now = new Date();
+            const currentHour = now.getHours();
+
+            // Khung giờ từ 0h (00:00) đến trước 5h sáng (05:59:59)
+            const isMaintenanceTime = (currentHour >= 0 && currentHour < 5);
+
+            if (isMaintenanceTime) {
+                if (!isMaintenancePage) {
+                    // Tạo thông tin cấu hình bảo trì để trang Baotri.html đọc và hiển thị
+                    const endMaintenance = new Date();
+                    endMaintenance.setHours(6, 0, 0, 0); // Mốc kết thúc: 06:00 AM cùng ngày
+
+                    const pad = (n) => n.toString().padStart(2, '0');
+                    const endTimeStr = `06:00 Ngày ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+
+                    localStorage.setItem("maintenanceConfig", JSON.stringify({
+                        end: endMaintenance.getTime(),
+                        textShow: endTimeStr
+                    }));
+
+                    // Chuyển hướng sang trang bảo trì
+                    window.location.replace(maintenancePage);
+                }
+            } else {
+                // Nếu đã hết giờ bảo trì nhưng vẫn ở trang Baotri.html -> Tự động quay về trang chủ
+                if (isMaintenancePage) {
+                    localStorage.removeItem("maintenanceConfig");
+                    window.location.replace("appliedmathematics.html"); // Đổi tên file trang chủ của bạn tại đây
+                }
+            }
+        }
+
+        // Chạy kiểm tra ngay khi vừa tải trang
+        checkMaintenanceTime();
+
+        // Đặt lịch kiểm tra định kỳ mỗi 30 giây (phòng trường hợp người dùng treo máy qua mốc 0h hoặc 6h)
+        setInterval(checkMaintenanceTime, 30000);
+    })();
 </script>
 </body>
 </html>
