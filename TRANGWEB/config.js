@@ -178,25 +178,46 @@ function saveEditRow() {
             else { toastEl.classList.remove('bg-danger', 'bg-primary'); toastEl.classList.add('bg-success'); }
             let toast = new bootstrap.Toast(toastEl, { delay: 2500 }); toast.show();
         };
+function getNaturalShortName(fullName) {
+    if (!fullName || typeof fullName !== 'string') return '';
+    let parts = fullName.trim().split(/\s+/);
+    if (parts.length <= 2) {
+        return parts.join(' ');
+    }
+    return parts.slice(-2).join(' ');
+}
 function renderUserInfo() {
     let sidebarUserInfo = $('#sidebarUserInfo');
     
-    // Nếu là Sinh viên thực sự đã đăng nhập
+    // Nếu là Sinh viên/Admin thực sự đã đăng nhập
     if (currentUser && !currentUser.isGuest) {
-        $('#sidebarUserName').text(currentUser.name);
+        
+        // 1. Kiểm tra xem tài khoản này có phải là Admin hay không
+        let isUserAdmin = isAdmin || (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+
+        // 2. TỰ ĐỘNG LẤY TÊN TỪ SHEET (Không nhập thủ công)
+        // - Admin: Lấy tên gốc đầy đủ (currentUser.name)
+        // - Sinh viên: Cắt lấy 2 chữ cuối (getNaturalShortName)
+        let displayName = getNaturalShortName(currentUser.name);
+
+        // 3. Đổ tên ra thanh Sidebar
+        $('#sidebarUserName').text(displayName);
+        
+        // 4. Các vị trí khác trên trang (Hồ sơ, Popover) luôn hiện tên đầy đủ từ Sheet
         $('#sidebarUserMSSV').text(currentUser.mssv);
         $('#popoverUserTitle').text(currentUser.name + " - " + currentUser.mssv);
-        updateAvatarDisplay(currentUser.avatar);
+        $('#pageProfileName').text(currentUser.name);
+        $('#pageProfileMSSV').text('MSSV: ' + currentUser.mssv);
 
+        updateAvatarDisplay(currentUser.avatar);
+        
+        // ... (Phần code bên dưới giữ nguyên) ...
         $('#profChuyenNganh').val(currentUser.chuyenNganh || '');
         $('#profKhoa').val(currentUser.khoa || '');
         $('#profKhoaHoc').val(currentUser.khoaHoc || '');
         $('#profNhom').val(currentUser.nhom || '');
 
-        $('#pageProfileName').text(currentUser.name);
-        $('#pageProfileMSSV').text('MSSV: ' + currentUser.mssv);
-
-        if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008") {
+        if (isUserAdmin) {
             $('#btnAdminLoginToggle').removeClass('d-none').addClass('d-flex');
             $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex');
             $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
@@ -209,8 +230,9 @@ function renderUserInfo() {
         }
 
         sidebarUserInfo.removeClass('d-none');
-$('#btnNavTongHop, #btnNavTKB, #btnNavShareCode').removeClass('d-none');
+        $('#btnNavTongHop, #btnNavTKB, #btnNavShareCode').removeClass('d-none');
     } else {
+        // ... (Phần xử lý tài khoản Khách phía dưới giữ nguyên) 
         // Trạng thái Khách: Hiển thị nút "Đăng nhập" trên Sidebar
         sidebarUserInfo.removeClass('d-none');
         $('#sidebarUserName').text("Khách");

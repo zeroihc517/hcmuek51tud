@@ -1225,6 +1225,9 @@ function initGlobalApp() {
             dataType: "json",
             success: function(res) {
                 if (res && res.success) {
+		if (res.name) {
+        currentUser.name = res.name;
+    }
                     // Cập nhật lại bộ nhớ đệm nội bộ với dữ liệu mới nhất
                     currentUser.chuyenNganh = res.chuyenNganh;
                     currentUser.khoa = res.khoa;
