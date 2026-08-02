@@ -1953,7 +1953,8 @@ function updateSystemUrl(paramKey, paramValue) {
     let newUrl = cleanPath;
     
     if (paramKey && paramValue) {
-        let cleanValue = paramValue.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "");
+        // Thay đoạn cũ bằng:
+let cleanValue = paramValue.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "");
         newUrl += `?${paramKey}=${cleanValue}`;
     }
     
@@ -2046,9 +2047,10 @@ async function initSystemUrlRouter() {
     if (courseParam) {
         try {
             let categories = await waitForCategories();
-            let matchedCourse = categories.find(name => 
-                name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase() === courseParam.toLowerCase()
-            );
+            // Thay đoạn cũ bằng:
+let matchedCourse = categories.find(name =>
+    name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "").toLowerCase() === courseParam.toLowerCase()
+);
             
             if (matchedCourse) {
                 loadDataByHocPhan(matchedCourse);
