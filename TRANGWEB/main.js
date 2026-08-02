@@ -295,35 +295,56 @@ function loadDataByHocPhan(sheetName, element) {
     
     if ($('#customViewWrapper').length > 0) $('#customViewWrapper').addClass('d-none');
     $('#examCardsContainer').addClass('d-none').html(''); 
-if (sheetName.toLowerCase() !== 'thông báo') {
-    updateSystemUrl('course', sheetName); 
-} else {
-    // Chỉ reset URL về mặc định nếu người dùng thực sự click bấm chọn vào nút "Thông báo" trên Sidebar
-    if (element) {
-        resetUrlToDefault();
+
+    // ==========================================
+    // BỔ SUNG CHẶN KHÁCH XEM TRANG TỔNG (ĐÃ ĐƯA RA NGOÀI VÀ LÊN ĐẦU)
+    // ==========================================
+    if (sheetName.toLowerCase() === 'thông báo') {
+        let urlParams = new URLSearchParams(window.location.search);
+        let tbParam = urlParams.get('tb');
+
+        // Nếu người dùng là Khách VÀ KHÔNG CÓ mã thông báo cụ thể (?tb=...)
+        if (currentUser && currentUser.isGuest && !tbParam) {
+            $('#loadingStatus').addClass('d-none');
+            $('#tableWrapper').addClass('d-none');
+            
+            let guestLockHtml = `
+                <div class="data-card p-5 text-center my-4 border-0 shadow-sm" style="border-radius: 16px; background: #ffffff;">
+                    <div class="mb-3">
+                        <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle" style="width: 80px; height: 80px; background-color: #f1f5f9; color: #0f4c81; font-size: 36px;">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold mb-2" style="color: #0f4c81;">Giao diện bị khóa đối với Khách</h4>
+                    <p class="text-muted mb-4 mx-auto" style="max-width: 500px; font-size: 15px; line-height: 1.6;">
+                        Bạn đang ở chế độ Khách nên không thể xem danh sách Thông báo tổng. Chế độ Khách chỉ hỗ trợ xem nội dung khi được chia sẻ liên kết trực tiếp.
+                    </p>
+                    <button class="btn text-white fw-bold px-4 py-2" style="background-color: #0f4c81; border-radius: 50px; font-size: 15px;" onclick="window.location.href='login.html'">
+                        <i class="fa-solid fa-right-to-bracket me-2"></i>Đăng nhập Cổng Sinh Viên
+                    </button>
+                </div>
+            `;
+
+            if ($('#customViewWrapper').length === 0) $('#tableWrapper').before('<div id="customViewWrapper" class="w-100"></div>');
+            $('#customViewWrapper').html(guestLockHtml).removeClass('d-none');
+            return; // Dừng hàm ngay lập tức, không cho tải bảng phía dưới nữa!
+        }
     }
-}
-   // Hiển thị form thêm dữ liệu nếu là Admin và Đổi nhãn thông minh
+    // ==========================================
+
+    if (sheetName.toLowerCase() !== 'thông báo') {
+        updateSystemUrl('course', sheetName); 
+    } else {
+        // Chỉ reset URL về mặc định nếu người dùng thực sự click bấm chọn vào nút "Thông báo" trên Sidebar
+        if (element) {
+            resetUrlToDefault();
+        }
+    }
+
+    // Hiển thị form thêm dữ liệu nếu là Admin và Đổi nhãn thông minh
     if (isAdmin) {
         $('#adminAddRowArea').removeClass('d-none');
-        
         if (sheetName.toLowerCase() === 'thông báo') {
-            $('#txtCol5, #txtCol6, #txtCol7').parent().show();
-            $('#insertCol5, #insertCol6, #insertCol7').parent().show();
-            $('#editCol5, #editCol6, #editCol7').parent().show();
-            
-            // Xếp đúng thứ tự cho Thông báo
-            $('#txtCol2').parent().css('order', '2');
-            $('#txtCol3').parent().css('order', '3');
-
-            $('#txtCol1, #insertCol1, #editCol1').prev('label').text('STT / Trạng thái (Cột 1)');
-            $('#txtCol2, #insertCol2, #editCol2').prev('label').text('Tiêu đề (Cột 2)');
-            
-            // Thêm nút Hẹn giờ vào Cột 3 và Cột 7
-            $('#txtCol3, #insertCol3, #editCol3').prev('label').html('Nội dung chi tiết (Cột 3) <button type="button" class="btn btn-sm text-white py-0 px-2 ms-2 shadow-sm" style="background:#e61d4a; font-size:11px; border-radius: 12px;" onclick="insertDeadlineTag(\'c3\', this, event)"><i class="fa-solid fa-clock"></i> Hẹn giờ Đếm ngược</button>');
-            $('#txtCol4, #insertCol4, #editCol4').prev('label').text('Ngày đăng (Cột 4)');
-            $('#txtCol7, #insertCol7, #editCol7').prev('label').html('Ghi chú (Cột 7) <button type="button" class="btn btn-sm text-white py-0 px-2 ms-2 shadow-sm" style="background:#64748b; font-size:11px; border-radius: 12px;" onclick="insertDeadlineTag(\'c7\', this, event)"><i class="fa-solid fa-clock"></i> Hẹn giờ Ẩn bài</button>');
-        } else {
             $('#txtCol5, #txtCol6, #txtCol7').parent().hide();
             $('#insertCol5, #insertCol6, #insertCol7').parent().hide();
             $('#editCol5, #editCol6, #editCol7').parent().hide();
@@ -361,11 +382,8 @@ if (sheetName.toLowerCase() !== 'thông báo') {
             // ==========================================
             // XỬ LÝ RIÊNG: GIAO DIỆN THÔNG BÁO (HỌC THUẬT & RÈN LUYỆN)
             // ==========================================
-           // ==========================================
-            // XỬ LÝ RIÊNG: GIAO DIỆN THÔNG BÁO (HỌC THUẬT & RÈN LUYỆN)
-            // ==========================================
             if (sheetName.toLowerCase() === 'thông báo') {
-              let mainHtml = `
+                let mainHtml = `
 <div class="tb-list-container shadow-sm mb-4">
     <div class="tb-header-blue">
         <div class="d-flex align-items-center"><i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo mới</div>
@@ -393,6 +411,7 @@ if (sheetName.toLowerCase() !== 'thông báo') {
     </div>
 </div>
 `;
+// ... (Phần code bên dưới giữ nguyên) ...
 
                let detailData = [];
                let hocThuatItemsHtml = '';
@@ -634,22 +653,28 @@ else {
 
                         let hiddenNoticeBadge = data.isHidden ? `<span class="badge bg-secondary ms-2" style="font-size: 12px;"></span>` : '';
 // XỬ LÝ NÚT TRỞ LẠI: NẾU LÀ KHÁCH THÌ ẨN LUÔN NÚT TRỞ LẠI VÀ CHỈ HIỂN THỊ TIÊU ĐỀ
-    let backButtonHtml = '';
-    if (!currentUser || currentUser.isGuest) {
-        // Đối với Khách, chỉ hiện một thanh tiêu đề nhỏ xíu, KHÔNG CÓ nút Trở lại
-        backButtonHtml = `
-            <div class="tb-header-blue" style="cursor: default;">
-                <i class="fa-solid fa-globe me-2"></i> Thông báo hệ thống
-            </div>
-        `;
-    } else {
-        // Đối với Sinh viên/Admin, hiện đầy đủ nút Trở lại
-        backButtonHtml = `
-            <div class="tb-header-blue" style="cursor: pointer;" onclick="backToThongBaoList()">
-                <i class="fa-solid fa-arrow-left me-2"></i> Trở lại <span class="mx-2">|</span> <i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo chi tiết
-            </div>
-        `;
-    }                        let html = `
+    // XỬ LÝ NÚT TÊN THANH HEADER CHO KHÁCH VÀ SINH VIÊN
+   // XỬ LÝ NÚT TRỞ LẠI CHO KHÁCH VÀ SINH VIÊN
+let backButtonHtml = '';
+if (!currentUser || currentUser.isGuest) {
+    // Khách: Chỉ hiện thanh tiêu đề + nút Đăng nhập (KHÔNG CÓ nút Trở lại)
+    backButtonHtml = `
+        <div class="tb-header-blue d-flex justify-content-between align-items-center" style="cursor: default;">
+            <span><i class="fa-solid fa-globe me-2"></i> Thông báo hệ thống</span>
+            <button class="btn btn-sm btn-light text-primary fw-bold px-3" style="border-radius: 20px;" onclick="window.location.href='login.html'">
+                <i class="fa-solid fa-right-to-bracket me-1"></i> Đăng nhập
+            </button>
+        </div>
+    `;
+} else {
+    // Sinh viên / Admin: Hiển thị nút Trở lại như cũ
+    backButtonHtml = `
+        <div class="tb-header-blue" style="cursor: pointer;" onclick="backToThongBaoList()">
+            <i class="fa-solid fa-arrow-left me-2"></i> Trở lại <span class="mx-2">|</span> <i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo chi tiết
+        </div>
+    `;
+}
+                      let html = `
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">
                                 [${currentCode}] ${data.c2} ${hiddenNoticeBadge}
@@ -674,19 +699,18 @@ else {
                     };
 
                     // HÀM TRỞ LẠI -> TỰ ĐỘNG XOÁ BỎ THAM SỐ ?tb= TRÊN BIA ĐỊA CHỈ
-                    window.backToThongBaoList = function() {
-        // BẢO MẬT: Nếu là Khách thì KHÔNG CHO PHÉP gọi hàm này
-        if (currentUser && currentUser.isGuest) {
-            alert("Bạn đang ở chế độ Khách nên không thể xem danh sách Thông báo. Vui lòng đăng nhập!");
-            return; 
-        }
+                  // HÀM TRỞ LẠI -> TỰ ĐỘNG XOÁ BỎ THAM SỐ ?tb= TRÊN BIA ĐỊA CHỈ
+                   window.backToThongBaoList = function() {
+                        // Bảo mật: Khách bấm lệnh này sẽ báo lỗi ngay
+                        if (currentUser && currentUser.isGuest) {
+                            alert("Chế độ Khách không thể xem danh sách Thông báo tổng. Vui lòng đăng nhập!");
+                            return; 
+                        }
 
-        $('#tbDetailContainer').addClass('d-none');
-        $('#tbMainView').removeClass('d-none');
-        resetUrlToDefault();
-        let cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-        window.history.pushState({ path: cleanUrl }, '', cleanUrl);
-    };
+                        $('#tbDetailContainer').addClass('d-none');
+                        $('#tbMainView').removeClass('d-none').attr('style', ''); // Xóa lệnh ẩn ép buộc để hiện lại bảng
+                        resetUrlToDefault();
+                    };
 
                     window.copyTBLink = function(url) {
                         navigator.clipboard.writeText(url).then(() => {
@@ -718,9 +742,14 @@ else {
                     window.tbDetailFunctionsInjected = true;
                 }
 
+               // Tự động kiểm tra trên URL xem có đang mở link chia sẻ không
+                let urlParamsTemp = new URLSearchParams(window.location.search);
+                // Nếu là Khách HOẶC đang mở link trực tiếp -> Giấu ngay bảng danh sách
+                let hideMainClass = ((currentUser && currentUser.isGuest) || urlParamsTemp.get('tb')) ? 'd-none' : '';
+
                 let customViewHtml = `
                 <div class="row g-4 mt-2 mb-4">
-                    <div class="col-12" id="tbMainView">
+                    <div class="col-12 ${hideMainClass}" id="tbMainView" ${hideMainClass ? 'style="display: none !important;"' : ''}>
                         ${mainHtml}
                     </div>
                     <div class="col-12">
@@ -2718,7 +2747,7 @@ function loadAdminMasterTkbView() {
 }
 function resetNavActive() {
     // Tự động khôi phục URL về mặc định khi chuyển sang danh mục khác
-    resetUrlToDefault();
+
 
     $('.btn-course').removeClass('active'); 
     $('#btnNavQA').removeClass('active'); 

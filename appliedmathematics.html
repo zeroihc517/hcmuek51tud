@@ -2071,20 +2071,34 @@ if (currentUser && currentUser.isGuest) {
         }
     }
     // 1. Mở bài viết Thông báo chi tiết
+    // 1. Mở bài viết Thông báo chi tiết
     if (tbParam) {
-        // Cứu cánh vòng lặp: Buộc hệ thống kéo dữ liệu Thông báo về
-        loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
+        // Đánh dấu nút Thông báo trên Sidebar cho đẹp
+        $('#btnNavThongBao').addClass('active');
+
+        // BÍ QUYẾT Ở ĐÂY: Truyền 'null' thay vì truyền 'document.getElementById...'
+        // Điều này báo cho hệ thống biết là đang load từ Link chia sẻ, tuyệt đối KHÔNG ĐƯỢC reset URL
+        loadDataByHocPhan('Thông báo', null);
         
         // Chờ dữ liệu đổ vào biến window.thongBaoData
         let tbData = await waitForThongBaoData();
         
+        let isFound = false;
         // Duyệt tìm mã thông báo trùng khớp và kích hoạt hàm mở chi tiết
         for (let key in tbData) {
             if (tbData[key] && tbData[key].tbCode === tbParam) {
                 // Trì hoãn 50ms để bảng DOM nền vẽ xong, giúp hiệu ứng bật Popup đè lên mượt hơn
                 setTimeout(() => viewThongBaoDetail(key), 50);
+                isFound = true;
                 break;
             }
+        }
+
+        // NẾU KHÔNG TÌM THẤY BÀI VIẾT (Mã sai/Bài đã xóa) MÀ LÀ KHÁCH -> ĐÁ VĂNG VỀ TRANG CHỦ
+        if (!isFound && currentUser && currentUser.isGuest) {
+            alert("Liên kết thông báo không tồn tại hoặc bạn không có quyền xem!");
+            resetUrlToDefault();
+            location.reload(); // Tự động load lại trang để bật màn hình Khóa
         }
         return;
     }
