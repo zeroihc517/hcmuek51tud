@@ -1037,13 +1037,18 @@ function initGlobalApp() {
     // --- BẮT ĐẦU ĐOẠN CẦN CẬP NHẬT/THÊM MỚI ---
     
     // 1. Gọi ngầm kiểm tra dữ liệu Q&A mỗi 5 giây
+// Thay thế vòng lặp setInterval cũ bằng khối này
+// 1. Gọi ngầm kiểm tra dữ liệu Q&A và ShareCode mỗi 5 giây
     setInterval(function() {
         if (!$('#qaSection').hasClass('d-none')) {
             silentCheckNewQA();
         } else {
             checkNewQA(); 
         }
-    }, 5000); 
+        
+        // Cập nhật huy hiệu cho ShareCode cực mượt
+        checkNewShareCodeGlobal(); 
+    }, 5000);
 
     // 2. ĐỒNG BỘ TRẠNG THÁI DEADLINE TỪ SERVER VỀ MÁY KHI KHỞI ĐỘNG
     if (currentUser && currentUser.mssv) {
@@ -1076,6 +1081,7 @@ function initGlobalApp() {
 
     loadWebLinks();
     checkNewQA(); 
+    checkNewShareCodeGlobal();
     fetchAndRenderCategories();
     renderUserInfo();
 	if (currentUser && currentUser.mssv) {

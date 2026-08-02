@@ -65,16 +65,114 @@ window.copyShareCodeDirect = function(index, btnElement) {
         alert('Trình duyệt không hỗ trợ copy tự động!');
     });
 };
-function checkNewQA() { $.ajax({ url: SCRIPT_URL + "?action=getQAData", method: "GET", dataType: "json", success: function(data) { 
-            if (!data || data.length === 0) return; 
-            if (data.some(row => (row[3] || '').trim() === '')) {
-                // Sửa ở đây: Hiển thị cả 2 badge
-                $('#qaSidebarBadge, #shareCodeSidebarBadge').removeClass('d-none'); 
-            } else { 
-                // Sửa ở đây: Ẩn cả 2 badge
-                $('#qaSidebarBadge, #shareCodeSidebarBadge').addClass('d-none'); 
-            } 
-        }}); }
+// Biến lưu trạng thái toàn cục
+window.isQAUnanswered = false;
+window.isShareCodeNew = false;
+
+// Hàm cập nhật Badge ngoài Sidebar
+function updateSidebarThaoLuanBadge() {
+    // Bật/tắt ngoài Sidebar
+    if (window.isQAUnanswered || window.isShareCodeNew) {
+        $('#shareCodeSidebarBadge').removeClass('d-none');
+    } else {
+        $('#shareCodeSidebarBadge').addClass('d-none');
+    }
+
+    // Bật/tắt riêng cho thẻ "Giải đáp thắc mắc" bên trong trang Thảo luận
+    if (window.isQAUnanswered) {
+        $('#qaInsideBadge').removeClass('d-none');
+    } else {
+        $('#qaInsideBadge').addClass('d-none');
+    }
+}
+// 1. Kiểm tra Q&A có câu hỏi mới chưa trả lời
+function checkNewQA() { 
+    $.ajax({ 
+        url: SCRIPT_URL + "?action=getQAData", 
+        method: "GET", 
+        dataType: "json", 
+        success: function(data) { 
+            if (!data || data.length === 0) {
+                window.isQAUnanswered = false;
+            } else {
+                // Kiểm tra xem có câu hỏi nào mà ô trả lời (row[3]) còn trống không
+                window.isQAUnanswered = data.some(row => {
+                    let answer = row[3] ? String(row[3]).trim() : '';
+                    return answer === '';
+                });
+            }
+            // Cập nhật hiển thị ra Sidebar
+            updateSidebarThaoLuanBadge();
+        }
+    }); 
+}
+
+// 2. Kiểm tra ShareCode có bài mới chưa bình luận
+// 2. Kiểm tra ShareCode có bài mới chưa bình luận
+function checkNewShareCodeGlobal() {
+    $.ajax({
+        url: SCRIPT_URL + "?action=getShareCodeData",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            if (!data || data.length === 0) {
+                window.isShareCodeNew = false;
+                updateSidebarThaoLuanBadge();
+                return;
+            }
+
+            let nowTime = new Date().getTime();
+            let oneDayMs = 24 * 60 * 60 * 1000; // 1 ngày
+            let hasGlobalNew = false;
+            let newCategories = {};
+
+            data.forEach(row => {
+                let time = row[0] || '';
+                let questionRaw = row[2] || '';
+                let answer = row[3] || '';
+
+                let categoryMatch = questionRaw.match(/^\[SHARECODE\|(.*?)(?:\|(.*))?\]/);
+                if (categoryMatch) {
+                    let category = categoryMatch[1].trim();
+                    let cleanCat = category.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+
+                    // Bóc tách ngày giờ thông minh, bao trọn mọi định dạng
+                    let postDate = null;
+                    let match2 = time.match(/(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/); // Dạng HH:MM DD/MM/YYYY
+                    let match1 = time.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/); // Dạng DD/MM/YYYY HH:MM
+                    
+                    if (match2) {
+                        postDate = new Date(parseInt(match2[5]), parseInt(match2[4]) - 1, parseInt(match2[3]), parseInt(match2[1]), parseInt(match2[2]), 0);
+                    } else if (match1) {
+                        let h = match1[4] ? parseInt(match1[4]) : 0;
+                        let m = match1[5] ? parseInt(match1[5]) : 0;
+                        postDate = new Date(parseInt(match1[3]), parseInt(match1[2]) - 1, parseInt(match1[1]), h, m, 0);
+                    }
+
+                    let isCommented = answer.trim() !== "";
+                    let isWithinOneDay = true;
+
+                    if (postDate && (nowTime - postDate.getTime() > oneDayMs)) {
+                        isWithinOneDay = false; // Tắt chữ "Mới" nếu qua 24 giờ
+                    }
+
+                    if (!isCommented && isWithinOneDay) {
+                        hasGlobalNew = true;
+                        newCategories[cleanCat] = true;
+                    }
+                }
+            });
+
+            window.isShareCodeNew = hasGlobalNew;
+            updateSidebarThaoLuanBadge();
+
+            $('.badge-sharecode-cat').addClass('d-none');
+            for (let cleanCat in newCategories) {
+                $('#badge-share-' + cleanCat).removeClass('d-none');
+            }
+        }
+    });
+}
 function openQASection() { 
     document.title = "Hỗ trợ & Giải đáp | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
@@ -594,6 +692,7 @@ $('#txtShareCodeDescription').val('');
 }
 
 // 1. Hàm tải dữ liệu và tạo khung Danh sách + Khung Chi tiết ẩn
+// Cập nhật hàm loadShareCodeData() trong TRANGWEB/qa.js
 function loadShareCodeData() {
     $('#shareCodeListArea').html(''); 
     $('#shareCodeLoadingStatus').removeClass('d-none');
@@ -611,8 +710,9 @@ function loadShareCodeData() {
             
             window.shareCodeList = []; 
             let rawList = [];
+            let nowTime = new Date().getTime();
+            let oneDayMs = 24 * 60 * 60 * 1000;
 
-            // Bóc tách dữ liệu từ Google Sheets
             data.forEach(row => {
                 let questionRaw = row[2] || '';
                 let targetTag = `[SHARECODE|${currentShareCategory}`;
@@ -634,33 +734,56 @@ function loadShareCodeData() {
                     questionRaw = questionRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '');
                 }
 
+                // Đồng bộ thuật toán tính giờ với hàm Global
+                let postDate = null;
+                let match2 = time.match(/(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+                let match1 = time.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+                if (match2) {
+                    postDate = new Date(parseInt(match2[5]), parseInt(match2[4]) - 1, parseInt(match2[3]), parseInt(match2[1]), parseInt(match2[2]), 0);
+                } else if (match1) {
+                    let h = match1[4] ? parseInt(match1[4]) : 0;
+                    let m = match1[5] ? parseInt(match1[5]) : 0;
+                    postDate = new Date(parseInt(match1[3]), parseInt(match1[2]) - 1, parseInt(match1[1]), h, m, 0);
+                }
+
+                let isCommented = answer.trim() !== "";
+                let isWithinOneDay = true;
+
+                if (postDate && (nowTime - postDate.getTime() > oneDayMs)) {
+                    isWithinOneDay = false;
+                }
+
+                let isNew = !isCommented && isWithinOneDay;
+
                 rawList.push({
                     time: time, author: displayMssv, rawAuthor: rawAuthor, 
-                    maBai: maBaiValue, codeContent: questionRaw, answer: answer, rowIndex: rowIndex
+                    maBai: maBaiValue, codeContent: questionRaw, answer: answer, rowIndex: rowIndex, isNew: isNew
                 });
             });
 
-            // LỌC GỘP BẢN SAO: Gom nhóm theo (Tác giả + Mã bài), chỉ giữ lại bản nộp mới nhất
             let uniqueMap = {};
             rawList.forEach(item => {
                 let uniqueKey = `${item.rawAuthor.trim().toLowerCase()}_${item.maBai.trim().toLowerCase()}`;
-                
-                // Do data từ GAS trả về mảng đã đảo ngược (mới nhất nằm trên cùng), 
-                // nên bản ghi được duyệt đầu tiên chính là BẢN MỚI NHẤT
                 if (!uniqueMap[uniqueKey]) {
                     uniqueMap[uniqueKey] = item;
+                } else {
+                    if (item.isNew) uniqueMap[uniqueKey].isNew = true; // Gộp chung nếu 1 trong số đó là mới
                 }
             });
 
-            // Chuyển Object về lại mảng để render
             window.shareCodeList = Object.values(uniqueMap);
 
             let gridHtml = '<div class="row g-3">'; 
             
             window.shareCodeList.forEach((item, arrayIndex) => {
+                
+                // ĐẶT CHỮ MỚI VÀO GÓC TRÁI AN TOÀN TRÁNH BỊ CẮT MẤT DO CSS
+                let newBadgeHtml = item.isNew ? `<span class="badge-new-qa position-absolute shadow-sm" style="top: 12px; left: 12px; z-index: 10; font-size: 11px;">Mới</span>` : '';
+                
                 gridHtml += `
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card-sharecode-box" onclick="openShareCodeDetail(${arrayIndex})">
+                    <div class="card-sharecode-box position-relative" onclick="openShareCodeDetail(${arrayIndex})">
+                        ${newBadgeHtml}
                         <div class="card-sharecode-badge">
                             <i class="fa-solid fa-code"></i>
                         </div>
@@ -696,7 +819,7 @@ function loadShareCodeData() {
         }
     });
 }
-// Cập nhật hàm xử lý xuống dòng thông minh
+
 function processFormattedText(text) {
     if (!text) return "";
     
