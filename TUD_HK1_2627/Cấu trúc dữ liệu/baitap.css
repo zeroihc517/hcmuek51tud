@@ -1,0 +1,167 @@
+  .question-nav-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            scroll-behavior: smooth;
+        }
+        .question-nav-container::-webkit-scrollbar {
+            height: 4px;
+        }
+        .question-nav-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .btn-question-tab {
+            background-color: #ffffff;
+            color: #475569;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-question-tab:hover {
+            border-color: #0f4c81;
+            color: #0f4c81;
+            background-color: #f0f7ff;
+        }
+        .btn-question-tab.active {
+            background-color: #0f4c81 !important;
+            color: #ffffff !important;
+            border-color: #0f4c81 !important;
+            box-shadow: 0 4px 10px rgba(15, 76, 129, 0.2);
+        }
+
+        /* GIAO DIỆN LỊCH SỬ NỀN TRẮNG SÁNG */
+        .history-card {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        }
+        .history-header {
+            background: #f8fafc;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-body {
+            padding: 20px;
+        }
+        .history-theory-box {
+            background: #f0f7ff;
+            border-left: 5px solid #0f4c81;
+            padding: 14px 18px;
+            border-radius: 0 12px 12px 0;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #1e293b;
+            margin-bottom: 18px;
+        }
+        .history-code-container {
+            position: relative;
+            background-color: #ffffff; 
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 10px;
+        }
+        .history-code-title {
+            color: #0f4c81;
+            font-weight: 700;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        .btn-copy-code-sample {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .history-code-text {
+            background-color: #f8fafc !important;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 14px;
+            font-family: 'Consolas', 'Fira Code', 'Courier New', monospace !important;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        /* KHUNG HIỂN THỊ ĐỀ BÀI CHUẨN CODE EDITOR (CÓ SỐ DÒNG & MÀU SẮC) */
+        .question-ace-view {
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            background-color: #f8fafc;
+            font-family: 'Consolas', 'Fira Code', 'Courier New', monospace !important;
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 12px 0;
+            overflow-x: auto;
+            margin-top: 12px;
+            margin-bottom: 12px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+        }
+        .ace-line-row {
+            display: flex;
+            white-space: pre;
+            width: 100%;
+        }
+        .ace-gutter-cell {
+            width: 48px;
+            text-align: right;
+            padding-right: 14px;
+            color: #94a3b8;
+            background-color: #f1f5f9;
+            user-select: none;
+            border-right: 1px solid #e2e8f0;
+            margin-right: 14px;
+            font-weight: 500;
+        }
+        .ace-code-content {
+            flex: 1;
+        }
+
+        /* BẢNG MÀU CÚ PHÁP CHUẨN VS CODE - TÔNG XANH (LIGHT THEME) */
+        .ace_keyword { color: #0000ff; font-weight: 600; }        
+        .ace_keyword.ace_operator { color: #0000ff; }             
+        .ace_identifier { color: #001080; }                       
+        .ace_function { color: #005a9e; font-weight: 600; }       
+        .ace_constant.ace_numeric { color: #098658; }            
+        .ace_boolean { color: #0000ff; font-weight: bold; }       
+        .ace_type { color: #008080; font-weight: 600; }          
+        .ace_comment { color: #008000; font-style: italic; }      
+        .ace_string { color: #0070c0; }                           
+
+        .ace-gutter-cell {
+            width: 44px;
+            text-align: right;
+            padding-right: 12px;
+            color: #0284c7;             
+            background-color: #f0f9ff;  
+            user-select: none;
+            border-right: 2px solid #bae6fd; 
+            margin-right: 12px;
+            font-weight: 600;
+        }
