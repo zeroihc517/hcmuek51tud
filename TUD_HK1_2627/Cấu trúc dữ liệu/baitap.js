@@ -90,130 +90,127 @@ function loadQuestionsData() {
     });
 }
 
-       function renderQuestion(index) {
-            index = parseInt(index);
-            currentQuestionIndex = index;
-            let q = questionsList[index];
-            if (!q) return;
+function renderQuestion(index) {
+    index = parseInt(index);
+    currentQuestionIndex = index;
+    let q = questionsList[index];
+    if (!q) return;
 
-            cancelEditMode();
+    cancelEditMode();
 
-            $('#badgeCourse').text(courseName);
-            $('#titleMaBai').text(`Bài tập: ${q.title}`);
-            $('#labelCurrentMaBai').text(`Mã bài: ${q.maBai}`);
+    $('#badgeCourse').text(courseName);
+    $('#titleMaBai').text(`Bài tập: ${q.title}`);
+    $('#labelCurrentMaBai').text(`Mã bài: ${q.maBai}`);
+    
+    let processedContent = q.content || '';
+
+    // 1. LUÔN HIỂN THỊ KHUNG NỘP CODE
+    $('#codeSectionWrapper').removeClass('d-none');
+
+    // 2. DỌN DẸP LATEX VÀ CHUẨN HÓA
+  if (processedContent) {
+    processedContent = processedContent
+        // Xóa triệt để rác LaTeX phổ biến
+        .replace(/\\\\\[\d+pt\]/g, '<br>')
+        .replace(/\\\\/g, '<br>')
+        .replace(/\[\d+pt\]/g, '')
+        .replace(/\\vspace\{.*?\}/g, '')
+        .replace(/\\hspace\{.*?\}/g, '')
+        .replace(/\\begin\{enumerate\}/g, '')
+        .replace(/\\end\{enumerate\}/g, '')
+        .replace(/\\begin\{center\}/g, '<div class="my-3">')
+        .replace(/\\end\{center\}/g, '</div>')
+        .replace(/\\small/g, '')
+        
+        // Chuẩn hóa bảng Input / Output (CHỈ thay dấu & nằm trong bảng tabular)
+        .replace(/\\begin\{tabular\}\{.*?\}/g, '<table class="table table-bordered align-middle my-3" style="width:100%; border-color:#cbd5e1;"><thead class="table-light"><tr><th style="width:40%;">Input</th><th style="width:60%;">Output</th></tr></thead><tbody><tr><td>')
+        .replace(/\\end\{tabular\}/g, '</td></tr></tbody></table>')
+        .replace(/\\begin\{minipage\}\[.*?\]\{.*?\}/g, '<div>')
+        .replace(/\\end\{minipage\}/g, '</div>')
+        .replace(/\\hline/g, '')
+        .replace(/\\textbf\{Input\}\s*&\s*\\textbf\{Output\}/gi, '')
+        .replace(/Input\s*&\s*Output/gi, '')
+        
+        // ĐÃ BỎ DÒNG .replace(/&/g, '</td><td>') BỊ LỖI NUỐT DẤU &&
+        
+        // Định dạng câu hỏi a), b), c) & chữ đậm
+        .replace(/\\textbf\{(.*?)\}/g, '<b>$1</b>')
+        .replace(/\\texttt\{(.*?)\}/g, '<code>$1</code>')
+        .replace(/\\item\[(.*?)\]/g, '<br><b>$1</b> ')
+        .replace(/\\item/g, '<br>• ');
+
+    // --- 3. BỌC KHUNG CODE MẪU BÊN ĐỀ BÀI ---
+    let tempDiv = document.createElement('div');
+    tempDiv.innerHTML = processedContent;
+    
+    let codeBlocks = tempDiv.querySelectorAll('pre, code, div[style*="background:#f8fafc"], div.question-code-block');
+
+    codeBlocks.forEach(blockEl => {
+        if (blockEl.classList.contains('question-ace-view') || blockEl.closest('.question-ace-view')) return;
+
+        let rawCodeText = blockEl.innerText || blockEl.textContent || '';
+        
+        if (rawCodeText.trim() !== '' && rawCodeText.includes('\n')) {
+            let lines = rawCodeText.split(/\r?\n/);
+            let renderedLinesHtml = '';
             
-            let processedContent = q.content || '';
+            let tokenizer = null;
+            try {
+                let HighlightRules = ace.require("ace/mode/c_cpp").Mode;
+                if (HighlightRules) {
+                    tokenizer = new HighlightRules().getTokenizer();
+                }
+            } catch (e) { }
 
-            // --- 1. LUÔN HIỂN THỊ KHUNG NỘP CODE BÊN CỘT BÀI LÀM CỦA SINH VIÊN ---
-            $('#codeSectionWrapper').removeClass('d-none');
-
-            // --- 2. DỌN DẸP RÁC LATEX VÀ BỌC BẢNG INPUT/OUTPUT (NẾU CÓ) ---
-            if (processedContent) {
-                processedContent = processedContent
-                    // Xóa triệt để rác LaTeX phổ biến
-                    .replace(/\\\\\[\d+pt\]/g, '<br>')
-                    .replace(/\\\\/g, '<br>')
-                    .replace(/\[\d+pt\]/g, '')
-                    .replace(/\\vspace\{.*?\}/g, '')
-                    .replace(/\\hspace\{.*?\}/g, '')
-                    .replace(/\\begin\{enumerate\}/g, '')
-                    .replace(/\\end\{enumerate\}/g, '')
-                    .replace(/\\begin\{center\}/g, '<div class="my-3">')
-                    .replace(/\\end\{center\}/g, '</div>')
-                    .replace(/\\small/g, '')
-                    
-                    // Chuẩn hóa bảng Input / Output
-                    .replace(/\\begin\{tabular\}\{.*?\}/g, '<table class="table table-bordered align-middle my-3" style="width:100%; border-color:#cbd5e1;"><thead class="table-light"><tr><th style="width:40%;">Input</th><th style="width:60%;">Output</th></tr></thead><tbody><tr><td>')
-                    .replace(/\\end\{tabular\}/g, '</td></tr></tbody></table>')
-                    .replace(/\\begin\{minipage\}\[.*?\]\{.*?\}/g, '<div>')
-                    .replace(/\\end\{minipage\}/g, '</div>')
-                    .replace(/\\hline/g, '')
-                    .replace(/\\textbf\{Input\}\s*&\s*\\textbf\{Output\}/gi, '')
-                    .replace(/Input\s*&\s*Output/gi, '')
-                    .replace(/&/g, '</td><td>')
-                    
-                    // Định dạng câu hỏi a), b), c) & chữ đậm
-                    .replace(/\\textbf\{(.*?)\}/g, '<b>$1</b>')
-                    .replace(/\\texttt\{(.*?)\}/g, '<code>$1</code>')
-                    .replace(/\\item\[(.*?)\]/g, '<br><b>$1</b> ')
-                    .replace(/\\item/g, '<br>• ');
-
-                // --- 3. BỌC KHUNG CODE MẪU BÊN ĐỀ BÀI (NẾU CÓ CODE MẪU) ---
-                let tempDiv = document.createElement('div');
-                tempDiv.innerHTML = processedContent;
+            lines.forEach((lineText, lineIdx) => {
+                if (lineIdx === lines.length - 1 && lineText.trim() === '') return;
                 
-                // Tìm các khối code thật bên đề bài
-                let codeBlocks = tempDiv.querySelectorAll('pre, code, div[style*="background:#f8fafc"], div.question-code-block');
+                let coloredLineText = escapeHtml(lineText);
+                
+                if (tokenizer) {
+                    try {
+                        let tokens = tokenizer.getLineTokens(lineText, "start");
+                        coloredLineText = tokens.tokens.map(t => {
+                            let className = "ace_" + t.type.replace(/\./g, " ace_");
+                            let escapedValue = escapeHtml(t.value);
+                            return `<span class="${className}">${escapedValue}</span>`;
+                        }).join('');
+                    } catch (err) {}
+                }
 
-                codeBlocks.forEach(blockEl => {
-                    if (blockEl.classList.contains('question-ace-view') || blockEl.closest('.question-ace-view')) return;
+                renderedLinesHtml += `
+                    <div class="ace-line-row">
+                        <div class="ace-gutter-cell">${lineIdx + 1}</div>
+                        <div class="ace-code-content">${coloredLineText}</div>
+                    </div>
+                `;
+            });
 
-                    let rawCodeText = blockEl.innerText || blockEl.textContent || '';
-                    
-                    if (rawCodeText.trim() !== '' && rawCodeText.includes('\n')) {
-                        let lines = rawCodeText.split(/\r?\n/);
-                        let renderedLinesHtml = '';
-                        
-                        let tokenizer = null;
-                        try {
-                            let HighlightRules = ace.require("ace/mode/c_cpp").Mode;
-                            if (HighlightRules) {
-                                tokenizer = new HighlightRules().getTokenizer();
-                            }
-                        } catch (e) { }
-
-                        lines.forEach((lineText, lineIdx) => {
-                            if (lineIdx === lines.length - 1 && lineText.trim() === '') return;
-                            
-                            let coloredLineText = escapeHtml(lineText);
-                            
-                            if (tokenizer) {
-                                try {
-                                    let tokens = tokenizer.getLineTokens(lineText, "start");
-                                    coloredLineText = tokens.tokens.map(t => {
-                                        let className = "ace_" + t.type.replace(/\./g, " ace_");
-                                        let escapedValue = escapeHtml(t.value);
-                                        return `<span class="${className}">${escapedValue}</span>`;
-                                    }).join('');
-                                } catch (err) {}
-                            }
-
-                            renderedLinesHtml += `
-                                <div class="ace-line-row">
-                                    <div class="ace-gutter-cell">${lineIdx + 1}</div>
-                                    <div class="ace-code-content">${coloredLineText}</div>
-                                </div>
-                            `;
-                        });
-
-                        let wrapperDiv = document.createElement('div');
-                        wrapperDiv.className = "question-ace-view";
-                        wrapperDiv.innerHTML = renderedLinesHtml;
-                        
-                        blockEl.parentNode.replaceChild(wrapperDiv, blockEl);
-                    }
-                });
-                processedContent = tempDiv.innerHTML;
-            }
-
-            // --- 4. CẬP NHẬT GIAO DIỆN VÀ MATHJAX ---
-            $('#questionContentArea').html(processedContent);
-            document.title = `${q.maBai} - ${courseName} | Làm bài tập`;
-
-            // Gọi MathJax biên dịch các công thức toán $...$ bên Đề bài
-            if (window.MathJax && window.MathJax.typesetPromise) {
-                MathJax.typesetPromise([document.getElementById('questionContentArea')]).catch(function (err) {
-                    console.log('MathJax error: ' + err.message);
-                });
-            }
-
-            // Cập nhật giao diện tab active
-            $('.btn-question-tab').removeClass('active');
-            $(`#tabBtnQuestion_${index}`).addClass('active');
-
-            // Tải lịch sử nộp bài của sinh viên
-            loadSubmissionHistory();
+            let wrapperDiv = document.createElement('div');
+            wrapperDiv.className = "question-ace-view";
+            wrapperDiv.innerHTML = renderedLinesHtml;
+            
+            blockEl.parentNode.replaceChild(wrapperDiv, blockEl);
         }
+    });
+    processedContent = tempDiv.innerHTML;
+}
+
+    // 4. CẬP NHẬT GIAO DIỆN VÀ MATHJAX
+    $('#questionContentArea').html(processedContent);
+    document.title = `${q.maBai} - ${courseName} | Làm bài tập`;
+
+    if (window.MathJax && window.MathJax.typesetPromise) {
+        MathJax.typesetPromise([document.getElementById('questionContentArea')]).catch(function (err) {
+            console.log('MathJax error: ' + err.message);
+        });
+    }
+
+    $('.btn-question-tab').removeClass('active');
+    $(`#tabBtnQuestion_${index}`).addClass('active');
+
+    loadSubmissionHistory();
+}
 
         function switchQuestion(index) {
             renderQuestion(index);
