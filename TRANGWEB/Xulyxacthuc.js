@@ -110,22 +110,14 @@ $.ajax({
     });
 }
 function logoutStudent() {
-    // 1. Xóa thông tin đăng nhập khỏi LocalStorage
+    // 1. Xóa thông tin đăng nhập và quyền Admin khỏi LocalStorage
     localStorage.removeItem('currentUser');
-    currentUser = null; 
-    
-    // 2. Xóa quyền Admin (nếu có)
     localStorage.removeItem('isAdmin');
+    currentUser = null; 
     isAdmin = false;
     
-    // 3. Kiểm tra chính xác theo tên file trên URL
-    if (window.location.pathname.includes("webduphong")) {
-        // Web dự phòng: Tải lại trang để mở Modal đăng nhập tại chỗ
-        location.reload();
-    } else {
-        // Web chính (appliedmathematics.html): Chuyển hướng hẳn về login.html
-        window.location.href = "login.html";
-    }
+    // 2. Chuyển hướng về trang đăng nhập
+    window.location.href = "login.html";
 }
 
 function openChangePasswordModal() { 
