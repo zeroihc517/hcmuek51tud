@@ -663,3 +663,105 @@ function sendExerciseHistoryReply(rowIndex) {
         }
     });
 }
+// HÀM CHẠY THỬ CODE (ĐÃ TÍCH HỢP PROXY BẢO MẬT CHỐNG LỖI CORS / MẠNG NỘI BỘ)
+function runCodeSample() {
+    let rawCode = exerciseEditor ? exerciseEditor.getValue().trim() : "";
+    let lang = $('#selectLang').val(); // 'cpp' hoặc 'python'
+    let inputData = $('#txtCodeInput').val();
+
+    if (!rawCode) {
+        alert("Vui lòng nhập mã nguồn trước khi chạy thử!");
+        return;
+    }
+
+    let btn = $('#btnRunCode');
+    let originalHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang thực thi...').prop('disabled', true);
+    $('#txtCodeOutput').text('⏳ Đang biên dịch code...');
+
+    // Chuẩn hóa payload cho Piston Engine
+    let targetLang = (lang === 'python') ? 'python' : 'c++';
+    let targetVersion = (lang === 'python') ? '3.10.0' : '10.2.0';
+
+    let payload = {
+        language: targetLang,
+        version: targetVersion,
+        files: [
+            {
+                name: (lang === 'python') ? 'main.py' : 'main.cpp',
+                content: rawCode
+            }
+        ],
+        stdin: inputData
+    };
+
+    // Gọi API qua CORS Proxy để chống bị trình duyệt chặn
+    let proxyUrl = "https://corsproxy.io/?" + encodeURIComponent("https://emkc.org/api/v2/piston/execute");
+
+    $.ajax({
+        url: proxyUrl,
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(payload),
+        dataType: "json",
+        timeout: 15000,
+        success: function(res) {
+            btn.html(originalHtml).prop('disabled', false);
+
+            if (res && res.run) {
+                let stdout = res.run.stdout || "";
+                let stderr = res.run.stderr || "";
+
+                if (res.run.code !== 0 && stderr) {
+                    $('#txtCodeOutput').text("❌ LỖI THỰC THI / BIÊN DỊCH:\n" + stderr);
+                } else if (stderr) {
+                    $('#txtCodeOutput').text(stdout + "\n⚠️ CẢNH BÁO (Stderr):\n" + stderr);
+                } else {
+                    $('#txtCodeOutput').text(stdout || "(Chương trình chạy thành công và không xuất ra dữ liệu nào)");
+                }
+            } else {
+                $('#txtCodeOutput').text("❌ Không nhận được kết quả hợp lệ từ máy chủ.");
+            }
+        },
+        error: function(xhr, status, err) {
+            // Nếu proxy chính bận, chuyển sang Proxy dự phòng (CodeX)
+            runCodeFallback(rawCode, lang, inputData, btn, originalHtml);
+        }
+    });
+}
+
+// HÀM DỰ PHÒNG CHẠY QUA CODEX API + PROXY
+function runCodeFallback(rawCode, lang, inputData, btn, originalHtml) {
+    $('#txtCodeOutput').text('⏳ Đang chuyển sang Server dự phòng...');
+
+    let payload = {
+        code: rawCode,
+        language: (lang === 'python') ? 'py' : 'cpp',
+        input: inputData
+    };
+
+    let proxyUrl = "https://corsproxy.io/?" + encodeURIComponent("https://api.codex.jaagrav.in");
+
+    $.ajax({
+        url: proxyUrl,
+        type: "POST",
+        contentType: "application/x-www-form-urlencoded",
+        data: $.param(payload),
+        dataType: "json",
+        timeout: 15000,
+        success: function(res) {
+            btn.html(originalHtml).prop('disabled', false);
+            if (res.output) {
+                $('#txtCodeOutput').text(res.output);
+            } else if (res.error) {
+                $('#txtCodeOutput').text("❌ LỖI BIÊN DỊCH / THỰC THI:\n" + res.error);
+            } else {
+                $('#txtCodeOutput').text("(Chương trình chạy thành công và không xuất ra dữ liệu nào)");
+            }
+        },
+        error: function() {
+            btn.html(originalHtml).prop('disabled', false);
+            $('#txtCodeOutput').text('❌ Lỗi kết nối! Vui lòng kiểm tra lại đường truyền mạng.');
+        }
+    });
+}
