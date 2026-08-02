@@ -178,7 +178,15 @@ function loadWebLinks() {
 }
 function renderSidebarCategories() {
     let optionsHtml = '';
-    
+    if (currentUser && currentUser.isGuest) {
+        $('#dynamicCourseList').html(`
+            <div class="text-center p-3 text-muted mt-2" style="background: #f8fafc; border-radius: 8px; border: 1px dashed #cbd5e1; font-size: 13.5px;">
+                <i class="fa-solid fa-lock mb-2" style="font-size: 24px; color: #94a3b8;"></i><br>
+                <strong>Nội dung bị khóa</strong><br>Vui lòng đăng nhập để truy cập tài liệu môn học.
+            </div>
+        `);
+        return; // Dừng hàm ngay lập tức
+    }
     // 1. Cấu hình phân nhóm danh mục (Bạn tự thêm tên Sheet thực tế vào mảng tương ứng)
     const categoryGroups = {
 	'HK1 - Năm 2': ['Hình học vi phân', 'Cấu trúc đại số', 'Cấu trúc dữ liệu', 'Lập trình hướng đối tượng', 'Tư tưởng Hồ Chí Minh'], 
@@ -603,8 +611,23 @@ else {
                         let fullShareUrl = window.location.href;
 
                         let hiddenNoticeBadge = data.isHidden ? `<span class="badge bg-secondary ms-2" style="font-size: 12px;"></span>` : '';
-
-                        let html = `
+// XỬ LÝ NÚT TRỞ LẠI: NẾU LÀ KHÁCH THÌ ẨN LUÔN NÚT TRỞ LẠI VÀ CHỈ HIỂN THỊ TIÊU ĐỀ
+    let backButtonHtml = '';
+    if (!currentUser || currentUser.isGuest) {
+        // Đối với Khách, chỉ hiện một thanh tiêu đề nhỏ xíu, KHÔNG CÓ nút Trở lại
+        backButtonHtml = `
+            <div class="tb-header-blue" style="cursor: default;">
+                <i class="fa-solid fa-globe me-2"></i> Thông báo hệ thống
+            </div>
+        `;
+    } else {
+        // Đối với Sinh viên/Admin, hiện đầy đủ nút Trở lại
+        backButtonHtml = `
+            <div class="tb-header-blue" style="cursor: pointer;" onclick="backToThongBaoList()">
+                <i class="fa-solid fa-arrow-left me-2"></i> Trở lại <span class="mx-2">|</span> <i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo chi tiết
+            </div>
+        `;
+    }                        let html = `
                         <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                             <div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">
                                 [${currentCode}] ${data.c2} ${hiddenNoticeBadge}
@@ -630,12 +653,18 @@ else {
 
                     // HÀM TRỞ LẠI -> TỰ ĐỘNG XOÁ BỎ THAM SỐ ?tb= TRÊN BIA ĐỊA CHỈ
                     window.backToThongBaoList = function() {
-                        $('#tbDetailContainer').addClass('d-none');
-                        $('#tbMainView').removeClass('d-none');
-                        resetUrlToDefault();
-                        let cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                        window.history.pushState({ path: cleanUrl }, '', cleanUrl);
-                    };
+        // BẢO MẬT: Nếu là Khách thì KHÔNG CHO PHÉP gọi hàm này
+        if (currentUser && currentUser.isGuest) {
+            alert("Bạn đang ở chế độ Khách nên không thể xem danh sách Thông báo. Vui lòng đăng nhập!");
+            return; 
+        }
+
+        $('#tbDetailContainer').addClass('d-none');
+        $('#tbMainView').removeClass('d-none');
+        resetUrlToDefault();
+        let cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.pushState({ path: cleanUrl }, '', cleanUrl);
+    };
 
                     window.copyTBLink = function(url) {
                         navigator.clipboard.writeText(url).then(() => {
@@ -1029,6 +1058,10 @@ if (extractedUrl) {
             $('#tableWrapper').removeClass('d-none'); 
             $('#swipeHint').removeClass('d-none');
 applyKaTeX('instructorArea');    // Quét phần thông tin giảng viên (nếu có công thức)
+$('#tbMainView').addClass('d-none');
+    $('#tbDetailContainer').removeClass('d-none');
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
             applyKaTeX('tableWrapper');      // Quét toàn bộ nội dung trong bảng 7 cột
             if (hasExamCards) applyKaTeX('examCardsContainer');
         },
@@ -1133,9 +1166,18 @@ if (localStorage.getItem('isAdmin') === 'true') {
         $('#adminDatabaseLink').removeClass('d-none');
     }
 $(document).ready(function() {
-    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    // Lấy dữ liệu từ localStorage (lưu ý không dùng 'let' để ghi đè thẳng vào biến toàn cục)
+    currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    
     if (!currentUser) {
-        // Nếu là Web dự phòng thì mở Modal tại chỗ
+        // 1. Tạo tài khoản Khách ảo để web có thể chạy được các tính năng xem
+        currentUser = {
+            mssv: "Khách",
+            name: "Khách",
+            isGuest: true
+        };
+
+        // 2. Vẫn giữ nguyên logic của Web dự phòng: Mở Modal đăng nhập
         if (window.location.pathname.includes("webduphong")) {
             let modalEl = document.getElementById('userAuthModal');
             if (modalEl) {
@@ -1143,14 +1185,17 @@ $(document).ready(function() {
                 authModal.show();
                 if (typeof renderSavedAccounts === 'function') renderSavedAccounts();
             }
-        } else {
-            // Ngược lại (Web chính), chưa đăng nhập thì buộc chuyển về login.html
-            window.location.href = "login.html";
-        }
+        } 
+        
+        // Bỏ lệnh window.location.href = "login.html"; ở đây để Khách không bị văng
+        // 3. Khởi chạy app với tư cách Khách
+        initGlobalApp();
+        
     } else { 
+        // Nếu đã đăng nhập thì khởi chạy bình thường
         initGlobalApp(); 
     }
-});
+});renderUserInfo
 
 // ==========================================
 // TÍNH NĂNG TÍNH ĐIỂM GPA (BẢN CHUẨN CUỐI CÙNG)

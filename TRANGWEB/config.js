@@ -180,37 +180,55 @@ function saveEditRow() {
         };
 function renderUserInfo() {
     let sidebarUserInfo = $('#sidebarUserInfo');
-    if (currentUser) {
-        // Gán Tên và MSSV vào thanh Sidebar
+    
+    // Nếu là Sinh viên thực sự đã đăng nhập
+    if (currentUser && !currentUser.isGuest) {
         $('#sidebarUserName').text(currentUser.name);
         $('#sidebarUserMSSV').text(currentUser.mssv);
         $('#popoverUserTitle').text(currentUser.name + " - " + currentUser.mssv);
-	updateAvatarDisplay(currentUser.avatar);
-        // Tìm bên trong hàm renderUserInfo() và thêm 4 dòng này vào khối if (currentUser)
-$('#profChuyenNganh').val(currentUser.chuyenNganh || '');
-$('#profKhoa').val(currentUser.khoa || '');
-$('#profKhoaHoc').val(currentUser.khoaHoc || '');
-$('#profNhom').val(currentUser.nhom || '');
-        // Gán dữ liệu sang Trang Hồ Sơ
+        updateAvatarDisplay(currentUser.avatar);
+
+        $('#profChuyenNganh').val(currentUser.chuyenNganh || '');
+        $('#profKhoa').val(currentUser.khoa || '');
+        $('#profKhoaHoc').val(currentUser.khoaHoc || '');
+        $('#profNhom').val(currentUser.nhom || '');
+
         $('#pageProfileName').text(currentUser.name);
         $('#pageProfileMSSV').text('MSSV: ' + currentUser.mssv);
-        
-        // Nhận diện Admin để đổi giao diện huy hiệu
-// Sửa lại khối kiểm tra Admin trong hàm renderUserInfo()
-if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008") {
-    $('#btnAdminLoginToggle').removeClass('d-none').addClass('d-flex');
-    $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex'); // Bật nút Quản lý TV
-    $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');   // Bật nút MasterTKB
-    $('#pageProfileRole').removeClass('bg-secondary').addClass('bg-danger').text('Quản trị viên (Admin)');
-} else {
-    $('#btnAdminLoginToggle').addClass('d-none').removeClass('d-flex');
-    $('#btnAdminManageUsers').addClass('d-none').removeClass('d-flex'); // Ẩn nút Quản lý
-    $('#pageProfileRole').removeClass('bg-danger').addClass('bg-secondary').text('Sinh viên');
-}
-        
+
+        if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008") {
+            $('#btnAdminLoginToggle').removeClass('d-none').addClass('d-flex');
+            $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex');
+            $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
+            $('#pageProfileRole').removeClass('bg-secondary').addClass('bg-danger').text('Quản trị viên (Admin)');
+        } else {
+            $('#btnAdminLoginToggle').addClass('d-none').removeClass('d-flex');
+            $('#btnAdminManageUsers').addClass('d-none').removeClass('d-flex');
+            $('#btnAdminMasterTkb').addClass('d-none').removeClass('d-flex');
+            $('#pageProfileRole').removeClass('bg-danger').addClass('bg-secondary').text('Sinh viên');
+        }
+
         sidebarUserInfo.removeClass('d-none');
+$('#btnNavTongHop, #btnNavTKB, #btnNavShareCode').removeClass('d-none');
     } else {
-        sidebarUserInfo.addClass('d-none');
+        // Trạng thái Khách: Hiển thị nút "Đăng nhập" trên Sidebar
+        sidebarUserInfo.removeClass('d-none');
+        $('#sidebarUserName').text("Khách");
+        $('#sidebarUserMSSV').text("Chưa đăng nhập");
+        $('#popoverUserTitle').text("Tài khoản Khách");
+        
+        // Cập nhật lại menu sổ xuống thành nút Đăng nhập
+        $('#sidebarUserInfo .dropdown-menu').html(`
+            <div class="text-center mb-3 mt-1">
+                <span class="fw-bold text-muted" style="font-size: 14px;">Bạn đang ở chế độ Khách</span>
+            </div>
+            <button class="btn w-100 fw-bold text-white" onclick="window.location.href='login.html'" style="background-color: #0f4c81; border-radius: 25px; font-size: 14px; padding: 8px 0;">
+                <i class="fa-solid fa-right-to-bracket me-2"></i>Đăng nhập Sinh viên
+            </button>
+        `);
+	// Thay vì chỉ ẩn 4 nút, ta ẨN SẠCH sẽ các nút chức năng luôn!
+$('#btnNavTongHop, #btnNavTKB, #gpaNavContainer, #btnNavShareCode, #btnNavThongBao').addClass('d-none');
+$('button[onclick="refreshCurrentCourseData()"]').addClass('d-none');
     }
 }
 function saveUserProfile() {

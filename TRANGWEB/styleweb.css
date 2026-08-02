@@ -2790,3 +2790,27 @@ body.dark-mode .mini-dl-title {
 .tb-detail-main-content .fw-bold {
     font-weight: 700 !important; /* Giữ lại in đậm cho những chỗ bạn CHỦ ĐỘNG bôi đậm */
 }
+#chatMessagesArea::-webkit-scrollbar,
+#chatContactsList::-webkit-scrollbar {
+    width: 6px;
+}
+#chatMessagesArea::-webkit-scrollbar-thumb,
+#chatContactsList::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+.chat-contact-item {
+    transition: background-color 0.2s ease;
+    border-radius: 8px;
+    margin: 4px 8px;
+}
+.chat-contact-item:hover {
+    background-color: #f1f5f9;
+}
+.chat-contact-item.active {
+    background-color: #e0f2fe;
+}
+/* Trên điện thoại, giấu cột trái hoặc phải tùy trạng thái */
+@media (max-width: 768px) {
+    #messengerSection .col-md-8 { display: none; } /* Mặc định giấu khung chat, hiện danh sách */
+}

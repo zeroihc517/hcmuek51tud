@@ -2062,7 +2062,14 @@ async function initSystemUrlRouter() {
     let courseParam = urlParams.get('course');
     let categoryParam = urlParams.get('category');
     let tbParam = urlParams.get('tb');
-
+if (currentUser && currentUser.isGuest) {
+        if (viewParam || courseParam) {
+            alert("Chế độ Khách chỉ được xem Thông báo. Vui lòng đăng nhập để truy cập nội dung này!");
+            resetUrlToDefault();
+            loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
+            return; // Ngắt luồng, đẩy Khách về màn hình Thông báo
+        }
+    }
     // 1. Mở bài viết Thông báo chi tiết
     if (tbParam) {
         // Cứu cánh vòng lặp: Buộc hệ thống kéo dữ liệu Thông báo về
