@@ -37,11 +37,21 @@ let cachedOnlineList = []; // Lưu danh sách user từ server
 let cachedOnlineCount = 0;
 
 // 2. Hàm che chuỗi bắt buộc (Bất kể Admin hay Sinh viên)
-function maskMSSVStrict(nameOrMssv) {
-    if (!nameOrMssv || nameOrMssv.toLowerCase() === "khách") return nameOrMssv;
-    let str = String(nameOrMssv).trim();
-    if (str.length <= 6) return str.substring(0, 1) + "***";
-    return str.substring(0, 2) + "***" + str.substring(str.length - 3);
+function maskMSSV(mssv) { 
+    let str = String(mssv).trim(); 
+    if (!str) return "";
+
+    // Lấy thông tin người dùng đang đăng nhập trên trình duyệt
+    let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    
+    // Nếu người xem là Admin (51.01.108.008) HOẶC là chính tác giả bài viết -> Giữ nguyên MSSV gốc, không che
+    if (activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008" || activeUser.mssv === str)) {
+        return str;
+    }
+
+    // Nếu người xem là sinh viên thường khác -> Tiến hành che MSSV
+    if (str.length <= 6) return str; 
+    return str.substring(0, 3) + '***' + str.substring(str.length - 3); 
 }
 
 // 3. Hàm kích hoạt chuyển chế độ (CHẠY SIÊU TỐC - KHÔNG GỌI LẠI AJAX)
