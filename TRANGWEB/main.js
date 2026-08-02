@@ -2300,21 +2300,32 @@ $(document).ready(function() {
 });
 
 tinymce.init({
-   selector: '#txtCol3, #insertCol3, #editCol3',
+    selector: '#txtCol3, #insertCol3, #editCol3',
     entity_encoding: 'raw',
-    plugins: 'table lists link advlist',
-    toolbar: 'undo redo | blocks fontfamily fontsize lineheight | bold italic underline | forecolor backcolor | alignleft aligncenter alignright alignjustify | table | bullist numlist | link',
     
-    // --- THÊM 2 DÒNG NÀY VÀO ---
+    // 1. Thêm nhiều plugin nâng cao: hình ảnh, media, xem toàn màn hình, code, tìm kiếm...
+    plugins: 'table lists link advlist image media fullscreen code wordcount searchreplace visualblocks preview',
+    
+    // 2. Mở rộng thanh công cụ (Toolbar) với các nút mới
+    toolbar: 'undo redo | blocks fontfamily fontsize lineheight | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media | table | removeformat | preview fullscreen code',
+    
+    toolbar_mode: 'wrap', 
+    line_height_formats: '1 1.15 1.2 1.5 1.8 2.0 2.5 3.0',
+    
+    // 3. BẬT LẠI thanh menu trên cùng
+    menubar: true, 
+    
+    height: 400, // Tăng nhẹ chiều cao để không gian soạn thảo rộng rãi hơn
+    branding: false,
     paste_as_text: false,
     paste_remove_styles_if_resembling_styles: true,
+    
     setup: function (editor) {
         editor.on('change', function () {
             editor.save(); 
         });
     }
-});
-// 1. Hàm hiển thị View Quản lý
+});// 1. Hàm hiển thị View Quản lý
 function loadAdminUserManageView() {
     document.title = "Quản lý Thành viên | Admin";
     
