@@ -61,14 +61,24 @@ function toggleAdminNameDisplay() {
 }
 
 // 4. Hàm vẽ giao diện Footer từ dữ liệu trong RAM
+// 4. Hàm vẽ giao diện Footer từ dữ liệu trong RAM
 function renderOnlineFooterUI() {
     if (!cachedOnlineList || cachedOnlineList.length === 0) return;
 
     let currentIsAdmin = isAdmin || (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008"));
 
-    let processedList = cachedOnlineList.map(userStr => {
+    let guestCount = 0;
+    let studentList = [];
+
+    // Tách riêng Khách và Sinh viên đăng nhập để đếm
+    cachedOnlineList.forEach(userStr => {
         let str = String(userStr).trim();
-        if (str.toLowerCase() === "khách" || !str.includes("|")) return str;
+        
+        // Nếu là Khách hoặc định dạng không có "|"
+        if (str.toLowerCase() === "khách" || !str.includes("|")) {
+            guestCount++;
+            return;
+        }
         
         let parts = str.split("|");
         let userMssv = parts[0]; 
@@ -76,35 +86,47 @@ function renderOnlineFooterUI() {
 
         // --- A. CỐ ĐỊNH CHỮ "ADMIN" CHO TÀI KHOẢN ADMIN (51.01.108.008) ---
         if (userMssv === "51.01.108.008" || userMssv === "5101108008") {
-            return `<span class="fw-bold" style="color: #facc15; text-transform: uppercase;"><i class="fa-solid fa-user-shield me-1"></i>ADMIN</span>`;
+            studentList.push(`<span class="fw-bold" style="color: #facc15; text-transform: uppercase;"><i class="fa-solid fa-user-shield me-1"></i>ADMIN</span>`);
+            return;
         }
 
         // --- B. XỬ LÝ 4 NẤC HIỂN THỊ CHO SINH VIÊN KHÁC ---
         if (currentIsAdmin) {
             if (adminDisplayMode === 1) {
-                // Lần 1: Chỉ MSSV đầy đủ
-                return userMssv;
+                studentList.push(userMssv);
+                return;
             } else if (adminDisplayMode === 2) {
-                // Lần 2: Chỉ Tên
-                return userName;
+                studentList.push(userName);
+                return;
             } else if (adminDisplayMode === 3) {
-                // Lần 3: Full Họ tên (MSSV)
-                return `${userName} (${userMssv})`;
+                studentList.push(`${userName} (${userMssv})`);
+                return;
             }
         }
         
-        // Mặc định (mode = 0) hoặc không phải Admin: Che dạng 51***042, lhc***517
-        return maskMSSVStrict(userMssv);
+        // Mặc định (mode = 0) hoặc không phải Admin: Che MSSV (Đồng bộ gọi đúng hàm maskMSSV)
+        studentList.push(maskMSSV(userMssv));
     });
 
-    let displayList = processedList.join(", ");
+    // Ghép danh sách sinh viên đăng nhập
+    let displayList = studentList.join(", ");
 
+    // Nếu có Khách thì đính kèm số lượng vào cuối chuỗi
+    if (guestCount > 0) {
+        let guestText = `<span style="color: #bae6fd;">Khách: ${guestCount}</span>`;
+        if (displayList !== "") {
+            displayList += ` <span class="mx-2 text-muted">|</span> ${guestText}`;
+        } else {
+            displayList = guestText;
+        }
+    }
+
+    // Đổ dữ liệu ra ngoài giao diện
     $('#footerOnlineStatus').html(`
         <i class="fa-solid fa-users me-2" onclick="toggleAdminNameDisplay()" style="cursor: pointer;" title="Bấm để xoay vòng chế độ hiển thị danh sách"></i> 
         ${cachedOnlineCount} người: <strong>${displayList}</strong>
     `);
 }
-
 // 5. Hàm gửi request lấy dữ liệu mới từ Server (chạy ngầm định kỳ)
 function pingOnlineStatus() {
     let savedUser = localStorage.getItem('currentUser');
