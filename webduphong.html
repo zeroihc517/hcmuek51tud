@@ -1732,38 +1732,6 @@
         </div>
     </div>
 </div>
-<!-- MODAL ĐĂNG NHẬP TRỰC TIẾP TRÊN WEB DỰ PHÒNG -->
-<div class="modal fade" id="userAuthModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content auth-modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
-            <div class="auth-header text-white text-center py-4 px-3" style="background: linear-gradient(135deg, #0f4c81, #1e3a8a);">
-                <div class="auth-header-icon mb-2" style="font-size: 40px;">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                </div>
-                <h4 class="fw-bold m-0">CỔNG SINH VIÊN</h4>
-                <small class="opacity-75">Học nhóm - Trang dự phòng</small>
-            </div>
-            <div class="modal-body p-4 p-md-5">
-                <div id="savedAccountsContainer" class="mb-3"></div>
-
-                <div class="input-icon-wrapper mb-3 position-relative">
-                    <i class="fa-solid fa-id-card position-absolute" style="top: 18px; left: 18px; color: #94a3b8;"></i>
-                    <input type="text" id="txtUserMSSV" class="form-control ps-5 py-3" style="border-radius: 12px;" placeholder="Mã số sinh viên (VD: 51.01...)">
-                </div>
-                <div class="input-icon-wrapper mb-3 position-relative">
-                    <i class="fa-solid fa-lock position-absolute" style="top: 18px; left: 18px; color: #94a3b8;"></i>
-                    <input type="password" id="txtUserPass" class="form-control ps-5 py-3" style="border-radius: 12px;" placeholder="Mật khẩu (Mặc định: 123)" onkeypress="if(event.key === 'Enter') loginStudentDirect()">
-                </div>
-
-                <small class="text-danger text-center d-block d-none mb-3 fw-bold" id="userAuthError"></small>
-
-                <button type="button" class="btn w-100 text-white fw-bold py-3 text-uppercase" id="btnLoginStudent" onclick="loginStudentDirect()" style="background: #0f4c81; border-radius: 12px;">
-                    Đăng nhập hệ thống
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 <!-- MODAL XUẤT THỜI KHÓA BIỂU & DEADLINE SANG GOOGLE LỊCH -->
 <div class="modal fade" id="exportCalendarModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
