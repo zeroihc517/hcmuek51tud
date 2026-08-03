@@ -43,10 +43,6 @@ function maskMSSV(mssv) {
 
     let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
     
-    // Nếu người xem là Admin (51.01.108.008) -> Giữ nguyên MSSV gốc, không che
-    if (activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008")) {
-        return str;
-    }
 
     if (str.length <= 6) return str; 
     return str.substring(0, 3) + '***' + str.substring(str.length - 3); 
