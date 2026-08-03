@@ -37,15 +37,27 @@ let cachedOnlineList = []; // Lưu danh sách user từ server
 let cachedOnlineCount = 0;
 
 // 2. Hàm che chuỗi bắt buộc (Bất kể Admin hay Sinh viên)
+// 2. Hàm che chuỗi bắt buộc (Trừ Admin và Chính chủ tài khoản)
 function maskMSSV(mssv) { 
     let str = String(mssv).trim(); 
     if (!str) return "";
 
     let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
     
+    // NẾU LÀ ADMIN HOẶC LÀ CHÍNH TÀI KHOẢN CỦA BẢN THÂN -> KHÔNG CHE
+    if (activeUser) {
+        // Chuẩn hóa chuỗi (xóa dấu chấm) để so sánh chính xác nhất
+        let myCleanMssv = activeUser.mssv.replace(/\./g, "");
+        let targetCleanMssv = str.replace(/\./g, "");
+        
+        if (myCleanMssv === targetCleanMssv ) {
+            return str; // Trả về MSSV gốc đầy đủ
+        }
+    }
 
     if (str.length <= 6) return str; 
-    return str.substring(0, 3) + '***' + str.substring(str.length - 3); 
+    // Che khuất theo định dạng 51***xxx
+    return str.substring(0, 2) + '***' + str.substring(str.length - 3); 
 }
 // 3. Hàm kích hoạt chuyển chế độ (CHẠY SIÊU TỐC - KHÔNG GỌI LẠI AJAX)
 function toggleAdminNameDisplay() {
