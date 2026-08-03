@@ -2879,3 +2879,15 @@ body.dark-mode .mini-dl-title {
 .custom-portal-table td i.fa-file-lines {
     margin-top: 2px !important;
 }
+/* Tăng nhẹ độ rộng hàng cho thoáng đẹp */
+.custom-portal-table td {
+    padding-top: 10px !important;    /* Tăng từ 4px/6px lên 10px */
+    padding-bottom: 10px !important; /* Tăng từ 4px/6px lên 10px */
+    vertical-align: middle !important;
+}
+
+/* Nới nhẹ độ rộng riêng cho hàng PHẦN 1, PHẦN 2... */
+.custom-portal-table tr.row-part td {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+}
