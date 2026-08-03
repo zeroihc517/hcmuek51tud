@@ -43,16 +43,14 @@ function maskMSSV(mssv) {
 
     let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
     
-    // Chỉ giữ nguyên MSSV gốc nếu đúng là chính chủ đang đăng nhập
-    if (activeUser && activeUser.mssv === str) {
+    // Nếu người xem là Admin (51.01.108.008) -> Giữ nguyên MSSV gốc, không che
+    if (activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008")) {
         return str;
     }
 
-    // Mặc định che MSSV (định dạng 51***001)
     if (str.length <= 6) return str; 
     return str.substring(0, 3) + '***' + str.substring(str.length - 3); 
 }
-
 // 3. Hàm kích hoạt chuyển chế độ (CHẠY SIÊU TỐC - KHÔNG GỌI LẠI AJAX)
 function toggleAdminNameDisplay() {
     adminDisplayMode = (adminDisplayMode + 1) % 4; // Xoay vòng 0 -> 1 -> 2 -> 3 -> 0

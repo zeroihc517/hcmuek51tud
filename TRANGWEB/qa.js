@@ -695,133 +695,188 @@ $('#txtShareCodeDescription').val('');
 
 // 1. Hàm tải dữ liệu và tạo khung Danh sách + Khung Chi tiết ẩn
 // Cập nhật hàm loadShareCodeData() trong TRANGWEB/qa.js
+// Thêm biến toàn cục để lưu từ điển tên sinh viên
+// Thêm biến toàn cục để lưu từ điển tên sinh viên
+window.allUsersMap = null;
+
 function loadShareCodeData() {
     $('#shareCodeListArea').html(''); 
     $('#shareCodeLoadingStatus').removeClass('d-none');
     
-    $.ajax({ 
-        url: SCRIPT_URL + "?action=getShareCodeData", 
-        method: "GET", 
-        dataType: "json", 
-        success: function(data) {
-            $('#shareCodeLoadingStatus').addClass('d-none');
-            if (!data || data.length === 0) {
-                $('#shareCodeListArea').html(`<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có bài chia sẻ nào.</div>`);
-                return;
-            }
-            
-            window.shareCodeList = []; 
-            let rawList = [];
-            let nowTime = new Date().getTime();
-            let oneDayMs = 24 * 60 * 60 * 1000;
+    let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
 
-            data.forEach(row => {
-                let questionRaw = row[2] || '';
-                let targetTag = `[SHARECODE|${currentShareCategory}`;
-                if (!questionRaw.startsWith(targetTag)) return;
-                
-                let time = row[0] || ''; 
-                let rawAuthor = row[1] || '';
-                let displayMssv = maskMSSV(rawAuthor); 
-                let answer = row[3] || ''; 
-                let rowIndex = row[6];       
-                
-                let categoryMatch = questionRaw.match(/^\[SHARECODE\|(.*?)(?:\|(.*))?\]/);
-                let maBaiValue = 'CODE KHÔNG TÊN';
-                
-                if (categoryMatch) {
-                    if (categoryMatch[2] && categoryMatch[2].trim() !== "undefined") {
-                        maBaiValue = categoryMatch[2].trim();
-                    }
-                    questionRaw = questionRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '');
-                }
-
-                // Đồng bộ thuật toán tính giờ với hàm Global
-                let postDate = null;
-                let match2 = time.match(/(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-                let match1 = time.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
-                if (match2) {
-                    postDate = new Date(parseInt(match2[5]), parseInt(match2[4]) - 1, parseInt(match2[3]), parseInt(match2[1]), parseInt(match2[2]), 0);
-                } else if (match1) {
-                    let h = match1[4] ? parseInt(match1[4]) : 0;
-                    let m = match1[5] ? parseInt(match1[5]) : 0;
-                    postDate = new Date(parseInt(match1[3]), parseInt(match1[2]) - 1, parseInt(match1[1]), h, m, 0);
-                }
-
-                let isCommented = answer.trim() !== "";
-                let isWithinOneDay = true;
-
-                if (postDate && (nowTime - postDate.getTime() > oneDayMs)) {
-                    isWithinOneDay = false;
-                }
-
-                let isNew = !isCommented && isWithinOneDay;
-
-                rawList.push({
-                    time: time, author: displayMssv, rawAuthor: rawAuthor, 
-                    maBai: maBaiValue, codeContent: questionRaw, answer: answer, rowIndex: rowIndex, isNew: isNew
-                });
+    // Tự động kéo danh sách sinh viên 1 lần duy nhất cho Admin
+    let userMapPromise = new Promise((resolve) => {
+        if (isSystemAdmin && !window.allUsersMap) {
+            $.ajax({
+                url: SCRIPT_URL + "?action=getAllUsers",
+                method: "GET",
+                dataType: "json",
+                success: function(users) {
+                    window.allUsersMap = {};
+                    users.forEach(u => { 
+                        // Lưu đồng thời định dạng có chấm và không chấm
+                        let cleanMssv = u.mssv.replace(/\./g, "");
+                        window.allUsersMap[u.mssv] = u.name; 
+                        window.allUsersMap[cleanMssv] = u.name;
+                    });
+                    resolve();
+                },
+                error: () => resolve() // Lỗi mạng thì vẫn cho chạy tiếp
             });
-
-            let uniqueMap = {};
-            rawList.forEach(item => {
-                let uniqueKey = `${item.rawAuthor.trim().toLowerCase()}_${item.maBai.trim().toLowerCase()}`;
-                if (!uniqueMap[uniqueKey]) {
-                    uniqueMap[uniqueKey] = item;
-                } else {
-                    if (item.isNew) uniqueMap[uniqueKey].isNew = true; // Gộp chung nếu 1 trong số đó là mới
-                }
-            });
-
-            window.shareCodeList = Object.values(uniqueMap);
-
-            let gridHtml = '<div class="row g-3">'; 
-            
-            window.shareCodeList.forEach((item, arrayIndex) => {
-                
-                // ĐẶT CHỮ MỚI VÀO GÓC TRÁI AN TOÀN TRÁNH BỊ CẮT MẤT DO CSS
-                let newBadgeHtml = item.isNew ? `<span class="badge-new-qa position-absolute shadow-sm" style="top: 12px; left: 12px; z-index: 10; font-size: 11px;">Mới</span>` : '';
-                
-                gridHtml += `
-                <div class="col-6 col-md-4 col-lg-2">
-                    <div class="card-sharecode-box position-relative" onclick="openShareCodeDetail(${arrayIndex})">
-                        ${newBadgeHtml}
-                        <div class="card-sharecode-badge">
-                            <i class="fa-solid fa-code"></i>
-                        </div>
-                        <div class="card-sharecode-icon">
-                            <i class="fa-solid fa-file-code"></i>
-                        </div>
-                        <div class="card-sharecode-body">
-                            <h6 class="card-sharecode-title" title="${item.maBai}">${item.maBai}</h6>
-                            <div class="card-sharecode-meta">
-                                <span class="meta-author"><i class="fa-solid fa-user-circle me-1"></i>${item.author}</span>
-                                <span class="meta-time"><i class="fa-regular fa-clock me-1"></i>${item.time}</span>
-                            </div>
-                        </div>
-                        <div class="card-sharecode-footer">
-                            <span>Xem chi tiết</span>
-                            <i class="fa-solid fa-arrow-right"></i>
-                        </div>
-                    </div>
-                </div>`;
-            });
-            
-            gridHtml += '</div>';
-            
-            if (window.shareCodeList.length === 0) {
-                gridHtml = `<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có code nào. Hãy chia sẻ!</div>`;
-            }
-            
-            let finalHtml = `
-                <div id="shareCodeListWrapper">${gridHtml}</div>
-                <div id="shareCodeDetailWrapper" class="d-none"></div>
-            `;
-            $('#shareCodeListArea').html(finalHtml); 
+        } else {
+            resolve();
         }
     });
-}
 
+    userMapPromise.then(() => {
+        $.ajax({ 
+            url: SCRIPT_URL + "?action=getShareCodeData", 
+            method: "GET", 
+            dataType: "json", 
+            success: function(data) {
+                $('#shareCodeLoadingStatus').addClass('d-none');
+                if (!data || data.length === 0) {
+                    $('#shareCodeListArea').html(`<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có bài chia sẻ nào.</div>`);
+                    return;
+                }
+                
+                window.shareCodeList = []; 
+                let rawList = [];
+                let nowTime = new Date().getTime();
+                let oneDayMs = 24 * 60 * 60 * 1000;
+
+                data.forEach(row => {
+                    let questionRaw = row[2] || '';
+                    let targetTag = `[SHARECODE|${currentShareCategory}`;
+                    if (!questionRaw.startsWith(targetTag)) return;
+                    
+                    let time = row[0] || ''; 
+                    // Loại bỏ tất cả khoảng trắng, gạch ngang, v.v. để lấy mssv gốc
+                    let rawAuthor = String(row[1] || '').trim().replace(/[-|]/g, '');
+                    let displayMssv = maskMSSV(rawAuthor); 
+                    
+                    // ==========================================
+                    // 1. NẾU LÀ ADMIN ĐANG XEM -> LẤY TÊN TỪ MAP
+                    // ==========================================
+                    if (isSystemAdmin) {
+                        let fullName = window.allUsersMap ? window.allUsersMap[rawAuthor] : null;
+                        if (fullName) {
+                            let shortName = getNaturalShortName(fullName);
+                            displayMssv = `${rawAuthor} - ${shortName}`;
+                        } else {
+                            displayMssv = rawAuthor; 
+                        }
+                    } 
+                    // ==========================================
+                    // 2. NẾU TÁC GIẢ BÀI VIẾT ĐANG TỰ XEM BÀI CỦA MÌNH
+                    // ==========================================
+                    else if (activeUser && activeUser.mssv) {
+                        // So sánh chuẩn hóa (bỏ dấu chấm)
+                        let myCleanMssv = activeUser.mssv.replace(/\./g, "");
+                        let authorCleanMssv = rawAuthor.replace(/\./g, "");
+                        
+                        if (myCleanMssv === authorCleanMssv) {
+                            let shortName = getNaturalShortName(activeUser.name);
+                            displayMssv = `${rawAuthor} - ${shortName} (Bạn)`;
+                        }
+                    }
+                    // ==========================================
+
+                    let answer = row[3] || ''; 
+                    let rowIndex = row[6];
+                    
+                    let categoryMatch = questionRaw.match(/^\[SHARECODE\|(.*?)(?:\|(.*))?\]/);
+                    let maBaiValue = 'CODE KHÔNG TÊN';
+                    
+                    if (categoryMatch) {
+                        if (categoryMatch[2] && categoryMatch[2].trim() !== "undefined") {
+                            maBaiValue = categoryMatch[2].trim();
+                        }
+                        questionRaw = questionRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '');
+                    }
+
+                    let postDate = null;
+                    let match2 = time.match(/(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+                    let match1 = time.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+                    if (match2) {
+                        postDate = new Date(parseInt(match2[5]), parseInt(match2[4]) - 1, parseInt(match2[3]), parseInt(match2[1]), parseInt(match2[2]), 0);
+                    } else if (match1) {
+                        let h = match1[4] ? parseInt(match1[4]) : 0;
+                        let m = match1[5] ? parseInt(match1[5]) : 0;
+                        postDate = new Date(parseInt(match1[3]), parseInt(match1[2]) - 1, parseInt(match1[1]), h, m, 0);
+                    }
+
+                    let isCommented = answer.trim() !== "";
+                    let isWithinOneDay = true;
+                    if (postDate && (nowTime - postDate.getTime() > oneDayMs)) {
+                        isWithinOneDay = false;
+                    }
+                    let isNew = !isCommented && isWithinOneDay;
+
+                    rawList.push({
+                        time: time, author: displayMssv, rawAuthor: rawAuthor, // Giữ nguyên MSSV thuần
+                        maBai: maBaiValue, codeContent: questionRaw, answer: answer, rowIndex: rowIndex, isNew: isNew
+                    });
+                });
+
+                // Lọc trùng & Gộp chung trạng thái isNew
+                let uniqueMap = {};
+                rawList.forEach(item => {
+                    let uniqueKey = `${item.rawAuthor.trim().toLowerCase()}_${item.maBai.trim().toLowerCase()}`;
+                    if (!uniqueMap[uniqueKey]) {
+                        uniqueMap[uniqueKey] = item;
+                    } else {
+                        if (item.isNew) uniqueMap[uniqueKey].isNew = true; 
+                    }
+                });
+
+                window.shareCodeList = Object.values(uniqueMap);
+
+                let gridHtml = '<div class="row g-3">'; 
+                window.shareCodeList.forEach((item, arrayIndex) => {
+                    let newBadgeHtml = item.isNew ? `<span class="badge-new-qa position-absolute shadow-sm" style="top: 12px; left: 12px; z-index: 10; font-size: 11px;">Mới</span>` : '';
+                    
+                    gridHtml += `
+                    <div class="col-6 col-md-4 col-lg-2">
+                        <div class="card-sharecode-box position-relative" onclick="openShareCodeDetail(${arrayIndex})">
+                            ${newBadgeHtml}
+                            <div class="card-sharecode-badge">
+                                <i class="fa-solid fa-code"></i>
+                            </div>
+                            <div class="card-sharecode-icon">
+                                <i class="fa-solid fa-file-code"></i>
+                            </div>
+                            <div class="card-sharecode-body">
+                                <h6 class="card-sharecode-title" title="${item.maBai}">${item.maBai}</h6>
+                                <div class="card-sharecode-meta">
+                                    <span class="meta-author"><i class="fa-solid fa-user-circle me-1"></i>${item.author}</span>
+                                    <span class="meta-time"><i class="fa-regular fa-clock me-1"></i>${item.time}</span>
+                                </div>
+                            </div>
+                            <div class="card-sharecode-footer">
+                                <span>Xem chi tiết</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                gridHtml += '</div>';
+                
+                if (window.shareCodeList.length === 0) {
+                    gridHtml = `<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có code nào. Hãy chia sẻ!</div>`;
+                }
+                
+                let finalHtml = `
+                    <div id="shareCodeListWrapper">${gridHtml}</div>
+                    <div id="shareCodeDetailWrapper" class="d-none"></div>
+                `;
+                $('#shareCodeListArea').html(finalHtml); 
+            }
+        });
+    });
+}
 function processFormattedText(text) {
     if (!text) return "";
     
@@ -921,11 +976,9 @@ window.sendShareCodeReply = function(rowIndex) {
     
     let studentMssv = currentUser ? currentUser.mssv : "Khách";
     
-    // Lấy thời gian hiện tại
     let now = new Date();
     let timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} ${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
     
-    // Đóng gói cấu trúc mới: MSSV:::Thời gian:::Nội dung
     let formattedReply = studentMssv + ":::" + timeStr + ":::" + replyText;
     
     let btn = $(`#shareReplyBox-${rowIndex} button`); 
@@ -947,17 +1000,47 @@ window.sendShareCodeReply = function(rowIndex) {
             method: "GET", 
             dataType: "json", 
             success: function(data) {
-                // (Giữ nguyên toàn bộ logic ajax success cũ tại đây)
                 window.shareCodeList = []; 
+                let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+                let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
+
                 data.forEach(row => {
                     let questionRaw = row[2] || '';
                     let targetTag = `[SHARECODE|${currentShareCategory}`;
                     if (!questionRaw.startsWith(targetTag)) return;
                     
                     let time = row[0] || ''; 
-                    let displayMssv = maskMSSV(row[1] || ''); 
+                    let rawAuthor = String(row[1] || '').trim().replace(/[-|]/g, '');
+                    let displayMssv = maskMSSV(rawAuthor); 
+                    
+                    // ==========================================
+                    // 1. NẾU LÀ ADMIN ĐANG XEM -> LẤY TÊN TỪ MAP
+                    // ==========================================
+                    if (isSystemAdmin) {
+                        let fullName = window.allUsersMap ? window.allUsersMap[rawAuthor] : null;
+                        if (fullName) {
+                            let shortName = getNaturalShortName(fullName);
+                            displayMssv = `${rawAuthor} - ${shortName}`;
+                        } else {
+                            displayMssv = rawAuthor;
+                        }
+                    } 
+                    // ==========================================
+                    // 2. NẾU TÁC GIẢ BÀI VIẾT ĐANG TỰ XEM BÀI CỦA MÌNH
+                    // ==========================================
+                    else if (activeUser && activeUser.mssv) {
+                        let myCleanMssv = activeUser.mssv.replace(/\./g, "");
+                        let authorCleanMssv = rawAuthor.replace(/\./g, "");
+                        
+                        if (myCleanMssv === authorCleanMssv) {
+                            let shortName = getNaturalShortName(activeUser.name);
+                            displayMssv = `${rawAuthor} - ${shortName} (Bạn)`;
+                        }
+                    }
+                    // ==========================================
+                    
                     let answer = row[3] || ''; 
-                    let rIndex = row[6];       
+                    let rIndex = row[6];
                     
                     let categoryMatch = questionRaw.match(/^\[SHARECODE\|(.*?)(?:\|(.*))?\]/);
                     let maBaiValue = 'CODE KHÔNG TÊN';
@@ -970,7 +1053,7 @@ window.sendShareCodeReply = function(rowIndex) {
                     }
 
                     window.shareCodeList.push({
-                        time: time, author: displayMssv, rawAuthor: row[1] || '', 
+                        time: time, author: displayMssv, rawAuthor: rawAuthor, // Giữ nguyên MSSV thuần
                         maBai: maBaiValue, codeContent: questionRaw, answer: answer, rowIndex: rIndex
                     });
                 });
@@ -986,6 +1069,7 @@ window.sendShareCodeReply = function(rowIndex) {
         btn.html(originalText).prop('disabled', false); 
     }); 
 };
+
 // 4. Hàm xử lý khi nhấn "Sửa Code" ngay bên trong giao diện Chi tiết
 window.editShareCodeDirect = function(index) {
     let item = window.shareCodeList[index];
