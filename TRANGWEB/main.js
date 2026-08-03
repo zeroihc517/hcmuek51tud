@@ -1025,11 +1025,12 @@ let dragAttr = (isAdmin && window.innerWidth >= 992) ? ` draggable="true" ondrag
                     let extractedUrl = c3.match(_urlRegex) ? c3.match(_urlRegex)[0] : null;
 
                     // Cột 4: Ghi chú (Kiểm tra chữ "Đang cập nhật")
-                    let col4Html = c4.replace(/<\/?p>/g, '').trim();
-                    let isUpdating = col4Html.toLowerCase().includes('đang cập nhật');
+                   // Cột 4: Ghi chú (Kiểm tra chữ "Đang cập nhật")
+let col4Html = c4.replace(/<\/?p[^>]*>/gi, '').replace(/&nbsp;/gi, ' ').replace(/(<br\s*\/?>|\n)+/gi, ' ').trim();
+let isUpdating = col4Html.toLowerCase().includes('đang cập nhật');
 
-                    // --- BẮT ĐẦU CỘT 2: TÊN BÀI HỌC VÀ LOGO ---
-                    let col2Html = c2.replace(/<\/?p>/g, '').trim(); 
+// --- BẮT ĐẦU CỘT 2: TÊN BÀI HỌC VÀ LOGO ---
+let col2Html = c2.replace(/<\/?(p|div)[^>]*>/gi, '').replace(/&nbsp;/gi, ' ').replace(/(<br\s*\/?>|\n)+/gi, ' ').trim();
                     
                     // Thêm Logo tự động: CHỈ hiện logo file tài liệu cho các hàng nội dung nhỏ bên trong
                     let lessonIcon = ''; 
@@ -1054,14 +1055,12 @@ if (extractedUrl) {
 
                     // Gói Tên bài học và Ngày tháng vào chung 1 khối (Hiển thị dọc)
                     // margin-left: 24px để hàng ngày tháng dịch vào chuẩn tỉ lệ thẳng hàng chữ tiêu đề bài học
-                    let finalCol2 = `
-                       <div class="d-flex flex-column align-items-start" style="gap: 2px;">
-    <div class="d-flex align-items-center">
-        ${col2Html} ${chevronHtml}
-    </div>
-    ${dateInfoHtml ? `<div class="d-flex flex-wrap gap-2 mt-1" style="margin-left: 24px;">${dateInfoHtml}</div>` : ''}
-</div>
-                    `;
+                   let finalCol2 = dateInfoHtml 
+    ? `<div class="d-flex flex-column align-items-start" style="gap:0;margin:0;padding:0;">
+         <div class="d-flex align-items-center">${col2Html} ${chevronHtml}</div>
+         <div class="d-flex flex-wrap gap-2 mt-1" style="margin-left:24px;">${dateInfoHtml}</div>
+       </div>`
+    : `<div class="d-flex align-items-center" style="margin:0;padding:0;">${col2Html} ${chevronHtml}</div>`;
                     // --- KẾT THÚC CỘT 2 ---
 
                     if (isUpdating) {
