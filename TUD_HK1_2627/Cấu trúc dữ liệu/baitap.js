@@ -195,7 +195,7 @@ function renderQuestion(index) {
     });
     processedContent = tempDiv.innerHTML;
 }
-
+	processedContent = convertUrlsToLinks(processedContent);
     // 4. CẬP NHẬT GIAO DIỆN VÀ MATHJAX
     $('#questionContentArea').html(processedContent);
     document.title = `${q.maBai} - ${courseName} | Làm bài tập`;
@@ -230,17 +230,20 @@ function renderQuestion(index) {
         return;
     }
 
-    let historyHtml = "";
+   let historyHtml = "";
     currentSubmissionsList.forEach((sub, idx) => {
         let submissionNumber = currentSubmissionsList.length - idx;
         let codeContainerId = `historyCode_${idx}_${Date.now()}`;
+
+        // Bổ sung convertUrlsToLinks cho phần lời giải lý thuyết
+        let theoryContentFormatted = convertUrlsToLinks(sub.theory || '');
 
         let theoryHtml = sub.theory ? `
             <div class="history-theory-box">
                 <div class="fw-bold text-primary mb-2" style="font-size: 15px;">
                     <i class="fa-solid fa-align-left me-1"></i> BÀI LÀM LÝ THUYẾT:
                 </div>
-                <div>${sub.theory}</div>
+                <div>${theoryContentFormatted}</div>
             </div>
         ` : '';
 
@@ -661,5 +664,29 @@ function sendExerciseHistoryReply(rowIndex) {
                 alert("✅ Đã gửi bình luận thành công!");
             }, 300);
         }
+    });
+}
+// Hàm tự động tìm và chuyển đổi chuỗi dạng URL thành link <a>
+function convertUrlsToLinks(text) {
+    if (!text) return "";
+    
+    // Regex bắt trọn vẹn chuỗi URL bắt đầu từ http://, https:// hoặc www.
+    const urlRegex = /(<a\b[^>]*>[\s\S]*?<\/a>)|(<[^>]+>)|((?:https?:\/\/|www\.)[^\s<>]+)/gi;
+    
+    return text.replace(urlRegex, function(match, aTag, anyTag, rawUrl) {
+        if (aTag || anyTag) return match; 
+        
+        // Cắt bỏ các dấu chấm, phẩy, ngoặc ở CUỐI CÙNG chuỗi nếu vô tình dính vào
+        let cleanUrl = rawUrl.replace(/[.,:;?!)]+$/, '');
+        let trailingChars = rawUrl.slice(cleanUrl.length);
+
+        let href = cleanUrl;
+        if (cleanUrl.toLowerCase().startsWith('www.')) {
+            href = 'http://' + cleanUrl;
+        }
+        
+        // Hiển thị chữ "TRUY CẬP LINK" thay vì hiển thị nguyên chuỗi URL dài
+        // Thêm tex2jax_ignore để MathJax không đụng vào làm méo chữ
+        return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="tex2jax_ignore fw-bold text-primary text-decoration-underline"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>TRUY CẬP LINK</a>${trailingChars}`;
     });
 }
