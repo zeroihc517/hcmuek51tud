@@ -267,7 +267,9 @@ function maskMSSV(mssv) {
     if (str.length <= 6) return str; 
     return str.substring(0, 3) + '***' + str.substring(str.length - 3); 
 }
-     function parseThread(text, rowIndex) {
+     
+            
+function parseThread(text, rowIndex) {
     let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== ""); 
     window.qaThreadParts[rowIndex] = parts; 
     let html = '';
@@ -282,40 +284,57 @@ function maskMSSV(mssv) {
             let svMsg = svTextRaw;
             let timeHtml = "";
             
-            // Xử lý tách thời gian do backend tự động chèn thêm "(dd/mm/yyyy hh:mm)\n"
             let timeMatch = svTextRaw.match(/^\((.*?)\)\n/);
             if (timeMatch) {
-                let timeStr = timeMatch[1]; // Lấy chuỗi thời gian
+                let timeStr = timeMatch[1];
                 timeHtml = `<span class="text-muted ms-2" style="font-size: 12.5px; font-weight: normal;"><i class="fa-regular fa-clock"></i> ${timeStr}</span>`;
-svTextRaw = svTextRaw.replace(timeMatch[0], '').trim();
+                svTextRaw = svTextRaw.replace(timeMatch[0], '').trim();
             }
             
-if (svTextRaw.includes(":::")) {
-    let splitData = svTextRaw.split(":::");
-    let rawMssv = splitData[0].trim();
-    let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv);
-    svName = "Sinh viên (" + displayMssv + ")";
+            if (svTextRaw.includes(":::")) {
+                let splitData = svTextRaw.split(":::");
+                let rawMssv = splitData[0].trim().replace(/[-|]/g, '');
+                let displayMssv = maskMSSV(rawMssv);
+                
+                // --- XỬ LÝ LẤY TÊN CHO ADMIN HOẶC TÁC GIẢ BÀI VIẾT (PHẦN PHẢN HỒI) ---
+                let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+                let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
+                
+                if (isSystemAdmin) {
+                    let fullName = window.allUsersMap ? window.allUsersMap[rawMssv] : null;
+                    if (fullName) {
+                        let shortName = getNaturalShortName(fullName);
+                        displayMssv = `${rawMssv} - ${shortName}`;
+                    } else {
+                        displayMssv = rawMssv; 
+                    }
+                } else if (activeUser && activeUser.mssv) {
+                    let myCleanMssv = activeUser.mssv.replace(/\./g, "");
+                    let authorCleanMssv = rawMssv.replace(/\./g, "");
+                    
+                    if (myCleanMssv === authorCleanMssv) {
+                        let shortName = getNaturalShortName(activeUser.name);
+                        displayMssv = `${rawMssv} - ${shortName} (Bạn)`;
+                    }
+                }
+                // -----------------------------------------------------------------
 
-    // Xử lý mới: Tách thời gian và nội dung ra riêng biệt
-    if (splitData.length >= 3) {
-        // Lấy chuỗi thời gian được kẹp ở giữa
-        let timeStr = splitData[1].trim();
-        // Gán thời gian vào UI để hiển thị gọn gàng cạnh tên người gửi
-        timeHtml = `<span class="text-muted ms-2" style="font-size: 12.5px; font-weight: normal;"><i class="fa-regular fa-clock"></i> ${timeStr}</span>`;
+                svName = "Sinh viên (" + displayMssv + ")";
 
-        // Chỉ lấy nội dung tin nhắn (từ phần tử thứ 2 trở đi)
-        svMsg = splitData.slice(2).join(":::").trim();
-    } else {
-        // Dành cho các tin nhắn phiên bản cũ chỉ có [MSSV:::Nội dung]
-        svMsg = splitData.slice(1).join(":::").trim();
-    }
-}
-            // Dòng mới thông minh:
-let formattedContent = formatCodeBlocks(svMsg);
-if (!/(<p>|<table>|<ul>|<li>|<div>|<br\s*\/?>)/i.test(formattedContent)) {
-    formattedContent = formattedContent.replace(/\n/g, '<br>');
-}
-let svFormattedMsg = formattedContent;
+                if (splitData.length >= 3) {
+                    let timeStr = splitData[1].trim();
+                    timeHtml = `<span class="text-muted ms-2" style="font-size: 12.5px; font-weight: normal;"><i class="fa-regular fa-clock"></i> ${timeStr}</span>`;
+                    svMsg = splitData.slice(2).join(":::").trim();
+                } else {
+                    svMsg = splitData.slice(1).join(":::").trim();
+                }
+            }
+            
+            let formattedContent = formatCodeBlocks(svMsg);
+            if (!/(<p>|<table>|<ul>|<li>|<div>|<br\s*\/?>)/i.test(formattedContent)) {
+                formattedContent = formattedContent.replace(/\n/g, '<br>');
+            }
+            let svFormattedMsg = formattedContent;
             
             html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>${svName}</strong>${timeHtml}:<br>${svFormattedMsg}`; 
             
@@ -334,6 +353,7 @@ let svFormattedMsg = formattedContent;
     }); 
     return html;
 }
+
 // Hàm tự động tẩy rác HTML dán từ web khác về
 function cleanExternalHTML(html) {
     if (!html) return "";
@@ -349,136 +369,171 @@ function cleanExternalHTML(html) {
         // Xóa các thẻ p nằm lồng bên trong td của bảng
         .replace(/<td[^>]*>\s*<p[^>]*>([\s\S]*?)<\/p>\s*<\/td>/gi, "<td>$1<\/td>");
 }
-       function loadQAData() {
+      function loadQAData() {
     $('#qaListArea').html(''); 
     $('#qaLoadingStatus').removeClass('d-none');
     
-    $.ajax({ 
-        url: SCRIPT_URL + "?action=getQAData", 
-        method: "GET", 
-        dataType: "json", 
-        success: function(data) {
-            $('#qaLoadingStatus').addClass('d-none');
-            
-            // Lưu lại chuỗi data ngay khi load thành công (dành cho tính năng tự động làm mới ngầm)
-            window.lastQADataString = JSON.stringify(data); 
+    let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
 
-            if (!data || data.length === 0) { 
-                $('#qaListArea').html('<div class="text-center p-4 text-muted border rounded bg-white"><i class="fa-regular fa-comments fs-2 mb-2"></i><br>Chưa có câu hỏi nào. Bạn hãy là người đầu tiên đặt câu hỏi nhé!</div>'); 
-                $('#qaSidebarBadge').addClass('d-none'); 
-                return; 
-            }
-            
-            let html = ''; 
-            let hasUnanswered = false;
-            
-data.forEach(row => {
-    let time = row[0] || ''; 
-    let rawMssv = row[1] || ''; 
-    let displayMssv = isAdmin ? rawMssv : maskMSSV(rawMssv); 
-    
-    // --- XỬ LÝ LỌC THẺ TAG ---
-    let rawQuestion = row[2] || '';
-    let topicBadgeHtml = '';
-    
-    // Dùng Regex để bắt thẻ <span> chứa chủ đề đã được lưu
-    let badgeRegex = /(<span class="badge[^>]*>.*?<\/span>)\s*/;
-    let match = rawQuestion.match(badgeRegex);
-    
-    if (match) {
-        // Dịch chuyển lớp css để margin cho đẹp khi đứng cạnh MSSV
-        topicBadgeHtml = match[1].replace('mb-2', 'ms-2'); 
-        rawQuestion = rawQuestion.replace(badgeRegex, ''); // Cắt bỏ tag khỏi nội dung chính
-    }
-    
-    let question = formatCodeBlocks(rawQuestion);
-    // -------------------------
-
-    let answer = row[3] || ''; 
-    let upvotes = parseInt(row[4]) || 0; 
-    let downvotes = parseInt(row[5]) || 0; 
-    let rowIndex = row[6];       
-    
-    let isNew = answer.trim() === ""; 
-    if (isNew) hasUnanswered = true; 
-    let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
-               html += `<div class="${itemClass}">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong> ${topicBadgeHtml}</div>`;
-                
-                if (isAdmin) { 
-                    html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`; 
-                }
-                
-                html += `   </div>
-                            <div class="qa-question">${question}</div>`;
-             
-                if (!isNew) {
-                    // Nếu đã có luồng tin nhắn, in nội dung đó ra
-                    html += parseThread(answer, rowIndex);
-                } else { 
-                    // Nếu trống, in dòng thông báo chờ admin
-                    html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ giải đáp...</div>`; 
-                }
-                
-                // ============ TẠO ID & KIỂM TRA TRẠNG THÁI VOTE ============
-                // Tạo ID cố định vĩnh viễn không bị ảnh hưởng khi xóa hàng
-                let uniqueId = "QA_" + time.replace(/\D/g, '') + "_" + rawMssv.replace(/\D/g, '');
-
-                let currentUserId = currentUser ? currentUser.mssv : (localStorage.getItem('user_uuid') || "guest");
-                let voteKey = `voted_qa_${uniqueId}_${currentUserId}`; 
-                let votedType = localStorage.getItem(voteKey);
-
-                let upClass = votedType === 'up' ? 'btn-vote up voted' : 'btn-vote up';
-                let downClass = votedType === 'down' ? 'btn-vote down voted' : 'btn-vote down';
-                // ==========================================================
-
-                // Gắn ID mới và Class mới vào thanh công cụ
-                html += `<div class="vote-action-bar">
-                            <div class="vote-group" id="voteArea-${rowIndex}">
-                                <button class="${upClass}" onclick="castVote(${rowIndex}, 'up', this, '${uniqueId}')"><i class="fa-solid fa-thumbs-up"></i> Hữu ích (${upvotes})</button>
-                                <button class="${downClass}" onclick="castVote(${rowIndex}, 'down', this, '${uniqueId}')"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button>
-                            </div>
-                            <button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')">
-                                <i class="fa-solid fa-comment-dots"></i> Bình luận / Phản hồi
-                            </button>
-                        </div>
-                        
-                        <div id="replyBox-${rowIndex}" class="reply-box d-none mt-3">
-                            <textarea id="txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập bình luận hoặc ý kiến của bạn..."></textarea>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-primary fw-bold" onclick="sendReply(${rowIndex})" id="btnSendReply-${rowIndex}" style="background: var(--primary-color); border:none;">Gửi bình luận</button>
-                                <button class="btn btn-sm btn-light border" onclick="$('#replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
-                            </div>
-                        </div>`;
-                        
-                if (isAdmin) { 
-                    html += `<div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);">
-                                <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
-                                <textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
-                                <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}"><i class="fa-solid fa-reply"></i> Đăng câu trả lời</button>
-                             </div>`; 
-                } 
-                
-                html += `</div>`; // Đóng thẻ .qa-item
+    // Khởi tạo Promise tải danh sách Tên sinh viên (Chỉ gọi 1 lần khi Admin tải)
+    let userMapPromise = new Promise((resolve) => {
+        if (isSystemAdmin && !window.allUsersMap) {
+            $.ajax({
+                url: SCRIPT_URL + "?action=getAllUsers",
+                method: "GET",
+                dataType: "json",
+                success: function(users) {
+                    window.allUsersMap = {};
+                    users.forEach(u => { 
+                        let cleanMssv = u.mssv.replace(/\./g, "");
+                        window.allUsersMap[u.mssv] = u.name; 
+                        window.allUsersMap[cleanMssv] = u.name;
+                    });
+                    resolve();
+                },
+                error: () => resolve()
             });
-            
-            $('#qaListArea').html(html); 
-            
-            if (hasUnanswered) {
-                $('#qaSidebarBadge').removeClass('d-none'); 
-            } else {
-                $('#qaSidebarBadge').addClass('d-none');
-            }
-            
-            if (window.Prism) {
-                Prism.highlightAllUnder(document.getElementById('qaListArea'));
-            }
-            applyKaTeX('qaListArea');
+        } else {
+            resolve();
         }
+    });
 
+    userMapPromise.then(() => {
+        $.ajax({ 
+            url: SCRIPT_URL + "?action=getQAData", 
+            method: "GET", 
+            dataType: "json", 
+            success: function(data) {
+                $('#qaLoadingStatus').addClass('d-none');
+                window.lastQADataString = JSON.stringify(data); 
+
+                if (!data || data.length === 0) { 
+                    $('#qaListArea').html('<div class="text-center p-4 text-muted border rounded bg-white"><i class="fa-regular fa-comments fs-2 mb-2"></i><br>Chưa có câu hỏi nào. Bạn hãy là người đầu tiên đặt câu hỏi nhé!</div>'); 
+                    $('#qaSidebarBadge').addClass('d-none'); 
+                    return; 
+                }
+                
+                let html = ''; 
+                let hasUnanswered = false;
+                
+                data.forEach(row => {
+                    let time = row[0] || ''; 
+                    let rawMssv = String(row[1] || '').trim().replace(/[-|]/g, ''); 
+                    let displayMssv = maskMSSV(rawMssv); 
+                    
+                    // ==========================================
+                    // TRÍCH XUẤT TÊN CHO CÂU HỎI Q&A GỐC
+                    // ==========================================
+                    if (isSystemAdmin) {
+                        let fullName = window.allUsersMap ? window.allUsersMap[rawMssv] : null;
+                        if (fullName) {
+                            let shortName = getNaturalShortName(fullName);
+                            displayMssv = `${rawMssv} - ${shortName}`;
+                        } else {
+                            displayMssv = rawMssv; 
+                        }
+                    } else if (activeUser && activeUser.mssv) {
+                        let myCleanMssv = activeUser.mssv.replace(/\./g, "");
+                        let authorCleanMssv = rawMssv.replace(/\./g, "");
+                        
+                        if (myCleanMssv === authorCleanMssv) {
+                            let shortName = getNaturalShortName(activeUser.name);
+                            displayMssv = `${rawMssv} - ${shortName} (Bạn)`;
+                        }
+                    }
+                    // ==========================================
+                    
+                    // --- XỬ LÝ LỌC THẺ TAG ---
+                    let rawQuestion = row[2] || '';
+                    let topicBadgeHtml = '';
+                    let badgeRegex = /(<span class="badge[^>]*>.*?<\/span>)\s*/;
+                    let match = rawQuestion.match(badgeRegex);
+                    
+                    if (match) {
+                        topicBadgeHtml = match[1].replace('mb-2', 'ms-2'); 
+                        rawQuestion = rawQuestion.replace(badgeRegex, ''); 
+                    }
+                    
+                    let question = formatCodeBlocks(rawQuestion);
+
+                    let answer = row[3] || ''; 
+                    let upvotes = parseInt(row[4]) || 0; 
+                    let downvotes = parseInt(row[5]) || 0; 
+                    let rowIndex = row[6];       
+                    
+                    let isNew = answer.trim() === ""; 
+                    if (isNew) hasUnanswered = true; 
+                    let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
+
+                    html += `<div class="${itemClass}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong> ${topicBadgeHtml}</div>`;
+                        
+                    if (isAdmin) { 
+                        html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`; 
+                    }
+                        
+                    html += `   </div>
+                                <div class="qa-question">${question}</div>`;
+                     
+                    if (!isNew) {
+                        html += parseThread(answer, rowIndex);
+                    } else { 
+                        html += `<div class="qa-no-answer"><i class="fa-solid fa-hourglass-half me-2"></i> Đang chờ giải đáp...</div>`; 
+                    }
+                        
+                    let uniqueId = "QA_" + time.replace(/\D/g, '') + "_" + rawMssv.replace(/\D/g, '');
+                    let currentUserId = activeUser ? activeUser.mssv : (localStorage.getItem('user_uuid') || "guest");
+                    let voteKey = `voted_qa_${uniqueId}_${currentUserId}`; 
+                    let votedType = localStorage.getItem(voteKey);
+
+                    let upClass = votedType === 'up' ? 'btn-vote up voted' : 'btn-vote up';
+                    let downClass = votedType === 'down' ? 'btn-vote down voted' : 'btn-vote down';
+
+                    html += `<div class="vote-action-bar">
+                                <div class="vote-group" id="voteArea-${rowIndex}">
+                                    <button class="${upClass}" onclick="castVote(${rowIndex}, 'up', this, '${uniqueId}')"><i class="fa-solid fa-thumbs-up"></i> Hữu ích (${upvotes})</button>
+                                    <button class="${downClass}" onclick="castVote(${rowIndex}, 'down', this, '${uniqueId}')"><i class="fa-solid fa-thumbs-down"></i> Chưa rõ (${downvotes})</button>
+                                </div>
+                                <button class="btn-reply-toggle m-0" onclick="$('#replyBox-${rowIndex}').toggleClass('d-none')">
+                                    <i class="fa-solid fa-comment-dots"></i> Bình luận / Phản hồi
+                                </button>
+                            </div>
+                            
+                            <div id="replyBox-${rowIndex}" class="reply-box d-none mt-3">
+                                <textarea id="txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập bình luận hoặc ý kiến của bạn..."></textarea>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-primary fw-bold" onclick="sendReply(${rowIndex})" id="btnSendReply-${rowIndex}" style="background: var(--primary-color); border:none;">Gửi bình luận</button>
+                                    <button class="btn btn-sm btn-light border" onclick="$('#replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
+                                </div>
+                            </div>`;
+                            
+                    if (isAdmin) { 
+                        html += `<div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);">
+                                    <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
+                                    <textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
+                                    <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendAdminReply(${rowIndex})" id="btnAdminSubmit-${rowIndex}"><i class="fa-solid fa-reply"></i> Đăng câu trả lời</button>
+                                 </div>`; 
+                    } 
+                    html += `</div>`; 
+                });
+                
+                $('#qaListArea').html(html); 
+                
+                if (hasUnanswered) {
+                    $('#qaSidebarBadge').removeClass('d-none'); 
+                } else {
+                    $('#qaSidebarBadge').addClass('d-none');
+                }
+                
+                if (window.Prism) Prism.highlightAllUnder(document.getElementById('qaListArea'));
+                applyKaTeX('qaListArea');
+            }
+        });
     });
 }
+
 function deleteThreadPart(rowIndex, partIndex) { if(!confirm("Bạn có chắc chắn muốn xóa đoạn tin nhắn này?")) return; window.qaThreadParts[rowIndex].splice(partIndex, 1); postToGAS({ action: "updateQAThread", rowIndex: rowIndex, fullText: window.qaThreadParts[rowIndex].join("\n\n") }, function(res) { loadQAData(); }, function() { alert("Lỗi!"); }); }
         let editQARowIndex = -1; let editQAPartIndex = -1;
         function openEditQAModal(rowIndex, partIndex) { editQARowIndex = rowIndex; editQAPartIndex = partIndex; $('#editQAText').val(window.qaThreadParts[rowIndex][partIndex].trim()); $('#editQAModal').modal('show'); }
