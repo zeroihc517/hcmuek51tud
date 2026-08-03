@@ -918,7 +918,7 @@ $('#loadingStatus').addClass('d-none');
                 
                 let isChapter = false;
                 let isLesson = false;
-
+		let isPart = false;
                 if (isNewRow) { rowClass += ' row-new'; }
                 else if (/ngânhàng/.test(fullRowText.replace(/\s+/g, ''))) { rowClass += ' row-white'; iconPrefix = '<i class="fa-solid fa-box-archive me-2 text-secondary"></i>'; } 
                 else if (/bàithi|kiểmtra|đềthi|lịchthi|phòngthi/.test(fullRowText.replace(/\s+/g, '')) || row.join(" ").toLowerCase().includes(' thi ')) { rowClass += ' row-exam'; iconPrefix = '<i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>'; } 
@@ -934,9 +934,12 @@ $('#loadingStatus').addClass('d-none');
                     isLesson = true;
                     currentLessonId++; 
                 }
-                else if (/phần/.test(firstCellText)) { 
+               else if (/phần/.test(firstCellText)) { 
     rowClass += ' row-part'; 
-    isPart = true; // Đánh dấu dòng này là PHẦN
+    isPart = true; 
+    // RESET BỘ ĐẾM: Đảm bảo các nội dung thuộc Phần 2 không bị nhận nhầm là con của Chương/Bài ở Phần 1
+    currentChapterId = 0; 
+    currentLessonId = 0; 
 }
                 let sheetRowIndex = rowIndex + 1;
                 // Bổ sung thêm điều kiện window.innerWidth >= 992 để chỉ bật Kéo-Thả trên PC
@@ -946,19 +949,21 @@ let dragAttr = (isAdmin && window.innerWidth >= 992) ? ` draggable="true" ondrag
                 let childClass = '';
                 let clickEvent = '';
 
-                // Phân cấp và Thu gọn mặc định bằng class d-none
-                if (isChapter) {
-                    clickEvent = ` onclick="toggleChapter(${currentChapterId}, this)" style="cursor: pointer;" title="Bấm để mở rộng"`;
-                } else if (isLesson) {
-                    clickEvent = ` onclick="toggleLesson(${currentChapterId}, ${currentLessonId}, this)" style="cursor: pointer;" title="Bấm để mở rộng"`;
-                    childClass = ` child-of-chapter-${currentChapterId} d-none`; // Bài thuộc Chương (ẩn lúc đầu)
-                } else {
-                    if (currentLessonId > 0) {
-                        childClass = ` child-of-chapter-${currentChapterId} child-of-lesson-${currentChapterId}-${currentLessonId} d-none`; // Nội dung thuộc Bài (ẩn lúc đầu)
-                    } else if (currentChapterId > 0) {
-                        childClass = ` child-of-chapter-${currentChapterId} direct-chapter-child d-none`; // Nội dung trực tiếp của Chương (ẩn lúc đầu)
-                    }
-                }
+if (isChapter) {
+    clickEvent = ` onclick="toggleChapter(${currentChapterId}, this)" style="cursor: pointer;" title="Bấm để mở rộng"`;
+} else if (isLesson) {
+    clickEvent = ` onclick="toggleLesson(${currentChapterId}, ${currentLessonId}, this)" style="cursor: pointer;" title="Bấm để mở rộng"`;
+    childClass = ` child-of-chapter-${currentChapterId} d-none`; 
+} else if (isPart) {
+    // Hàng Phần là độc lập hoàn toàn, không bị ẩn hay phụ thuộc vào Chương/Bài nào
+    childClass = ''; 
+} else {
+    if (currentLessonId > 0) {
+        childClass = ` child-of-chapter-${currentChapterId} child-of-lesson-${currentChapterId}-${currentLessonId} d-none`; 
+    } else if (currentChapterId > 0) {
+        childClass = ` child-of-chapter-${currentChapterId} direct-chapter-child d-none`; 
+    }
+}
 
                bodyHtml += `<tr class="${rowClass}${childClass}"${clickEvent}${dragAttr}>`;
                 
