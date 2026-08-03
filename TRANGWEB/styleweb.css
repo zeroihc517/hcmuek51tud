@@ -308,7 +308,7 @@ body.dark-mode .qa-question table td {
 
 /* Ô dữ liệu - Điều chỉnh padding nhỏ lại để hàng thon gọn hơn */
 .custom-portal-table td { 
-    padding: 10px 20px; /* Giảm padding trên/dưới từ 16px xuống 10px */
+    padding: 6px 20px; /* 👈 Giảm số 10px xuống thành 6px (hoặc 4px) */
     border-bottom: 1px solid #f1f5f9; 
     font-size: 15px; 
     font-weight: 500; 
@@ -316,7 +316,7 @@ body.dark-mode .qa-question table td {
     color: #334155; 
     white-space: pre-wrap; 
     word-break: break-word; 
-    line-height: 1.4; /* Thu nhỏ khoảng cách dãn dòng */
+    line-height: 1; 
 }
 
 /* Hiệu ứng di chuột qua các hàng */
@@ -2813,4 +2813,69 @@ body.dark-mode .mini-dl-title {
 /* Trên điện thoại, giấu cột trái hoặc phải tùy trạng thái */
 @media (max-width: 768px) {
     #messengerSection .col-md-8 { display: none; } /* Mặc định giấu khung chat, hiện danh sách */
+}
+/* ==========================================
+   ĐỊNH DẠNG CỐ ĐỊNH DÒNG PHẦN 1, PHẦN 2...
+   ========================================== */
+
+/* 1. Đánh kiểu nền hồng, chữ đỏ đô cố định */
+.custom-portal-table tr.row-part td {
+    background-color: #fce7f3 !important; /* Màu nền hồng nhạt dịu mắt */
+    color: #be185d !important;             /* Màu chữ đỏ hồng đậm */
+    font-weight: 700 !important;
+    font-size: 15px !important;
+    text-transform: uppercase;
+    border-bottom: 1px solid #fbcfe8 !important;
+    padding: 12px 20px !important;
+}
+
+/* ÉP ĐỒNG BỘ: Bắt buộc tất cả thẻ chữ (span, a, i) bên trong dòng này phải theo màu hồng, triệt tiêu màu xanh mặc định */
+.custom-portal-table tr.row-part td span,
+.custom-portal-table tr.row-part td a,
+.custom-portal-table tr.row-part td i {
+    color: #be185d !important;
+}
+
+/* 2. Đậm màu hồng lên một chút khi rê chuột qua */
+.custom-portal-table tr.row-part:hover td {
+    background-color: #fbcfe8 !important;
+}
+
+/* 3. Icon lớp layer góc trái */
+.custom-portal-table tr.row-part td:first-child i {
+    color: #be185d !important;
+    font-size: 16px;
+}
+/* =======================================================
+   THU GỌN CHIỀU CAO BẢNG HỌC PHẦN (GIỐNG ẢNH 2)
+   ======================================================= */
+
+/* 1. Ép nhỏ padding của toàn bộ các ô dữ liệu thông thường */
+.custom-portal-table td {
+    padding: 6px 12px !important; 
+    line-height: 1.4 !important;
+}
+
+/* 2. Thu gọn padding của hàng màu hồng (Phần 1, Phần 2...) */
+.custom-portal-table tr.row-part td {
+    padding: 8px 16px !important; 
+    font-size: 14.5px !important; /* Chữ nhỏ lại một chút cho cân đối */
+}
+
+/* 3. Triệt tiêu khoảng trống thừa do các thẻ div/p bên trong sinh ra */
+.custom-portal-table td .d-flex.flex-column {
+    gap: 0px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.custom-portal-table td p {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 4. Chỉnh lại khoảng cách của icon thư mục/tài liệu cho vừa vặn */
+.custom-portal-table td i.fa-folder-open,
+.custom-portal-table td i.fa-file-lines {
+    margin-top: 2px !important;
 }

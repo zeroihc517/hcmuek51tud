@@ -859,7 +859,7 @@ $('#loadingStatus').addClass('d-none');
                         row.forEach((cell) => { headHtml += `<th>${String(cell || '')}</th>`; });
                     } else {
                         // Tùy chỉnh tiêu đề cột cho Danh mục Học phần
-                        headHtml += `<th style="width: 80px;">STT</th><th>Nội dung bài học</th><th style="width: 250px;">Ghi chú</th>`;
+                        headHtml += `<th style="width: 105px;">STT</th><th>Nội dung bài học</th><th style="width: 250px;">Ghi chú</th>`;
                     }
                     if (isAdmin) headHtml += `<th style="width: 180px; min-width: 180px;">Thao tác</th>`; 
                     return; 
@@ -934,7 +934,10 @@ $('#loadingStatus').addClass('d-none');
                     isLesson = true;
                     currentLessonId++; 
                 }
-                
+                else if (/phần/.test(firstCellText)) { 
+    rowClass += ' row-part'; 
+    isPart = true; // Đánh dấu dòng này là PHẦN
+}
                 let sheetRowIndex = rowIndex + 1;
                 // Bổ sung thêm điều kiện window.innerWidth >= 992 để chỉ bật Kéo-Thả trên PC
 let dragAttr = (isAdmin && window.innerWidth >= 992) ? ` draggable="true" ondragstart="handleDragStart(event, ${sheetRowIndex})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndex}, '${currentSheetName}')" style="cursor: grab;"` : '';
@@ -1030,9 +1033,9 @@ let dragAttr = (isAdmin && window.innerWidth >= 992) ? ` draggable="true" ondrag
                     
                     // Thêm Logo tự động: CHỈ hiện logo file tài liệu cho các hàng nội dung nhỏ bên trong
                     let lessonIcon = ''; 
-                    if (!isChapter && !isLesson) {
-                        lessonIcon = '<i class="fa-solid fa-file-lines me-2" style="color: #0ea5e9; font-size: 16px;"></i>';
-                    }
+if (!isChapter && !isLesson && !rowClass.includes('row-part')) {
+    lessonIcon = '<i class="fa-solid fa-file-lines me-2" style="color: #0ea5e9; font-size: 16px;"></i>';
+}
 
 if (extractedUrl) {
     if (isUpdating && !isAdmin) {
