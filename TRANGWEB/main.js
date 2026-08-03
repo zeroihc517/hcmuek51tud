@@ -133,6 +133,7 @@ function renderOnlineFooterUI() {
     `);
 }
 // 5. Hàm gửi request lấy dữ liệu mới từ Server (chạy ngầm định kỳ)
+// 5. Hàm gửi request lấy dữ liệu mới từ Server (chạy ngầm định kỳ)
 function pingOnlineStatus() {
     let savedUser = localStorage.getItem('currentUser');
     let mssvParam = "Khách"; 
@@ -154,8 +155,24 @@ function pingOnlineStatus() {
         mssvParam = currentUser.mssv + "|" + currentUser.name; 
     }
 
+    // --- LOGIC LẤY TÊN MỤC ĐANG XEM (CHUẨN XÁC THEO MENU) ---
+    let currentView = "Trang chủ"; // Mặc định
+    
+    // Tìm text của nút đang được in đậm (có class 'active') trên thanh menu Sidebar
+    let activeMenuText = $('#sidebarMenu .active').text().trim();
+    
+    if (activeMenuText) {
+        currentView = activeMenuText; // Lấy đúng chữ "Lịch học", "Hình học vi phân"...
+    } else if (typeof currentSheetName !== 'undefined' && currentSheetName !== "") {
+        currentView = currentSheetName; // Dự phòng lấy tên môn học
+    } else {
+        currentView = document.title.split('|')[0].trim(); // Dự phòng lấy tiêu đề tab web
+    }
+    // -------------------------------------------------------------
+
     $.ajax({ 
-        url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID + "&mssv=" + encodeURIComponent(mssvParam), 
+        // ĐÃ BỔ SUNG &lastView VÀO URL GỬI LÊN MÁY CHỦ
+        url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID + "&mssv=" + encodeURIComponent(mssvParam) + "&lastView=" + encodeURIComponent(currentView), 
         method: "GET", 
         dataType: "json", 
         cache: false,
@@ -171,7 +188,6 @@ function pingOnlineStatus() {
         } 
     });
 }
-
 function loadWebLinks() { 
     $('#webLinksContainer').html(`
         <div class="col-12 w-100">
@@ -4240,3 +4256,10 @@ function resetUrlToDefault() {
     let cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
     window.history.pushState({ path: cleanUrl }, '', cleanUrl);
 }
+// Bắt sự kiện click vào các nút trên menu Sidebar và các nút chuyển hướng
+$(document).on('click', '.btn-course, .dropdown-item', function() {
+    // Trì hoãn 300 mili-giây để giao diện web kịp cập nhật xong class 'active' cho nút mới
+    setTimeout(function() {
+        pingOnlineStatus(); // Gọi hàm gửi tín hiệu lên máy chủ ngay lập tức
+    }, 300);
+});

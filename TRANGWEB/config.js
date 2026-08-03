@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbycgo3zOM9t5XlE44Wvt3rTFPGpfZX6Limxo0L6K_PHxCH-huFNsxHzPqReOoUsxs6-/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbynauXQp-rTFED1CcyE1mrqgRxY9Sko3MvItgDxU5js4K42QEESYw-MFXwOXUhLfeNg/exec'; 
 
      let isAdmin = localStorage.getItem('isAdmin') === 'true';
         let currentSheetName = "";
@@ -394,9 +394,11 @@ $(document).ready(function() {
     initInactivityTracker();     // Lắng nghe thao tác để tính thời gian chờ 1 tiếng[cite: 1]
 });
 // Hàm gọi API lấy danh sách Lịch sử truy cập cho Admin
+// Hàm gọi API lấy danh sách Lịch sử truy cập cho Admin
 function fetchUserAccessHistory() {
     let tbody = $('#accessHistoryTableBody');
-    tbody.html('<tr><td colspan="5" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải lịch sử truy cập...</td></tr>');
+    // Đổi colspan="5" thành colspan="6" vì ta thêm 1 cột mới
+    tbody.html('<tr><td colspan="6" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải lịch sử truy cập...</td></tr>');
 
     $.ajax({
         url: SCRIPT_URL + "?action=getAllUsersAccessHistory",
@@ -404,7 +406,7 @@ function fetchUserAccessHistory() {
         dataType: "json",
         success: function(users) {
             if (!users || users.length === 0) {
-                tbody.html('<tr><td colspan="5" class="text-center text-muted py-3">Chưa có dữ liệu thành viên.</td></tr>');
+                tbody.html('<tr><td colspan="6" class="text-center text-muted py-3">Chưa có dữ liệu thành viên.</td></tr>');
                 return;
             }
 
@@ -428,11 +430,16 @@ function fetchUserAccessHistory() {
                     }
                 }
 
+                // Xử lý hiển thị Mục truy cập cuối
+                let lastViewDisplay = u.lastView ? `<span class="badge bg-info text-dark">${u.lastView}</span>` : '<span class="text-muted small">Không rõ</span>';
+
                 html += `
                 <tr>
                     <td class="fw-bold text-muted">${index + 1}</td>
                     <td class="fw-bold text-primary">${u.mssv}</td>
                     <td class="text-start fw-bold">${u.name}</td>
+                    <!-- THÊM CỘT MỤC TRUY CẬP CUỐI Ở ĐÂY -->
+                    <td class="text-center">${lastViewDisplay}</td>
                     <td class="font-monospace">${u.lastActive || 'Chưa từng truy cập'}</td>
                     <td>${statusBadge}</td>
                 </tr>`;
@@ -441,7 +448,7 @@ function fetchUserAccessHistory() {
             tbody.html(html);
         },
         error: function() {
-            tbody.html('<tr><td colspan="5" class="text-center text-danger py-3"><i class="fa-solid fa-triangle-exclamation me-1"></i> Không thể tải dữ liệu!</td></tr>');
+            tbody.html('<tr><td colspan="6" class="text-center text-danger py-3"><i class="fa-solid fa-triangle-exclamation me-1"></i> Không thể tải dữ liệu!</td></tr>');
         }
     });
 }
