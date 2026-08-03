@@ -393,11 +393,25 @@ $(document).ready(function() {
     checkSessionExpiryOnLoad();  // Kiểm tra phiên đăng nhập ngay khi mở trang[cite: 1]
     initInactivityTracker();     // Lắng nghe thao tác để tính thời gian chờ 1 tiếng[cite: 1]
 });
-// Hàm gọi API lấy danh sách Lịch sử truy cập cho Admin
-// Hàm gọi API lấy danh sách Lịch sử truy cập cho Admin
+// 1. Hàm chuyển đổi ngày giờ sang chuẩn Việt Nam (UTC+7) định dạng YYYY-MM-DD HH:MM:SS
+// 1. Hàm chuyển đổi ngày giờ sang chuẩn Việt Nam định dạng DD/MM/YYYY HH:MM:SS
+function formatVNDateTime(dateStr) {
+    if (!dateStr || dateStr === "Chưa từng truy cập") return "Chưa từng truy cập";
+    let d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr; // Trả về chuỗi gốc nếu không parse được
+
+    // Tính toán bù trừ múi giờ để luôn ra đúng giờ Việt Nam (UTC+7)
+    let utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    let vnTime = new Date(utc + (3600000 * 7));
+
+    let pad = (n) => String(n).padStart(2, '0');
+    // Đảo ngược vị trí để ra chuẩn Ngày/Tháng/Năm
+    return `${pad(vnTime.getDate())}/${pad(vnTime.getMonth() + 1)}/${vnTime.getFullYear()} ${pad(vnTime.getHours())}:${pad(vnTime.getMinutes())}:${pad(vnTime.getSeconds())}`;
+}
+
+// 2. Cập nhật lại hàm gọi API lấy danh sách Lịch sử truy cập
 function fetchUserAccessHistory() {
     let tbody = $('#accessHistoryTableBody');
-    // Đổi colspan="5" thành colspan="6" vì ta thêm 1 cột mới
     tbody.html('<tr><td colspan="6" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải lịch sử truy cập...</td></tr>');
 
     $.ajax({
@@ -415,32 +429,41 @@ function fetchUserAccessHistory() {
 
             let html = '';
             users.forEach((u, index) => {
-                let statusBadge = '<span class="badge bg-secondary">Ngoại tuyến</span>';
+                // ----------------------------------------------------
+                // 1. TRẠNG THÁI: Bỏ khung (badge), chỉ dùng màu chữ đậm
+                // ----------------------------------------------------
+                let statusBadge = '<span class="fw-bold text-muted"><i class="fa-solid fa-circle me-1" style="font-size: 8px;"></i> Ngoại tuyến</span>';
                 
-                // Nếu lần cuối truy cập cách đây dưới 5 phút -> Hiển thị Đang Online
                 if (u.lastActive && u.lastActive !== "Chưa từng truy cập") {
                     let lastTime = new Date(u.lastActive).getTime();
                     let nowTime = new Date().getTime();
                     let diffMinutes = (nowTime - lastTime) / (1000 * 60);
 
                     if (diffMinutes <= 5) {
-                        statusBadge = '<span class="badge bg-success"><i class="fa-solid fa-circle fa-beat me-1" style="font-size: 8px;"></i> Đang hoạt động</span>';
+                        statusBadge = '<span class="fw-bold text-success"><i class="fa-solid fa-circle fa-beat me-1" style="font-size: 8px;"></i> Đang hoạt động</span>';
                     } else if (diffMinutes <= 60) {
-                        statusBadge = `<span class="badge bg-warning text-dark">${Math.floor(diffMinutes)} phút trước</span>`;
+                        statusBadge = `<span class="fw-bold" style="color: #d97706;"><i class="fa-solid fa-clock me-1"></i> ${Math.floor(diffMinutes)} phút trước</span>`;
                     }
                 }
 
-                // Xử lý hiển thị Mục truy cập cuối
-                let lastViewDisplay = u.lastView ? `<span class="badge bg-info text-dark">${u.lastView}</span>` : '<span class="text-muted small">Không rõ</span>';
+                // ----------------------------------------------------
+                // 2. MỤC ĐANG XEM: Bỏ khung, dùng đúng biến lastView
+                // ----------------------------------------------------
+                let sectionName = u.lastView || u.currentSection || u.action || u.view || "Không rõ"; 
+                let currentSectionText = (sectionName !== "Không rõ" && sectionName !== "") 
+                    ? `<span class="fw-bold" style="color: #0ea5e9;">${sectionName}</span>` 
+                    : `<span class="fw-bold text-muted">Không rõ</span>`;
 
                 html += `
                 <tr>
                     <td class="fw-bold text-muted">${index + 1}</td>
                     <td class="fw-bold text-primary">${u.mssv}</td>
                     <td class="text-start fw-bold">${u.name}</td>
-                    <!-- THÊM CỘT MỤC TRUY CẬP CUỐI Ở ĐÂY -->
-                    <td class="text-center">${lastViewDisplay}</td>
-                    <td class="font-monospace">${u.lastActive || 'Chưa từng truy cập'}</td>
+                    <!-- Cột Mục đang xem -->
+                    <td>${currentSectionText}</td>
+                    <!-- Cột Lần cuối truy cập theo giờ VN -->
+                    <td class="font-monospace text-muted">${formatVNDateTime(u.lastActive)}</td>
+                    <!-- Cột Trạng thái -->
                     <td>${statusBadge}</td>
                 </tr>`;
             });
