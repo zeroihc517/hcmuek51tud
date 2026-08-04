@@ -2859,7 +2859,7 @@ function resetNavActive() {
     $('#btnNavTKB').removeClass('active');
     $('#btnNavShareCode').removeClass('active');
     $('#btnNavGPA').removeClass('active');
-    
+    $('#btnNavDatLich').removeClass('active');
     $('#tongHopSection').addClass('d-none'); 
     $('#courseSection').addClass('d-none');
     $('#qaSection').addClass('d-none'); 
@@ -2867,6 +2867,7 @@ function resetNavActive() {
     $('#shareCodeSection').addClass('d-none'); 
     $('#gpaSection').addClass('d-none');
     $('#profileSection').addClass('d-none');
+	$('#datLichSection').addClass('d-none');
 }
 
 // Chèn lệnh ẩn vào hàm reset mặc định
