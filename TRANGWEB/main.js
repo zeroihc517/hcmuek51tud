@@ -549,9 +549,7 @@ data.forEach((row, rowIndex) => {
     let publishDate = null;
     let c4_display = c4_raw; 
     let dateMatch = c4_raw.match(/(?:(\d{1,2}):(\d{2}))?\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-	let trackingPartName = "";
-let trackingChapterName = "";
-let trackingLessonName = "";
+
     if (dateMatch) {
         let hour = dateMatch[1] ? parseInt(dateMatch[1]) : 0;
         let minute = dateMatch[2] ? parseInt(dateMatch[2]) : 0;
@@ -878,8 +876,13 @@ $('#loadingStatus').addClass('d-none');
             
          // THÊM MỚI: Biến quản lý ID nhóm cho tính năng Thu gọn/Thả xuống đa cấp
             let currentChapterId = 0;
-            let currentLessonId = 0;
-let activeChapterId = 0;
+        let currentLessonId = 0;
+        let activeChapterId = 0;
+        
+        // THÊM 3 DÒNG NÀY VÀO ĐÂY:
+        let trackingPartName = "";
+        let trackingChapterName = "";
+        let trackingLessonName = "";
            data.forEach((row, rowIndex) => {
     if (!row || row.length === 0 || row.filter(cell => String(cell).trim() !== "").length === 0) return;
     let fullRowText = row.join(" ").toLowerCase().replace(/\s+/g, ' '); 
@@ -1125,8 +1128,10 @@ let safeTitle = col2Html.replace(/'/g, "\\'").replace(/"/g, "&quot;");
             if (cleanContentName) trackStr += ` - ${cleanContentName}`;
         }
 
-        // Chèn hàm setDetailedView() vào đầu sự kiện onclick
-        col2Html = `<span onclick="setDetailedView('${trackStr}'); openDocumentViewer('${safeUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem bài học trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;    }
+      // Chèn hàm setDetailedView() vào đầu sự kiện onclick (ĐÃ BỔ SUNG SAFE TRACK)
+        let safeTrackStr = trackStr.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        
+        col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${safeUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem bài học trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`; }
 } else {
                         col2Html = `<span style="color: #0f4c81; font-weight: 700;">${lessonIcon}${col2Html}</span>`;
                     }
