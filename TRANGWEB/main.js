@@ -846,12 +846,12 @@ $('#loadingStatus').addClass('d-none');
          // THÊM MỚI: Biến quản lý ID nhóm cho tính năng Thu gọn/Thả xuống đa cấp
             let currentChapterId = 0;
             let currentLessonId = 0;
-
-            data.forEach((row, rowIndex) => {
-		if (!row || row.length === 0 || row.filter(cell => String(cell).trim() !== "").length === 0) return;
-                let fullRowText = row.join(" ").toLowerCase().replace(/\s+/g, ' '); 
-                let firstCellTextRaw = String(row[0]).trim(); 
-                let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
+let activeChapterId = 0;
+           data.forEach((row, rowIndex) => {
+    if (!row || row.length === 0 || row.filter(cell => String(cell).trim() !== "").length === 0) return;
+    let fullRowText = row.join(" ").toLowerCase().replace(/\s+/g, ' '); 
+    let firstCellTextRaw = String(row[0]).trim(); 
+    let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
                 
                 // 1. Xử lý tiêu đề cột
                 if (rowIndex === 0) { 
@@ -913,57 +913,71 @@ $('#loadingStatus').addClass('d-none');
                 }
 
                 // 4. Nhận diện trạng thái "Mới" và Phân cấp Chương/Bài
-                let isNewRow = false;
-                let rowClass = 'grid-row'; let iconPrefix = '';
-                
-                let isChapter = false;
-                let isLesson = false;
-		let isPart = false;
-                if (isNewRow) { rowClass += ' row-new'; }
-                else if (/ngânhàng/.test(fullRowText.replace(/\s+/g, ''))) { rowClass += ' row-white'; iconPrefix = '<i class="fa-solid fa-box-archive me-2 text-secondary"></i>'; } 
-                else if (/bàithi|kiểmtra|đềthi|lịchthi|phòngthi/.test(fullRowText.replace(/\s+/g, '')) || row.join(" ").toLowerCase().includes(' thi ')) { rowClass += ' row-exam'; iconPrefix = '<i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>'; } 
-                else if (/chủđề|chương/.test(firstCellText)) { 
-                    rowClass += ' row-topic is-chapter'; 
-                    isChapter = true;
-                    currentChapterId++; 
-                    currentLessonId = 0; // Reset bài khi sang chương mới
-                } 
-                else if (/bài/.test(firstCellText)) { 
-                    rowClass += ' row-lesson is-lesson'; 
-                    iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; 
-                    isLesson = true;
-                    currentLessonId++; 
-                }
-               else if (/phần/.test(firstCellText)) { 
-    rowClass += ' row-part'; 
-    isPart = true; 
-    // RESET BỘ ĐẾM: Đảm bảo các nội dung thuộc Phần 2 không bị nhận nhầm là con của Chương/Bài ở Phần 1
-    currentChapterId = 0; 
-    currentLessonId = 0; 
-}
-                let sheetRowIndex = rowIndex + 1;
-                // Bổ sung thêm điều kiện window.innerWidth >= 992 để chỉ bật Kéo-Thả trên PC
-let dragAttr = (isAdmin && window.innerWidth >= 992) ? ` draggable="true" ondragstart="handleDragStart(event, ${sheetRowIndex})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndex}, '${currentSheetName}')" style="cursor: grab;"` : '';
-                
-                // Gắn Class child cho các dòng dữ liệu con, và gán sự kiện Click
-                let childClass = '';
-                let clickEvent = '';
+               let isNewRow = false;
+    let rowClass = 'grid-row'; let iconPrefix = '';
+    
+    let isChapter = false;
+    let isLesson = false;
+    let isPart = false;
 
-if (isChapter) {
-    clickEvent = ` onclick="toggleChapter(${currentChapterId}, this)" style="cursor: pointer;" title="Bấm để mở rộng"`;
-} else if (isLesson) {
-    clickEvent = ` onclick="toggleLesson(${currentChapterId}, ${currentLessonId}, this)" style="cursor: pointer;" title="Bấm để mở rộng"`;
-    childClass = ` child-of-chapter-${currentChapterId} d-none`; 
-} else if (isPart) {
-    // Hàng Phần là độc lập hoàn toàn, không bị ẩn hay phụ thuộc vào Chương/Bài nào
-    childClass = ''; 
-} else {
-    if (currentLessonId > 0) {
-        childClass = ` child-of-chapter-${currentChapterId} child-of-lesson-${currentChapterId}-${currentLessonId} d-none`; 
-    } else if (currentChapterId > 0) {
-        childClass = ` child-of-chapter-${currentChapterId} direct-chapter-child d-none`; 
+    if (/phần/.test(firstCellText)) { 
+        rowClass += ' row-part'; 
+        isPart = true; 
+        // Cắt đứt liên kết với Chủ đề/Bài của Phần trước
+        activeChapterId = 0; 
+        currentLessonId = 0; 
+    } 
+    else if (/chủđề|chương/.test(firstCellText)) { 
+        rowClass += ' row-topic is-chapter'; 
+        isChapter = true;
+        currentChapterId = rowIndex; 
+        activeChapterId = rowIndex; 
+        currentLessonId = 0; 
+    } 
+    else if (/bài/.test(firstCellText)) { 
+        rowClass += ' row-lesson is-lesson'; 
+        iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; 
+        isLesson = true;
+        currentLessonId = rowIndex; 
     }
-}
+
+    let sheetRowIndex = rowIndex + 1;
+    let dragAttr = (isAdmin && window.innerWidth >= 992) ? ` draggable="true" ondragstart="handleDragStart(event, ${sheetRowIndex})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndex}, '${currentSheetName}')" style="cursor: grab;"` : '';
+    
+    // LOGIC ĐÃ FIX: Xử lý hiển thị phân cấp (Không ẩn nhầm hàng độc lập)
+    let childClass = '';
+    let clickEvent = '';
+
+    if (isChapter) {
+        clickEvent = ` onclick="toggleChapter(${currentChapterId}, this)" style="cursor: pointer;" title="Bấm để mở rộng"`;
+    } else if (isLesson) {
+        clickEvent = ` onclick="toggleLesson(${activeChapterId}, ${currentLessonId}, this)" style="cursor: pointer;" title="Bấm để mở rộng"`;
+        if (activeChapterId > 0) {
+            // Nằm trong Chương -> Ẩn đi chờ mở
+            childClass = ` child-of-chapter-${activeChapterId} is-lesson d-none`; 
+        } else {
+            // Nằm trực tiếp dưới Phần (Không có Chương) -> KHÔNG ẨN
+            childClass = ` is-lesson`; 
+        }
+    } else if (isPart) {
+        // Hàng Phần độc lập hoàn toàn, luôn hiện
+        childClass = ''; 
+    } else {
+        // Hàng Nội dung chi tiết
+        if (currentLessonId > 0 && activeChapterId > 0) {
+            // Nằm trong Bài + Có Chương
+            childClass = ` child-of-chapter-${activeChapterId} child-of-lesson-${activeChapterId}-${currentLessonId} d-none`; 
+        } else if (currentLessonId > 0 && activeChapterId === 0) {
+            // Nằm trong Bài + Không có Chương
+            childClass = ` child-of-lesson-0-${currentLessonId} d-none`; 
+        } else if (activeChapterId > 0) {
+            // Nằm trực tiếp dưới Chương (Không có Bài)
+            childClass = ` child-of-chapter-${activeChapterId} direct-chapter-child d-none`; 
+        } else {
+            // Nằm trực tiếp dưới Phần (Chỉ có nội dung) -> KHÔNG ẨN
+            childClass = ''; 
+        }
+    }
 
                bodyHtml += `<tr class="${rowClass}${childClass}"${clickEvent}${dragAttr}>`;
                 
@@ -3047,7 +3061,7 @@ window.toggleChapter = function(chapterId, rowElement) {
         $(rowElement).addClass('expanded');
         chevronIcon.css('transform', 'rotate(0deg)');
         
-        // Hiện các Bài (nhưng bài vẫn đang thu gọn), và Hiện các nội dung trực tiếp của Chương
+        // Hiện các Bài thuộc chương này
         $(`.child-of-chapter-${chapterId}.is-lesson`).removeClass('d-none');
         $(`.child-of-chapter-${chapterId}.direct-chapter-child`).removeClass('d-none');
     } else {
@@ -3055,7 +3069,7 @@ window.toggleChapter = function(chapterId, rowElement) {
         $(rowElement).removeClass('expanded');
         chevronIcon.css('transform', 'rotate(-90deg)');
         
-        // Ẩn tất cả Bài và Nội dung bên trong Chương
+        // Ẩn tất cả Bài và Nội dung bên trong Chương này
         $(`.child-of-chapter-${chapterId}`).addClass('d-none');
         
         // Trả các thẻ Bài về trạng thái thu gọn
@@ -3063,7 +3077,6 @@ window.toggleChapter = function(chapterId, rowElement) {
         $(`.child-of-chapter-${chapterId}.is-lesson .fa-chevron-down`).css('transform', 'rotate(-90deg)');
     }
 };
-
 // HÀM ĐIỀU KHIỂN THU GỌN / MỞ RỘNG (BÀI)
 window.toggleLesson = function(chapterId, lessonId, rowElement) {
     let chevronIcon = $(rowElement).find('.fa-chevron-down');
