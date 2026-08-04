@@ -132,6 +132,13 @@ function renderOnlineFooterUI() {
         ${cachedOnlineCount} người: <strong>${displayList}</strong>
     `);
 }
+window.userDetailedView = ""; 
+
+// Hàm gán view chi tiết và đẩy lên server ngay lập tức
+window.setDetailedView = function(viewString) {
+    window.userDetailedView = viewString;
+    pingOnlineStatus(); // Gọi hàm ping để cập nhật lên bảng Admin ngay lập tức
+};
 // 5. Hàm gửi request lấy dữ liệu mới từ Server (chạy ngầm định kỳ)
 // 5. Hàm gửi request lấy dữ liệu mới từ Server (chạy ngầm định kỳ)
 function pingOnlineStatus() {
@@ -156,17 +163,22 @@ function pingOnlineStatus() {
     }
 
     // --- LOGIC LẤY TÊN MỤC ĐANG XEM (CHUẨN XÁC THEO MENU) ---
-    let currentView = "Trang chủ"; // Mặc định
-    
-    // Tìm text của nút đang được in đậm (có class 'active') trên thanh menu Sidebar
+   let currentView = "Trang chủ"; 
     let activeMenuText = $('#sidebarMenu .active').text().trim();
     
-    if (activeMenuText) {
-        currentView = activeMenuText; // Lấy đúng chữ "Lịch học", "Hình học vi phân"...
-    } else if (typeof currentSheetName !== 'undefined' && currentSheetName !== "") {
-        currentView = currentSheetName; // Dự phòng lấy tên môn học
+    // ƯU TIÊN 1: Lấy view chi tiết (Nếu sinh viên vừa click vào bài học)
+    if (window.userDetailedView !== "") {
+        currentView = window.userDetailedView;
+    } 
+    // ƯU TIÊN 2: Lấy theo Sidebar Menu
+    else if (activeMenuText) {
+        currentView = activeMenuText; 
+    } 
+    // ƯU TIÊN 3 & 4: Tên môn hoặc Tab
+    else if (typeof currentSheetName !== 'undefined' && currentSheetName !== "") {
+        currentView = currentSheetName; 
     } else {
-        currentView = document.title.split('|')[0].trim(); // Dự phòng lấy tiêu đề tab web
+        currentView = document.title.split('|')[0].trim(); 
     }
     // -------------------------------------------------------------
 
@@ -522,6 +534,9 @@ data.forEach((row, rowIndex) => {
     let publishDate = null;
     let c4_display = c4_raw; 
     let dateMatch = c4_raw.match(/(?:(\d{1,2}):(\d{2}))?\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+	let trackingPartName = "";
+let trackingChapterName = "";
+let trackingLessonName = "";
     if (dateMatch) {
         let hour = dateMatch[1] ? parseInt(dateMatch[1]) : 0;
         let minute = dateMatch[2] ? parseInt(dateMatch[2]) : 0;
@@ -671,7 +686,9 @@ else {
                     window.viewThongBaoDetail = function(index) {
                         let data = window.thongBaoData[index];
                         if(!data) return;
-                        
+                        if (typeof window.setDetailedView === 'function') {
+        window.setDetailedView("Thông báo - " + data.c2); // data.c2 là Tiêu đề
+    }
                         // Cập nhật đường dẫn thanh địa chỉ tự động mà KHÔNG làm tải lại trang
                         let currentCode = data.tbCode || "";
                         if (currentCode) {
@@ -771,6 +788,7 @@ if (!currentUser || currentUser.isGuest) {
 
                         $('#tbDetailContainer').addClass('d-none');
                         $('#tbMainView').removeClass('d-none').attr('style', ''); // Xóa lệnh ẩn ép buộc để hiện lại bảng
+			if (typeof window.setDetailedView === 'function') window.setDetailedView("Thông báo");
                         resetUrlToDefault();
                     };
 
@@ -903,12 +921,15 @@ let activeChapterId = 0;
 
                    // Dọn dẹp dấu nháy để không làm gãy sự kiện onclick
                     let safeTitle = titleText.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-                    
-                    examCardsHtml += `
-                        <a href="javascript:void(0)" onclick="openDocumentViewer('${linkUrl}', '${safeTitle}')" class="card-minigame-box" title="${titleText}">
-                            ${imgDisplayHtml}
-                            <div class="card-minigame-title">${titleText}</div>
-                        </a>`;
+
+// TẠO CHUỖI TRACKING CHO ĐỀ THI
+let trackStr = `${currentSheetName} - Minigame/Đề thi: ${safeTitle}`;
+
+examCardsHtml += `
+    <a href="javascript:void(0)" onclick="setDetailedView('${trackStr}'); openDocumentViewer('${linkUrl}', '${safeTitle}')" class="card-minigame-box" title="${titleText}">
+        ${imgDisplayHtml}
+        <div class="card-minigame-title">${titleText}</div>
+    </a>`;
                     return; 
                 }
 
@@ -920,12 +941,17 @@ let activeChapterId = 0;
     let isLesson = false;
     let isPart = false;
 
-    if (/phần/.test(firstCellText)) { 
+   if (/phần/.test(firstCellText)) { 
         rowClass += ' row-part'; 
         isPart = true; 
-        // Cắt đứt liên kết với Chủ đề/Bài của Phần trước
         activeChapterId = 0; 
         currentLessonId = 0; 
+        
+        // Lưu tên Phần (Gộp Cột 1 và Cột 2)
+        trackingPartName = `${String(row[0] || '').trim()} ${String(row[1] || '').trim()}`.trim();
+        // Reset lại khi sang Phần mới
+        trackingChapterName = ""; 
+        trackingLessonName = ""; 
     } 
     else if (/chủđề|chương/.test(firstCellText)) { 
         rowClass += ' row-topic is-chapter'; 
@@ -933,12 +959,19 @@ let activeChapterId = 0;
         currentChapterId = rowIndex; 
         activeChapterId = rowIndex; 
         currentLessonId = 0; 
+        
+        // Lưu tên Chủ đề/Chương
+        trackingChapterName = `${String(row[0] || '').trim()} ${String(row[1] || '').trim()}`.trim();
+        trackingLessonName = ""; // Reset Bài
     } 
     else if (/bài/.test(firstCellText)) { 
         rowClass += ' row-lesson is-lesson'; 
         iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; 
         isLesson = true;
         currentLessonId = rowIndex; 
+        
+        // Lưu tên Bài
+        trackingLessonName = `${String(row[0] || '').trim()} ${String(row[1] || '').trim()}`.trim();
     }
 
     let sheetRowIndex = rowIndex + 1;
@@ -1061,13 +1094,24 @@ if (extractedUrl) {
     if (isUpdating && !isAdmin) {
         col2Html = `<span onclick="$('#updatingModal').modal('show'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Đang cập nhật">${lessonIcon}${col2Html || "Đang cập nhật"}</span>`;
     } else {
-        // Dùng Regex để loại bỏ các dấu nháy gây gãy chuỗi HTML cho Tiêu đề và Link
-        let safeTitle = col2Html.replace(/'/g, "\\'").replace(/"/g, "&quot;"); 
-        let safeUrl = extractedUrl.replace(/'/g, "\\'"); // <-- Khử dấu nháy đơn trong link Upcoder
+let safeTitle = col2Html.replace(/'/g, "\\'").replace(/"/g, "&quot;"); 
+        let safeUrl = extractedUrl.replace(/'/g, "\\'"); 
 
-        // Thay extractedUrl bằng safeUrl bên dưới
-        col2Html = `<span onclick="openDocumentViewer('${safeUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem bài học trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;
-    }
+        // TẠO CHUỖI TRACKING ĐA CẤP (Lấy Tên bài thay vì STT)
+        let trackStr = `${currentSheetName}`; // Tên môn
+        if (trackingPartName) trackStr += ` - ${trackingPartName}`;       // Phần
+        if (trackingChapterName) trackStr += ` - ${trackingChapterName}`; // Chương
+        if (trackingLessonName) trackStr += ` - ${trackingLessonName}`;   // Bài
+        
+        // Nếu dòng này là Nội dung, lấy thẳng tên bài ở Cột 2 (c2)
+        if (!isChapter && !isLesson && !isPart) {
+            // Loại bỏ các thẻ HTML (nếu có) trong c2 để chuỗi gửi về Admin sạch đẹp
+            let cleanContentName = c2.replace(/<[^>]*>?/gm, '').trim();
+            if (cleanContentName) trackStr += ` - ${cleanContentName}`;
+        }
+
+        // Chèn hàm setDetailedView() vào đầu sự kiện onclick
+        col2Html = `<span onclick="setDetailedView('${trackStr}'); openDocumentViewer('${safeUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem bài học trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;    }
 } else {
                         col2Html = `<span style="color: #0f4c81; font-weight: 700;">${lessonIcon}${col2Html}</span>`;
                     }
@@ -1334,6 +1378,7 @@ function loadGPAView() {
 }
 const originalResetNav = resetNavActive;
 resetNavActive = function() {
+	window.userDetailedView = "";
     originalResetNav();
     $('#btnNavGPA').removeClass('active');
     $('#gpaSection').addClass('d-none');

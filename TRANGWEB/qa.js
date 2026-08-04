@@ -179,7 +179,7 @@ function openQASection() {
     resetNavActive(); 
     $('#btnNavShareCode').addClass('active'); 
     $('#qaSection').removeClass('d-none'); 
-    
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - Giải đáp thắc mắc");
     updateSystemUrl('view', 'qa'); // Đổi URL thành ?view=qa
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
     if (currentUser) { $('#txtMSSV').val(currentUser.mssv).prop('readonly', true).css({ 'background-color': '#e9ecef', 'cursor': 'not-allowed' }); } 
@@ -641,7 +641,7 @@ function openShareCodeSection() {
     resetNavActive(); 
     $('#btnNavShareCode').addClass('active'); 
     $('#shareCodeSection').removeClass('d-none'); 
-    
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận");
     // Nếu không có tham số category trên URL thì mới trở về danh mục Thảo luận tổng
     let urlParams = new URLSearchParams(window.location.search);
     if (!urlParams.get('category')) {
@@ -657,7 +657,7 @@ function openShareCodeSection() {
 function backToShareCategories() {
     $('#shareContentView').addClass('d-none');
     $('#shareCategoryView').removeClass('d-none');
-    
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận");
     // Phục hồi lại đường link Thảo luận chung (?view=thaoluan)
     updateSystemUrl('view', 'thaoluan');
 }
@@ -670,7 +670,7 @@ function openShareCategory(categoryName, lang) {
     $('#currentShareTitle').text(categoryName);
     $('#shareCategoryView').addClass('d-none');
     $('#shareContentView').removeClass('d-none');
-    
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - Không gian Code - " + categoryName);
     // Tạo link dạng ?view=sharecode&category=LapTrinhPython
    // Thay đoạn cũ bằng:
 let cleanCategory = categoryName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "");
@@ -947,10 +947,12 @@ function processFormattedText(text) {
 window.openShareCodeDetail = function(index) {
     let item = window.shareCodeList[index];
     if(!item) return;
-
+	if (typeof window.setDetailedView === 'function') {
+        window.setDetailedView(`Thảo luận - Không gian Code - ${currentShareCategory} - Mã bài: ${item.maBai}`);
+    }
     let questionFormatted = formatCodeBlocks(item.codeContent);
     let threadHtml = item.answer.trim() !== "" ? parseThread(item.answer, item.rowIndex) : '';
-
+	
     // KIỂM TRA QUYỀN CHỈNH SỬA
     let canEdit = false;
     if (currentUser) {
@@ -1023,6 +1025,7 @@ window.openShareCodeDetail = function(index) {
 window.backToShareCodeList = function() {
     $('#shareCodeDetailWrapper').addClass('d-none');
     $('#shareCodeListWrapper').removeClass('d-none');
+	if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - Không gian Code - " + currentShareCategory);
 };
 // Hàm xử lý gửi bình luận / góp ý trong phần Share Code
 window.sendShareCodeReply = function(rowIndex) { 

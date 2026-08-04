@@ -387,6 +387,9 @@ if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv ===
 $(document).ready(function() {
     $('#documentViewerModal').on('hidden.bs.modal', function () {
         $('#docViewerIframe').attr('src', '');
+	if (typeof window.setDetailedView === 'function' && typeof currentSheetName !== 'undefined') {
+            window.setDetailedView(currentSheetName);
+        }
     });
 });
 $(document).ready(function() {
@@ -449,10 +452,21 @@ function fetchUserAccessHistory() {
                 // ----------------------------------------------------
                 // 2. MỤC ĐANG XEM: Bỏ khung, dùng đúng biến lastView
                 // ----------------------------------------------------
-                let sectionName = u.lastView || u.currentSection || u.action || u.view || "Không rõ"; 
-                let currentSectionText = (sectionName !== "Không rõ" && sectionName !== "") 
-                    ? `<span class="fw-bold" style="color: #0ea5e9;">${sectionName}</span>` 
-                    : `<span class="fw-bold text-muted">Không rõ</span>`;
+                // ----------------------------------------------------
+// 2. MỤC ĐANG XEM: Bỏ khung, dùng đúng biến lastView
+// ----------------------------------------------------
+let sectionName = u.lastView || u.currentSection || u.action || u.view || "Không rõ"; 
+
+// Tách chuỗi tại dấu " - " và ép xuống dòng kèm icon mũi tên phân cấp
+let formattedSectionName = sectionName;
+if (sectionName !== "Không rõ" && sectionName !== "") {
+    formattedSectionName = sectionName.replace(/\s-\s/g, '<br><i class="fa-solid fa-arrow-turn-up fa-rotate-90 text-secondary ms-2 me-1" style="font-size: 11px;"></i>');
+}
+
+// Bọc trong thẻ div căn trái (text-start) để tạo hiệu ứng bậc thang
+let currentSectionText = (sectionName !== "Không rõ" && sectionName !== "") 
+    ? `<div class="fw-bold text-start d-inline-block" style="color: #0ea5e9; line-height: 1.6;">${formattedSectionName}</div>` 
+    : `<span class="fw-bold text-muted">Không rõ</span>`;
 
                 html += `
                 <tr>
