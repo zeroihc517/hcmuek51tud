@@ -1775,98 +1775,94 @@ if (syncType === 'switch_class') {
         let btn = $('#btnSwitchClassMode');
         if (btn.length) btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang chuyển lớp...').prop('disabled', true);
 
-        // BƯỚC 1: XÓA LỚP CŨ TRÊN MÁY CHỦ
-       // BƯỚC 1: XÓA LỚP CŨ TRÊN MÁY CHỦ (Bản vá: Căn chỉnh xóa chuẩn xác theo classId)
-        let cleanupPromise = function(nextCallback) {
-            if (existingSyncedClass) {
-                userRegisteredCourseIds = userRegisteredCourseIds.filter(id => String(id).trim() !== String(existingSyncedClass.id).trim());
-                postToGAS({ action: "saveSystemTkbSelection", mssv: currentUser.mssv, courseIds: userRegisteredCourseIds.join(',') }, function() { nextCallback(); }, function() { nextCallback(); });
-            } else if (existingCopiedClass) {
-                let indicesToDelete = [];
-                globalTkbData = globalTkbData.filter(tkb => {
-                    let isTarget = false;
-                    if (tkb.classId && String(tkb.classId).trim() !== "") {
-                        isTarget = (String(tkb.classId).trim() === String(existingCopiedClass.id).trim());
-                    } else {
-                        isTarget = (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(subject.displayName));
-                    }
-
-                    if (isTarget && tkb.sheetRowIndex) {
-                        indicesToDelete.push(tkb.sheetRowIndex);
-                        return false;
-                    }
-                    return true;
-                });
-
-                if (indicesToDelete.length > 0) {
-                    postToGAS({ action: "deleteMultipleTKBRows", rowIndices: indicesToDelete.join(','), mssv: currentUser.mssv }, function() { nextCallback(); }, function() { nextCallback(); });
-                } else { nextCallback(); }
-            } else { nextCallback(); }
-        };
-
-        // BƯỚC 2: THÊM LỚP MỚI THEO DẠNG "SAO CHÉP CÁ NHÂN"
-        cleanupPromise(function() {
-            let coursesToCopyRaw = globalSystemCourses.filter(c => String(c.id).trim() === String(selectedClassId).trim());
+        if (existingSyncedClass) {
+            // 1. NẾU LỚP CŨ LÀ ĐỒNG BỘ HỆ THỐNG -> LỚP MỚI CŨNG LÀ ĐỒNG BỘ
+            userRegisteredCourseIds = userRegisteredCourseIds.filter(id => String(id).trim() !== String(existingSyncedClass.id).trim());
+            if (!userRegisteredCourseIds.includes(String(selectedClassId).trim())) {
+                userRegisteredCourseIds.push(String(selectedClassId).trim());
+            }
             
-            if (coursesToCopyRaw.length > 0) {
-                let coursesToCopy = coursesToCopyRaw.map(newCourseObj => {
-                    let isVle = (newCourseObj.hinhThuc || '').toUpperCase().includes('VLE');
-                    let baseHinhThuc = newCourseObj.hinhThuc || (isVle ? "VLE" : "");
-                    let cleanHinhThuc = baseHinhThuc.replace(/#[a-zA-Z0-9_]+/g, '').trim();
-                    
-                    return {
-                        id: newCourseObj.id,
-                        classId: newCourseObj.id,
-                        mon: newCourseObj.mon,
-                        thu: newCourseObj.thu || (isVle ? 99 : 2),
-                        tietBd: newCourseObj.tietBd || (isVle ? 99 : 1),
-                        soTiet: newCourseObj.soTiet || 1,
-                        thoiGian: newCourseObj.thoiGian || (isVle ? "VLE" : ""),
-                        hinhThuc: cleanHinhThuc + " #" + newCourseObj.id, // BẢN VÁ: Giấu classId vào hình thức
-                        phong: newCourseObj.phong || (isVle ? "VLE" : ""),
-                        gv: newCourseObj.gv || "",
-                        color: newCourseObj.color || "#e0f2fe",
-                        ngayBatDau: newCourseObj.ngayBatDau || "",
-                        ngayKetThuc: newCourseObj.ngayKetThuc || "",
-                        ngayNgoaiLe: newCourseObj.ngayNgoaiLe || ""
-                    };
-                });
-  
+            // XÓA NGAY lớp cũ khỏi bộ nhớ đệm (RAM) để tránh lỗi hiển thị "bóng ma"
+            globalTkbData = globalTkbData.filter(tkb => !(tkb.isSystem && String(tkb.classId).trim() === String(existingSyncedClass.id).trim()));
+            
+            postToGAS({ action: "saveSystemTkbSelection", mssv: currentUser.mssv, courseIds: userRegisteredCourseIds.join(',') }, function() {
+                loadThoiGianBieu(); 
+                loadDeadlines();
+                setTimeout(() => {
+                    openSubjectDetail(currentSysSubjectKey);
+                    alert("Đã chuyển lớp thành công (Trạng thái: Đã đồng bộ)!");
+                }, 500);
+            }, function() {
+                alert("Lỗi kết nối máy chủ!");
+                openSubjectDetail(currentSysSubjectKey);
+            });
+            
+       } else if (existingCopiedClass) {
+            let indicesToDelete = [];
+            
+            // QUÉT DỌN TRIỆT ĐỂ LỚP CŨ THEO TÊN MÔN
+            globalTkbData.forEach(tkb => {
+                let isTarget = !tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(subject.displayName);
+                if (isTarget && tkb.sheetRowIndex && String(tkb.sheetRowIndex).indexOf("TEMP_") === -1) {
+                    indicesToDelete.push(tkb.sheetRowIndex);
+                }
+            });
 
-                postToGAS({ action: "copySystemTkbToPersonal", mssv: currentUser.mssv, courses: coursesToCopy }, function(res) {
-                    coursesToCopy.forEach(c => {
-                        globalTkbData.push({
-                            classId: String(c.id).trim(),
-                            mon: c.mon, thu: parseInt(c.thu), tietBd: parseInt(c.tietBd),
-                            soTiet: parseInt(c.soTiet), hinhThuc: c.hinhThuc, phong: c.phong,
-                            gv: c.gv, color: c.color, ngayBatDau: c.ngayBatDau,
-                            ngayKetThuc: c.ngayKetThuc, 
-ngayNgoaiLe: c.ngayNgoaiLe || "",
-				sheetRowIndex: "TEMP_" + Date.now() + Math.random(), isSystem: false
-                        });
+            let copyNewClassFunc = function() {
+                let coursesToCopyRaw = globalSystemCourses.filter(c => String(c.id).trim() === String(selectedClassId).trim());
+                if (coursesToCopyRaw.length > 0) {
+                    let coursesToCopy = coursesToCopyRaw.map(newCourseObj => {
+                        let isVle = (newCourseObj.hinhThuc || '').toUpperCase().includes('VLE');
+                        let baseHinhThuc = newCourseObj.hinhThuc || (isVle ? "VLE" : "");
+                        let cleanHinhThuc = baseHinhThuc.replace(/#[a-zA-Z0-9_]+/g, '').trim();
+                        
+                        return {
+                            id: newCourseObj.id,
+                            classId: newCourseObj.id,
+                            mon: newCourseObj.mon,
+                            thu: newCourseObj.thu || (isVle ? 99 : 2),
+                            tietBd: newCourseObj.tietBd || (isVle ? 99 : 1),
+                            soTiet: newCourseObj.soTiet || 1,
+                            thoiGian: newCourseObj.thoiGian || (isVle ? "VLE" : ""),
+                            hinhThuc: cleanHinhThuc + " #" + newCourseObj.id,
+                            phong: newCourseObj.phong || (isVle ? "VLE" : ""),
+                            gv: newCourseObj.gv || "",
+                            color: newCourseObj.color || "#e0f2fe",
+                            ngayBatDau: newCourseObj.ngayBatDau || "",
+                            ngayKetThuc: newCourseObj.ngayKetThuc || "",
+                            ngayNgoaiLe: newCourseObj.ngayNgoaiLe || ""
+                        };
                     });
 
-                    // CHÚ Ý: KHÔNG PUSH VÀO userRegisteredCourseIds để giữ nguyên cờ SAO CHÉP
-                    loadThoiGianBieu(); 
-                    loadDeadlines();
-
-                    setTimeout(() => {
+                    postToGAS({ action: "copySystemTkbToPersonal", mssv: currentUser.mssv, courses: coursesToCopy }, function(res) {
+                        // BẮT BUỘC TẢI LẠI TRỰC TIẾP TỪ SERVER ĐỂ LẤY ID THẬT
+                        $.ajax({
+                            url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv,
+                            method: "GET", dataType: "json", cache: false,
+                            success: function(data) {
+                                processTKBData(data);
+                                openSubjectDetail(currentSysSubjectKey);
+                                alert("Đã chuyển lớp thành công (Trạng thái: Đã sao chép)!");
+                            }
+                        });
+                    }, function() {
+                        alert("Lỗi kết nối máy chủ khi đăng ký lớp mới!");
                         openSubjectDetail(currentSysSubjectKey);
-                        alert("Đã chuyển lớp thành công (Trạng thái: Đã sao chép)!");
-                    }, 500);
+                    });
+                }
+            };
 
-                }, function() {
-                    alert("Lỗi kết nối máy chủ khi đăng ký lớp mới!");
-                    openSubjectDetail(currentSysSubjectKey);
-                });
+            if (indicesToDelete.length > 0) {
+                postToGAS({ action: "deleteMultipleTKBRows", rowIndices: indicesToDelete.join(','), mssv: currentUser.mssv }, function() { copyNewClassFunc(); }, function() { copyNewClassFunc(); });
+            } else { 
+                copyNewClassFunc(); 
             }
-        });
+        }
     });
 
     $('#confirmSwitchClassModal').modal('show');
     return;
 }
-
     // ==========================================================
     // 2. CHẾ ĐỘ: ĐỒNG BỘ HỆ THỐNG
     // ==========================================================
@@ -1897,7 +1893,7 @@ ngayNgoaiLe: c.ngayNgoaiLe || "",
    // ==========================================================
     // 3. CHẾ ĐỘ: SAO CHÉP (CÁ NHÂN) - ĐÃ FIX CHÍNH XÁC PHÂN BIỆT SAO CHÉP
     // ==========================================================
-    else if (syncType === 'personal') {
+   else if (syncType === 'personal') {
         let btn = $('#btnSavePersonalTkbMode'); 
         let originalText = btn.html();
         btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang chép...').prop('disabled', true);
@@ -1916,33 +1912,25 @@ ngayNgoaiLe: c.ngayNgoaiLe || "",
                 tietBd: c.tietBd || (isVle ? 99 : 1),
                 soTiet: c.soTiet || 1,
                 thoiGian: c.thoiGian || (isVle ? "VLE" : ""),
-                hinhThuc: cleanHinhThuc + " #" + c.id, // BẢN VÁ: Giấu classId vào hình thức
+                hinhThuc: cleanHinhThuc + " #" + c.id, 
                 phong: c.phong || (isVle ? "VLE" : ""),
                 gv: c.gv || "", color: c.color || "#e0f2fe",
                 ngayBatDau: c.ngayBatDau || "", ngayKetThuc: c.ngayKetThuc || "", ngayNgoaiLe: c.ngayNgoaiLe || ""
             };
         });
 
-
         postToGAS({ action: "copySystemTkbToPersonal", mssv: currentUser.mssv, courses: coursesToCopy }, function(res) {
-            coursesToCopy.forEach(c => {
-                globalTkbData.push({
-                    classId: String(c.id).trim(), // Đảm bảo gán classId cho bộ nhớ tạm cá nhân
-                    mon: c.mon, thu: parseInt(c.thu), tietBd: parseInt(c.tietBd),
-                    soTiet: parseInt(c.soTiet), hinhThuc: c.hinhThuc, phong: c.phong,
-                    gv: c.gv, color: c.color, ngayBatDau: c.ngayBatDau,
-                    ngayKetThuc: c.ngayKetThuc, 
-ngayNgoaiLe: c.ngayNgoaiLe || "",
-	sheetRowIndex: "TEMP_" + Date.now(), isSystem: false
-                });
+            // KHÔNG DÙNG TEMP_ NỮA, ÉP TẢI LẠI TỪ SERVER ĐỂ CÓ DATA THẬT
+            $.ajax({
+                url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv,
+                method: "GET", dataType: "json", cache: false,
+                success: function(data) {
+                    processTKBData(data);
+                    btn.html(originalText).prop('disabled', false);
+                    openSubjectDetail(currentSysSubjectKey);
+                    alert("Đã sao chép thành công!");
+                }
             });
-
-            // KHÔNG PUSH VÀO userRegisteredCourseIds để không bị biến thành ĐỒNG BỘ HỆ THỐNG
-
-            btn.html(originalText).prop('disabled', false);
-            openSubjectDetail(currentSysSubjectKey);
-            alert("Đã sao chép thành công!");
-            loadThoiGianBieu(); loadDeadlines();
         }, function() {
             alert("Lỗi kết nối máy chủ!");
             btn.html(originalText).prop('disabled', false);
@@ -1994,21 +1982,23 @@ window.cancelPersonalCopyDirect = function(rowIndicesStr, event) {
     let subjectObj = groupedSystemCourses[currentSysSubjectKey];
     let indicesToDelete = [];
 
+    // QUÉT DỌN TRIỆT ĐỂ: Tìm TẤT CẢ các dòng sao chép cá nhân CÙNG TÊN MÔN
     if (subjectObj) {
         globalTkbData.forEach(tkb => {
             let isTarget = !tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(subjectObj.displayName);
-            if (isTarget && tkb.sheetRowIndex) {
+            // Loại bỏ các dòng TEMP ảo trên RAM
+            if (isTarget && tkb.sheetRowIndex && String(tkb.sheetRowIndex).indexOf("TEMP_") === -1) {
                 indicesToDelete.push(tkb.sheetRowIndex);
             }
         });
     }
 
     if (indicesToDelete.length === 0 && rowIndicesStr) {
-        indicesToDelete = rowIndicesStr.split(',').map(i => i.trim()).filter(Boolean);
+        indicesToDelete = rowIndicesStr.split(',').map(i => String(i).trim()).filter(i => i.indexOf("TEMP_") === -1 && i !== "");
     }
 
     if (indicesToDelete.length === 0) {
-        alert("Không tìm thấy dữ liệu lịch học để xóa!");
+        alert("Dữ liệu đang được đồng bộ, vui lòng tải lại trang (F5) và thử lại!");
         return;
     }
 
@@ -2017,23 +2007,32 @@ window.cancelPersonalCopyDirect = function(rowIndicesStr, event) {
     $('#btnConfirmCancelSyncAction').off('click').on('click', function() {
         $('#confirmCancelSyncModal').modal('hide');
 
-        // Lọc bỏ môn trên bộ nhớ cục bộ
-        globalTkbData = globalTkbData.filter(tkb => !indicesToDelete.includes(tkb.sheetRowIndex));
-
         // Bật Spinner Loading trên giao diện
-        openSubjectDetail(currentSysSubjectKey);
+        let targetRows = $('.system-course-checkbox').closest('tr');
+        targetRows.find('td:last-child').html(`
+            <span class="badge bg-warning text-dark py-2 w-100 shadow-sm">
+                <i class="fa-solid fa-spinner fa-spin me-1"></i> Đang xóa...
+            </span>
+        `);
 
         postToGAS({ 
             action: "deleteMultipleTKBRows", 
             rowIndices: indicesToDelete.join(','), 
             mssv: currentUser.mssv 
         }, function(res) {
-            alert("Đã xóa sao chép!");
-            loadThoiGianBieu(); 
-            loadDeadlines();
+            // ÉP TẢI LẠI TOÀN BỘ DATA TỪ GOOGLE SHEET CHỐNG LỖI BÓNG MA
+            $.ajax({
+                url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv,
+                method: "GET", dataType: "json", cache: false,
+                success: function(data) {
+                    processTKBData(data);
+                    openSubjectDetail(currentSysSubjectKey);
+                    alert("Đã hủy lớp sao chép cá nhân thành công!");
+                }
+            });
         }, function() {
             alert("Lỗi kết nối máy chủ khi xóa!");
-            loadThoiGianBieu();
+            openSubjectDetail(currentSysSubjectKey);
         });
     });
 
