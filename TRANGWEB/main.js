@@ -4413,3 +4413,78 @@ window.addEventListener('storage', function(e) {
 $(document).ready(function() {
     updateCountdownUI();
 });
+// =========================================================================
+// CẬP NHẬT ĐỒNG HỒ ĐẾM NGƯỢC ĐỒNG BỘ FOOTER + IFRAME HEADER
+// =========================================================================
+
+// Hủy đếm ngược
+function cancelUserCountdown() {
+    localStorage.removeItem('user_countdown_target');
+    localStorage.removeItem('user_countdown_triggered');
+    if (userCountdownInterval) clearInterval(userCountdownInterval);
+    
+    // Ẩn ở Footer
+    $('#countdownSetupArea').removeClass('d-none');
+    $('#countdownDisplayArea').addClass('d-none');
+    $('#txtCountHours, #txtCountMinutes, #txtCountSeconds').val('');
+    
+    // Ẩn ở Iframe Viewer Header
+    $('#viewerCountdownClock').addClass('d-none');
+}
+
+// Cập nhật giao diện đếm ngược mỗi giây
+function updateCountdownUI() {
+    let targetStr = localStorage.getItem('user_countdown_target');
+    if (!targetStr) {
+        $('#countdownSetupArea').removeClass('d-none');
+        $('#countdownDisplayArea').addClass('d-none');
+        $('#viewerCountdownClock').addClass('d-none');
+        if (userCountdownInterval) clearInterval(userCountdownInterval);
+        return;
+    }
+
+    let targetTime = parseInt(targetStr);
+    
+    // Hiện đồng hồ ở Footer & Iframe Header
+    $('#countdownSetupArea').addClass('d-none');
+    $('#countdownDisplayArea').removeClass('d-none');
+    $('#viewerCountdownClock').removeClass('d-none');
+
+    if (userCountdownInterval) clearInterval(userCountdownInterval);
+
+    function tick() {
+        let now = Date.now();
+        let distance = targetTime - now;
+
+        if (distance <= 0) {
+            // ĐÃ HẾT GIỜ
+            clearInterval(userCountdownInterval);
+            $('#lblCountdownClock').text("00:00:00");
+            $('#lblViewerCountdownClock').text("00:00:00");
+            
+            if (!localStorage.getItem('user_countdown_triggered')) {
+                localStorage.setItem('user_countdown_triggered', 'true');
+                triggerTimeUpAlert();
+            }
+            
+            setTimeout(() => {
+                cancelUserCountdown();
+            }, 3000);
+        } else {
+            // TÍNH GIỜ - PHÚT - GIÂY CÒN LẠI
+            let hours = Math.floor(distance / (1000 * 60 * 60));
+            let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            let pad = n => String(n).padStart(2, '0');
+            let displayStr = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+
+            // Đổ thời gian đồng thời ra Footer và Iframe Viewer
+            $('#lblCountdownClock').text(displayStr);
+            $('#lblViewerCountdownClock').text(displayStr);
+        }
+    }
+
+    tick();
+    userCountdownInterval = setInterval(tick, 1000);
+}

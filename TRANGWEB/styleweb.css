@@ -2976,11 +2976,18 @@ body.dark-mode .mini-dl-title {
     background: #dc2626 !important;
 }
 
+/* Chuyển chữ và icon Đồng hồ đếm ngược ở Footer sang màu vàng */
 .countdown-clock-text {
     font-family: 'Chakra Petch', sans-serif;
     font-size: 15px;
-    color: #f87171;
+    color: #facc15 !important; /* Màu vàng Gold rực rỡ */
     letter-spacing: 0.5px;
+    text-shadow: 0 0 6px rgba(250, 204, 21, 0.35); /* Hiệu ứng ánh vàng dịu */
+}
+
+/* Đổi màu icon bấm chạy hẹn giờ khi ở trạng thái đếm */
+#countdownDisplayArea .fa-stopwatch {
+    color: #facc15 !important;
 }
 
 .btn-countdown-cancel {
@@ -3013,5 +3020,22 @@ body.dark-mode .mini-dl-title {
     .countdown-input {
         width: 36px !important;
         font-size: 11px !important;
+    }
+}
+/* Tối ưu đồng hồ đếm ngược trên thanh Header của Iframe Viewer */
+#viewerCountdownClock {
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+}
+
+@media (max-width: 576px) {
+    #docViewerTitle {
+        max-width: 25% !important;
+        font-size: 13px !important;
+    }
+    #viewerCountdownClock {
+        padding: 2px 8px !important;
+    }
+    #lblViewerCountdownClock {
+        font-size: 13px !important;
     }
 }

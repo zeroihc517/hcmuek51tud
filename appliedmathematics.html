@@ -1197,15 +1197,17 @@
             </div>
 
             <!-- Màn hình 2: KHI ĐANG ĐẾM NGƯỢC -->
-            <div id="countdownDisplayArea" class="d-none d-flex align-items-center gap-2">
-                <div class="d-flex align-items-center gap-1">
-                    <i class="fa-solid fa-stopwatch text-danger fa-spin-slow"></i>
-                    <span class="fw-bold countdown-clock-text" id="lblCountdownClock">00:00:00</span>
-                </div>
-                <button class="btn btn-sm btn-outline-light btn-countdown-cancel" onclick="cancelUserCountdown()" title="Hủy đếm ngược">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
+            <!-- Màn hình 2: KHI ĐANG ĐẾM NGƯỢC -->
+<div id="countdownDisplayArea" class="d-none d-flex align-items-center gap-2">
+    <div class="d-flex align-items-center gap-1">
+        <!-- Đã đổi màu icon fa-stopwatch và màu chữ lblCountdownClock sang màu vàng #facc15 -->
+        <i class="fa-solid fa-stopwatch fa-spin-slow" style="color: #facc15;"></i>
+        <span class="fw-bold countdown-clock-text" id="lblCountdownClock" style="color: #facc15 !important;">00:00:00</span>
+    </div>
+    <button class="btn btn-sm btn-outline-light btn-countdown-cancel" onclick="cancelUserCountdown()" title="Hủy đếm ngược">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+</div>
         </div>
 
         <!-- 🔴 ĐỒNG HỒ HỆ THỐNG LED (NẰM NGAY BÊN PHẢI ĐỒNG HỒ ĐẾM NGƯỢC) -->
@@ -1659,24 +1661,35 @@
     </div>
 </div>
 <!-- MODAL XEM TÀI LIỆU TRỰC TIẾP (FULLSCREEN) -->
+<!-- MODAL XEM TÀI LIỆU TRỰC TIẾP (FULLSCREEN) -->
 <div class="modal fade" id="documentViewerModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-fullscreen"> <!-- Dùng class này để tràn 100% màn hình -->
+    <div class="modal-dialog modal-fullscreen">
         <div class="modal-content border-0">
             <!-- Header Modal -->
-            <div class="modal-header text-white" style="background-color: #0f4c81; padding: 12px 24px;">
-                <h6 class="modal-title m-0 fw-bold d-flex align-items-center" id="docViewerTitle" style="font-size: 16px; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            <div class="modal-header text-white d-flex align-items-center justify-content-between" style="background-color: #0f4c81; padding: 12px 24px;">
+                
+                <!-- Tiêu đề bên trái -->
+                <h6 class="modal-title m-0 fw-bold d-flex align-items-center" id="docViewerTitle" style="font-size: 16px; max-width: 35%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                     <i class="fa-solid fa-file-lines me-2"></i>Xem tài liệu
                 </h6>
                 
-                <!-- Nút mở tab mới (Sẽ được ẩn/hiện bằng JavaScript) -->
-                <button type="button" id="btnOpenInNewTab" class="btn btn-sm btn-outline-light me-3 d-none">
-                    <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Mở tab mới
-                </button>
+                <!-- 🔴 ĐỒNG HỒ ĐẾM NGƯỢC CHÍNH GIỮA THANH HEADER IFRAME -->
+               <!-- 🔴 ĐỒNG HỒ ĐẾM NGƯỢC CHÍNH GIỮA THANH HEADER IFRAME (CHỮ MÀU VÀNG) -->
+<div id="viewerCountdownClock" class="d-none px-3 py-1 rounded-pill" style="background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.3); font-family: 'Chakra Petch', sans-serif;">
+    <i class="fa-solid fa-stopwatch fa-spin-slow me-2" style="color: #facc15;"></i>
+    <span class="fw-bold fs-6" id="lblViewerCountdownClock" style="color: #facc15; letter-spacing: 0.5px;">00:00:00</span>
+</div>
                 
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <!-- Nhóm nút bên phải -->
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" id="btnOpenInNewTab" class="btn btn-sm btn-outline-light d-none">
+                        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Mở tab mới
+                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
             </div>
             
-            <!-- Phần khung nhúng iFrame (Đổi nền sang màu xám đen để đồng bộ với màu của Google Drive) -->
             <div class="modal-body p-0" style="background-color: #202124; position: relative;">
                 <div class="w-100 h-100 d-flex align-items-center justify-content-center" id="docLoading" style="position: absolute; z-index: 0;">
                     <div class="text-center text-white opacity-75">
@@ -1684,12 +1697,12 @@
                     </div>
                 </div>
                 
-<iframe id="docViewerIframe" src="" 
-        style="width: 100%; height: 100%; border: none; position: relative; z-index: 1;" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-        allowfullscreen
-        onload="document.getElementById('docLoading').style.display='none'">
-</iframe>
+                <iframe id="docViewerIframe" src="" 
+                        style="width: 100%; height: 100%; border: none; position: relative; z-index: 1;" 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                        allowfullscreen
+                        onload="document.getElementById('docLoading').style.display='none'">
+                </iframe>
             </div>
         </div>
     </div>
