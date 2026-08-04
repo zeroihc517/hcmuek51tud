@@ -439,19 +439,28 @@ function loadDataByHocPhan(sheetName, element) {
     // Đóng sidebar trên mobile
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
     
-    $.ajax({ 
+$.ajax({ 
         url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName), 
         method: "GET", 
         dataType: "json",
         success: function(data) {
-            if (!data || data.length === 0) { 
+            // 1. Bắt lỗi nếu Google Server bị nghẽn và trả về object báo lỗi
+            if (data && data.error) {
+                $('#loadingStatus').html('<span class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi Google Server: ' + data.error + '</span>');
+                return;
+            }
+
+            // 2. Chống sập vòng lặp nếu data không phải là Mảng hợp lệ
+            if (!data || !Array.isArray(data) || data.length === 0) { 
                 currentSheetTotalRows = 1; 
                 $('#sheetTableBody').html('<tr><td colspan="5" class="text-center py-5 text-muted"><i class="fa-regular fa-folder-open fs-1 mb-3 d-block"></i>Chưa có dữ liệu.</td></tr>'); 
-                $('#loadingStatus').addClass('d-none'); $('#tableWrapper').removeClass('d-none'); $('#swipeHint').removeClass('d-none'); 
+                $('#loadingStatus').addClass('d-none'); 
+                $('#tableWrapper').removeClass('d-none'); 
+                $('#swipeHint').removeClass('d-none'); 
                 return; 
             }
             
-            currentSheetTotalRows = data.length; 
+            currentSheetTotalRows = data.length;
 
             // ==========================================
             // XỬ LÝ RIÊNG: GIAO DIỆN THÔNG BÁO (HỌC THUẬT & RÈN LUYỆN)
@@ -518,7 +527,13 @@ function loadDataByHocPhan(sheetName, element) {
                    }
                    tbCodesMap[i] = code;
                }
-
+const regexNgayDang = /ĐĂNG=((?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4})/i;
+    const regexCapNhat = /UPDATE=((?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4})/i;
+    const regexUrl = /(https?:\/\/[^\s<"]+)/g;
+    const regexUrlNgoai = /(https?:\/\/[^\s]+)/g;
+    const regexTheP = /<\/?(p|div)[^>]*>/gi;
+    const regexNbsp = /&nbsp;/gi;
+    const regexBr = /(<br\s*\/?>|\n)+/gi;
 data.forEach((row, rowIndex) => {
     if (rowIndex === 0) return; 
     
@@ -3885,14 +3900,16 @@ function saveAvatar() {
     }
 }
 // Hàm làm mới dữ liệu cho Thông báo và các Danh mục học phần
+// Hàm làm mới dữ liệu cho Thông báo và các Danh mục học phần
 function refreshCurrentCourseData() {
     if (!currentSheetName) {
         currentSheetName = 'Thông báo';
     }
     
-    // Xóa cache cục bộ của sheet hiện tại (nếu có) để bắt buộc gọi dữ liệu mới từ Apps Script
+    // Xóa cache cục bộ của sheet hiện tại trên cả RAM và SessionStorage
     if (window.boNhoDemHocPhan && window.boNhoDemHocPhan[currentSheetName]) {
         delete window.boNhoDemHocPhan[currentSheetName];
+        sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan));
     }
     
     // Gọi tải lại dữ liệu học phần/thông báo hiện tại
@@ -4546,3 +4563,65 @@ function updateCountdownUI() {
     tick();
     userCountdownInterval = setInterval(tick, 1000);
 }
+// --- CHIẾN DỊCH TẢI NGẦM TOÀN BỘ DANH MỤC (PRE-FETCHING) TỐI ƯU HÓA ---
+// --- CHIẾN DỊCH TẢI NGẦM TOÀN BỘ DANH MỤC (PRE-FETCHING) TỐI ƯU HÓA ---
+$(document).ready(function() {
+    window.boNhoDemHocPhan = JSON.parse(sessionStorage.getItem('boNhoDemHocPhan_Cache')) || {};
+
+    const originalAjax = $.ajax;
+    $.ajax = function(settings) {
+        if (settings && settings.url && settings.url.includes("action=getHocPhanData")) {
+            let match = settings.url.match(/sheetName=([^&]+)/);
+            let sheet = match ? decodeURIComponent(match[1]) : null;
+            
+            // BỘ LỌC 1: Chỉ nhả dữ liệu ra nếu nó thực sự là một Mảng (Array) hợp lệ
+            if (sheet && window.boNhoDemHocPhan[sheet] && Array.isArray(window.boNhoDemHocPhan[sheet]) && typeof isAdmin !== 'undefined' && !isAdmin) {
+                setTimeout(() => { if (settings.success) settings.success(window.boNhoDemHocPhan[sheet]); }, 10);
+                // Trả về object giả lập để jQuery không bị sập
+                return { done: function(cb){ cb(window.boNhoDemHocPhan[sheet]); return this; }, fail: function(){ return this; }, always: function(cb){ cb(); return this; } }; 
+            }
+            
+            let oldSuccess = settings.success;
+            settings.success = function(data) {
+                // BỘ LỌC 2: Chỉ lưu vào bộ nhớ nếu Google trả về đúng danh sách (Không lưu rác/lỗi)
+                if (sheet && Array.isArray(data)) {
+                    window.boNhoDemHocPhan[sheet] = data;
+                    try {
+                        sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan));
+                    } catch(e) {}
+                }
+                if (oldSuccess) oldSuccess(data);
+            };
+        }
+        return originalAjax.apply(this, arguments);
+    };
+
+    function batDauTaiNgam() {
+        if (typeof globalCategories !== 'undefined' && globalCategories.length > 0 && typeof isAdmin !== 'undefined' && !isAdmin) {
+            globalCategories.forEach((sheetName, index) => {
+                let lower = sheetName.toLowerCase();
+                if (['thông báo', 'users', 'cauhinhhocky', 'mastertkb'].includes(lower)) return;
+
+                // Chỉ tải nếu chưa có hoặc dữ liệu bị lỗi
+                if (window.boNhoDemHocPhan[sheetName] && Array.isArray(window.boNhoDemHocPhan[sheetName])) return;
+
+                setTimeout(() => {
+                    originalAjax({
+                        url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
+                        method: "GET",
+                        dataType: "json",
+                        success: function(data) {
+                            if(Array.isArray(data)) {
+                                window.boNhoDemHocPhan[sheetName] = data; 
+                                sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan));
+                            }
+                        }
+                    });
+                }, index * 2500); 
+            });
+        } else {
+            setTimeout(batDauTaiNgam, 2000);
+        }
+    }
+    setTimeout(batDauTaiNgam, 3000);
+});

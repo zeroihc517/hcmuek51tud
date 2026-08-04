@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbynauXQp-rTFED1CcyE1mrqgRxY9Sko3MvItgDxU5js4K42QEESYw-MFXwOXUhLfeNg/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxoQg5gp4Uu5opKStO4-e8yya1_5KOs-8MZCa7SZAFaL2gQZxsUXxFn9Gjq63KQLndI/exec'; 
 
      let isAdmin = localStorage.getItem('isAdmin') === 'true';
         let currentSheetName = "";
@@ -487,5 +487,16 @@ let currentSectionText = (sectionName !== "Không rõ" && sectionName !== "")
         error: function() {
             tbody.html('<tr><td colspan="6" class="text-center text-danger py-3"><i class="fa-solid fa-triangle-exclamation me-1"></i> Không thể tải dữ liệu!</td></tr>');
         }
+    });
+}
+// PROMISE: Giám sát siêu tốc dữ liệu Thông báo (Đã fix lỗi CPU)
+function waitForThongBaoData() {
+    return new Promise((resolve) => {
+        const checkInterval = setInterval(() => {
+            if (window.thongBaoData && Object.keys(window.thongBaoData).length > 0) {
+                clearInterval(checkInterval);
+                resolve(window.thongBaoData);
+            }
+        }, 200); // 200ms kiểm tra 1 lần là đủ mượt và không hại CPU
     });
 }
