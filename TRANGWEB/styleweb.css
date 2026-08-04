@@ -3042,3 +3042,14 @@ body.hide-hidden-posts .is-hidden-post {
         font-size: 13px !important;
     }
 }
+@media (max-width: 991.98px) {
+    /* Tuyệt đối ẩn khung hẹn giờ đếm ngược trên điện thoại */
+    #userCountdownWidget {
+        display: none !important;
+    }
+
+    /* Tuyệt đối ẩn đồng hồ LED hệ thống trên điện thoại */
+    .clock-led-container {
+        display: none !important;
+    }
+}
