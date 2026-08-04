@@ -694,6 +694,9 @@ function convertUrlsToLinks(text) {
 
 let isDrawing = false;
 let canvas, ctx;
+let isErasing = false; // Trạng thái dùng tẩy hay bút
+let undoStack = [];    // Mảng lưu trạng thái Undo
+let redoStack = [];    // Mảng lưu trạng thái Redo
 
 // Bật/tắt bảng vẽ
 function toggleDrawingTool() {
@@ -705,13 +708,23 @@ function toggleDrawingTool() {
     }
 }
 
+// Khởi tạo Canvas
 function initCanvas() {
     canvas = document.getElementById('sketchCanvas');
     if (!canvas) return;
     ctx = canvas.getContext('2d');
+    
+    // Đổ nền trắng cho Canvas để khi Undo/Redo hoặc tẩy không bị lỗi nền
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
+    ctx.lineJoin = 'round'; // Làm mượt góc khi vẽ nét uốn lượn
+
+    canvas.style.cursor = 'crosshair'; // Con trỏ khởi tạo mặc định là dấu thập
+    saveCanvasState(); // Lưu lại khung tranh trắng ban đầu
 
     canvas.addEventListener('mousedown', startDraw);
     canvas.addEventListener('mousemove', drawing);
@@ -719,17 +732,63 @@ function initCanvas() {
     canvas.addEventListener('mouseleave', stopDraw);
 }
 
+// Tính toán chính xác tọa độ chuột bù trừ tỷ lệ thu phóng của class w-100
+function getMousePos(canvas, evt) {
+    let rect = canvas.getBoundingClientRect();
+    let scaleX = canvas.width / rect.width;    
+    let scaleY = canvas.height / rect.height;  
+
+    return {
+        x: (evt.clientX - rect.left) * scaleX,
+        y: (evt.clientY - rect.top) * scaleY
+    };
+}
+
+// Chuyển đổi giữa Bút và Tẩy
+function setDrawMode(mode) {
+    if (mode === 'eraser') {
+        isErasing = true;
+        // Đổi con trỏ chuột thành hình tròn 20px báo hiệu đang cầm tẩy
+        let eraserCursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="9" fill="%23ffffff" stroke="%23000000" stroke-width="1"/></svg>') 10 10, auto`;
+        canvas.style.cursor = eraserCursor;
+    } else {
+        isErasing = false;
+        // Chuyển về con trỏ chuột dấu thập để vẽ
+        canvas.style.cursor = 'crosshair';
+    }
+}
+
+// Hàm lưu trạng thái Canvas vào mảng Undo
+function saveCanvasState() {
+    if (undoStack.length > 20) { 
+        undoStack.shift(); // Tối đa lưu 20 thao tác để không làm nặng web
+    }
+    undoStack.push(canvas.toDataURL());
+}
+
 function startDraw(e) {
     isDrawing = true;
+    saveCanvasState(); // Lưu trạng thái bảng vẽ trước khi bắt đầu hạ bút
+    redoStack = [];    // Khi vẽ nét mới thì mảng redo (làm lại) phải bị reset
+    
     ctx.beginPath();
-    let rect = canvas.getBoundingClientRect();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    let pos = getMousePos(canvas, e);
+    ctx.moveTo(pos.x, pos.y);
 }
 
 function drawing(e) {
     if (!isDrawing) return;
-    let rect = canvas.getBoundingClientRect();
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    
+    if (isErasing) {
+        ctx.strokeStyle = '#ffffff'; 
+        ctx.lineWidth = 20; // Nét cục tẩy to 20px
+    } else {
+        ctx.strokeStyle = '#000000'; 
+        ctx.lineWidth = 2;  // Nét bút chì 2px       
+    }
+    
+    let pos = getMousePos(canvas, e);
+    ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
 }
 
@@ -737,9 +796,46 @@ function stopDraw() {
     isDrawing = false;
 }
 
+// Hàm Hoàn tác (Undo) - Lùi lại 1 bước
+function undoCanvas() {
+    if (undoStack.length > 0) {
+        // Cất trạng thái hiện tại vào kho Redo
+        redoStack.push(canvas.toDataURL());
+        
+        // Lấy trạng thái cũ nhất từ Undo ra để phục hồi
+        let previousState = undoStack.pop();
+        restoreCanvasState(previousState);
+    }
+}
+
+// Hàm Làm lại (Redo) - Tiến tới 1 bước
+function redoCanvas() {
+    if (redoStack.length > 0) {
+        // Cất trạng thái hiện hành ngược lại vào kho Undo
+        undoStack.push(canvas.toDataURL());
+        
+        // Lấy trạng thái tiến lên từ Redo để phục hồi
+        let nextState = redoStack.pop();
+        restoreCanvasState(nextState);
+    }
+}
+
+// Hàm nạp dữ liệu ảnh lên lại Canvas
+function restoreCanvasState(base64Str) {
+    let img = new Image();
+    img.src = base64Str;
+    img.onload = function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+    };
+}
+
 function clearCanvas() {
     if (ctx && canvas) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        saveCanvasState(); // Lưu lại bước trước khi xóa phòng hờ người dùng ấn Undo
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        redoStack = [];
     }
 }
 
@@ -754,6 +850,5 @@ function insertDrawingToEditor() {
         tinymce.get('theoryEditor').insertContent(imgHtml);
     }
     
-    // Ẩn bảng vẽ sau khi chèn
     $('#drawingContainer').addClass('d-none');
 }

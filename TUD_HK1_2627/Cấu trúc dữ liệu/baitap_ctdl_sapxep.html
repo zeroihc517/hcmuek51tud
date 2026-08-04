@@ -72,6 +72,15 @@
     <div class="d-flex justify-content-between align-items-center mb-2">
         <span class="fw-bold small text-dark"><i class="fa-solid fa-paintbrush me-1"></i> Bảng vẽ phác thảo tự do:</span>
         <div class="d-flex gap-2">
+            <!-- Nút công cụ vẽ & tẩy -->
+            <button type="button" class="btn btn-sm btn-outline-dark" onclick="setDrawMode('pen')" title="Bút chì"><i class="fa-solid fa-pen"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDrawMode('eraser')" title="Cục tẩy"><i class="fa-solid fa-eraser"></i></button>
+            
+            <!-- Nút Undo / Redo -->
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="undoCanvas()" title="Hoàn tác"><i class="fa-solid fa-rotate-left"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="redoCanvas()" title="Làm lại"><i class="fa-solid fa-rotate-right"></i></button>
+            
+            <!-- Nút mặc định -->
             <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearCanvas()">Xóa sạch</button>
             <button type="button" class="btn btn-sm btn-primary" onclick="insertDrawingToEditor()">Chèn vào bài làm</button>
         </div>
