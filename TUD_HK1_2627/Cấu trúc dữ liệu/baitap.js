@@ -32,8 +32,9 @@ let langParam = urlParams.get('lang') || "cpp";
                 selector: '#theoryEditor',
                 height: 250,
                 menubar: false,
-                plugins: 'lists link table code',
-                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | table link',
+		
+                plugins: 'lists link table code image',
+                toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | table link image',
                 content_style: 'body { font-family:Inter,sans-serif; font-size:15px }',
                 setup: function(editor) {
                     editor.on('init', function() {
@@ -689,4 +690,70 @@ function convertUrlsToLinks(text) {
         // Thêm tex2jax_ignore để MathJax không đụng vào làm méo chữ
         return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="tex2jax_ignore fw-bold text-primary text-decoration-underline"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>TRUY CẬP LINK</a>${trailingChars}`;
     });
+}
+
+let isDrawing = false;
+let canvas, ctx;
+
+// Bật/tắt bảng vẽ
+function toggleDrawingTool() {
+    let container = $('#drawingContainer');
+    container.toggleClass('d-none');
+    
+    if (!container.hasClass('d-none') && !canvas) {
+        initCanvas();
+    }
+}
+
+function initCanvas() {
+    canvas = document.getElementById('sketchCanvas');
+    if (!canvas) return;
+    ctx = canvas.getContext('2d');
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', drawing);
+    canvas.addEventListener('mouseup', stopDraw);
+    canvas.addEventListener('mouseleave', stopDraw);
+}
+
+function startDraw(e) {
+    isDrawing = true;
+    ctx.beginPath();
+    let rect = canvas.getBoundingClientRect();
+    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+}
+
+function drawing(e) {
+    if (!isDrawing) return;
+    let rect = canvas.getBoundingClientRect();
+    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+    ctx.stroke();
+}
+
+function stopDraw() {
+    isDrawing = false;
+}
+
+function clearCanvas() {
+    if (ctx && canvas) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+}
+
+// Chèn hình vẽ từ canvas vào TinyMCE dưới dạng hình ảnh Base64
+function insertDrawingToEditor() {
+    if (!canvas) return;
+    let dataURL = canvas.toDataURL("image/png");
+    
+    let imgHtml = `<p class="text-center"><img src="${dataURL}" alt="Hình vẽ phác thảo" style="max-width:100%; border:1px solid #ddd; border-radius:8px;"/></p>`;
+    
+    if (typeof tinymce !== 'undefined' && tinymce.get('theoryEditor')) {
+        tinymce.get('theoryEditor').insertContent(imgHtml);
+    }
+    
+    // Ẩn bảng vẽ sau khi chèn
+    $('#drawingContainer').addClass('d-none');
 }
