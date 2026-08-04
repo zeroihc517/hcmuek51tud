@@ -1841,6 +1841,7 @@ if (syncType === 'switch_class') {
                             method: "GET", dataType: "json", cache: false,
                             success: function(data) {
                                 processTKBData(data);
+				loadDeadlines();
                                 openSubjectDetail(currentSysSubjectKey);
                                 alert("Đã chuyển lớp thành công (Trạng thái: Đã sao chép)!");
                             }
@@ -1926,6 +1927,7 @@ if (syncType === 'switch_class') {
                 method: "GET", dataType: "json", cache: false,
                 success: function(data) {
                     processTKBData(data);
+		loadDeadlines();
                     btn.html(originalText).prop('disabled', false);
                     openSubjectDetail(currentSysSubjectKey);
                     alert("Đã sao chép thành công!");
@@ -2026,6 +2028,7 @@ window.cancelPersonalCopyDirect = function(rowIndicesStr, event) {
                 method: "GET", dataType: "json", cache: false,
                 success: function(data) {
                     processTKBData(data);
+		loadDeadlines();
                     openSubjectDetail(currentSysSubjectKey);
                     alert("Đã hủy lớp sao chép cá nhân thành công!");
                 }
