@@ -11,14 +11,16 @@ function resetNavActive() {
     $('#btnNavTKB').removeClass('active');
     $('#btnNavShareCode').removeClass('active');
     $('#btnNavGPA').removeClass('active');
-    
+    $('#btnNavDatLich').removeClass('active');
     $('#tongHopSection').addClass('d-none'); 
+	$('#courseSection').addClass('d-none');
     $('#courseSection').addClass('d-none');
     $('#qaSection').addClass('d-none'); 
     $('#tkbSection').addClass('d-none');
     $('#shareCodeSection').addClass('d-none'); 
     $('#gpaSection').addClass('d-none');
     $('#profileSection').addClass('d-none'); // <--- Ẩn trang hồ sơ
+	$('#datLichSection').addClass('d-none');
 }
 
 // Thay đổi hàm loadTongHopView để không gọi lại dữ liệu nếu đã có
@@ -259,7 +261,7 @@ function renderSidebarCategories() {
         let lowerName = name.trim().toLowerCase();
         
         // Bỏ qua các sheet dữ liệu hệ thống ẩn
-if (lowerName === 'deadlines_admin' || lowerName === 'deadlines_status' || lowerName === 'tkb_admin' || lowerName === 'khaosat' || lowerName === 'weblinks_personal' || lowerName === 'registrationhistory' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'gpa_data' || lowerName === 'exercisequestions' || lowerName === 'sharecode') return;
+if (lowerName === 'deadlines_admin' || lowerName === 'deadlines_status' || lowerName === 'tkb_admin' || lowerName === 'khaosat' || lowerName === 'weblinks_personal' || lowerName === 'registrationhistory' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'datlichhen' || lowerName === 'gpa_data' || lowerName === 'exercisequestions' || lowerName === 'sharecode') return;
         if (lowerName !== 'thông báo') {
             if (lowerName === 'users' && !isAdmin) return;
             if (lowerName === 'cauhinhhocky' && !isAdmin) return; 
@@ -4630,3 +4632,163 @@ $(document).ready(function() {
     }
     setTimeout(batDauTaiNgam, 3000);
 });
+window.datLichCache = [];
+
+// 1. Hàm chuyển sang màn hình Giao diện Đặt lịch hẹn
+function loadDatLichHenView() {
+    document.title = "Đặt lịch hẹn | Học nhóm APMA Khoa Toán";
+    resetNavActive(); 
+    $('#btnNavDatLich').addClass('active'); 
+    $('#datLichSection').removeClass('d-none');
+    
+    updateSystemUrl('view', 'datlich'); // Đổi URL thành ?view=datlich
+    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
+    
+    closeFormDatLich();
+    loadDatLichData();
+}
+
+// 2. Tải dữ liệu từ Google Sheets
+function loadDatLichData() {
+    $('#datLichTableBody').html('<tr><td colspan="3" class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải danh sách...</td></tr>');
+    
+    $.ajax({
+        url: SCRIPT_URL + "?action=getDatLichHenData",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            window.datLichCache = data || [];
+            renderDatLichTable();
+        },
+        error: function() {
+            $('#datLichTableBody').html('<tr><td colspan="3" class="text-center text-danger py-5"><i class="fa-solid fa-triangle-exclamation fs-3 mb-2"></i><br>Không thể tải dữ liệu!</td></tr>');
+        }
+    });
+}
+
+// 3. Render bảng hiển thị 2 cột Tên & Tác giả người đăng
+function renderDatLichTable() {
+    let tbody = $('#datLichTableBody');
+    let data = window.datLichCache;
+
+    if (!data || data.length === 0) {
+        tbody.html('<tr><td colspan="3" class="text-center py-5 text-muted"><i class="fa-regular fa-calendar-xmark fs-2 mb-2"></i><br>Chưa có bài đăng lịch hẹn nào.</td></tr>');
+        return;
+    }
+
+    let html = '';
+    data.forEach((item, index) => {
+        let isOwnerOrAdmin = isAdmin || (currentUser && currentUser.mssv && (currentUser.mssv === item.mssv || currentUser.mssv === "51.01.108.008"));
+        
+        let actionButtons = '';
+        if (isOwnerOrAdmin) {
+            actionButtons = `
+                <button class="btn btn-sm btn-outline-warning py-1 px-3 fw-bold me-1" onclick="editDatLichPost(${index})"><i class="fa-solid fa-pen me-1"></i>Sửa</button>
+                <button class="btn btn-sm btn-outline-danger py-1 px-3 fw-bold" onclick="deleteDatLichPost('${item.rowIndex}')"><i class="fa-solid fa-trash me-1"></i>Xóa</button>
+            `;
+        } else {
+            actionButtons = `<span class="badge bg-light text-muted border"><i class="fa-solid fa-lock me-1"></i>Khóa</span>`;
+        }
+
+        html += `
+        <tr>
+            <td style="padding-left: 20px;">
+                <a href="${item.url}" target="_blank" class="fw-bold text-decoration-none fs-6" style="color: #0f4c81;" title="Bấm để mở đường link đặt lịch">
+                    <i class="fa-solid fa-arrow-up-right-from-square me-2" style="font-size: 13px;"></i>${item.title}
+                </a>
+            </td>
+            <td>
+                <span class="fw-bold text-dark">${item.authorName}</span>
+                <span class="text-muted small ms-1">(${maskMSSV(item.mssv)})</span>
+            </td>
+            <td class="text-center">${actionButtons}</td>
+        </tr>`;
+    });
+
+    tbody.html(html);
+}
+
+// 4. Các hàm Bật/Tắt Form tạo bài đăng
+function openFormDatLich() {
+    if (!currentUser || currentUser.isGuest) {
+        alert("Vui lòng đăng nhập để tạo bài đăng lịch hẹn!");
+        return;
+    }
+    $('#datLichRowIndex, #txtDatLichTen, #txtDatLichUrl').val('');
+    $('#formDatLichTitle').html('<i class="fa-solid fa-plus me-2"></i>Tạo bài đăng lịch hẹn mới');
+    $('#formDatLichArea').removeClass('d-none');
+    $('html, body').animate({ scrollTop: $('#formDatLichArea').offset().top - 80 }, 300);
+}
+
+function closeFormDatLich() {
+    $('#formDatLichArea').addClass('d-none');
+    $('#datLichRowIndex, #txtDatLichTen, #txtDatLichUrl').val('');
+}
+
+// 5. Chỉnh sửa & Lưu bài đăng
+function editDatLichPost(index) {
+    let item = window.datLichCache[index];
+    if (!item) return;
+
+    $('#datLichRowIndex').val(item.rowIndex);
+    $('#txtDatLichTen').val(item.title);
+    $('#txtDatLichUrl').val(item.url);
+    $('#formDatLichTitle').html('<i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa bài đăng lịch hẹn');
+    $('#formDatLichArea').removeClass('d-none');
+    $('html, body').animate({ scrollTop: $('#formDatLichArea').offset().top - 80 }, 300);
+}
+
+function saveDatLichPost() {
+    let rowIndex = $('#datLichRowIndex').val().trim();
+    let title = $('#txtDatLichTen').val().trim();
+    let url = $('#txtDatLichUrl').val().trim();
+
+    if (!title || !url) {
+        alert("Vui lòng nhập đầy đủ Tên bài đăng và Đường link URL!");
+        return;
+    }
+
+    if (!url.match(/^https?:\/\//i)) {
+        url = 'https://' + url;
+    }
+
+    let btn = $('#btnSaveDatLich');
+    let originalText = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang lưu...').prop('disabled', true);
+
+    let isEdit = rowIndex !== "";
+    let payload = {
+        action: isEdit ? "editDatLichHen" : "addDatLichHen",
+        rowIndex: rowIndex,
+        mssv: currentUser.mssv,
+        authorName: currentUser.name,
+        title: title,
+        url: url
+    };
+
+    postToGAS(payload, function(res) {
+        alert(res);
+        btn.html(originalText).prop('disabled', false);
+        closeFormDatLich();
+        loadDatLichData();
+    }, function() {
+        alert("Lỗi kết nối máy chủ!");
+        btn.html(originalText).prop('disabled', false);
+    });
+}
+
+// 6. Xóa bài đăng
+function deleteDatLichPost(rowIndex) {
+    if (!confirm("Bạn có chắc chắn muốn xóa bài đăng lịch hẹn này không?")) return;
+
+    postToGAS({
+        action: "deleteDatLichHen",
+        rowIndex: rowIndex,
+        mssv: currentUser.mssv
+    }, function(res) {
+        alert(res);
+        loadDatLichData();
+    }, function() {
+        alert("Lỗi kết nối khi gửi yêu cầu xóa!");
+    });
+}

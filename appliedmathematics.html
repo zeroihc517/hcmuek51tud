@@ -112,9 +112,9 @@
             <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
                 <i class="fa-solid fa-calendar"></i> Lịch học
             </button>
-	<button class="btn-course" id="btnNavDatLich" onclick="window.open('https://calendar.app.google/qCZGUa55jhPeqX726', '_blank')">
+	<button class="btn-course" id="btnNavDatLich" onclick="loadDatLichHenView()">
     <i class="fa-solid fa-user-clock"></i> Đặt lịch hẹn
-	</button>
+</button>
 
             <div id="gpaNavContainer" class="d-none">
                 <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
@@ -234,7 +234,67 @@
         </div>
     </div>
 </div>
+<div id="datLichSection" class="d-none">
+    <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="page-title"><i class="fa-solid fa-calendar-check"></i> Đặt lịch hẹn & Lịch trao đổi</div>
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
+                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
+                    onclick="loadDatLichData()">
+                <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
+            </button>
+            <button class="btn text-white fw-bold shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" onclick="openFormDatLich()">
+                <i class="fa-solid fa-plus me-1"></i> Tạo bài đăng mới
+            </button>
+        </div>
+    </header>
 
+    <!-- Khung tạo/chỉnh sửa Lịch hẹn (Ẩn mặc định) -->
+    <div id="formDatLichArea" class="data-card p-4 mb-4 d-none">
+        <h5 class="fw-bold text-primary mb-3" id="formDatLichTitle"><i class="fa-solid fa-pen-to-square me-2"></i>Tạo bài đăng lịch hẹn</h5>
+        <input type="hidden" id="datLichRowIndex" value="">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold small">Tên bài đăng / Tiêu đề lịch hẹn <span class="text-danger">*</span></label>
+                <input type="text" id="txtDatLichTen" class="form-control fw-bold" placeholder="VD: Lịch hẹn trao đổi Khóa luận tốt nghiệp">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold small">Đường dẫn URL liên kết <span class="text-danger">*</span></label>
+                <input type="text" id="txtDatLichUrl" class="form-control" placeholder="https://calendar.app.google/...">
+            </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="button" class="btn btn-light border fw-bold px-4" onclick="closeFormDatLich()">Hủy</button>
+            <button type="button" class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" onclick="saveDatLichPost()" id="btnSaveDatLich">Lưu bài đăng</button>
+        </div>
+    </div>
+
+    <!-- Bảng danh sách bài đăng lịch hẹn -->
+    <div class="data-card p-0 shadow-sm">
+        <div class="tb-header-blue d-flex justify-content-between align-items-center">
+            <span><i class="fa-solid fa-list-check me-2"></i> Danh sách bài đăng lịch hẹn hiện có</span>
+            <small class="opacity-75"><i class="fa-solid fa-lightbulb me-1"></i> Bấm vào tên bài đăng để mở link</small>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle m-0 bg-white" style="font-size: 15px;">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50%; padding-left: 20px;">Tên bài đăng</th>
+                        <th style="width: 30%;">Người đăng</th>
+                        <th style="width: 20%;" class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="datLichTableBody">
+                    <tr>
+                        <td colspan="3" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải danh sách lịch hẹn...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 <!-- MODAL 2: CHỈNH SỬA LIÊN KẾT CÁ NHÂN -->
 <div class="modal fade" id="editWebLinkModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -2167,6 +2227,7 @@ if (currentUser && currentUser.isGuest) {
         else if (viewParam === 'gpa') loadGPAView();
         else if (viewParam === 'profile') loadProfileView();
         else if (viewParam === 'qa') openQASection();
+	else if (viewParam === 'datlich') loadDatLichHenView();
         else if (viewParam === 'sharecode') {
             openShareCodeSection();
             if (categoryParam) {
