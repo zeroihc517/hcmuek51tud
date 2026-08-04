@@ -1166,24 +1166,62 @@
     </div>
 </div>
 
-            <footer class="fixed-bottom-footer">
-                <div class="footer-info-left">
-                    <span id="footerOnlineStatus" style="font-size: 12px; color: #bae6fd;">
-                        <i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh sách...
-                    </span>
-                </div>
-                <div class="d-flex align-items-center gap-2 px-3 clock-led-container" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); height: 32px; border-radius: 6px; font-family: 'Chakra Petch', sans-serif;">
-                    <span id="ledDate" class="led-date" style="font-size: 14px; color: #f3e8ff; font-weight: 600;">--/--/----</span>
-                    <div style="width: 1px; height: 14px; background-color: rgba(255, 255, 255, 0.3);"></div>
-                    <div class="d-flex align-items-center gap-1" style="font-size: 15px; font-weight: 600;">
-                        <span id="ledTimeMain" style="color: #60a5fa;">00:00</span>
-                        <span style="color: #60a5fa;">:</span>
-                        <span id="ledSeconds" style="color: #f87171;">00</span>
-                        <span id="ledAmpm" style="color: #60a5fa; font-size: 13px; margin-left: 2px; text-transform: uppercase;">--</span>
-                    </div>
-                </div>
+           <footer class="fixed-bottom-footer">
+    <!-- CỘT TRÁI: Danh sách người dùng Online -->
+    <div class="footer-info-left">
+        <span id="footerOnlineStatus" style="font-size: 12px; color: #bae6fd;">
+            <i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh sách...
+        </span>
+    </div>
 
-            </footer>
+    <!-- CỘT PHẢI: ĐỒNG HỒ ĐẾM NGƯỢC (BÊN TRÁI) + ĐỒNG HỒ HỆ THỐNG (BÊN PHẢI) -->
+    <div class="footer-info-right d-flex align-items-center gap-2">
+        
+        <!-- 🔴 CỤM ĐỒNG HỒ ĐẾM NGƯỢC CÁ NHÂN -->
+        <div class="user-countdown-footer-widget" id="userCountdownWidget">
+            <!-- Màn hình 1: KHI CHƯA ĐẶT GIỜ -->
+            <div id="countdownSetupArea" class="d-flex align-items-center gap-1">
+                <span class="countdown-label d-none d-md-inline-block">
+                    <i class="fa-solid fa-hourglass-start text-warning me-1"></i>Hẹn giờ:
+                </span>
+                <div class="d-flex align-items-center gap-1">
+                    <input type="number" id="txtCountHours" class="form-control form-control-sm countdown-input" placeholder="Giờ" min="0" max="23" title="Giờ">
+                    <span class="time-sep">:</span>
+                    <input type="number" id="txtCountMinutes" class="form-control form-control-sm countdown-input" placeholder="Phút" min="0" max="59" title="Phút">
+                    <span class="time-sep">:</span>
+                    <input type="number" id="txtCountSeconds" class="form-control form-control-sm countdown-input" placeholder="Giây" min="0" max="59" title="Giây">
+                </div>
+                <button class="btn btn-sm btn-danger btn-countdown-start ms-1" onclick="startUserCountdown()" title="Chạy đếm ngược">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+            </div>
+
+            <!-- Màn hình 2: KHI ĐANG ĐẾM NGƯỢC -->
+            <div id="countdownDisplayArea" class="d-none d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center gap-1">
+                    <i class="fa-solid fa-stopwatch text-danger fa-spin-slow"></i>
+                    <span class="fw-bold countdown-clock-text" id="lblCountdownClock">00:00:00</span>
+                </div>
+                <button class="btn btn-sm btn-outline-light btn-countdown-cancel" onclick="cancelUserCountdown()" title="Hủy đếm ngược">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 🔴 ĐỒNG HỒ HỆ THỐNG LED (NẰM NGAY BÊN PHẢI ĐỒNG HỒ ĐẾM NGƯỢC) -->
+        <div class="d-flex align-items-center gap-2 px-3 clock-led-container" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); height: 32px; border-radius: 6px; font-family: 'Chakra Petch', sans-serif;">
+            <span id="ledDate" class="led-date" style="font-size: 14px; color: #f3e8ff; font-weight: 600;">--/--/----</span>
+            <div style="width: 1px; height: 14px; background-color: rgba(255, 255, 255, 0.3);"></div>
+            <div class="d-flex align-items-center gap-1" style="font-size: 15px; font-weight: 600;">
+                <span id="ledTimeMain" style="color: #60a5fa;">00:00</span>
+                <span style="color: #60a5fa;">:</span>
+                <span id="ledSeconds" style="color: #f87171;">00</span>
+                <span id="ledAmpm" style="color: #60a5fa; font-size: 13px; margin-left: 2px; text-transform: uppercase;">--</span>
+            </div>
+        </div>
+
+    </div>
+</footer>
         </main>
     </div>
 

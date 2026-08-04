@@ -4270,3 +4270,146 @@ $(document).on('click', '.btn-course, .dropdown-item', function() {
         pingOnlineStatus(); // Gọi hàm gửi tín hiệu lên máy chủ ngay lập tức
     }, 300);
 });
+// =========================================================================
+// TÍNH NĂNG: ĐỒNG HỒ ĐẾM NGƯỢC CÁ NHÂN (CHỌN GIỜ - PHÚT - GIÂY & ĐỒNG BỘ TAB)
+// =========================================================================
+
+let userCountdownInterval = null;
+
+// 1. Kích hoạt bộ đếm ngược
+function startUserCountdown() {
+    let hrs = parseInt($('#txtCountHours').val()) || 0;
+    let mins = parseInt($('#txtCountMinutes').val()) || 0;
+    let secs = parseInt($('#txtCountSeconds').val()) || 0;
+
+    let totalSeconds = (hrs * 3600) + (mins * 60) + secs;
+
+    if (totalSeconds <= 0) {
+        alert("Vui lòng chọn thời gian hẹn giờ (Giờ, Phút hoặc Giây lớn hơn 0)!");
+        $('#txtCountMinutes').focus();
+        return;
+    }
+
+    let targetTime = Date.now() + (totalSeconds * 1000);
+    
+    // Lưu thông tin vào localStorage để đồng bộ tất cả các tab
+    localStorage.setItem('user_countdown_target', targetTime.toString());
+    localStorage.removeItem('user_countdown_triggered');
+
+    updateCountdownUI();
+}
+
+// 2. Hủy bộ đếm ngược
+function cancelUserCountdown() {
+    localStorage.removeItem('user_countdown_target');
+    localStorage.removeItem('user_countdown_triggered');
+    if (userCountdownInterval) clearInterval(userCountdownInterval);
+    
+    $('#countdownSetupArea').removeClass('d-none');
+    $('#countdownDisplayArea').addClass('d-none');
+    $('#txtCountHours, #txtCountMinutes, #txtCountSeconds').val('');
+}
+
+// 3. Cập nhật đếm ngược mỗi giây
+function updateCountdownUI() {
+    let targetStr = localStorage.getItem('user_countdown_target');
+    if (!targetStr) {
+        $('#countdownSetupArea').removeClass('d-none');
+        $('#countdownDisplayArea').addClass('d-none');
+        if (userCountdownInterval) clearInterval(userCountdownInterval);
+        return;
+    }
+
+    let targetTime = parseInt(targetStr);
+    
+    $('#countdownSetupArea').addClass('d-none');
+    $('#countdownDisplayArea').removeClass('d-none');
+
+    if (userCountdownInterval) clearInterval(userCountdownInterval);
+
+    function tick() {
+        let now = Date.now();
+        let distance = targetTime - now;
+
+        if (distance <= 0) {
+            // ĐÃ HẾT GIỜ
+            clearInterval(userCountdownInterval);
+            $('#lblCountdownClock').text("00:00:00");
+            
+            if (!localStorage.getItem('user_countdown_triggered')) {
+                localStorage.setItem('user_countdown_triggered', 'true');
+                triggerTimeUpAlert();
+            }
+            
+            setTimeout(() => {
+                cancelUserCountdown();
+            }, 3000);
+        } else {
+            // DỰ TÍNH GIỜ - PHÚT - GIÂY CÒN LẠI
+            let hours = Math.floor(distance / (1000 * 60 * 60));
+            let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            let pad = n => String(n).padStart(2, '0');
+            let displayStr = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+
+            $('#lblCountdownClock').text(displayStr);
+        }
+    }
+
+    tick();
+    userCountdownInterval = setInterval(tick, 1000);
+}
+
+// 4. Bật Bảng Thông Báo Khẩn Cấp khi Hết giờ (Chạy trên MỌI TAB đang mở)
+function triggerTimeUpAlert() {
+    // Phát âm thanh chuông báo
+    try {
+        let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+        audio.play();
+    } catch(e) {}
+
+    // Bật Toast góc màn hình
+    if (typeof alert === 'function') {
+        alert("⏰ HẾT GIỜ RỒI! Thời gian đếm ngược cá nhân của bạn đã hoàn tất.");
+    }
+
+    // Bật Modal cảnh báo nổi giữa màn hình
+    if ($('#timeUpModal').length === 0) {
+        let modalHtml = `
+        <div class="modal fade" id="timeUpModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" style="z-index: 10900;">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow-lg text-white modal-timer-expired" style="border-radius: 20px;">
+                    <div class="modal-body p-4 text-center">
+                        <div class="mb-3">
+                            <i class="fa-solid fa-bell-concierge fa-bounce" style="font-size: 55px; color: #f87171;"></i>
+                        </div>
+                        <h3 class="fw-bold mb-2 text-white">HẾT GIỜ RỒI!</h3>
+                        <p class="fs-6 mb-4 opacity-90 text-light">Thời gian đếm ngược cá nhân của bạn đã kết thúc. Hãy nghỉ ngơi hoặc chuyển sang công việc tiếp theo nhé!</p>
+                        <button type="button" class="btn btn-light fw-bold px-5 py-2 text-danger rounded-pill shadow" data-bs-dismiss="modal" onclick="$('#timeUpModal').modal('hide')">
+                            ĐÃ RÕ (ĐÓNG)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        $('body').append(modalHtml);
+    }
+    
+    $('#timeUpModal').modal('show');
+}
+
+// 5. Lắng nghe sự kiện đồng bộ nhiều tab trình duyệt
+window.addEventListener('storage', function(e) {
+    if (e.key === 'user_countdown_target') {
+        updateCountdownUI();
+    }
+    if (e.key === 'user_countdown_triggered' && e.newValue === 'true') {
+        triggerTimeUpAlert();
+    }
+});
+
+// 6. Tự động kiểm tra đếm ngược khi load lại trang/chuyển tab
+$(document).ready(function() {
+    updateCountdownUI();
+});
