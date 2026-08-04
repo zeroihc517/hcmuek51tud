@@ -4691,15 +4691,22 @@ function renderDatLichTable() {
             actionButtons = `<span class="badge bg-light text-muted border"><i class="fa-solid fa-lock me-1"></i>Khóa</span>`;
         }
 
+        // Tự động cắt 2 chữ cuối của tác giả bằng hàm có sẵn của hệ thống[cite: 1, 2]
+        let shortAuthorName = getNaturalShortName(item.authorName);
+        
+        // Chuẩn bị HTML cho Ngày cập nhật[cite: 2]
+        let timeHtml = item.updateTime ? `<div class="text-muted small mt-1"><i class="fa-solid fa-clock-rotate-left me-1"></i>Cập nhật: ${item.updateTime}</div>` : '';
+
         html += `
         <tr>
             <td style="padding-left: 20px;">
                 <a href="${item.url}" target="_blank" class="fw-bold text-decoration-none fs-6" style="color: #0f4c81;" title="Bấm để mở đường link đặt lịch">
                     <i class="fa-solid fa-arrow-up-right-from-square me-2" style="font-size: 13px;"></i>${item.title}
                 </a>
+                ${timeHtml} <!-- Đổ thời gian cập nhật vào ngay bên dưới tiêu đề -->
             </td>
             <td>
-                <span class="fw-bold text-dark">${item.authorName}</span>
+                <span class="fw-bold text-dark">${shortAuthorName}</span>
                 <span class="text-muted small ms-1">(${maskMSSV(item.mssv)})</span>
             </td>
             <td class="text-center">${actionButtons}</td>
