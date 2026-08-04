@@ -2989,6 +2989,9 @@ body.dark-mode .mini-dl-title {
 #countdownDisplayArea .fa-stopwatch {
     color: #facc15 !important;
 }
+body.hide-hidden-posts .is-hidden-post {
+    display: none !important;
+}
 
 .btn-countdown-cancel {
     height: 20px !important;

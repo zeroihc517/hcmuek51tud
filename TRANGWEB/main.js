@@ -378,9 +378,10 @@ function loadDataByHocPhan(sheetName, element) {
 
     // Hiển thị form thêm dữ liệu nếu là Admin và Đổi nhãn thông minh
     // Hiển thị form thêm dữ liệu nếu là Admin và Đổi nhãn thông minh
-    if (isAdmin) {
+   if (isAdmin) {
         $('#adminAddRowArea').removeClass('d-none');
         if (sheetName.toLowerCase() === 'thông báo') {
+            $('#btnToggleHiddenPosts').removeClass('d-none'); // HIỆN NÚT CHUYỂN ĐỔI GÓC NHÌN
             // 1. HIỂN THỊ LẠI ĐẦY ĐỦ CÁC CỘT (Hủy lệnh hide cũ)
             $('#txtCol5, #txtCol6, #txtCol7').parent().show();
             $('#insertCol5, #insertCol6, #insertCol7').parent().show();
@@ -412,6 +413,7 @@ function loadDataByHocPhan(sheetName, element) {
             $('#txtCol3').parent().attr('class', 'col-12').css('order', '7');
 
         } else {
+            $('#btnToggleHiddenPosts').addClass('d-none');
             // PHỤC HỒI GIAO DIỆN MẶC ĐỊNH KHI MỞ CÁC MÔN HỌC KHÁC
             $('#txtCol5, #txtCol6, #txtCol7').parent().show();
             $('#insertCol5, #insertCol6, #insertCol7').parent().show();
@@ -561,9 +563,9 @@ data.forEach((row, rowIndex) => {
         publishDate = new Date(year, month, day, hour, minute, 0);
         c4_display = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
     }
-
-    let now = new Date(); 
-    if (publishDate && publishDate > now && !isAdmin) {
+let now = new Date(); 
+    // Sinh viên không được vẽ bài tương lai. Admin thì vẽ hết để dùng CSS ẩn/hiện tức thì
+    if (publishDate && publishDate > now && (!isAdmin || adminShowHidden)) {
         return; 
     }
     
@@ -589,6 +591,10 @@ data.forEach((row, rowIndex) => {
     // Kiểm tra trạng thái ẩn bài
     let hideTime = extractDeadline(c7_raw);
     let isHidden = (hideTime && now.getTime() > hideTime);
+    let isFuturePost = (publishDate && publishDate > now);
+
+    // Gán class nhận diện bài ẩn/hẹn giờ
+    let hiddenClassAttr = (isHidden || isFuturePost) ? 'is-hidden-post' : '';
 
     let dlStrRegex = /(?:DEADLINE\s*=\s*|Hết hạn(?: lúc\s*)?)\d{1,2}:\d{2}\s*(?:Ngày\s*)?\d{1,2}\/\d{1,2}\/\d{2,4}/ig;
     c3 = c3.replace(dlStrRegex, '').replace(/<[^\/>][^>]*>\s*<\/[^>]+>/g, '').trim();
@@ -604,7 +610,7 @@ data.forEach((row, rowIndex) => {
     detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew, isHidden, tbCode: assignedTbCode };
 
     // Bỏ qua không vẽ ra danh sách bên ngoài nếu bài bị ẩn và không phải Admin
-    if (isHidden && !isAdmin) {
+if (isHidden && !isAdmin) {
         return; 
     }
 
@@ -631,8 +637,8 @@ data.forEach((row, rowIndex) => {
         let ec4 = escapeJS(c4); let ec5 = escapeJS(c5); let ec6 = escapeJS(c6); let ec7 = escapeJS(c7_raw);
         
         adminHtml = `
-        <div class="mt-2" onclick="event.stopPropagation();">
-            <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
+<div class="mt-2 admin-action-col d-none" onclick="event.stopPropagation();">
+    <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Lên" ...
             <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
             <button class="btn btn-sm btn-outline-success py-0 px-2 fw-bold" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button>
             <button class="btn btn-sm btn-outline-warning py-0 px-2 fw-bold" onclick="openEditRowModal(${sheetRowIndex}, '${ec1}', '${ec2}', '${ec3}', '${ec4}', '${ec5}', '${ec6}', '${ec7}')"><i class="fa-solid fa-pen"></i></button>
@@ -642,7 +648,7 @@ data.forEach((row, rowIndex) => {
 
 if (isHeThong) {
     heThongItemsHtml += `
-    <div class="border-animation mb-4">
+    <div class="border-animation mb-4 ${hiddenClassAttr}">
         <div class="alert shadow-sm border-0 position-relative" role="alert" style="background: linear-gradient(to right, #fff5f5, #ffffff);" onclick="viewThongBaoDetail(${rowIndex})">
             <div class="d-flex align-items-start gap-3">
                 <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
@@ -661,7 +667,7 @@ if (isHeThong) {
 }
 else {
         let itemHtml = `
-        <div class="tb-list-item" onclick="viewThongBaoDetail(${rowIndex})">
+       <div class="tb-list-item ${hiddenClassAttr}" onclick="viewThongBaoDetail(${rowIndex})">
             <div class="tb-icon-wrapper">
                 <i class="fa-solid fa-bell"></i>
                 ${badgeHtml}
@@ -899,7 +905,7 @@ $('#loadingStatus').addClass('d-none');
                         // Tùy chỉnh tiêu đề cột cho Danh mục Học phần
                         headHtml += `<th style="width: 105px;">STT</th><th>Nội dung bài học</th><th style="width: 250px;">Ghi chú</th>`;
                     }
-                    if (isAdmin) headHtml += `<th style="width: 180px; min-width: 180px;">Thao tác</th>`; 
+                    if (isAdmin) headHtml += `<th class="admin-action-col d-none" style="width: 180px; min-width: 180px;">Thao tác</th>`;
                     return; 
                 }
                 
@@ -1170,7 +1176,7 @@ let safeTitle = col2Html.replace(/'/g, "\\'").replace(/"/g, "&quot;");
                     let escapedCells = row.map(c => String(c || '').replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, ""));
                     while(escapedCells.length < 7) escapedCells.push(''); 
                     
-                    bodyHtml += `<td onclick="event.stopPropagation();"><div class="d-flex flex-wrap gap-1">
+                    bodyHtml += `<td class="admin-action-col d-none" onclick="event.stopPropagation();"><div class="d-flex flex-wrap gap-1">
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
                         <button class="btn btn-sm btn-outline-success py-1 px-2" title="Chèn" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button>
@@ -1312,7 +1318,17 @@ if (localStorage.getItem('isAdmin') === 'true') {
 $(document).ready(function() {
     // Lấy dữ liệu từ localStorage (lưu ý không dùng 'let' để ghi đè thẳng vào biến toàn cục)
     currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-    
+    if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
+        isAdmin = true;
+        localStorage.setItem('isAdmin', 'true');
+        
+        // Mở sẵn các nút giao diện Admin
+        $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
+        $('#btnManageCategories').removeClass('d-none');
+        $('#adminDatabaseLink').removeClass('d-none');
+        $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex');
+        $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
+    }
     if (!currentUser) {
         // 1. Tạo tài khoản Khách ảo để web có thể chạy được các tính năng xem
         currentUser = {
@@ -4800,3 +4816,32 @@ function deleteDatLichPost(rowIndex) {
         alert("Lỗi kết nối khi gửi yêu cầu xóa!");
     });
 }
+
+window.adminShowHidden = false; // Mặc định ban đầu CHỈ hiện bài công khai (Góc nhìn Sinh viên)
+
+window.toggleAdminShowHidden = function() {
+    window.adminShowHidden = !window.adminShowHidden;
+    let btn = $('#btnToggleHiddenPosts');
+
+    if (window.adminShowHidden) {
+        // Đang BẬT xem tất cả -> Nút sẽ đề nghị chuyển về xem công khai
+        $('body').removeClass('hide-hidden-posts');
+        btn.html('<i class="fa-solid fa-eye-slash me-1"></i> Ẩn');
+        btn.removeClass('btn-secondary text-white').addClass('btn-info text-dark');
+    } else {
+        // Đang TẮT (Chỉ xem công khai) -> Nút sẽ đề nghị xem tất cả
+        $('body').addClass('hide-hidden-posts');
+        btn.html('<i class="fa-solid fa-eye me-1"></i> Hiện');
+        btn.removeClass('btn-info text-dark').addClass('btn-secondary text-white');
+    }
+
+    // Tự động ẩn/hiện tiêu đề khối nếu không còn bài viết nào bên trong
+    ['HocThuat', 'RenLuyen'].forEach(type => {
+        let visibleCount = $(`#tbItems${type} .tb-list-item:visible`).length;
+        if (visibleCount === 0) {
+            $(`#tbSection${type}`).addClass('d-none');
+        } else {
+            $(`#tbSection${type}`).removeClass('d-none');
+        }
+    });
+};

@@ -24,6 +24,17 @@ function loginStudent() {
 		avatar: response.avatar || ""
             };
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
+		if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008") {
+                isAdmin = true;
+                localStorage.setItem('isAdmin', 'true');
+                
+                // Mở sẵn các nút giao diện Admin
+                $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
+                $('#btnManageCategories').removeClass('d-none');
+                $('#adminDatabaseLink').removeClass('d-none');
+                $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex');
+                $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
+            }
             localStorage.setItem('lastActiveTime', Date.now().toString());
             let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
             savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
@@ -188,7 +199,7 @@ function verifyAdmin() {
 }
 function openAdminModal() {
     if (isAdmin) {
-        // Xóa hoàn toàn lệnh if(confirm(...)) và để code thực thi luôn
+        // --- XỬ LÝ ĐĂNG XUẤT ADMIN ---
         isAdmin = false; 
         localStorage.removeItem('isAdmin'); // Xóa quyền Admin khỏi trình duyệt
         
@@ -198,7 +209,7 @@ function openAdminModal() {
         
         renderSidebarCategories(); 
         
-        if (!currentUser || currentUser.mssv !== "51.01.108.008") {
+        if (!currentUser || (currentUser.mssv !== "51.01.108.008" && currentUser.mssv !== "5101108008")) {
             $('#adminDatabaseLink').addClass('d-none');
         }
         
@@ -206,14 +217,36 @@ function openAdminModal() {
         loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
         if (!$('#qaSection').hasClass('d-none')) { loadQAData(); }
         
-        alert("Đã đăng xuất quyền Admin!"); // Bạn có thể bỏ dòng alert này luôn nếu muốn "âm thầm" đăng xuất
+        alert("Đã đăng xuất quyền Admin!");
     } else { 
-        $('#adminLoginError').addClass('d-none'); 
-        $('#txtAdminPass').val(''); 
-        $('#adminLoginModal').modal('show'); 
+        // --- XỬ LÝ ĐĂNG NHẬP ADMIN ---
+        // Tự động cấp quyền nếu là tài khoản Admin
+        if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
+            isAdmin = true;
+            localStorage.setItem('isAdmin', 'true');
+            
+            // Cập nhật giao diện sang chế độ Admin
+            $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
+            $('#btnManageCategories').removeClass('d-none');
+            $('#adminDatabaseLink').removeClass('d-none');
+            
+            // Hiện cả hai menu quản lý
+            $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex');
+            $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
+            
+            renderSidebarCategories(); 
+            if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
+            if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); } 
+            
+            alert("Tự động xác thực quyền Admin thành công!");
+        } else {
+            // Nếu là tài khoản thường thì vẫn mở Modal yêu cầu nhập mật khẩu bình thường
+            $('#adminLoginError').addClass('d-none'); 
+            $('#txtAdminPass').val(''); 
+            $('#adminLoginModal').modal('show'); 
+        }
     }
 }
-
  function renderSavedAccounts() {
             let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || []; let container = $('#savedAccountsContainer');
             if (savedAccounts.length === 0) { container.hide(); return; }

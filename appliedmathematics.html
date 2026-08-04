@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="hide-hidden-posts">
 <!-- OVERLAY LOADING TOÀN TRANG -->
 <div id="globalScreenLoader" class="d-flex flex-column align-items-center justify-content-center" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background-color: #f8fafc; z-index: 10500; transition: opacity 0.6s ease;">
     
@@ -808,48 +808,67 @@
             <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
         </button>
     </header>
-<div id="adminAddRowArea" class="instructor-card d-none mb-3" style="border-left-color: var(--accent-red); padding: 24px;">
-    <h6 class="mb-3" style="color: var(--accent-red);"><i class="fa-solid fa-bullhorn"></i> Ban Quản Trị - Thêm Nội Dung Mới</h6>
-    <div class="row g-3 mb-3">
-        <div class="col-md-2">
-            <label class="form-label fw-bold small text-muted">STT / Trạng thái (Cột 1)</label>
-            <input type="text" id="txtCol1" class="form-control" placeholder="VD: 1, 2 hoặc NEW...">
+<div id="adminAddRowArea" class="instructor-card d-none mb-3 p-0" style="border-left-color: var(--accent-red); overflow: hidden;">
+    <!-- Thanh công cụ Admin chứa 2 nút Toggle -->
+    <div class="d-flex justify-content-between align-items-center p-3 flex-wrap gap-2" style="background-color: #fff1f2;">
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-danger fw-bold shadow-sm" onclick="$('#adminAddFormContent').slideToggle();">
+                <i class="fa-solid fa-plus-circle me-1"></i> Mở / Đóng Bảng Thêm
+            </button>
+            <button class="btn btn-warning fw-bold shadow-sm text-dark" onclick="$('.admin-action-col').toggleClass('d-none');">
+                <i class="fa-solid fa-pen-ruler me-1"></i> Bật / Tắt Cột Thao Tác
+            </button>
+            <!-- NÚT MỚI: CHUYỂN ĐỔI GÓC NHÌN BÀI ẨN/HIỆN -->
+            <!-- NÚT MỚI: CHUYỂN ĐỔI GÓC NHÌN BÀI ẨN/HIỆN -->
+            <button type="button" class="btn btn-secondary fw-bold shadow-sm text-white d-none" id="btnToggleHiddenPosts" onclick="toggleAdminShowHidden();">
+                <i class="fa-solid fa-eye me-1"></i> Ẩn/Hiện
+            </button>
         </div>
-        <div class="col-md-4">
-            <label class="form-label fw-bold small text-muted">Tiêu đề (Cột 2)</label>
-            <input type="text" id="txtCol2" class="form-control" placeholder="Nhập tiêu đề học phần/thông báo...">
+        <h6 class="m-0 d-none d-md-block" style="color: var(--accent-red);"><i class="fa-solid fa-user-shield"></i> Bảng Điều Khiển Admin</h6>
+    </div>
+    
+    <!-- Khung nhập liệu (Ẩn mặc định) -->
+    <div id="adminAddFormContent" class="p-3 p-md-4" style="display: none; border-top: 1px dashed #fecaca;">
+        <div class="row g-3 mb-3">
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">STT / Trạng thái (Cột 1)</label>
+                <input type="text" id="txtCol1" class="form-control" placeholder="VD: 1, 2 hoặc NEW...">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Tiêu đề (Cột 2)</label>
+                <input type="text" id="txtCol2" class="form-control" placeholder="Nhập tiêu đề học phần/thông báo...">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">Nội dung chi tiết (Cột 3)</label>
+                <textarea id="txtCol3" class="form-control" rows="3" placeholder="Nhập nội dung chi tiết bài viết..."></textarea>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Ngày đăng (Cột 4)</label>
+                <input type="text" id="txtCol4" class="form-control" placeholder="VD: 02/07/2026">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Ngày cập nhật (Cột 5)</label>
+                <input type="text" id="txtCol5" class="form-control" placeholder="Để trống nếu chưa có">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Đường link đính kèm (Cột 6)</label>
+                <input type="text" id="txtCol6" class="form-control" placeholder="https://...">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Ghi chú (Cột 7)</label>
+                <input type="text" id="txtCol7" class="form-control" placeholder="Ghi chú thêm...">
+            </div>
         </div>
-<div class="col-md-6">
-    <label class="form-label fw-bold small text-muted">Nội dung chi tiết (Cột 3)</label>
-    <textarea id="txtCol3" class="form-control" rows="3" placeholder="Nhập nội dung chi tiết bài viết..."></textarea>
-</div>
-        <div class="col-md-3">
-            <label class="form-label fw-bold small text-muted">Ngày đăng (Cột 4)</label>
-            <input type="text" id="txtCol4" class="form-control" placeholder="VD: 02/07/2026">
-        </div>
-        <div class="col-md-3">
-            <label class="form-label fw-bold small text-muted">Ngày cập nhật (Cột 5)</label>
-            <input type="text" id="txtCol5" class="form-control" placeholder="Để trống nếu chưa có">
-        </div>
-        <div class="col-md-3">
-            <label class="form-label fw-bold small text-muted">Đường link đính kèm (Cột 6)</label>
-            <input type="text" id="txtCol6" class="form-control" placeholder="https://...">
-        </div>
-        <div class="col-md-3">
-            <label class="form-label fw-bold small text-muted">Ghi chú (Cột 7)</label>
-            <input type="text" id="txtCol7" class="form-control" placeholder="Ghi chú thêm...">
+        <div class="d-flex flex-wrap gap-2 mt-2">
+            <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="submitRowData()" id="btnSubmitRow">
+                <i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng
+            </button>
+            <button class="btn btn-outline-danger fw-bold px-4" onclick="submitRowBottomData()" id="btnSubmitRowBottom">
+                <i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng
+            </button>
         </div>
     </div>
-    <div class="d-flex flex-wrap gap-2 mt-2">
-        <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="submitRowData()" id="btnSubmitRow">
-            <i class="fa-solid fa-arrow-up-from-bracket me-2"></i> Chèn lên đầu bảng
-        </button>
-        <button class="btn btn-outline-danger fw-bold px-4" onclick="submitRowBottomData()" id="btnSubmitRowBottom">
-            <i class="fa-solid fa-arrow-down-to-bracket me-2"></i> Chèn xuống cuối bảng
-        </button>
-    </div>
 </div>
-
 <div class="modal fade" id="insertRowModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
