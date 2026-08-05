@@ -711,30 +711,83 @@ function toggleDrawingTool() {
     }
 }
 
-// Khởi tạo Canvas
+let resizeObserver = null; // Khai báo thêm biến này ở đầu file hoặc ngoài hàm
+
 function initCanvas() {
     canvas = document.getElementById('sketchCanvas');
     if (!canvas) return;
     ctx = canvas.getContext('2d');
     
-    // Đổ nền trắng cho Canvas để khi Undo/Redo hoặc tẩy không bị lỗi nền
+    // Đổ nền trắng ban đầu (phải thiết lập width/height khớp với thẻ bao bọc)
+    let wrapper = document.getElementById('canvasWrapper');
+    if (wrapper) {
+        canvas.width = wrapper.clientWidth;
+        canvas.height = wrapper.clientHeight;
+    }
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.strokeStyle = '#000000';
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-    ctx.lineJoin = 'round'; // Làm mượt góc khi vẽ nét uốn lượn
+    ctx.lineJoin = 'round';
 
-    canvas.style.cursor = 'crosshair'; // Con trỏ khởi tạo mặc định là dấu thập
-    saveCanvasState(); // Lưu lại khung tranh trắng ban đầu
+    // Đổi con trỏ chuột thành dấu chấm đen
+    let penCursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="3" fill="%23000000"/></svg>') 10 10, auto`;
+    canvas.style.cursor = penCursor;
+    
+    saveCanvasState();
+
+    // --- ĐOẠN THEO DÕI SỰ KIỆN KÉO GÓC BẢNG VẼ ---
+    if (wrapper && !resizeObserver) {
+        resizeObserver = new ResizeObserver(entries => {
+            for (let entry of entries) {
+                let newWidth = Math.round(entry.contentRect.width);
+                let newHeight = Math.round(entry.contentRect.height);
+                
+                // Tránh chạy lúc mới khởi tạo, chỉ chạy khi người dùng thực sự kéo thay đổi kích thước
+                if (canvas.width !== newWidth || canvas.height !== newHeight) {
+                    
+                    // 1. Lưu lại hình ảnh hiện hành dạng Base64
+                    let currentData = canvas.toDataURL();
+                    let img = new Image();
+                    img.src = currentData;
+                    
+                    img.onload = function() {
+                        // 2. Thay đổi size vật lý của Canvas (bước này làm canvas bị tẩy trắng hoàn toàn)
+                        canvas.width = newWidth;
+                        canvas.height = newHeight;
+                        
+                        // 3. Phục hồi nền trắng
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        // 4. In lại hình ảnh cũ đè lên
+                        ctx.drawImage(img, 0, 0);
+                        
+                        // 5. Setup lại cấu hình bút (bị mất do ở bước 2)
+                        ctx.lineCap = 'round';
+                        ctx.lineJoin = 'round';
+                        if (isErasing) {
+                            ctx.strokeStyle = '#ffffff'; 
+                            ctx.lineWidth = 20;
+                        } else {
+                            ctx.strokeStyle = '#000000'; 
+                            ctx.lineWidth = 2;
+                        }
+                    };
+                }
+            }
+        });
+        resizeObserver.observe(wrapper);
+    }
+    // ---------------------------------------------
 
     canvas.addEventListener('mousedown', startDraw);
     canvas.addEventListener('mousemove', drawing);
     canvas.addEventListener('mouseup', stopDraw);
     canvas.addEventListener('mouseleave', stopDraw);
 }
-
 // Tính toán chính xác tọa độ chuột bù trừ tỷ lệ thu phóng của class w-100
 function getMousePos(canvas, evt) {
     let rect = canvas.getBoundingClientRect();
@@ -748,6 +801,7 @@ function getMousePos(canvas, evt) {
 }
 
 // Chuyển đổi giữa Bút và Tẩy
+// Chuyển đổi giữa Bút và Tẩy
 function setDrawMode(mode) {
     if (mode === 'eraser') {
         isErasing = true;
@@ -756,8 +810,9 @@ function setDrawMode(mode) {
         canvas.style.cursor = eraserCursor;
     } else {
         isErasing = false;
-        // Chuyển về con trỏ chuột dấu thập để vẽ
-        canvas.style.cursor = 'crosshair';
+        // Chuyển về con trỏ chuột dấu chấm đen
+        let penCursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="3" fill="%23000000"/></svg>') 10 10, auto`;
+        canvas.style.cursor = penCursor;
     }
 }
 
@@ -895,4 +950,39 @@ function checkCompletedQuestions() {
             });
         }
     });
+}
+// Hàm mở rộng chiều dài bảng vẽ
+function expandCanvas() {
+    if (!canvas || !ctx) return;
+    
+    // Lưu trạng thái trước khi mở rộng vào Undo (để người dùng có thể quay lại)
+    saveCanvasState();
+
+    // Lấy nội dung hiện tại của bảng vẽ
+    let currentData = canvas.toDataURL();
+    let img = new Image();
+    img.src = currentData;
+    
+    img.onload = function() {
+        // Tăng chiều cao thêm 200px (bạn có thể thay đổi con số này)
+        canvas.height += 200;
+        
+        // Bôi trắng toàn bộ nền với kích thước mới
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Vẽ lại hình ảnh cũ đè lên
+        ctx.drawImage(img, 0, 0);
+        
+        // Phục hồi lại các thiết lập của nét vẽ (vì bị reset khi đổi size)
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        if (isErasing) {
+            ctx.strokeStyle = '#ffffff'; 
+            ctx.lineWidth = 20;
+        } else {
+            ctx.strokeStyle = '#000000'; 
+            ctx.lineWidth = 2;
+        }
+    };
 }

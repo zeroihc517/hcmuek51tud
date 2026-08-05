@@ -85,7 +85,11 @@
             <button type="button" class="btn btn-sm btn-primary" onclick="insertDrawingToEditor()">Chèn vào bài làm</button>
         </div>
     </div>
-    <canvas id="sketchCanvas" width="600" height="250" class="w-100 bg-white border rounded shadow-sm" style="cursor: crosshair;"></canvas>
+<!-- Bọc canvas vào thẻ div có thuộc tính resize để kéo tự do -->
+<div id="canvasWrapper" class="shadow-sm rounded" style="resize: vertical; overflow: hidden; min-height: 250px; border: 1px solid #cbd5e1; background: #ffffff; position: relative;">
+    <!-- Bỏ width, height cố định ở đây để canvas tự động co giãn theo thẻ div bọc ngoài -->
+    <canvas id="sketchCanvas" style="cursor: crosshair; display: block; width: 100%; height: 100%;"></canvas>
+</div>
 </div>
 
                     <div class="card-body p-4 d-flex flex-column justify-content-between">
