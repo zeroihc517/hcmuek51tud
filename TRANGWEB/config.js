@@ -41,11 +41,19 @@
     let c2_val = $('#txtCol2').val().trim();
     let c3_val = tinymce.get('txtCol3').getContent().trim();
     
-    // Tự động hứng dữ liệu dựa theo vị trí đã đổi
     let col2 = currentSheetName.toLowerCase() === 'thông báo' ? c2_val : c3_val;
     let col3 = currentSheetName.toLowerCase() === 'thông báo' ? c3_val : c2_val;
     
-    let col4 = $('#txtCol4').val().trim(); let col5 = $('#txtCol5').val().trim(); let col6 = $('#txtCol6').val().trim(); let col7 = $('#txtCol7').val().trim();
+    // --- CODE MỚI: TỰ ĐỘNG TẠO NGÀY ĐĂNG NẾU ĐỂ TRỐNG ---
+    let col4 = $('#txtCol4').val().trim(); 
+    if (currentSheetName.toLowerCase() === 'thông báo' && col4 === '') {
+        let now = new Date();
+        let pad = (n) => String(n).padStart(2, '0');
+        col4 = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    }
+    // ----------------------------------------------------
+    
+    let col5 = $('#txtCol5').val().trim(); let col6 = $('#txtCol6').val().trim(); let col7 = $('#txtCol7').val().trim();
     tinymce.get('txtCol3').setContent('');
     if (!col1 && !col2) { alert("Vui lòng nhập nội dung!"); return; }
     
@@ -63,7 +71,16 @@ function submitRowBottomData() {
     let col2 = currentSheetName.toLowerCase() === 'thông báo' ? c2_val : c3_val;
     let col3 = currentSheetName.toLowerCase() === 'thông báo' ? c3_val : c2_val;
     
-    let col4 = $('#txtCol4').val().trim(); let col5 = $('#txtCol5').val().trim(); let col6 = $('#txtCol6').val().trim(); let col7 = $('#txtCol7').val().trim();
+    // --- CODE MỚI: TỰ ĐỘNG TẠO NGÀY ĐĂNG NẾU ĐỂ TRỐNG ---
+    let col4 = $('#txtCol4').val().trim(); 
+    if (currentSheetName.toLowerCase() === 'thông báo' && col4 === '') {
+        let now = new Date();
+        let pad = (n) => String(n).padStart(2, '0');
+        col4 = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    }
+    // ----------------------------------------------------
+    
+    let col5 = $('#txtCol5').val().trim(); let col6 = $('#txtCol6').val().trim(); let col7 = $('#txtCol7').val().trim();
     tinymce.get('txtCol3').setContent('');
     if (!col1 && !col2) { alert("Vui lòng nhập nội dung!"); return; }
     
@@ -97,13 +114,26 @@ function saveInsertRow() {
     let c2 = currentSheetName.toLowerCase() === 'thông báo' ? c2_input : c3_input;
     let c3 = currentSheetName.toLowerCase() === 'thông báo' ? c3_input : c2_input;
     
-    let c4 = $('#insertCol4').val().trim(); let c5 = $('#insertCol5').val().trim(); let c6 = $('#insertCol6').val().trim(); let c7 = $('#insertCol7').val().trim();
+    // --- CODE MỚI: TỰ ĐỘNG TẠO NGÀY ĐĂNG NẾU ĐỂ TRỐNG ---
+    let c4 = $('#insertCol4').val().trim(); 
+    if (currentSheetName.toLowerCase() === 'thông báo' && c4 === '') {
+        let now = new Date();
+        let pad = (n) => String(n).padStart(2, '0');
+        c4 = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    }
+    // ----------------------------------------------------
+    
+    let c5 = $('#insertCol5').val().trim(); let c6 = $('#insertCol6').val().trim(); let c7 = $('#insertCol7').val().trim();
     if (!c1 && !c2) { alert("Vui lòng nhập nội dung!"); return; }
     
     let btn = $('#btnSaveInsertRow'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
-    postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: insertRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4, col5: c5, col6: c6, col7: c7 }, res => { alert(res); btn.html('Chèn nội dung').prop('disabled', false); $('#insertRowModal').modal('hide'); loadDataByHocPhan(currentSheetName); });
+    postToGAS({ action: "insertSheetRowAfter", sheetName: currentSheetName, rowIndex: insertRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4, col5: c5, col6: c6, col7: c7 }, res => { 
+        alert(res); 
+        btn.html('Chèn nội dung').prop('disabled', false); 
+        $('#insertRowModal').modal('hide'); 
+        loadDataByHocPhan(currentSheetName); 
+    });
 }
-
 let editRowIndexVar = -1;
 function openEditRowModal(sheetRowIndex, c1, c2, c3, c4, c5, c6, c7) { 
     editRowIndexVar = sheetRowIndex; 
@@ -134,11 +164,29 @@ function saveEditRow() {
     let c2 = currentSheetName.toLowerCase() === 'thông báo' ? c2_input : c3_input;
     let c3 = currentSheetName.toLowerCase() === 'thông báo' ? c3_input : c2_input;
     
-    let c4 = $('#editCol4').val(); let c5 = $('#editCol5').val(); let c6 = $('#editCol6').val(); let c7 = $('#editCol7').val();
+    let c4 = $('#editCol4').val(); 
+    
+    // --- CODE MỚI: TỰ ĐỘNG TẠO NGÀY CẬP NHẬT ---
+    let c5 = $('#editCol5').val(); 
+    if (currentSheetName.toLowerCase() === 'thông báo') {
+        let now = new Date();
+        let pad = (n) => String(n).padStart(2, '0');
+        // Định dạng HH:MM DD/MM/YYYY
+        c5 = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    }
+    // -------------------------------------------
+    
+    let c6 = $('#editCol6').val(); let c7 = $('#editCol7').val();
     
     let btn = $('#btnSaveEditRow'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
-    postToGAS({ action: "editSheetRow", sheetName: currentSheetName, rowIndex: editRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4, col5: c5, col6: c6, col7: c7 }, res => { alert(res); btn.html('Lưu thay đổi').prop('disabled', false); $('#editRowModal').modal('hide'); loadDataByHocPhan(currentSheetName); });
+    postToGAS({ action: "editSheetRow", sheetName: currentSheetName, rowIndex: editRowIndexVar, col1: c1, col2: c2, col3: c3, col4: c4, col5: c5, col6: c6, col7: c7 }, res => { 
+        alert(res); 
+        btn.html('Lưu thay đổi').prop('disabled', false); 
+        $('#editRowModal').modal('hide'); 
+        loadDataByHocPhan(currentSheetName); 
+    });
 }
+
         function deleteRowItem(sheetRowIndex) { if(!confirm("Bạn có chắc chắn muốn xóa dữ liệu này? Hành động này không thể hoàn tác.")) return; postToGAS({ action: "deleteSheetRow", sheetName: currentSheetName, rowIndex: sheetRowIndex }, res => { alert(res); loadDataByHocPhan(currentSheetName); }); }
         function moveRowItem(sheetRowIndex, direction) { postToGAS({ action: "moveSheetRow", sheetName: currentSheetName, rowIndex: sheetRowIndex, direction: direction }, function(res) { if(res.includes("Lỗi") || res.includes("Đã ở")) alert(res); else loadDataByHocPhan(currentSheetName); }, function() { alert("Lỗi khi di chuyển!"); }); }
         
