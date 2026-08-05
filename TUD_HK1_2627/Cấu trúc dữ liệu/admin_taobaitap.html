@@ -78,21 +78,32 @@
                         <i class="fa-solid fa-pen-to-square me-2"></i>1. Nhập thông tin đề bài
                     </div>
                     <div class="card-body p-4">
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="fw-bold mb-1">Môn học</label>
-                                <input type="text" id="txtCourse" class="form-control fw-bold text-primary" value="Minigame CTDL đề 01" oninput="updatePreview()">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="fw-bold mb-1">Mã bài (VD: B08)</label>
-                                <input type="text" id="txtMaBai" class="form-control fw-bold text-danger" placeholder="B08" oninput="updatePreview()">
-                            </div>
-                        </div>
+                        <!-- Thêm datalist ẩn để lưu trữ danh sách gợi ý -->
+<datalist id="courseList"></datalist>
+<datalist id="titleList"></datalist>
 
-                        <div class="mb-3">
-                            <label class="fw-bold mb-1">Tiêu đề bài học (Hiển thị ở Tabs)</label>
-                            <input type="text" id="txtTabTitle" class="form-control" placeholder="VD: Câu 8. Thuật toán Tìm kiếm nhị phân" oninput="updatePreview()">
-                        </div>
+<div class="row g-3 mb-3">
+    <div class="col-md-6">
+        <label class="fw-bold mb-1">Môn học</label>
+        <!-- Bổ sung thuộc tính list="courseList" -->
+        <input type="text" id="txtCourse" list="courseList" class="form-control fw-bold text-primary" value="Minigame CTDL đề 01" oninput="updatePreview()">
+    </div>
+    <div class="col-md-6">
+        <label class="fw-bold mb-1">Mã bài (VD: B08)</label>
+        <!-- Thêm hàm checkMaBai() vào sự kiện oninput -->
+        <input type="text" id="txtMaBai" class="form-control fw-bold text-danger" placeholder="B08" oninput="checkMaBai(); updatePreview()">
+        <!-- Khung cảnh báo trùng mã bài (Mặc định ẩn) -->
+        <div id="maBaiWarning" class="text-danger small fw-bold mt-1 d-none">
+            <i class="fa-solid fa-triangle-exclamation"></i> Mã bài này đã tồn tại (Dữ liệu sẽ bị ghi đè/trùng)!
+        </div>
+    </div>
+</div>
+
+<div class="mb-3">
+    <label class="fw-bold mb-1">Tiêu đề bài học (Hiển thị ở Tabs)</label>
+    <!-- Bổ sung thuộc tính list="titleList" -->
+    <input type="text" id="txtTabTitle" list="titleList" class="form-control" placeholder="VD: Câu 8. Thuật toán Tìm kiếm nhị phân" oninput="updatePreview()">
+</div>
 
                         <div class="mb-3">
                             <label class="fw-bold mb-1">Câu dẫn đề bài</label>
@@ -107,10 +118,10 @@
                             <div id="codeEditor" style="height: 220px; border: 1px solid #cbd5e1; border-radius: 8px;"></div>
                         </div>
 
-                        <div class="mb-3">
-                            <label class="fw-bold mb-1 text-primary"><i class="fa-solid fa-list-ol me-1"></i> Các câu hỏi phụ (Có dọn dẹp rác LaTeX)</label>
-                            <textarea id="txtSubQuestions" class="form-control font-monospace" rows="5" placeholder="\item[a)] \textbf{(0,75 điểm)...}&#10;\item[b)] ..." oninput="updatePreview()"></textarea>
-                        </div>
+                       <div class="mb-3">
+    <label class="fw-bold mb-1 text-primary"><i class="fa-solid fa-list-ol me-1"></i> Các câu hỏi phụ (Có dọn dẹp rác LaTeX)</label>
+    <textarea id="txtSubQuestions" class="form-control font-monospace" rows="5" placeholder="\item[a)] \textbf{(0,75 điểm)...}&#10;\item[b)] ..." oninput="updatePreview()">Các bạn hãy https://test.upcoder.xyz/index.php/problems/viewall này và nhập mã bài <mark>XXX</mark> để thực hiện. Sau khi bài làm đạt đúng toàn bộ test, nhớ copy code và nộp vào phần bài làm để lưu lại. Việc này sẽ giúp các bạn vẫn có code để xem hoặc chỉnh sửa sau này, phòng trường hợp website Upcoder gặp sự cố hoặc không truy cập lại được.</textarea>
+</div>
 
                         <button class="btn text-white fw-bold w-100 py-3 mt-2" style="background-color: #e61d4a; font-size: 16px; border-radius: 12px;" onclick="submitNewQuestion()" id="btnSubmit">
                             <i class="fa-solid fa-cloud-arrow-up me-2"></i> Lưu và Phát hành câu hỏi
@@ -183,19 +194,24 @@
         };
 
         let editor;
-        $(document).ready(function() {
-            editor = ace.edit("codeEditor");
-            editor.setTheme("ace/theme/textmate");
-            editor.session.setMode("ace/mode/c_cpp");
-            editor.setOptions({ fontSize: "15px", showPrintMargin: false });
+let existingQuestions = []; // Mảng chứa dữ liệu bài tập đã tồn tại
 
-            // Lắng nghe sự thay đổi code để cập nhật xem trước ngay lập tức
-            editor.session.on('change', function() {
-                updatePreview();
-            });
+$(document).ready(function() {
+    editor = ace.edit("codeEditor");
+    editor.setTheme("ace/theme/textmate");
+    editor.session.setMode("ace/mode/c_cpp");
+    editor.setOptions({ fontSize: "15px", showPrintMargin: false });
 
-            updatePreview();
-        });
+    // Lắng nghe sự thay đổi code để cập nhật xem trước ngay lập tức
+    editor.session.on('change', function() {
+        updatePreview();
+    });
+
+    updatePreview();
+    
+    // Tải dữ liệu để tạo gợi ý ngay khi mở trang Admin
+    loadExistingData();
+});
 
         // HÀM TẠO NỘI DUNG HTML ĐÃ TỐI ƯU & DỌN DẸP LATEX
         function buildGeneratedHtml() {
@@ -372,6 +388,71 @@
                 }
             });
         }
-    </script>
+// HÀM TẢI DỮ LIỆU BÀI TẬP HIỆN CÓ ĐỂ TẠO GỢI Ý
+function loadExistingData() {
+    $.ajax({
+        url: SCRIPT_URL + "?action=getExerciseQuestions",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            if(data && data.length > 0) {
+                existingQuestions = data;
+                let courses = new Set();
+                let titles = new Set();
+
+                // Trích xuất các Môn học và Tiêu đề không trùng lặp
+                data.forEach(item => {
+                    if(item.course) courses.add(item.course.trim());
+                    if(item.title) titles.add(item.title.trim());
+                });
+
+                // Nạp vào Datalist Môn học
+                let courseHtml = "";
+                courses.forEach(c => courseHtml += `<option value="${c}">`);
+                $('#courseList').html(courseHtml);
+
+                // Nạp vào Datalist Tiêu đề
+                let titleHtml = "";
+                titles.forEach(t => titleHtml += `<option value="${t}">`);
+                $('#titleList').html(titleHtml);
+                
+                // Chạy kiểm tra mã bài luôn phòng trường hợp trình duyệt tự điền
+                checkMaBai();
+            }
+        }
+    });
+}
+
+// HÀM KIỂM TRA TRÙNG LẶP MÃ BÀI (LIVE CHECKING)
+// HÀM KIỂM TRA TRÙNG LẶP MÃ BÀI (LIVE CHECKING - CHUẨN XÁC 100%)
+function checkMaBai() {
+    let currentMaBai = $('#txtMaBai').val().trim();
+    
+    // Nếu chưa nhập gì thì ẩn cảnh báo
+    if(!currentMaBai) {
+        $('#maBaiWarning').addClass('d-none');
+        $('#txtMaBai').removeClass('border-danger bg-danger-subtle');
+        return;
+    }
+    
+    // Ép kiểu dữ liệu về Chuỗi (String) trước khi so sánh ===
+    let exists = existingQuestions.some(q => {
+        if (q.maBai !== undefined && q.maBai !== null) {
+            return String(q.maBai).trim() === currentMaBai;
+        }
+        return false;
+    });
+    
+    if(exists) {
+        // Hiện cảnh báo và đổi màu ô input sang đỏ nhạt
+        $('#maBaiWarning').removeClass('d-none');
+        $('#txtMaBai').addClass('border-danger bg-danger-subtle');
+    } else {
+        // Ẩn cảnh báo, trả ô input về bình thường
+        $('#maBaiWarning').addClass('d-none');
+        $('#txtMaBai').removeClass('border-danger bg-danger-subtle');
+    }
+}
+   </script>
 </body>
 </html>
