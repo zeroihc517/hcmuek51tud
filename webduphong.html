@@ -225,7 +225,7 @@
         <button class="btn btn-light fw-bold shadow-sm me-3" onclick="$('#datLichSection').addClass('d-none'); openShareCodeSection();">
             <i class="fa-solid fa-arrow-left"></i> Trở lại
         </button>
-        <div class="page-title m-0"><i class="fa-solid fa-calendar-check"></i> Đặt lịch hẹn & Lịch trao đổi</div>
+        <div class="page-title m-0"><i class="fa-solid fa-calendar-check"></i> Đặt lịch hẹn & Chia sẻ thông tin</div>
     </div>
     <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
@@ -240,17 +240,30 @@
 </header>
 
     <!-- Khung tạo/chỉnh sửa Lịch hẹn (Ẩn mặc định) -->
+    <!-- Khung tạo/chỉnh sửa Lịch hẹn (Ẩn mặc định) -->
     <div id="formDatLichArea" class="data-card p-4 mb-4 d-none">
-        <h5 class="fw-bold text-primary mb-3" id="formDatLichTitle"><i class="fa-solid fa-pen-to-square me-2"></i>Tạo bài đăng lịch hẹn</h5>
+        <h5 class="fw-bold text-primary mb-3" id="formDatLichTitle"><i class="fa-solid fa-pen-to-square me-2"></i>Tạo bài đăng mới</h5>
         <input type="hidden" id="datLichRowIndex" value="">
         <div class="row g-3">
-            <div class="col-md-6">
-                <label class="form-label fw-bold small">Tên bài đăng / Tiêu đề lịch hẹn <span class="text-danger">*</span></label>
-                <input type="text" id="txtDatLichTen" class="form-control fw-bold" placeholder="VD: Lịch hẹn trao đổi Khóa luận tốt nghiệp">
+            <div class="col-md-4">
+                <label class="form-label fw-bold small">Tên bài đăng / Tiêu đề <span class="text-danger">*</span></label>
+                <input type="text" id="txtDatLichTen" class="form-control fw-bold" placeholder="VD: Trao đổi bài tập lớn...">
             </div>
-            <div class="col-md-6">
+            <!-- CỘT NỘI DUNG MỚI ĐƯỢC THÊM VÀO -->
+            <div class="col-md-4">
+                <label class="form-label fw-bold small">Nội dung <span class="text-danger">*</span></label>
+                <select id="selDatLichNoiDung" class="form-select fw-bold border-primary-subtle" onchange="toggleDatLichKhac()">
+                    <option value="Đặt lịch hẹn">Đặt lịch hẹn</option>
+                    <option value="Chia sẻ Minh Chứng Rèn luyện">Chia sẻ Minh Chứng Rèn luyện</option>
+                    <option value="Chia sẻ Hoạt động Rèn luyện">Chia sẻ Hoạt động Rèn luyện</option>
+                    <option value="Khác">Chia sẻ thông tin khác...</option>
+                </select>
+                <!-- Ô nhập text sẽ hiện ra nếu chọn "Khác" -->
+                <input type="text" id="txtDatLichNoiDungKhac" class="form-control mt-2 d-none" placeholder="Ghi rõ nội dung...">
+            </div>
+            <div class="col-md-4">
                 <label class="form-label fw-bold small">Đường dẫn URL liên kết <span class="text-danger">*</span></label>
-                <input type="text" id="txtDatLichUrl" class="form-control" placeholder="https://calendar.app.google/...">
+                <input type="text" id="txtDatLichUrl" class="form-control" placeholder="https://...">
             </div>
         </div>
         <div class="d-flex justify-content-end gap-2 mt-3">
@@ -260,24 +273,45 @@
     </div>
 
     <!-- Bảng danh sách bài đăng lịch hẹn -->
+   <!-- Bảng danh sách bài đăng lịch hẹn -->
     <div class="data-card p-0 shadow-sm">
-        <div class="tb-header-blue d-flex justify-content-between align-items-center">
-            <span><i class="fa-solid fa-list-check me-2"></i> Danh sách bài đăng lịch hẹn hiện có</span>
-            <small class="opacity-75"><i class="fa-solid fa-lightbulb me-1"></i> Bấm vào tên bài đăng để mở link</small>
+        <div class="tb-header-blue d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <span><i class="fa-solid fa-list-check me-2"></i> Danh sách bài đăng lịch hẹn</span>
+            
+            <!-- BỘ LỌC VÀ TÌM KIẾM ĐƯỢC THÊM VÀO ĐÂY -->
+            <div class="d-flex gap-2">
+                <select id="filterDatLichNoiDung" class="form-select form-select-sm border-0 shadow-sm" style="width: auto; border-radius: 6px; font-weight: 600; color: #0f4c81;" onchange="searchDatLich()">
+                    <option value="">-- Tất cả nội dung --</option>
+                    <option value="Đặt lịch hẹn">Đặt lịch hẹn</option>
+                    <option value="Chia sẻ Minh Chứng Rèn luyện">Chia sẻ Minh Chứng Rèn luyện</option>
+                    <option value="Chia sẻ Hoạt động Rèn luyện">Chia sẻ Hoạt động Rèn luyện</option>
+                    <option value="Khác">Các nội dung Khác</option>
+                </select>
+                
+                <div class="input-group input-group-sm shadow-sm" style="width: 250px;">
+                    <input type="text" id="txtSearchDatLich" class="form-control border-0" placeholder="Tìm tên bài, người đăng..." onkeyup="searchDatLich()" style="border-radius: 6px 0 0 6px;">
+                    <button class="btn text-white fw-bold" onclick="searchDatLich()" style="background: #e61d4a; border: none; border-radius: 0 6px 6px 0;">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+            </div>
         </div>
+        
         <div class="table-responsive">
+            <!-- (Giữ nguyên thẻ table bên dưới như cũ) -->
             <table class="table table-hover align-middle m-0 bg-white" style="font-size: 15px;">
                 <thead class="table-light">
                     <tr>
-                        <th style="width: 50%; padding-left: 20px;">Tên bài đăng</th>
-                        <th style="width: 30%;">Người đăng</th>
-                        <th style="width: 20%;" class="text-center">Thao tác</th>
+                        <th style="width: 35%; padding-left: 20px;">Tên bài đăng</th>
+                        <th style="width: 25%;">Nội dung</th> <!-- TIÊU ĐỀ CỘT MỚI -->
+                        <th style="width: 25%;">Người đăng</th>
+                        <th style="width: 15%;" class="text-center">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody id="datLichTableBody">
                     <tr>
-                        <td colspan="3" class="text-center py-5 text-muted">
-                            <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải danh sách lịch hẹn...
+                        <td colspan="4" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải danh sách...
                         </td>
                     </tr>
                 </tbody>
@@ -1101,8 +1135,8 @@
             <i class="fa-solid fa-calendar-check" style="color: #8b5cf6;"></i>
         </div>
         <div class="card-text-wrapper">
-            <h5>Đặt lịch hẹn</h5>
-            <p class="card-desc">Lịch trao đổi bài tập</p>
+            <h5>Đặt lịch hẹn/Chia sẻ thông tin</h5>
+            <p class="card-desc">Cùng nhau chia sẻ thông tin, đặt lịch hẹn học tập...</p>
         </div>
     </div>
 </div>

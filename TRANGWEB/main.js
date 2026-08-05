@@ -4694,13 +4694,22 @@ function loadDatLichData() {
     });
 }
 
-// 3. Render bảng hiển thị 2 cột Tên & Tác giả người đăng
+// Thêm hàm bật/tắt ô nhập tay nội dung "Khác"
+window.toggleDatLichKhac = function() {
+    if ($('#selDatLichNoiDung').val() === 'Khác') {
+        $('#txtDatLichNoiDungKhac').removeClass('d-none').focus();
+    } else {
+        $('#txtDatLichNoiDungKhac').addClass('d-none').val('');
+    }
+};
+
+// Cập nhật hàm Render Bảng
 function renderDatLichTable() {
     let tbody = $('#datLichTableBody');
     let data = window.datLichCache;
 
     if (!data || data.length === 0) {
-        tbody.html('<tr><td colspan="3" class="text-center py-5 text-muted"><i class="fa-regular fa-calendar-xmark fs-2 mb-2"></i><br>Chưa có bài đăng lịch hẹn nào.</td></tr>');
+        tbody.html('<tr><td colspan="4" class="text-center py-5 text-muted"><i class="fa-regular fa-calendar-xmark fs-2 mb-2"></i><br>Chưa có bài đăng nào.</td></tr>');
         return;
     }
 
@@ -4718,11 +4727,9 @@ function renderDatLichTable() {
             actionButtons = `<span class="badge bg-light text-muted border"><i class="fa-solid fa-lock me-1"></i>Khóa</span>`;
         }
 
-        // Tự động cắt 2 chữ cuối của tác giả bằng hàm có sẵn của hệ thống[cite: 1, 2]
         let shortAuthorName = getNaturalShortName(item.authorName);
-        
-        // Chuẩn bị HTML cho Ngày cập nhật[cite: 2]
         let timeHtml = item.updateTime ? `<div class="text-muted small mt-1"><i class="fa-solid fa-clock-rotate-left me-1"></i>Cập nhật: ${item.updateTime}</div>` : '';
+        let noiDung = item.noiDung || "Đặt lịch hẹn";
 
         html += `
         <tr>
@@ -4730,7 +4737,10 @@ function renderDatLichTable() {
                 <a href="${item.url}" target="_blank" class="fw-bold text-decoration-none fs-6" style="color: #0f4c81;" title="Bấm để mở đường link đặt lịch">
                     <i class="fa-solid fa-arrow-up-right-from-square me-2" style="font-size: 13px;"></i>${item.title}
                 </a>
-                ${timeHtml} <!-- Đổ thời gian cập nhật vào ngay bên dưới tiêu đề -->
+                ${timeHtml}
+            </td>
+            <td>
+                <span class="badge bg-light text-dark border border-secondary" style="font-size: 12.5px;"><i class="fa-solid fa-tag me-1 text-primary"></i> ${noiDung}</span>
             </td>
             <td>
                 <span class="fw-bold text-dark">${shortAuthorName}</span>
@@ -4739,28 +4749,29 @@ function renderDatLichTable() {
             <td class="text-center">${actionButtons}</td>
         </tr>`;
     });
-
     tbody.html(html);
 }
 
-// 4. Các hàm Bật/Tắt Form tạo bài đăng
+// Cập nhật reset giá trị cho hàm Open/Close Form
 function openFormDatLich() {
     if (!currentUser || currentUser.isGuest) {
         alert("Vui lòng đăng nhập để tạo bài đăng lịch hẹn!");
         return;
     }
-    $('#datLichRowIndex, #txtDatLichTen, #txtDatLichUrl').val('');
-    $('#formDatLichTitle').html('<i class="fa-solid fa-plus me-2"></i>Tạo bài đăng lịch hẹn mới');
+    $('#datLichRowIndex, #txtDatLichTen, #txtDatLichUrl, #txtDatLichNoiDungKhac').val('');
+    $('#selDatLichNoiDung').val('Đặt lịch hẹn');
+    $('#txtDatLichNoiDungKhac').addClass('d-none');
+    $('#formDatLichTitle').html('<i class="fa-solid fa-plus me-2"></i>Tạo bài đăng mới');
     $('#formDatLichArea').removeClass('d-none');
     $('html, body').animate({ scrollTop: $('#formDatLichArea').offset().top - 80 }, 300);
 }
 
 function closeFormDatLich() {
     $('#formDatLichArea').addClass('d-none');
-    $('#datLichRowIndex, #txtDatLichTen, #txtDatLichUrl').val('');
+    $('#datLichRowIndex, #txtDatLichTen, #txtDatLichUrl, #txtDatLichNoiDungKhac').val('');
 }
 
-// 5. Chỉnh sửa & Lưu bài đăng
+// Cập nhật hàm Edit để load giá trị Nội dung cũ
 function editDatLichPost(index) {
     let item = window.datLichCache[index];
     if (!item) return;
@@ -4768,15 +4779,40 @@ function editDatLichPost(index) {
     $('#datLichRowIndex').val(item.rowIndex);
     $('#txtDatLichTen').val(item.title);
     $('#txtDatLichUrl').val(item.url);
-    $('#formDatLichTitle').html('<i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa bài đăng lịch hẹn');
+    
+    // Kiểm tra xem nội dung lưu trước đó có nằm trong option mặc định hay không
+    let nd = item.noiDung || "Đặt lịch hẹn";
+    let defaultOptions = ["Đặt lịch hẹn", "Chia sẻ Minh Chứng Rèn luyện", "Chia sẻ Hoạt động Rèn luyện"];
+    
+    if (defaultOptions.includes(nd)) {
+        $('#selDatLichNoiDung').val(nd);
+        $('#txtDatLichNoiDungKhac').addClass('d-none').val('');
+    } else {
+        $('#selDatLichNoiDung').val('Khác');
+        $('#txtDatLichNoiDungKhac').removeClass('d-none').val(nd);
+    }
+
+    $('#formDatLichTitle').html('<i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa bài đăng');
     $('#formDatLichArea').removeClass('d-none');
     $('html, body').animate({ scrollTop: $('#formDatLichArea').offset().top - 80 }, 300);
 }
 
+// Cập nhật hàm Gửi dữ liệu về Server (đính kèm biến noiDung)
 function saveDatLichPost() {
     let rowIndex = $('#datLichRowIndex').val().trim();
     let title = $('#txtDatLichTen').val().trim();
     let url = $('#txtDatLichUrl').val().trim();
+    
+    // Lấy biến nội dung
+    let noiDung = $('#selDatLichNoiDung').val();
+    if (noiDung === 'Khác') {
+        noiDung = $('#txtDatLichNoiDungKhac').val().trim();
+        if (!noiDung) {
+            alert("Vui lòng ghi rõ nội dung khác!");
+            $('#txtDatLichNoiDungKhac').focus();
+            return;
+        }
+    }
 
     if (!title || !url) {
         alert("Vui lòng nhập đầy đủ Tên bài đăng và Đường link URL!");
@@ -4798,7 +4834,8 @@ function saveDatLichPost() {
         mssv: currentUser.mssv,
         authorName: currentUser.name,
         title: title,
-        url: url
+        url: url,
+        noiDung: noiDung // << Đóng gói nội dung vào Payload gửi đi
     };
 
     postToGAS(payload, function(res) {
@@ -4811,7 +4848,6 @@ function saveDatLichPost() {
         btn.html(originalText).prop('disabled', false);
     });
 }
-
 // 6. Xóa bài đăng
 function deleteDatLichPost(rowIndex) {
     if (!confirm("Bạn có chắc chắn muốn xóa bài đăng lịch hẹn này không?")) return;
@@ -4868,4 +4904,42 @@ window.toggleAdminActions = function() {
         $('.admin-action-col').addClass('d-none');
         $('.drag-handle-row').attr('draggable', 'false').css('cursor', 'pointer');
     }
+};
+// Hàm Lọc và Tìm kiếm cho Bảng Đặt lịch hẹn
+window.searchDatLich = function() {
+    let keyword = $('#txtSearchDatLich').val().toLowerCase().trim();
+    let selectedFilter = $('#filterDatLichNoiDung').val();
+
+    $('#datLichTableBody tr').each(function() {
+        // Bỏ qua dòng thông báo hệ thống (như dòng "Đang tải danh sách..." có colspan)
+        if ($(this).find('td').length === 1 && $(this).find('td').attr('colspan')) return;
+
+        // Tìm thông tin text trong toàn bộ hàng (bao gồm tiêu đề và tác giả)
+        let rowText = $(this).text().toLowerCase();
+        
+        // Lấy Nội dung từ Cột 2 (Text bên trong thẻ hiển thị nhãn)
+        let rowNoiDung = $(this).find('td:nth-child(2)').text().trim(); 
+
+        // 1. Kiểm tra từ khóa tìm kiếm
+        let matchKeyword = keyword === "" || rowText.includes(keyword);
+        
+        // 2. Kiểm tra bộ lọc
+        let matchFilter = false;
+        if (selectedFilter === "") {
+            matchFilter = true;
+        } else if (selectedFilter === "Khác") {
+            let defaultOptions = ["Đặt lịch hẹn", "Chia sẻ Minh Chứng Rèn luyện", "Chia sẻ Hoạt động Rèn luyện"];
+            // Nếu Nội dung của thẻ không nằm trong 3 mục mặc định, thì nó thuộc loại "Khác"
+            matchFilter = !defaultOptions.some(opt => rowNoiDung.includes(opt));
+        } else {
+            matchFilter = rowNoiDung.includes(selectedFilter);
+        }
+
+        // Hiển thị nếu thỏa mãn CẢ 2 điều kiện
+        if (matchKeyword && matchFilter) {
+            $(this).removeClass('d-none');
+        } else {
+            $(this).addClass('d-none');
+        }
+    });
 };
