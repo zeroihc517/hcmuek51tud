@@ -1266,14 +1266,20 @@
     </div>
 <!-- MÀN HÌNH 3: KHU VỰC CHIA SẺ NHÓM HỌC TẬP -->
 <div id="groupLinksView" class="d-none">
-    <div class="d-flex align-items-center mb-4">
-        <button class="btn btn-light fw-bold shadow-sm me-3" onclick="$('#groupLinksView').addClass('d-none'); $('#shareCategoryView').removeClass('d-none');">
-            <i class="fa-solid fa-arrow-left"></i> Trở lại
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-light fw-bold shadow-sm me-3" onclick="$('#groupLinksView').addClass('d-none'); $('#shareCategoryView').removeClass('d-none');">
+                <i class="fa-solid fa-arrow-left"></i> Trở lại
+            </button>
+            <h5 class="fw-bold m-0 text-success"><i class="fa-solid fa-users-rectangle me-2"></i>Khu vực Chia sẻ Nhóm Học Tập</h5>
+        </div>
+        <!-- Thêm nút bật bảng chỉnh sửa -->
+        <button class="btn text-white fw-bold shadow-sm" style="background-color: #10b981; border-radius: 8px;" onclick="toggleGroupLinkForm()">
+            <i class="fa-solid fa-plus me-1"></i> Chia sẻ nhóm mới
         </button>
-        <h5 class="fw-bold m-0 text-success"><i class="fa-solid fa-users-rectangle me-2"></i>Khu vực Chia sẻ Nhóm Học Tập</h5>
     </div>
 
-    <div class="instructor-card border-start-0 mb-4" style="border-top: 4px solid #10b981;">
+  <div id="groupLinkFormContainer" class="instructor-card border-start-0 mb-4 d-none" style="border-top: 4px solid #10b981;">
         <h6 class="mb-3 text-success" id="groupLinkFormTitle"><i class="fa-solid fa-plus-circle me-2"></i>Tạo / Chia sẻ nhóm mới</h6>
         <input type="hidden" id="glRowIndex" value="">
         

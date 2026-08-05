@@ -1455,6 +1455,16 @@ window.saveGroupLink = function() {
     });
 };
 
+window.toggleGroupLinkForm = function() {
+    if (!currentUser || currentUser.isGuest) {
+        alert("Vui lòng đăng nhập để chia sẻ nhóm học tập!");
+        return;
+    }
+    // Mở bảng lên và cuộn màn hình nhẹ xuống
+    $('#groupLinkFormContainer').removeClass('d-none');
+    $('html, body').animate({ scrollTop: $('#groupLinkFormContainer').offset().top - 100 }, 300);
+};
+
 // 4. Đổ dữ liệu cũ vào Form Sửa
 window.editGroupLinkDirect = function(index) {
     let item = window.groupLinksData[index];
@@ -1473,7 +1483,10 @@ window.editGroupLinkDirect = function(index) {
     $('#btnSaveGroupLink').html('<i class="fa-solid fa-floppy-disk me-2"></i> Lưu thay đổi');
     $('#btnCancelEditGroupLink').removeClass('d-none');
     
-    $('html, body').animate({ scrollTop: $('#groupLinksView').offset().top - 100 }, 300);
+    // Thêm dòng này để hiện form nếu đang ẩn
+    $('#groupLinkFormContainer').removeClass('d-none');
+    
+    $('html, body').animate({ scrollTop: $('#groupLinkFormContainer').offset().top - 100 }, 300);
 };
 
 // 5. Reset Form về trạng thái Đăng Nhóm Mới
@@ -1484,8 +1497,10 @@ window.cancelEditGroupLink = function() {
     $('#groupLinkFormTitle').html('<i class="fa-solid fa-plus-circle me-2"></i>Tạo / Chia sẻ nhóm mới');
     $('#btnSaveGroupLink').html('<i class="fa-solid fa-share-nodes me-2"></i> Đăng chia sẻ nhóm');
     $('#btnCancelEditGroupLink').addClass('d-none');
+    
+    // Thêm dòng này để tự động ẩn Form đi khi ấn hủy hoặc đăng xong
+    $('#groupLinkFormContainer').addClass('d-none');
 };
-
 // 6. Xóa vĩnh viễn nhóm
 window.deleteGroupLinkDirect = function(rowIndex) {
     if (!confirm("Bạn có chắc chắn muốn xóa nhóm học tập này khỏi hệ thống?")) return;
