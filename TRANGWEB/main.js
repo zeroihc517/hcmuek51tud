@@ -647,12 +647,17 @@ if (isHidden && !isAdmin) {
         </div>`;
     }
 
-if (isHeThong) {
-    heThongItemsHtml += `
-    <div class="border-animation mb-4 ${hiddenClassAttr}">
-        <div class="alert shadow-sm border-0 position-relative" role="alert" style="background: linear-gradient(to right, #fff5f5, #ffffff);" onclick="viewThongBaoDetail(${rowIndex})">
-            <div class="d-flex align-items-start gap-3">
-                <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+// --- THÊM ĐOẠN NÀY ĐỂ TÍNH TOÁN KÉO THẢ CHO THÔNG BÁO ---
+    let sheetRowIndexDrag = rowIndex + 1;
+    let isDragEnabled = window.isAdminActionsEnabled ? 'true' : 'false';
+    let dragStyleTb = window.isAdminActionsEnabled ? 'cursor: grab;' : 'cursor: pointer;';
+    let dragAttrTb = (isAdmin && window.innerWidth >= 992) ? ` draggable="${isDragEnabled}" ondragstart="handleDragStart(event, ${sheetRowIndexDrag})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndexDrag}, '${currentSheetName}')" style="${dragStyleTb}"` : 'style="cursor: pointer;"';
+
+    if (isHeThong) {
+        heThongItemsHtml += `
+        <div class="border-animation mb-4 ${hiddenClassAttr} drag-handle-row" ${dragAttrTb}>
+            <div class="alert shadow-sm border-0 position-relative" role="alert" style="background: linear-gradient(to right, #fff5f5, #ffffff);" onclick="viewThongBaoDetail(${rowIndex})">
+                <div class="d-flex align-items-start gap-3">                <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
                     <i class="fa-solid fa-triangle-exclamation fs-4 fa-fade"></i>
                 </div>
                 <div class="flex-grow-1 mt-1">
@@ -668,7 +673,7 @@ if (isHeThong) {
 }
 else {
         let itemHtml = `
-       <div class="tb-list-item ${hiddenClassAttr}" onclick="viewThongBaoDetail(${rowIndex})">
+       <div class="tb-list-item ${hiddenClassAttr} drag-handle-row" onclick="viewThongBaoDetail(${rowIndex})" ${dragAttrTb}>
             <div class="tb-icon-wrapper">
                 <i class="fa-solid fa-bell"></i>
                 ${badgeHtml}
@@ -1001,8 +1006,10 @@ examCardsHtml += `
         trackingLessonName = `${String(row[0] || '').trim()} ${String(row[1] || '').trim()}`.trim();
     }
 
-    let sheetRowIndex = rowIndex + 1;
-    let dragAttr = (isAdmin && window.innerWidth >= 992) ? ` draggable="true" ondragstart="handleDragStart(event, ${sheetRowIndex})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndex}, '${currentSheetName}')" style="cursor: grab;"` : '';
+   let sheetRowIndex = rowIndex + 1;
+    let isDragEnabled = window.isAdminActionsEnabled ? 'true' : 'false';
+    let dragStyle = window.isAdminActionsEnabled ? 'cursor: grab;' : '';
+    let dragAttr = (isAdmin && window.innerWidth >= 992) ? ` draggable="${isDragEnabled}" ondragstart="handleDragStart(event, ${sheetRowIndex})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndex}, '${currentSheetName}')" style="${dragStyle}"` : '';
     
     // LOGIC ĐÃ FIX: Xử lý hiển thị phân cấp (Không ẩn nhầm hàng độc lập)
     let childClass = '';
@@ -1039,7 +1046,7 @@ examCardsHtml += `
         }
     }
 
-               bodyHtml += `<tr class="${rowClass}${childClass}"${clickEvent}${dragAttr}>`;
+              bodyHtml += `<tr class="${rowClass}${childClass} drag-handle-row"${clickEvent}${dragAttr}>`;
                 
                 if (sheetName.toLowerCase() === 'thông báo') {
                     // GIỮ NGUYÊN LOGIC CŨ CHO BẢNG THÔNG BÁO
@@ -3071,59 +3078,60 @@ $.ajaxSetup({ cache: false });
 
 let dragSourceIndex = -1;
 
+// Cập nhật lại các hàm handleDrag và handleDrop (Khoảng dòng 914)
 window.handleDragStart = function(e, index) {
+    if (!window.isAdminActionsEnabled) {
+        e.preventDefault();
+        return;
+    }
     dragSourceIndex = index;
     e.dataTransfer.effectAllowed = 'move';
-    
-    // Lệnh BẮT BUỘC: Khai báo dữ liệu để trình duyệt kích hoạt chế độ Kéo-Thả (Drag & Drop)
     e.dataTransfer.setData('text/plain', index);
     
-    // Dùng setTimeout để tránh lỗi giật hình (flicker) trên UI khi vừa click chuột
     setTimeout(() => {
-        $(e.target).closest('tr').css('opacity', '0.4');
+        $(e.target).closest('.drag-handle-row').css('opacity', '0.4');
     }, 0);
 };
 
 window.handleDragOver = function(e) {
-    // Lệnh BẮT BUỘC: Hủy hành vi mặc định để hệ thống cho phép "Thả" (Drop) vào khu vực này
+    if (!window.isAdminActionsEnabled) return true;
     e.preventDefault(); 
     e.dataTransfer.dropEffect = 'move';
     return false;
 };
 
 window.handleDragEnter = function(e) {
+    if (!window.isAdminActionsEnabled) return;
     e.preventDefault();
-    let tr = $(e.target).closest('tr');
-    tr.css('border-top', '3px solid var(--accent-red)'); // Vạch đỏ báo hiệu vị trí sẽ chèn vào
+    let row = $(e.target).closest('.drag-handle-row');
+    if (row.length) row.css('border-top', '3px solid var(--accent-red)');
 };
 
 window.handleDragLeave = function(e) {
-    let tr = $(e.target).closest('tr');
-    tr.css('border-top', ''); // Gỡ vạch đỏ khi kéo chuột rời đi
+    let row = $(e.target).closest('.drag-handle-row');
+    if (row.length) row.css('border-top', '');
 };
 
 window.handleDrop = function(e, targetIndex, sheetName) {
+    if (!window.isAdminActionsEnabled) return;
     e.preventDefault();
     e.stopPropagation();
     
-    let tr = $(e.target).closest('tr');
-    tr.css('border-top', '');
-    $('.grid-row').css('opacity', '1');
+    let row = $(e.target).closest('.drag-handle-row');
+    if (row.length) row.css('border-top', '');
+    $('.drag-handle-row').css('opacity', '1');
 
-    // Bỏ qua nếu thả lại đúng vị trí ban đầu
     if (dragSourceIndex === -1 || dragSourceIndex === targetIndex) return;
     
     $('#loadingStatus').removeClass('d-none');
     $('#tableWrapper').addClass('d-none');
 
-    // Gọi API xử lý trên Google Apps Script
     postToGAS({
         action: "dragDropSheetRow",
         sheetName: sheetName,
         fromIndex: dragSourceIndex,
         toIndex: targetIndex
     }, function(res) {
-        // Tải lại bảng ngay sau khi có phản hồi
         loadDataByHocPhan(sheetName);
     }, function() {
         alert("Lỗi khi kéo thả di chuyển!");
@@ -3131,11 +3139,12 @@ window.handleDrop = function(e, targetIndex, sheetName) {
     });
 };
 
-// Sự kiện phòng hờ: Khôi phục mọi hiệu ứng UI nếu người dùng kéo ra ngoài web rồi nhả chuột
+// Cứu cánh hiệu ứng khi kéo thả thất bại
 document.addEventListener("dragend", function(e) {
-    $('.grid-row').css('opacity', '1');
-    $('.grid-row').css('border-top', '');
+    $('.drag-handle-row').css('opacity', '1');
+    $('.drag-handle-row').css('border-top', '');
 });
+
 // HÀM ĐIỀU KHIỂN THU GỌN / MỞ RỘNG (CHƯƠNG)
 window.toggleChapter = function(chapterId, rowElement) {
     let chevronIcon = $(rowElement).find('.fa-chevron-down');
@@ -4846,4 +4855,17 @@ window.toggleAdminShowHidden = function() {
             $(`#tbSection${type}`).removeClass('d-none');
         }
     });
+};
+// Thêm đoạn này vào dưới cùng của tệp Source 8
+window.isAdminActionsEnabled = false;
+
+window.toggleAdminActions = function() {
+    window.isAdminActionsEnabled = !window.isAdminActionsEnabled;
+    if (window.isAdminActionsEnabled) {
+        $('.admin-action-col').removeClass('d-none');
+        $('.drag-handle-row').attr('draggable', 'true').css('cursor', 'grab');
+    } else {
+        $('.admin-action-col').addClass('d-none');
+        $('.drag-handle-row').attr('draggable', 'false').css('cursor', 'pointer');
+    }
 };
