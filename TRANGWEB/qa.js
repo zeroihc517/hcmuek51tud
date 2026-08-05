@@ -656,6 +656,7 @@ function openShareCodeSection() {
 // 2. Thoát khỏi môn Code -> Trở về danh mục Thảo luận tổng & Phục hồi URL về ?view=sharecode
 function backToShareCategories() {
     $('#shareContentView').addClass('d-none');
+$('#groupLinksView').addClass('d-none');
     $('#shareCategoryView').removeClass('d-none');
     if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận");
     // Phục hồi lại đường link Thảo luận chung (?view=thaoluan)

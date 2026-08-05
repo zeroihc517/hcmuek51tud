@@ -18,6 +18,7 @@ function resetNavActive() {
     $('#qaSection').addClass('d-none'); 
     $('#tkbSection').addClass('d-none');
     $('#shareCodeSection').addClass('d-none'); 
+	$('#groupLinksView').addClass('d-none');
     $('#gpaSection').addClass('d-none');
     $('#profileSection').addClass('d-none'); // <--- Ẩn trang hồ sơ
 	$('#datLichSection').addClass('d-none');
