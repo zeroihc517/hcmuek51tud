@@ -2449,3 +2449,119 @@ function buildICSContent(events, dayScheduleSummary) {
     icsLines.push('END:VCALENDAR');
     return icsLines.join('\r\n');
 }
+window.processDirectCalendarSync = function() {
+    let option = $('input[name="exportDataOption"]:checked').val();
+    let fromDateStr = $('#expFromDate').val();
+    let toDateStr = $('#expToDate').val();
+
+    if (!fromDateStr || !toDateStr) {
+        alert("Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc!");
+        return;
+    }
+
+    let fromDate = new Date(fromDateStr + "T00:00:00");
+    let toDate = new Date(toDateStr + "T23:59:59");
+
+    if (fromDate > toDate) {
+        alert("Ngày bắt đầu không được lớn hơn ngày kết thúc!");
+        return;
+    }
+
+    let events = [];
+
+    // LẤY DỮ LIỆU THỜI KHÓA BIỂU
+    if ((option === 'both' || option === 'tkb') && typeof globalTkbData !== 'undefined') {
+        globalTkbData.forEach(c => {
+            if ((c.hinhThuc || '').toUpperCase().includes('VLE')) return; 
+
+            let startRange = parseDateString(c.ngayBatDau) || fromDate;
+            let endRange = parseDateString(c.ngayKetThuc) || toDate;
+            let curDate = new Date(Math.max(fromDate.getTime(), startRange.getTime()));
+            let lastDate = new Date(Math.min(toDate.getTime(), endRange.getTime()));
+
+            let targetDayOfWeek = c.thu === 8 ? 0 : c.thu - 1; 
+            let skipDates = (c.ngayNgoaiLe || "").split(',').map(d => d.trim());
+
+            let sH = 7, sM = 0, eH = 9, eM = 30;
+            if (c.thoiGian && c.thoiGian.includes('-')) {
+                let isPM = /PM/i.test(c.thoiGian);
+                let cleanTime = c.thoiGian.replace(/PM|AM/gi, '').replace(/[hgG]/g, ':').replace(/\s+/g, '');
+                let times = cleanTime.split('-');
+                const parseTimeStr = (tStr) => {
+                    let parts = tStr.split(':');
+                    return [parseInt(parts[0]) || 0, parseInt(parts[1]) || 0];
+                };
+                [sH, sM] = parseTimeStr(times[0]);
+                [eH, eM] = parseTimeStr(times[1]);
+                if (isPM || (sH >= 1 && sH <= 5)) sH += 12;
+                if (isPM || (eH >= 1 && eH <= 5) || (eH < sH)) eH += 12;
+            } else if (c.tietBd) {
+                let startMinsTotal = 390 + (c.tietBd - 1) * 50; 
+                let endMinsTotal = startMinsTotal + (c.soTiet || 1) * 50;
+                sH = Math.floor(startMinsTotal / 60); sM = startMinsTotal % 60;
+                eH = Math.floor(endMinsTotal / 60); eM = endMinsTotal % 60;
+            }
+
+            while (curDate <= lastDate) {
+                if (curDate.getDay() === targetDayOfWeek) {
+                    let formattedDateStr = formatDateDDMMYYYY(curDate);
+                    if (!skipDates.includes(formattedDateStr)) {
+                        let startDT = new Date(curDate); startDT.setHours(sH, sM, 0, 0);
+                        let endDT = new Date(curDate); endDT.setHours(eH, eM, 0, 0);
+
+                        events.push({
+                            type: 'TIMED',
+                            title: c.mon,
+                            start: startDT,
+                            end: endDT,
+                            location: c.phong ? `Phòng ${c.phong} (${c.hinhThuc || ''})` : (c.hinhThuc || ''),
+                            description: `Giảng viên: ${c.gv || 'Chưa cập nhật'}\nHình thức: ${c.hinhThuc || ''}`
+                        });
+                    }
+                }
+                curDate.setDate(curDate.getDate() + 1);
+            }
+        });
+    }
+
+    // LẤY DỮ LIỆU DEADLINE
+    if ((option === 'both' || option === 'deadline') && typeof globalDeadlineData !== 'undefined') {
+        globalDeadlineData.forEach(d => {
+            let startDateObj = parseDateString(d.dateStart);
+            let endDateObj = parseDateString(d.dateEnd) || startDateObj;
+
+            if (startDateObj && endDateObj >= fromDate && startDateObj <= toDate) {
+                events.push({
+                    type: 'ALLDAY',
+                    title: d.title ? d.title.replace(/(https?:\/\/[^\s]+)/g, '').trim() : 'Nhiệm vụ',
+                    startDate: startDateObj,
+                    endDate: endDateObj,
+                    location: d.tag || '',
+                    description: `Hạn chót: ${d.duration || d.dateStart}\nHình thức: ${d.tag || ''}`
+                });
+            }
+        });
+    }
+
+    if (events.length === 0) {
+        alert("Không tìm thấy sự kiện nào trong khoảng thời gian đã chọn!");
+        return;
+    }
+
+    // GỌI API ĐỒNG BỘ TRỰC TIẾP
+    let btn = $('#btnDirectSync');
+    let originalHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang đồng bộ...').prop('disabled', true);
+
+    postToGAS({
+        action: "syncToGoogleCalendar",
+        events: events
+    }, function(res) {
+        alert(res);
+        $('#exportCalendarModal').modal('hide');
+        btn.html(originalHtml).prop('disabled', false);
+    }, function() {
+        alert("Lỗi kết nối máy chủ! Không thể đồng bộ lịch.");
+        btn.html(originalHtml).prop('disabled', false);
+    });
+};

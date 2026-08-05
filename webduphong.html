@@ -2000,12 +2000,15 @@
                     <div>Sau khi xuất file, vào Google Lịch, Nhấn vào dấu + ở mục Lịch khác, Chọn nút Nhập, Chọn tệp từ máy tính (Thêm vào lịch mà bạn muốn thêm, nên tạo 1 lịch mới để tránh bị xung đột dữ liệu), Nhấn "Nhập" và hoàn tất</div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pb-4 d-flex gap-2">
-                <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal" style="border-radius: 50px;">Hủy</button>
-                <button type="button" class="btn text-white fw-bold px-4 flex-grow-1" style="background-color: #0f4c81; border-radius: 50px;" onclick="processExportCalendar()">
-                    <i class="fa-solid fa-file-export me-2"></i> Xuất File Google Lịch (.ics)
-                </button>
-            </div>
+<div class="modal-footer border-0 pb-4 d-flex flex-wrap gap-2">
+    <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal" style="border-radius: 50px;">Hủy</button>
+    <button type="button" class="btn text-white fw-bold px-4 flex-grow-1" style="background-color: #16a34a; border-radius: 50px;" id="btnDirectSync" onclick="processDirectCalendarSync()">
+        <i class="fa-brands fa-google me-2"></i> Đồng bộ trực tiếp Google
+    </button>
+    <button type="button" class="btn text-white fw-bold px-4 flex-grow-1" style="background-color: #0f4c81; border-radius: 50px;" onclick="processExportCalendar()">
+        <i class="fa-solid fa-file-export me-2"></i> Tải File (.ics)
+    </button>
+</div>
         </div>
     </div>
 </div>
