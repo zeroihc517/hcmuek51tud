@@ -89,14 +89,14 @@
         <input type="text" id="txtCourse" list="courseList" class="form-control fw-bold text-primary" value="Minigame CTDL đề 01" oninput="updatePreview()">
     </div>
     <div class="col-md-6">
-        <label class="fw-bold mb-1">Mã bài (VD: B08)</label>
-        <!-- Thêm hàm checkMaBai() vào sự kiện oninput -->
-        <input type="text" id="txtMaBai" class="form-control fw-bold text-danger" placeholder="B08" oninput="checkMaBai(); updatePreview()">
-        <!-- Khung cảnh báo trùng mã bài (Mặc định ẩn) -->
-        <div id="maBaiWarning" class="text-danger small fw-bold mt-1 d-none">
-            <i class="fa-solid fa-triangle-exclamation"></i> Mã bài này đã tồn tại (Dữ liệu sẽ bị ghi đè/trùng)!
-        </div>
+    <label class="fw-bold mb-1">Mã bài (VD: B08)</label>
+    <!-- Thêm syncMaBaiToTextarea() vào oninput -->
+    <input type="text" id="txtMaBai" class="form-control fw-bold text-danger" placeholder="B08" oninput="checkMaBai(); syncMaBaiToTextarea(); updatePreview()">
+    
+    <div id="maBaiWarning" class="text-danger small fw-bold mt-1 d-none">
+        <i class="fa-solid fa-triangle-exclamation"></i> Mã bài này đã tồn tại (Dữ liệu sẽ bị ghi đè/trùng)!
     </div>
+</div>
 </div>
 
 <div class="mb-3">
@@ -452,6 +452,21 @@ function checkMaBai() {
         $('#maBaiWarning').addClass('d-none');
         $('#txtMaBai').removeClass('border-danger bg-danger-subtle');
     }
+}
+// HÀM TỰ ĐỘNG ĐỒNG BỘ MÃ BÀI VÀO TEXTAREA
+function syncMaBaiToTextarea() {
+    let maBai = $('#txtMaBai').val().trim();
+    
+    // Nếu ô mã bài trống, hiển thị chữ mặc định để không bị mất thẻ mark
+    let displayMaBai = maBai ? maBai : "VONGTRON01"; 
+    
+    let currentText = $('#txtSubQuestions').val();
+    
+    // Dùng Regex tìm thẻ <mark> đầu tiên và thay thế nội dung bên trong nó
+    let newText = currentText.replace(/<mark>.*?<\/mark>/i, `<mark>${displayMaBai}</mark>`);
+    
+    // Cập nhật lại nội dung vào khung nhập liệu
+    $('#txtSubQuestions').val(newText);
 }
    </script>
 </body>
