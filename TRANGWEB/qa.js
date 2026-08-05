@@ -877,17 +877,7 @@ function loadShareCodeData() {
                 });
 
                 // Lọc trùng & Gộp chung trạng thái isNew
-                let uniqueMap = {};
-                rawList.forEach(item => {
-                    let uniqueKey = `${item.rawAuthor.trim().toLowerCase()}_${item.maBai.trim().toLowerCase()}`;
-                    if (!uniqueMap[uniqueKey]) {
-                        uniqueMap[uniqueKey] = item;
-                    } else {
-                        if (item.isNew) uniqueMap[uniqueKey].isNew = true; 
-                    }
-                });
-
-                window.shareCodeList = Object.values(uniqueMap);
+               window.shareCodeList = rawList;
 
                 let gridHtml = '<div class="row g-3">'; 
                 window.shareCodeList.forEach((item, arrayIndex) => {
