@@ -1299,3 +1299,204 @@ window.handleTopicSelection = function(type) {
         }
     }
 };
+window.groupLinksData = [];
+
+// 1. Mở màn hình danh sách nhóm
+window.openGroupLinksSection = function() {
+    $('#shareCategoryView').addClass('d-none');
+    $('#groupLinksView').removeClass('d-none');
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - Nhóm học tập");
+    
+    // Bật khung chỉ định nếu là Admin
+    if (isAdmin) {
+        $('#adminGroupAssignArea').removeClass('d-none');
+    } else {
+        $('#adminGroupAssignArea').addClass('d-none');
+    }
+
+    cancelEditGroupLink();
+    loadGroupLinks();
+};
+
+// 2. Tải và lọc danh sách các nhóm
+window.loadGroupLinks = function() {
+    $('#groupLinksListArea').html('');
+    $('#groupLinksLoading').removeClass('d-none');
+    
+    $.ajax({
+        url: SCRIPT_URL + "?action=getGroupLinks",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            $('#groupLinksLoading').addClass('d-none');
+            
+            let html = '';
+            window.groupLinksData = data; 
+            
+            if (data && data.length > 0) {
+                data.forEach((row, index) => {
+                    let time = row[0]; let mssv = row[1]; let author = row[2];
+                    let title = row[3]; let platform = row[4]; let desc = row[5];
+                    let url = row[6]; let assigned = row[7]; let rowIndex = row[8];
+                    
+                    // LỌC QUYỀN HIỂN THỊ (ADMIN CHỈ ĐỊNH)
+                    let allowedToSee = true;
+                    if (assigned && assigned.trim() !== "") {
+                        let allowedMssvs = assigned.split(',').map(s => s.trim());
+                        
+                        // Admin hoặc chính người tạo ra luôn thấy
+                        if (isAdmin || (currentUser && currentUser.mssv === mssv)) {
+                            allowedToSee = true;
+                        } 
+                        // Nếu là sinh viên, phải có MSSV trong danh sách mới thấy
+                        else if (currentUser && allowedMssvs.includes(currentUser.mssv)) {
+                            allowedToSee = true;
+                        } else {
+                            allowedToSee = false; // Chặn không cho xem
+                        }
+                    }
+                    
+                    if (!allowedToSee) return; // Bỏ qua không vẽ ra giao diện
+                    
+                    // Cấp quyền sửa xóa cho Admin hoặc Chính chủ
+                    let isOwnerOrAdmin = isAdmin || (currentUser && (currentUser.mssv === mssv || currentUser.mssv === "51.01.108.008"));
+                    
+                    let iconHtml = ''; let badgeBg = 'bg-light text-dark';
+                    if (platform === 'Zalo') { iconHtml = '<i class="fa-solid fa-comment-dots text-primary"></i>'; }
+                    else if (platform === 'Messenger') { iconHtml = '<i class="fa-brands fa-facebook-messenger text-primary"></i>'; }
+                    else if (platform === 'Discord') { iconHtml = '<i class="fa-brands fa-discord" style="color: #5865F2;"></i>'; }
+                    else if (platform === 'Telegram') { iconHtml = '<i class="fa-brands fa-telegram text-info"></i>'; }
+                    else { iconHtml = '<i class="fa-solid fa-users text-success"></i>'; }
+                    
+                    let actionBtns = '';
+                    if (isOwnerOrAdmin) {
+                        actionBtns = `
+                            <button class="btn btn-sm btn-outline-warning py-0 px-2 fw-bold me-1" title="Sửa" onclick="editGroupLinkDirect(${index})"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn btn-sm btn-outline-danger py-0 px-2 fw-bold" title="Xóa" onclick="deleteGroupLinkDirect('${rowIndex}')"><i class="fa-solid fa-trash"></i></button>
+                        `;
+                    }
+                    
+                    // Thêm huy hiệu thông báo nhóm kín dành cho Admin nhìn thấy
+                    let privateBadge = (assigned && assigned.trim() !== "") ? `<br><span class="badge bg-danger mt-1" title="Chỉ định: ${assigned}"><i class="fa-solid fa-lock"></i> Nhóm chỉ định</span>` : '';
+
+                    html += `
+                    <div class="col-md-6 col-lg-3">
+                        <div class="card-sharecode-box shadow-sm" style="border-left: 4px solid #10b981; align-items: flex-start; min-height: 160px; cursor: default; justify-content: start; border-radius: 12px; padding: 18px;">
+                            <div class="d-flex justify-content-between align-items-center w-100 mb-2">
+                                <span class="badge ${badgeBg} border shadow-sm fs-6">${iconHtml} ${platform}</span>
+                                <div class="d-flex gap-1">${actionBtns}</div>
+                            </div>
+                            <h6 class="fw-bold mb-1 mt-2" style="color: #1e293b; font-size: 16px;">${title} ${privateBadge}</h6>
+                            <div class="text-muted small mb-2" style="font-size: 12px;">
+                                <i class="fa-regular fa-clock me-1"></i>${time} <span class="mx-1">|</span> Đăng bởi: <span class="fw-bold text-secondary">${getNaturalShortName(author)}</span>
+                            </div>
+                            <p class="small text-secondary mb-3" style="line-height: 1.4;">${desc}</p>
+                            <a href="${url}" target="_blank" class="btn btn-sm w-100 fw-bold text-white mt-auto shadow-sm" style="background: #10b981; border-radius: 8px;">Tham gia nhóm <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                        </div>
+                    </div>`;
+                });
+            }
+
+            if (html === '') {
+                $('#groupLinksListArea').html('<div class="col-12 text-center text-muted p-5 bg-white rounded border shadow-sm"><i class="fa-solid fa-users-slash fs-1 mb-3"></i><br>Không có nhóm học tập nào được phép hiển thị cho bạn.</div>');
+            } else {
+                $('#groupLinksListArea').html(html);
+            }
+        }
+    });
+};
+
+// 3. Đăng tải nhóm mới
+window.saveGroupLink = function() {
+    if (!currentUser || currentUser.isGuest) {
+        alert("Vui lòng đăng nhập để chia sẻ nhóm học tập!");
+        return;
+    }
+    
+    let rowIndex = $('#glRowIndex').val();
+    let title = $('#glTitle').val().trim();
+    let platform = $('#glPlatform').val();
+    let url = $('#glUrl').val().trim();
+    let desc = $('#glDesc').val().trim();
+    let assigned = isAdmin ? $('#glAssigned').val().trim() : "";
+    
+    if (!title || !url) {
+        alert("Vui lòng nhập đầy đủ Môn học/Chủ đề nhóm và Link tham gia!");
+        return;
+    }
+    if (!url.match(/^https?:\/\//i)) url = 'https://' + url;
+    
+    let isEdit = rowIndex !== "";
+    let payload = {
+        action: isEdit ? "editGroupLink" : "addGroupLink",
+        mssv: currentUser.mssv,
+        author: currentUser.name,
+        title: title,
+        platform: platform,
+        desc: desc,
+        url: url,
+        assigned: assigned
+    };
+    if (isEdit) payload.rowIndex = rowIndex;
+    
+    let btn = $('#btnSaveGroupLink');
+    let originText = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...').prop('disabled', true);
+    
+    postToGAS(payload, function(res) {
+        alert(res);
+        btn.html(originText).prop('disabled', false);
+        cancelEditGroupLink();
+        loadGroupLinks();
+    }, function() {
+        alert("Lỗi kết nối máy chủ!");
+        btn.html(originText).prop('disabled', false);
+    });
+};
+
+// 4. Đổ dữ liệu cũ vào Form Sửa
+window.editGroupLinkDirect = function(index) {
+    let item = window.groupLinksData[index];
+    if (!item) return;
+    
+    $('#glRowIndex').val(item[8]);
+    $('#glTitle').val(item[3]);
+    $('#glPlatform').val(item[4]);
+    $('#glDesc').val(item[5]);
+    $('#glUrl').val(item[6]);
+    if (isAdmin) {
+        $('#glAssigned').val(item[7] || "");
+    }
+    
+    $('#groupLinkFormTitle').html('<i class="fa-solid fa-pen-to-square me-2 text-warning"></i>Đang chỉnh sửa nhóm');
+    $('#btnSaveGroupLink').html('<i class="fa-solid fa-floppy-disk me-2"></i> Lưu thay đổi');
+    $('#btnCancelEditGroupLink').removeClass('d-none');
+    
+    $('html, body').animate({ scrollTop: $('#groupLinksView').offset().top - 100 }, 300);
+};
+
+// 5. Reset Form về trạng thái Đăng Nhóm Mới
+window.cancelEditGroupLink = function() {
+    $('#glRowIndex, #glTitle, #glDesc, #glUrl, #glAssigned').val('');
+    $('#glPlatform').val('Zalo');
+    
+    $('#groupLinkFormTitle').html('<i class="fa-solid fa-plus-circle me-2"></i>Tạo / Chia sẻ nhóm mới');
+    $('#btnSaveGroupLink').html('<i class="fa-solid fa-share-nodes me-2"></i> Đăng chia sẻ nhóm');
+    $('#btnCancelEditGroupLink').addClass('d-none');
+};
+
+// 6. Xóa vĩnh viễn nhóm
+window.deleteGroupLinkDirect = function(rowIndex) {
+    if (!confirm("Bạn có chắc chắn muốn xóa nhóm học tập này khỏi hệ thống?")) return;
+    
+    postToGAS({
+        action: "deleteGroupLink",
+        rowIndex: rowIndex,
+        mssv: currentUser.mssv
+    }, function(res) {
+        alert(res);
+        loadGroupLinks();
+    }, function() {
+        alert("Lỗi kết nối máy chủ!");
+    });
+};

@@ -261,7 +261,7 @@ function renderSidebarCategories() {
         let lowerName = name.trim().toLowerCase();
         
         // Bỏ qua các sheet dữ liệu hệ thống ẩn
-if (lowerName === 'deadlines_admin' || lowerName === 'deadlines_status' || lowerName === 'tkb_admin' || lowerName === 'khaosat' || lowerName === 'weblinks_personal' || lowerName === 'registrationhistory' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'datlichhen' || lowerName === 'gpa_data' || lowerName === 'exercisequestions' || lowerName === 'sharecode') return;
+if (lowerName === 'deadlines_admin' || lowerName === 'deadlines_status' || lowerName === 'tkb_admin' || lowerName === 'khaosat' || lowerName === 'weblinks_personal' || lowerName === 'registrationhistory' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'datlichhen' || lowerName === 'gpa_data' || lowerName === 'exercisequestions' || lowerName === 'sharecode' || lowerName === 'grouplinks') return;
         if (lowerName !== 'thông báo') {
             if (lowerName === 'users' && !isAdmin) return;
             if (lowerName === 'cauhinhhocky' && !isAdmin) return; 
@@ -4652,10 +4652,11 @@ $(document).ready(function() {
 window.datLichCache = [];
 
 // 1. Hàm chuyển sang màn hình Giao diện Đặt lịch hẹn
-function loadDatLichHenView() {
+// 1. Hàm chuyển sang màn hình Giao diện Đặt lịch hẹn
+window.loadDatLichHenView = function() {
     document.title = "Đặt lịch hẹn | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
-    $('#btnNavDatLich').addClass('active'); 
+    $('#btnNavShareCode').addClass('active'); // Đổi từ btnNavDatLich sang btnNavShareCode
     $('#datLichSection').removeClass('d-none');
     
     updateSystemUrl('view', 'datlich'); // Đổi URL thành ?view=datlich
@@ -4663,7 +4664,7 @@ function loadDatLichHenView() {
     
     closeFormDatLich();
     loadDatLichData();
-}
+};
 
 // 2. Tải dữ liệu từ Google Sheets
 function loadDatLichData() {

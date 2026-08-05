@@ -112,9 +112,7 @@
             <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
                 <i class="fa-solid fa-calendar"></i> Lịch học
             </button>
-	<button class="btn-course" id="btnNavDatLich" onclick="loadDatLichHenView()">
-    <i class="fa-solid fa-user-clock"></i> Đặt lịch hẹn
-</button>
+	
 
             <div id="gpaNavContainer" class="d-none">
                 <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
@@ -236,18 +234,23 @@
 </div>
 <div id="datLichSection" class="d-none">
     <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div class="page-title"><i class="fa-solid fa-calendar-check"></i> Đặt lịch hẹn & Lịch trao đổi</div>
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
-                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
-                    onclick="loadDatLichData()">
-                <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
-            </button>
-            <button class="btn text-white fw-bold shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" onclick="openFormDatLich()">
-                <i class="fa-solid fa-plus me-1"></i> Tạo bài đăng mới
-            </button>
-        </div>
-    </header>
+    <div class="d-flex align-items-center">
+        <button class="btn btn-light fw-bold shadow-sm me-3" onclick="$('#datLichSection').addClass('d-none'); openShareCodeSection();">
+            <i class="fa-solid fa-arrow-left"></i> Trở lại
+        </button>
+        <div class="page-title m-0"><i class="fa-solid fa-calendar-check"></i> Đặt lịch hẹn & Lịch trao đổi</div>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+        <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
+                style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
+                onclick="loadDatLichData()">
+            <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
+        </button>
+        <button class="btn text-white fw-bold shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" onclick="openFormDatLich()">
+            <i class="fa-solid fa-plus me-1"></i> Tạo bài đăng mới
+        </button>
+    </div>
+</header>
 
     <!-- Khung tạo/chỉnh sửa Lịch hẹn (Ẩn mặc định) -->
     <div id="formDatLichArea" class="data-card p-4 mb-4 d-none">
@@ -1108,17 +1111,32 @@
             </div>
         </div>
 
-        <!-- Thẻ 2: Cộng đồng Messenger -->
-        <div class="col">
-            <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #0084ff;" onclick="window.open('https://m.me/cm/Abb7rwbcNinBoSRr/?send_source=cm%3Acopy_invite_link', '_blank')">
-                <div class="icon-box"><i class="fa-brands fa-facebook-messenger" style="color: #0084ff; font-size: 42px;"></i></div>
-                <div class="card-text-wrapper">
-                    <h5>Cộng đồng Messenger</h5>
-                    <p class="card-desc">Trao đổi bài tập Toán</p>
-                </div>
-            </div>
+ <!-- Thẻ 5: Đặt lịch hẹn -->
+<div class="col">
+    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #8b5cf6;" onclick="loadDatLichHenView()">
+        <div class="icon-box position-relative">
+            <i class="fa-solid fa-calendar-check" style="color: #8b5cf6;"></i>
         </div>
+        <div class="card-text-wrapper">
+            <h5>Đặt lịch hẹn</h5>
+            <p class="card-desc">Lịch trao đổi bài tập</p>
+        </div>
+    </div>
+</div>
         
+        <!-- Thẻ 4: Nhóm học tập -->
+<div class="col">
+    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #10b981;" onclick="openGroupLinksSection()">
+        <div class="icon-box position-relative">
+            <i class="fa-solid fa-users-rectangle" style="color: #10b981;"></i>
+        </div>
+        <div class="card-text-wrapper">
+            <h5>Nhóm học tập</h5>
+            <p class="card-desc">Tham gia nhóm Zalo, Discord</p>
+        </div>
+    </div>
+</div>
+
         <!-- Thẻ 3: Google Classroom (Dành cho tất cả sinh viên) -->
         <div class="col">
             <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #f59e0b;" onclick="window.open('https://classroom.google.com/c/ODI0MjY2NDc0OTQx?cjc=fmvongzm', '_blank')">
@@ -1246,8 +1264,69 @@
         </div>
         <div id="shareCodeListArea"></div>
     </div>
+<!-- MÀN HÌNH 3: KHU VỰC CHIA SẺ NHÓM HỌC TẬP -->
+<div id="groupLinksView" class="d-none">
+    <div class="d-flex align-items-center mb-4">
+        <button class="btn btn-light fw-bold shadow-sm me-3" onclick="$('#groupLinksView').addClass('d-none'); $('#shareCategoryView').removeClass('d-none');">
+            <i class="fa-solid fa-arrow-left"></i> Trở lại
+        </button>
+        <h5 class="fw-bold m-0 text-success"><i class="fa-solid fa-users-rectangle me-2"></i>Khu vực Chia sẻ Nhóm Học Tập</h5>
+    </div>
+
+    <div class="instructor-card border-start-0 mb-4" style="border-top: 4px solid #10b981;">
+        <h6 class="mb-3 text-success" id="groupLinkFormTitle"><i class="fa-solid fa-plus-circle me-2"></i>Tạo / Chia sẻ nhóm mới</h6>
+        <input type="hidden" id="glRowIndex" value="">
+        
+        <div class="row g-3 mb-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">Môn học / Chủ đề nhóm <span class="text-danger">*</span></label>
+                <input type="text" id="glTitle" class="form-control fw-bold" placeholder="VD: Nhóm ôn thi Giải tích 1">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">Nền tảng ứng dụng <span class="text-danger">*</span></label>
+                <select id="glPlatform" class="form-select fw-bold border-success-subtle">
+                    <option value="Zalo">Zalo</option>
+                    <option value="Messenger">Messenger</option>
+                    <option value="Discord">Discord</option>
+                    <option value="Telegram">Telegram</option>
+                    <option value="Khác">Khác</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">Link tham gia <span class="text-danger">*</span></label>
+                <input type="text" id="glUrl" class="form-control" placeholder="https://zalo.me/g/...">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">Mô tả thêm (Tùy chọn)</label>
+                <input type="text" id="glDesc" class="form-control" placeholder="VD: Mọi người vào trao đổi bài tập lớn nha...">
+            </div>
+<div class="col-md-12 d-none" id="adminGroupAssignArea">
+                <label class="form-label fw-bold small text-danger"><i class="fa-solid fa-user-shield me-1"></i>Chỉ định Sinh viên (Dành riêng cho Admin)</label>
+                <input type="text" id="glAssigned" class="form-control border-danger-subtle" placeholder="Nhập MSSV các sinh viên được phép xem (cách nhau bằng dấu phẩy). Để trống nếu muốn tất cả đều xem.">
+            </div>
+        </div>
+        
+        <div class="d-flex gap-2">
+            <button class="btn fw-bold px-4 py-2 text-white shadow-sm" onclick="saveGroupLink()" id="btnSaveGroupLink" style="background: #10b981; border:none;">
+                <i class="fa-solid fa-share-nodes me-2"></i> Đăng chia sẻ nhóm
+            </button>
+            <button class="btn fw-bold px-4 py-2 btn-light border d-none" onclick="cancelEditGroupLink()" id="btnCancelEditGroupLink">Hủy sửa</button>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold m-0" style="color: #059669;">Danh sách các nhóm đang hoạt động</h5>
+        <button class="btn btn-sm btn-light border fw-bold" onclick="loadGroupLinks()"><i class="fa-solid fa-rotate-right"></i> Làm mới</button>
+    </div>
+    
+    <div id="groupLinksLoading" class="pulse-loader d-none">
+        <div class="spinner-modern" style="border-top-color: #10b981;"></div>
+    </div>
+    
+    <div class="row g-3" id="groupLinksListArea"></div>
 </div>
 
+</div>
            <footer class="fixed-bottom-footer">
     <!-- CỘT TRÁI: Danh sách người dùng Online -->
     <div class="footer-info-left">
