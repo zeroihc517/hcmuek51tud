@@ -84,6 +84,7 @@ function loadQuestionsData() {
             $('#labelTotalQuestions').text(`Tổng: ${questionsList.length} câu`);
 
             renderQuestion(0);
+	checkCompletedQuestions();
         },
         error: function() {
             $('#questionContentArea').html('<div class="text-danger fw-bold py-3">Lỗi kết nối khi tải đề bài!</div>');
@@ -581,7 +582,8 @@ if (sub.code && window.ace) {
 
                     renderHistoryUI();
                     cancelEditMode();
-
+		$(`#tabBtnQuestion_${currentQuestionIndex}`).addClass('completed');
+                    $(`#tabBtnQuestion_${currentQuestionIndex}`).find('i').removeClass('fa-file-code').addClass('fa-circle-check');
                     alert(isUpdating ? `✅ CẬP NHẬT BÀI NỘP THÀNH CÔNG!` : `✅ NỘP BÀI THÀNH CÔNG!`);
                 },
                 error: function(xhr, status, err) {
@@ -595,7 +597,8 @@ if (sub.code && window.ace) {
 
                     renderHistoryUI();
                     cancelEditMode();
-
+			$(`#tabBtnQuestion_${currentQuestionIndex}`).addClass('completed');
+                    $(`#tabBtnQuestion_${currentQuestionIndex}`).find('i').removeClass('fa-file-code').addClass('fa-circle-check');
                     alert(isUpdating ? `✅ CẬP NHẬT BÀI NỘP THÀNH CÔNG!` : `✅ NỘP BÀI THÀNH CÔNG!`);
                 }
             });
@@ -851,4 +854,45 @@ function insertDrawingToEditor() {
     }
     
     $('#drawingContainer').addClass('d-none');
+}
+// Hàm kiểm tra toàn bộ dữ liệu để đánh dấu các câu đã nộp
+function checkCompletedQuestions() {
+    let mssv = $('#txtExerciseMSSV').val().trim();
+    if (!mssv || mssv === "Khách") return; // Nếu chưa đăng nhập thì không kiểm tra
+
+    $.ajax({
+        url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
+        method: "GET",
+        dataType: "json",
+        cache: false,
+        success: function(data) {
+            if (!data || data.length === 0) return;
+
+            let completedMaBai = new Set(); // Lưu danh sách các mã bài đã nộp
+
+            // Lọc dữ liệu để tìm các bài user đã nộp
+            data.forEach(row => {
+                let rowMssv = row[1] || '';
+                let contentRaw = row[2] || '';
+                
+                if (rowMssv.trim().toLowerCase() === mssv.toLowerCase()) {
+                    // Dùng Regex để lấy mã bài từ chuỗi dạng [SHARECODE|Tên môn|Mã bài]
+                    let match = contentRaw.match(/^\[SHARECODE\|(.*?)\|(.*?)\]/);
+                    if (match && match[1] === courseName) {
+                        completedMaBai.add(match[2].trim());
+                    }
+                }
+            });
+
+            // Duyệt qua danh sách câu hỏi hiện tại, nếu trùng mã bài thì tô xanh
+            questionsList.forEach((q, idx) => {
+                if (completedMaBai.has(q.maBai.trim())) {
+                    let tabBtn = $(`#tabBtnQuestion_${idx}`);
+                    tabBtn.addClass('completed'); // Thêm viền/nền xanh
+                    // Đổi icon thành dấu tick cho đẹp
+                    tabBtn.find('i').removeClass('fa-file-code').addClass('fa-circle-check'); 
+                }
+            });
+        }
+    });
 }

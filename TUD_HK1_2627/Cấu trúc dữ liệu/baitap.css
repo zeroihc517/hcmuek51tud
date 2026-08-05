@@ -168,3 +168,20 @@
 .tox-statusbar__branding {
     display: none !important;
 }
+/* TRẠNG THÁI CÂU HỎI ĐÃ HOÀN THÀNH (MÀU XANH LÁ) */
+.btn-question-tab.completed {
+    background-color: #dcfce7;
+    color: #166534;
+    border-color: #22c55e;
+}
+.btn-question-tab.completed:hover {
+    background-color: #bbf7d0;
+    border-color: #16a34a;
+    color: #15803d;
+}
+.btn-question-tab.completed.active {
+    background-color: #16a34a !important;
+    color: #ffffff !important;
+    border-color: #16a34a !important;
+    box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2);
+}
