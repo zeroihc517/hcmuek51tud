@@ -94,19 +94,26 @@ function renderOnlineFooterUI() {
 
         // --- A. CỐ ĐỊNH CHỮ "ADMIN" CHO TÀI KHOẢN ADMIN (51.01.108.008) ---
         if (userMssv === "51.01.108.008" || userMssv === "5101108008") {
-            studentList.push(`<span class="fw-bold" style="color: #facc15; text-transform: uppercase;"><i class="fa-solid fa-user-shield me-1"></i>ADMIN</span>`);
+            studentList.push(`<span class="fw-bold" style="color: #facc15; text-transform: uppercase;"><i class="fa-solid fa-user-shield me-1"></i>Admin</span>`);
             return;
         }
 
         // --- B. XỬ LÝ 4 NẤC HIỂN THỊ CHO SINH VIÊN KHÁC ---
-        if (currentIsAdmin) {
-            if (adminDisplayMode === 1) {
+      if (currentIsAdmin) {
+            if (adminDisplayMode === 0) {
+                // Mặc định của Admin: Hiện Tên rút gọn (Lấy 2 chữ cuối)
+                studentList.push(getNaturalShortName(userName));
+                return;
+            } else if (adminDisplayMode === 1) {
+                // Nấc 1: Hiện MSSV đầy đủ
                 studentList.push(userMssv);
                 return;
             } else if (adminDisplayMode === 2) {
+                // Nấc 2: Hiện Họ và Tên đầy đủ
                 studentList.push(userName);
                 return;
             } else if (adminDisplayMode === 3) {
+                // Nấc 3: Hiện Họ Tên (MSSV)
                 studentList.push(`${userName} (${userMssv})`);
                 return;
             }
@@ -908,9 +915,13 @@ $('#loadingStatus').addClass('d-none');
                     if (sheetName.toLowerCase() === 'thông báo') {
                         row.forEach((cell) => { headHtml += `<th>${String(cell || '')}</th>`; });
                     } else {
-                        // Tùy chỉnh tiêu đề cột cho Danh mục Học phần
-                        headHtml += `<th style="width: 105px;">STT</th><th>Nội dung bài học</th><th style="width: 250px;">Ghi chú</th>`;
-                    }
+        // Lấy tiêu đề trực tiếp từ dữ liệu dòng đầu tiên trong Sheet (Cột 1, Cột 2, Cột 4)
+        let h1 = String(row[0] || 'STT');
+        let h2 = String(row[1] || 'Nội dung bài học');
+        let h4 = String(row[3] || 'Ghi chú');
+        
+        headHtml += `<th style="width: 105px;">${h1}</th><th>${h2}</th><th style="width: 250px;">${h4}</th>`;
+    }
                     if (isAdmin) headHtml += `<th class="admin-action-col d-none" style="width: 180px; min-width: 180px;">Thao tác</th>`;
                     return; 
                 }
