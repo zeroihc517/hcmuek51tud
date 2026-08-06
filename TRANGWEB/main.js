@@ -1246,6 +1246,7 @@ function initGlobalApp() {
         
         // Cập nhật huy hiệu cho ShareCode cực mượt
         checkNewShareCodeGlobal(); 
+checkNewDatLichGlobal();
     }, 5000);
 
     // 2. ĐỒNG BỘ TRẠNG THÁI DEADLINE TỪ SERVER VỀ MÁY KHI KHỞI ĐỘNG
@@ -1280,6 +1281,7 @@ function initGlobalApp() {
     loadWebLinks();
     checkNewQA(); 
     checkNewShareCodeGlobal();
+	checkNewDatLichGlobal();
     fetchAndRenderCategories();
     renderUserInfo();
 	if (currentUser && currentUser.mssv) {

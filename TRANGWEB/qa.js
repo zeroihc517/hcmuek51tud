@@ -66,13 +66,15 @@ window.copyShareCodeDirect = function(index, btnElement) {
     });
 };
 // Biến lưu trạng thái toàn cục
+// Thêm biến theo dõi Đặt lịch hẹn
 window.isQAUnanswered = false;
 window.isShareCodeNew = false;
+window.isDatLichNew = false; // THÊM MỚI
 
-// Hàm cập nhật Badge ngoài Sidebar
+// Cập nhật hàm updateSidebarThaoLuanBadge
 function updateSidebarThaoLuanBadge() {
-    // Bật/tắt ngoài Sidebar
-    if (window.isQAUnanswered || window.isShareCodeNew) {
+    // Bật/tắt ngoài Sidebar (Thêm isDatLichNew)
+    if (window.isQAUnanswered || window.isShareCodeNew || window.isDatLichNew) {
         $('#shareCodeSidebarBadge').removeClass('d-none');
     } else {
         $('#shareCodeSidebarBadge').addClass('d-none');
@@ -84,7 +86,58 @@ function updateSidebarThaoLuanBadge() {
     } else {
         $('#qaInsideBadge').addClass('d-none');
     }
+    
+    // THÊM MỚI: Bật/tắt riêng cho thẻ "Đặt lịch hẹn"
+    if (window.isDatLichNew) {
+        $('#datLichInsideBadge').removeClass('d-none');
+    } else {
+        $('#datLichInsideBadge').addClass('d-none');
+    }
 }
+// Hàm kiểm tra Đặt Lịch Hẹn có bài mới hay không
+function checkNewDatLichGlobal() {
+    $.ajax({
+        url: SCRIPT_URL + "?action=getDatLichHenData",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            if (!data || data.length === 0) {
+                window.isDatLichNew = false;
+                updateSidebarThaoLuanBadge();
+                return;
+            }
+
+            let nowTime = new Date().getTime();
+            let oneDayMs = 24 * 60 * 60 * 1000; // 24 giờ
+            let hasNew = false;
+
+            data.forEach(item => {
+                let time = item.updateTime || '';
+                let postDate = null;
+                
+                let match2 = time.match(/(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/); 
+                let match1 = time.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/); 
+                
+                if (match2) {
+                    postDate = new Date(parseInt(match2[5]), parseInt(match2[4]) - 1, parseInt(match2[3]), parseInt(match2[1]), parseInt(match2[2]), 0);
+                } else if (match1) {
+                    let h = match1[4] ? parseInt(match1[4]) : 0;
+                    let m = match1[5] ? parseInt(match1[5]) : 0;
+                    postDate = new Date(parseInt(match1[3]), parseInt(match1[2]) - 1, parseInt(match1[1]), h, m, 0);
+                }
+
+                // Nếu bài đăng xuất hiện trong vòng 1 ngày -> Có bài mới
+                if (postDate && (nowTime - postDate.getTime() <= oneDayMs)) {
+                    hasNew = true;
+                }
+            });
+
+            window.isDatLichNew = hasNew;
+            updateSidebarThaoLuanBadge();
+        }
+    });
+}
+
 // 1. Kiểm tra Q&A có câu hỏi mới chưa trả lời
 function checkNewQA() { 
     $.ajax({ 
