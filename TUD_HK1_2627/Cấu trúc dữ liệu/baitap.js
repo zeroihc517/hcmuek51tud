@@ -45,53 +45,86 @@ let langParam = urlParams.get('lang') || "cpp";
             });
         });
 
+// Thêm biến toàn cục để lưu cache lịch sử nộp bài (đặt ở đầu file cùng các biến khác)
+let globalSubmissionData = null;
+
 function loadQuestionsData() {
     let displayKeyword = filterKeyword || "Tất cả bài tập";
-    $('#questionContentArea').html(`<div class="text-center py-4 text-primary"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang lọc đề bài "${displayKeyword}"...</div>`);
+    $('#questionContentArea').html(`<div class="text-center py-4 text-primary"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải dữ liệu đề bài và lịch sử...</div>`);
     
-    $.ajax({
+    let mssv = $('#txtExerciseMSSV').val().trim();
+    
+    // 1. Tạo request lấy danh sách câu hỏi
+    let reqQuestions = $.ajax({
         url: SCRIPT_URL + "?action=getExerciseQuestions&course=" + encodeURIComponent(courseName),
         method: "GET",
         dataType: "json",
-        cache: false,   
-        success: function(data) {
-            if (data && data.length > 0) {
-                if (filterKeyword) {
-                    // Dùng biến filterKeyword đã khai báo thay vì fix cứng chuỗi
-                    questionsList = data.filter(q => q.title && q.title.toLowerCase().includes(filterKeyword.toLowerCase()));
-                } else {
-                    questionsList = data;
-                }
-            } 
-            
-            if (!questionsList || questionsList.length === 0) {
-                $('#questionContentArea').html(`<div class="text-danger fw-bold py-3"><i class="fa-solid fa-triangle-exclamation"></i> Không tìm thấy câu hỏi nào chứa tiêu đề "${displayKeyword}".</div>`);
-                $('#questionTabsContainer').html('');
-                $('#labelTotalQuestions').text('0 câu');
-                return;
-            }
+        cache: false
+    });
 
-            let tabsHtml = "";
-            questionsList.forEach((q, idx) => {
-                tabsHtml += `
-                    <button class="btn-question-tab ${idx === 0 ? 'active' : ''}" id="tabBtnQuestion_${idx}" onclick="switchQuestion(${idx})">
-                        <i class="fa-solid fa-file-code"></i> Câu ${idx + 1}
-                    </button>
-                `;
-            });
+    // 2. Tạo request lấy lịch sử bài nộp (Chỉ lấy nếu không phải là "Khách")
+    let reqHistory = (mssv && mssv !== "Khách") ? $.ajax({
+        url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
+        method: "GET",
+        dataType: "json",
+        cache: false
+    }) : $.Deferred().resolve([]).promise();
 
-            $('#questionTabsContainer').html(tabsHtml);
-            $('#labelTotalQuestions').text(`Tổng: ${questionsList.length} câu`);
+    // 3. Chạy TẤT CẢ cùng lúc
+    $.when(reqQuestions, reqHistory).done(function(resQuestions, resHistory) {
+        let dataQ = resQuestions[0];
+        let dataH = resHistory[0] || [];
+        
+        // Lưu lịch sử vào biến toàn cục để dùng ngay cho các câu khác
+        globalSubmissionData = dataH; 
 
-            renderQuestion(0);
-	checkCompletedQuestions();
-        },
-        error: function() {
-            $('#questionContentArea').html('<div class="text-danger fw-bold py-3">Lỗi kết nối khi tải đề bài!</div>');
+        if (dataQ && dataQ.length > 0) {
+            questionsList = filterKeyword ? dataQ.filter(q => q.title && q.title.toLowerCase().includes(filterKeyword.toLowerCase())) : dataQ;
+        } 
+        
+        if (!questionsList || questionsList.length === 0) {
+            $('#questionContentArea').html(`<div class="text-danger fw-bold py-3"><i class="fa-solid fa-triangle-exclamation"></i> Không tìm thấy câu hỏi nào chứa tiêu đề "${displayKeyword}".</div>`);
+            $('#questionTabsContainer').html('');
+            $('#labelTotalQuestions').text('0 câu');
+            return;
         }
+
+        // 4. Lọc ra các mã bài đã nộp từ lịch sử vừa lấy
+        let completedMaBai = new Set();
+        dataH.forEach(row => {
+            let rowMssv = row[1] || '';
+            let contentRaw = row[2] || '';
+            if (rowMssv.trim().toLowerCase() === mssv.toLowerCase()) {
+                let match = contentRaw.match(/^\[SHARECODE\|(.*?)\|(.*?)\]/);
+                if (match && match[1] === courseName) {
+                    completedMaBai.add(match[2].trim());
+                }
+            }
+        });
+
+        // 5. Sinh HTML cho Tabs và TÔ MÀU XANH LUÔN nếu đã làm
+        let tabsHtml = "";
+        questionsList.forEach((q, idx) => {
+            let isCompleted = completedMaBai.has(q.maBai.trim());
+            let activeClass = idx === 0 ? 'active' : '';
+            let completedClass = isCompleted ? 'completed' : ''; // Đã tích hợp class tô xanh từ CSS
+            let iconClass = isCompleted ? 'fa-circle-check' : 'fa-file-code';
+            
+            tabsHtml += `
+                <button class="btn-question-tab ${activeClass} ${completedClass}" id="tabBtnQuestion_${idx}" onclick="switchQuestion(${idx})">
+                    <i class="fa-solid ${iconClass}"></i> Câu ${idx + 1}
+                </button>
+            `;
+        });
+
+        $('#questionTabsContainer').html(tabsHtml);
+        $('#labelTotalQuestions').text(`Tổng: ${questionsList.length} câu`);
+
+        renderQuestion(0);
+    }).fail(function() {
+        $('#questionContentArea').html('<div class="text-danger fw-bold py-3">Lỗi kết nối khi tải dữ liệu!</div>');
     });
 }
-
 function renderQuestion(index) {
     index = parseInt(index);
     currentQuestionIndex = index;
@@ -397,87 +430,100 @@ if (sub.code && window.ace) {
             }
         }
 
-        function loadSubmissionHistory() {
-            let mssv = $('#txtExerciseMSSV').val().trim();
-            let q = questionsList[currentQuestionIndex];
-            
-            if (!q || !mssv || mssv === "Khách") {
-                $('#submissionHistoryContainer').html(`
-                    <div class="text-center text-muted py-3">
-                        <i class="fa-solid fa-lock text-secondary fs-4 mb-2 d-block"></i>
-                        Vui lòng đăng nhập tài khoản để xem lịch sử nộp bài cá nhân.
-                    </div>
-                `);
-                return;
-            }
+        function loadSubmissionHistory(forceRefresh = false) {
+    let mssv = $('#txtExerciseMSSV').val().trim();
+    let q = questionsList[currentQuestionIndex];
+    
+    if (!q || !mssv || mssv === "Khách") {
+        $('#submissionHistoryContainer').html(`
+            <div class="text-center text-muted py-3">
+                <i class="fa-solid fa-lock text-secondary fs-4 mb-2 d-block"></i>
+                Vui lòng đăng nhập tài khoản để xem lịch sử nộp bài cá nhân.
+            </div>
+        `);
+        return;
+    }
 
-            $('#submissionHistoryContainer').html(`
-                <div class="text-center text-muted py-3">
-                    <i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải danh sách bài nộp của mã <b>${q.maBai}</b>...
-                </div>
-            `);
-
-            $.ajax({
-                url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
-                method: "GET",
-                dataType: "json",
-                cache: false,
-                success: function(data) {
-                    currentSubmissionsList = [];
-                    if (!data || data.length === 0) {
-                        renderHistoryUI();
-                        return;
-                    }
-
-                    let targetTag = `[SHARECODE|${courseName}|${q.maBai}]`;
-
-                    data.forEach(row => {
-                        let time = row[0] || '';
-                        let rowMssv = row[1] || '';
-                        let contentRaw = row[2] || '';
-			let answerThread = row[3] || '';
-                        let rowIndex = row[6];
-
-                        if (rowMssv.trim().toLowerCase() === mssv.toLowerCase() && contentRaw.startsWith(targetTag)) {
-                            let cleanContent = contentRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '').trim();
-                            
-                            let theoryPart = "";
-                            let codePart = "";
-                            let langMatch = "CPP";
-
-                            let codeMatch = cleanContent.match(/```(cpp|python|c\+\+|c)?([\s\S]*?)```/i);
-                            if (codeMatch) {
-                                let rawLang = (codeMatch[1] || "cpp").toLowerCase();
-                                langMatch = (rawLang === 'python') ? 'PYTHON' : 'CPP';
-                                codePart = codeMatch[2].trim();
-                                theoryPart = cleanContent.replace(codeMatch[0], '').trim();
-                            } else {
-                                theoryPart = cleanContent;
-                            }
-
-                            theoryPart = theoryPart.replace(/<div class="mb-3"><strong>Lời giải lý thuyết:<\/strong><br>/g, '')
-                                                   .replace(/<\/div>$/g, '')
-                                                   .replace(/<p><\/p>/g, '')
-                                                   .trim();
-
-                            currentSubmissionsList.push({
-                                rowIndex: rowIndex,
-                                time: time,
-                                theory: theoryPart,
-                                code: codePart,
-                                lang: langMatch,
-				answerThread: answerThread
-                            });
-                        }
-                    });
-
-                    renderHistoryUI();
-                },
-                error: function() {
-                    $('#submissionHistoryContainer').html(`<div class="text-center text-danger py-3">Lỗi kết nối khi tải lịch sử bài nộp!</div>`);
-                }
-            });
+    // Hàm nội bộ để xử lý và render UI từ data có sẵn
+    const processHistoryData = (data) => {
+        currentSubmissionsList = [];
+        if (!data || data.length === 0) {
+            renderHistoryUI();
+            return;
         }
+
+        let targetTag = `[SHARECODE|${courseName}|${q.maBai}]`;
+
+        data.forEach(row => {
+            let time = row[0] || '';
+            let rowMssv = row[1] || '';
+            let contentRaw = row[2] || '';
+            let answerThread = row[3] || '';
+            let rowIndex = row[6];
+
+            if (rowMssv.trim().toLowerCase() === mssv.toLowerCase() && contentRaw.startsWith(targetTag)) {
+                let cleanContent = contentRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '').trim();
+                
+                let theoryPart = "";
+                let codePart = "";
+                let langMatch = "CPP";
+
+                let codeMatch = cleanContent.match(/```(cpp|python|c\+\+|c)?([\s\S]*?)```/i);
+                if (codeMatch) {
+                    let rawLang = (codeMatch[1] || "cpp").toLowerCase();
+                    langMatch = (rawLang === 'python') ? 'PYTHON' : 'CPP';
+                    codePart = codeMatch[2].trim();
+                    theoryPart = cleanContent.replace(codeMatch[0], '').trim();
+                } else {
+                    theoryPart = cleanContent;
+                }
+
+                theoryPart = theoryPart.replace(/<div class="mb-3"><strong>Lời giải lý thuyết:<\/strong><br>/g, '')
+                                       .replace(/<\/div>$/g, '')
+                                       .replace(/<p><\/p>/g, '')
+                                       .trim();
+
+                currentSubmissionsList.push({
+                    rowIndex: rowIndex,
+                    time: time,
+                    theory: theoryPart,
+                    code: codePart,
+                    lang: langMatch,
+                    answerThread: answerThread
+                });
+            }
+        });
+
+        renderHistoryUI();
+    };
+
+    // NẾU KHÔNG BẮT BUỘC LÀM MỚI VÀ ĐÃ CÓ CACHE -> DÙNG LUÔN (TỐC ĐỘ RẤT NHANH)
+    if (!forceRefresh && globalSubmissionData) {
+        processHistoryData(globalSubmissionData);
+        return;
+    }
+
+    // NẾU ÉP LÀM MỚI HOẶC CHƯA CÓ DATA -> GỌI LẠI API
+    $('#submissionHistoryContainer').html(`
+        <div class="text-center text-muted py-3">
+            <i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải danh sách bài nộp của mã <b>${q.maBai}</b>...
+        </div>
+    `);
+
+    $.ajax({
+        url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
+        method: "GET",
+        dataType: "json",
+        cache: false,
+        success: function(data) {
+            globalSubmissionData = data; // Cập nhật lại cache toàn cục
+            processHistoryData(data);
+        },
+        error: function() {
+            $('#submissionHistoryContainer').html(`<div class="text-center text-danger py-3">Lỗi kết nối khi tải lịch sử bài nộp!</div>`);
+        }
+    });
+}
 
         function escapeHtml(text) {
             return text
@@ -661,7 +707,7 @@ function sendExerciseHistoryReply(rowIndex) {
             $(`#replyBoxExercise_${rowIndex}`).addClass('d-none');
 
             // 3. Kích hoạt load lại lịch sử
-            loadSubmissionHistory();
+            loadSubmissionHistory(true);
 
             // 4. Báo thành công sau 300ms (Không làm kẹt giao diện)
             setTimeout(function() {
