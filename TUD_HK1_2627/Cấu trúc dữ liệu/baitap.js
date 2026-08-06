@@ -46,83 +46,87 @@ let langParam = urlParams.get('lang') || "cpp";
         });
 
 // Thêm biến toàn cục để lưu cache lịch sử nộp bài (đặt ở đầu file cùng các biến khác)
+// Thêm 2 biến toàn cục để quản lý lịch sử tải ngầm (đặt ở đầu file)
 let globalSubmissionData = null;
+let historyAjaxRequest = null; 
 
 function loadQuestionsData() {
     let displayKeyword = filterKeyword || "Tất cả bài tập";
-    $('#questionContentArea').html(`<div class="text-center py-4 text-primary"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải dữ liệu đề bài và lịch sử...</div>`);
+    $('#questionContentArea').html(`<div class="text-center py-4 text-primary"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải dữ liệu đề bài...</div>`);
     
     let mssv = $('#txtExerciseMSSV').val().trim();
     
-    // 1. Tạo request lấy danh sách câu hỏi
-    let reqQuestions = $.ajax({
+    // --- 1. Gọi API tải LỊCH SỬ CHẠY NGẦM (Không làm kẹt giao diện hiển thị đề) ---
+    if (mssv && mssv !== "Khách") {
+        historyAjaxRequest = $.ajax({
+            url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
+            method: "GET",
+            dataType: "json",
+            cache: false
+        }).done(function(dataH) {
+            globalSubmissionData = dataH;
+            
+            // Sau khi tải ngầm xong, lướt qua để tô màu xanh các câu đã làm
+            if (questionsList && questionsList.length > 0) {
+                let completedMaBai = new Set();
+                dataH.forEach(row => {
+                    let rowMssv = row[1] || '';
+                    let contentRaw = row[2] || '';
+                    if (rowMssv.trim().toLowerCase() === mssv.toLowerCase()) {
+                        let match = contentRaw.match(/^\[SHARECODE\|(.*?)\|(.*?)\]/);
+                        if (match && match[1] === courseName) {
+                            completedMaBai.add(match[2].trim());
+                        }
+                    }
+                });
+
+                questionsList.forEach((q, idx) => {
+                    if (completedMaBai.has(q.maBai.trim())) {
+                        let tabBtn = $(`#tabBtnQuestion_${idx}`);
+                        tabBtn.addClass('completed');
+                        tabBtn.find('i').removeClass('fa-file-code').addClass('fa-circle-check');
+                    }
+                });
+            }
+        });
+    }
+
+    // --- 2. Gọi API tải ĐỀ BÀI (Ưu tiên hiển thị ra ngay lập tức) ---
+    $.ajax({
         url: SCRIPT_URL + "?action=getExerciseQuestions&course=" + encodeURIComponent(courseName),
         method: "GET",
         dataType: "json",
-        cache: false
-    });
-
-    // 2. Tạo request lấy lịch sử bài nộp (Chỉ lấy nếu không phải là "Khách")
-    let reqHistory = (mssv && mssv !== "Khách") ? $.ajax({
-        url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
-        method: "GET",
-        dataType: "json",
-        cache: false
-    }) : $.Deferred().resolve([]).promise();
-
-    // 3. Chạy TẤT CẢ cùng lúc
-    $.when(reqQuestions, reqHistory).done(function(resQuestions, resHistory) {
-        let dataQ = resQuestions[0];
-        let dataH = resHistory[0] || [];
-        
-        // Lưu lịch sử vào biến toàn cục để dùng ngay cho các câu khác
-        globalSubmissionData = dataH; 
-
-        if (dataQ && dataQ.length > 0) {
-            questionsList = filterKeyword ? dataQ.filter(q => q.title && q.title.toLowerCase().includes(filterKeyword.toLowerCase())) : dataQ;
-        } 
-        
-        if (!questionsList || questionsList.length === 0) {
-            $('#questionContentArea').html(`<div class="text-danger fw-bold py-3"><i class="fa-solid fa-triangle-exclamation"></i> Không tìm thấy câu hỏi nào chứa tiêu đề "${displayKeyword}".</div>`);
-            $('#questionTabsContainer').html('');
-            $('#labelTotalQuestions').text('0 câu');
-            return;
-        }
-
-        // 4. Lọc ra các mã bài đã nộp từ lịch sử vừa lấy
-        let completedMaBai = new Set();
-        dataH.forEach(row => {
-            let rowMssv = row[1] || '';
-            let contentRaw = row[2] || '';
-            if (rowMssv.trim().toLowerCase() === mssv.toLowerCase()) {
-                let match = contentRaw.match(/^\[SHARECODE\|(.*?)\|(.*?)\]/);
-                if (match && match[1] === courseName) {
-                    completedMaBai.add(match[2].trim());
-                }
-            }
-        });
-
-        // 5. Sinh HTML cho Tabs và TÔ MÀU XANH LUÔN nếu đã làm
-        let tabsHtml = "";
-        questionsList.forEach((q, idx) => {
-            let isCompleted = completedMaBai.has(q.maBai.trim());
-            let activeClass = idx === 0 ? 'active' : '';
-            let completedClass = isCompleted ? 'completed' : ''; // Đã tích hợp class tô xanh từ CSS
-            let iconClass = isCompleted ? 'fa-circle-check' : 'fa-file-code';
+        cache: false,
+        success: function(dataQ) {
+            if (dataQ && dataQ.length > 0) {
+                questionsList = filterKeyword ? dataQ.filter(q => q.title && q.title.toLowerCase().includes(filterKeyword.toLowerCase())) : dataQ;
+            } 
             
-            tabsHtml += `
-                <button class="btn-question-tab ${activeClass} ${completedClass}" id="tabBtnQuestion_${idx}" onclick="switchQuestion(${idx})">
-                    <i class="fa-solid ${iconClass}"></i> Câu ${idx + 1}
-                </button>
-            `;
-        });
+            if (!questionsList || questionsList.length === 0) {
+                $('#questionContentArea').html(`<div class="text-danger fw-bold py-3"><i class="fa-solid fa-triangle-exclamation"></i> Không tìm thấy câu hỏi nào chứa tiêu đề "${displayKeyword}".</div>`);
+                $('#questionTabsContainer').html('');
+                $('#labelTotalQuestions').text('0 câu');
+                return;
+            }
 
-        $('#questionTabsContainer').html(tabsHtml);
-        $('#labelTotalQuestions').text(`Tổng: ${questionsList.length} câu`);
+            let tabsHtml = "";
+            questionsList.forEach((q, idx) => {
+                tabsHtml += `
+                    <button class="btn-question-tab ${idx === 0 ? 'active' : ''}" id="tabBtnQuestion_${idx}" onclick="switchQuestion(${idx})">
+                        <i class="fa-solid fa-file-code"></i> Câu ${idx + 1}
+                    </button>
+                `;
+            });
 
-        renderQuestion(0);
-    }).fail(function() {
-        $('#questionContentArea').html('<div class="text-danger fw-bold py-3">Lỗi kết nối khi tải dữ liệu!</div>');
+            $('#questionTabsContainer').html(tabsHtml);
+            $('#labelTotalQuestions').text(`Tổng: ${questionsList.length} câu`);
+checkCompletedQuestions();
+            // Mở ngay câu hỏi đầu tiên
+            renderQuestion(0);
+        },
+        error: function() {
+            $('#questionContentArea').html('<div class="text-danger fw-bold py-3">Lỗi kết nối khi tải đề bài!</div>');
+        }
     });
 }
 function renderQuestion(index) {
@@ -430,7 +434,7 @@ if (sub.code && window.ace) {
             }
         }
 
-        function loadSubmissionHistory(forceRefresh = false) {
+      function loadSubmissionHistory(forceRefresh = false) {
     let mssv = $('#txtExerciseMSSV').val().trim();
     let q = questionsList[currentQuestionIndex];
     
@@ -444,7 +448,6 @@ if (sub.code && window.ace) {
         return;
     }
 
-    // Hàm nội bộ để xử lý và render UI từ data có sẵn
     const processHistoryData = (data) => {
         currentSubmissionsList = [];
         if (!data || data.length === 0) {
@@ -497,32 +500,44 @@ if (sub.code && window.ace) {
         renderHistoryUI();
     };
 
-    // NẾU KHÔNG BẮT BUỘC LÀM MỚI VÀ ĐÃ CÓ CACHE -> DÙNG LUÔN (TỐC ĐỘ RẤT NHANH)
-    if (!forceRefresh && globalSubmissionData) {
+    $('#submissionHistoryContainer').html(`
+        <div class="text-center text-muted py-3">
+            <i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải lịch sử bài nộp của mã <b>${q.maBai}</b>...
+        </div>
+    `);
+
+    // 1. NẾU ÉP LÀM MỚI -> Gọi lại API từ đầu
+    if (forceRefresh) {
+        historyAjaxRequest = $.ajax({
+            url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
+            method: "GET",
+            dataType: "json",
+            cache: false,
+            success: function(data) {
+                globalSubmissionData = data;
+                processHistoryData(data);
+            },
+            error: function() {
+                $('#submissionHistoryContainer').html(`<div class="text-center text-danger py-3">Lỗi kết nối khi tải lịch sử bài nộp!</div>`);
+            }
+        });
+        return;
+    }
+
+    // 2. NẾU ĐÃ CÓ CACHE -> Xử lý luôn (Chuyển câu rất mượt)
+    if (globalSubmissionData) {
         processHistoryData(globalSubmissionData);
         return;
     }
 
-    // NẾU ÉP LÀM MỚI HOẶC CHƯA CÓ DATA -> GỌI LẠI API
-    $('#submissionHistoryContainer').html(`
-        <div class="text-center text-muted py-3">
-            <i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải danh sách bài nộp của mã <b>${q.maBai}</b>...
-        </div>
-    `);
-
-    $.ajax({
-        url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
-        method: "GET",
-        dataType: "json",
-        cache: false,
-        success: function(data) {
-            globalSubmissionData = data; // Cập nhật lại cache toàn cục
-            processHistoryData(data);
-        },
-        error: function() {
-            $('#submissionHistoryContainer').html(`<div class="text-center text-danger py-3">Lỗi kết nối khi tải lịch sử bài nộp!</div>`);
-        }
-    });
+    // 3. NẾU ĐANG CHỜ API LỊCH SỬ CHẠY NGẦM HOÀN THÀNH -> Đợi nó xong thì in ra
+    if (historyAjaxRequest) {
+        historyAjaxRequest.done(function() {
+            processHistoryData(globalSubmissionData);
+        }).fail(function() {
+            $('#submissionHistoryContainer').html(`<div class="text-center text-danger py-3">Lỗi tải lịch sử!</div>`);
+        });
+    }
 }
 
         function escapeHtml(text) {
@@ -957,45 +972,48 @@ function insertDrawingToEditor() {
     $('#drawingContainer').addClass('d-none');
 }
 // Hàm kiểm tra toàn bộ dữ liệu để đánh dấu các câu đã nộp
+// Hàm kiểm tra toàn bộ dữ liệu để đánh dấu các câu đã nộp
 function checkCompletedQuestions() {
     let mssv = $('#txtExerciseMSSV').val().trim();
     if (!mssv || mssv === "Khách") return; // Nếu chưa đăng nhập thì không kiểm tra
 
-    $.ajax({
-        url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
-        method: "GET",
-        dataType: "json",
-        cache: false,
-        success: function(data) {
-            if (!data || data.length === 0) return;
-
-            let completedMaBai = new Set(); // Lưu danh sách các mã bài đã nộp
-
-            // Lọc dữ liệu để tìm các bài user đã nộp
-            data.forEach(row => {
-                let rowMssv = row[1] || '';
-                let contentRaw = row[2] || '';
-                
-                if (rowMssv.trim().toLowerCase() === mssv.toLowerCase()) {
-                    // Dùng Regex để lấy mã bài từ chuỗi dạng [SHARECODE|Tên môn|Mã bài]
-                    let match = contentRaw.match(/^\[SHARECODE\|(.*?)\|(.*?)\]/);
-                    if (match && match[1] === courseName) {
-                        completedMaBai.add(match[2].trim());
-                    }
+    // Hàm xử lý chung để duyệt mảng và tô màu
+    const processCompleted = (data) => {
+        if (!data || data.length === 0) return;
+        let completedMaBai = new Set();
+        
+        data.forEach(row => {
+            let rowMssv = row[1] || '';
+            let contentRaw = row[2] || '';
+            if (rowMssv.trim().toLowerCase() === mssv.toLowerCase()) {
+                let match = contentRaw.match(/^\[SHARECODE\|(.*?)\|(.*?)\]/);
+                if (match && match[1] === courseName) {
+                    completedMaBai.add(match[2].trim());
                 }
-            });
+            }
+        });
 
-            // Duyệt qua danh sách câu hỏi hiện tại, nếu trùng mã bài thì tô xanh
-            questionsList.forEach((q, idx) => {
-                if (completedMaBai.has(q.maBai.trim())) {
-                    let tabBtn = $(`#tabBtnQuestion_${idx}`);
-                    tabBtn.addClass('completed'); // Thêm viền/nền xanh
-                    // Đổi icon thành dấu tick cho đẹp
-                    tabBtn.find('i').removeClass('fa-file-code').addClass('fa-circle-check'); 
-                }
-            });
-        }
-    });
+        // Duyệt qua danh sách câu hỏi hiện tại, nếu trùng mã bài thì tô xanh
+        questionsList.forEach((q, idx) => {
+            if (completedMaBai.has(q.maBai.trim())) {
+                let tabBtn = $(`#tabBtnQuestion_${idx}`);
+                tabBtn.addClass('completed'); // Thêm viền/nền xanh
+                // Đổi icon thành dấu tick cho đẹp
+                tabBtn.find('i').removeClass('fa-file-code').addClass('fa-circle-check'); 
+            }
+        });
+    };
+
+    // Nếu đã tải xong dữ liệu lịch sử ngầm, dùng ngay
+    if (globalSubmissionData) {
+        processCompleted(globalSubmissionData);
+    } 
+    // Nếu API tải ngầm vẫn đang chạy, thì chờ nó done rồi mới chạy
+    else if (historyAjaxRequest) {
+        historyAjaxRequest.done(function(data) {
+            processCompleted(data);
+        });
+    }
 }
 // Hàm mở rộng chiều dài bảng vẽ
 function expandCanvas() {
