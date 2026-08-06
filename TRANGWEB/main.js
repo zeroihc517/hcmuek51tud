@@ -608,7 +608,7 @@ let now = new Date();
     let assignedTbCode = tbCodesMap[rowIndex] || "";
     
     // Ghi nhớ dữ liệu vào detailData KỂ CẢ KHI BÀI ĐÃ BỊ ẨN để dán link mở được
-    detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew, isHidden, tbCode: assignedTbCode };
+   detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew, isHidden, tbCode: assignedTbCode, deadlineTime: deadlineTime };
 
     // Bỏ qua không vẽ ra danh sách bên ngoài nếu bài bị ẩn và không phải Admin
 if (isHidden && !isAdmin) {
@@ -728,7 +728,7 @@ else {
 
                         let linkHtml = data.c6 ? `<div class="mt-4"><a href="${data.c6}" target="_blank" class="btn fw-bold text-white shadow-sm px-4" style="background: #0f4c81; border-radius: 8px;"><i class="fa-solid fa-link me-2"></i>Truy cập liên kết đính kèm</a></div>` : '';
                         let noteHtml = data.c7 ? `<div class="mt-4 p-3 border-start border-4 border-warning rounded text-dark" style="background: #fffbeb;"><strong><i class="fa-solid fa-paperclip me-1"></i> Ghi chú:</strong> ${data.c7}</div>` : '';
-                        let detailDeadlineTime = extractDeadline(data.c3) || extractDeadline(data.c7);
+                       let detailDeadlineTime = data.deadlineTime;
                         let detailCountdownHtml = '';
                         if (detailDeadlineTime) {
                             detailCountdownHtml = `
