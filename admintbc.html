@@ -178,6 +178,7 @@
       <h3>Nền tảng</h3>
       <a class="active" onclick="showTab('nentang',this)">HCMUE</a>
       <a onclick="showTab('ungdung',this)">Cá nhân</a>
+<a onclick="showTab('lichsu',this)">Lịch sử</a>
       <a href="login.html" target="_self" onclick="showTab('ungdung', this)">Học nhóm Năm 2</a>
 	  <a href="webduphong.html" target="_self" onclick="showTab('ungdung', this)">Học nhóm (Dự phòng)</a>
       
@@ -194,7 +195,39 @@
       <div id="ungdung" class="content">
           <div class="platform-grid"></div>
       </div>
+	
+<div id="lichsu" class="content">
+        <div class="card" style="margin-top: 24px; padding: 20px; background: #fff; border-radius: 14px; box-shadow: 0 4px 18px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="font-size: 18px; font-weight: 700; color: #0f4c81; margin: 0;">
+                    <i class="fa-solid fa-clock-rotate-left" style="margin-right: 8px;"></i>Lịch sử truy cập của Sinh viên
+                </h3>
+                <button onclick="fetchUserAccessHistory()" style="background: #0f4c81; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">
+                    <i class="fa-solid fa-rotate-right" style="margin-right: 6px;"></i> Làm mới
+                </button>
+            </div>
 
+            <div style="overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 14px;">
+                    <thead>
+                        <tr style="background: #0f4c81; color: #fff;">
+                            <th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2); width: 60px;">STT</th>
+                            <th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2);">MSSV</th>
+                            <th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2);">Họ và Tên</th>
+                            <th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2);">Mục đang xem</th>
+                            <th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2);">Lần cuối truy cập</th>
+                            <th style="padding: 12px; border: 1px solid rgba(255,255,255,0.2);">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accessHistoryTableBody">
+                        <tr>
+                            <td colspan="6" style="padding: 20px; color: #6b7280;">Bấm "Làm mới" để tải dữ liệu...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>	
       <div id="hk2" class="content">
           <div class="card">
               <div class="card-header">Thời khóa biểu cá nhân</div>
@@ -852,6 +885,86 @@ displayHinhThuc = displayHinhThuc.replace(/#\S+/g, '').trim();
     }
     tbody.innerHTML = tableHtml;
 }
+// 1. Hàm định dạng ngày giờ sang giờ Việt Nam (DD/MM/YYYY HH:MM:SS)
+function formatVNDateTime(dateStr) {
+    if (!dateStr || dateStr === "Chưa từng truy cập") return "Chưa từng truy cập";
+    let d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    let utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    let vnTime = new Date(utc + (3600000 * 7));
+    let pad = (n) => String(n).padStart(2, '0');
+    return `${pad(vnTime.getDate())}/${pad(vnTime.getMonth() + 1)}/${vnTime.getFullYear()} ${pad(vnTime.getHours())}:${pad(vnTime.getMinutes())}:${pad(vnTime.getSeconds())}`;
+}
+
+// Gọi API lấy lịch sử truy cập
+// Gọi API lấy lịch sử truy cập
+function fetchUserAccessHistory() {
+    const tbody = $('#accessHistoryTableBody');
+    if (!tbody.length) return;
+    tbody.html('<tr><td colspan="6" style="padding: 20px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>Đang tải lịch sử truy cập...</td></tr>');
+
+    // ĐIỂM QUAN TRỌNG: Trỏ URL API về đúng hệ thống Backend của Applied Math
+    const APPLIED_MATH_API = 'https://script.google.com/macros/s/AKfycbw4R45QtR887n5OPtToGn-ZOIICrCUOVByIfiSvqpEb-DYFCace12MeeA3m_1Oo8xc0/exec';
+
+    $.ajax({
+        url: APPLIED_MATH_API + "?action=getAllUsersAccessHistory",
+        method: "GET",
+        dataType: "json",
+        success: function(users) {
+            if (!users || users.length === 0) {
+                tbody.html('<tr><td colspan="6" style="padding: 20px; color: #6b7280;">Chưa có dữ liệu thành viên.</td></tr>');
+                return;
+            }
+            
+            // Xếp người hoạt động gần nhất lên đầu
+            users.sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive));
+            let html = '';
+            
+            users.forEach((u, index) => {
+                let statusBadge = '<span style="color: #6b7280; font-weight: 600;"><i class="fa-solid fa-circle" style="font-size: 8px; margin-right: 4px;"></i> Ngoại tuyến</span>';
+                if (u.lastActive && u.lastActive !== "Chưa từng truy cập") {
+                    let lastTime = new Date(u.lastActive).getTime();
+                    let nowTime = new Date().getTime();
+                    let diffMinutes = (nowTime - lastTime) / (1000 * 60);
+                    if (diffMinutes <= 5) {
+                        statusBadge = '<span style="color: #16a34a; font-weight: 700;"><i class="fa-solid fa-circle fa-beat" style="font-size: 8px; margin-right: 4px;"></i> Đang hoạt động</span>';
+                    } else if (diffMinutes <= 60) {
+                        statusBadge = `<span style="color: #d97706; font-weight: 600;"><i class="fa-solid fa-clock" style="margin-right: 4px;"></i> ${Math.floor(diffMinutes)} phút trước</span>`;
+                    }
+                }
+
+                let sectionName = u.lastView || u.currentSection || u.action || u.view || "Không rõ";
+                let formattedSectionName = sectionName;
+                if (sectionName !== "Không rõ" && sectionName !== "") {
+                    formattedSectionName = sectionName.replace(/\s-\s/g, '<br><i class="fa-solid fa-arrow-turn-up fa-rotate-90" style="font-size: 11px; margin-left: 8px; color: #6b7280;"></i> ');
+                }
+                
+                let currentSectionText = (sectionName !== "Không rõ" && sectionName !== "") 
+                    ? `<div style="color: #0284c7; font-weight: 600; text-align: left; display: inline-block; line-height: 1.5;">${formattedSectionName}</div>` 
+                    : `<span style="color: #9ca3af; font-weight: 600;">Không rõ</span>`;
+
+                html += `<tr style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="padding: 10px; color: #6b7280; font-weight: 600;">${index + 1}</td>
+                    <td style="padding: 10px; color: #0f4c81; font-weight: 700;">${u.mssv}</td>
+                    <td style="padding: 10px; text-align: left; font-weight: 600; color: #111827;">${u.name}</td>
+                    <td style="padding: 10px;">${currentSectionText}</td>
+                    <td style="padding: 10px; color: #4b5563; font-family: monospace;">${formatVNDateTime(u.lastActive)}</td>
+                    <td style="padding: 10px;">${statusBadge}</td>
+                </tr>`;
+            });
+            tbody.html(html);
+        },
+        error: function() {
+            tbody.html('<tr><td colspan="6" style="padding: 20px; color: #dc2626;"><i class="fa-solid fa-triangle-exclamation" style="margin-right: 6px;"></i>Không thể tải dữ liệu!</td></tr>');
+        }
+    });
+}
+// Tự động tải dữ liệu khi bấm vào tab Lịch sử
+$(document).ready(function() {
+    $('a[onclick*="lichsu"]').on('click', function() {
+        fetchUserAccessHistory();
+    });
+});
 </script>
 
 </body>
