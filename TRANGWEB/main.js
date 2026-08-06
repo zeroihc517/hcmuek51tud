@@ -1383,6 +1383,33 @@ $(document).ready(function() {
 // ==========================================
 let myGPADataset = JSON.parse(localStorage.getItem('myGPADataset')) || [];
 function loadGPAView() {
+	if (!isAdmin) {
+        // Cập nhật nội dung câu chữ vào Bảng Modal #updatingModal có sẵn trong HTML
+       $('#updatingModal .modal-body').html(`
+            <div class="mb-3">
+                <i class="fa-solid fa-calculator" style="font-size: 50px; color: #0f4c81;"></i>
+            </div>
+            <h5 class="fw-bold mb-2" style="color: #0f4c81;">Tính năng đang được cập nhật!</h5>
+            <p class="text-muted mb-4" style="font-size: 14.5px;">Dữ liệu bảng tính điểm <b>GPA Tích lũy</b> đang trong quá trình đồng bộ và hoàn thiện. Bạn vui lòng quay lại sau nhé!</p>
+            <button type="button" class="btn fw-bold px-4 py-2 text-white" style="background-color: #0f4c81; border-radius: 50px; box-shadow: 0 4px 10px rgba(15, 76, 129, 0.2);" data-bs-dismiss="modal">Đã rõ</button>
+        `);
+        
+        // Bật Bảng Cửa Sổ Modal nổi lên chính giữa màn hình
+        $('#updatingModal').modal('show');
+        
+        // Trả URL về mặc định (không thêm ?view=gpa)
+        if (typeof resetUrlToDefault === 'function') {
+            resetUrlToDefault();
+        }
+
+        // Đóng Sidebar nếu đang dùng điện thoại
+        if (window.innerWidth < 992 && typeof sidebar !== 'undefined' && sidebar) {
+            sidebar.classList.remove('show');
+            if (typeof overlay !== 'undefined' && overlay) overlay.classList.remove('show');
+        }
+
+        return; // DỪNG HOÀN TOÀN: Sinh viên ở nguyên trang hiện tại, không mở trang GPA
+    }
     document.title = "Tính điểm GPA | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
     $('#btnNavGPA').addClass('active'); 
