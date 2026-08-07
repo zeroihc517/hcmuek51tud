@@ -3053,3 +3053,15 @@ body.hide-hidden-posts .is-hidden-post {
         display: none !important;
     }
 }
+@media (max-width: 576px) {
+    #docViewerTitle, #latexViewerTitle {
+        max-width: 25% !important;
+        font-size: 13px !important;
+    }
+    #viewerCountdownClock, #latexCountdownClock {
+        padding: 2px 8px !important;
+    }
+    #lblViewerCountdownClock, #lblLatexCountdownClock {
+        font-size: 13px !important;
+    }
+}
