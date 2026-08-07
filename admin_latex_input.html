@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nhập Đáp Án LaTeX | Admin APMA</title>
+    
+    <!-- Bootstrap & FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- KaTeX CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #0f4c81;
+            --bg-global: #f4f6f8;
+        }
+        body {
+            background-color: var(--bg-global);
+            font-family: 'Inter', sans-serif;
+            color: #1f2937;
+        }
+        .data-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .preview-box {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 400px;
+            background-color: #f8fafc;
+            overflow-y: auto;
+            max-height: 600px;
+        }
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.1);
+        }
+        .header-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            border-bottom: 3px solid var(--primary-color);
+            display: inline-block;
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid py-4 px-md-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="header-title"><i class="fa-solid fa-square-root-variable me-2"></i>Trình soạn thảo Đáp án Toán học (LaTeX)</h3>
+        <a href="admintbc.html" class="btn btn-outline-secondary fw-bold">
+            <i class="fa-solid fa-arrow-left me-2"></i>Về trang Quản trị
+        </a>
+    </div>
+
+    <div class="row g-4">
+        <!-- CỘT NHẬP LIỆU -->
+        <div class="col-lg-6">
+            <div class="data-card h-100">
+                <h5 class="fw-bold text-primary mb-3"><i class="fa-solid fa-keyboard me-2"></i>Khu vực Nhập liệu</h5>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="fw-bold small text-muted mb-1">Môn học (Tên Sheet đích) <span class="text-danger">*</span></label>
+                        <input type="text" id="latexSheetName" class="form-control fw-bold text-primary" placeholder="VD: Hình học vi phân">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="fw-bold small text-muted mb-1">STT / Mã bài (Cột 1)</label>
+                        <input type="text" id="latexCol1" class="form-control" placeholder="VD: NEW hoặc Bài 1">
+                    </div>
+                    <div class="col-12">
+                        <label class="fw-bold small text-muted mb-1">Tiêu đề (Cột 2) <span class="text-danger">*</span></label>
+                        <input type="text" id="latexCol2" class="form-control fw-bold" placeholder="VD: Đáp án chi tiết Chương 1">
+                    </div>
+                </div>
+
+           <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-end mb-1">
+                        <label class="fw-bold small text-muted mb-0">Nội dung giải chi tiết (Cột 3) - Có hỗ trợ LaTeX</label>
+                    </div>
+                    
+                    <!-- NÚT CHÈN NHANH TEMPLATE -->
+                    <div class="mb-2 d-flex gap-2 flex-wrap">
+                        <button class="btn btn-sm btn-outline-primary fw-bold" onclick="insertTemplate('question')">
+                            <i class="fa-solid fa-bookmark"></i> Bảng Bài Tập
+                        </button>
+                        <button class="btn btn-sm btn-outline-success fw-bold" onclick="insertTemplate('title')">
+                            <i class="fa-solid fa-heading"></i> Bảng Tiêu Đề
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary fw-bold" onclick="insertTemplate('table')">
+                            <i class="fa-solid fa-table"></i> Bảng Cột/Hàng
+                        </button>
+                    </div>
+
+                    <textarea id="latexCol3" class="form-control" rows="15" placeholder="Nhập văn bản và công thức LaTeX tại đây.&#10;Ví dụ: Hệ phương trình $\int_{0}^{1} x^2 dx$"></textarea>
+                </div>
+                
+                <div class="d-flex justify-content-end gap-2 mt-4 border-top pt-3">
+                    <button class="btn btn-light fw-bold px-4" onclick="clearLatexForm()">Làm mới</button>
+                    <button class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" id="btnSubmitLatex" onclick="submitLatexData()">
+                        <i class="fa-solid fa-cloud-arrow-up me-2"></i>Đăng Đáp Án
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT XEM TRƯỚC THỜI GIAN THỰC -->
+        <div class="col-lg-6">
+            <div class="data-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-success m-0"><i class="fa-solid fa-eye me-2"></i>Xem trước kết quả hiển thị</h5>
+                    <span class="badge bg-light text-secondary border"><i class="fa-solid fa-bolt text-warning me-1"></i>Thời gian thực</span>
+                </div>
+                
+                <!-- Khu vực render -->
+                <div id="latexPreviewArea" class="preview-box">
+                    <span class="text-muted">Bắt đầu gõ để xem trước công thức LaTeX...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<!-- Thư viện KaTeX -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+<!-- Kết nối với SCRIPT_URL của hệ thống -->
+<script src="TRANGWEB/config.js"></script>
+
+<script>
+    // Xử lý xem trước thời gian thực
+    $('#latexCol3').on('input', function() {
+        let rawContent = $(this).val();
+        
+        if (!rawContent.trim()) {
+            $('#latexPreviewArea').html('<span class="text-muted">Bắt đầu gõ để xem trước công thức LaTeX...</span>');
+            return;
+        }
+
+        // Thay thế ngắt dòng thành thẻ <br> để HTML hiểu
+        let htmlContent = rawContent.replace(/\n/g, '<br>');
+        $('#latexPreviewArea').html(htmlContent);
+
+        // Gọi KaTeX để render toán học
+        if (window.renderMathInElement) {
+            renderMathInElement(document.getElementById('latexPreviewArea'), {
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false},
+                    {left: '\\[', right: '\\]', display: true}
+                ],
+                throwOnError: false,
+                output: "html"
+            });
+        }
+    });
+
+    // Hàm xóa form
+    function clearLatexForm() {
+        $('#latexCol1, #latexCol2, #latexCol3').val('');
+        $('#latexPreviewArea').html('<span class="text-muted">Bắt đầu gõ để xem trước công thức LaTeX...</span>');
+    }
+
+   // Hàm gửi dữ liệu lên Google Apps Script
+    function submitLatexData() {
+        let sheetName = $('#latexSheetName').val().trim();
+        let col1 = $('#latexCol1').val().trim() || "NEW";
+        let col2 = $('#latexCol2').val().trim();
+        let col3 = $('#latexCol3').val().trim();
+
+        if (!sheetName || !col2 || !col3) {
+            alert("Vui lòng nhập Tên môn học, Tiêu đề và Nội dung!");
+            return;
+        }
+
+        // Tạo ngày đăng tự động
+        let now = new Date();
+        let pad = (n) => String(n).padStart(2, '0');
+        let currentDate = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+
+        let btn = $('#btnSubmitLatex');
+        let originalText = btn.html();
+        btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang đẩy lên...').prop('disabled', true);
+
+        // 1. TẢI DỮ LIỆU ĐỂ TÌM SỐ DÒNG HIỆN TẠI CỦA BẢNG (ĐỂ CHÈN VÀO CUỐI)
+        $.ajax({
+            url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
+            method: "GET",
+            dataType: "json",
+            success: function(data) {
+                // Xác định dòng cuối cùng
+                let totalRows = (Array.isArray(data) && data.length > 0) ? data.length : 1;
+
+                // 2. GỬI LỆNH CHÈN VÀO CUỐI BẢNG
+                let payload = {
+                    action: "insertSheetRowAfter", // Lệnh chèn vào dưới hàng cụ thể
+                    sheetName: sheetName,
+                    rowIndex: totalRows,           // Chèn xuống dưới hàng cuối cùng
+                    col1: col1,
+                    col2: col2,
+                    col3: col3, 
+                    col4: "ĐĂNG=" + currentDate,   // Cột 4 (Ghi chú) hiển thị Ngày Đăng
+                    col5: "",
+                    col6: "",
+                    col7: ""
+                };
+
+                $.ajax({
+                    url: SCRIPT_URL,
+                    method: "POST",
+                    data: JSON.stringify(payload),
+                    contentType: "text/plain;charset=utf-8",
+                    success: function(res) {
+                        alert("Đăng bài thành công vào cuối bảng!"); // Báo thành công
+                        btn.html(originalText).prop('disabled', false);
+                        clearLatexForm();
+                    },
+                    error: function() {
+                        alert("Lỗi kết nối đến máy chủ. Vui lòng thử lại!");
+                        btn.html(originalText).prop('disabled', false);
+                    }
+                });
+            },
+            error: function() {
+                alert("Không thể tìm thấy môn học này trên hệ thống. Vui lòng kiểm tra lại Tên môn học (Tên Sheet)!");
+                btn.html(originalText).prop('disabled', false);
+            }
+        });
+    }
+// Hàm thực hiện chèn nội dung vào đúng vị trí con trỏ
+    function doInsertContent(contentToInsert) {
+        let textarea = document.getElementById('latexCol3');
+        let startPos = textarea.selectionStart;
+        let endPos = textarea.selectionEnd;
+        let textBefore = textarea.value.substring(0, startPos);
+        let textAfter = textarea.value.substring(endPos, textarea.value.length);
+        
+        textarea.value = textBefore + contentToInsert + textAfter;
+        textarea.selectionStart = textarea.selectionEnd = startPos + contentToInsert.length;
+        
+        $('#latexCol3').trigger('input');
+        textarea.focus();
+    }
+
+    // Hàm gọi khi nhấn các nút
+    function insertTemplate(type) {
+        if (type === 'question') {
+            let content = '<div style="border-left: 5px solid #0f4c81; background-color: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);"><div style="background-color: #0f4c81; color: #ffffff; display: inline-block; padding: 6px 20px; border-radius: 20px; font-weight: bold; font-size: 0.95em; margin-bottom: 15px; letter-spacing: 0.5px;">Bài tập 1</div><div style="font-size: 1.05em; color: #334155; line-height: 1.7;">Trên mặt phẳng tọa độ, hãy chứng tỏ các đường bậc hai không suy biến quen thuộc là Elip, Parabol... (Gõ công thức LaTeX bình thường)</div></div>\n';
+            doInsertContent(content);
+        } else if (type === 'title') {
+            let content = '<div style="border: 2px solid #0f4c81; background-color: #f0f4f8; border-radius: 12px; padding: 12px 25px; text-align: center; color: #0f4c81; font-weight: bold; font-size: 1.2em; margin-bottom: 20px; box-shadow: 3px 3px 0px rgba(15, 76, 129, 0.15); display: flex; justify-content: center; align-items: center;">Bài 3: Tiếp tuyến, tính trơn và tính chính quy</div>\n';
+            doInsertContent(content);
+        } else if (type === 'table') {
+            // Thay vì dùng prompt, gọi hàm hiển thị Cửa sổ Popup chuyên nghiệp
+            showCustomTableModal();
+        }
+    }
+
+    // Hàm tạo và hiển thị Cửa sổ Popup (Modal) nhập Hàng/Cột
+    function showCustomTableModal() {
+        // Xóa popup cũ nếu còn tồn tại trong DOM
+        if (document.getElementById('customTableModal')) {
+            document.getElementById('customTableModal').remove();
+        }
+
+        // Tạo giao diện Popup (dùng class của Bootstrap cho xịn)
+        let modalHtml = `
+        <div id="customTableModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1050; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+            <div style="background: #ffffff; padding: 25px; border-radius: 12px; width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transform: scale(1); animation: popIn 0.2s ease-out;">
+                <h5 class="fw-bold mb-3" style="color: #0f4c81;">
+                    <i class="fa-solid fa-table me-2"></i>Tạo Bảng Nhanh
+                </h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <label class="fw-bold small text-muted mb-1">Số Cột:</label>
+                        <input type="number" id="tbModalCols" class="form-control fw-bold" value="4" min="1">
+                    </div>
+                    <div class="col-6">
+                        <label class="fw-bold small text-muted mb-1">Số Hàng:</label>
+                        <input type="number" id="tbModalRows" class="form-control fw-bold" value="3" min="1">
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2">
+                    <button class="btn btn-light fw-bold px-4" onclick="document.getElementById('customTableModal').remove()">Hủy</button>
+                    <button class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" onclick="generateTableFromModal()">Chèn Bảng</button>
+                </div>
+            </div>
+            <style>
+                @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+            </style>
+        </div>`;
+
+        // Thêm vào body
+        $('body').append(modalHtml);
+        
+        // Tự động focus vào ô nhập số cột
+        setTimeout(() => document.getElementById('tbModalCols').focus(), 100);
+    }
+
+    // Hàm sinh code bảng sau khi bấm "Chèn Bảng" từ Popup
+    function generateTableFromModal() {
+        let numCols = parseInt($('#tbModalCols').val()) || 3;
+        let numRows = parseInt($('#tbModalRows').val()) || 2;
+        
+        // Đóng Popup
+        document.getElementById('customTableModal').remove();
+
+        // Xây dựng code HTML cho bảng (Nén 1 dòng)
+        let tableHtml = '<div style="overflow-x: auto; margin-bottom: 20px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);"><table style="width: 100%; border-collapse: collapse; background-color: #ffffff; font-size: 0.95em; margin: 0;"><thead style="background-color: #f0f4f8; border-bottom: 2px solid #0f4c81;"><tr>';
+        
+        // Tạo Header
+        for (let c = 1; c <= numCols; c++) {
+            let borderRight = (c === numCols) ? '' : ' border-right: 1px solid #e2e8f0;';
+            tableHtml += `<th style="padding: 12px 15px; color: #0f4c81; font-weight: 600; text-align: left;${borderRight}">Tiêu đề ${c}</th>`;
+        }
+        tableHtml += '</tr></thead><tbody>';
+
+        // Tạo Rows
+        for (let r = 1; r <= numRows; r++) {
+            let bg = (r % 2 === 0) ? ' background-color: #f8fafc;' : '';
+            let borderBottom = (r === numRows) ? '' : ' border-bottom: 1px solid #e2e8f0;';
+            tableHtml += `<tr style="${bg}${borderBottom}">`;
+            
+            for (let c = 1; c <= numCols; c++) {
+                let borderRight = (c === numCols) ? '' : ' border-right: 1px solid #e2e8f0;';
+                tableHtml += `<td style="padding: 10px 15px; color: #334155;${borderRight}">Nội dung ${r}-${c}</td>`;
+            }
+            tableHtml += '</tr>';
+        }
+        tableHtml += '</tbody></table></div>\n';
+
+        // Chèn vào Editor
+        doInsertContent(tableHtml);
+    }
+</script>
+</body>
+</html>
