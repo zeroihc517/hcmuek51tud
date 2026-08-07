@@ -1836,12 +1836,11 @@
         </div>
     </div>
 </div>
-<!-- MODAL XEM CHI TIẾT NỘI DUNG & LATEX (FULLSCREEN & HỖ TRỢ SỬA TIÊU ĐỀ + NỘI DUNG) -->
+<!-- MODAL XEM CHI TIẾT NỘI DUNG & LATEX (KHUNG TRẮNG RỘNG TOÀN MÀN HÌNH) -->
 <div class="modal fade" id="latexViewerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content border-0">
             <!-- Header Modal -->
-           <!-- Header Modal -->
             <div class="modal-header text-white d-flex align-items-center justify-content-between" style="background-color: #0f4c81; padding: 12px 24px;">
                 
                 <h6 class="modal-title m-0 fw-bold d-flex align-items-center" id="latexViewerTitle" style="font-size: 16px; max-width: 60%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -1851,7 +1850,7 @@
                 <div class="d-flex gap-2 align-items-center">
                     <!-- Icon ChatGPT -->
                     <a href="https://chatgpt.com/" target="_blank" class="btn btn-sm d-flex align-items-center justify-content-center p-0 shadow-sm" style="width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid rgba(255, 255, 255, 0.7); background-color: #10a37f; color: #ffffff; transition: 0.2s;" title="Mở ChatGPT" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                        <svg style="width: 18px; height: 18px; fill: currentColor;" viewBox="0 0 24 24"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.073zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.8956zm16.0993 3.8558L12.5973 8.3829v-2.3323a.0757.0757 0 0 1 .0332-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66l-.1467-.0852-4.783-2.7582a.7712.7712 0 0 0-.7806 0zM8.3065 12.863l-2.02-1.1686a.071.071 0 0 1-.038-.052V6.06A4.504 4.504 0 0 1 10.743 1.5656a4.4755 4.4755 0 0 1 2.8764 1.0408l-.1419.0804-4.7783 2.7582a.7948.7948 0 0 0-.3927.6813zm10.9973-3.0655a4.485 4.485 0 0 1-2.3655 1.9728V6.0825a.7664.7664 0 0 0-.3879-.6765L10.736 2.0517l2.0201-1.1685a.0757.0757 0 0 1 .071 0l4.8303 2.7865a4.504 4.504 0 0 1 1.6464 6.1276zM9.742 10.9996l2.8485-1.6441 2.8485 1.6441v3.2882l-2.8485 1.6441-2.8485-1.6441z"/></svg>
+                        <svg style="width: 18px; height: 18px; fill: currentColor;" viewBox="0 0 24 24"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.073zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.8956zm16.0993 3.8558L12.5973 8.3829v-2.3323a.0757.0757 0 0 1 .0332-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66l-.1467-.0852-4.783-2.7582a.7712.7712 0 0 0-.7806 0zM8.3065 12.863l-2.02-1.1686a.071.071 0 0 1-.038-.052V6.06A4.504 4.504 0 0 1 10.743 1.5656a4.4755 4.4755 0 0 1 2.8764 1.0408l-.1419.0804-4.7783 2.7582a.7948.7948 0 0 0 .3927.6813zm10.9973-3.0655a4.485 4.485 0 0 1-2.3655 1.9728V6.0825a.7664.7664 0 0 0-.3879-.6765L10.736 2.0517l2.0201-1.1685a.0757.0757 0 0 1 .071 0l4.8303 2.7865a4.504 4.504 0 0 1 1.6464 6.1276zM9.742 10.9996l2.8485-1.6441 2.8485 1.6441v3.2882l-2.8485 1.6441-2.8485-1.6441z"/></svg>
                     </a>
 
                     <!-- Icon Gemini -->
@@ -1868,50 +1867,49 @@
             </div>
             
             <!-- Thân Modal -->
-            <div class="modal-body p-4 p-md-5" style="background-color: #f8fafc;">
-                <!-- 1. CHẾ ĐỘ XEM TRƯỚC -->
-                <div id="latexViewMode" style="font-size: 16px; line-height: 1.8; color: #334155; font-family: 'Inter', sans-serif;">
+            <div class="modal-body p-2 p-md-3 overflow-auto d-flex justify-content-center" style="background-color: #f0f2f5;">
+                
+                <!-- 1. CHẾ ĐỘ XEM TRƯỚC (Nền trắng mở rộng 100%) -->
+                <div id="latexViewMode" class="w-100 p-4 p-md-5 bg-white border shadow-sm" style="min-height: 100%; border-radius: 8px; border-color: #e2e8f0 !important; font-size: 16px; line-height: 1.8; color: #1e293b; font-family: 'Inter', sans-serif;">
                     <!-- Nội dung render Toán học -->
                 </div>
                 
-                <!-- 2. CHẾ ĐỘ SỬA TRỰC TIẾP -->
-                <!-- 2. CHẾ ĐỘ SỬA TRỰC TIẾP -->
-                <div id="latexEditMode" class="d-none h-100 flex-column">
+                <!-- 2. CHẾ ĐỘ SỬA TRỰC TIẾP (Nền trắng mở rộng 100%) -->
+                <div id="latexEditMode" class="d-none w-100 flex-column">
                     <!-- Ô NHẬP SỬA TIÊU ĐỀ -->
                     <div class="mb-3">
                         <label class="fw-bold text-primary mb-1"><i class="fa-solid fa-heading me-1"></i> Tiêu đề bài học</label>
                         <input type="text" id="latexEditTitleInput" class="form-control fw-bold text-dark border-primary-subtle shadow-sm" style="font-size: 16px; padding: 10px 15px;" placeholder="Nhập tiêu đề...">
                     </div>
 
-                    <!-- KHU VỰC SOẠN THẢO VÀ XEM TRƯỚC (CHIA 2 CỘT TRÊN PC) -->
+                    <!-- KHU VỰC SOẠN THẢO VÀ XEM TRƯỚC -->
                     <div class="row flex-grow-1 mb-3 g-3">
                         <!-- Cột soạn thảo -->
-                        <!-- Cột soạn thảo -->
-<div class="col-lg-6 d-flex flex-column h-100">
-    <div class="d-flex justify-content-between align-items-end mb-2">
-        <label class="fw-bold text-primary m-0"><i class="fa-solid fa-code me-1"></i> Soạn thảo mã LaTeX / Nội dung</label>
-    </div>
-    
-    <!-- THÊM 3 NÚT CHÈN MẪU GIAO DIỆN -->
-    <div class="mb-2 d-flex gap-2 flex-wrap">
-        <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="insertAdminTemplate('question')">
-            <i class="fa-solid fa-bookmark"></i> Bảng Bài Tập
-        </button>
-        <button type="button" class="btn btn-sm btn-outline-success fw-bold" onclick="insertAdminTemplate('title')">
-            <i class="fa-solid fa-heading"></i> Bảng Tiêu Đề
-        </button>
-        <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" onclick="insertAdminTemplate('table')">
-            <i class="fa-solid fa-table"></i> Bảng Cột/Hàng
-        </button>
-    </div>
+                        <div class="col-lg-6 d-flex flex-column h-100">
+                            <div class="d-flex justify-content-between align-items-end mb-2">
+                                <label class="fw-bold text-primary m-0"><i class="fa-solid fa-code me-1"></i> Soạn thảo mã LaTeX / Nội dung</label>
+                            </div>
+                            
+                            <!-- THÊM 3 NÚT CHÈN MẪU GIAO DIỆN -->
+                            <div class="mb-2 d-flex gap-2 flex-wrap">
+                                <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="insertAdminTemplate('question')">
+                                    <i class="fa-solid fa-bookmark"></i> Bảng Bài Tập
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-success fw-bold" onclick="insertAdminTemplate('title')">
+                                    <i class="fa-solid fa-heading"></i> Bảng Tiêu Đề
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" onclick="insertAdminTemplate('table')">
+                                    <i class="fa-solid fa-table"></i> Bảng Cột/Hàng
+                                </button>
+                            </div>
 
-    <textarea id="latexEditTextarea" class="form-control flex-grow-1 shadow-sm" style="font-family: monospace; font-size: 15px; resize: none; border: 2px solid #cbd5e1; min-height: 300px;"></textarea>
-</div>
+                            <textarea id="latexEditTextarea" class="form-control flex-grow-1 shadow-sm" style="font-family: monospace; font-size: 15px; resize: none; border: 2px solid #cbd5e1; min-height: 300px;"></textarea>
+                        </div>
                         
                         <!-- Cột xem trước thời gian thực -->
                         <div class="col-lg-6 d-flex flex-column h-100">
                             <label class="fw-bold text-success mb-2"><i class="fa-solid fa-eye me-1"></i> Xem trước trực tiếp</label>
-                            <div id="latexEditPreviewArea" class="flex-grow-1 shadow-sm p-3" style="border: 2px dashed #cbd5e1; border-radius: 8px; background-color: #ffffff; overflow-y: auto; min-height: 300px;">
+                            <div id="latexEditPreviewArea" class="flex-grow-1 shadow-sm p-4 bg-white border" style="border-radius: 8px; border-color: #cbd5e1 !important; overflow-y: auto; min-height: 300px;">
                                 <span class="text-muted">Nhập nội dung để xem trước...</span>
                             </div>
                         </div>
@@ -1925,6 +1923,7 @@
                         </button>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

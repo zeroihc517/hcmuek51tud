@@ -5144,15 +5144,30 @@ $(document).on('input', '#latexEditTextarea', function() {
     }
 
     let htmlContent = rawContent;
-    // Xuống dòng tự động nếu văn bản thuần (Không chứa thẻ HTML)
+    
+    // 1. Tự động làm sạch các dấu nháy và dấu gạch chéo dư thừa
+    htmlContent = htmlContent.replace(/\\"/g, '"').replace(/\\'/g, "'");
+
+    // 2. Chuyển đổi THẺ HÌNH ẢNH TRƯỚC (Bao trọn các dạng có và không có kích thước)
+    // Dạng [IMG=50%]url[/IMG] hoặc [IMG=200px]url[/IMG]
+    htmlContent = htmlContent.replace(/\[IMG=(.*?)\](.*?)\[\/IMG\]/gi, function(match, size, url) {
+        return `<div class="text-center my-3"><a href="${url.trim()}" target="_blank"><img src="${url.trim()}" style="width: ${size}; max-width: 100%; border-radius: 8px;"></a></div>`;
+    });
+    
+    // Dạng cơ bản [IMG]url[/IMG]
+    htmlContent = htmlContent.replace(/\[IMG\](.*?)\[\/IMG\]/gi, function(match, url) {
+        return `<div class="text-center my-3"><a href="${url.trim()}" target="_blank"><img src="${url.trim()}" style="max-width: 100%; border-radius: 8px;"></a></div>`;
+    });
+
+    // 3. Xuống dòng tự động nếu văn bản thuần (Không chứa thẻ HTML cấu trúc khối)
     if (!/(<p>|<table>|<br>|<br\s*\/?>|<div>)/i.test(htmlContent)) {
         htmlContent = htmlContent.replace(/\n/g, '<br>');
     }
     
-    // Đổ Text vào khung Preview
+    // 4. Đổ Text vào khung Preview
     $('#latexEditPreviewArea').html(htmlContent);
 
-    // Gọi bộ thư viện KaTeX để vẽ công thức Toán
+    // 5. Gọi bộ thư viện KaTeX để vẽ công thức Toán
     if (window.renderMathInElement) {
         renderMathInElement(document.getElementById('latexEditPreviewArea'), {
             delimiters: [
@@ -5164,6 +5179,13 @@ $(document).on('input', '#latexEditTextarea', function() {
             throwOnError: false,
             output: "html"
         });
+    }
+});
+// 1. Đoạn này giúp sửa lỗi không bấm được vào menu xổ xuống khi dùng TinyMCE trong bảng nhỏ (Modal)
+// ĐÃ BỔ SUNG: Cho phép click vào #adminTableModal và #adminImageModal
+$(document).on('focusin', function(e) {
+    if ($(e.target).closest(".tox-tinymce, .tox-tinymce-aux, .moxman-window, .tam-assetmanager-root, #adminTableModal, #adminImageModal").length) {
+        e.stopImmediatePropagation();
     }
 });
 // =======================================================
@@ -5187,7 +5209,6 @@ function doInsertAdminContent(contentToInsert) {
     textarea.focus();
 }
 
-// Hàm gọi khi nhấn các nút chèn mẫu
 function insertAdminTemplate(type) {
     if (type === 'question') {
         let content = '<div style="border-left: 5px solid #0f4c81; background-color: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);"><div style="background-color: #0f4c81; color: #ffffff; display: inline-block; padding: 6px 20px; border-radius: 20px; font-weight: bold; font-size: 0.95em; margin-bottom: 15px; letter-spacing: 0.5px;">Bài tập 1</div><div style="font-size: 1.05em; color: #334155; line-height: 1.7;">Trên mặt phẳng tọa độ, hãy chứng tỏ các đường bậc hai không suy biến quen thuộc là Elip, Parabol... (Gõ công thức LaTeX bình thường)</div></div>\n';
@@ -5197,9 +5218,85 @@ function insertAdminTemplate(type) {
         doInsertAdminContent(content);
     } else if (type === 'table') {
         showAdminTableModal();
+    } else if (type === 'image') {
+        // GỌI KHUNG POPUP CHÈN ẢNH CHUYÊN NGHIỆP
+        showAdminImageModal();
     }
 }
 
+function showAdminImageModal() {
+    if (document.getElementById('adminImageModal')) {
+        document.getElementById('adminImageModal').remove();
+    }
+
+    let modalHtml = `
+    <div id="adminImageModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1060; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+        <div style="background: #ffffff; padding: 25px; border-radius: 12px; width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transform: scale(1); animation: popIn 0.2s ease-out;">
+            <h5 class="fw-bold mb-3" style="color: #0f4c81;">
+                <i class="fa-solid fa-image me-2"></i>Chèn Ảnh Tự Động
+            </h5>
+            <div class="mb-3">
+                <label class="fw-bold small text-muted mb-1">Đường dẫn ảnh (URL / Google Drive):</label>
+                <input type="text" id="imgAdminUrl" class="form-control fw-bold" placeholder="https://...">
+            </div>
+            <div class="mb-4">
+                <label class="fw-bold small text-muted mb-1">Kích thước hiển thị (%):</label>
+                <select id="imgAdminSize" class="form-select fw-bold">
+                    <option value="100%">100% (Mặc định)</option>
+                    <option value="90%">90%</option>
+                    <option value="80%">80%</option>
+                    <option value="70%">70%</option>
+                    <option value="60%">60%</option>
+                    <option value="50%">50%</option>
+                    <option value="40%">40%</option>
+                    <option value="30%">30%</option>
+                    <option value="20%">20%</option>
+                </select>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-light fw-bold px-4" onclick="document.getElementById('adminImageModal').remove()">Hủy</button>
+                <button type="button" class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" onclick="generateAdminImageFromModal()">Chèn Ảnh</button>
+            </div>
+        </div>
+        <style>
+            @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        </style>
+    </div>`;
+
+    $('body').append(modalHtml);
+    // Tự động focus vào ô nhập link
+    setTimeout(() => document.getElementById('imgAdminUrl').focus(), 100);
+}
+function generateAdminImageFromModal() {
+    let imgUrl = $('#imgAdminUrl').val().trim();
+    let imgSize = $('#imgAdminSize').val();
+    
+    if (!imgUrl) {
+        alert("Vui lòng nhập đường dẫn ảnh!");
+        $('#imgAdminUrl').focus();
+        return;
+    }
+
+    // TỰ ĐỘNG BÓC TÁCH & CHUYỂN ĐỔI LINK GOOGLE DRIVE
+    let cleanUrl = imgUrl;
+    let driveMatch = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || cleanUrl.match(/id=([a-zA-Z0-9_-]+)/);
+    if (driveMatch && driveMatch[1]) {
+        let fileId = driveMatch[1];
+        cleanUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+    }
+
+    let formattedImg = '';
+    // Nếu chọn 100% thì gán thẻ thường [IMG], nếu chọn kích thước khác thì gán [IMG=size]
+    if (imgSize === '100%') {
+        formattedImg = `[IMG]${cleanUrl}[/IMG]\n`;
+    } else {
+        formattedImg = `[IMG=${imgSize}]${cleanUrl}[/IMG]\n`;
+    }
+
+    // Tắt Popup và tiến hành chèn vào vị trí con trỏ
+    document.getElementById('adminImageModal').remove();
+    doInsertAdminContent(formattedImg);
+}
 // Hàm tạo và hiển thị Cửa sổ Popup (Modal) nhập Hàng/Cột (Có z-index: 1060 để đè lên Modal Sửa bài)
 function showAdminTableModal() {
     if (document.getElementById('adminTableModal')) {
