@@ -968,9 +968,40 @@
     </div>
                 <div class="data-card" id="mainDataCard">
                     <div id="loadingStatus" class="pulse-loader">
-                        <div class="spinner-modern"></div>
-                        <span class="text-muted fw-bold" style="font-size: 16px;">Đang tải dữ liệu...</span>
-                    </div>
+    <div class="stair-loader-container mx-auto mb-3">
+        <!-- Cột 1 (Trái cùng - 5 ô: Từ nhạt nhất) -->
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 1; --c: #e0f2fe;"></div>
+            <div class="stair-box" style="--i: 2; --c: #bae6fd;"></div>
+            <div class="stair-box" style="--i: 3; --c: #7dd3fc;"></div>
+            <div class="stair-box" style="--i: 4; --c: #38bdf8;"></div>
+            <div class="stair-box" style="--i: 5; --c: #0ea5e9;"></div>
+        </div>
+        <!-- Cột 2 (4 ô) -->
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 6; --c: #0284c7;"></div>
+            <div class="stair-box" style="--i: 7; --c: #0369a1;"></div>
+            <div class="stair-box" style="--i: 8; --c: #075985;"></div>
+            <div class="stair-box" style="--i: 9; --c: #0c4a6e;"></div>
+        </div>
+        <!-- Cột 3 (3 ô) -->
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 10; --c: #3b82f6;"></div>
+            <div class="stair-box" style="--i: 11; --c: #2563eb;"></div>
+            <div class="stair-box" style="--i: 12; --c: #1d4ed8;"></div>
+        </div>
+        <!-- Cột 4 (2 ô) -->
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 13; --c: #1e40af;"></div>
+            <div class="stair-box" style="--i: 14; --c: #1e3a8a;"></div>
+        </div>
+        <!-- Cột 5 (Phải cùng - 1 ô: Đậm nhất) -->
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 15; --c: #0f4c81;"></div>
+        </div>
+    </div>
+    <span class="text-muted fw-bold" style="font-size: 16px; color: #0f4c81 !important;">Đang tải dữ liệu...</span>
+</div>
 
                     <div id="swipeHint" class="d-none d-lg-none text-center py-2 fw-bold" style="font-size: 13px; color: var(--accent-red); background: var(--exam-bg); border-bottom: 1px dashed var(--exam-border);">
     <i class="fa-solid fa-arrows-left-right fa-fade me-1"></i> Vuốt ngang để xem hết các cột/nội dung

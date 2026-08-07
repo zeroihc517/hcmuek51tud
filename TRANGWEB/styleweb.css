@@ -3132,3 +3132,116 @@ body.hide-hidden-posts .is-hidden-post {
     0% { left: -50%; }
     100% { left: 100%; }
 }
+/* =========================================
+   HIỆU ỨNG VẼ SVG ĐA GIÁC 12 ĐỈNH PHÁT SÁNG
+========================================= */
+.polygon-loader-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Có thể tăng/giảm width height để đổi kích cỡ khối đa giác */
+    width: 200px;
+    height: 200px;
+}
+
+.dodecagon-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible; /* Giúp hào quang phát sáng không bị cắt lẹm ở viền */
+}
+
+/* Các đỉnh bình thường sẽ có màu xám */
+.glow-dot {
+    fill: #94a3b8; 
+    transform-box: fill-box;
+    transform-origin: center;
+    
+    /* 1 vòng quay mất 1.2s */
+    animation: pulseSvgVertex 1.2s infinite;
+    animation-delay: calc(var(--i) * 0.1s);
+}
+
+/* Hiệu ứng chớp sáng dứt khoát 1 lần 1 đỉnh rồi tắt */
+@keyframes pulseSvgVertex {
+    0%, 8.33% { 
+        /* 8.33% chính xác là 1/12 thời gian của 1 vòng tròn */
+        fill: var(--color);
+        filter: drop-shadow(0 0 6px var(--color)) drop-shadow(0 0 10px var(--color));
+        transform: scale(2); /* Phình to nhẹ lên khi chớp */
+    }
+    8.34%, 100% {
+        fill: #94a3b8;
+        filter: none;
+        transform: scale(1); /* Thu nhỏ lại như cũ */
+    }
+}
+/* Container căn đáy cho các cột bậc thang */
+.stair-loader-container {
+    display: flex;
+    align-items: flex-end; 
+    justify-content: center;
+    gap: 4px;
+}
+
+/* Cột dọc chứa các ô vuông */
+.stair-col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Kiểu dáng ô vuông lúc tắt */
+.stair-box {
+    width: 24px;
+    height: 24px;
+    background-color: #f1f5f9; /* Màu nền xám nhạt khi tắt */
+    border: 1.5px solid #cbd5e1;
+    border-radius: 4px;
+    animation: stairGlowChaser 2s infinite ease-in-out;
+    animation-delay: calc(var(--i) * 0.1s);
+}
+
+/* Hiệu ứng chớp sáng lấy màu động từ HTML (var(--c)) */
+@keyframes stairGlowChaser {
+    0%, 100% {
+        background-color: #f1f5f9;
+        border-color: #cbd5e1;
+        box-shadow: none;
+        transform: scale(1);
+    }
+    10%, 20% {
+        background-color: var(--c); /* Lấy màu tương ứng của từng ô */
+        border-color: var(--c);     
+        box-shadow: 0 0 12px var(--c);
+        transform: scale(1.15);     
+    }
+    30% {
+        background-color: #f1f5f9;
+        border-color: #cbd5e1;
+        box-shadow: none;
+        transform: scale(1);
+    }
+}
+
+/* Đồng bộ hiển thị Dark Mode (nếu web bạn đang dùng) */
+body.dark-mode .stair-box {
+    background-color: #1e293b;
+    border-color: #334155;
+}
+@keyframes stairGlowChaserDark {
+    0%, 100%, 30% { 
+        background-color: #1e293b; 
+        border-color: #334155; 
+        box-shadow: none; 
+        transform: scale(1); 
+    }
+    10%, 20% { 
+        background-color: var(--c); 
+        border-color: var(--c); 
+        box-shadow: 0 0 12px var(--c); 
+        transform: scale(1.15); 
+    }
+}
+body.dark-mode .stair-box {
+    animation-name: stairGlowChaserDark;
+}

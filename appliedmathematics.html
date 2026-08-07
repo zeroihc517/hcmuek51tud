@@ -13,23 +13,53 @@
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
 </head>
 <body class="hide-hidden-posts">
+
 <!-- OVERLAY LOADING TOÀN TRANG -->
 
+<!-- OVERLAY LOADING TOÀN TRANG -->
 <div id="globalScreenLoader" class="d-flex flex-column align-items-center justify-content-center" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background-color: #f8fafc; z-index: 10500; transition: opacity 0.3s ease;">
     
-    <!-- Hiệu ứng Logo -->
-    <div class="loader-logo-wrapper mb-4">
-        <div class="loader-logo">
-            <i class="fa-solid fa-graduation-cap"></i>
-        </div>
-        <!-- Vòng tròn pulse tỏa ra xung quanh -->
-        <div class="loader-pulse"></div>
+    <!-- VẼ TRỰC TIẾP SVG ĐA GIÁC ĐỀU 12 ĐỈNH -->
+    <div class="polygon-loader-container mb-4">
+        <svg viewBox="0 0 200 200" width="180" height="180" class="dodecagon-svg">
+            <!-- 1. Viền đa giác nối 12 đỉnh -->
+            <polygon points="100,20 140,30.7 169.3,60 180,100 169.3,140 140,169.3 100,180 60,169.3 30.7,140 20,100 30.7,60 60,30.7" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
+            
+            <!-- 2. Chữ hiển thị A1 -> A12 -->
+            <g font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#475569" text-anchor="middle" dominant-baseline="central">
+                <text x="100" y="4">A<tspan font-size="10" dy="3">1</tspan></text>
+                <text x="149" y="15">A<tspan font-size="10" dy="3">2</tspan></text>
+                <text x="185" y="51">A<tspan font-size="10" dy="3">3</tspan></text>
+                <text x="195" y="100">A<tspan font-size="10" dy="3">4</tspan></text>
+                <text x="185" y="149">A<tspan font-size="10" dy="3">5</tspan></text>
+                <text x="149" y="185">A<tspan font-size="10" dy="3">6</tspan></text>
+                <text x="100" y="196">A<tspan font-size="10" dy="3">7</tspan></text>
+                <text x="51" y="185">A<tspan font-size="10" dy="3">8</tspan></text>
+                <text x="15" y="149">A<tspan font-size="10" dy="3">9</tspan></text>
+                <text x="5" y="100">A<tspan font-size="10" dy="3">10</tspan></text>
+                <text x="15" y="51">A<tspan font-size="10" dy="3">11</tspan></text>
+                <text x="51" y="15">A<tspan font-size="10" dy="3">12</tspan></text>
+            </g>
+
+            <!-- 3. Các chấm tròn đại diện cho 12 đỉnh (sẽ tự động phát sáng) -->
+            <circle cx="100" cy="20" r="3.5" class="glow-dot" style="--i: 0; --color: #ef4444;" />
+            <circle cx="140" cy="30.7" r="3.5" class="glow-dot" style="--i: 1; --color: #f97316;" />
+            <circle cx="169.3" cy="60" r="3.5" class="glow-dot" style="--i: 2; --color: #eab308;" />
+            <circle cx="180" cy="100" r="3.5" class="glow-dot" style="--i: 3; --color: #84cc16;" />
+            <circle cx="169.3" cy="140" r="3.5" class="glow-dot" style="--i: 4; --color: #22c55e;" />
+            <circle cx="140" cy="169.3" r="3.5" class="glow-dot" style="--i: 5; --color: #10b981;" />
+            <circle cx="100" cy="180" r="3.5" class="glow-dot" style="--i: 6; --color: #06b6d4;" />
+            <circle cx="60" cy="169.3" r="3.5" class="glow-dot" style="--i: 7; --color: #0ea5e9;" />
+            <circle cx="30.7" cy="140" r="3.5" class="glow-dot" style="--i: 8; --color: #3b82f6;" />
+            <circle cx="20" cy="100" r="3.5" class="glow-dot" style="--i: 9; --color: #6366f1;" />
+            <circle cx="30.7" cy="60" r="3.5" class="glow-dot" style="--i: 10; --color: #a855f7;" />
+            <circle cx="60" cy="30.7" r="3.5" class="glow-dot" style="--i: 11; --color: #d946ef;" />
+        </svg>
     </div>
     
-    <h5 class="fw-bold mb-2" style="color: #0f4c81; letter-spacing: 0.5px;">Đang đồng bộ dữ liệu hệ thống...</h5>
+    <h5 class="fw-bold mb-2 mt-2" style="color: #0f4c81; letter-spacing: 0.5px;">Đang đồng bộ dữ liệu hệ thống...</h5>
     <small class="text-muted fw-bold mb-4" style="font-size: 14px;">Vui lòng chờ trong giây lát</small>
 
-    <!-- Thanh Progress Bar trượt (Tạo cảm giác đang load rất nhanh) -->
     <div class="loader-progress-bar">
         <div class="loader-progress-value"></div>
     </div>
@@ -990,10 +1020,41 @@
         <!-- Các thẻ bài kiểm tra sẽ được Javascript chèn vào đây -->
     </div>
                 <div class="data-card" id="mainDataCard">
-                    <div id="loadingStatus" class="pulse-loader">
-                        <div class="spinner-modern"></div>
-                        <span class="text-muted fw-bold" style="font-size: 16px;">Đang tải dữ liệu...</span>
-                    </div>
+                   <div id="loadingStatus" class="pulse-loader">
+    <div class="stair-loader-container mx-auto mb-3">
+        <!-- Cột 1 (Trái cùng - 5 ô: Từ nhạt nhất) -->
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 1; --c: #e0f2fe;"></div>
+            <div class="stair-box" style="--i: 2; --c: #bae6fd;"></div>
+            <div class="stair-box" style="--i: 3; --c: #7dd3fc;"></div>
+            <div class="stair-box" style="--i: 4; --c: #38bdf8;"></div>
+            <div class="stair-box" style="--i: 5; --c: #0ea5e9;"></div>
+        </div>
+        <!-- Cột 2 (4 ô) -->
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 6; --c: #0284c7;"></div>
+            <div class="stair-box" style="--i: 7; --c: #0369a1;"></div>
+            <div class="stair-box" style="--i: 8; --c: #075985;"></div>
+            <div class="stair-box" style="--i: 9; --c: #0c4a6e;"></div>
+        </div>
+        <!-- Cột 3 (3 ô) -->
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 10; --c: #3b82f6;"></div>
+            <div class="stair-box" style="--i: 11; --c: #2563eb;"></div>
+            <div class="stair-box" style="--i: 12; --c: #1d4ed8;"></div>
+        </div>
+        <!-- Cột 4 (2 ô) -->
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 13; --c: #1e40af;"></div>
+            <div class="stair-box" style="--i: 14; --c: #1e3a8a;"></div>
+        </div>
+        <!-- Cột 5 (Phải cùng - 1 ô: Đậm nhất) -->
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 15; --c: #0f4c81;"></div>
+        </div>
+    </div>
+    <span class="text-muted fw-bold" style="font-size: 16px; color: #0f4c81 !important;">Đang tải dữ liệu...</span>
+</div>
 
                     <div id="swipeHint" class="d-none d-lg-none text-center py-2 fw-bold" style="font-size: 13px; color: var(--accent-red); background: var(--exam-bg); border-bottom: 1px dashed var(--exam-border);">
     <i class="fa-solid fa-arrows-left-right fa-fade me-1"></i> Vuốt ngang để xem hết các cột/nội dung

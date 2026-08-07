@@ -369,3 +369,4 @@ function generateThongBaoID(index) {
     let numberFormatted = String(index).padStart(4, '0'); // Đảm bảo đủ 4 chữ số (0001, 0002...)
     return `TB${yearPrefix}${numberFormatted}`; // Kết quả: TB260001
 }
+
