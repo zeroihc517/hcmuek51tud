@@ -3245,3 +3245,84 @@ body.dark-mode .stair-box {
 body.dark-mode .stair-box {
     animation-name: stairGlowChaserDark;
 }
+/* =========================================
+   PRO TRIANGLE LOADER (SÓNG CHUYỂN ĐỘNG MƯỢT MÀ)
+========================================= */
+.pro-triangle-loader {
+    filter: drop-shadow(0 4px 10px rgba(15, 76, 129, 0.05));
+}
+
+.pro-node circle {
+    fill: #ffffff;
+    stroke: #cbd5e1;
+    stroke-width: 2.5;
+    transform-origin: center;
+    transform-box: fill-box;
+    /* Thời gian 1 vòng là 1.5s, các điểm trễ nhau 0.25s */
+    animation: proGlowWave 1.5s infinite ease-in-out;
+    animation-delay: calc(var(--i) * 0.25s);
+    transition: all 0.3s ease;
+}
+
+.pro-node text {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    fill: #64748b;
+    text-anchor: middle;
+    /* Chữ cũng sáng lên đồng bộ với vòng tròn */
+    animation: proTextWave 1.5s infinite ease-in-out;
+    animation-delay: calc(var(--i) * 0.25s);
+}
+
+/* Hiệu ứng Wave: Sáng rực lên ở 0% rồi từ từ tắt hẳn ở 30%, tạo vệt sáng đuổi nhau */
+@keyframes proGlowWave {
+    0% {
+        fill: var(--c);
+        stroke: var(--c);
+        stroke-width: 4;
+        transform: scale(1.25);
+        filter: drop-shadow(0 0 12px var(--c));
+    }
+    30%, 100% {
+        fill: #ffffff;
+        stroke: #cbd5e1;
+        stroke-width: 2.5;
+        transform: scale(1);
+        filter: none;
+    }
+}
+
+/* Khi ô sáng lên thì chữ bên trong tự động đổi thành màu trắng */
+@keyframes proTextWave {
+    0% { fill: #ffffff; }
+    30%, 100% { fill: #64748b; }
+}
+
+/* --- Tương thích Dark Mode --- */
+body.dark-mode .pro-node circle {
+    fill: #1e293b;
+    stroke: #475569;
+}
+body.dark-mode .pro-node text {
+    fill: #94a3b8;
+}
+@keyframes proGlowWaveDark {
+    0% {
+        fill: var(--c);
+        stroke: var(--c);
+        stroke-width: 4;
+        transform: scale(1.25);
+        filter: drop-shadow(0 0 12px var(--c));
+    }
+    30%, 100% {
+        fill: #1e293b;
+        stroke: #475569;
+        stroke-width: 2.5;
+        transform: scale(1);
+        filter: none;
+    }
+}
+body.dark-mode .pro-node circle {
+    animation-name: proGlowWaveDark;
+}

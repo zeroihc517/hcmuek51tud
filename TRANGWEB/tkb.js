@@ -30,8 +30,53 @@ function loadThoiGianBieu() {
         $('#deadlineBox').addClass('d-none'); return;
     }
 
-    $('#tkb-body').html('<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-spinner fa-spin fs-3 mb-3"></i><br>Đang tải TKB của '+ currentUser.name +'...</td></tr>');
+    // ĐOẠN CODE PHÓNG TO HÌNH TAM GIÁC
+    let loadingHtml = `
+    <tr>
+        <td colspan="9" style="text-align: center; padding: 60px 20px; background: #f8fafc;">
+            <!-- Đã tăng chiều rộng & chiều cao lên 220px -->
+            <div class="pro-triangle-loader mx-auto mb-4" style="width: 220px; height: 220px; position: relative;">
+                <svg viewBox="0 0 200 200" width="100%" height="100%" style="overflow: visible;">
+                    <!-- Viền tam giác (tăng stroke-width lên 3.5) -->
+                    <polygon points="100,25 175,155 25,155" fill="none" stroke="#e2e8f0" stroke-width="3.5" stroke-linejoin="round"/>
+                    
+                    <!-- Các điểm đỉnh A, P, C, N, B, M -->
+                    <g class="pro-node" style="--i: 0; --c: #7dd3fc;">
+                        <circle cx="100" cy="25" r="18" />
+                        <text x="100" y="31">A</text>
+                    </g>
+                    <g class="pro-node" style="--i: 1; --c: #38bdf8;">
+                        <circle cx="137.5" cy="90" r="18" />
+                        <text x="137.5" y="96">P</text>
+                    </g>
+                    <g class="pro-node" style="--i: 2; --c: #0ea5e9;">
+                        <circle cx="175" cy="155" r="18" />
+                        <text x="175" y="161">C</text>
+                    </g>
+                    <g class="pro-node" style="--i: 3; --c: #0284c7;">
+                        <circle cx="100" cy="155" r="18" />
+                        <text x="100" y="161">N</text>
+                    </g>
+                    <g class="pro-node" style="--i: 4; --c: #0369a1;">
+                        <circle cx="25" cy="155" r="18" />
+                        <text x="25" y="161">B</text>
+                    </g>
+                    <g class="pro-node" style="--i: 5; --c: #0f4c81;">
+                        <circle cx="62.5" cy="90" r="18" />
+                        <text x="62.5" y="96">M</text>
+                    </g>
+                </svg>
+            </div>
+            <div class="fw-bold" style="font-size: 17px; color: #0f4c81; letter-spacing: 0.5px;">
+                Đang đồng bộ Thời khóa biểu...
+            </div>
+            <div class="text-muted small mt-1">Vui lòng chờ trong giây lát</div>
+        </td>
+    </tr>`;
     
+    $('#tkb-body').html(loadingHtml);
+    
+    // Yêu cầu tải dữ liệu
     $.ajax({
         url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv + "&_=" + new Date().getTime(), 
         method: "GET", dataType: "json", cache: false,
@@ -39,7 +84,6 @@ function loadThoiGianBieu() {
         error: function() { $('#tkb-body').html('<tr><td colspan="9" class="text-danger text-center">Lỗi khi tải dữ liệu TKB!</td></tr>'); }
     });
 }
-
 function loadDeadlines() {
     $('#deadlineBox').removeClass('d-none');
     $('#deadline-container').html('<div class="w-100 text-center text-muted" style="grid-column: 1/-1"><i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải dữ liệu Deadline...</div>');
