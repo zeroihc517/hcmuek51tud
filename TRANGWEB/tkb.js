@@ -2200,7 +2200,7 @@ function processExportCalendar() {
                 curDate.setDate(curDate.getDate() + 1);
             }
 
-            // 2. Thuật toán gộp các tuần liên tiếp thành nhóm
+            // 2. Thuật toán gộp các tuần liên tiếp thành nhóm vòng lặp
             if (validDates.length > 0) {
                 let groups = [];
                 let currentGroup = [validDates[0]];
@@ -2208,13 +2208,12 @@ function processExportCalendar() {
                 for (let i = 1; i < validDates.length; i++) {
                     let prevDate = currentGroup[currentGroup.length - 1];
                     let currDate = validDates[i];
-                    let diffDays = (currDate - prevDate) / (1000 * 60 * 60 * 24);
+                    // THÊM MATH.ROUND ĐỂ TRÁNH LỖI LỆCH SỐ THẬP PHÂN GÂY MẤT VÒNG LẶP
+                    let diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
 
-                    // Nếu cách nhau đúng 7 ngày -> Học liên tiếp -> Gộp chung
                     if (diffDays === 7) {
                         currentGroup.push(currDate);
                     } else {
-                        // Bị ngắt quãng (Nghỉ lễ/thi) -> Đóng nhóm cũ, tạo nhóm mới
                         groups.push(currentGroup);
                         currentGroup = [currDate];
                     }
@@ -2229,17 +2228,14 @@ function processExportCalendar() {
                     let startDT = new Date(groupStart); startDT.setHours(sH, sM, 0, 0);
                     let endDT = new Date(groupStart); endDT.setHours(eH, eM, 0, 0);
 
-                    let locationStr = c.phong ? `Phòng ${c.phong} (${c.hinhThuc || ''})` : (c.hinhThuc || '');
-                    let descriptionStr = `Môn học: ${c.mon}\\nGiảng viên: ${c.gv || 'Chưa cập nhật'}\\nHình thức: ${c.hinhThuc || ''}`;
-
                     events.push({
                         type: group.length > 1 ? 'RECURRING' : 'TIMED',
                         title: c.mon,
                         start: startDT,
                         end: endDT,
-                        count: group.length, // Số tuần lặp lại
-                        location: locationStr,
-                        description: descriptionStr
+                        count: group.length, // Số lần lặp lại
+                        location: c.phong ? `Phòng ${c.phong} (${c.hinhThuc || ''})` : (c.hinhThuc || ''),
+                        description: `Giảng viên: ${c.gv || 'Chưa cập nhật'}\nHình thức: ${c.hinhThuc || ''}`
                     });
                 });
             }
@@ -2537,24 +2533,53 @@ window.processDirectCalendarSync = function() {
                 eH = Math.floor(endMinsTotal / 60); eM = endMinsTotal % 60;
             }
 
+            // 1. Quét tìm tất cả các ngày học hợp lệ (Bỏ qua ngày nghỉ)
+            let validDates = [];
             while (curDate <= lastDate) {
                 if (curDate.getDay() === targetDayOfWeek) {
                     let formattedDateStr = formatDateDDMMYYYY(curDate);
                     if (!skipDates.includes(formattedDateStr)) {
-                        let startDT = new Date(curDate); startDT.setHours(sH, sM, 0, 0);
-                        let endDT = new Date(curDate); endDT.setHours(eH, eM, 0, 0);
-
-                        events.push({
-                            type: 'TIMED',
-                            title: c.mon,
-                            start: startDT,
-                            end: endDT,
-                            location: c.phong ? `Phòng ${c.phong} (${c.hinhThuc || ''})` : (c.hinhThuc || ''),
-                            description: `Giảng viên: ${c.gv || 'Chưa cập nhật'}\nHình thức: ${c.hinhThuc || ''}`
-                        });
+                        validDates.push(new Date(curDate));
                     }
                 }
                 curDate.setDate(curDate.getDate() + 1);
+            }
+
+            // 2. Thuật toán gộp các tuần liên tiếp thành nhóm vòng lặp
+            if (validDates.length > 0) {
+                let groups = [];
+                let currentGroup = [validDates[0]];
+
+                for (let i = 1; i < validDates.length; i++) {
+                    let prevDate = currentGroup[currentGroup.length - 1];
+                    let currDate = validDates[i];
+                    let diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 7) {
+                        currentGroup.push(currDate);
+                    } else {
+                        groups.push(currentGroup);
+                        currentGroup = [currDate];
+                    }
+                }
+                groups.push(currentGroup);
+
+                // 3. Đẩy dữ liệu đã gộp vào mảng events
+                groups.forEach(group => {
+                    let groupStart = group[0];
+                    let startDT = new Date(groupStart); startDT.setHours(sH, sM, 0, 0);
+                    let endDT = new Date(groupStart); endDT.setHours(eH, eM, 0, 0);
+
+                    events.push({
+                        type: group.length > 1 ? 'RECURRING' : 'TIMED',
+                        title: c.mon,
+                        start: startDT,
+                        end: endDT,
+                        count: group.length, // Số buổi học liên tiếp
+                        location: c.phong ? `Phòng ${c.phong} (${c.hinhThuc || ''})` : (c.hinhThuc || ''),
+                        description: `Giảng viên: ${c.gv || 'Chưa cập nhật'}\nHình thức: ${c.hinhThuc || ''}`
+                    });
+                });
             }
         });
     }
@@ -2582,7 +2607,64 @@ window.processDirectCalendarSync = function() {
         alert("Không tìm thấy sự kiện nào trong khoảng thời gian đã chọn!");
         return;
     }
+// --- BẮT ĐẦU CHÈN CODE TÍNH TOÁN THÔNG BÁO ---
+    let dayScheduleSummary = {}; 
+    events.forEach(evt => {
+        if (evt.type === 'TIMED' || evt.type === 'RECURRING') {
+            let dateKey = `${evt.start.getFullYear()}-${evt.start.getMonth() + 1}-${evt.start.getDate()}`;
+            if (!dayScheduleSummary[dateKey]) {
+                dayScheduleSummary[dateKey] = { hasMorning: false, hasAfternoon: false, morningEnd: null, afternoonEnd: null };
+            }
+            let startH = evt.start.getHours();
+            if (startH < 12) {
+                dayScheduleSummary[dateKey].hasMorning = true;
+                if (!dayScheduleSummary[dateKey].morningEnd || evt.end > dayScheduleSummary[dateKey].morningEnd) {
+                    dayScheduleSummary[dateKey].morningEnd = new Date(evt.end);
+                }
+            } else if (startH >= 12 && startH < 17) {
+                dayScheduleSummary[dateKey].hasAfternoon = true;
+                if (!dayScheduleSummary[dateKey].afternoonEnd || evt.end > dayScheduleSummary[dateKey].afternoonEnd) {
+                    dayScheduleSummary[dateKey].afternoonEnd = new Date(evt.end);
+                }
+            }
+        }
+    });
 
+    events.forEach(evt => {
+        evt.reminders = []; // Danh sách thời gian nhắc nhở (tính bằng số phút trước sự kiện)
+        if (evt.type === 'ALLDAY') {
+            // Deadline (ALLDAY): 00:00. Để nhắc 5:30 sáng -> báo sau 330 phút (tương đương -330 trước sự kiện)
+            evt.reminders.push(-330);
+        } else {
+            let startH = evt.start.getHours();
+            let dateKey = `${evt.start.getFullYear()}-${evt.start.getMonth() + 1}-${evt.start.getDate()}`;
+            let dayInfo = dayScheduleSummary[dateKey] || { hasMorning: false, hasAfternoon: false };
+
+            if (startH < 12) {
+                let a1 = new Date(evt.start); a1.setDate(a1.getDate() - 1); a1.setHours(18, 0, 0, 0);
+                let a2 = new Date(evt.start); a2.setHours(5, 30, 0, 0);
+                evt.reminders.push(Math.round((evt.start.getTime() - a1.getTime()) / 60000));
+                evt.reminders.push(Math.round((evt.start.getTime() - a2.getTime()) / 60000));
+            } else if (startH >= 12 && startH < 17) {
+                let a1 = new Date(evt.start);
+                if (!dayInfo.hasMorning) a1.setHours(7, 0, 0, 0);
+                else { a1.setDate(a1.getDate() - 1); a1.setHours(18, 0, 0, 0); }
+                
+                let a2 = new Date(evt.start);
+                if (dayInfo.hasMorning && dayInfo.morningEnd) a2 = new Date(dayInfo.morningEnd.getTime() + 10 * 60000);
+                else a2.setHours(11, 40, 0, 0);
+
+                evt.reminders.push(Math.round((evt.start.getTime() - a1.getTime()) / 60000));
+                evt.reminders.push(Math.round((evt.start.getTime() - a2.getTime()) / 60000));
+            } else {
+                let a = new Date(evt.start);
+                if (dayInfo.hasAfternoon && dayInfo.afternoonEnd) a = new Date(dayInfo.afternoonEnd.getTime() + 5 * 60000);
+                else a.setHours(15, 0, 0, 0);
+                evt.reminders.push(Math.round((evt.start.getTime() - a.getTime()) / 60000));
+            }
+        }
+    });
+    // --- KẾT THÚC CHÈN CODE ---
     // GỌI API ĐỒNG BỘ TRỰC TIẾP
     let btn = $('#btnDirectSync');
     let originalHtml = btn.html();
