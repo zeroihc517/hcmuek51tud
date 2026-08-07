@@ -386,67 +386,63 @@ function loadDataByHocPhan(sheetName, element) {
 
     // Hiển thị form thêm dữ liệu nếu là Admin và Đổi nhãn thông minh
     // Hiển thị form thêm dữ liệu nếu là Admin và Đổi nhãn thông minh
-   if (isAdmin) {
-        $('#adminAddRowArea').removeClass('d-none');
-        if (sheetName.toLowerCase() === 'thông báo') {
-            $('#btnToggleHiddenPosts').removeClass('d-none'); // HIỆN NÚT CHUYỂN ĐỔI GÓC NHÌN
-            // 1. HIỂN THỊ LẠI ĐẦY ĐỦ CÁC CỘT (Hủy lệnh hide cũ)
-            $('#txtCol5, #txtCol6, #txtCol7').parent().show();
-            $('#insertCol5, #insertCol6, #insertCol7').parent().show();
-            $('#editCol5, #editCol6, #editCol7').parent().show();
-            
-            // 2. KHÔI PHỤC TÊN NHÃN VÀ THÊM NÚT "HẸN GIỜ" ĐÚNG NHƯ ẢNH
-            $('#txtCol1, #insertCol1, #editCol1').prev('label').html('STT (Cột 1)');
-            $('#txtCol2, #insertCol2, #editCol2').prev('label').html('Tiêu đề (Cột 2)');
-            $('#txtCol4, #insertCol4, #editCol4').prev('label').html('Ngày đăng (Cột 4)');
-            $('#txtCol5, #insertCol5, #editCol5').prev('label').html('Ngày cập nhật (Cột 5)');
-            $('#txtCol6, #insertCol6, #editCol6').prev('label').html('Đường link đính kèm (Cột 6)');
-            
-            // Chèn nút Hẹn giờ Đếm ngược vào Cột 3
-            $('#txtCol3, #insertCol3, #editCol3').prev('label').html('Nội dung chi tiết (Cột 3) <button type="button" class="btn btn-sm text-white py-0 px-2 ms-2 rounded-pill shadow-sm fw-bold" style="font-size: 11px; background-color: var(--accent-red);" onclick="insertDeadlineTag(\'c3\', this, event)"><i class="fa-solid fa-clock"></i> Hẹn giờ Đếm ngược</button>');
-            
-            // Chèn nút Hẹn giờ Ẩn bài vào Cột 7
-            $('#txtCol7, #insertCol7, #editCol7').prev('label').html('Ghi chú (Cột 7) <button type="button" class="btn btn-sm text-white py-0 px-2 ms-2 rounded-pill shadow-sm fw-bold" style="font-size: 11px; background-color: #6b7280;" onclick="insertDeadlineTag(\'c7\', this, event)"><i class="fa-solid fa-clock"></i> Hẹn giờ Ẩn bài</button>');
+  // Hiển thị form thêm dữ liệu nếu là Admin và Đổi nhãn thông minh
+if (isAdmin) {
+    $('#adminAddRowArea').removeClass('d-none');
+    
+    if (sheetName.toLowerCase() === 'thông báo') {
+        $('#btnToggleHiddenPosts').removeClass('d-none'); // HIỆN NÚT CHUYỂN ĐỔI GÓC NHÌN
+        
+        // 1. HIỂN THỊ LẠI ĐẦY ĐỦ 7 CỘT
+        $('#txtCol5, #txtCol6, #txtCol7').parent().show();
+        $('#insertCol5, #insertCol6, #insertCol7').parent().show();
+        $('#editCol5, #editCol6, #editCol7').parent().show();
+        
+        // 2. KHÔI PHỤC TÊN NHÃN VÀ THÊM NÚT "HẸN GIỜ" CHO THÔNG BÁO
+        $('#txtCol1, #insertCol1, #editCol1').prev('label').html('STT (Cột 1)');
+        $('#txtCol2, #insertCol2, #editCol2').prev('label').html('Tiêu đề (Cột 2)');
+        $('#txtCol4, #insertCol4, #editCol4').prev('label').html('Ngày đăng (Cột 4)');
+        $('#txtCol5, #insertCol5, #editCol5').prev('label').html('Ngày cập nhật (Cột 5)');
+        $('#txtCol6, #insertCol6, #editCol6').prev('label').html('Đường link đính kèm (Cột 6)');
+        $('#txtCol3, #insertCol3, #editCol3').prev('label').html('Nội dung chi tiết (Cột 3) <button type="button" class="btn btn-sm text-white py-0 px-2 ms-2 rounded-pill shadow-sm fw-bold" style="font-size: 11px; background-color: var(--accent-red);" onclick="insertDeadlineTag(\'c3\', this, event)"><i class="fa-solid fa-clock"></i> Hẹn giờ Đếm ngược</button>');
+        $('#txtCol7, #insertCol7, #editCol7').prev('label').html('Ghi chú (Cột 7) <button type="button" class="btn btn-sm text-white py-0 px-2 ms-2 rounded-pill shadow-sm fw-bold" style="font-size: 11px; background-color: #6b7280;" onclick="insertDeadlineTag(\'c7\', this, event)"><i class="fa-solid fa-clock"></i> Hẹn giờ Ẩn bài</button>');
 
-            // 3. SẮP XẾP LẠI VỊ TRÍ (ORDER) VÀ ĐỘ RỘNG CÁC CỘT CHO KHUNG THÊM MỚI GIỐNG 100% ẢNH
-            // Hàng 1
-            $('#txtCol1').parent().attr('class', 'col-md-2').css('order', '1');
-            $('#txtCol4').parent().attr('class', 'col-md-3').css('order', '2');
-            $('#txtCol5').parent().attr('class', 'col-md-3').css('order', '3');
-            $('#txtCol6').parent().attr('class', 'col-md-4').css('order', '4');
-            // Hàng 2
-            $('#txtCol7').parent().attr('class', 'col-md-3').css('order', '5');
-            $('#txtCol2').parent().attr('class', 'col-md-9').css('order', '6');
-            // Hàng 3
-            $('#txtCol3').parent().attr('class', 'col-12').css('order', '7');
+        // 3. SẮP XẾP LẠI VỊ TRÍ CÁC CỘT CHO THÔNG BÁO
+        $('#txtCol1').parent().attr('class', 'col-md-2').css('order', '1');
+        $('#txtCol4').parent().attr('class', 'col-md-3').css('order', '2');
+        $('#txtCol5').parent().attr('class', 'col-md-3').css('order', '3');
+        $('#txtCol6').parent().attr('class', 'col-md-4').css('order', '4');
+        $('#txtCol7').parent().attr('class', 'col-md-3').css('order', '5');
+        $('#txtCol2').parent().attr('class', 'col-md-9').css('order', '6');
+        $('#txtCol3').parent().attr('class', 'col-12').css('order', '7');
 
-        } else {
-            $('#btnToggleHiddenPosts').addClass('d-none');
-            // PHỤC HỒI GIAO DIỆN MẶC ĐỊNH KHI MỞ CÁC MÔN HỌC KHÁC
-            $('#txtCol5, #txtCol6, #txtCol7').parent().show();
-            $('#insertCol5, #insertCol6, #insertCol7').parent().show();
-            $('#editCol5, #editCol6, #editCol7').parent().show();
-            
-            $('#txtCol1, #insertCol1, #editCol1').prev('label').text('STT / Trạng thái (Cột 1)');
-            $('#txtCol2, #insertCol2, #editCol2').prev('label').text('Tiêu đề (Cột 2)');
-            $('#txtCol3, #insertCol3, #editCol3').prev('label').text('Nội dung chi tiết (Cột 3)');
-            $('#txtCol4, #insertCol4, #editCol4').prev('label').text('Ngày đăng (Cột 4)');
-            $('#txtCol5, #insertCol5, #editCol5').prev('label').text('Ngày cập nhật (Cột 5)');
-            $('#txtCol6, #insertCol6, #editCol6').prev('label').text('Đường link đính kèm (Cột 6)');
-            $('#txtCol7, #insertCol7, #editCol7').prev('label').text('Ghi chú (Cột 7)');
-            
-            // Trả lại cấu trúc layout mặc định của HTML gốc
-            $('#txtCol1').parent().attr('class', 'col-md-2').css('order', '1');
-            $('#txtCol2').parent().attr('class', 'col-md-4').css('order', '2');
-            $('#txtCol3').parent().attr('class', 'col-md-6').css('order', '3');
-            $('#txtCol4').parent().attr('class', 'col-md-3').css('order', '4');
-            $('#txtCol5').parent().attr('class', 'col-md-3').css('order', '5');
-            $('#txtCol6').parent().attr('class', 'col-md-3').css('order', '6');
-            $('#txtCol7').parent().attr('class', 'col-md-3').css('order', '7');
-        }
     } else {
-        $('#adminAddRowArea').addClass('d-none');
+        // ==========================================
+        // GIAO DIỆN CHỈNH SỬA DÀNH CHO "HỌC PHẦN"
+        // ==========================================
+        $('#btnToggleHiddenPosts').addClass('d-none');
+        
+        // 1. ẨN CÁC CỘT KHÔNG DÙNG ĐẾN (CỘT 5, 6, 7)
+        $('#txtCol5, #txtCol6, #txtCol7').parent().hide();
+        $('#insertCol5, #insertCol6, #insertCol7').parent().hide();
+        $('#editCol5, #editCol6, #editCol7').parent().hide();
+        
+        // 2. ĐỔI TÊN NHÃN CHO 4 CỘT CÒN LẠI 
+        // (Lưu ý: Input số 3 đang chứa TinyMCE nên sẽ đóng vai trò là "Nội dung chi tiết Cột 2")
+        $('#txtCol1, #insertCol1, #editCol1').prev('label').text('STT (Cột 1)');
+        $('#txtCol3, #insertCol3, #editCol3').prev('label').text('Nội dung chi tiết (Cột 2)'); // Khung TinyMCE
+        $('#txtCol2, #insertCol2, #editCol2').prev('label').text('Đường link (Cột 3)');       // Ô text thường
+        $('#txtCol4, #insertCol4, #editCol4').prev('label').text('Ghi chú (Cột 4)');
+        
+        // 3. SẮP XẾP LẠI GIAO DIỆN BẢNG THÊM MỚI BÊN DƯỚI (Dùng Flexbox Order)
+        $('#txtCol1').parent().attr('class', 'col-md-2').css('order', '1');
+        $('#txtCol3').parent().attr('class', 'col-md-10').css('order', '2'); // Khung nội dung rộng ra
+        $('#txtCol2').parent().attr('class', 'col-md-6').css('order', '3');
+        $('#txtCol4').parent().attr('class', 'col-md-6').css('order', '4');
     }
+} else {
+    $('#adminAddRowArea').addClass('d-none');
+}
     
     // Đóng sidebar trên mobile
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
