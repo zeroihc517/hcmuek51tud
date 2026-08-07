@@ -2188,27 +2188,60 @@ function processExportCalendar() {
                 eM = endMinsTotal % 60;
             }
 
+// 1. Quét tìm tất cả các ngày học hợp lệ
+            let validDates = [];
             while (curDate <= lastDate) {
                 if (curDate.getDay() === targetDayOfWeek) {
                     let formattedDateStr = formatDateDDMMYYYY(curDate);
                     if (!skipDates.includes(formattedDateStr)) {
-                        let startDT = new Date(curDate); startDT.setHours(sH, sM, 0, 0);
-                        let endDT = new Date(curDate); endDT.setHours(eH, eM, 0, 0);
-
-                        let location = c.phong ? `Phòng ${c.phong} (${c.hinhThuc || ''})` : (c.hinhThuc || '');
-                        let description = `Môn học: ${c.mon}\\nGiảng viên: ${c.gv || 'Chưa cập nhật'}\\nHình thức: ${c.hinhThuc || ''}`;
-
-                        events.push({
-                            type: 'TIMED',
-                            title: `${c.mon}`,
-                            start: startDT,
-                            end: endDT,
-                            location: location,
-                            description: description
-                        });
+                        validDates.push(new Date(curDate));
                     }
                 }
                 curDate.setDate(curDate.getDate() + 1);
+            }
+
+            // 2. Thuật toán gộp các tuần liên tiếp thành nhóm
+            if (validDates.length > 0) {
+                let groups = [];
+                let currentGroup = [validDates[0]];
+
+                for (let i = 1; i < validDates.length; i++) {
+                    let prevDate = currentGroup[currentGroup.length - 1];
+                    let currDate = validDates[i];
+                    let diffDays = (currDate - prevDate) / (1000 * 60 * 60 * 24);
+
+                    // Nếu cách nhau đúng 7 ngày -> Học liên tiếp -> Gộp chung
+                    if (diffDays === 7) {
+                        currentGroup.push(currDate);
+                    } else {
+                        // Bị ngắt quãng (Nghỉ lễ/thi) -> Đóng nhóm cũ, tạo nhóm mới
+                        groups.push(currentGroup);
+                        currentGroup = [currDate];
+                    }
+                }
+                groups.push(currentGroup);
+
+                // 3. Đẩy dữ liệu đã gộp vào mảng events
+                groups.forEach(group => {
+                    let groupStart = group[0];
+                    let groupEnd = group[group.length - 1];
+
+                    let startDT = new Date(groupStart); startDT.setHours(sH, sM, 0, 0);
+                    let endDT = new Date(groupStart); endDT.setHours(eH, eM, 0, 0);
+
+                    let locationStr = c.phong ? `Phòng ${c.phong} (${c.hinhThuc || ''})` : (c.hinhThuc || '');
+                    let descriptionStr = `Môn học: ${c.mon}\\nGiảng viên: ${c.gv || 'Chưa cập nhật'}\\nHình thức: ${c.hinhThuc || ''}`;
+
+                    events.push({
+                        type: group.length > 1 ? 'RECURRING' : 'TIMED',
+                        title: c.mon,
+                        start: startDT,
+                        end: endDT,
+                        count: group.length, // Số tuần lặp lại
+                        location: locationStr,
+                        description: descriptionStr
+                    });
+                });
             }
         });
     }
@@ -2368,7 +2401,9 @@ function buildICSContent(events, dayScheduleSummary) {
             // --- 2. THỜI KHÓA BIỂU (SỰ KIỆN THEO GIỜ) ---
             icsLines.push(`DTSTART;TZID=Asia/Ho_Chi_Minh:${formatLocalICS(evt.start)}`);
             icsLines.push(`DTEND;TZID=Asia/Ho_Chi_Minh:${formatLocalICS(evt.end)}`);
-
+		if (evt.type === 'RECURRING') {
+                icsLines.push(`RRULE:FREQ=WEEKLY;COUNT=${evt.count}`);
+            }
             let startH = evt.start.getHours();
             let dateKey = `${evt.start.getFullYear()}-${evt.start.getMonth() + 1}-${evt.start.getDate()}`;
             let dayInfo = dayScheduleSummary[dateKey] || { hasMorning: false, hasAfternoon: false };
