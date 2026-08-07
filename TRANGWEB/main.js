@@ -5181,13 +5181,12 @@ $(document).on('input', '#latexEditTextarea', function() {
         });
     }
 });
-// 1. Đoạn này giúp sửa lỗi không bấm được vào menu xổ xuống khi dùng TinyMCE trong bảng nhỏ (Modal)
-// ĐÃ BỔ SUNG: Cho phép click vào #adminTableModal và #adminImageModal
-$(document).on('focusin', function(e) {
-    if ($(e.target).closest(".tox-tinymce, .tox-tinymce-aux, .moxman-window, .tam-assetmanager-root, #adminTableModal, #adminImageModal").length) {
+// --- FIX TRIỆT ĐỂ LỖI KHÓA Ô NHẬP LINK TINYMCE TRONG BOOTSTRAP 5 MODAL ---
+document.addEventListener('focusin', function(e) {
+    if (e.target.closest(".tox-tinymce, .tox-tinymce-aux, .moxman-window, .tam-assetmanager-root, #adminTableModal, #adminImageModal") !== null) {
         e.stopImmediatePropagation();
     }
-});
+}, true); // <-- Tham số 'true' (Capture) bắt sự kiện trước khi Bootstrap nhận được
 // =======================================================
 // TÍNH NĂNG CHÈN NHANH MẪU GIAO DIỆN (BẢNG BÀI TẬP, TIÊU ĐỀ, BẢNG DỮ LIỆU)
 // Tương thích với Khung Sửa Nội dung LaTeX (latexEditTextarea)
