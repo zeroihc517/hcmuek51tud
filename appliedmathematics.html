@@ -14,16 +14,25 @@
 </head>
 <body class="hide-hidden-posts">
 <!-- OVERLAY LOADING TOÀN TRANG -->
-<div id="globalScreenLoader" class="d-flex flex-column align-items-center justify-content-center" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background-color: #f8fafc; z-index: 10500; transition: opacity 0.6s ease;">
+
+<div id="globalScreenLoader" class="d-flex flex-column align-items-center justify-content-center" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background-color: #f8fafc; z-index: 10500; transition: opacity 0.3s ease;">
     
-    <!-- Logo hoặc Icon của hệ thống -->
-    <div class="mb-4" style="width: 80px; height: 80px; background: linear-gradient(135deg, #154c79, #0f4c81); color: #ffffff; font-size: 35px; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(21, 76, 121, 0.2);">
-        <i class="fa-solid fa-graduation-cap"></i>
+    <!-- Hiệu ứng Logo -->
+    <div class="loader-logo-wrapper mb-4">
+        <div class="loader-logo">
+            <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <!-- Vòng tròn pulse tỏa ra xung quanh -->
+        <div class="loader-pulse"></div>
     </div>
     
-    <div class="spinner-border mb-3" style="width: 2.5rem; height: 2.5rem; color: #0f4c81; border-width: 0.25em;" role="status"></div>
-    <h5 class="fw-bold" style="color: #0f4c81;">Đang đồng bộ dữ liệu hệ thống...</h5>
-    <small class="text-muted fw-bold">Vui lòng chờ trong giây lát</small>
+    <h5 class="fw-bold mb-2" style="color: #0f4c81; letter-spacing: 0.5px;">Đang đồng bộ dữ liệu hệ thống...</h5>
+    <small class="text-muted fw-bold mb-4" style="font-size: 14px;">Vui lòng chờ trong giây lát</small>
+
+    <!-- Thanh Progress Bar trượt (Tạo cảm giác đang load rất nhanh) -->
+    <div class="loader-progress-bar">
+        <div class="loader-progress-value"></div>
+    </div>
 </div>
     <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
         <div id="autoToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">

@@ -336,32 +336,32 @@ function initInactivityTracker() {
 $(document).ready(function() {
     // Nếu có màn hình loading toàn trang thì bắt đầu kiểm tra
     if ($('#globalScreenLoader').length) {
+        
+        // TĂNG TỐC QUÉT KIỂM TRA: Giảm từ 300ms xuống 100ms để bắt sự kiện tải xong tức thì
         let checkInitialLoad = setInterval(function() {
-            // Kiểm tra các phân hệ chính đã tải xong chưa (dựa vào cấu trúc hiện tại của web)
             let isTableLoaded = $('#loadingStatus').hasClass('d-none');
-            // Kiểm tra sidebar đã có danh sách học phần chưa
             let isCategoriesLoaded = $('#dynamicCourseList').text().indexOf('Đang tải') === -1;
             
             // Nếu các điều kiện tải trang hoàn tất
             if (isTableLoaded && isCategoriesLoaded) {
-                clearInterval(checkInitialLoad); // Dừng vòng lặp kiểm tra
+                clearInterval(checkInitialLoad); 
                 
-                // Mờ dần màn hình loading và xóa luôn khỏi giao diện để web mượt hơn
-                $('#globalScreenLoader').fadeOut(600, function() {
+                // TĂNG TỐC HIỆU ỨNG TẮT: Giảm từ fadeOut(600) xuống fadeOut(250) để vào web nhanh hơn
+                $('#globalScreenLoader').fadeOut(250, function() {
                     $(this).remove();
                 });
             }
-        }, 300); // Kiểm tra mỗi 300ms
+        }, 100); 
 
-        // Đề phòng trường hợp lỗi mạng bị kẹt loading mãi mãi, tự động đóng sau 10 giây
+        // Đề phòng trường hợp lỗi mạng bị kẹt loading mãi mãi, tự động đóng sau 8 giây (Gốc là 10 giây)
         setTimeout(function() {
             clearInterval(checkInitialLoad);
             if ($('#globalScreenLoader').length) {
-                $('#globalScreenLoader').fadeOut(600, function() {
+                $('#globalScreenLoader').fadeOut(250, function() {
                     $(this).remove();
                 });
             }
-        }, 10000); 
+        }, 8000); 
     }
 });
 function generateThongBaoID(index) {
