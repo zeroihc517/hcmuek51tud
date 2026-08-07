@@ -473,7 +473,7 @@ $.ajax({
             }
             
             currentSheetTotalRows = data.length;
-
+window.currentSubjectData = data;
             // ==========================================
             // XỬ LÝ RIÊNG: GIAO DIỆN THÔNG BÁO (HỌC THUẬT & RÈN LUYỆN)
             // ==========================================
@@ -927,7 +927,7 @@ $('#loadingStatus').addClass('d-none');
                 }
                 
                 // 2. Trích xuất thông tin giảng viên
-                if (/mãhp|họcphần|gv\d|giảngviên|email|thôngbáo|sốtínchỉ/.test(fullRowText.replace(/\s+/g, ''))) { 
+                if (/mãhọcphần|họcphần|giảngviênphụtrách|emailgiảngviên/.test(fullRowText.replace(/\s+/g, ''))) { 
                     let info = row.filter(cell => String(cell).trim() !== "").join(" <span class='mx-2 text-black-50'>|</span> "); 
                     if(info) instructorInfos.push(info); 
                     return; 
@@ -1135,34 +1135,39 @@ if (!isChapter && !isLesson && !rowClass.includes('row-part')) {
     lessonIcon = '<i class="fa-solid fa-file-lines me-2" style="color: #0ea5e9; font-size: 16px;"></i>';
 }
 
-if (extractedUrl) {
-    if (isUpdating && !isAdmin) {
-        col2Html = `<span onclick="$('#updatingModal').modal('show'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Đang cập nhật">${lessonIcon}${col2Html || "Đang cập nhật"}</span>`;
-    } else {
+        
+       // --- LOGIC PHÂN LOẠI HIỂN THỊ: LINK HAY NỘI DUNG LATEX ---
+let isLinkOnly = extractedUrl && c3.replace(_urlRegex, '').trim() === '';
+
 let safeTitle = col2Html.replace(/'/g, "\\'").replace(/"/g, "&quot;"); 
-        let safeUrl = extractedUrl.replace(/'/g, "\\'"); 
+let safeUrl = extractedUrl ? extractedUrl.replace(/'/g, "\\'") : ''; 
 
-        // TẠO CHUỖI TRACKING ĐA CẤP (Lấy Tên bài thay vì STT)
-        let trackStr = `${currentSheetName}`; // Tên môn
-        if (trackingPartName) trackStr += ` - ${trackingPartName}`;       // Phần
-        if (trackingChapterName) trackStr += ` - ${trackingChapterName}`; // Chương
-        if (trackingLessonName) trackStr += ` - ${trackingLessonName}`;   // Bài
-        
-        // Nếu dòng này là Nội dung, lấy thẳng tên bài ở Cột 2 (c2)
-        if (!isChapter && !isLesson && !isPart) {
-            // Loại bỏ các thẻ HTML (nếu có) trong c2 để chuỗi gửi về Admin sạch đẹp
-            let cleanContentName = c2.replace(/<[^>]*>?/gm, '').trim();
-            if (cleanContentName) trackStr += ` - ${cleanContentName}`;
-        }
+// TẠO CHUỖI TRACKING ĐA CẤP (Lấy Tên bài thay vì STT)
+let trackStr = `${currentSheetName}`; // Tên môn
+if (trackingPartName) trackStr += ` - ${trackingPartName}`;       // Phần
+if (trackingChapterName) trackStr += ` - ${trackingChapterName}`; // Chương
+if (trackingLessonName) trackStr += ` - ${trackingLessonName}`;   // Bài
 
-      // Chèn hàm setDetailedView() vào đầu sự kiện onclick (ĐÃ BỔ SUNG SAFE TRACK)
-        let safeTrackStr = trackStr.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-        
-        col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${safeUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem bài học trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`; }
+if (!isChapter && !isLesson && !isPart) {
+    let cleanContentName = c2.replace(/<[^>]*>?/gm, '').trim();
+    if (cleanContentName) trackStr += ` - ${cleanContentName}`;
+}
+let safeTrackStr = trackStr.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+
+if (isUpdating && !isAdmin) {
+    // Trường hợp đang cập nhật
+    col2Html = `<span onclick="$('#updatingModal').modal('show'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Đang cập nhật">${lessonIcon}${col2Html || "Đang cập nhật"}</span>`;
+} else if (isLinkOnly) {
+    // CỘT 3 CHỈ CHỨA LINK -> Mở File Drive/PDF như cũ
+    col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${safeUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem tài liệu trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`; 
+} else if (c3.trim() !== '') {
+    // CỘT 3 CÓ CHỨA NỘI DUNG/LATEX -> Bật Modal Xem Chi Tiết
+    col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openLatexContentViewer(${rowIndex}); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem nội dung chi tiết">${lessonIcon}${col2Html || "Xem chi tiết"}</span>`;
 } else {
-                        col2Html = `<span style="color: #0f4c81; font-weight: 700;">${lessonIcon}${col2Html}</span>`;
-                    }
-
+    // TRỐNG HOÀN TOÀN -> Chỉ hiện chữ bình thường không click được
+    col2Html = `<span style="color: #0f4c81; font-weight: 700;">${lessonIcon}${col2Html}</span>`;
+}
+// --- KẾT THÚC CỘT 2 ---
                     // Gói Tên bài học và Ngày tháng vào chung 1 khối (Hiển thị dọc)
                     // margin-left: 24px để hàng ngày tháng dịch vào chuẩn tỉ lệ thẳng hàng chữ tiêu đề bài học
                    let finalCol2 = dateInfoHtml 
@@ -4983,3 +4988,281 @@ window.searchDatLich = function() {
         }
     });
 };
+
+// --- BỘ XỬ LÝ XEM VÀ CHỈNH SỬA TIÊU ĐỀ + NỘI DUNG LATEX TRỰC TIẾP FULLSCREEN ---
+
+window.currentLatexRowIndex = -1; 
+
+// 1. HÀM MỞ BẢNG XEM CHI TIẾT
+window.openLatexContentViewer = function(rowIndex) {
+    if (!window.currentSubjectData || !window.currentSubjectData[rowIndex]) return;
+    
+    window.currentLatexRowIndex = rowIndex;
+    let row = window.currentSubjectData[rowIndex];
+    let title = String(row[1] || 'Chi tiết nội dung').trim();
+    let contentRaw = String(row[2] || '').trim();
+
+    let contentDisplay = contentRaw;
+    if (!/(<p>|<table>|<br>|<br\s*\/?>|<div>)/i.test(contentDisplay)) {
+        contentDisplay = contentDisplay.replace(/\n/g, '<br>');
+    }
+
+    // Đặt giao diện về trạng thái XEM
+    $('#latexViewMode').removeClass('d-none').html(contentDisplay);
+    $('#latexEditMode').removeClass('d-flex').addClass('d-none');
+    
+    // Đổ dữ liệu vào Tiêu đề xem và Khung nhập Sửa
+    $('#latexViewerTitle').html(`<i class="fa-solid fa-file-signature me-2"></i> ${title}`);
+    $('#latexEditTitleInput').val(title); // Nạp Tiêu đề cũ vào ô input sửa
+    $('#latexEditTextarea').val(contentRaw); // Nạp Nội dung cũ vào ô textarea
+    
+    // Check quyền Admin
+    if (typeof isAdmin !== 'undefined' && isAdmin) {
+        $('#btnEditLatexModal').removeClass('d-none');
+        $('#btnEditLatexModal').html('<i class="fa-solid fa-pen me-1"></i> Sửa Nội Dung').removeClass('btn-secondary').addClass('btn-warning');
+    } else {
+        $('#btnEditLatexModal').addClass('d-none');
+    }
+
+    $('#latexViewerModal').modal('show');
+    
+    setTimeout(() => { applyKaTeX('latexViewMode'); }, 100);
+};
+
+// 2. HÀM BẬT/TẮT CHẾ ĐỘ SỬA
+window.toggleLatexEditMode = function() {
+    let viewMode = $('#latexViewMode');
+    let editMode = $('#latexEditMode');
+    let btnEdit = $('#btnEditLatexModal');
+    
+    if (viewMode.hasClass('d-none')) {
+        // Đang từ Sửa -> Quay về Xem
+        viewMode.removeClass('d-none');
+        editMode.removeClass('d-flex').addClass('d-none');
+        btnEdit.html('<i class="fa-solid fa-pen me-1"></i> Sửa Nội Dung').removeClass('btn-secondary text-white').addClass('btn-warning text-dark');
+    } else {
+        // Đang từ Xem -> Chuyển sang Sửa
+        viewMode.addClass('d-none');
+        editMode.removeClass('d-none').addClass('d-flex');
+        btnEdit.html('<i class="fa-solid fa-eye me-1"></i> Trở về Xem trước').removeClass('btn-warning text-dark').addClass('btn-secondary text-white');
+        
+        // KÍCH HOẠT RENDER XEM TRƯỚC NGAY LẬP TỨC CHO NỘI DUNG CŨ
+        $('#latexEditTextarea').trigger('input');
+    }
+};
+
+// 3. HÀM LƯU DỮ LIỆU ĐÃ SỬA VỀ GOOGLE SHEETS
+window.saveLatexContent = function() {
+    if (window.currentLatexRowIndex === -1) return;
+    
+    let rowIndex = window.currentLatexRowIndex;
+    let rowData = window.currentSubjectData[rowIndex];
+    let sheetRowIndexVar = rowIndex + 1; 
+
+    // Lấy giá trị mới từ ô nhập
+    let newTitle = $('#latexEditTitleInput').val().trim();
+    let newContent = $('#latexEditTextarea').val().trim();
+    
+    if (!newTitle) {
+        alert("Tiêu đề bài học không được để trống!");
+        $('#latexEditTitleInput').focus();
+        return;
+    }
+
+    let c1 = String(rowData[0] || '');
+    let c2 = newTitle;   
+    let c3 = newContent; 
+    
+    // --- XỬ LÝ CỘT 4 (GHI CHÚ): GIỮ NGÀY ĐĂNG VÀ CẬP NHẬT NGÀY UPDATE ---
+    let c4 = String(rowData[3] || ''); 
+    
+    let now = new Date();
+    let pad = (n) => String(n).padStart(2, '0');
+    let dateOnlyStr = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    let dateTimeStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${dateOnlyStr}`;
+    
+    // Xóa chuỗi UPDATE cũ (nếu có) để thay bằng chuỗi mới
+    c4 = c4.replace(/UPDATE=(?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4}/ig, '').trim();
+    
+    // Nối chuỗi UPDATE mới vào sau
+    if (c4 !== '') {
+        c4 = c4 + ` UPDATE=${dateTimeStr}`;
+    } else {
+        c4 = `UPDATE=${dateTimeStr}`;
+    }
+    
+    // Phục hồi nguyên vẹn các cột dư còn lại
+    let c5 = String(rowData[4] || '');
+    let c6 = String(rowData[5] || '');
+    let c7 = String(rowData[6] || '');
+
+    let btnSave = $('#btnSaveLatexModal');
+    let oldText = btnSave.html();
+    btnSave.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang lưu...').prop('disabled', true);
+
+    postToGAS({
+        action: "editSheetRow",
+        sheetName: currentSheetName,
+        rowIndex: sheetRowIndexVar,
+        col1: c1, col2: c2, col3: c3, col4: c4, col5: c5, col6: c6, col7: c7
+    }, function(res) {
+        alert("Lưu thay đổi thành công!");
+        btnSave.html(oldText).prop('disabled', false);
+        
+        // 1. Cập nhật dữ liệu ngay vào RAM nội bộ
+        window.currentSubjectData[rowIndex][1] = c2;
+        window.currentSubjectData[rowIndex][2] = c3;
+        window.currentSubjectData[rowIndex][3] = c4;
+        
+        // 2. Cập nhật giao diện Modal
+        $('#latexViewerTitle').html(`<i class="fa-solid fa-file-signature me-2"></i> ${c2}`);
+        
+        let contentDisplay = c3;
+        if (!/(<p>|<table>|<br>|<br\s*\/?>|<div>)/i.test(contentDisplay)) {
+            contentDisplay = contentDisplay.replace(/\n/g, '<br>');
+        }
+        $('#latexViewMode').html(contentDisplay);
+        applyKaTeX('latexViewMode');
+        
+        toggleLatexEditMode(); // Trở về chế độ xem
+        
+        // 3. Tải lại bảng bên dưới để giao diện bên ngoài nhận luôn ngày Update
+        loadDataByHocPhan(currentSheetName);
+        
+    }, function() {
+        alert("Lỗi kết nối máy chủ! Vui lòng thử lại.");
+        btnSave.html(oldText).prop('disabled', false);
+    });
+};
+// --- SỰ KIỆN: RENDER XEM TRƯỚC THỜI GIAN THỰC TRONG QUÁ TRÌNH GÕ ---
+$(document).on('input', '#latexEditTextarea', function() {
+    let rawContent = $(this).val();
+    
+    if (!rawContent.trim()) {
+        $('#latexEditPreviewArea').html('<span class="text-muted">Nhập nội dung để xem trước...</span>');
+        return;
+    }
+
+    let htmlContent = rawContent;
+    // Xuống dòng tự động nếu văn bản thuần (Không chứa thẻ HTML)
+    if (!/(<p>|<table>|<br>|<br\s*\/?>|<div>)/i.test(htmlContent)) {
+        htmlContent = htmlContent.replace(/\n/g, '<br>');
+    }
+    
+    // Đổ Text vào khung Preview
+    $('#latexEditPreviewArea').html(htmlContent);
+
+    // Gọi bộ thư viện KaTeX để vẽ công thức Toán
+    if (window.renderMathInElement) {
+        renderMathInElement(document.getElementById('latexEditPreviewArea'), {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false},
+                {left: '\\(', right: '\\)', display: false},
+                {left: '\\[', right: '\\]', display: true}
+            ],
+            throwOnError: false,
+            output: "html"
+        });
+    }
+});
+// =======================================================
+// TÍNH NĂNG CHÈN NHANH MẪU GIAO DIỆN (BẢNG BÀI TẬP, TIÊU ĐỀ, BẢNG DỮ LIỆU)
+// Tương thích với Khung Sửa Nội dung LaTeX (latexEditTextarea)
+// =======================================================
+
+// Hàm thực hiện chèn nội dung vào đúng vị trí con trỏ
+function doInsertAdminContent(contentToInsert) {
+    let textarea = document.getElementById('latexEditTextarea');
+    let startPos = textarea.selectionStart;
+    let endPos = textarea.selectionEnd;
+    let textBefore = textarea.value.substring(0, startPos);
+    let textAfter = textarea.value.substring(endPos, textarea.value.length);
+    
+    textarea.value = textBefore + contentToInsert + textAfter;
+    textarea.selectionStart = textarea.selectionEnd = startPos + contentToInsert.length;
+    
+    // Ép render lại khung Xem trước (Preview) ngay lập tức
+    $('#latexEditTextarea').trigger('input');
+    textarea.focus();
+}
+
+// Hàm gọi khi nhấn các nút chèn mẫu
+function insertAdminTemplate(type) {
+    if (type === 'question') {
+        let content = '<div style="border-left: 5px solid #0f4c81; background-color: #f8f9fa; padding: 20px; border-radius: 6px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);"><div style="background-color: #0f4c81; color: #ffffff; display: inline-block; padding: 6px 20px; border-radius: 20px; font-weight: bold; font-size: 0.95em; margin-bottom: 15px; letter-spacing: 0.5px;">Bài tập 1</div><div style="font-size: 1.05em; color: #334155; line-height: 1.7;">Trên mặt phẳng tọa độ, hãy chứng tỏ các đường bậc hai không suy biến quen thuộc là Elip, Parabol... (Gõ công thức LaTeX bình thường)</div></div>\n';
+        doInsertAdminContent(content);
+    } else if (type === 'title') {
+        let content = '<div style="border: 2px solid #0f4c81; background-color: #f0f4f8; border-radius: 12px; padding: 12px 25px; text-align: center; color: #0f4c81; font-weight: bold; font-size: 1.2em; margin-bottom: 20px; box-shadow: 3px 3px 0px rgba(15, 76, 129, 0.15); display: flex; justify-content: center; align-items: center;">Bài 3: Tiếp tuyến, tính trơn và tính chính quy</div>\n';
+        doInsertAdminContent(content);
+    } else if (type === 'table') {
+        showAdminTableModal();
+    }
+}
+
+// Hàm tạo và hiển thị Cửa sổ Popup (Modal) nhập Hàng/Cột (Có z-index: 1060 để đè lên Modal Sửa bài)
+function showAdminTableModal() {
+    if (document.getElementById('adminTableModal')) {
+        document.getElementById('adminTableModal').remove();
+    }
+
+    let modalHtml = `
+    <div id="adminTableModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1060; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px);">
+        <div style="background: #ffffff; padding: 25px; border-radius: 12px; width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); transform: scale(1); animation: popIn 0.2s ease-out;">
+            <h5 class="fw-bold mb-3" style="color: #0f4c81;">
+                <i class="fa-solid fa-table me-2"></i>Tạo Bảng Nhanh
+            </h5>
+            <div class="row g-3 mb-4">
+                <div class="col-6">
+                    <label class="fw-bold small text-muted mb-1">Số Cột:</label>
+                    <input type="number" id="tbAdminCols" class="form-control fw-bold" value="4" min="1">
+                </div>
+                <div class="col-6">
+                    <label class="fw-bold small text-muted mb-1">Số Hàng:</label>
+                    <input type="number" id="tbAdminRows" class="form-control fw-bold" value="3" min="1">
+                </div>
+            </div>
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-light fw-bold px-4" onclick="document.getElementById('adminTableModal').remove()">Hủy</button>
+                <button type="button" class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" onclick="generateAdminTableFromModal()">Chèn Bảng</button>
+            </div>
+        </div>
+        <style>
+            @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        </style>
+    </div>`;
+
+    $('body').append(modalHtml);
+    setTimeout(() => document.getElementById('tbAdminCols').focus(), 100);
+}
+
+// Hàm sinh code bảng sau khi bấm "Chèn Bảng" từ Popup
+function generateAdminTableFromModal() {
+    let numCols = parseInt($('#tbAdminCols').val()) || 3;
+    let numRows = parseInt($('#tbAdminRows').val()) || 2;
+    
+    document.getElementById('adminTableModal').remove();
+
+    let tableHtml = '<div style="overflow-x: auto; margin-bottom: 20px; border-radius: 6px; border: 1px solid #cbd5e1; box-shadow: 0 1px 3px rgba(0,0,0,0.05);"><table style="width: 100%; border-collapse: collapse; background-color: #ffffff; font-size: 0.95em; margin: 0;"><thead style="background-color: #f0f4f8; border-bottom: 2px solid #0f4c81;"><tr>';
+    
+    for (let c = 1; c <= numCols; c++) {
+        let borderRight = (c === numCols) ? '' : ' border-right: 1px solid #e2e8f0;';
+        tableHtml += `<th style="padding: 12px 15px; color: #0f4c81; font-weight: 600; text-align: left;${borderRight}">Tiêu đề ${c}</th>`;
+    }
+    tableHtml += '</tr></thead><tbody>';
+
+    for (let r = 1; r <= numRows; r++) {
+        let bg = (r % 2 === 0) ? ' background-color: #f8fafc;' : '';
+        let borderBottom = (r === numRows) ? '' : ' border-bottom: 1px solid #e2e8f0;';
+        tableHtml += `<tr style="${bg}${borderBottom}">`;
+        
+        for (let c = 1; c <= numCols; c++) {
+            let borderRight = (c === numCols) ? '' : ' border-right: 1px solid #e2e8f0;';
+            tableHtml += `<td style="padding: 10px 15px; color: #334155;${borderRight}">Nội dung ${r}-${c}</td>`;
+        }
+        tableHtml += '</tr>';
+    }
+    tableHtml += '</tbody></table></div>\n';
+
+    doInsertAdminContent(tableHtml);
+}
