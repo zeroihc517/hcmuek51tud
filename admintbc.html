@@ -802,7 +802,7 @@ function loadPersonalLinks() {
         renderTKBTable(filteredData);
     }
 
-    function renderTKBTable(courses) {
+   function renderTKBTable(courses) {
     const tbody = document.getElementById('tkb-body'); 
     if (!tbody) return;
     
@@ -811,10 +811,61 @@ function loadPersonalLinks() {
     let tableHtml = "";
     
     const courseMap = {};
+    
+    // 1. Quét dữ liệu để xác định các thứ có lịch học
+    let activeDays = {2: false, 3: false, 4: false, 5: false, 6: false, 7: false, 8: false};
     courses.forEach(c => {
         courseMap[`${c.thu}-${c.tietBd}`] = c;
+        activeDays[c.thu] = true;
     });
     
+    // 2. Xử lý logic Ẩn Chủ Nhật & Thu hẹp các ngày trống
+    let hideSunday = !activeDays[8]; // Không có lịch CN -> Ẩn CN
+    let shrinkDays = {2: false, 3: false, 4: false, 5: false, 6: false, 7: false, 8: false};
+    let shrinkCount = 0;
+    let visibleNormalCols = 0;
+
+    for (let i = 2; i <= 8; i++) {
+        if (i === 8 && hideSunday) continue; // Bỏ qua đếm cột bị ẩn
+
+        // Nếu CN có lịch, kiểm tra xem Thứ 2 -> Thứ 7 có ngày trống không
+        if (!hideSunday && i >= 2 && i <= 7 && !activeDays[i]) {
+            shrinkDays[i] = true;
+            shrinkCount++;
+        } else {
+            visibleNormalCols++;
+        }
+    }
+
+    // 3. Tự động điều chỉnh độ rộng (Width) của các Header
+    for (let i = 2; i <= 8; i++) {
+        let th = document.getElementById(`th-day-${i}`);
+        if (!th) continue;
+
+        if (i === 8 && hideSunday) {
+            th.style.display = 'none'; // Ẩn cột Chủ nhật
+        } else {
+            th.style.display = ''; 
+            let spanDate = th.querySelector('span'); // Thẻ chứa ngày tháng
+
+            if (shrinkDays[i]) {
+                th.style.width = '30px'; 
+                th.style.padding = '14px 2px'; 
+                th.childNodes[0].nodeValue = "T" + i + " "; // Viết tắt text thành T2, T3...
+                if (spanDate) spanDate.style.display = 'none'; // Ẩn luôn (Ngày/Tháng)
+            } else {
+                // 110px là tổng độ rộng 2 cột: Buổi (60px) + Tiết (50px). Cột thu hẹp = 30px.
+                let totalFixed = 110 + (shrinkCount * 30);
+                th.style.width = `calc((100% - ${totalFixed}px) / ${visibleNormalCols})`;
+                th.style.padding = '14px 8px'; 
+                let thName = i === 8 ? "Chủ nhật" : "Thứ " + i;
+                th.childNodes[0].nodeValue = thName + " ";
+                if (spanDate) spanDate.style.display = 'inline';
+            }
+        }
+    }
+    
+    // 4. Kết xuất thân bảng (TBody)
     for (let i = 1; i <= totalRows; i++) {
         tableHtml += `<tr>`;
         if (i === 1) tableHtml += `<td rowspan="6" class="session-label">Sáng</td>`;
@@ -824,6 +875,7 @@ function loadPersonalLinks() {
         tableHtml += `<td class="col-tiet">${i}</td>`;
         
         for (let thu = 2; thu <= 8; thu++) {
+            if (thu === 8 && hideSunday) continue; // Không in td Chủ nhật nếu ẩn
             if (occupied[i][thu]) continue; 
             
             const course = courseMap[`${thu}-${i}`];
@@ -835,15 +887,15 @@ function loadPersonalLinks() {
                 }
                 
                 let rawHinhThuc = course.hinhThuc || "";
-let customLink = checkAndExtractUrl(rawHinhThuc);
-let displayHinhThuc = rawHinhThuc;
+                let customLink = checkAndExtractUrl(rawHinhThuc);
+                let displayHinhThuc = rawHinhThuc;
 
-if (customLink) {
-    displayHinhThuc = rawHinhThuc.replace(customLink, '').trim();
-}
+                if (customLink) {
+                    displayHinhThuc = rawHinhThuc.replace(customLink, '').trim();
+                }
 
-// Lọc bỏ mã học phần dạng #XXXXXX khỏi dòng Địa điểm / Hình thức
-displayHinhThuc = displayHinhThuc.replace(/#\S+/g, '').trim();
+                // Lọc bỏ mã học phần dạng #XXXXXX khỏi dòng Địa điểm / Hình thức
+                displayHinhThuc = displayHinhThuc.replace(/#\S+/g, '').trim();
                 
                 let autoColor = course.color;
                 const locU = displayHinhThuc.toUpperCase();
@@ -883,13 +935,19 @@ displayHinhThuc = displayHinhThuc.replace(/#\S+/g, '').trim();
                     </div>
                 </td>`;
             } else { 
-                tableHtml += `<td class="day"></td>`; 
+                // Cột trống: Nếu thuộc ngày bị thu hẹp thì bỏ padding đi cho ô gọn lại
+                if (shrinkDays[thu]) {
+                    tableHtml += `<td class="day" style="padding: 0;"></td>`;
+                } else {
+                    tableHtml += `<td class="day"></td>`; 
+                }
             }
         }
         tableHtml += `</tr>`;
     }
     tbody.innerHTML = tableHtml;
 }
+
 // 1. Hàm định dạng ngày giờ sang giờ Việt Nam (DD/MM/YYYY HH:MM:SS)
 function formatVNDateTime(dateStr) {
     if (!dateStr || dateStr === "Chưa từng truy cập") return "Chưa từng truy cập";
