@@ -929,7 +929,7 @@ $('#loadingStatus').addClass('d-none');
                     return; 
                 }
 
-                // 3. Trích xuất thẻ bài kiểm tra/minigame (ĐOẠN NÀY LÀ CÁI BẠN BỊ MẤT)
+                // 3. Trích xuất thẻ bài kiểm tra/minigame
                 let isSpecialExam = /(đề thi thử|đề demo|minigame tuần|minigame hè|minigame số)/i.test(fullRowText);
                 if (isSpecialExam) {
                     hasExamCards = true; 
@@ -958,17 +958,50 @@ $('#loadingStatus').addClass('d-none');
                         imgDisplayHtml = `<div class="card-minigame-img default-icon"><i class="fa-solid ${iconClass}"></i></div>`;
                     }
 
-                   // Dọn dẹp dấu nháy để không làm gãy sự kiện onclick
+                    // Dọn dẹp dấu nháy để không làm gãy sự kiện onclick
                     let safeTitle = titleText.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
-// TẠO CHUỖI TRACKING CHO ĐỀ THI
-let trackStr = `${currentSheetName} - Minigame/Đề thi: ${safeTitle}`;
+                    // TẠO CHUỖI TRACKING CHO ĐỀ THI
+                    let trackStr = `${currentSheetName} - Minigame/Đề thi: ${safeTitle}`;
 
-examCardsHtml += `
-    <a href="javascript:void(0)" onclick="setDetailedView('${trackStr}'); openDocumentViewer('${linkUrl}', '${safeTitle}')" class="card-minigame-box" title="${titleText}">
-        ${imgDisplayHtml}
-        <div class="card-minigame-title">${titleText}</div>
-    </a>`;
+                    // --- BỔ SUNG KHỐI KÉO THẢ & NÚT ADMIN (ĐÃ FIX LỖI GIAO DIỆN & KÉO THẢ) ---
+                    let sheetRowIndexDrag = rowIndex + 1;
+                    let isDragEnabled = window.isAdminActionsEnabled ? 'true' : 'false';
+                    let dragStyleTb = window.isAdminActionsEnabled ? 'cursor: grab;' : '';
+                    
+                    // Gắn cờ bắt sự kiện kéo thả giống hệ thống hàng bảng (table rows)
+                    let dragAttrTb = (isAdmin && window.innerWidth >= 992) ? ` draggable="${isDragEnabled}" ondragstart="handleDragStart(event, ${sheetRowIndexDrag})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndexDrag}, '${currentSheetName}')" style="${dragStyleTb}"` : '';
+
+                    let adminMinigameBtns = '';
+                    if (isAdmin) {
+                        let escapedCells = row.map(c => String(c || '').replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, ""));
+                        while(escapedCells.length < 7) escapedCells.push(''); 
+                        
+                        // Fix giao diện: Đổi thành lớp mờ phủ toàn bộ card để xếp 4 nút 2x2 ngay chính giữa
+                        adminMinigameBtns = `
+                        <div class="admin-action-col d-none position-absolute w-100 h-100" style="top: 0; left: 0; z-index: 10; pointer-events: none;">
+                            <div class="d-flex flex-column justify-content-center align-items-center gap-2 w-100 h-100 p-2" style="background: rgba(255,255,255,0.85); border-radius: 12px; border: 2px dashed var(--accent-red); pointer-events: auto;" onclick="event.stopPropagation();">
+                                <div class="d-flex w-100 justify-content-center gap-2">
+                                    <button class="btn btn-sm btn-light border-secondary py-1 px-3 shadow-sm" title="Qua trái" onclick="moveRowItem(${sheetRowIndexDrag}, 'up')"><i class="fa-solid fa-arrow-left"></i></button>
+                                    <button class="btn btn-sm btn-light border-secondary py-1 px-3 shadow-sm" title="Qua phải" onclick="moveRowItem(${sheetRowIndexDrag}, 'down')"><i class="fa-solid fa-arrow-right"></i></button>
+                                </div>
+                                <div class="d-flex w-100 justify-content-center gap-2">
+                                    <button class="btn btn-sm btn-warning py-1 px-3 shadow-sm fw-bold text-dark" title="Sửa" onclick="openEditRowModal(${sheetRowIndexDrag}, '${escapedCells[0]}', '${escapedCells[1]}', '${escapedCells[2]}', '${escapedCells[3]}', '${escapedCells[4]}', '${escapedCells[5]}', '${escapedCells[6]}')"><i class="fa-solid fa-pen"></i></button>
+                                    <button class="btn btn-sm btn-danger py-1 px-3 shadow-sm fw-bold text-white" title="Xóa" onclick="deleteRowItem(${sheetRowIndexDrag})"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>`;
+                    }
+
+                    // Bao bọc toàn bộ thẻ bằng thẻ div có class "drag-handle-row" để kích hoạt tính năng kéo thẻ
+                    examCardsHtml += `
+                    <div class="position-relative drag-handle-row" ${dragAttrTb} style="height: 100%;">
+                        ${adminMinigameBtns}
+                        <a href="javascript:void(0)" onclick="setDetailedView('${trackStr}'); openDocumentViewer('${linkUrl}', '${safeTitle}')" class="card-minigame-box" title="${titleText}">
+                            ${imgDisplayHtml}
+                            <div class="card-minigame-title">${titleText}</div>
+                        </a>
+                    </div>`;
                     return; 
                 }
 
