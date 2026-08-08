@@ -54,12 +54,18 @@ function loadThoiGianBieu() {
     
     $('#tkb-body').html(loadingHtml);
     
+    // THÊM ĐOẠN NÀY: Ép hiển thị lại từ Thứ 2 đến Chủ Nhật (trọng số chia đều / 7) lúc đang load
+    for (let thu = 2; thu <= 8; thu++) {
+        $(`#th-day-${thu}`).show().css("width", "calc((100% - 60px) / 7)");
+    }
+    
     $.ajax({
         url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv + "&_=" + new Date().getTime(), 
         method: "GET", dataType: "json", cache: false,
         success: function(data) { processTKBData(data); renderTkbToolBar(); },
         error: function() { $('#tkb-body').html('<tr><td colspan="8" class="text-danger text-center">Lỗi khi tải dữ liệu TKB!</td></tr>'); }
     });
+
 }
 function loadDeadlines() {
     $('#deadlineBox').removeClass('d-none');
