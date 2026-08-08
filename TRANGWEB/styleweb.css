@@ -156,7 +156,7 @@
 }
 /* Thu nhỏ tiêu đề nhóm học kỳ (HK1 - NĂM 2, HK2 - NĂM 2...) trong sidebar */
 .portal-filter-box .text-uppercase.fw-bold {
-    font-size: 12px !important;
+    font-size: 13px !important;
     margin-top: 10px !important;
     margin-bottom: 4px !important;
 }
@@ -165,7 +165,7 @@
     font-size: 9px !important;
 }
 .btn-course { 
-    font-size: 13px !important;      /* Thu nhỏ cỡ chữ (cũ 13.5px) */
+    font-size: 14px !important;      /* Thu nhỏ cỡ chữ (cũ 13.5px) */
     padding: 6px 6px !important;     /* Giảm khoảng đệm đệm trên/dưới và hai bên */
     gap: 6px !important;             /* Thu hẹp khoảng cách giữa Icon và Chữ */
     line-height: 1.2 !important;
@@ -188,7 +188,7 @@
 }
         .portal-filter-box { margin-bottom: 24px; }
 .portal-label { 
-    font-size: 12px; 
+    font-size: 12.5px; 
     text-transform: uppercase; 
     font-weight: 800; 
     color: #0f4c81; 
