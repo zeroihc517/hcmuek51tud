@@ -161,6 +161,72 @@ body {
             border-color: #154c79 !important;
             transform: scale(1.01);
         }
+/* --- CSS THANH THÔNG BÁO BẢO TRÌ PREMIUM & LIÊN TỤC --- */
+.maintenance-banner-premium {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    /* Hiệu ứng kính mờ (Glassmorphism) đồng bộ với form đăng nhập */
+    background: rgba(15, 76, 129, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 12px 0;
+    font-size: 15px;
+    font-weight: 500;
+    z-index: 10999;
+    overflow: hidden;
+    box-shadow: 0 -4px 25px rgba(15, 76, 129, 0.4);
+}
+
+.marquee-wrapper {
+    display: flex;
+    width: max-content;
+    /* Thời gian 35s. Số càng nhỏ chạy càng nhanh */
+    animation: marqueeContinuous 35s linear infinite;
+}
+
+.maintenance-text {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+}
+
+.maintenance-text strong {
+    color: #fcd34d; /* Màu vàng nổi bật chữ "THÔNG BÁO HỆ THỐNG" */
+    margin: 0 6px;
+    letter-spacing: 0.5px;
+}
+
+.spacer {
+    margin: 0 40px; /* Khoảng cách nối đuôi giữa 2 câu */
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.pulse-icon {
+    color: #ef4444; /* Màu đỏ cảnh báo */
+    animation: pulseIcon 1.5s infinite;
+}
+
+/* Kỹ thuật dịch chuyển 50% để lặp vô tận mượt mà */
+@keyframes marqueeContinuous {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); } 
+}
+
+@keyframes pulseIcon {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Hover chuột vào thì dừng lại để đọc */
+.maintenance-banner-premium:hover .marquee-wrapper {
+    animation-play-state: paused;
+}
     </style>
 </head>
 <body class="d-flex align-items-center justify-content-center vh-100 p-3">
@@ -238,12 +304,44 @@ body {
         </div>
     </div>
 </div>
+<!-- THANH THÔNG BÁO BẢO TRÌ LIÊN TỤC & ĐẸP MẮT -->
+<!-- THANH THÔNG BÁO BẢO TRÌ (Đã được ẩn mặc định) -->
+<div id="maintenanceBanner" class="maintenance-banner-premium" style="display: none;">
+    <div class="marquee-wrapper">
+        <!-- BẢN TEXT THỨ NHẤT -->
+        <div class="maintenance-text">
+            <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> 
+            <strong>THÔNG BÁO HỆ THỐNG:</strong> Trang web sẽ được bảo trì định kỳ từ 00:00 đến 05:00 mỗi ngày để cập nhật, nâng cấp và cải thiện hệ thống. Trong thời gian này, web có thể tạm thời không truy cập được. Mọi người thông cảm và quay lại sau giờ bảo trì nhé! ❤️
+            <span class="spacer">✦</span>
+        </div>
+        <!-- BẢN TEXT THỨ HAI (Nối đuôi ngay lập tức để không bị ngắt quãng) -->
+        <div class="maintenance-text">
+            <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> 
+            <strong>THÔNG BÁO HỆ THỐNG:</strong> Trang web sẽ được bảo trì định kỳ từ 00:00 đến 05:00 mỗi ngày để cập nhật, nâng cấp và cải thiện hệ thống. Trong thời gian này, web có thể tạm thời không truy cập được. Mọi người thông cảm và quay lại sau giờ bảo trì nhé! ❤️
+            <span class="spacer">✦</span>
+        </div>
+    </div>
+</div>
     <!-- Thư viện cần thiết -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="TRANGWEB/config.js"></script>
     <script src="TRANGWEB/Xulyxacthuc.js"></script>
     <script>
+// --- SCRIPT KIỂM TRA GIỜ ĐỂ HIỂN THỊ BẢO TRÌ ---
+document.addEventListener('DOMContentLoaded', function() {
+    // Lấy giờ hiện tại (từ 0 đến 23)
+    let currentHour = new Date().getHours();
+    
+    // Kiểm tra: Nếu từ 20h tối  đến trước 5h sáng (0, 1, 2, 3, 4)
+    if (currentHour >= 20 || currentHour < 5) {
+        // Tìm và hiển thị thanh thông báo
+        let banner = document.getElementById('maintenanceBanner');
+        if (banner) {
+            banner.style.display = 'block';
+        }
+    }
+});
         $(document).ready(function() {
     // 1. KIỂM TRẢ TỰ ĐỘNG ĐĂNG NHẬP
     let currentUser = localStorage.getItem('currentUser');
