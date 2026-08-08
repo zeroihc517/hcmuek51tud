@@ -26,45 +26,23 @@ function loadTKBView() {
 function loadThoiGianBieu() {
     $('.tkb-personal-toolbar').remove();
     if (!currentUser) {
-        $('#tkb-body').html(`<tr><td colspan="9" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-lock fs-1 mb-3 text-secondary"></i><br><h6 class="fw-bold">Bạn chưa đăng nhập</h6><p class="mb-3">Vui lòng đăng nhập để xem và tự điều chỉnh lịch học thời gian biểu cá nhân.</p><button class="btn btn-primary fw-bold px-4" onclick="openAddTkbModal(true)">Đăng nhập / Đăng ký</button></td></tr>`);
+        $('#tkb-body').html(`<tr><td colspan="8" style="text-align: center; padding: 60px; color: #6b7280;"><i class="fa-solid fa-lock fs-1 mb-3 text-secondary"></i><br><h6 class="fw-bold">Bạn chưa đăng nhập</h6><p class="mb-3">Vui lòng đăng nhập để xem và tự điều chỉnh lịch học thời gian biểu cá nhân.</p><button class="btn btn-primary fw-bold px-4" onclick="openAddTkbModal(true)">Đăng nhập / Đăng ký</button></td></tr>`);
         $('#deadlineBox').addClass('d-none'); return;
     }
 
-    // ĐOẠN CODE PHÓNG TO HÌNH TAM GIÁC
+    // ĐOẠN CODE PHÓNG TO HÌNH TAM GIÁC (ĐÃ ĐỔI COLSPAN=8 ĐỂ KHÔNG BỊ DƯ CỘT)
     let loadingHtml = `
     <tr>
-        <td colspan="9" style="text-align: center; padding: 60px 20px; background: #f8fafc;">
-            <!-- Đã tăng chiều rộng & chiều cao lên 220px -->
+        <td colspan="8" style="text-align: center; padding: 60px 20px; background: #f8fafc;">
             <div class="pro-triangle-loader mx-auto mb-4" style="width: 220px; height: 220px; position: relative;">
                 <svg viewBox="0 0 200 200" width="100%" height="100%" style="overflow: visible;">
-                    <!-- Viền tam giác (tăng stroke-width lên 3.5) -->
                     <polygon points="100,25 175,155 25,155" fill="none" stroke="#e2e8f0" stroke-width="3.5" stroke-linejoin="round"/>
-                    
-                    <!-- Các điểm đỉnh A, P, C, N, B, M -->
-                    <g class="pro-node" style="--i: 0; --c: #7dd3fc;">
-                        <circle cx="100" cy="25" r="18" />
-                        <text x="100" y="31">A</text>
-                    </g>
-                    <g class="pro-node" style="--i: 1; --c: #38bdf8;">
-                        <circle cx="137.5" cy="90" r="18" />
-                        <text x="137.5" y="96">P</text>
-                    </g>
-                    <g class="pro-node" style="--i: 2; --c: #0ea5e9;">
-                        <circle cx="175" cy="155" r="18" />
-                        <text x="175" y="161">C</text>
-                    </g>
-                    <g class="pro-node" style="--i: 3; --c: #0284c7;">
-                        <circle cx="100" cy="155" r="18" />
-                        <text x="100" y="161">N</text>
-                    </g>
-                    <g class="pro-node" style="--i: 4; --c: #0369a1;">
-                        <circle cx="25" cy="155" r="18" />
-                        <text x="25" y="161">B</text>
-                    </g>
-                    <g class="pro-node" style="--i: 5; --c: #0f4c81;">
-                        <circle cx="62.5" cy="90" r="18" />
-                        <text x="62.5" y="96">M</text>
-                    </g>
+                    <g class="pro-node" style="--i: 0; --c: #7dd3fc;"><circle cx="100" cy="25" r="18" /><text x="100" y="31">A</text></g>
+                    <g class="pro-node" style="--i: 1; --c: #38bdf8;"><circle cx="137.5" cy="90" r="18" /><text x="137.5" y="96">P</text></g>
+                    <g class="pro-node" style="--i: 2; --c: #0ea5e9;"><circle cx="175" cy="155" r="18" /><text x="175" y="161">C</text></g>
+                    <g class="pro-node" style="--i: 3; --c: #0284c7;"><circle cx="100" cy="155" r="18" /><text x="100" y="161">N</text></g>
+                    <g class="pro-node" style="--i: 4; --c: #0369a1;"><circle cx="25" cy="155" r="18" /><text x="25" y="161">B</text></g>
+                    <g class="pro-node" style="--i: 5; --c: #0f4c81;"><circle cx="62.5" cy="90" r="18" /><text x="62.5" y="96">M</text></g>
                 </svg>
             </div>
             <div class="fw-bold" style="font-size: 17px; color: #0f4c81; letter-spacing: 0.5px;">
@@ -76,12 +54,11 @@ function loadThoiGianBieu() {
     
     $('#tkb-body').html(loadingHtml);
     
-    // Yêu cầu tải dữ liệu
     $.ajax({
         url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv + "&_=" + new Date().getTime(), 
         method: "GET", dataType: "json", cache: false,
         success: function(data) { processTKBData(data); renderTkbToolBar(); },
-        error: function() { $('#tkb-body').html('<tr><td colspan="9" class="text-danger text-center">Lỗi khi tải dữ liệu TKB!</td></tr>'); }
+        error: function() { $('#tkb-body').html('<tr><td colspan="8" class="text-danger text-center">Lỗi khi tải dữ liệu TKB!</td></tr>'); }
     });
 }
 function loadDeadlines() {
@@ -1093,16 +1070,76 @@ function getAutoLink(locationName, customLink) {
 function renderTKBTable(courses) {
     const tbody = document.getElementById('tkb-body'); if (!tbody) return;
     const totalRows = 16; const occupied = Array.from({ length: totalRows + 1 }, () => Array(9).fill(false));
+    
+    // 1. Quét dữ liệu: Xác định các ngày trong tuần có sự kiện/lịch học
+    let hasCourse = Array(9).fill(false);
+    courses.forEach(c => {
+        if (c.thu >= 2 && c.thu <= 8) hasCourse[c.thu] = true;
+    });
+
+    // 2. Xác định trọng số (độ rộng) và trạng thái ẩn của từng cột
+    let hideDay = Array(9).fill(false);
+    let weights = Array(9).fill(1); // Mặc định mỗi cột trọng số là 1 phần
+
+    if (courses.length === 0) {
+        // Mặc định lúc load (chưa có sự kiện nào) -> Hiện đều từ T2 đến Chủ Nhật (tất cả trọng số = 1)
+    } else if (!hasCourse[8]) {
+        // Trường hợp 1: Có sự kiện nhưng Chủ nhật trống -> Ẩn Chủ nhật, Thứ 2 - Thứ 7 chia đều
+        hideDay[8] = true;
+    } else {
+        // Chủ nhật có sự kiện
+        let hasEventMonToSat = false;
+        for (let i = 2; i <= 7; i++) {
+            if (hasCourse[i]) {
+                hasEventMonToSat = true;
+                break;
+            }
+        }
+
+        if (!hasEventMonToSat) {
+            // Trường hợp 3: Chủ nhật có sự kiện, Thứ 2 - Thứ 7 ĐỀU TRỐNG
+            for (let i = 2; i <= 7; i++) weights[i] = 1; // Thu hẹp T2-T7
+            weights[8] = 3; // Để Chủ nhật rộng ra (Gấp 3 lần ngày trống)
+        } else {
+            // Trường hợp 2: Chủ nhật có sự kiện, Thứ 2 - Thứ 7 có ngày trống
+            for (let i = 2; i <= 8; i++) {
+                if (hasCourse[i]) {
+                    weights[i] = 2.5; // Ngày có sự kiện chiếm không gian rộng hơn
+                } else {
+                    weights[i] = 1; // Ngày trống thu hẹp lại
+                }
+            }
+        }
+    }
+
+    // 3. Cập nhật thẻ <th> Header & Cân đối lại tỉ lệ width
+    let totalWeight = 0;
+    for (let thu = 2; thu <= 8; thu++) {
+        if (!hideDay[thu]) totalWeight += weights[thu];
+    }
+
+    // Gán CSS Inline Width vào thẻ tiêu đề ngày, bảng table-layout: fixed sẽ tự ép các ô <td> ăn theo
+    for (let thu = 2; thu <= 8; thu++) {
+        if (hideDay[thu]) {
+            $(`#th-day-${thu}`).hide();
+        } else {
+            let colWidth = `calc((100% - 60px) * ${weights[thu]} / ${totalWeight})`;
+            $(`#th-day-${thu}`).show().css("width", colWidth);
+        }
+    }
+
+    // 4. Render các dòng dữ liệu <tr> <td>
     let tableHtml = "";
     for (let i = 1; i <= totalRows; i++) {
         tableHtml += `<tr>`;
-        if (i === 1) tableHtml += `<td rowspan="6" class="col-tiet" style="font-weight: bold; text-transform: uppercase;">Sáng</td>`;
-        if (i === 7) tableHtml += `<td rowspan="6" class="col-tiet" style="font-weight: bold; text-transform: uppercase;">Chiều</td>`;
-        if (i === 13) tableHtml += `<td rowspan="4" class="col-tiet" style="font-weight: bold; text-transform: uppercase;">Tối</td>`;
         tableHtml += `<td class="col-tiet">${i}</td>`;
         for (let thu = 2; thu <= 8; thu++) {
+            // Nếu ngày bị ẩn thì bỏ qua không tạo thẻ <td>
+            if (hideDay[thu]) continue; 
+
             if (occupied[i][thu]) continue; 
             const course = courses.find(c => c.thu === thu && c.tietBd === i);
+            
             if (course) {
                 const len = course.soTiet;
                 for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
@@ -1129,7 +1166,7 @@ function renderTKBTable(courses) {
                     }
                 }                        
                 tableHtml += `
-               <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'}">
+               <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'};">
                     <div class="tkb-actions">
                         <button class="btn-tkb-act text-warning" onclick="openEditTkbModal('${course.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
                         <button class="btn-tkb-act text-danger" onclick="promptDeletePersonalTkb('${course.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
@@ -1142,13 +1179,14 @@ function renderTKBTable(courses) {
                         ${course.gv ? `<span class="teacher">GV: ${course.gv}</span>` : ''}
                     </div>
                 </td>`;
-            } else { tableHtml += `<td class="day"></td>`; }
+            } else { 
+                tableHtml += `<td class="day"></td>`; 
+            }
         }
         tableHtml += `</tr>`;
     }
     tbody.innerHTML = tableHtml;
 }
-
 function fetchSemesterConfig() {
     $.ajax({
         url: SCRIPT_URL + "?action=getConfigHocKy",
