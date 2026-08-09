@@ -136,9 +136,13 @@ function renderOnlineFooterUI() {
         }
     }
 
+let iconHtml = currentIsAdmin 
+        ? `<i class="fa-solid fa-users me-2" onclick="toggleAdminNameDisplay()" style="cursor: pointer;" title="Bấm để xoay vòng chế độ hiển thị danh sách"></i>`
+        : `<i class="fa-solid fa-users me-2"></i>`;
+
     // Đổ dữ liệu ra ngoài giao diện
     $('#footerOnlineStatus').html(`
-        <i class="fa-solid fa-users me-2" onclick="toggleAdminNameDisplay()" style="cursor: pointer;" title="Bấm để xoay vòng chế độ hiển thị danh sách"></i> 
+        ${iconHtml} 
         ${cachedOnlineCount} người: <strong>${displayList}</strong>
     `);
 }
@@ -1364,12 +1368,19 @@ checkNewDatLichGlobal();
     }
 }
 if (localStorage.getItem('isAdmin') === 'true') {
+    // Ràng buộc thêm: Phải đúng MSSV của Admin mới cấp quyền
+    if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
         isAdmin = true;
         $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
         $('#btnManageCategories').removeClass('d-none');
         renderSidebarCategories();
         $('#adminDatabaseLink').removeClass('d-none');
+    } else {
+        // Thu hồi quyền và xóa key giả mạo nếu sinh viên cố tình gõ lệnh F12
+        isAdmin = false;
+        localStorage.removeItem('isAdmin');
     }
+}
 $(document).ready(function() {
     // Lấy dữ liệu từ localStorage (lưu ý không dùng 'let' để ghi đè thẳng vào biến toàn cục)
     currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
