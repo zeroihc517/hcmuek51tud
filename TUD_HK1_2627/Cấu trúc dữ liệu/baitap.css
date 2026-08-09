@@ -185,3 +185,54 @@
     border-color: #16a34a !important;
     box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2);
 }
+/* BỐ CỤC DANH SÁCH BÀI TẬP (TRANG CHỦ) */
+.home-question-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+.btn-question-card {
+    background-color: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: left;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+.btn-question-card:hover {
+    border-color: #0f4c81;
+    background-color: #f0f7ff;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(15, 76, 129, 0.1);
+}
+.btn-question-card .q-title {
+    color: #0f4c81;
+    font-weight: 700;
+    font-size: 16px;
+}
+.btn-question-card .q-code {
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* TRẠNG THÁI CÂU HỎI ĐÃ HOÀN THÀNH (MÀU XANH LÁ) DÀNH CHO TRANG CHỦ */
+.btn-question-card.completed {
+    background-color: #dcfce7 !important;
+    border-color: #22c55e !important;
+}
+.btn-question-card.completed:hover {
+    background-color: #bbf7d0 !important;
+    border-color: #16a34a !important;
+}
+.btn-question-card.completed .q-title {
+    color: #166534 !important;
+}
+.btn-question-card.completed .q-code {
+    color: #15803d !important;
+}

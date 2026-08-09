@@ -98,31 +98,38 @@ function loadQuestionsData() {
         dataType: "json",
         cache: false,
         success: function(dataQ) {
+            $('#loadingQuestionsIndicator').addClass('d-none');
+            $('#badgeCourseHome').text(courseName);
+
             if (dataQ && dataQ.length > 0) {
                 questionsList = filterKeyword ? dataQ.filter(q => q.title && q.title.toLowerCase().includes(filterKeyword.toLowerCase())) : dataQ;
             } 
             
             if (!questionsList || questionsList.length === 0) {
-                $('#questionContentArea').html(`<div class="text-danger fw-bold py-3"><i class="fa-solid fa-triangle-exclamation"></i> Không tìm thấy câu hỏi nào chứa tiêu đề "${displayKeyword}".</div>`);
-                $('#questionTabsContainer').html('');
+                $('#questionContentAreaError').html(`<div class="text-danger fw-bold py-3"><i class="fa-solid fa-triangle-exclamation"></i> Không tìm thấy câu hỏi nào chứa tiêu đề "${displayKeyword}".</div>`);
+                $('#homeQuestionList').html('');
                 $('#labelTotalQuestions').text('0 câu');
                 return;
             }
 
             let tabsHtml = "";
             questionsList.forEach((q, idx) => {
+                // Thay đổi class HTML thành card lưới
                 tabsHtml += `
-                    <button class="btn-question-tab ${idx === 0 ? 'active' : ''}" id="tabBtnQuestion_${idx}" onclick="switchQuestion(${idx})">
-                        <i class="fa-solid fa-file-code"></i> Câu ${idx + 1}
+                    <button class="btn-question-card" id="tabBtnQuestion_${idx}" onclick="switchQuestion(${idx})">
+                        <div class="q-title"><i class="fa-solid fa-file-code me-1"></i> Câu ${idx + 1}</div>
+                        <div class="q-code">Mã: ${q.maBai}</div>
                     </button>
                 `;
             });
 
-            $('#questionTabsContainer').html(tabsHtml);
+            $('#homeQuestionList').html(tabsHtml);
             $('#labelTotalQuestions').text(`Tổng: ${questionsList.length} câu`);
-checkCompletedQuestions();
-            // Mở ngay câu hỏi đầu tiên
-            renderQuestion(0);
+            
+            checkCompletedQuestions();
+            
+            // QUAN TRỌNG: XÓA hoặc COMMENT dòng renderQuestion(0); để không tự động mở câu 1
+            // renderQuestion(0);
         },
         error: function() {
             $('#questionContentArea').html('<div class="text-danger fw-bold py-3">Lỗi kết nối khi tải đề bài!</div>');
@@ -130,6 +137,11 @@ checkCompletedQuestions();
     });
 }
 function renderQuestion(index) {
+    // Ẩn trang chủ, hiện giao diện bài làm
+    $('#homeView').addClass('d-none');
+    $('#workingView').removeClass('d-none');
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Cuộn lên đầu
+    
     index = parseInt(index);
     currentQuestionIndex = index;
     let q = questionsList[index];
@@ -137,8 +149,7 @@ function renderQuestion(index) {
 
     cancelEditMode();
 
-    $('#badgeCourse').text(courseName);
-    $('#titleMaBai').text(`Bài tập: ${q.title}`);
+    $('#badgeCourse').text(courseName);    $('#titleMaBai').text(`Bài tập: ${q.title}`);
     $('#labelCurrentMaBai').text(`Mã bài: ${q.maBai}`);
     
     let processedContent = q.content || '';
@@ -1049,4 +1060,13 @@ function expandCanvas() {
             ctx.lineWidth = 2;
         }
     };
+}
+function goBackToHome() {
+    $('#workingView').addClass('d-none');
+    $('#homeView').removeClass('d-none');
+    document.title = "Danh sách bài tập | Học nhóm APMA";
+    
+    // Cập nhật lại màu sắc đề phòng lúc làm bài có nộp thêm bài mới
+    checkCompletedQuestions(); 
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }

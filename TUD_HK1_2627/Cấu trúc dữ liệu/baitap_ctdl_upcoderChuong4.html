@@ -9,38 +9,55 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Đường dẫn CSS lùi 2 cấp thư mục -->
     <link href="../../TRANGWEB/styleweb.css" rel="stylesheet">
-    <link href="../Cấu trúc dữ liệu/baitap.css" rel="stylesheet">
+    <link href="baitap.css" rel="stylesheet">
 
 </head>
 <body style="background-color: #f8fafc; font-family: 'Inter', sans-serif;">
 
-    <div class="container-fluid px-3 px-md-5 py-4">
-        
-       <!-- GỘP CHUNG: HEADER BÀI TẬP & DANH SÁCH CÂU HỎI -->
+  <div class="container-fluid px-3 px-md-5 py-4">
+    
+    <!-- VIEW 1: TRANG CHỦ (DANH SÁCH BÀI TẬP) -->
+    <div id="homeView">
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; border-left: 6px solid #0f4c81 !important; background: #ffffff;">
             <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3 pb-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                        <span class="badge bg-primary mb-2 px-3 py-1.5" style="font-size: 13px; background-color: #0f4c81 !important;" id="badgeCourse">Đang tải học phần...</span>
-                        <h3 class="fw-bold text-dark m-0" id="titleMaBai">Bài tập: ---</h3>
+                        <span class="badge bg-primary mb-2 px-3 py-1.5" style="font-size: 13px; background-color: #0f4c81 !important;" id="badgeCourseHome">Đang tải học phần...</span>
+                        <h3 class="fw-bold text-dark m-0">Danh sách bài tập</h3>
                     </div>
+                    <span class="badge bg-light text-dark border fw-normal" id="labelTotalQuestions">0 câu</span>
                 </div>
+                
+                <div id="loadingQuestionsIndicator" class="text-center py-4 text-primary">
+                    <i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải dữ liệu đề bài...
+                </div>
+                <div id="questionContentAreaError"></div>
 
-                <div>
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="fw-bold text-uppercase small text-muted" style="letter-spacing: 0.5px;">
-                            <i class="fa-solid fa-layer-group text-primary me-1"></i> Danh sách câu hỏi:
-                        </span>
-                        <span class="badge bg-light text-dark border fw-normal" id="labelTotalQuestions">0 câu</span>
-                    </div>
-                    <div class="question-nav-container" id="questionTabsContainer"></div>
-                </div>
+                <!-- Lưới danh sách các câu hỏi -->
+                <div class="home-question-grid" id="homeQuestionList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: GIAO DIỆN BÀI LÀM (MẶC ĐỊNH ẨN) -->
+    <div id="workingView" class="d-none">
+        
+        <!-- Nút Trở về -->
+        <button class="btn btn-outline-secondary fw-bold shadow-sm mb-3" onclick="goBackToHome()" style="border-radius: 8px; background: white;">
+            <i class="fa-solid fa-arrow-left me-1"></i> Trở về danh sách
+        </button>
+
+        <!-- Header của bài đang làm -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; border-left: 6px solid #0f4c81 !important; background: #ffffff;">
+            <div class="card-body p-4">
+                <span class="badge bg-primary mb-2 px-3 py-1.5" style="font-size: 13px; background-color: #0f4c81 !important;" id="badgeCourse">Đang tải học phần...</span>
+                <h3 class="fw-bold text-dark m-0" id="titleMaBai">Bài tập: ---</h3>
             </div>
         </div>
 
         <!-- BỐ CỤC CHÍNH: 1/3 TRÁI (ĐỀ BÀI) & 2/3 PHẢI (BÀI LÀM) -->
         <div class="row g-4 mb-4">
-            <!-- 1/3 CỘT TRÁI: Khung hiển thị Đề bài chi tiết -->
+            <!-- CỘT TRÁI ĐỀ BÀI (Giữ nguyên class cũ của bạn) -->
             <div class="col-lg-5">
                 <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; background-color: #ffffff;">
                     <div class="card-header bg-light border-0 pt-3 px-4 d-flex align-items-center justify-content-between">
@@ -53,7 +70,7 @@
                 </div>
             </div>
 
-            <!-- 2/3 CỘT PHẢI: Khung Soạn thảo Lý thuyết & Mã nguồn Code (Có hỗ trợ ẩn/hiện khung code) -->
+            <!-- CỘT PHẢI BÀI LÀM (Giữ nguyên toàn bộ nội dung cũ của bạn từ <div class="col-lg-7">...) -->
             <div class="col-lg-7">
                 <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; overflow: hidden;" id="mainSubmissionCard">
                     <div class="card-header text-white d-flex justify-content-between align-items-center py-3 px-4" style="background-color: #0f4c81;">
@@ -130,7 +147,7 @@
                             </div>
                             <button type="button" class="btn text-white fw-bold px-5 py-2.5 shadow-sm" style="background-color: #0f4c81; border-radius: 12px; font-size: 15px;" onclick="submitExerciseSolution()" id="btnSubmitExercise">
                                 <i class="fa-solid fa-paper-plane me-2"></i> Nộp bài & Đăng lên Thảo luận
-                            </button>
+</button>
                         </div>
                     </div>
                 </div>
@@ -141,7 +158,7 @@
         <div class="card border-0 shadow-sm" style="border-radius: 16px; background-color: #ffffff;">
             <div class="card-header bg-light border-0 pt-3 px-4 d-flex align-items-center justify-content-between">
                 <h6 class="fw-bold text-success m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử bài nộp của tôi</h6>
-               <button class="btn btn-sm btn-outline-success fw-bold" onclick="loadSubmissionHistory(true)" style="border-radius: 8px;">
+                <button class="btn btn-sm btn-outline-success fw-bold" onclick="loadSubmissionHistory(true)" style="border-radius: 8px;">
     <i class="fa-solid fa-rotate-right me-1"></i> Làm mới lịch sử
 </button>
             </div>
@@ -151,7 +168,7 @@
                 </div>
             </div>
         </div>
-
+</div>
     </div>
 
     <!-- Thư viện JS -->
@@ -168,7 +185,7 @@
     </script>
     
     <!-- File JS dùng chung cho tất cả các trang bài tập -->
-    <script src="../Cấu trúc dữ liệu/baitap.js"></script>
+    <script src="baitap.js"></script>
 <!-- Thêm MathJax để đọc công thức LaTeX $n$, \(...\) -->
 <script>
     window.MathJax = {
