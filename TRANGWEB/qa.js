@@ -963,7 +963,7 @@ function loadShareCodeData() {
                     
                     // Thêm nhãn "Của bạn" vào góc phải
                     let myBadgeHtml = isMyCode 
-                        ? `<span class="badge bg-success position-absolute shadow-sm" style="top: 8px; right: 8px; z-index: 10; font-size: 10px;"><i class="fa-solid fa-user-check me-1"></i>Code của Bạn</span>` 
+                        ? `<span class="badge bg-success position-absolute shadow-sm" style="top: 8px; right: 8px; z-index: 10; font-size: 10px;"><i class="fa-solid fa-user-check me-1"></i>Bạn</span>` 
                         : `<div class="card-sharecode-badge"><i class="fa-solid fa-code"></i></div>`;
                         
                     // Đổi màu icon trung tâm thành tông xanh lá nếu là bài của mình
