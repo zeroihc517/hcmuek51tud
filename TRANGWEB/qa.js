@@ -930,21 +930,51 @@ function loadShareCodeData() {
                     });
                 });
 
-                // Lọc trùng & Gộp chung trạng thái isNew
-               window.shareCodeList = rawList;
+              // === BẮT ĐẦU ĐOẠN CODE THAY THẾ ===
+                
+                // 1. Tách danh sách thành 2 mảng: Bài của tôi và Bài của người khác
+                let activeUserObj = JSON.parse(localStorage.getItem('currentUser')) || null;
+                let myCleanMssv = activeUserObj ? activeUserObj.mssv.replace(/\./g, "") : "";
+                
+                let myCodes = [];
+                let otherCodes = [];
+                
+                rawList.forEach(item => {
+                    let authorCleanMssv = item.rawAuthor.replace(/\./g, "");
+                    // Nếu MSSV của tác giả trùng với MSSV đang đăng nhập
+                    if (myCleanMssv !== "" && authorCleanMssv === myCleanMssv) {
+                        myCodes.push(item);
+                    } else {
+                        otherCodes.push(item);
+                    }
+                });
+                
+                // Gộp lại: Đẩy toàn bộ bài của mình lên đầu tiên
+                window.shareCodeList = myCodes.concat(otherCodes);
 
+                // 2. Render giao diện danh sách thẻ
                 let gridHtml = '<div class="row g-3">'; 
                 window.shareCodeList.forEach((item, arrayIndex) => {
+                    
+                    let authorCleanMssv = item.rawAuthor.replace(/\./g, "");
+                    let isMyCode = (myCleanMssv !== "" && authorCleanMssv === myCleanMssv);
+                    
                     let newBadgeHtml = item.isNew ? `<span class="badge-new-qa position-absolute shadow-sm" style="top: 12px; left: 12px; z-index: 10; font-size: 11px;">Mới</span>` : '';
+                    
+                    // Thêm nhãn "Của bạn" vào góc phải
+                    let myBadgeHtml = isMyCode 
+                        ? `<span class="badge bg-success position-absolute shadow-sm" style="top: 8px; right: 8px; z-index: 10; font-size: 10px;"><i class="fa-solid fa-user-check me-1"></i>Code của Bạn</span>` 
+                        : `<div class="card-sharecode-badge"><i class="fa-solid fa-code"></i></div>`;
+                        
+                    // Đổi màu icon trung tâm thành tông xanh lá nếu là bài của mình
+                    let iconStyle = isMyCode ? 'background: linear-gradient(135deg, #dcfce7 0%, #86efac 100%); color: #166534;' : '';
                     
                     gridHtml += `
                     <div class="col-6 col-md-4 col-lg-2">
                         <div class="card-sharecode-box position-relative" onclick="openShareCodeDetail(${arrayIndex})">
                             ${newBadgeHtml}
-                            <div class="card-sharecode-badge">
-                                <i class="fa-solid fa-code"></i>
-                            </div>
-                            <div class="card-sharecode-icon">
+                            ${myBadgeHtml}
+                            <div class="card-sharecode-icon" style="${iconStyle}">
                                 <i class="fa-solid fa-file-code"></i>
                             </div>
                             <div class="card-sharecode-body">
@@ -962,6 +992,8 @@ function loadShareCodeData() {
                     </div>`;
                 });
                 gridHtml += '</div>';
+                
+                // === KẾT THÚC ĐOẠN CODE THAY THẾ ===
                 
                 if (window.shareCodeList.length === 0) {
                     gridHtml = `<div class="text-center p-4 text-muted"><i class="fa-solid fa-laptop-code fs-2 mb-2"></i><br>Học phần <b>${currentShareCategory}</b> chưa có code nào. Hãy chia sẻ!</div>`;
