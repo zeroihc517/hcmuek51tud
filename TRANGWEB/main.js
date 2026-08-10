@@ -346,34 +346,14 @@ function loadDataByHocPhan(sheetName, element) {
     // ==========================================
     // BỔ SUNG CHẶN KHÁCH XEM TRANG TỔNG (ĐÃ ĐƯA RA NGOÀI VÀ LÊN ĐẦU)
     // ==========================================
-    if (sheetName.toLowerCase() === 'thông báo') {
+ if (sheetName.toLowerCase() === 'thông báo') {
         let urlParams = new URLSearchParams(window.location.search);
         let tbParam = urlParams.get('tb');
 
         // Nếu người dùng là Khách VÀ KHÔNG CÓ mã thông báo cụ thể (?tb=...)
         if (currentUser && currentUser.isGuest && !tbParam) {
-            $('#loadingStatus').addClass('d-none');
-            $('#tableWrapper').addClass('d-none');
-            
-            let guestLockHtml = `
-                <div class="data-card p-5 text-center my-4 border-0 shadow-sm" style="border-radius: 16px; background: #ffffff;">
-                    <div class="mb-3">
-                        <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle" style="width: 80px; height: 80px; background-color: #f1f5f9; color: #0f4c81; font-size: 36px;">
-                            <i class="fa-solid fa-lock"></i>
-                        </div>
-                    </div>
-                    <h4 class="fw-bold mb-2" style="color: #0f4c81;">Giao diện bị khóa đối với Khách</h4>
-                    <p class="text-muted mb-4 mx-auto" style="max-width: 500px; font-size: 15px; line-height: 1.6;">
-                        Bạn đang ở chế độ Khách nên không thể xem danh sách Thông báo tổng. Chế độ Khách chỉ hỗ trợ xem nội dung khi được chia sẻ liên kết trực tiếp.
-                    </p>
-                    <button class="btn text-white fw-bold px-4 py-2" style="background-color: #0f4c81; border-radius: 50px; font-size: 15px;" onclick="window.location.href='login.html'">
-                        <i class="fa-solid fa-right-to-bracket me-2"></i>Đăng nhập Cổng Sinh Viên
-                    </button>
-                </div>
-            `;
-
-            if ($('#customViewWrapper').length === 0) $('#tableWrapper').before('<div id="customViewWrapper" class="w-100"></div>');
-            $('#customViewWrapper').html(guestLockHtml).removeClass('d-none');
+            // Lập tức chuyển hướng sang trang đăng nhập thay vì hiện khung khóa
+            window.location.href = 'login.html';
             return; // Dừng hàm ngay lập tức, không cho tải bảng phía dưới nữa!
         }
     }

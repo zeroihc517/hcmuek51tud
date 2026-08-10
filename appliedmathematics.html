@@ -151,7 +151,6 @@
             <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
                 <i class="fa-solid fa-calendar"></i> Lịch học
             </button>
-	
 
             <div id="gpaNavContainer" class="d-none">
                 <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
@@ -494,7 +493,6 @@
                     <table class="sched">
                         <thead>
                             <tr id="header-row">
-                              
                                 <th>Tiết</th>
                                 <th id="th-day-2">Thứ 2</th>
                                 <th id="th-day-3">Thứ 3</th>
@@ -2388,7 +2386,6 @@
         </div>
     </div>
 </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
@@ -2487,15 +2484,22 @@ async function initSystemUrlRouter() {
     let courseParam = urlParams.get('course');
     let categoryParam = urlParams.get('category');
     let tbParam = urlParams.get('tb');
-if (currentUser && currentUser.isGuest) {
+
+    // KIỂM TRA QUYỀN KHÁCH NGAY TỪ ĐẦU
+    if (currentUser && currentUser.isGuest) {
+        // Nếu không có mã thông báo cụ thể, ĐẨY VỀ TRANG ĐĂNG NHẬP LẬP TỨC
+        if (!tbParam) {
+            window.location.href = 'login.html';
+            return; // Ngắt luồng ngay
+        }
+        
+        // Chặn khách xem các phân hệ khác (nếu lọt qua được)
         if (viewParam || courseParam) {
-            alert("Chế độ Khách chỉ được xem Thông báo. Vui lòng đăng nhập để truy cập nội dung này!");
-            resetUrlToDefault();
-            loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
-            return; // Ngắt luồng, đẩy Khách về màn hình Thông báo
+            window.location.href = 'login.html';
+            return;
         }
     }
-    // 1. Mở bài viết Thông báo chi tiết
+
     // 1. Mở bài viết Thông báo chi tiết
     if (tbParam) {
         // Đánh dấu nút Thông báo trên Sidebar cho đẹp
