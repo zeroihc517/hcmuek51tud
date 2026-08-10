@@ -1400,7 +1400,22 @@
             </div>
 <div class="col-md-12" id="adminGroupAssignArea">
     <label class="form-label fw-bold small text-muted"><i class="fa-solid fa-user-lock me-1"></i>Chỉ định Sinh viên (Tùy chọn)</label>
-    <input type="text" id="glAssigned" class="form-control" placeholder="Nhập MSSV các sinh viên được phép xem (cách nhau bằng dấu phẩy). Để trống nếu muốn tất cả đều xem.">
+    
+    <!-- Khung chứa giao diện Tags -->
+    <div class="form-control d-flex flex-wrap gap-1 align-items-center" style="min-height: 42px; position: relative; padding: 6px 10px;">
+        <!-- Nơi hiển thị các thẻ chọn (Badge) -->
+        <div id="glAssignedTags" class="d-flex flex-wrap gap-1"></div>
+        
+        <!-- Ô nhập liệu tìm kiếm -->
+        <input type="text" id="glAssignedSearch" class="border-0 shadow-none flex-grow-1 fw-bold" placeholder="Nhập MSSV hoặc Tên để tìm... Để trống nếu mọi người đều có thể thấy" style="outline: none; min-width: 200px; background: transparent; font-size: 14px;">
+        
+        <!-- Dropdown gợi ý kết quả xổ xuống -->
+        <ul id="glAssignedDropdown" class="dropdown-menu w-100 shadow-lg border-0" style="position: absolute; top: 100%; left: 0; max-height: 250px; overflow-y: auto; display: none; z-index: 1050; border-radius: 8px;">
+        </ul>
+    </div>
+    
+    <!-- Biến ẩn chứa dữ liệu thực sự (MSSV cách nhau dấu phẩy) để giữ nguyên cấu trúc lưu của hệ thống -->
+    <input type="hidden" id="glAssigned" value="">
 </div>
         </div>
         
