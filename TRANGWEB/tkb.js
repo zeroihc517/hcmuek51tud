@@ -1069,6 +1069,7 @@ function getAutoLink(locationName, customLink) {
     if (loc.includes("LÊ VĂN SỸ") || loc.includes("LVS")) return "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5";
     if (loc.includes("LẠC LONG QUÂN") || loc.includes("LLQ")) return "https://maps.app.goo.gl/oV1mXHYDuW44cGbN6";
     if (loc.includes("LÊ THỊ RIÊNG") || loc.includes("CVLTR")) return "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA";
+ if (loc.includes("NTD.PHU THO")) return "https://maps.app.goo.gl/2X5Xb5J5jW6Ytugp6";
     if (loc.includes("PHÂN HIỆU LONG AN") || loc.includes("PHLA")) return "https://maps.app.goo.gl/KNwjk6CUQZM44CZ16";
     return "#";
 }
@@ -1157,7 +1158,7 @@ function renderTKBTable(courses) {
                 if (locU.includes("AN DƯƠNG VƯƠNG") || locU.includes("ADV")) autoColor = "#e0f2fe";
                 else if (locU.includes("LÊ VĂN SỸ") || locU.includes("LVS")) autoColor = "#e6f9ef";
                 else if (locU.includes("LẠC LONG QUÂN") || locU.includes("LLQ")) autoColor = "#fff3e0";
-                else if (locU.includes("LÊ THỊ RIÊNG") || locU.includes("CVLTR")) autoColor = "#fef9c3";
+                else if (locU.includes("LÊ THỊ RIÊNG") || locU.includes("CVLTR") || locU.includes("NTD.PHU THO")) autoColor = "#fef9c3";
                 else if (locU.includes("ONLINE") || locU.includes("HỌP")) autoColor = "#f3e8ff";
                 else if (locU.includes("PHÂN HIỆU LONG AN") || locU.includes("PHLA")) autoColor = "#fff5fb";
 
