@@ -1249,11 +1249,11 @@ $('#tbMainView').addClass('d-none');
             applyKaTeX('tableWrapper');      // Quét toàn bộ nội dung trong bảng 7 cột
             if (hasExamCards) applyKaTeX('examCardsContainer');
         },
-       error: function(xhr, status, error) { 
-            // Cập nhật lại giao diện báo lỗi có nút thử lại
+      error: function(xhr, status, error) { 
+            // Cập nhật lại giao diện báo lỗi có nút thử lại, không để dòng báo lỗi chết
             $('#loadingStatus').html(`
                 <div class="text-center">
-                    <span class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> Máy chủ Google đang bận hoặc quá tải!</span>
+                    <span class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi kết nối hoặc Google đang bận!</span>
                     <br>
                     <button class="btn btn-sm btn-outline-primary mt-3 fw-bold" onclick="loadDataByHocPhan('${sheetName}')">
                         <i class="fa-solid fa-rotate-right"></i> Thử tải lại
@@ -3785,62 +3785,80 @@ window.openEditPersonalLinkByIndex = function(index, event) {
     
     $('#editWebLinkModal').modal('show');
 };
-// --- CHIẾN DỊCH TẢI NGẦM TOÀN BỘ DANH MỤC (PRE-FETCHING) ---
+// --- CHIẾN DỊCH TẢI NGẦM TOÀN BỘ DANH MỤC (ASYNC QUEUE) ---
 $(document).ready(function() {
-    window.boNhoDemHocPhan = {};
+    window.boNhoDemHocPhan = JSON.parse(sessionStorage.getItem('boNhoDemHocPhan_Cache')) || {};
 
-    // 1. CHẶN KẾT NỐI MẠNG: Ép web dùng dữ liệu tải sẵn nếu có
     const originalAjax = $.ajax;
     $.ajax = function(settings) {
-        if (settings.url && settings.url.includes("action=getHocPhanData")) {
+        if (settings && settings.url && settings.url.includes("action=getHocPhanData")) {
             let match = settings.url.match(/sheetName=([^&]+)/);
             let sheet = match ? decodeURIComponent(match[1]) : null;
             
-            // Nếu sinh viên click và dữ liệu đã có sẵn trong kho -> Hiện ngay lập tức
-            if (sheet && window.boNhoDemHocPhan[sheet] && typeof isAdmin !== 'undefined' && !isAdmin) {
-                // Nhả dữ liệu ra lập tức với độ trễ 10ms để giao diện không bị giật
+            // Nếu dữ liệu đã có sẵn trong kho, nhả ra ngay lập tức
+            if (sheet && window.boNhoDemHocPhan[sheet] && Array.isArray(window.boNhoDemHocPhan[sheet]) && typeof isAdmin !== 'undefined' && !isAdmin) {
                 setTimeout(() => { if (settings.success) settings.success(window.boNhoDemHocPhan[sheet]); }, 10);
-                return; // Cắt đứt kết nối mạng, không chờ Google nữa
+                return { done: function(cb){ cb(window.boNhoDemHocPhan[sheet]); return this; }, fail: function(){ return this; }, always: function(cb){ cb(); return this; } }; 
             }
             
-            // Lần đầu tải (chưa có sẵn) -> Lưu lại vào kho sau khi tải xong
             let oldSuccess = settings.success;
             settings.success = function(data) {
-                if (sheet) window.boNhoDemHocPhan[sheet] = data;
+                if (sheet && Array.isArray(data)) {
+                    window.boNhoDemHocPhan[sheet] = data;
+                    try { sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan)); } catch(e) {}
+                }
                 if (oldSuccess) oldSuccess(data);
             };
         }
         return originalAjax.apply(this, arguments);
     };
 
-    // 2. TỰ ĐỘNG KÉO NGẦM TẤT CẢ DỮ LIỆU VỀ MÁY
-   function batDauTaiNgam() {
+    // VÒNG LẶP HÀNG ĐỢI (Đợi xong môn trước mới tải môn sau)
+    async function batDauTaiNgamQueue() {
         if (typeof globalCategories !== 'undefined' && globalCategories.length > 0 && typeof isAdmin !== 'undefined' && !isAdmin) {
-            globalCategories.forEach((sheetName, index) => {
+            
+            // Lọc ra các môn chưa được tải
+            let sheetsToFetch = globalCategories.filter(sheetName => {
                 let lower = sheetName.toLowerCase();
-                if (['thông báo', 'users', 'cauhinhhocky', 'mastertkb'].includes(lower)) return;
-
-                if (window.boNhoDemHocPhan[sheetName] && Array.isArray(window.boNhoDemHocPhan[sheetName])) return;
-
-                setTimeout(() => {
-                    originalAjax({
-                        url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
-                        method: "GET",
-                        dataType: "json",
-                        success: function(data) {
-                            if(Array.isArray(data)) {
-                                window.boNhoDemHocPhan[sheetName] = data; 
-                                sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan));
-                            }
-                        }
-                    });
-                }, index * 3500); // TĂNG TỪ 2500 LÊN 3500 ĐỂ TRÁNH BỊ GOOGLE CHẶN (RATE LIMIT)
+                if (['thông báo', 'users', 'cauhinhhocky', 'mastertkb'].includes(lower)) return false;
+                if (window.boNhoDemHocPhan[sheetName] && Array.isArray(window.boNhoDemHocPhan[sheetName])) return false;
+                return true;
             });
+
+            // Duyệt tuần tự từng môn một
+            for (let i = 0; i < sheetsToFetch.length; i++) {
+                let sheetName = sheetsToFetch[i];
+                try {
+                    await new Promise((resolve) => {
+                        originalAjax({
+                            url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
+                            method: "GET",
+                            dataType: "json",
+                            success: function(data) {
+                                if(Array.isArray(data)) {
+                                    window.boNhoDemHocPhan[sheetName] = data; 
+                                    sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan));
+                                }
+                                resolve();
+                            },
+                            error: function() { resolve(); } // Dù lỗi mạng thì vẫn nhả promise để đi tiếp môn sau
+                        });
+                    });
+                    
+                    // Cho máy chủ Google nghỉ ngơi 1.5 giây giữa các lượt tải để chống ban IP
+                    await new Promise(r => setTimeout(r, 1500)); 
+                    
+                } catch (err) {
+                    console.error("Lỗi tải ngầm", err);
+                }
+            }
         } else {
-            setTimeout(batDauTaiNgam, 2000);
+            setTimeout(batDauTaiNgamQueue, 2000);
         }
     }
-    setTimeout(batDauTaiNgam, 3000);
+    
+    // Đợi 3 giây sau khi web khởi động xong mới bắt đầu tải ngầm
+    setTimeout(batDauTaiNgamQueue, 3000);
 });
 
 function loadProfileView() {
