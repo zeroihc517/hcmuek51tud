@@ -1249,8 +1249,17 @@ $('#tbMainView').addClass('d-none');
             applyKaTeX('tableWrapper');      // Quét toàn bộ nội dung trong bảng 7 cột
             if (hasExamCards) applyKaTeX('examCardsContainer');
         },
-        error: function() { 
-            $('#loadingStatus').html('<span class="text-danger fw-bold">Có lỗi xảy ra khi tải dữ liệu!</span>'); 
+       error: function(xhr, status, error) { 
+            // Cập nhật lại giao diện báo lỗi có nút thử lại
+            $('#loadingStatus').html(`
+                <div class="text-center">
+                    <span class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> Máy chủ Google đang bận hoặc quá tải!</span>
+                    <br>
+                    <button class="btn btn-sm btn-outline-primary mt-3 fw-bold" onclick="loadDataByHocPhan('${sheetName}')">
+                        <i class="fa-solid fa-rotate-right"></i> Thử tải lại
+                    </button>
+                </div>
+            `); 
         }
     });
 }
@@ -3805,37 +3814,35 @@ $(document).ready(function() {
     };
 
     // 2. TỰ ĐỘNG KÉO NGẦM TẤT CẢ DỮ LIỆU VỀ MÁY
-    function batDauTaiNgam() {
-        // Chỉ chạy cho Sinh viên (Admin luôn cần dữ liệu thực tế) và danh mục đã load xong
+   function batDauTaiNgam() {
         if (typeof globalCategories !== 'undefined' && globalCategories.length > 0 && typeof isAdmin !== 'undefined' && !isAdmin) {
             globalCategories.forEach((sheetName, index) => {
                 let lower = sheetName.toLowerCase();
-                // Bỏ qua các sheet không phải môn học
-                if (lower === 'thông báo' || lower === 'users' || lower === 'cauhinhhocky' || lower === 'mastertkb') return;
+                if (['thông báo', 'users', 'cauhinhhocky', 'mastertkb'].includes(lower)) return;
 
-                // Xếp hàng tải ngầm từng môn, cách nhau 0.8 giây để không làm quá tải máy chủ Google
+                if (window.boNhoDemHocPhan[sheetName] && Array.isArray(window.boNhoDemHocPhan[sheetName])) return;
+
                 setTimeout(() => {
-                    if (!window.boNhoDemHocPhan[sheetName]) {
-                        originalAjax({
-                            url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
-                            method: "GET",
-                            dataType: "json",
-                            success: function(data) {
-                                window.boNhoDemHocPhan[sheetName] = data; // Tải xong giấu vào kho
+                    originalAjax({
+                        url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
+                        method: "GET",
+                        dataType: "json",
+                        success: function(data) {
+                            if(Array.isArray(data)) {
+                                window.boNhoDemHocPhan[sheetName] = data; 
+                                sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan));
                             }
-                        });
-                    }
-                }, index * 800); 
+                        }
+                    });
+                }, index * 3500); // TĂNG TỪ 2500 LÊN 3500 ĐỂ TRÁNH BỊ GOOGLE CHẶN (RATE LIMIT)
             });
         } else {
-            // Nếu danh sách môn chưa tải xong, đợi 2 giây rồi thử lại
             setTimeout(batDauTaiNgam, 2000);
         }
     }
-
-    // Khởi động chiến dịch tải ngầm sau khi trang hiện lên 3 giây (để máy tập trung load mượt giao diện chính trước)
     setTimeout(batDauTaiNgam, 3000);
 });
+
 function loadProfileView() {
     document.title = "Hồ sơ cá nhân | Học nhóm APMA Khoa Toán";
     resetNavActive(); 

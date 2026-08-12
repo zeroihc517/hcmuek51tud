@@ -13,7 +13,7 @@ function loginStudent() {
     postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
         let response = typeof res === 'string' ? JSON.parse(res) : res;
         if (response.success) {
-            // 1. Lưu thông tin người dùng vào bộ nhớ
+            // 1. Lưu thông tin người dùng
             currentUser = { 
                 mssv: response.mssv, 
                 name: response.name,
@@ -21,20 +21,18 @@ function loginStudent() {
                 khoa: response.khoa,
                 khoaHoc: response.khoaHoc,
                 nhom: response.nhom,
-		avatar: response.avatar || ""
+                avatar: response.avatar || ""
             };
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-		if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008") {
+            
+            if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008") {
                 isAdmin = true;
                 localStorage.setItem('isAdmin', 'true');
-                
-                // Mở sẵn các nút giao diện Admin
                 $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
-                $('#btnManageCategories').removeClass('d-none');
-                $('#adminDatabaseLink').removeClass('d-none');
-                $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex');
-                $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
+                $('#btnManageCategories, #adminDatabaseLink').removeClass('d-none');
+                $('#btnAdminManageUsers, #btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
             }
+            
             localStorage.setItem('lastActiveTime', Date.now().toString());
             let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
             savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
@@ -45,50 +43,76 @@ function loginStudent() {
             // 2. Đổi trạng thái UI nút bấm
             btn.html('<i class="fa-solid fa-cloud-arrow-down fa-bounce me-2"></i>Đang tải toàn bộ dữ liệu hệ thống...');
             
-            // 3. KÍCH HOẠT TẢI NGẦM TẤT CẢ CÁC PHÂN HỆ CÙNG MỘT LÚC (PARALLEL LOADING)
+            // 3. KÍCH HOẠT TẢI NGẦM CÓ BẮT LỖI
             pingOnlineStatus();
             renderUserInfo();
 
-		if (typeof updateAvatarDisplay === 'function') {
+            if (typeof updateAvatarDisplay === 'function') {
                 updateAvatarDisplay(response.avatar);
             }
             initGlobalApp();
-            
-            // Xóa bỏ lệnh loadDataByHocPhan('Thông báo') vô điều kiện ở đây
-            // vì hàm initGlobalApp() ở trên đã tự động phân luồng URL thông minh rồi!
             fetchAndRenderCategories();
             loadWebLinks();
 
-            // Tải ngầm Lịch học TKB & Deadlines
-           $.ajax({ url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(data) { processTKBData(data); } });
-            $.ajax({ url: SCRIPT_URL + "?action=getDeadlinesUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(data) { globalDeadlineData = data.map(r => ({ title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5], dateStart: r[6] || "", dateEnd: r[7] || "", sheetRowIndex: r[8] })); } });
-$.ajax({ 
-                url: SCRIPT_URL + "?action=getCompletedDeadlines&mssv=" + currentUser.mssv, 
-                method: "GET", 
-                dataType: "json", // Bắt buộc phải có dòng này để nó hiểu dữ liệu
+            // Bổ sung callback error để tránh treo luồng khi mạng lỗi
+            $.ajax({ 
+                url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", 
+                success: function(data) { processTKBData(data); },
+                error: function() { console.error("Lỗi tải TKB"); }
+            });
+            
+            $.ajax({ 
+                url: SCRIPT_URL + "?action=getDeadlinesUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", 
+                success: function(data) { 
+                    globalDeadlineData = data.map(r => ({ title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5], dateStart: r[6] || "", dateEnd: r[7] || "", sheetRowIndex: r[8] })); 
+                },
+                error: function() { console.error("Lỗi tải Deadlines"); }
+            });
+            
+            $.ajax({ 
+                url: SCRIPT_URL + "?action=getCompletedDeadlines&mssv=" + currentUser.mssv, method: "GET", dataType: "json",
                 success: function(res) {
-                    // Kiểm tra đảm bảo không lưu cục báo lỗi vào máy
                     if (res && !res.error) {
-                        // Nếu là mảng thì stringify, nếu đã là chuỗi thì giữ nguyên
                         let dataToSave = typeof res === 'string' ? res : JSON.stringify(res);
                         localStorage.setItem('completed_deadlines_' + currentUser.mssv, dataToSave);
-                        renderDeadlines(); // Cập nhật màu trên trang chủ
+                        renderDeadlines(); 
                     }
                 },
-                error: function(err) {
-                    console.error("Lỗi kéo dữ liệu Deadline:", err);
-                }
+                error: function(err) { console.error("Lỗi kéo dữ liệu Deadline:", err); }
             });
-            // Tải ngầm Bảng điểm GPA (và cấu hình song ngành)
-            $.ajax({ url: SCRIPT_URL + "?action=getGPAConfig&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(configRes) { if (configRes) { try { gpaConfig = typeof configRes === 'string' ? JSON.parse(configRes) : configRes; localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig)); } catch(e){} } } });
-            $.ajax({ url: SCRIPT_URL + "?action=getGPAUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(res) { try { myGPADataset = typeof res === 'string' ? JSON.parse(res) : res; if(!Array.isArray(myGPADataset)) myGPADataset = []; } catch(e){ myGPADataset = []; } } });
+            
+            $.ajax({ 
+                url: SCRIPT_URL + "?action=getGPAConfig&mssv=" + currentUser.mssv, method: "GET", dataType: "json", 
+                success: function(configRes) { 
+                    if (configRes) { 
+                        try { 
+                            gpaConfig = typeof configRes === 'string' ? JSON.parse(configRes) : configRes; 
+                            localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig)); 
+                        } catch(e){} 
+                    } 
+                } 
+            });
+            
+            $.ajax({ 
+                url: SCRIPT_URL + "?action=getGPAUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", 
+                success: function(res) { 
+                    try { 
+                        myGPADataset = typeof res === 'string' ? JSON.parse(res) : res; 
+                        if(!Array.isArray(myGPADataset)) myGPADataset = []; 
+                    } catch(e){ myGPADataset = []; } 
+                } 
+            });
 
-            // 4. KIỂM TRA ĐIỀU KIỆN HOÀN TẤT ĐỂ ĐÓNG MODAL
+            // 4. KIỂM TRA ĐIỀU KIỆN - TỐI ƯU HIỆU SUẤT BẰNG CÁCH CACHE DOM
+            let $loadingStatus = $('#loadingStatus');
+            let $webLinksContainer = $('#webLinksContainer');
+            let $dynamicCourseList = $('#dynamicCourseList');
+            
             let checkLoaded = setInterval(function() {
-                // Kiểm tra xem các bảng nội dung chính đã hết hiệu ứng loading chưa
-                let isTableLoaded = $('#loadingStatus').hasClass('d-none');
-                let isLinksLoaded = $('#webLinksContainer .pulse-loader').length === 0;
-                let isCategoriesLoaded = $('#dynamicCourseList').text() !== 'Đang tải danh sách...';
+                // DOM chỉ được duyệt query một lần, vòng lặp chỉ kiểm tra thuộc tính
+                let isTableLoaded = $loadingStatus.hasClass('d-none');
+                let isLinksLoaded = $webLinksContainer.find('.pulse-loader').length === 0;
+                let isCategoriesLoaded = $dynamicCourseList.text().indexOf('Đang tải') === -1;
 
                 if (isTableLoaded && isLinksLoaded && isCategoriesLoaded) {
                     clearInterval(checkLoaded);
@@ -99,9 +123,9 @@ $.ajax({
                     alert("Xin chào, " + response.name + "! Dữ liệu đã sẵn sàng.");
                     btn.html('Đăng nhập ngay').prop('disabled', false);
                 }
-            }, 200);
+            }, 300); // Giãn tần suất quét từ 200ms lên 300ms để giảm tải CPU
 
-            // 5. Dự phòng an toàn sau 8 giây nếu mạng chậm
+            // 5. Dự phòng an toàn
             setTimeout(function() {
                 clearInterval(checkLoaded);
                 let authModal = bootstrap.Modal.getInstance(document.getElementById('userAuthModal'));
@@ -120,6 +144,7 @@ $.ajax({
         btn.html('Đăng nhập ngay').prop('disabled', false); 
     });
 }
+
 function logoutStudent() {
     // 1. Xóa thông tin đăng nhập và quyền Admin khỏi LocalStorage
     localStorage.removeItem('currentUser');
@@ -335,35 +360,37 @@ function initInactivityTracker() {
 
 $(document).ready(function() {
     // Nếu có màn hình loading toàn trang thì bắt đầu kiểm tra
-    if ($('#globalScreenLoader').length) {
+    let $globalLoader = $('#globalScreenLoader');
+    if ($globalLoader.length) {
         
-        // TĂNG TỐC QUÉT KIỂM TRA: Giảm từ 300ms xuống 100ms để bắt sự kiện tải xong tức thì
+        // Cache DOM selectors
+        let $loadingStatus = $('#loadingStatus');
+        let $dynamicCourseList = $('#dynamicCourseList');
+        
+        // Tần suất quét 250ms là đủ mượt mà không làm trình duyệt bị đơ
         let checkInitialLoad = setInterval(function() {
-            let isTableLoaded = $('#loadingStatus').hasClass('d-none');
-            let isCategoriesLoaded = $('#dynamicCourseList').text().indexOf('Đang tải') === -1;
+            let isTableLoaded = $loadingStatus.hasClass('d-none');
+            let isCategoriesLoaded = $dynamicCourseList.text().indexOf('Đang tải') === -1;
             
-            // Nếu các điều kiện tải trang hoàn tất
             if (isTableLoaded && isCategoriesLoaded) {
                 clearInterval(checkInitialLoad); 
-                
-                // TĂNG TỐC HIỆU ỨNG TẮT: Giảm từ fadeOut(600) xuống fadeOut(250) để vào web nhanh hơn
-                $('#globalScreenLoader').fadeOut(250, function() {
+                $globalLoader.fadeOut(250, function() {
                     $(this).remove();
                 });
             }
-        }, 100); 
+        }, 250); 
 
-        // Đề phòng trường hợp lỗi mạng bị kẹt loading mãi mãi, tự động đóng sau 8 giây (Gốc là 10 giây)
         setTimeout(function() {
             clearInterval(checkInitialLoad);
-            if ($('#globalScreenLoader').length) {
-                $('#globalScreenLoader').fadeOut(250, function() {
+            if ($globalLoader.length) {
+                $globalLoader.fadeOut(250, function() {
                     $(this).remove();
                 });
             }
         }, 8000); 
     }
 });
+
 function generateThongBaoID(index) {
     let yearPrefix = new Date().getFullYear().toString().slice(-2); // Lấy "26" cho năm 2026
     let numberFormatted = String(index).padStart(4, '0'); // Đảm bảo đủ 4 chữ số (0001, 0002...)
