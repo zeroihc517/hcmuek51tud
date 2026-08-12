@@ -2339,18 +2339,28 @@ function resetUrlToDefault() {
     window.history.pushState({ path: cleanUrl }, '', cleanUrl);
 }
 
-// PROMISE: Chờ Danh sách Học phần
+// PROMISE: Chờ Danh sách Học phần an toàn
 function waitForCategories() {
     return new Promise((resolve) => {
+        // Kiểm tra ngay lập tức nếu đã có dữ liệu
         if (typeof globalCategories !== 'undefined' && globalCategories.length > 0) {
-            resolve(globalCategories);
-        } else {
-            $(document).ajaxSuccess(function(event, xhr, settings) {
-                if (settings.url.includes("action=getHocPhanList")) {
-                    setTimeout(() => resolve(globalCategories), 10);
-                }
-            });
-        }
+            return resolve(globalCategories);
+        } 
+        
+        let retryCount = 0;
+        let checkInterval = setInterval(() => {
+            if (typeof globalCategories !== 'undefined' && globalCategories.length > 0) {
+                clearInterval(checkInterval);
+                resolve(globalCategories);
+            }
+            
+            retryCount++;
+            // Chờ tối đa 10 giây (50 lần x 200ms), nếu vẫn lỗi thì nhả kết quả để web không bị treo chết
+            if (retryCount > 50) {
+                clearInterval(checkInterval);
+                resolve(globalCategories);
+            }
+        }, 200);
     });
 }
 
