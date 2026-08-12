@@ -341,8 +341,8 @@ function loadDataByHocPhan(sheetName, element) {
     $('#loadingStatus').removeClass('d-none');
     
     if ($('#customViewWrapper').length > 0) $('#customViewWrapper').addClass('d-none');
-    $('#examCardsContainer').addClass('d-none').html(''); 
-
+  $('#minigameWrapper').addClass('d-none');
+$('#examCardsContainer').html('');
     // ==========================================
     // BỔ SUNG CHẶN KHÁCH XEM TRANG TỔNG (ĐÃ ĐƯA RA NGOÀI VÀ LÊN ĐẦU)
     // ==========================================
@@ -1228,7 +1228,10 @@ if (isUpdating && !isAdmin) {
                       
 
             // Gắn dữ liệu vào DOM
-            if (hasExamCards) $('#examCardsContainer').html(examCardsHtml).removeClass('d-none');
+           if (hasExamCards) {
+    $('#examCardsContainer').html(examCardsHtml);
+    $('#minigameWrapper').removeClass('d-none');
+}
             if (instructorInfos.length > 0) { 
                 let cardContent = `<div class="instructor-card"><h6 class="mb-4"><i class="fa-solid fa-chalkboard-user me-2"></i>Thông tin lớp học & Giảng viên phụ trách</h6><div class="row">`; 
                 instructorInfos.forEach(info => { cardContent += `<div class="col-12 col-md-6 instructor-item"><i class="fa-solid fa-check"></i> <span>${info}</span></div>`; }); 
