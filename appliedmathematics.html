@@ -1013,35 +1013,76 @@
     </div>
 </div>
 
-                <div id="instructorArea" class="d-none"></div>
-<!-- KHỐI MINIGAME DẠNG GẤP MỞ -->
-<div id="minigameWrapper" class="d-none mt-4 mb-4">
-    <div class="data-card border-0 shadow-sm" style="border: 2px solid #ef4444; border-radius: 12px; overflow: hidden;">
-        
-        <!-- Nút bấm gập/mở -->
-        <div class="d-flex justify-content-between align-items-center p-3" data-bs-toggle="collapse" data-bs-target="#collapseMinigames" aria-expanded="false" style="background: #fff1f2; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fff1f2'">
-            <h6 class="m-0 fw-bold" style="color: #ef4444;"><i class="fa-solid fa-gamepad fa-bounce me-2"></i> MINIGAME & CÁC ĐỀ LUYỆN TẬP</h6>
-            <i class="fa-solid fa-chevron-down text-danger minigame-chevron" style="transition: transform 0.3s;"></i>
-        </div>
-        
-        <!-- Nội dung Minigame (Mặc định thu gọn, khi bấm sẽ xổ xuống) -->
-        <div class="collapse" id="collapseMinigames">
-            <div class="p-4" style="background: #ffffff; border-top: 1px dashed #fecaca;">
-                <div id="examCardsContainer" class="grid-7-cols">
-                    <!-- Javascript sẽ đổ các thẻ Minigame vào đây -->
+             <!-- KHU VỰC THÔNG TIN GIẢNG VIÊN VÀ MINIGAME (XẾP NGANG) -->
+<div class="d-flex flex-wrap gap-3 mt-4 mb-4 align-items-start w-100">
+    
+    <!-- 1. KHỐI THÔNG TIN GIẢNG VIÊN -->
+    <div id="instructorWrapper" class="d-none widget-wrapper" style="width: 320px; max-width: 100%; transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">
+        <div class="data-card border-0 shadow-sm m-0" style="border: 2px solid #0f4c81; border-radius: 12px; overflow: hidden; width: 100%;">
+            <!-- Nút bấm gập/mở -->
+            <div class="d-flex justify-content-between align-items-center p-3" data-bs-toggle="collapse" data-bs-target="#collapseInstructor" aria-expanded="false" style="background: #e0f2fe; cursor: pointer; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#bae6fd'" onmouseout="this.style.background='#e0f2fe'">
+                <h6 class="m-0 fw-bold" style="color: #0f4c81;"><i class="fa-solid fa-chalkboard-user me-2"></i> THÔNG TIN GIẢNG VIÊN</h6>
+                <i class="fa-solid fa-chevron-down text-primary instructor-chevron ms-3" style="transition: transform 0.3s;"></i>
+            </div>
+            <!-- Nội dung Giảng viên -->
+            <div class="collapse" id="collapseInstructor">
+                <div class="p-4" style="background: #ffffff; border-top: 1px dashed #bae6fd;">
+                    <div class="row" id="instructorListContainer">
+                        <!-- JS sẽ đổ dữ liệu vào đây -->
+                    </div>
                 </div>
             </div>
         </div>
-        
     </div>
-    
-    <!-- CSS xoay mũi tên khi gập/mở -->
-    <style>
-        [data-bs-toggle="collapse"][aria-expanded="true"] .minigame-chevron {
-            transform: rotate(180deg);
-        }
-    </style>
+
+    <!-- 2. KHỐI MINIGAME DẠNG GẤP MỞ -->
+    <div id="minigameWrapper" class="d-none widget-wrapper" style="width: 320px; max-width: 100%; transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">
+        <div class="data-card border-0 shadow-sm m-0" style="border: 2px solid #ef4444; border-radius: 12px; overflow: hidden; width: 100%;">
+            <!-- Nút bấm gập/mở -->
+            <div class="d-flex justify-content-between align-items-center p-3" data-bs-toggle="collapse" data-bs-target="#collapseMinigames" aria-expanded="false" style="background: #fff1f2; cursor: pointer; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fff1f2'">
+                <h6 class="m-0 fw-bold" style="color: #ef4444;"><i class="fa-solid fa-gamepad fa-bounce me-2"></i> MINIGAME & LUYỆN TẬP</h6>
+                <i class="fa-solid fa-chevron-down text-danger minigame-chevron ms-3" style="transition: transform 0.3s;"></i>
+            </div>
+            <!-- Nội dung Minigame -->
+            <div class="collapse" id="collapseMinigames">
+                <div class="p-4" style="background: #ffffff; border-top: 1px dashed #fecaca;">
+                    <div id="examCardsContainer" class="grid-7-cols">
+                        <!-- JS sẽ đổ các thẻ Minigame vào đây -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- CSS xoay mũi tên và tự động dài ra cho khối mở -->
+<style>
+    [data-bs-toggle="collapse"][aria-expanded="true"] .minigame-chevron,
+    [data-bs-toggle="collapse"][aria-expanded="true"] .instructor-chevron {
+        transform: rotate(180deg);
+    }
+    
+    /* Khi mở, wrapper sẽ chiếm 100% chiều rộng */
+    .widget-wrapper:has([aria-expanded="true"]) {
+        width: 100% !important;
+    }
+</style>
+
+<!-- JS Tự động dài ra (Dự phòng cho mọi trình duyệt) -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const setupAccordion = (collapseId, wrapperId) => {
+            let collapseEl = document.getElementById(collapseId);
+            let wrapperEl = document.getElementById(wrapperId);
+            if (collapseEl && wrapperEl) {
+                collapseEl.addEventListener('show.bs.collapse', () => wrapperEl.style.width = '100%');
+                collapseEl.addEventListener('hide.bs.collapse', () => wrapperEl.style.width = '320px');
+            }
+        };
+        setupAccordion('collapseMinigames', 'minigameWrapper');
+        setupAccordion('collapseInstructor', 'instructorWrapper');
+    });
+</script>
 
                 <div class="data-card" id="mainDataCard">
                    <div id="loadingStatus" class="pulse-loader">

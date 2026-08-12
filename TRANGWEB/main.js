@@ -337,7 +337,8 @@ function loadDataByHocPhan(sheetName, element) {
     $('#courseSection').removeClass('d-none'); 
     $('#tableWrapper').addClass('d-none'); 
     $('#swipeHint').addClass('d-none');
-    $('#instructorArea').addClass('d-none').html(''); 
+   $('#instructorWrapper').addClass('d-none'); 
+$('#instructorListContainer').html('');
     $('#loadingStatus').removeClass('d-none');
     
     if ($('#customViewWrapper').length > 0) $('#customViewWrapper').addClass('d-none');
@@ -1232,12 +1233,14 @@ if (isUpdating && !isAdmin) {
     $('#examCardsContainer').html(examCardsHtml);
     $('#minigameWrapper').removeClass('d-none');
 }
-            if (instructorInfos.length > 0) { 
-                let cardContent = `<div class="instructor-card"><h6 class="mb-4"><i class="fa-solid fa-chalkboard-user me-2"></i>Thông tin lớp học & Giảng viên phụ trách</h6><div class="row">`; 
-                instructorInfos.forEach(info => { cardContent += `<div class="col-12 col-md-6 instructor-item"><i class="fa-solid fa-check"></i> <span>${info}</span></div>`; }); 
-                cardContent += `</div></div>`; 
-                $('#instructorArea').html(cardContent).removeClass('d-none'); 
-            }
+if (instructorInfos.length > 0) { 
+    let listContent = ""; 
+    instructorInfos.forEach(info => { 
+        listContent += `<div class="col-12 col-md-6 mb-2 d-flex align-items-start"><i class="fa-solid fa-check text-primary mt-1 me-2"></i> <span style="font-size: 15px; font-weight: 500; color: var(--text-main);">${info}</span></div>`; 
+    }); 
+    $('#instructorListContainer').html(listContent);
+    $('#instructorWrapper').removeClass('d-none'); 
+}
             
             $('#sheetTableHead').html(headHtml); 
             $('#sheetTableBody').html(bodyHtml); 
