@@ -3776,66 +3776,62 @@ window.openEditPersonalLinkByIndex = function(index, event) {
     
     $('#editWebLinkModal').modal('show');
 };
-// --- CHIẾN DỊCH TẢI NGẦM TOÀN BỘ DANH MỤC (PRE-FETCHING) ---
+
 $(document).ready(function() {
-    window.boNhoDemHocPhan = {};
+    window.boNhoDemHocPhan = JSON.parse(sessionStorage.getItem('boNhoDemHocPhan_Cache')) || {};
 
-    // 1. CHẶN KẾT NỐI MẠNG: Ép web dùng dữ liệu tải sẵn nếu có
-    const originalAjax = $.ajax;
-    $.ajax = function(settings) {
-        if (settings.url && settings.url.includes("action=getHocPhanData")) {
-            let match = settings.url.match(/sheetName=([^&]+)/);
-            let sheet = match ? decodeURIComponent(match[1]) : null;
-            
-            // Nếu sinh viên click và dữ liệu đã có sẵn trong kho -> Hiện ngay lập tức
-            if (sheet && window.boNhoDemHocPhan[sheet] && typeof isAdmin !== 'undefined' && !isAdmin) {
-                // Nhả dữ liệu ra lập tức với độ trễ 10ms để giao diện không bị giật
-                setTimeout(() => { if (settings.success) settings.success(window.boNhoDemHocPhan[sheet]); }, 10);
-                return; // Cắt đứt kết nối mạng, không chờ Google nữa
+    // Chỉ ghi đè $.ajax một lần duy nhất để tránh xung đột
+    if (!window.isAjaxOverridden) {
+        const originalAjax = $.ajax;
+        $.ajax = function(settings) {
+            if (settings && settings.url && settings.url.includes("action=getHocPhanData")) {
+                let match = settings.url.match(/sheetName=([^&]+)/);
+                let sheet = match ? decodeURIComponent(match[1]) : null;
+                
+                if (sheet && window.boNhoDemHocPhan[sheet] && Array.isArray(window.boNhoDemHocPhan[sheet]) && typeof isAdmin !== 'undefined' && !isAdmin) {
+                    setTimeout(() => { if (settings.success) settings.success(window.boNhoDemHocPhan[sheet]); }, 10);
+                    return { done: function(cb){ cb(window.boNhoDemHocPhan[sheet]); return this; }, fail: function(){ return this; }, always: function(cb){ cb(); return this; } }; 
+                }
+                
+                let oldSuccess = settings.success;
+                settings.success = function(data) {
+                    if (sheet && Array.isArray(data)) {
+                        window.boNhoDemHocPhan[sheet] = data;
+                        try { sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan)); } catch(e) {}
+                    }
+                    if (oldSuccess) oldSuccess(data);
+                };
             }
-            
-            // Lần đầu tải (chưa có sẵn) -> Lưu lại vào kho sau khi tải xong
-            let oldSuccess = settings.success;
-            settings.success = function(data) {
-                if (sheet) window.boNhoDemHocPhan[sheet] = data;
-                if (oldSuccess) oldSuccess(data);
-            };
-        }
-        return originalAjax.apply(this, arguments);
-    };
+            return originalAjax.apply(this, arguments);
+        };
+        window.isAjaxOverridden = true;
+    }
 
-    // 2. TỰ ĐỘNG KÉO NGẦM TẤT CẢ DỮ LIỆU VỀ MÁY
     function batDauTaiNgam() {
-        // Chỉ chạy cho Sinh viên (Admin luôn cần dữ liệu thực tế) và danh mục đã load xong
         if (typeof globalCategories !== 'undefined' && globalCategories.length > 0 && typeof isAdmin !== 'undefined' && !isAdmin) {
             globalCategories.forEach((sheetName, index) => {
                 let lower = sheetName.toLowerCase();
-                // Bỏ qua các sheet không phải môn học
-                if (lower === 'thông báo' || lower === 'users' || lower === 'cauhinhhocky' || lower === 'mastertkb') return;
+                if (['thông báo', 'users', 'cauhinhhocky', 'mastertkb'].includes(lower)) return;
+                if (window.boNhoDemHocPhan[sheetName] && Array.isArray(window.boNhoDemHocPhan[sheetName])) return;
 
-                // Xếp hàng tải ngầm từng môn, cách nhau 0.8 giây để không làm quá tải máy chủ Google
+                // Giãn cách thời gian gọi API lên 3 giây để Google Apps Script không khóa kết nối do spam
                 setTimeout(() => {
-                    if (!window.boNhoDemHocPhan[sheetName]) {
-                        originalAjax({
-                            url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
-                            method: "GET",
-                            dataType: "json",
-                            success: function(data) {
-                                window.boNhoDemHocPhan[sheetName] = data; // Tải xong giấu vào kho
-                            }
-                        });
-                    }
-                }, index * 800); 
+                    $.ajax({
+                        url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
+                        method: "GET",
+                        dataType: "json",
+                        success: function(data) {} // Cache đã được tự động xử lý bởi hàm ghi đè phía trên
+                    });
+                }, index * 3000); 
             });
         } else {
-            // Nếu danh sách môn chưa tải xong, đợi 2 giây rồi thử lại
             setTimeout(batDauTaiNgam, 2000);
         }
     }
-
-    // Khởi động chiến dịch tải ngầm sau khi trang hiện lên 3 giây (để máy tập trung load mượt giao diện chính trước)
-    setTimeout(batDauTaiNgam, 3000);
+    // Chờ hệ thống load xong các thành phần chính rồi mới bắt đầu tải ngầm
+    setTimeout(batDauTaiNgam, 5000);
 });
+
 function loadProfileView() {
     document.title = "Hồ sơ cá nhân | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
