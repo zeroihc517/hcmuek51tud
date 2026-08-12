@@ -1249,17 +1249,8 @@ $('#tbMainView').addClass('d-none');
             applyKaTeX('tableWrapper');      // Quét toàn bộ nội dung trong bảng 7 cột
             if (hasExamCards) applyKaTeX('examCardsContainer');
         },
-      error: function(xhr, status, error) { 
-            // Cập nhật lại giao diện báo lỗi có nút thử lại, không để dòng báo lỗi chết
-            $('#loadingStatus').html(`
-                <div class="text-center">
-                    <span class="text-danger fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi kết nối hoặc Google đang bận!</span>
-                    <br>
-                    <button class="btn btn-sm btn-outline-primary mt-3 fw-bold" onclick="loadDataByHocPhan('${sheetName}')">
-                        <i class="fa-solid fa-rotate-right"></i> Thử tải lại
-                    </button>
-                </div>
-            `); 
+        error: function() { 
+            $('#loadingStatus').html('<span class="text-danger fw-bold">Có lỗi xảy ra khi tải dữ liệu!</span>'); 
         }
     });
 }
@@ -3785,82 +3776,66 @@ window.openEditPersonalLinkByIndex = function(index, event) {
     
     $('#editWebLinkModal').modal('show');
 };
-// --- CHIẾN DỊCH TẢI NGẦM TOÀN BỘ DANH MỤC (ASYNC QUEUE) ---
+// --- CHIẾN DỊCH TẢI NGẦM TOÀN BỘ DANH MỤC (PRE-FETCHING) ---
 $(document).ready(function() {
-    window.boNhoDemHocPhan = JSON.parse(sessionStorage.getItem('boNhoDemHocPhan_Cache')) || {};
+    window.boNhoDemHocPhan = {};
 
+    // 1. CHẶN KẾT NỐI MẠNG: Ép web dùng dữ liệu tải sẵn nếu có
     const originalAjax = $.ajax;
     $.ajax = function(settings) {
-        if (settings && settings.url && settings.url.includes("action=getHocPhanData")) {
+        if (settings.url && settings.url.includes("action=getHocPhanData")) {
             let match = settings.url.match(/sheetName=([^&]+)/);
             let sheet = match ? decodeURIComponent(match[1]) : null;
             
-            // Nếu dữ liệu đã có sẵn trong kho, nhả ra ngay lập tức
-            if (sheet && window.boNhoDemHocPhan[sheet] && Array.isArray(window.boNhoDemHocPhan[sheet]) && typeof isAdmin !== 'undefined' && !isAdmin) {
+            // Nếu sinh viên click và dữ liệu đã có sẵn trong kho -> Hiện ngay lập tức
+            if (sheet && window.boNhoDemHocPhan[sheet] && typeof isAdmin !== 'undefined' && !isAdmin) {
+                // Nhả dữ liệu ra lập tức với độ trễ 10ms để giao diện không bị giật
                 setTimeout(() => { if (settings.success) settings.success(window.boNhoDemHocPhan[sheet]); }, 10);
-                return { done: function(cb){ cb(window.boNhoDemHocPhan[sheet]); return this; }, fail: function(){ return this; }, always: function(cb){ cb(); return this; } }; 
+                return; // Cắt đứt kết nối mạng, không chờ Google nữa
             }
             
+            // Lần đầu tải (chưa có sẵn) -> Lưu lại vào kho sau khi tải xong
             let oldSuccess = settings.success;
             settings.success = function(data) {
-                if (sheet && Array.isArray(data)) {
-                    window.boNhoDemHocPhan[sheet] = data;
-                    try { sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan)); } catch(e) {}
-                }
+                if (sheet) window.boNhoDemHocPhan[sheet] = data;
                 if (oldSuccess) oldSuccess(data);
             };
         }
         return originalAjax.apply(this, arguments);
     };
 
-    // VÒNG LẶP HÀNG ĐỢI (Đợi xong môn trước mới tải môn sau)
-    async function batDauTaiNgamQueue() {
+    // 2. TỰ ĐỘNG KÉO NGẦM TẤT CẢ DỮ LIỆU VỀ MÁY
+    function batDauTaiNgam() {
+        // Chỉ chạy cho Sinh viên (Admin luôn cần dữ liệu thực tế) và danh mục đã load xong
         if (typeof globalCategories !== 'undefined' && globalCategories.length > 0 && typeof isAdmin !== 'undefined' && !isAdmin) {
-            
-            // Lọc ra các môn chưa được tải
-            let sheetsToFetch = globalCategories.filter(sheetName => {
+            globalCategories.forEach((sheetName, index) => {
                 let lower = sheetName.toLowerCase();
-                if (['thông báo', 'users', 'cauhinhhocky', 'mastertkb'].includes(lower)) return false;
-                if (window.boNhoDemHocPhan[sheetName] && Array.isArray(window.boNhoDemHocPhan[sheetName])) return false;
-                return true;
-            });
+                // Bỏ qua các sheet không phải môn học
+                if (lower === 'thông báo' || lower === 'users' || lower === 'cauhinhhocky' || lower === 'mastertkb') return;
 
-            // Duyệt tuần tự từng môn một
-            for (let i = 0; i < sheetsToFetch.length; i++) {
-                let sheetName = sheetsToFetch[i];
-                try {
-                    await new Promise((resolve) => {
+                // Xếp hàng tải ngầm từng môn, cách nhau 0.8 giây để không làm quá tải máy chủ Google
+                setTimeout(() => {
+                    if (!window.boNhoDemHocPhan[sheetName]) {
                         originalAjax({
                             url: SCRIPT_URL + "?action=getHocPhanData&sheetName=" + encodeURIComponent(sheetName),
                             method: "GET",
                             dataType: "json",
                             success: function(data) {
-                                if(Array.isArray(data)) {
-                                    window.boNhoDemHocPhan[sheetName] = data; 
-                                    sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan));
-                                }
-                                resolve();
-                            },
-                            error: function() { resolve(); } // Dù lỗi mạng thì vẫn nhả promise để đi tiếp môn sau
+                                window.boNhoDemHocPhan[sheetName] = data; // Tải xong giấu vào kho
+                            }
                         });
-                    });
-                    
-                    // Cho máy chủ Google nghỉ ngơi 1.5 giây giữa các lượt tải để chống ban IP
-                    await new Promise(r => setTimeout(r, 1500)); 
-                    
-                } catch (err) {
-                    console.error("Lỗi tải ngầm", err);
-                }
-            }
+                    }
+                }, index * 800); 
+            });
         } else {
-            setTimeout(batDauTaiNgamQueue, 2000);
+            // Nếu danh sách môn chưa tải xong, đợi 2 giây rồi thử lại
+            setTimeout(batDauTaiNgam, 2000);
         }
     }
-    
-    // Đợi 3 giây sau khi web khởi động xong mới bắt đầu tải ngầm
-    setTimeout(batDauTaiNgamQueue, 3000);
-});
 
+    // Khởi động chiến dịch tải ngầm sau khi trang hiện lên 3 giây (để máy tập trung load mượt giao diện chính trước)
+    setTimeout(batDauTaiNgam, 3000);
+});
 function loadProfileView() {
     document.title = "Hồ sơ cá nhân | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
