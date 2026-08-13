@@ -2275,6 +2275,127 @@ function getSyncConfig() {
     $('.sync-item-cb:checked').each(function() { selectedItems.push($(this).val()); });
     return { option, fromDateStr, toDateStr, selectedItems };
 }
+// =========================================================================
+// HÀM TÍNH TOÁN THỜI GIAN NHẮC NHỞ TỰ ĐỘNG THÔNG MINH THEO QUY ƯỚC MỚI
+// =========================================================================
+window.applySmartReminders = function(events) {
+    let days = {};
+    
+    // Phân nhóm các sự kiện theo ngày
+    events.forEach(evt => {
+        if (evt.type === 'ALLDAY') {
+            evt.remindersAbsolute = [new Date(evt.startDate.getTime() + 5.5 * 3600000)]; // 5:30 sáng
+            evt.reminders = [-330];
+            return; 
+        }
+        let dateKey = `${evt.start.getFullYear()}-${evt.start.getMonth() + 1}-${evt.start.getDate()}`;
+        if (!days[dateKey]) days[dateKey] = [];
+        days[dateKey].push(evt);
+    });
+
+    for (let key in days) {
+        let dayEvts = days[key];
+        dayEvts.sort((a, b) => a.start.getTime() - b.start.getTime());
+
+        // Phân loại các ca học trong ngày
+        let mornings = dayEvts.filter(e => e.start.getHours() < 12);
+        let afternoons = dayEvts.filter(e => e.start.getHours() >= 12 && e.start.getHours() < 17);
+        let evenings = dayEvts.filter(e => e.start.getHours() >= 17);
+
+        let aftCa1 = afternoons.filter(e => e.start.getHours() < 15);
+        let aftCa2 = afternoons.filter(e => e.start.getHours() >= 15);
+
+        // =======================
+        // LUẬT CHO BUỔI SÁNG
+        // =======================
+        if (mornings.length >= 2) {
+            // Có từ 2 môn trở lên: Cả 2 môn đều thông báo lúc 7h tối hôm trước
+            let prevDay7PM = new Date(mornings[0].start);
+            prevDay7PM.setDate(prevDay7PM.getDate() - 1);
+            prevDay7PM.setHours(19, 0, 0, 0);
+            mornings.forEach(e => e.remindersAbsolute = [new Date(prevDay7PM)]);
+        } else if (mornings.length === 1) {
+            // Chỉ có 1 môn: Thông báo trước 30/60 phút tùy cơ sở
+            let e = mornings[0];
+            let loc = (e.location || "").toUpperCase();
+            let isMain = loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV") || loc.includes("PHÂN HIỆU LONG AN") || loc.includes("PHLA");
+            let offset = isMain ? 30 : 60;
+            e.remindersAbsolute = [new Date(e.start.getTime() - offset * 60000)];
+        }
+
+        // =======================
+        // LUẬT CHO BUỔI CHIỀU
+        // =======================
+        let aftSharedReminder = null;
+        if (afternoons.length >= 2) {
+            let mon1 = afternoons[0];
+            let loc = (mon1.location || "").toUpperCase();
+            let isMain = loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV") || loc.includes("PHÂN HIỆU LONG AN") || loc.includes("PHLA");
+
+            if (isMain) {
+                // Cơ sở chính: 30 phút trước khi sự kiện môn 1 bắt đầu
+                aftSharedReminder = new Date(mon1.start.getTime() - 30 * 60000);
+            } else {
+                // Cơ sở khác: Phụ thuộc vào ca sáng
+                if (mornings.length === 0) {
+                    aftSharedReminder = new Date(mon1.start.getTime() - 60 * 60000);
+                } else {
+                    let lastMorning = mornings[mornings.length - 1];
+                    // Kiểm tra nếu môn sáng kết thúc lúc 11h40 (>= 11h30 cho an toàn thực tế)
+                    if (lastMorning.end.getHours() === 11 && lastMorning.end.getMinutes() >= 30) {
+                        aftSharedReminder = new Date(mon1.start);
+                        aftSharedReminder.setHours(11, 50, 0, 0);
+                    } else {
+                        // Môn sáng kết thúc trước 11h
+                        aftSharedReminder = new Date(mon1.start.getTime() - 60 * 60000);
+                    }
+                }
+            }
+            // Gán chung thời điểm thông báo cho môn 1 và môn 2
+            afternoons.forEach(e => { e.remindersAbsolute = [new Date(aftSharedReminder)]; });
+        } else if (afternoons.length === 1) {
+            // Chỉ học 1 môn chiều: Tính như luật 5-15 phút bình thường
+            let e = afternoons[0];
+            let loc = (e.location || "").toUpperCase();
+            let isMain = loc.includes("AN DƯƠNG VƯƠNG") || loc.includes("ADV") || loc.includes("PHÂN HIỆU LONG AN") || loc.includes("PHLA");
+            let offset = isMain ? 30 : 60;
+            aftSharedReminder = new Date(e.start.getTime() - offset * 60000);
+            e.remindersAbsolute = [new Date(aftSharedReminder)];
+        }
+
+        // =======================
+        // LUẬT CHO BUỔI TỐI
+        // =======================
+        evenings.forEach(e => {
+            e.remindersAbsolute = [];
+            let fiveMinsBefore = new Date(e.start.getTime() - 5 * 60000);
+            
+            if (aftCa1.length > 0 && aftCa2.length > 0) {
+                // Buổi chiều học cả 2 ca
+                if (aftCa1[0].remindersAbsolute && aftCa1[0].remindersAbsolute.length > 0) {
+                    e.remindersAbsolute.push(new Date(aftCa1[0].remindersAbsolute[0]));
+                }
+                e.remindersAbsolute.push(fiveMinsBefore);
+            } else if (aftCa2.length > 0 && aftCa1.length === 0) {
+                // Buổi chiều chỉ học ca 2
+                if (aftCa2[0].remindersAbsolute && aftCa2[0].remindersAbsolute.length > 0) {
+                    e.remindersAbsolute.push(new Date(aftCa2[0].remindersAbsolute[0]));
+                }
+                e.remindersAbsolute.push(fiveMinsBefore);
+            } else {
+                // Chiều chỉ học ca 1 (cách rất xa) hoặc không có học chiều
+                e.remindersAbsolute.push(new Date(e.start.getTime() - 30 * 60000));
+            }
+        });
+    }
+
+    // Chuyển đổi Ngày Giờ tuyệt đối (Date) thành Số Phút (Số nguyên) cho API của Google Calendar
+    events.forEach(evt => {
+        if (evt.type !== 'ALLDAY') {
+            evt.reminders = evt.remindersAbsolute.map(d => Math.round((evt.start.getTime() - d.getTime()) / 60000));
+        }
+    });
+};
 
 // 3. ĐỒNG BỘ TRỰC TIẾP (KÈM TÍNH TOÁN THÔNG BÁO THÔNG MINH)
 window.processDirectCalendarSync = function() {
@@ -2373,64 +2494,10 @@ window.processDirectCalendarSync = function() {
         });
     }
 
-    if (events.length === 0) { alert("Không tìm thấy sự kiện nào trong khoảng thời gian đã chọn!"); return; }
+  if (events.length === 0) { alert("Không tìm thấy sự kiện nào trong khoảng thời gian đã chọn!"); return; }
 
-    // --- KHỐI TÍNH TOÁN THỜI GIAN NHẮC NHỞ TỰ ĐỘNG THÔNG MINH ---
-    let dayScheduleSummary = {}; 
-    events.forEach(evt => {
-        if (evt.type === 'TIMED' || evt.type === 'RECURRING') {
-            let dateKey = `${evt.start.getFullYear()}-${evt.start.getMonth() + 1}-${evt.start.getDate()}`;
-            if (!dayScheduleSummary[dateKey]) {
-                dayScheduleSummary[dateKey] = { hasMorning: false, hasAfternoon: false, morningEnd: null, afternoonEnd: null };
-            }
-            let startH = evt.start.getHours();
-            if (startH < 12) {
-                dayScheduleSummary[dateKey].hasMorning = true;
-                if (!dayScheduleSummary[dateKey].morningEnd || evt.end > dayScheduleSummary[dateKey].morningEnd) {
-                    dayScheduleSummary[dateKey].morningEnd = new Date(evt.end);
-                }
-            } else if (startH >= 12 && startH < 17) {
-                dayScheduleSummary[dateKey].hasAfternoon = true;
-                if (!dayScheduleSummary[dateKey].afternoonEnd || evt.end > dayScheduleSummary[dateKey].afternoonEnd) {
-                    dayScheduleSummary[dateKey].afternoonEnd = new Date(evt.end);
-                }
-            }
-        }
-    });
-
-    events.forEach(evt => {
-        evt.reminders = []; 
-        if (evt.type === 'ALLDAY') {
-            evt.reminders.push(-330); // 5h30 sáng cho Deadline
-        } else {
-            let startH = evt.start.getHours();
-            let dateKey = `${evt.start.getFullYear()}-${evt.start.getMonth() + 1}-${evt.start.getDate()}`;
-            let dayInfo = dayScheduleSummary[dateKey] || { hasMorning: false, hasAfternoon: false };
-
-            if (startH < 12) {
-                let a1 = new Date(evt.start); a1.setDate(a1.getDate() - 1); a1.setHours(18, 0, 0, 0);
-                let a2 = new Date(evt.start); a2.setHours(5, 30, 0, 0);
-                evt.reminders.push(Math.round((evt.start.getTime() - a1.getTime()) / 60000));
-                evt.reminders.push(Math.round((evt.start.getTime() - a2.getTime()) / 60000));
-            } else if (startH >= 12 && startH < 17) {
-                let a1 = new Date(evt.start);
-                if (!dayInfo.hasMorning) { a1.setHours(7, 0, 0, 0); }
-                else { a1.setDate(a1.getDate() - 1); a1.setHours(18, 0, 0, 0); }
-                
-                let a2 = new Date(evt.start);
-                if (dayInfo.hasMorning && dayInfo.morningEnd) a2 = new Date(dayInfo.morningEnd.getTime() + 10 * 60000);
-                else a2.setHours(11, 40, 0, 0);
-
-                evt.reminders.push(Math.round((evt.start.getTime() - a1.getTime()) / 60000));
-                evt.reminders.push(Math.round((evt.start.getTime() - a2.getTime()) / 60000));
-            } else {
-                let a = new Date(evt.start);
-                if (dayInfo.hasAfternoon && dayInfo.afternoonEnd) a = new Date(dayInfo.afternoonEnd.getTime() + 5 * 60000);
-                else a.setHours(15, 0, 0, 0);
-                evt.reminders.push(Math.round((evt.start.getTime() - a.getTime()) / 60000));
-            }
-        }
-    });
+    // --- KHỐI TÍNH TOÁN THỜI GIAN NHẮC NHỞ TỰ ĐỘNG THÔNG MINH MỚI ---
+    window.applySmartReminders(events);
 
     let btn = $('#btnDirectSync');
     let originalHtml = btn.html();
@@ -2542,30 +2609,11 @@ window.processExportCalendar = function() {
 
     if (events.length === 0) { alert("Không tìm thấy dữ liệu để xuất!"); return; }
 
-    // Tính toán Day Summary giống y hàm gốc để file .ics nhận giờ nhắc đúng
-    let dayScheduleSummary = {}; 
-    events.forEach(evt => {
-        if (evt.type === 'TIMED' || evt.type === 'RECURRING') {
-            let dateKey = `${evt.start.getFullYear()}-${evt.start.getMonth() + 1}-${evt.start.getDate()}`;
-            if (!dayScheduleSummary[dateKey]) {
-                dayScheduleSummary[dateKey] = { hasMorning: false, hasAfternoon: false, morningEnd: null, afternoonEnd: null };
-            }
-            let startH = evt.start.getHours();
-            if (startH < 12) {
-                dayScheduleSummary[dateKey].hasMorning = true;
-                if (!dayScheduleSummary[dateKey].morningEnd || evt.end > dayScheduleSummary[dateKey].morningEnd) {
-                    dayScheduleSummary[dateKey].morningEnd = new Date(evt.end);
-                }
-            } else if (startH >= 12 && startH < 17) {
-                dayScheduleSummary[dateKey].hasAfternoon = true;
-                if (!dayScheduleSummary[dateKey].afternoonEnd || evt.end > dayScheduleSummary[dateKey].afternoonEnd) {
-                    dayScheduleSummary[dateKey].afternoonEnd = new Date(evt.end);
-                }
-            }
-        }
-    });
-
-    let icsContent = buildICSContent(events, dayScheduleSummary);
+   // Tính toán Day Summary thông minh bằng thuật toán mới
+    window.applySmartReminders(events);
+    
+    // Tạo ICS (Không cần truyền dayScheduleSummary nữa vì giờ đã lưu thẳng vào events)
+    let icsContent = buildICSContent(events);
 
     let blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8;' });
     let link = document.createElement('a');
@@ -2579,7 +2627,7 @@ window.processExportCalendar = function() {
 };
 
 // 5. XÂY DỰNG FILE .ICS KÈM THEO THÔNG BÁO TỰ ĐỘNG THÔNG MINH
-window.buildICSContent = function(events, dayScheduleSummary) {
+window.buildICSContent = function(events) {
     let pad = (n) => String(n).padStart(2, '0');
     const formatLocalICS = (date) => { return date.getFullYear() + pad(date.getMonth() + 1) + pad(date.getDate()) + 'T' + pad(date.getHours()) + pad(date.getMinutes()) + pad(date.getSeconds()); };
     const formatDateOnlyICS = (date) => { return date.getFullYear() + pad(date.getMonth() + 1) + pad(date.getDate()); };
@@ -2620,7 +2668,7 @@ window.buildICSContent = function(events, dayScheduleSummary) {
             icsLines.push('BEGIN:VALARM');
             icsLines.push('ACTION:DISPLAY');
             icsLines.push(`DESCRIPTION:Nhắc nhở Deadline: ${evt.title}`);
-            icsLines.push('TRIGGER;RELATED=START:PT5H30M'); 
+            icsLines.push('TRIGGER;RELATED=START:-PT5H30M'); // Báo trước mốc 0h là sai, vì là AllDay Event StartTime sẽ tính từ 00:00 -> Muốn nhắc 5:30 sáng thì PT5H30M
             icsLines.push('END:VALARM');
 
         } else {
@@ -2630,37 +2678,15 @@ window.buildICSContent = function(events, dayScheduleSummary) {
                 icsLines.push(`RRULE:FREQ=WEEKLY;COUNT=${evt.count}`);
             }
 
-            let startH = evt.start.getHours();
-            let dateKey = `${evt.start.getFullYear()}-${evt.start.getMonth() + 1}-${evt.start.getDate()}`;
-            let dayInfo = dayScheduleSummary[dateKey] || { hasMorning: false, hasAfternoon: false };
-
-            if (startH < 12) {
-                let alarmTarget1 = new Date(evt.start); alarmTarget1.setDate(alarmTarget1.getDate() - 1); alarmTarget1.setHours(18, 0, 0, 0);
-                let alarmTarget2 = new Date(evt.start); alarmTarget2.setHours(5, 30, 0, 0);
-                
-                icsLines.push('BEGIN:VALARM'); icsLines.push('ACTION:DISPLAY'); icsLines.push(`DESCRIPTION:Nhắc trước lịch học sáng: ${evt.title}`);
-                icsLines.push(`TRIGGER:${calculateTriggerOffset(evt.start, alarmTarget1)}`); icsLines.push('END:VALARM');
-                
-                icsLines.push('BEGIN:VALARM'); icsLines.push('ACTION:DISPLAY'); icsLines.push(`DESCRIPTION:Nhắc trong ngày lịch học sáng: ${evt.title}`);
-                icsLines.push(`TRIGGER:${calculateTriggerOffset(evt.start, alarmTarget2)}`); icsLines.push('END:VALARM');
-            } else if (startH >= 12 && startH < 17) {
-                let alarmTarget1 = new Date(evt.start);
-                if (!dayInfo.hasMorning) { alarmTarget1.setHours(7, 0, 0, 0); } else { alarmTarget1.setDate(alarmTarget1.getDate() - 1); alarmTarget1.setHours(18, 0, 0, 0); }
-                
-                let alarmTarget2 = new Date(evt.start);
-                if (dayInfo.hasMorning && dayInfo.morningEnd) { alarmTarget2 = new Date(dayInfo.morningEnd.getTime() + 10 * 60000); } else { alarmTarget2.setHours(11, 40, 0, 0); }
-
-                icsLines.push('BEGIN:VALARM'); icsLines.push('ACTION:DISPLAY'); icsLines.push(`DESCRIPTION:Nhắc trước lịch học chiều: ${evt.title}`);
-                icsLines.push(`TRIGGER:${calculateTriggerOffset(evt.start, alarmTarget1)}`); icsLines.push('END:VALARM');
-                
-                icsLines.push('BEGIN:VALARM'); icsLines.push('ACTION:DISPLAY'); icsLines.push(`DESCRIPTION:Nhắc trong ngày lịch học chiều: ${evt.title}`);
-                icsLines.push(`TRIGGER:${calculateTriggerOffset(evt.start, alarmTarget2)}`); icsLines.push('END:VALARM');
-            } else {
-                let alarmTargetNight = new Date(evt.start);
-                if (dayInfo.hasAfternoon && dayInfo.afternoonEnd) { alarmTargetNight = new Date(dayInfo.afternoonEnd.getTime() + 5 * 60000); } else { alarmTargetNight.setHours(15, 0, 0, 0); }
-
-                icsLines.push('BEGIN:VALARM'); icsLines.push('ACTION:DISPLAY'); icsLines.push(`DESCRIPTION:Nhắc lịch học tối: ${evt.title}`);
-                icsLines.push(`TRIGGER:${calculateTriggerOffset(evt.start, alarmTargetNight)}`); icsLines.push('END:VALARM');
+            // Sinh mã VALARM dựa trên những mốc thời gian tuyệt đối đã được tính sẵn
+            if (evt.remindersAbsolute && evt.remindersAbsolute.length > 0) {
+                evt.remindersAbsolute.forEach((reminderDate) => {
+                    icsLines.push('BEGIN:VALARM'); 
+                    icsLines.push('ACTION:DISPLAY'); 
+                    icsLines.push(`DESCRIPTION:Nhắc nhở lịch học: ${evt.title}`);
+                    icsLines.push(`TRIGGER:${calculateTriggerOffset(evt.start, reminderDate)}`); 
+                    icsLines.push('END:VALARM');
+                });
             }
         }
         icsLines.push('END:VEVENT');
@@ -2668,4 +2694,4 @@ window.buildICSContent = function(events, dayScheduleSummary) {
 
     icsLines.push('END:VCALENDAR');
     return icsLines.join('\r\n');
-}
+};
