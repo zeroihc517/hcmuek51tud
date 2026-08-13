@@ -2209,53 +2209,59 @@
                 </h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4">
-                <!-- 1. CHỌN DỮ LIỆU CẦN XUẤT -->
-                <div class="mb-4">
-                    <label class="form-label fw-bold text-primary mb-2">
-                        <i class="fa-solid fa-list-check me-1"></i> Nội dung xuất
-                    </label>
-                    <div class="d-flex flex-column gap-2 bg-light p-3 rounded border">
-                        
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="exportDataOption" id="expOptionTkb" value="tkb" checked>
-                            <label class="form-check-label fw-bold" for="expOptionTkb">
-                                <i class="fa-solid fa-calendar-days text-success me-1"></i> Chỉ Thời khóa biểu
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="exportDataOption" id="expOptionDeadline" value="deadline">
-                            <label class="form-check-label fw-bold" for="expOptionDeadline">
-                                <i class="fa-solid fa-thumbtack text-danger me-1"></i> Chỉ Deadline
-                            </label>
-                        </div>
-<div class="form-check">
-                            <input class="form-check-input" type="radio" name="exportDataOption" id="expOptionBoth" value="both" >
-                            <label class="form-check-label fw-bold" for="expOptionBoth">
-                                <i class="fa-solid fa-layer-group text-primary me-1"></i> Cả Thời khóa biểu & Deadline
-                            </label>
-                        </div>
-                    </div>
-                </div>
+<div class="modal-body p-4">
+    <!-- 1. CHỌN DỮ LIỆU CẦN XUẤT -->
+    <div class="mb-3">
+        <label class="form-label fw-bold text-primary mb-2">
+            <i class="fa-solid fa-list-check me-1"></i> Nội dung xuất
+        </label>
+        <div class="d-flex flex-column gap-2 bg-light p-3 rounded border">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="exportDataOption" id="expOptionTkb" value="tkb" checked>
+                <label class="form-check-label fw-bold" for="expOptionTkb">
+                    <i class="fa-solid fa-calendar-days text-success me-1"></i> Chỉ Thời khóa biểu
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="exportDataOption" id="expOptionDeadline" value="deadline">
+                <label class="form-check-label fw-bold" for="expOptionDeadline">
+                    <i class="fa-solid fa-thumbtack text-danger me-1"></i> Chỉ Deadline
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="exportDataOption" id="expOptionBoth" value="both" >
+                <label class="form-check-label fw-bold" for="expOptionBoth">
+                    <i class="fa-solid fa-layer-group text-primary me-1"></i> Cả Thời khóa biểu & Deadline
+                </label>
+            </div>
+        </div>
+    </div>
 
-                <!-- 2. CHỌN KHOẢNG THỜI GIAN -->
-                <div class="row g-3 mb-3">
-                    <div class="col-6">
-                        <label class="form-label fw-bold small text-muted">Từ ngày</label>
-                        <input type="date" id="expFromDate" class="form-control fw-bold border-primary-subtle">
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label fw-bold small text-muted">Đến ngày</label>
-                        <input type="date" id="expToDate" class="form-control fw-bold border-primary-subtle">
-                    </div>
-                </div>
+    <!-- KHU VỰC CHỌN HỌC PHẦN ĐỂ ĐỒNG BỘ -->
+    <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <label class="form-label fw-bold text-primary m-0"><i class="fa-solid fa-check-square me-1"></i> Chọn học phần đồng bộ</label>
+            <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="toggleSelectAllSyncItems()" id="btnToggleSelectAllSync">Bỏ chọn tất cả</button>
+        </div>
+        <div id="syncCourseList" class="bg-light p-2 rounded border" style="max-height: 180px; overflow-y: auto;">
+            <!-- Danh sách checkbox sẽ được JS render vào đây -->
+        </div>
+    </div>
+
+    <!-- 2. CHỌN KHOẢNG THỜI GIAN -->
+    <div class="row g-3 mb-3">
+        <div class="col-6">
+            <label class="form-label fw-bold small text-muted">Từ ngày</label>
+            <input type="date" id="expFromDate" class="form-control fw-bold border-primary-subtle">
+        </div>
+        <div class="col-6">
+            <label class="form-label fw-bold small text-muted">Đến ngày</label>
+            <input type="date" id="expToDate" class="form-control fw-bold border-primary-subtle">
+        </div>
+    </div>
 
                 <!-- GHI CHÚ THÔNG BÁO -->
-                <div class="alert alert-info border-0 p-2.5 small mb-0 rounded-3 d-flex align-items-center gap-2" style="background-color: #e0f2fe; color: #0369a1;">
-                    <i class="fa-solid fa-bell fs-5"></i>
-                    <div>Sau khi xuất file, vào Google Lịch, Nhấn vào dấu + ở mục Lịch khác, Chọn nút Nhập, Chọn tệp từ máy tính (Thêm vào lịch mà bạn muốn thêm, nên tạo 1 lịch mới để tránh bị xung đột dữ liệu), Nhấn "Nhập" và hoàn tất</div>
-                </div>
-            </div>
+
 <div class="modal-footer border-0 pb-4 d-flex flex-wrap gap-2">
     <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal" style="border-radius: 50px;">Hủy</button>
     <button type="button" class="btn text-white fw-bold px-4 flex-grow-1" style="background-color: #16a34a; border-radius: 50px;" id="btnDirectSync" onclick="processDirectCalendarSync()">
@@ -2265,6 +2271,11 @@
         <i class="fa-solid fa-file-export me-2"></i> Tải File (.ics)
     </button>
 </div>
+                <div class="alert alert-info border-0 p-2.5 small mb-0 rounded-3 d-flex align-items-center gap-2" style="background-color: #e0f2fe; color: #0369a1;">
+                    <i class="fa-solid fa-bell fs-5"></i>
+                    <div>Sau khi xuất file, vào Google Lịch, Nhấn vào dấu + ở mục Lịch khác, Chọn nút Nhập, Chọn tệp từ máy tính (Thêm vào lịch mà bạn muốn thêm, nên tạo 1 lịch mới để tránh bị xung đột dữ liệu), Nhấn "Nhập" và hoàn tất</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
