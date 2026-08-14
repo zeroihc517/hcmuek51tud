@@ -3218,28 +3218,33 @@ body.hide-hidden-posts .is-hidden-post {
         transform: scale(1); /* Thu nhỏ lại như cũ */
     }
 }
+
+/* =========================================
+   HIỆU ỨNG LOADING BẬC THANG (ĐÃ PHÓNG TO)
+========================================= */
 /* Container căn đáy cho các cột bậc thang */
 .stair-loader-container {
     display: flex;
     align-items: flex-end; 
     justify-content: center;
-    gap: 4px;
+    gap: 6px; /* Tăng khoảng cách các cột từ 4px lên 6px */
+    margin-bottom: 20px;
 }
 
 /* Cột dọc chứa các ô vuông */
 .stair-col {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px; /* Tăng khoảng cách các ô trong cột từ 4px lên 6px */
 }
 
 /* Kiểu dáng ô vuông lúc tắt */
 .stair-box {
-    width: 24px;
-    height: 24px;
-    background-color: #f1f5f9; /* Màu nền xám nhạt khi tắt */
-    border: 1.5px solid #cbd5e1;
-    border-radius: 4px;
+    width: 38px;  /* Tăng kích thước từ 24px lên 38px (Bằng với ô bàn cờ) */
+    height: 38px; /* Tăng kích thước từ 24px lên 38px */
+    background-color: #f1f5f9; 
+    border: 2px solid #cbd5e1; /* Tăng độ dày viền từ 1.5px lên 2px */
+    border-radius: 6px; /* Bo góc tròn hơn một chút */
     animation: stairGlowChaser 2s infinite ease-in-out;
     animation-delay: calc(var(--i) * 0.1s);
 }
@@ -3253,9 +3258,9 @@ body.hide-hidden-posts .is-hidden-post {
         transform: scale(1);
     }
     10%, 20% {
-        background-color: var(--c); /* Lấy màu tương ứng của từng ô */
+        background-color: var(--c); 
         border-color: var(--c);     
-        box-shadow: 0 0 12px var(--c);
+        box-shadow: 0 0 16px var(--c); /* Tăng quầng sáng từ 12px lên 16px cho tương xứng với ô to */
         transform: scale(1.15);     
     }
     30% {
@@ -3266,7 +3271,7 @@ body.hide-hidden-posts .is-hidden-post {
     }
 }
 
-/* Đồng bộ hiển thị Dark Mode (nếu web bạn đang dùng) */
+/* Đồng bộ hiển thị Dark Mode */
 body.dark-mode .stair-box {
     background-color: #1e293b;
     border-color: #334155;
@@ -3281,14 +3286,13 @@ body.dark-mode .stair-box {
     10%, 20% { 
         background-color: var(--c); 
         border-color: var(--c); 
-        box-shadow: 0 0 12px var(--c); 
+        box-shadow: 0 0 16px var(--c); 
         transform: scale(1.15); 
     }
 }
 body.dark-mode .stair-box {
     animation-name: stairGlowChaserDark;
-}
-/* =========================================
+}/* =========================================
    PRO TRIANGLE LOADER (SÓNG CHUYỂN ĐỘNG MƯỢT MÀ)
 ========================================= */
 .pro-triangle-loader {
@@ -3369,3 +3373,59 @@ body.dark-mode .pro-node text {
 body.dark-mode .pro-node circle {
     animation-name: proGlowWaveDark;
 }
+/* =========================================
+   HIỆU ỨNG LOADING BÀN CỜ 6x6 HIỆN ĐẠI (ĐÃ PHÓNG TO)
+========================================= */
+.chess-loader-container {
+    display: grid;
+    /* Tăng kích thước mỗi ô từ 26px lên 38px (bạn có thể chỉnh số này to hơn nữa nếu muốn) */
+    grid-template-columns: repeat(6, 38px);
+    grid-template-rows: repeat(6, 38px);
+    gap: 3px; /* Tăng khoảng cách giữa các ô một chút cho thoáng */
+    justify-content: center;
+    margin: 0 auto 20px auto; 
+    background: #cbd5e1; /* Viền/nền tổng thể bàn cờ */
+    padding: 6px; /* Khung viền bàn cờ dày hơn */
+    border-radius: 10px;
+    box-shadow: 0 6px 20px rgba(15, 76, 129, 0.18);
+}
+
+/* Các ô vuông trắng/xám đan xen */
+.chess-square {
+    width: 100%; 
+    height: 100%; 
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px; /* Tăng kích thước quân cờ từ 15px lên 24px cho tương xứng với ô */
+    background-color: #f8fafc;
+}
+.chess-square:nth-child(even) { background-color: #e2e8f0; }
+
+/* Hiệu ứng nhấp nháy, mờ ảo cho quân cờ */
+.chess-piece {
+    color: #0f4c81;
+    opacity: 0;
+    animation: modernChessBlink 1.5s infinite alternate ease-in-out;
+}
+
+/* Đổi màu và tạo độ trễ đan xen cho cảm giác máy tính đang xử lý */
+.chess-square:nth-child(2n) .chess-piece { animation-delay: 0.2s; color: #e61d4a; }
+.chess-square:nth-child(3n) .chess-piece { animation-delay: 0.4s; color: #0284c7; }
+.chess-square:nth-child(5n) .chess-piece { animation-delay: 0.7s; color: #10b981; }
+.chess-square:nth-child(7n) .chess-piece { animation-delay: 1.0s; color: #f59e0b; }
+
+@keyframes modernChessBlink {
+    0% { opacity: 0; transform: scale(0.6) translateY(5px); }
+    50% { opacity: 1; transform: scale(1.15) translateY(0); filter: drop-shadow(0 3px 6px currentColor); }
+    100% { opacity: 0; transform: scale(0.6) translateY(-5px); }
+}
+
+/* Tương thích Dark Mode */
+body.dark-mode .chess-loader-container {
+    background: #1e293b;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+body.dark-mode .chess-square { background-color: #0f172a; }
+body.dark-mode .chess-square:nth-child(even) { background-color: #1e293b; }

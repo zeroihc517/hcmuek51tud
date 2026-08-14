@@ -326,6 +326,32 @@ for (const [groupName, html] of Object.entries(groupHtml)) {
                 success: function(list) { globalCategories = list; renderSidebarCategories(); if ($('#manageCategoryModal').is(':visible')) { renderCategoryManager(); } }
             });
         }
+
+function generateChessLoaderHTML() {
+    let pieces = ['fa-chess-knight', 'fa-chess-pawn', 'fa-chess-rook', 'fa-chess-bishop', 'fa-chess-queen', 'fa-chess-king'];
+    
+    // Thuật toán xáo trộn [0,1,2,3,4,5] để đảm bảo mỗi cột có đúng 1 quân cờ chính, mỗi hàng 1 quân
+    let cols = [0, 1, 2, 3, 4, 5].sort(() => Math.random() - 0.5);
+
+    let html = '<div class="chess-loader-container">';
+    for (let r = 0; r < 6; r++) {
+        for (let c = 0; c < 6; c++) {
+            let randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
+            
+            if (cols[r] === c) {
+                // Quân cờ chính chắc chắn xuất hiện (để đảm bảo điều kiện mỗi hàng/cột có ít nhất 1 con)
+                html += `<div class="chess-square"><i class="fa-solid ${randomPiece} chess-piece"></i></div>`;
+            } else {
+                // Xác suất 30% xuất hiện quân cờ phụ nhấp nháy nhanh hơn
+                let extraPiece = (Math.random() > 0.7) ? `<i class="fa-solid ${randomPiece} chess-piece" style="animation-duration: 0.8s; opacity: 0.5;"></i>` : '';
+                html += `<div class="chess-square">${extraPiece}</div>`;
+            }
+        }
+    }
+    html += '</div>';
+    return html;
+}
+
 function loadDataByHocPhan(sheetName, element) {
     if(!sheetName) return; 
     document.title = sheetName + " | Học nhóm APMA Khoa Toán";
@@ -333,17 +359,74 @@ function loadDataByHocPhan(sheetName, element) {
     resetNavActive(); 
     if(element) $(element).addClass('active');
     $('#courseHeaderTitle').html(`<i class="fa-solid fa-book-open me-2"></i> ${sheetName}`);
+    
     // Reset giao diện trước khi tải
     $('#courseSection').removeClass('d-none'); 
     $('#tableWrapper').addClass('d-none'); 
     $('#swipeHint').addClass('d-none');
-   $('#instructorWrapper').addClass('d-none'); 
-$('#instructorListContainer').html('');
+    $('#instructorWrapper').addClass('d-none'); 
+    $('#instructorListContainer').html('');
+    
+    // ==========================================
+    // LOGIC CHỌN LOADING: BẬC THANG HAY BÀN CỜ 
+    // ==========================================
+    let isEvenIndex = false;
+    if (element) {
+        // Lấy tất cả các nút danh mục đang hiển thị
+        let allNavButtons = $('.nav-hocphan'); 
+        let currentIndex = allNavButtons.index(element);
+        
+        // Trong lập trình, index 0 là vị trí lẻ thứ 1, index 1 là vị trí chẵn thứ 2
+        isEvenIndex = (currentIndex % 2 !== 0); 
+    }
+
+    // HTML Loading Bậc thang (Mặc định)
+   // HTML Loading Bậc thang (Đa sắc màu)
+    let stairHtml = `
+    <div class="stair-loader-container mx-auto mb-3">
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 1; --c: #ef4444;"></div> <!-- Đỏ -->
+            <div class="stair-box" style="--i: 2; --c: #f97316;"></div> <!-- Cam -->
+            <div class="stair-box" style="--i: 3; --c: #f59e0b;"></div> <!-- Vàng cam -->
+            <div class="stair-box" style="--i: 4; --c: #eab308;"></div> <!-- Vàng -->
+            <div class="stair-box" style="--i: 5; --c: #84cc16;"></div> <!-- Xanh chanh -->
+        </div>
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 6; --c: #22c55e;"></div> <!-- Xanh lá -->
+            <div class="stair-box" style="--i: 7; --c: #10b981;"></div> <!-- Xanh ngọc -->
+            <div class="stair-box" style="--i: 8; --c: #14b8a6;"></div> <!-- Xanh mòng két -->
+            <div class="stair-box" style="--i: 9; --c: #06b6d4;"></div> <!-- Xanh Cyan -->
+        </div>
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 10; --c: #0ea5e9;"></div> <!-- Xanh da trời -->
+            <div class="stair-box" style="--i: 11; --c: #3b82f6;"></div> <!-- Xanh dương -->
+            <div class="stair-box" style="--i: 12; --c: #6366f1;"></div> <!-- Xanh chàm -->
+        </div>
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 13; --c: #8b5cf6;"></div> <!-- Tím Violet -->
+            <div class="stair-box" style="--i: 14; --c: #d946ef;"></div> <!-- Tím hồng -->
+        </div>
+        <div class="stair-col">
+            <div class="stair-box" style="--i: 15; --c: #e61d4a;"></div> <!-- Đỏ hồng (Màu chủ đạo) -->
+        </div>
+    </div>`;
+
+    // Quyết định dùng HTML nào
+    let finalLoaderHtml = isEvenIndex ? generateChessLoaderHTML() : stairHtml;
+
+    // Đổ vào khu vực Loading
+    $('#loadingStatus').html(`
+        ${finalLoaderHtml}
+        <span class="text-muted fw-bold" style="font-size: 16px; color: #0f4c81 !important;">Đang tải dữ liệu...</span>
+    `);
     $('#loadingStatus').removeClass('d-none');
     
+    // (Phần code hiển thị Admin và gọi AJAX getHocPhanData của bạn giữ nguyên tiếp theo bên dưới...)
     if ($('#customViewWrapper').length > 0) $('#customViewWrapper').addClass('d-none');
-  $('#minigameWrapper').addClass('d-none');
-$('#examCardsContainer').html('');
+    $('#minigameWrapper').addClass('d-none');
+    $('#examCardsContainer').html('');
+
+    // ... Toàn bộ đoạn code dưới giữ nguyên
     // ==========================================
     // BỔ SUNG CHẶN KHÁCH XEM TRANG TỔNG (ĐÃ ĐƯA RA NGOÀI VÀ LÊN ĐẦU)
     // ==========================================
