@@ -91,9 +91,8 @@ function renderOnlineFooterUI() {
         let parts = str.split("|");
         let userMssv = parts[0]; 
         let userName = parts[1];
-
-        // --- A. CỐ ĐỊNH CHỮ "ADMIN" CHO TÀI KHOẢN ADMIN (51.01.108.008) ---
-        if (userMssv === "51.01.108.008" || userMssv === "5101108008") {
+let userIsAdminActive = parts[2] === "1";
+       if ((userMssv === "51.01.108.008" || userMssv === "5101108008") && userIsAdminActive) {
             studentList.push(`<span class="fw-bold" style="color: #facc15; text-transform: uppercase;"><i class="fa-solid fa-user-shield me-1"></i>Admin</span>`);
             return;
         }
@@ -162,7 +161,7 @@ function pingOnlineStatus() {
     if (savedUser) {
         try {
             let userObj = JSON.parse(savedUser);
-            mssvParam = userObj.mssv + "|" + userObj.name; 
+            mssvParam = userObj.mssv + "|" + userObj.name + "|" + (isAdmin ? "1" : "0"); 
             $('#gpaNavContainer').removeClass('d-none');
         } catch(e) { 
             mssvParam = "Khách"; 
@@ -1454,8 +1453,8 @@ $(document).ready(function() {
     // Lấy dữ liệu từ localStorage (lưu ý không dùng 'let' để ghi đè thẳng vào biến toàn cục)
     currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
     if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
-        isAdmin = true;
-        localStorage.setItem('isAdmin', 'true');
+        isAdmin = false;
+        localStorage.setItem('isAdmin', 'false');
         
         // Mở sẵn các nút giao diện Admin
         $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');

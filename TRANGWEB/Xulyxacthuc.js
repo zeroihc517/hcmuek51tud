@@ -24,17 +24,8 @@ function loginStudent() {
 		avatar: response.avatar || ""
             };
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-		if (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008") {
-                isAdmin = true;
-                localStorage.setItem('isAdmin', 'true');
-                
-                // Mở sẵn các nút giao diện Admin
-                $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
-                $('#btnManageCategories').removeClass('d-none');
-                $('#adminDatabaseLink').removeClass('d-none');
-                $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex');
-                $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
-            }
+		isAdmin = false;
+localStorage.removeItem('isAdmin');
             localStorage.setItem('lastActiveTime', Date.now().toString());
             let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
             savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
@@ -194,6 +185,7 @@ function verifyAdmin() {
         renderSidebarCategories(); 
         if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
         if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); } 
+	pingOnlineStatus();
         alert("Xác thực quyền Admin thành công!");
     } else { $('#adminLoginError').removeClass('d-none'); }
 }
@@ -216,7 +208,7 @@ function openAdminModal() {
         // Tự động chuyển về trang thông báo và reload lại dữ liệu để ẩn các nút Admin
         loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
         if (!$('#qaSection').hasClass('d-none')) { loadQAData(); }
-        
+        pingOnlineStatus();
         alert("Đã đăng xuất quyền Admin!");
     } else { 
         // --- XỬ LÝ ĐĂNG NHẬP ADMIN ---
@@ -237,7 +229,7 @@ function openAdminModal() {
             renderSidebarCategories(); 
             if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
             if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); } 
-            
+            pingOnlineStatus();
             alert("Tự động xác thực quyền Admin thành công!");
         } else {
             // Nếu là tài khoản thường thì vẫn mở Modal yêu cầu nhập mật khẩu bình thường
