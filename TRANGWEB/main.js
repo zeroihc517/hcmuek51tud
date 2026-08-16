@@ -77,7 +77,7 @@ function renderOnlineFooterUI() {
 
     let guestCount = 0;
     let studentList = [];
-
+	let processedMssv = new Set();
     // Tách riêng Khách và Sinh viên đăng nhập để đếm
     cachedOnlineList.forEach(userStr => {
         let str = String(userStr).trim();
@@ -92,7 +92,9 @@ function renderOnlineFooterUI() {
         let userMssv = parts[0]; 
         let userName = parts[1];
 let userIsAdminActive = parts[2] === "1";
-       if ((userMssv === "51.01.108.008" || userMssv === "5101108008") && userIsAdminActive) {
+if (processedMssv.has(userMssv)) return;
+        processedMssv.add(userMssv);
+      if ((userMssv === "51.01.108.008" || userMssv === "5101108008") && userIsAdminActive) {
             studentList.push(`<span class="fw-bold" style="color: #facc15; text-transform: uppercase;"><i class="fa-solid fa-user-shield me-1"></i>Admin</span>`);
             return;
         }
@@ -121,7 +123,7 @@ let userIsAdminActive = parts[2] === "1";
         // Mặc định (mode = 0) hoặc không phải Admin: Che MSSV (Đồng bộ gọi đúng hàm maskMSSV)
         studentList.push(maskMSSV(userMssv));
     });
-
+let realTotalOnline = studentList.length + guestCount;
     // Ghép danh sách sinh viên đăng nhập
     let displayList = studentList.join(", ");
 
