@@ -2497,14 +2497,14 @@
 <script>
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
-        const startMaintenance = new Date(2026, 6, 29, 20, 59);  
-        const endMaintenance   = new Date(2026, 6, 30, 6, 29); 
+        const startMaintenance = new Date(2026, 7, 16, 15, 30);  
+        const endMaintenance   = new Date(2026, 7, 16, 16, 50); 
 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
 
-        const maintenancePage = "webduphong.html"; 
+        const maintenancePage = "Baotri2.html"; 
         const now = new Date();
 
         if (now >= startMaintenance && now <= endMaintenance) {
