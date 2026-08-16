@@ -143,9 +143,9 @@ let iconHtml = currentIsAdmin
 
     // Đổ dữ liệu ra ngoài giao diện
     $('#footerOnlineStatus').html(`
-        ${iconHtml} 
-        ${cachedOnlineCount} người: <strong>${displayList}</strong>
-    `);
+    ${iconHtml} 
+    ${realTotalOnline} người: <strong>${displayList}</strong>
+`);
 }
 window.userDetailedView = ""; 
 
