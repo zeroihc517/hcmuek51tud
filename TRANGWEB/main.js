@@ -1457,7 +1457,7 @@ $(document).ready(function() {
         localStorage.setItem('isAdmin', 'false');
         
         // Mở sẵn các nút giao diện Admin
-        $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Đăng xuất Admin').css('color', 'var(--accent-red)');
+        $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Dành cho bản quản trị').css('color', 'var(--accent-red)');
         $('#btnManageCategories').removeClass('d-none');
         $('#adminDatabaseLink').removeClass('d-none');
         $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex');
