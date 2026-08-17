@@ -235,28 +235,7 @@ function exportTKBToImage(event) {
     btn.innerHTML = '<span>⏳</span> Đang xuất ảnh...';
     btn.disabled = true;
 
-    // 1. Nhận diện và tạm ẩn buổi tối nếu trống (Tiết 13 -> 16)
-    const rows = document.querySelectorAll('#tkb-body tr');
-    let hasEveningClass = false;
-    for (let i = 12; i < rows.length; i++) {
-        if (rows[i] && rows[i].querySelector('.td-subject')) {
-            hasEveningClass = true;
-            break;
-        }
-    }
-
-    const eveningRows = [];
-    if (!hasEveningClass && rows.length >= 16) {
-        for (let i = 12; i < rows.length; i++) {
-            if (rows[i]) {
-                eveningRows.push({
-                    el: rows[i],
-                    prevDisplay: rows[i].style.display
-                });
-                rows[i].style.display = 'none';
-            }
-        }
-    }
+    // Đã gỡ bỏ logic tự động ẩn các tiết buổi tối ở đây để xuất toàn bộ khung thời khóa biểu
 
     // 2. Ép mỏng viền xuống 0.3px (Phù hợp với Scale 4x)
     const tempStyle = document.createElement('style');
@@ -277,7 +256,6 @@ function exportTKBToImage(event) {
         logging: false
     }).then(canvas => {
         document.head.removeChild(tempStyle);
-        eveningRows.forEach(item => item.el.style.display = item.prevDisplay);
         tableBox.style.overflow = originalOverflow;
         
         const link = document.createElement('a');
@@ -291,8 +269,7 @@ function exportTKBToImage(event) {
         console.error("Lỗi xuất ảnh:", err);
         alert("Có lỗi xảy ra khi xuất ảnh. Vui lòng thử lại!");
         
-        document.head.removeChild(tempStyle);
-        eveningRows.forEach(item => item.el.style.display = item.prevDisplay);
+        if (document.head.contains(tempStyle)) document.head.removeChild(tempStyle);
         tableBox.style.overflow = originalOverflow;
         btn.innerHTML = originalText;
         btn.disabled = false;
