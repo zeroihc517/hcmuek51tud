@@ -220,3 +220,81 @@ function printTKB() {
 }
 // Gọi hàm khi trang tải xong
 window.addEventListener('DOMContentLoaded', renderPlatforms);
+function exportTKBToImage(event) {
+    const tableBox = document.querySelector('.table-box');
+    const weekSelect = document.getElementById('apiWeek');
+    let weekText = "Tuan";
+    
+    if (weekSelect && weekSelect.selectedIndex > 0) {
+        let rawText = weekSelect.options[weekSelect.selectedIndex].text;
+        weekText = rawText.split('(')[0].trim().replace(/\s+/g, '_'); 
+    }
+
+    const btn = event.currentTarget || event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span>⏳</span> Đang xuất ảnh...';
+    btn.disabled = true;
+
+    // 1. Nhận diện và tạm ẩn buổi tối nếu trống (Tiết 13 -> 16)
+    const rows = document.querySelectorAll('#tkb-body tr');
+    let hasEveningClass = false;
+    for (let i = 12; i < rows.length; i++) {
+        if (rows[i] && rows[i].querySelector('.td-subject')) {
+            hasEveningClass = true;
+            break;
+        }
+    }
+
+    const eveningRows = [];
+    if (!hasEveningClass && rows.length >= 16) {
+        for (let i = 12; i < rows.length; i++) {
+            if (rows[i]) {
+                eveningRows.push({
+                    el: rows[i],
+                    prevDisplay: rows[i].style.display
+                });
+                rows[i].style.display = 'none';
+            }
+        }
+    }
+
+    // 2. Ép mỏng viền xuống 0.3px (Phù hợp với Scale 4x)
+    const tempStyle = document.createElement('style');
+    tempStyle.innerHTML = `
+        .sched td { border-width: 0.3px !important; }
+        .sched th { border-right-width: 0.3px !important; }
+    `;
+    document.head.appendChild(tempStyle);
+
+    const originalOverflow = tableBox.style.overflow;
+    tableBox.style.overflow = 'visible';
+
+    // 3. Chụp ảnh với Scale 4 (Siêu nét)
+    html2canvas(tableBox, {
+        scale: 4, // Đẩy lên 4x để chất lượng nét căng
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        logging: false
+    }).then(canvas => {
+        document.head.removeChild(tempStyle);
+        eveningRows.forEach(item => item.el.style.display = item.prevDisplay);
+        tableBox.style.overflow = originalOverflow;
+        
+        const link = document.createElement('a');
+        link.download = `TKB_${weekText}.png`; 
+        link.href = canvas.toDataURL('image/png', 1.0);
+        link.click();
+        
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }).catch(err => {
+        console.error("Lỗi xuất ảnh:", err);
+        alert("Có lỗi xảy ra khi xuất ảnh. Vui lòng thử lại!");
+        
+        document.head.removeChild(tempStyle);
+        eveningRows.forEach(item => item.el.style.display = item.prevDisplay);
+        tableBox.style.overflow = originalOverflow;
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
