@@ -2703,7 +2703,6 @@ window.exportHocNhomTKBToImage = function(event) {
     const weekSelect = document.getElementById('weekSelect');
     let weekText = "Tuan_Hoc_Nhom";
     
-    // Lấy số tuần đang chọn để đặt tên ảnh
     if (weekSelect && weekSelect.selectedIndex > 0) {
         let rawText = weekSelect.options[weekSelect.selectedIndex].text;
         weekText = rawText.split('(')[0].trim().replace(/\s+/g, '_'); 
@@ -2711,72 +2710,71 @@ window.exportHocNhomTKBToImage = function(event) {
 
     const btn = event.currentTarget || event.target;
     const originalText = btn.innerHTML;
+    // Bật trạng thái "Đang xuất..."
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Đang xuất...';
     btn.disabled = true;
 
-    // 1. TỰ ĐỘNG NHẬN DIỆN BUỔI TỐI VÀ ẨN ĐI NẾU TRỐNG
-    const rows = document.querySelectorAll('#tkb-body tr');
-    let hasEveningClass = false;
-    // Bảng này không có nhãn Sáng/Chiều/Tối chia theo ROWSPAN nên ta dựa vào số tiết.
-    // Tiết 13-16 tương ứng với 4 hàng cuối (index từ rows.length - 4 đến rows.length - 1)
-    for (let i = Math.max(0, rows.length - 4); i < rows.length; i++) {
-        if (rows[i] && rows[i].querySelector('.td-subject')) {
-            hasEveningClass = true;
-            break;
-        }
-    }
-
-    const eveningRows = [];
-    if (!hasEveningClass && rows.length >= 16) {
-        for (let i = rows.length - 4; i < rows.length; i++) {
-            if (rows[i]) {
-                eveningRows.push({ el: rows[i], prevDisplay: rows[i].style.display });
-                rows[i].style.display = 'none';
+    // SỬ DỤNG SETTIMEOUT ĐỂ ÉP TRÌNH DUYỆT RENDER CHỮ TRƯỚC KHI CHỤP ẢNH
+    setTimeout(() => {
+        // 1. TỰ ĐỘNG NHẬN DIỆN BUỔI TỐI VÀ ẨN ĐI NẾU TRỐNG
+        const rows = document.querySelectorAll('#tkb-body tr');
+        let hasEveningClass = false;
+        
+        for (let i = Math.max(0, rows.length - 4); i < rows.length; i++) {
+            if (rows[i] && rows[i].querySelector('.td-subject')) {
+                hasEveningClass = true;
+                break;
             }
         }
-    }
 
-    // 2. KHẮC PHỤC LỖI VIỀN DÀY BẰNG CSS ẢO MỎNG XUỐNG 0.3PX
-    const tempStyle = document.createElement('style');
-    tempStyle.innerHTML = `
-        .sched td { border-width: 0.3px !important; }
-        .sched th { border-right-width: 0.3px !important; }
-    `;
-    document.head.appendChild(tempStyle);
+        const eveningRows = [];
+        if (!hasEveningClass && rows.length >= 16) {
+            for (let i = rows.length - 4; i < rows.length; i++) {
+                if (rows[i]) {
+                    eveningRows.push({ el: rows[i], prevDisplay: rows[i].style.display });
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
 
-    // Mở tràn thanh cuộn ngang để chụp đủ 100% chiều rộng bảng
-    const originalOverflow = tableBox.style.overflowX;
-    tableBox.style.overflowX = 'visible';
+        // 2. Ép mỏng viền cực đại (0.15px) cho độ phân giải 4K/8K
+        const tempStyle = document.createElement('style');
+        tempStyle.innerHTML = `
+            .sched td { border-width: 0.15px !important; }
+            .sched th { border-right-width: 0.15px !important; }
+        `;
+        document.head.appendChild(tempStyle);
 
-    // 3. TIẾN HÀNH CHỤP VỚI SCALE 4x
-    html2canvas(tableBox, {
-        scale: 4, 
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        logging: false
-    }).then(canvas => {
-        // KHÔI PHỤC GIAO DIỆN
-        document.head.removeChild(tempStyle);
-        eveningRows.forEach(item => item.el.style.display = item.prevDisplay);
-        tableBox.style.overflowX = originalOverflow;
-        
-        // Tải xuống
-        const link = document.createElement('a');
-        link.download = `TKB_Nhom_${weekText}.png`; 
-        link.href = canvas.toDataURL('image/png', 1.0);
-        link.click();
-        
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }).catch(err => {
-        console.error("Lỗi xuất ảnh:", err);
-        alert("Có lỗi xảy ra khi xuất ảnh. Vui lòng tải lại trang và thử lại!");
-        
-        // Khôi phục nếu lỗi
-        if (document.head.contains(tempStyle)) document.head.removeChild(tempStyle);
-        eveningRows.forEach(item => item.el.style.display = item.prevDisplay);
-        tableBox.style.overflowX = originalOverflow;
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    });
+        const originalOverflow = tableBox.style.overflowX;
+        tableBox.style.overflowX = 'visible';
+
+        // 3. TIẾN HÀNH CHỤP VỚI SCALE 6 (SIÊU NÉT 4K)
+        html2canvas(tableBox, {
+            scale: 6, // Hệ số phóng to 6 lần
+            backgroundColor: "#ffffff",
+            useCORS: true,
+            logging: false
+        }).then(canvas => {
+            document.head.removeChild(tempStyle);
+            eveningRows.forEach(item => item.el.style.display = item.prevDisplay);
+            tableBox.style.overflowX = originalOverflow;
+            
+            const link = document.createElement('a');
+            link.download = `TKB_APMA_${weekText}_4K.png`; 
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }).catch(err => {
+            console.error("Lỗi xuất ảnh:", err);
+            alert("Có lỗi xảy ra khi xuất ảnh. Vui lòng tải lại trang và thử lại!");
+            
+            if (document.head.contains(tempStyle)) document.head.removeChild(tempStyle);
+            eveningRows.forEach(item => item.el.style.display = item.prevDisplay);
+            tableBox.style.overflowX = originalOverflow;
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    }, 100); 
 };
