@@ -377,6 +377,9 @@ function renderTkbToolBar() {
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #dc2626;" onclick="openManageDeadlineListModal()"><i class="fa-solid fa-thumbtack text-warning"></i> Deadline</button>
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openAddTkbModal(false)"><i class="fa-solid fa-plus"></i> Thêm lịch mới</button>
 <button class="btn btn-sm text-white fw-bold" style="background-color: #16a34a;" onclick="openExportCalendarModal()"><i class="fa-solid fa-calendar-plus"></i> Xuất Google Lịch</button>
+<button class="btn btn-sm text-white fw-bold" style="background-color: #10b981;" onclick="exportHocNhomTKBToImage(event)">
+                    <i class="fa-solid fa-camera"></i> Xuất Ảnh
+                </button>
             </div>
         </div>`;
     $('.table-box').before(toolbarHtml);
@@ -2694,4 +2697,86 @@ window.buildICSContent = function(events) {
 
     icsLines.push('END:VCALENDAR');
     return icsLines.join('\r\n');
+};
+window.exportHocNhomTKBToImage = function(event) {
+    const tableBox = document.querySelector('.table-box');
+    const weekSelect = document.getElementById('weekSelect');
+    let weekText = "Tuan_Hoc_Nhom";
+    
+    // Lấy số tuần đang chọn để đặt tên ảnh
+    if (weekSelect && weekSelect.selectedIndex > 0) {
+        let rawText = weekSelect.options[weekSelect.selectedIndex].text;
+        weekText = rawText.split('(')[0].trim().replace(/\s+/g, '_'); 
+    }
+
+    const btn = event.currentTarget || event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Đang xuất...';
+    btn.disabled = true;
+
+    // 1. TỰ ĐỘNG NHẬN DIỆN BUỔI TỐI VÀ ẨN ĐI NẾU TRỐNG
+    const rows = document.querySelectorAll('#tkb-body tr');
+    let hasEveningClass = false;
+    // Bảng này không có nhãn Sáng/Chiều/Tối chia theo ROWSPAN nên ta dựa vào số tiết.
+    // Tiết 13-16 tương ứng với 4 hàng cuối (index từ rows.length - 4 đến rows.length - 1)
+    for (let i = Math.max(0, rows.length - 4); i < rows.length; i++) {
+        if (rows[i] && rows[i].querySelector('.td-subject')) {
+            hasEveningClass = true;
+            break;
+        }
+    }
+
+    const eveningRows = [];
+    if (!hasEveningClass && rows.length >= 16) {
+        for (let i = rows.length - 4; i < rows.length; i++) {
+            if (rows[i]) {
+                eveningRows.push({ el: rows[i], prevDisplay: rows[i].style.display });
+                rows[i].style.display = 'none';
+            }
+        }
+    }
+
+    // 2. KHẮC PHỤC LỖI VIỀN DÀY BẰNG CSS ẢO MỎNG XUỐNG 0.3PX
+    const tempStyle = document.createElement('style');
+    tempStyle.innerHTML = `
+        .sched td { border-width: 0.3px !important; }
+        .sched th { border-right-width: 0.3px !important; }
+    `;
+    document.head.appendChild(tempStyle);
+
+    // Mở tràn thanh cuộn ngang để chụp đủ 100% chiều rộng bảng
+    const originalOverflow = tableBox.style.overflowX;
+    tableBox.style.overflowX = 'visible';
+
+    // 3. TIẾN HÀNH CHỤP VỚI SCALE 4x
+    html2canvas(tableBox, {
+        scale: 4, 
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        logging: false
+    }).then(canvas => {
+        // KHÔI PHỤC GIAO DIỆN
+        document.head.removeChild(tempStyle);
+        eveningRows.forEach(item => item.el.style.display = item.prevDisplay);
+        tableBox.style.overflowX = originalOverflow;
+        
+        // Tải xuống
+        const link = document.createElement('a');
+        link.download = `TKB_Nhom_${weekText}.png`; 
+        link.href = canvas.toDataURL('image/png', 1.0);
+        link.click();
+        
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }).catch(err => {
+        console.error("Lỗi xuất ảnh:", err);
+        alert("Có lỗi xảy ra khi xuất ảnh. Vui lòng tải lại trang và thử lại!");
+        
+        // Khôi phục nếu lỗi
+        if (document.head.contains(tempStyle)) document.head.removeChild(tempStyle);
+        eveningRows.forEach(item => item.el.style.display = item.prevDisplay);
+        tableBox.style.overflowX = originalOverflow;
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
 };
