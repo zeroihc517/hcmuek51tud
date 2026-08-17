@@ -270,6 +270,12 @@
 <button class="btn-blue" onclick="exportTKBToImage(event)" style="background: #10b981;">
         <span>📸</span> Xuất ảnh
     </button>
+<button class="btn-blue" onclick="openBangTongHop()" style="background: #8b5cf6;">
+        <span>📋</span> Bảng tổng hợp
+    </button>
+<button class="btn-blue" onclick="openBangTongHopDeadline()" style="background: #e61d4a;">
+        <span>📌</span> Bảng DL
+    </button>
                   </div>
               </div>
 
@@ -305,8 +311,67 @@
 
   </div>
 </div>
+<!-- KHUNG BẢNG TỔNG HỢP TKB -->
+<div class="modal-overlay" id="modalBangTongHop" onclick="closeBangTongHop(event)">
+    <div class="modal-container" onclick="event.stopPropagation()" style="max-width: 1200px;">
+        <div class="modal-header">
+            <h3 id="modalTongHopTitle"><i class="fa-solid fa-list-check" style="margin-right: 8px;"></i>Bảng Tổng Hợp Lịch Học</h3>
+            <button class="modal-close" onclick="closeBangTongHop()">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 0;">
+            <table class="tkb-list-table" style="border-radius: 0; border: none; border-bottom: 1px solid #e5e7eb;">
+                <thead>
+                    <tr>
+                        <th style="width: 25%; text-align: left; padding-left: 20px;">Môn học</th>
+                        <th style="width: 12%;">Ghi chú</th>
+                        <th style="width: 10%;">Thứ & Tiết</th>
+                        <th style="width: 13%;">Cơ sở</th>
+                        <th style="width: 10%;">Thời gian</th>
+                        <th style="width: 12%;">Ngày học</th>
+                        <th style="width: 8%;">Phòng</th>
+                        <th style="width: 10%;">Giảng viên</th>
+                    </tr>
+                </thead>
+                <tbody id="bangTongHopBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<!-- KHUNG BẢNG TỔNG HỢP DEADLINE -->
+<div class="modal-overlay" id="modalBangTongHopDeadline" onclick="closeBangTongHopDeadline(event)">
+    <div class="modal-container" onclick="event.stopPropagation()" style="max-width: 1000px;">
+        <div class="modal-header" style="background: #0f4c81;"> <!-- Đồng bộ màu xanh web -->
+            <h3 id="modalTongHopDeadlineTitle"><i class="fa-solid fa-thumbtack" style="margin-right: 8px;"></i>Bảng Tổng Hợp Deadline</h3>
+            <button class="modal-close" onclick="closeBangTongHopDeadline()">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 0;">
+            <table class="tkb-list-table" style="border-radius: 0; border: none; border-bottom: 1px solid #e5e7eb;">
+                <thead style="background: #0f4c81;">
+                    <tr>
+                        <th style="width: 15%; background: #0f4c81;">Loại</th>
+                        <th style="width: 45%; text-align: left; background: #0f4c81;">Tên công việc</th>
+                        <th style="width: 25%; background: #0f4c81;">Thời gian diễn ra</th>
+                        <th style="width: 15%; background: #0f4c81;">Hình thức</th>
+                    </tr>
+                </thead>
+                <tbody id="bangTongHopDeadlineBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<style>
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(2px); }
+.modal-container { background: #fff; width: 95%; max-height: 85vh; border-radius: 14px; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; }
+.modal-header { background: #0f4c81; color: #fff; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { margin: 0; font-size: 18px; font-weight: 700; }
+.modal-close { background: none; border: none; color: #fff; font-size: 26px; cursor: pointer; line-height: 1; padding: 0; opacity: 0.8; }
+.modal-close:hover { opacity: 1; }
+.modal-body { overflow-y: auto; background: #f8fafc; }
+.tkb-list-table { width: 100%; border-collapse: collapse; background: #fff; }
+.tkb-list-table th { color: #fff; padding: 14px; font-size: 14px; position: sticky; top: 0; border: 1px solid rgba(255,255,255,0.2); text-align: center; }
+.tkb-list-table td { padding: 12px; border: 1px solid #e5e7eb; font-size: 14px; vertical-align: middle; text-align: center; color: #374151; }
+</style><script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="scriptindex.js"></script>
 <script>
     // URL Google Apps Script lấy dữ liệu Web Links từ hệ thống
@@ -738,27 +803,52 @@ function loadPersonalLinks() {
         });
     }
 
-    function processTKBData(data) {
+ function processTKBData(data) {
     globalTkbData = data.map((row) => {
-        let lastElement = row.pop(); // Lấy phần tử cuối cùng (Mã dòng hoặc mã môn hệ thống)
+        let lastElement = row.pop(); 
         let actualRowIndex = -1;
         let isSystemFlag = false;
 
-        // Kiểm tra nhận diện học phần được đồng bộ từ hệ thống
         if (typeof lastElement === 'string' && lastElement.startsWith('SYS_')) {
-            isSystemFlag = true;
-            actualRowIndex = lastElement; 
+            isSystemFlag = true; actualRowIndex = lastElement; 
         } else {
             actualRowIndex = parseInt(lastElement) || -1;
         }
 
+        // Tách mã HP triệt để khỏi Hình thức (Khắc phục lỗi mã HP dính ở cột Cơ sở)
+        let extractedClassId = row[12] || ""; 
+        let hinhThucRaw = row[4] || "";
+        
+        let match = hinhThucRaw.match(/#([a-zA-Z0-9_]+)/);
+        if (match) {
+            if (!extractedClassId) extractedClassId = match[1];
+            hinhThucRaw = hinhThucRaw.replace(match[0], '').trim();
+            row[4] = hinhThucRaw; 
+        }
+
+        if (isSystemFlag && !extractedClassId) {
+            let parts = actualRowIndex.split('_'); 
+            if (parts.length >= 2) extractedClassId = parts[1];
+        }
+
+        // Xử lý làm sạch tên môn học (Tách mã lớp nếu nó bị dính ở đầu tên)
+        let tenMon = row[5] || "";
+        // Bắt đầu bằng chữ/số dài 6-15 ký tự, nối với tên môn bằng khoảng trắng hoặc gạch ngang
+        let prefixMatch = tenMon.match(/^([A-Za-z0-9]{6,15})\s*[-_:]*\s+(.*)/);
+        // BẮT BUỘC PHẢI CHỨA SỐ mới được xem là mã HP
+        if (prefixMatch && /\d/.test(prefixMatch[1])) {
+            if (!extractedClassId) extractedClassId = prefixMatch[1];
+            tenMon = prefixMatch[2]; 
+        }
+
         return {
             thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
-            thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: row[5] || "", phong: row[6] || "",     
+            thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: tenMon, phong: row[6] || "",     
             gv: row[7] || "", color: row[8] || "#e0f2fe", ngayBatDau: row[9] || "", ngayKetThuc: row[10] || "",
-            ngayNgoaiLe: row[11] || "", sheetRowIndex: actualRowIndex, isSystem: isSystemFlag 
+            ngayNgoaiLe: row[11] || "", sheetRowIndex: actualRowIndex, isSystem: isSystemFlag,
+            classId: extractedClassId
         };
-    }).filter(c => c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1);
+    }).filter(c => (c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1) || (c.hinhThuc || '').toUpperCase().includes('VLE'));
     
     filterAndRenderTKB();
 }

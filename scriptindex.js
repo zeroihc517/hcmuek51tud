@@ -298,3 +298,367 @@ function exportTKBToImage(event) {
         btn.disabled = false;
     });
 }
+// 1. Hàm bóc tách, loại bỏ các chữ "Kiểm tra", "Tiểu luận" để lấy tên gốc
+function getBaseSubjectName(name) {
+    if (!name) return "KHÁC";
+    let cleanName = name.replace(/^([a-zA-Z0-9_\.]+)\s*-\s*/, '');
+    let base = cleanName.toLowerCase()
+        .replace(/\(.*?\)/g, "") 
+        .replace(/(tiểu luận kết thúc học phần|tiểu luận|kiểm tra quá trình|kiểm tra giữa học phần|kiểm tra kết thúc học phần|kiểm tra|học bù|tự học)/g, "")
+        .replace(/^[\s-:]+/, '').replace(/[\s-:]+$/, '').replace(/\s+/g, ' ').trim();
+    if (base.endsWith("vecto")) { base = base.slice(0, -5) + "vector"; }
+    return base.toUpperCase() || "KHÁC";
+}
+
+// 2. Phân loại hiển thị nhãn môn học
+function getNoteFromSubject(mon) {
+    let monLower = (mon || "").toLowerCase(); 
+    if (monLower.includes('kiểm tra kết thúc học phần')) return `<span style="color: #dc2626; font-weight: bold;">Kiểm tra Cuối kỳ</span>`;
+    if (monLower.includes('kiểm tra giữa học phần')) return `<span style="color: #dc2626; font-weight: bold;">Kiểm tra Giữa kỳ</span>`;
+    if (monLower.includes('kiểm tra quá trình')) return `<span style="color: #dc2626; font-weight: bold;">Kiểm tra Quá Trình</span>`;
+    if (monLower.includes('kiểm tra')) return `<span style="color: #dc2626; font-weight: bold;">Kiểm tra</span>`;
+    if (monLower.includes('bù')) return `<span style="color: #d97706; font-weight: bold;">Học bù</span>`;
+    if (monLower.includes('thực hành')) return `<span style="color: #16a34a; font-weight: bold;">Thực hành</span>`;
+    return '<span class="text-muted" style="font-size: 13px;">Chính khóa</span>';
+}
+function processTKBData(data) {
+    globalTkbData = data.map((row) => {
+        let lastElement = row.pop(); 
+        let actualRowIndex = -1;
+        let isSystemFlag = false;
+
+        if (typeof lastElement === 'string' && lastElement.startsWith('SYS_')) {
+            isSystemFlag = true; actualRowIndex = lastElement; 
+        } else {
+            actualRowIndex = parseInt(lastElement) || -1;
+        }
+
+        // Tách mã HP triệt để khỏi Hình thức (Khắc phục lỗi mã HP dính ở cột Cơ sở)
+        let extractedClassId = row[12] || ""; 
+        let hinhThucRaw = row[4] || "";
+        
+        let match = hinhThucRaw.match(/#([a-zA-Z0-9_]+)/);
+        if (match) {
+            if (!extractedClassId) extractedClassId = match[1];
+            hinhThucRaw = hinhThucRaw.replace(match[0], '').trim();
+            row[4] = hinhThucRaw; 
+        }
+
+        if (isSystemFlag && !extractedClassId) {
+            let parts = actualRowIndex.split('_'); 
+            if (parts.length >= 2) extractedClassId = parts[1];
+        }
+
+        // Xử lý làm sạch tên môn học (Tách mã lớp nếu nó bị dính ở đầu tên)
+        let tenMon = row[5] || "";
+        // Bắt đầu bằng chữ/số dài 6-15 ký tự, nối với tên môn bằng khoảng trắng hoặc gạch ngang
+        let prefixMatch = tenMon.match(/^([A-Za-z0-9]{6,15})\s*[-_:]*\s+(.*)/);
+        // BẮT BUỘC PHẢI CHỨA SỐ mới được xem là mã HP
+        if (prefixMatch && /\d/.test(prefixMatch[1])) {
+            if (!extractedClassId) extractedClassId = prefixMatch[1];
+            tenMon = prefixMatch[2]; 
+        }
+
+        return {
+            thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
+            thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: tenMon, phong: row[6] || "",     
+            gv: row[7] || "", color: row[8] || "#e0f2fe", ngayBatDau: row[9] || "", ngayKetThuc: row[10] || "",
+            ngayNgoaiLe: row[11] || "", sheetRowIndex: actualRowIndex, isSystem: isSystemFlag,
+            classId: extractedClassId
+        };
+    }).filter(c => (c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1) || (c.hinhThuc || '').toUpperCase().includes('VLE'));
+    
+    filterAndRenderTKB();
+}
+// BỘ CÔNG CỤ XỬ LÝ BẢNG TỔNG HỢP 
+function getBaseSubjectName(name) {
+    if (!name) return "KHÁC";
+    
+    let base = name.toLowerCase()
+        .replace(/\(.*?\)/g, "") 
+        .replace(/(tiểu luận kết thúc học phần|tiểu luận|kiểm tra quá trình|kiểm tra giữa học phần|kiểm tra kết thúc học phần|kiểm tra|học bù|tự học)/g, "")
+        .replace(/^[\s-:]+/, '').replace(/[\s-:]+$/, '').replace(/\s+/g, ' ').trim();
+        
+    if (base.endsWith("vecto")) { base = base.slice(0, -5) + "vector"; }
+    return base.toUpperCase() || "KHÁC";
+}
+function getNoteFromSubject(mon) {
+    let monLower = (mon || "").toLowerCase(); 
+    if (monLower.includes('kiểm tra kết thúc học phần')) return `<span style="color: #dc2626; font-weight: bold;">Kiểm tra Cuối kỳ</span>`;
+    if (monLower.includes('kiểm tra giữa học phần')) return `<span style="color: #dc2626; font-weight: bold;">Kiểm tra Giữa kỳ</span>`;
+    if (monLower.includes('kiểm tra quá trình')) return `<span style="color: #dc2626; font-weight: bold;">Kiểm tra Quá Trình</span>`;
+    if (monLower.includes('kiểm tra')) return `<span style="color: #dc2626; font-weight: bold;">Kiểm tra</span>`;
+    if (monLower.includes('bù')) return `<span style="color: #d97706; font-weight: bold;">Học bù</span>`;
+    if (monLower.includes('thực hành')) return `<span style="color: #16a34a; font-weight: bold;">Thực hành</span>`;
+    return '<span class="text-muted" style="font-size: 13px;">Chính khóa</span>';
+}
+
+function getAcademicTimeRange() {
+    let selectedNH = $('#apiNamHoc').val();
+    let selectedHK = $('#apiHocKy').val();
+    let titleSuffix = '', startMonTime = null, endSunTime = null;
+
+    if (selectedNH && selectedHK) {
+        let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+        if (config) {
+            let sDate = parseDateString(config[2]);
+            let numWeeks = parseInt(config[3]);
+            let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+            if (sDate && numWeeks) {
+                let startMon = getMondayOfDate(sDate);
+                startMonTime = startMon.getTime();
+                let acadWk = 1, calWk = 1;
+                while (acadWk <= numWeeks && calWk <= 52) { if (!breakWeeks.includes(calWk)) { acadWk++; } calWk++; }
+                let endSun = new Date(startMon);
+                endSun.setDate(endSun.getDate() + ((calWk - 1) * 7) - 1);
+                endSun.setHours(23, 59, 59, 999);
+                endSunTime = endSun.getTime();
+                titleSuffix = ` - ${selectedHK} (${selectedNH})`;
+            }
+        }
+    }
+    return { titleSuffix, startMonTime, endSunTime, selectedHK };
+}
+
+// 1. MỞ BẢNG TKB
+function openBangTongHop() {
+    let { titleSuffix, startMonTime, endSunTime, selectedHK } = getAcademicTimeRange();
+    let tbody = document.getElementById('bangTongHopBody');
+    document.getElementById('modalTongHopTitle').innerHTML = `<i class="fa-solid fa-list-check" style="margin-right: 8px;"></i>Bảng Tổng Hợp Lịch Học${titleSuffix}`;
+
+    let filteredTkbData = globalTkbData.filter(c => {
+        if (!startMonTime || !endSunTime) return true;
+        let s = parseDateString(c.ngayBatDau); let cStartT = s ? s.getTime() : null;
+        let e = parseDateString(c.ngayKetThuc); let cEndT = e ? e.getTime() : null;
+        if (!cStartT && !cEndT) return true; 
+        if (cStartT && cEndT) return cStartT <= endSunTime && cEndT >= startMonTime;
+        if (cStartT) return cStartT <= endSunTime;
+        if (cEndT) return cEndT >= startMonTime;
+        return true;
+    });
+
+    // 1. Tạo tập hợp Tên & Mã lớp TKB để đối chiếu
+    let tkbSubjectNames = new Set();
+    let tkbClassIds = new Set();
+    filteredTkbData.forEach(c => {
+        tkbSubjectNames.add(getBaseSubjectName(c.mon));
+        if (c.classId) tkbClassIds.add(String(c.classId).trim().toUpperCase());
+    });
+
+    // 2. Nhặt các VLE từ bảng Deadline đưa sang TKB nếu nó có buổi thi/lịch học trùng mã
+    let vleFromDeadlines = [];
+    (globalDeadlineData || []).forEach(d => {
+        if ((d.tag || '').toUpperCase().includes('VLE')) {
+            // Kiểm tra thời gian (chỉ lấy VLE thuộc khoảng thời gian đang lọc)
+            let s = parseDateString(d.dateStart); let cStartT = s ? s.getTime() : null;
+            let e = parseDateString(d.dateEnd); let cEndT = e ? e.getTime() : null;
+            let inRange = true;
+            if (startMonTime && endSunTime) {
+                if (cStartT && cEndT) inRange = (cStartT <= endSunTime && cEndT >= startMonTime);
+                else if (cStartT) inRange = (cStartT <= endSunTime);
+                else if (cEndT) inRange = (cEndT >= startMonTime);
+            }
+
+            if (inRange) {
+                let dTitle = d.title || "";
+                let dClassId = "";
+                // Tách mã lớp khỏi tên VLE (VD: 2511PSYC100115 - Tâm lý học đại cương)
+                let prefixMatch = dTitle.match(/^([A-Za-z0-9]{6,15})\s*[-_:]*\s+(.*)/);
+                if (prefixMatch && /\d/.test(prefixMatch[1])) {
+                    dClassId = prefixMatch[1];
+                    dTitle = prefixMatch[2]; // Tên sạch không có mã
+                }
+                let dBaseName = getBaseSubjectName(dTitle);
+
+                // Nếu VLE này khớp với Tên môn hoặc Mã lớp đang có trong TKB
+                if (tkbSubjectNames.has(dBaseName) || (dClassId && tkbClassIds.has(dClassId.toUpperCase()))) {
+                    vleFromDeadlines.push({
+                        mon: dTitle,
+                        classId: dClassId,
+                        hinhThuc: d.tag,
+                        thu: 99, 
+                        tietBd: 1, 
+                        soTiet: 1,
+                        thoiGian: "",
+                        phong: "",
+                        gv: "",
+                        ngayBatDau: d.dateStart,
+                        ngayKetThuc: d.dateEnd
+                    });
+                }
+            }
+        }
+    });
+
+    // 3. Gộp chung VLE (vừa nhặt) vào dữ liệu TKB
+    let combinedTkbData = [...filteredTkbData, ...vleFromDeadlines];
+
+    if (combinedTkbData.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding: 40px; color: #6b7280;">Không có môn học nào trong ${selectedHK || 'khoảng thời gian này'}.</td></tr>`;
+        document.getElementById('modalBangTongHop').style.display = 'flex'; return;
+    }
+
+    let groupedByMon = {};
+    combinedTkbData.forEach(c => {
+        let groupKey = getBaseSubjectName(c.mon);
+        if (!groupedByMon[groupKey]) groupedByMon[groupKey] = [];
+        groupedByMon[groupKey].push(c);
+    });
+
+    let html = ''; let groupIndex = 0;
+    for (let key in groupedByMon) {
+        let items = groupedByMon[key];
+        let rowSpan = items.length;
+        let groupBgColor = (groupIndex % 2 === 0) ? "#f8fafc" : "#ffffff";
+        groupIndex++;
+
+        let foundClassId = items.find(item => item.classId && String(item.classId).trim() !== "")?.classId;
+        let baseNameDisplay = foundClassId ? `<span style="color: #475569; font-weight: 700;">${foundClassId}</span><br>${key}` : key;
+
+        items.sort((a, b) => {
+            let tA = parseDateString(a.ngayBatDau); tA = tA ? tA.getTime() : 0;
+            let tB = parseDateString(b.ngayBatDau); tB = tB ? tB.getTime() : 0;
+            if (tA !== tB) return tA - tB;
+            if (a.thu !== b.thu) return a.thu - b.thu;
+            return a.tietBd - b.tietBd;
+        });
+
+        items.forEach((c, index) => {
+            let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
+            let thuText = isVle ? "-" : (c.thu === 8 ? "Chủ nhật" : (c.thu === 99 ? "-" : "Thứ " + c.thu));
+            let tietText = isVle ? "VLE" : `Tiết ${c.tietBd} - ${c.tietBd + c.soTiet - 1}`;
+            let thoiGianHienThi = isVle ? "-" : (c.thoiGian || '-');
+
+            let dateDisplay = '-';
+            if (c.ngayBatDau && c.ngayKetThuc) dateDisplay = (c.ngayBatDau === c.ngayKetThuc) ? c.ngayBatDau : `Từ ${c.ngayBatDau}<br>đến ${c.ngayKetThuc}`; 
+            else if (c.ngayBatDau) dateDisplay = c.ngayBatDau; 
+            else if (c.ngayKetThuc) dateDisplay = c.ngayKetThuc;
+
+            let extractedLink = checkAndExtractUrl(c.hinhThuc || "");
+            let displayHinhThuc = extractedLink ? (c.hinhThuc || "").replace(extractedLink, '').trim() : c.hinhThuc;
+            if (!displayHinhThuc && extractedLink) displayHinhThuc = "Truy cập Link";
+            let hinhThucHtml = extractedLink ? `<a href="${extractedLink}" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: none;">${displayHinhThuc} <i class="fa-solid fa-arrow-up-right-from-square ms-1" style="font-size: 11px;"></i></a>` : `<span style="font-weight: 600;">${displayHinhThuc || '-'}</span>`;
+
+            html += `<tr style="background-color: ${groupBgColor}; ${index === rowSpan - 1 ? 'border-bottom: 2px solid #cbd5e1;' : ''}">`;
+            if (index === 0) html += `<td rowspan="${rowSpan}" style="font-weight: 700; color: #0f4c81; text-align: left; vertical-align: middle; border-right: 1px solid #e5e7eb; border-left: 3px solid #0f4c81; padding-left: 20px; text-transform: uppercase;">${baseNameDisplay}</td>`;
+            
+            html += `
+                <td style="border-right: 1px solid #e5e7eb;">${getNoteFromSubject(c.mon)}</td>
+                <td style="border-right: 1px solid #e5e7eb;"><span style="font-weight: 700; color: #374151;">${thuText}</span><br><span style="font-size: 12px; color: #6b7280;">(${tietText})</span></td>
+                <td style="border-right: 1px solid #e5e7eb;">${hinhThucHtml}</td>
+                <td style="color: #dc2626; font-weight: bold; border-right: 1px solid #e5e7eb;">${thoiGianHienThi}</td>
+                <td style="font-size: 13px; border-right: 1px solid #e5e7eb;">${dateDisplay}</td>
+                <td style="font-weight: 600; border-right: 1px solid #e5e7eb;">${c.phong || '-'}</td>
+                <td>${c.gv || '-'}</td>
+            </tr>`;
+        });
+    }
+    tbody.innerHTML = html;
+    document.getElementById('modalBangTongHop').style.display = 'flex';
+}
+
+// 2. MỞ BẢNG DEADLINE
+function openBangTongHopDeadline() {
+    let { titleSuffix, startMonTime, endSunTime, selectedHK } = getAcademicTimeRange();
+    let tbody = document.getElementById('bangTongHopDeadlineBody');
+    document.getElementById('modalTongHopDeadlineTitle').innerHTML = `<i class="fa-solid fa-thumbtack" style="margin-right: 8px;"></i>Bảng Tổng Hợp Deadline${titleSuffix}`;
+
+    let tkbSubjectNames = new Set();
+    let tkbClassIds = new Set();
+    
+    globalTkbData.forEach(c => {
+        if (!(c.hinhThuc || '').toUpperCase().includes('VLE')) {
+            tkbSubjectNames.add(getBaseSubjectName(c.mon));
+            if (c.classId) tkbClassIds.add(String(c.classId).trim().toUpperCase());
+        }
+    });
+
+    let virtualVLEs = [];
+    if (typeof globalTkbData !== 'undefined') {
+        globalTkbData.forEach(c => {
+            if ((c.hinhThuc || '').toUpperCase().includes('VLE')) {
+                let baseName = getBaseSubjectName(c.mon);
+                let cId = String(c.classId || "").trim().toUpperCase();
+                
+                let hasSameName = tkbSubjectNames.has(baseName);
+                let hasSameClassId = (cId !== "" && tkbClassIds.has(cId));
+
+                if (!hasSameName && !hasSameClassId) {
+                    let durationStr = (c.ngayBatDau && c.ngayKetThuc && c.ngayBatDau !== c.ngayKetThuc) ? `Từ ${c.ngayBatDau} đến ${c.ngayKetThuc}` : (c.ngayBatDau || "Chưa rõ");
+                    virtualVLEs.push({ title: c.mon, duration: durationStr, tag: c.hinhThuc, icon: "primary", dateStart: c.ngayBatDau || "", dateEnd: c.ngayKetThuc || "", isVirtualVLE: true });
+                }
+            }
+        });
+    }
+
+    // Lọc Deadline: BỎ QUA các VLE đã được nhặt sang Bảng TKB ở hàm trên
+    let filteredGlobalDeadlines = (globalDeadlineData || []).filter(d => {
+        if ((d.tag || '').toUpperCase().includes('VLE')) {
+            let dTitle = d.title || "";
+            let dClassId = "";
+            let prefixMatch = dTitle.match(/^([A-Za-z0-9]{6,15})\s*[-_:]*\s+(.*)/);
+            if (prefixMatch && /\d/.test(prefixMatch[1])) {
+                dClassId = prefixMatch[1];
+                dTitle = prefixMatch[2];
+            }
+            let dBaseName = getBaseSubjectName(dTitle);
+            
+            // Nếu khớp mã hoặc tên -> Nó sẽ thuộc bảng TKB -> Ẩn nó ở bảng Deadline
+            if (tkbSubjectNames.has(dBaseName) || (dClassId && tkbClassIds.has(dClassId.toUpperCase()))) {
+                return false; 
+            }
+        }
+        return true;
+    });
+
+    let combinedDeadlineData = [...filteredGlobalDeadlines, ...virtualVLEs];
+    let filteredDeadlines = combinedDeadlineData.filter(d => {
+        if (!startMonTime || !endSunTime) return true;
+        let sDate = parseDateString(d.dateStart); let dStartTime = sDate ? sDate.getTime() : null;
+        let eDate = parseDateString(d.dateEnd); let dEndTime = eDate ? eDate.getTime() : null;
+        if (!dStartTime && !dEndTime) return true;
+        if (dStartTime && dEndTime) return dStartTime <= endSunTime && dEndTime >= startMonTime;
+        if (dStartTime) return dStartTime <= endSunTime;
+        if (dEndTime) return dEndTime >= startMonTime;
+        return true;
+    });
+
+    if (filteredDeadlines.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding: 40px; color: #6b7280;">Không có deadline nào trong ${selectedHK || 'khoảng thời gian này'}.</td></tr>`;
+        document.getElementById('modalBangTongHopDeadline').style.display = 'flex'; return;
+    }
+
+    filteredDeadlines.sort((a, b) => {
+        let sA = parseDateString(a.dateStart); let startA = sA ? sA.getTime() : 0;
+        let sB = parseDateString(b.dateStart); let startB = sB ? sB.getTime() : 0;
+        return startA - startB;
+    });
+
+    let html = '';
+    filteredDeadlines.forEach(c => {
+        let extLinkTitle = checkAndExtractUrl(c.title || "");
+        let extLinkTag = checkAndExtractUrl(c.tag || "");
+        let extLink = extLinkTitle || extLinkTag;
+        
+        let displayTitle = c.title || "";
+        let displayTag = c.tag || "Khác";
+        if (extLinkTitle) displayTitle = displayTitle.replace(extLinkTitle, '').trim();
+        if (extLinkTag) displayTag = displayTag.replace(extLinkTag, '').trim();
+        if (displayTag === "") displayTag = "Truy cập";
+
+        let tagHtml = extLink ? `<a href="${extLink}" target="_blank" style="color: #2563eb; font-weight: 600; text-decoration: none;">${displayTag} <i class="fa-solid fa-arrow-up-right-from-square ms-1" style="font-size: 11px;"></i></a>` : `<span style="font-weight: 600; color: #374151;">${displayTag}</span>`;
+        let badgeType = c.isVirtualVLE ? `<span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold;">HỆ THỐNG VLE</span>` : `<span style="background: #fee2e2; color: #be123c; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold;">DEADLINE</span>`;
+
+        html += `<tr style="border-bottom: 1px solid #e5e7eb;">
+            <td>${badgeType}</td>
+            <td style="text-align: left; font-weight: 700; color: #1f2937;">${displayTitle}</td>
+            <td style="color: #dc2626; font-weight: bold;">${c.duration || '-'}</td>
+            <td>${tagHtml}</td>
+        </tr>`;
+    });
+    tbody.innerHTML = html;
+    document.getElementById('modalBangTongHopDeadline').style.display = 'flex';
+}
+
+function closeBangTongHop(event) { if (event && event.target !== document.getElementById('modalBangTongHop')) return; document.getElementById('modalBangTongHop').style.display = 'none'; }
+function closeBangTongHopDeadline(event) { if (event && event.target !== document.getElementById('modalBangTongHopDeadline')) return; document.getElementById('modalBangTongHopDeadline').style.display = 'none'; }
