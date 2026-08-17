@@ -2716,26 +2716,7 @@ window.exportHocNhomTKBToImage = function(event) {
 
     // SỬ DỤNG SETTIMEOUT ĐỂ ÉP TRÌNH DUYỆT RENDER CHỮ TRƯỚC KHI CHỤP ẢNH
     setTimeout(() => {
-        // 1. TỰ ĐỘNG NHẬN DIỆN BUỔI TỐI VÀ ẨN ĐI NẾU TRỐNG
-        const rows = document.querySelectorAll('#tkb-body tr');
-        let hasEveningClass = false;
-        
-        for (let i = Math.max(0, rows.length - 4); i < rows.length; i++) {
-            if (rows[i] && rows[i].querySelector('.td-subject')) {
-                hasEveningClass = true;
-                break;
-            }
-        }
-
-        const eveningRows = [];
-        if (!hasEveningClass && rows.length >= 16) {
-            for (let i = rows.length - 4; i < rows.length; i++) {
-                if (rows[i]) {
-                    eveningRows.push({ el: rows[i], prevDisplay: rows[i].style.display });
-                    rows[i].style.display = 'none';
-                }
-            }
-        }
+        // Đã gỡ bỏ logic tự động ẩn các tiết buổi tối ở đây để xuất toàn bộ khung thời khóa biểu
 
         // 2. Ép mỏng viền cực đại (0.15px) cho độ phân giải 4K/8K
         const tempStyle = document.createElement('style');
@@ -2756,7 +2737,6 @@ window.exportHocNhomTKBToImage = function(event) {
             logging: false
         }).then(canvas => {
             document.head.removeChild(tempStyle);
-            eveningRows.forEach(item => item.el.style.display = item.prevDisplay);
             tableBox.style.overflowX = originalOverflow;
             
             const link = document.createElement('a');
@@ -2771,7 +2751,6 @@ window.exportHocNhomTKBToImage = function(event) {
             alert("Có lỗi xảy ra khi xuất ảnh. Vui lòng tải lại trang và thử lại!");
             
             if (document.head.contains(tempStyle)) document.head.removeChild(tempStyle);
-            eveningRows.forEach(item => item.el.style.display = item.prevDisplay);
             tableBox.style.overflowX = originalOverflow;
             btn.innerHTML = originalText;
             btn.disabled = false;
