@@ -2250,7 +2250,43 @@ window.openExportCalendarModal = function() {
 
     let now = new Date();
     let defaultStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    let defaultEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 30);
+    let defaultEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 104); // Mặc định dự phòng
+
+    // --- BẮT ĐẦU: LẤY THỜI GIAN THEO HỌC KỲ ĐANG ĐƯỢC CHỌN ---
+    let selectedNH = $('#namHocSelect').val(); 
+    let selectedHK = $('#hocKySelect').val();
+    
+    if (selectedNH && selectedHK && typeof globalConfigHK !== 'undefined') {
+        let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+        if (config) {
+            let sDate = parseDateString(config[2]); // Lấy ngày bắt đầu từ cấu hình
+            let numAcademicWeeks = parseInt(config[3]); // Số tuần học
+            
+            if (sDate && numAcademicWeeks) {
+                // Tính tổng thời gian = (Số tuần học + Số tuần nghỉ lễ) * 7 ngày
+                let breakWeeksCount = (config[4] || "").split(',').filter(w => w.trim() !== "").length;
+                let totalDays = (numAcademicWeeks + breakWeeksCount) * 7;
+                
+                let eDate = new Date(sDate);
+                eDate.setDate(eDate.getDate() + totalDays); // Tính ngày kết thúc
+
+                if (now < sDate) {
+                    // 1. Chưa tới kỳ: Lấy trọn vẹn từ ngày bắt đầu -> ngày kết thúc
+                    defaultStart = new Date(sDate);
+                    defaultEnd = new Date(eDate);
+                } else if (now >= sDate && now <= eDate) {
+                    // 2. Đang trong kỳ: Lấy từ hôm nay -> ngày kết thúc
+                    defaultStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    defaultEnd = new Date(eDate);
+                } else {
+                    // 3. Đã qua kỳ (Xem quá khứ): Lấy trọn vẹn từ ngày bắt đầu -> ngày kết thúc
+                    defaultStart = new Date(sDate);
+                    defaultEnd = new Date(eDate);
+                }
+            }
+        }
+    }
+    // --- KẾT THÚC XỬ LÝ LẤY THỜI GIAN ---
 
     const formatISODate = (d) => { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
