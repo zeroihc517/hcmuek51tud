@@ -164,8 +164,14 @@ function pingOnlineStatus() {
         try {
             let userObj = JSON.parse(savedUser);
             mssvParam = userObj.mssv + "|" + userObj.name + "|" + (isAdmin ? "1" : "0"); 
-            $('#gpaNavContainer').removeClass('d-none');
-        } catch(e) { 
+            
+            // CHỈ HIỂN THỊ NÚT KẾT QUẢ HỌC TẬP CHO ADMIN
+            if (userObj.mssv === "51.01.108.008" || userObj.mssv === "ihcspt517") {
+                $('#gpaNavContainer').removeClass('d-none');
+            } else {
+                $('#gpaNavContainer').addClass('d-none');
+            }
+        } catch(e) {
             mssvParam = "Khách"; 
             $('#gpaNavContainer').addClass('d-none');
         }
@@ -1498,7 +1504,7 @@ $(document).ready(function() {
 // ==========================================
 let myGPADataset = JSON.parse(localStorage.getItem('myGPADataset')) || [];
 function loadGPAView() {
-	if (!isAdmin) {
+	/* if (!isAdmin) {
         // Cập nhật nội dung câu chữ vào Bảng Modal #updatingModal có sẵn trong HTML
        $('#updatingModal .modal-body').html(`
             <div class="mb-3">
@@ -1524,7 +1530,7 @@ function loadGPAView() {
         }
 
         return; // DỪNG HOÀN TOÀN: Sinh viên ở nguyên trang hiện tại, không mở trang GPA
-    }
+    } */  // (Vô hiệu hóa tính năng Đang cập nhật của Kết quả học tập
     document.title = "Tính điểm GPA | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
     $('#btnNavGPA').addClass('active'); 
