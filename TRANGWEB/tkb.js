@@ -2701,11 +2701,25 @@ window.buildICSContent = function(events) {
 window.exportHocNhomTKBToImage = function(event) {
     const tableBox = document.querySelector('.table-box');
     const weekSelect = document.getElementById('weekSelect');
-    let weekText = "Tuan_Hoc_Nhom";
+    const namHocSelect = document.getElementById('namHocSelect');
+    const hocKySelect = document.getElementById('hocKySelect');
     
+    let weekText = "Tuan_Hoc_Nhom";
+    let dateRangeText = "";
+    
+    // Lấy tên Năm học và Học kỳ hiện tại
+    let namHocText = (namHocSelect && namHocSelect.selectedIndex > 0) ? namHocSelect.options[namHocSelect.selectedIndex].text : "...";
+    let hocKyText = (hocKySelect && hocKySelect.selectedIndex > 0) ? hocKySelect.options[hocKySelect.selectedIndex].text : "...";
+
     if (weekSelect && weekSelect.selectedIndex > 0) {
         let rawText = weekSelect.options[weekSelect.selectedIndex].text;
         weekText = rawText.split('(')[0].trim().replace(/\s+/g, '_'); 
+        
+        // Trích xuất ngày từ chuỗi "Tuần X (DD/MM/YYYY - DD/MM/YYYY)"
+        let match = rawText.match(/\((.*?)\)/);
+        if (match) {
+            dateRangeText = match[1];
+        }
     }
 
     const btn = event.currentTarget || event.target;
@@ -2716,7 +2730,29 @@ window.exportHocNhomTKBToImage = function(event) {
 
     // SỬ DỤNG SETTIMEOUT ĐỂ ÉP TRÌNH DUYỆT RENDER CHỮ TRƯỚC KHI CHỤP ẢNH
     setTimeout(() => {
-        // Đã gỡ bỏ logic tự động ẩn các tiết buổi tối ở đây để xuất toàn bộ khung thời khóa biểu
+        // 1. Tạo phần tử tiêu đề tạm thời
+        const headerDiv = document.createElement('div');
+        headerDiv.id = 'temp-export-header';
+        headerDiv.style.textAlign = 'center';
+        headerDiv.style.marginBottom = '20px';
+        headerDiv.style.fontFamily = "'Inter', sans-serif";
+        headerDiv.style.color = '#0f4c81';
+
+        let titleHtml = `<h4 style="font-weight: bold; margin-bottom: 5px; text-transform: uppercase;">THỜI KHÓA BIỂU - ${hocKyText} - NĂM HỌC: ${namHocText}</h4>`;
+        
+        if (dateRangeText) {
+            let dates = dateRangeText.split('-');
+            if(dates.length === 2) {
+                titleHtml += `<p style="font-size: 16px; margin: 0; font-weight: 600; color: #475569;">(Áp dụng từ ngày ${dates[0].trim()} đến ngày ${dates[1].trim()})</p>`;
+            } else {
+                titleHtml += `<p style="font-size: 16px; margin: 0; font-weight: 600; color: #475569;">(Áp dụng: ${dateRangeText})</p>`;
+            }
+        }
+        
+        headerDiv.innerHTML = titleHtml;
+        
+        // Chèn tiêu đề vào đầu khung table-box
+        tableBox.insertBefore(headerDiv, tableBox.firstChild);
 
         // 2. Ép mỏng viền cực đại (0.15px) cho độ phân giải 4K/8K
         const tempStyle = document.createElement('style');
@@ -2727,7 +2763,12 @@ window.exportHocNhomTKBToImage = function(event) {
         document.head.appendChild(tempStyle);
 
         const originalOverflow = tableBox.style.overflowX;
+        const originalPadding = tableBox.style.padding;
+        const originalBg = tableBox.style.backgroundColor;
+        
         tableBox.style.overflowX = 'visible';
+        tableBox.style.padding = '20px'; // Thêm khoảng không xung quanh để ảnh đẹp hơn
+        tableBox.style.backgroundColor = '#ffffff'; // Nền trắng nguyên khối
 
         // 3. TIẾN HÀNH CHỤP VỚI SCALE 6 (SIÊU NÉT 4K)
         html2canvas(tableBox, {
@@ -2736,8 +2777,12 @@ window.exportHocNhomTKBToImage = function(event) {
             useCORS: true,
             logging: false
         }).then(canvas => {
+            // 4. Dọn dẹp DOM (Xóa tiêu đề và khôi phục CSS)
+            tableBox.removeChild(headerDiv);
             document.head.removeChild(tempStyle);
             tableBox.style.overflowX = originalOverflow;
+            tableBox.style.padding = originalPadding;
+            tableBox.style.backgroundColor = originalBg;
             
             const link = document.createElement('a');
             link.download = `TKB_APMA_${weekText}_4K.png`; 
@@ -2750,8 +2795,12 @@ window.exportHocNhomTKBToImage = function(event) {
             console.error("Lỗi xuất ảnh:", err);
             alert("Có lỗi xảy ra khi xuất ảnh. Vui lòng tải lại trang và thử lại!");
             
+            // Dọn dẹp nếu có lỗi
+            if (document.getElementById('temp-export-header')) tableBox.removeChild(headerDiv);
             if (document.head.contains(tempStyle)) document.head.removeChild(tempStyle);
             tableBox.style.overflowX = originalOverflow;
+            tableBox.style.padding = originalPadding;
+            tableBox.style.backgroundColor = originalBg;
             btn.innerHTML = originalText;
             btn.disabled = false;
         });
