@@ -220,61 +220,128 @@ function printTKB() {
 }
 // Gọi hàm khi trang tải xong
 window.addEventListener('DOMContentLoaded', renderPlatforms);
-function exportTKBToImage(event) {
+window.exportTKBToImage = function(event) {
     const tableBox = document.querySelector('.table-box');
-    const weekSelect = document.getElementById('apiWeek');
-    let weekText = "Tuan";
     
-    if (weekSelect && weekSelect.selectedIndex > 0) {
+    // Bao quát toàn bộ các ID có thể dùng trên web 2
+    const weekSelect = document.getElementById('apiWeek') || document.getElementById('selectTuan');
+    const namHocSelect = document.getElementById('apiNamHoc') || document.getElementById('selectNamHoc');
+    const hocKySelect = document.getElementById('apiHocKy') || document.getElementById('selectHocKy');
+    
+    let weekText = "Tuan";
+    let dateRangeText = "";
+    
+    // Trích xuất text Năm học (Kiểm tra nếu có giá trị được chọn)
+    let namHocText = "...";
+    if (namHocSelect && namHocSelect.selectedIndex !== -1 && namHocSelect.value !== "") {
+        namHocText = namHocSelect.options[namHocSelect.selectedIndex].text;
+    }
+
+    // Trích xuất text Học kỳ (Kiểm tra nếu có giá trị được chọn)
+    let hocKyText = "...";
+    if (hocKySelect && hocKySelect.selectedIndex !== -1 && hocKySelect.value !== "") {
+        hocKyText = hocKySelect.options[hocKySelect.selectedIndex].text;
+    }
+
+    // Trích xuất text Tuần và khoảng thời gian ngày tháng
+    if (weekSelect && weekSelect.selectedIndex !== -1 && weekSelect.value !== "") {
         let rawText = weekSelect.options[weekSelect.selectedIndex].text;
         weekText = rawText.split('(')[0].trim().replace(/\s+/g, '_'); 
+        
+        let match = rawText.match(/\((.*?)\)/);
+        if (match) {
+            dateRangeText = match[1];
+        }
     }
 
     const btn = event.currentTarget || event.target;
     const originalText = btn.innerHTML;
+    // Bật trạng thái "Đang xuất ảnh"
     btn.innerHTML = '<span>⏳</span> Đang xuất ảnh...';
     btn.disabled = true;
 
-    // Đã gỡ bỏ logic tự động ẩn các tiết buổi tối ở đây để xuất toàn bộ khung thời khóa biểu
+    // Ép trình duyệt render thẻ tiêu đề trước khi chụp ảnh
+    setTimeout(() => {
+        // 1. Tạo phần tử tiêu đề tạm thời
+        const headerDiv = document.createElement('div');
+        headerDiv.id = 'temp-export-header';
+        headerDiv.style.textAlign = 'center';
+        headerDiv.style.marginBottom = '25px'; // Tăng khoảng cách với bảng một chút
+        headerDiv.style.fontFamily = "'Inter', sans-serif";
 
-    // 2. Ép mỏng viền xuống 0.3px (Phù hợp với Scale 4x)
-    const tempStyle = document.createElement('style');
-    tempStyle.innerHTML = `
-        .sched td { border-width: 0.3px !important; }
-        .sched th { border-right-width: 0.3px !important; }
-    `;
-    document.head.appendChild(tempStyle);
+        // Dòng 1: Chữ to (28px), in đậm, màu xanh
+        let titleHtml = `<div style="font-size: 28px; font-weight: 900; margin-bottom: 8px; text-transform: uppercase; color: #0b4a78;">THỜI KHÓA BIỂU - ${hocKyText} - NĂM HỌC: ${namHocText}</div>`;
+        
+        // Dòng 2: Chữ màu đỏ, to hơn cũ (20px) nhưng nhỏ hơn dòng 1
+        if (dateRangeText) {
+            let dates = dateRangeText.split('-');
+            if(dates.length === 2) {
+                titleHtml += `<div style="font-size: 20px; font-weight: 700; color: #dc2626;">(Áp dụng từ ngày ${dates[0].trim()} đến ngày ${dates[1].trim()})</div>`;
+            } else {
+                titleHtml += `<div style="font-size: 20px; font-weight: 700; color: #dc2626;">(Áp dụng: ${dateRangeText})</div>`;
+            }
+        }
+        
+        headerDiv.innerHTML = titleHtml;
+        
+        // Chèn tiêu đề vào đầu khung table-box
+        tableBox.insertBefore(headerDiv, tableBox.firstChild);
 
-    const originalOverflow = tableBox.style.overflow;
-    tableBox.style.overflow = 'visible';
+        // 2. Ép mỏng viền xuống 0.3px (Phù hợp với Scale 4x)
+        const tempStyle = document.createElement('style');
+        tempStyle.innerHTML = `
+            .sched td { border-width: 0.3px !important; }
+            .sched th { border-right-width: 0.3px !important; }
+        `;
+        document.head.appendChild(tempStyle);
 
-    // 3. Chụp ảnh với Scale 4 (Siêu nét)
-    html2canvas(tableBox, {
-        scale: 4, // Đẩy lên 4x để chất lượng nét căng
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        logging: false
-    }).then(canvas => {
-        document.head.removeChild(tempStyle);
-        tableBox.style.overflow = originalOverflow;
+        // Sao lưu các thuộc tính CSS gốc
+        const originalOverflow = tableBox.style.overflow;
+        const originalPadding = tableBox.style.padding;
+        const originalBg = tableBox.style.backgroundColor;
         
-        const link = document.createElement('a');
-        link.download = `TKB_${weekText}.png`; 
-        link.href = canvas.toDataURL('image/png', 1.0);
-        link.click();
-        
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }).catch(err => {
-        console.error("Lỗi xuất ảnh:", err);
-        alert("Có lỗi xảy ra khi xuất ảnh. Vui lòng thử lại!");
-        
-        if (document.head.contains(tempStyle)) document.head.removeChild(tempStyle);
-        tableBox.style.overflow = originalOverflow;
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    });
+        tableBox.style.overflow = 'visible';
+        tableBox.style.padding = '30px 20px'; // Thêm khoảng trắng trên/dưới để ảnh thoáng hơn
+        tableBox.style.backgroundColor = '#ffffff';
+
+        // 3. Chụp ảnh với Scale 4 (Siêu nét)
+        html2canvas(tableBox, {
+            scale: 4, 
+            backgroundColor: "#ffffff",
+            useCORS: true,
+            logging: false
+        }).then(canvas => {
+            // 4. Dọn dẹp DOM ngay sau khi lấy được ảnh
+            tableBox.removeChild(headerDiv);
+            document.head.removeChild(tempStyle);
+            tableBox.style.overflow = originalOverflow;
+            tableBox.style.padding = originalPadding;
+            tableBox.style.backgroundColor = originalBg;
+            
+            const link = document.createElement('a');
+            link.download = `TKB_${weekText}.png`; 
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }).catch(err => {
+            console.error("Lỗi xuất ảnh:", err);
+            alert("Có lỗi xảy ra khi xuất ảnh. Vui lòng thử lại!");
+            
+            // Dọn dẹp nếu có lỗi
+            if (document.getElementById('temp-export-header')) tableBox.removeChild(headerDiv);
+            if (document.head.contains(tempStyle)) document.head.removeChild(tempStyle);
+            tableBox.style.overflow = originalOverflow;
+            tableBox.style.padding = originalPadding;
+            tableBox.style.backgroundColor = originalBg;
+            
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        });
+    }, 100);
 }
+
 // 1. Hàm bóc tách, loại bỏ các chữ "Kiểm tra", "Tiểu luận" để lấy tên gốc
 function getBaseSubjectName(name) {
     if (!name) return "KHÁC";
