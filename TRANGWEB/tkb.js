@@ -2273,7 +2273,7 @@ window.openExportCalendarModal = function() {
                 if (now < sDate) {
                     // 1. Chưa tới kỳ: Lấy trọn vẹn từ ngày bắt đầu -> ngày kết thúc
                     defaultStart = new Date(sDate);
-                    defaultEnd = new Date(eDate);
+                    defaultEnd = new Date(eDate-1);
                 } else if (now >= sDate && now <= eDate) {
                     // 2. Đang trong kỳ: Lấy từ hôm nay -> ngày kết thúc
                     defaultStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
