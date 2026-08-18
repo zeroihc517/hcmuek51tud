@@ -2707,11 +2707,18 @@ window.exportHocNhomTKBToImage = function(event) {
     let weekText = "Tuan_Hoc_Nhom";
     let dateRangeText = "";
     
-    // Lấy tên Năm học và Học kỳ hiện tại
-    let namHocText = (namHocSelect && namHocSelect.selectedIndex > 0) ? namHocSelect.options[namHocSelect.selectedIndex].text : "...";
-    let hocKyText = (hocKySelect && hocKySelect.selectedIndex > 0) ? hocKySelect.options[hocKySelect.selectedIndex].text : "...";
+    // Lấy tên Năm học và Học kỳ hiện tại (kiểm tra chặt chẽ index và value rỗng)
+    let namHocText = "...";
+    if (namHocSelect && namHocSelect.selectedIndex !== -1 && namHocSelect.value !== "") {
+        namHocText = namHocSelect.options[namHocSelect.selectedIndex].text;
+    }
 
-    if (weekSelect && weekSelect.selectedIndex > 0) {
+    let hocKyText = "...";
+    if (hocKySelect && hocKySelect.selectedIndex !== -1 && hocKySelect.value !== "") {
+        hocKyText = hocKySelect.options[hocKySelect.selectedIndex].text;
+    }
+
+    if (weekSelect && weekSelect.selectedIndex !== -1 && weekSelect.value !== "") {
         let rawText = weekSelect.options[weekSelect.selectedIndex].text;
         weekText = rawText.split('(')[0].trim().replace(/\s+/g, '_'); 
         
@@ -2734,18 +2741,19 @@ window.exportHocNhomTKBToImage = function(event) {
         const headerDiv = document.createElement('div');
         headerDiv.id = 'temp-export-header';
         headerDiv.style.textAlign = 'center';
-        headerDiv.style.marginBottom = '20px';
+        headerDiv.style.marginBottom = '25px'; // Tăng lề dưới cho thoáng
         headerDiv.style.fontFamily = "'Inter', sans-serif";
-        headerDiv.style.color = '#0f4c81';
 
-        let titleHtml = `<h4 style="font-weight: bold; margin-bottom: 5px; text-transform: uppercase;">THỜI KHÓA BIỂU - ${hocKyText} - NĂM HỌC: ${namHocText}</h4>`;
+        // Dòng 1: Chữ to (28px), in đậm, màu xanh chủ đạo của trang (#0f4c81)
+        let titleHtml = `<div style="font-size: 28px; font-weight: 900; margin-bottom: 8px; text-transform: uppercase; color: #0f4c81;">THỜI KHÓA BIỂU - ${hocKyText} - NĂM HỌC: ${namHocText}</div>`;
         
+        // Dòng 2: Chữ màu đỏ (#dc2626), to (20px) nhưng nhỏ hơn dòng 1
         if (dateRangeText) {
             let dates = dateRangeText.split('-');
             if(dates.length === 2) {
-                titleHtml += `<p style="font-size: 16px; margin: 0; font-weight: 600; color: #475569;">(Áp dụng từ ngày ${dates[0].trim()} đến ngày ${dates[1].trim()})</p>`;
+                titleHtml += `<div style="font-size: 20px; font-weight: 700; color: #dc2626;">(Áp dụng từ ngày ${dates[0].trim()} đến ngày ${dates[1].trim()})</div>`;
             } else {
-                titleHtml += `<p style="font-size: 16px; margin: 0; font-weight: 600; color: #475569;">(Áp dụng: ${dateRangeText})</p>`;
+                titleHtml += `<div style="font-size: 20px; font-weight: 700; color: #dc2626;">(Áp dụng: ${dateRangeText})</div>`;
             }
         }
         
@@ -2762,12 +2770,13 @@ window.exportHocNhomTKBToImage = function(event) {
         `;
         document.head.appendChild(tempStyle);
 
+        // Lấy lại các style gốc
         const originalOverflow = tableBox.style.overflowX;
         const originalPadding = tableBox.style.padding;
         const originalBg = tableBox.style.backgroundColor;
         
         tableBox.style.overflowX = 'visible';
-        tableBox.style.padding = '20px'; // Thêm khoảng không xung quanh để ảnh đẹp hơn
+        tableBox.style.padding = '30px 20px'; // Thêm padding xung quanh khung chụp ảnh
         tableBox.style.backgroundColor = '#ffffff'; // Nền trắng nguyên khối
 
         // 3. TIẾN HÀNH CHỤP VỚI SCALE 6 (SIÊU NÉT 4K)
