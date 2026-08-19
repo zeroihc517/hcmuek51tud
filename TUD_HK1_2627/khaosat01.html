@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Khảo sát Nền tảng Thảo luận | Học nhóm Khoa Toán</title>
+    <title>Khảo sát Giờ học ban đêm | Điều chỉnh lịch bảo trì</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -103,7 +103,7 @@
 
         /* Icon ứng dụng */
         .app-icon {
-            font-size: 24px;
+            font-size: 20px;
             width: 40px;
             height: 40px;
             display: flex;
@@ -113,16 +113,24 @@
             color: white;
         }
         
-        .icon-zalo { background: #0068FF; }
-        .icon-messenger { background: linear-gradient(45deg, #00B2FF, #006AFF); }
-        .icon-discord { background: #5865F2; }
-        .icon-teams { background: #464EB8; }
-        .icon-other { background: #94a3b8; }
+        .icon-level-1 { background: #3b82f6; } /* Xanh dương */
+        .icon-level-2 { background: #6366f1; } /* Indigo */
+        .icon-level-3 { background: #8b5cf6; } /* Tím */
+        .icon-level-4 { background: #1e3a8a; } /* Đen xanh - rất khuya */
+        .icon-other { background: #94a3b8; }   /* Xám */
 
         .option-text {
             font-size: 16px;
             font-weight: 600;
             flex-grow: 1;
+        }
+        
+        .option-subtext {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-top: 2px;
+            display: block;
         }
 
         /* Nút Radio giả bọc ngoài */
@@ -188,6 +196,16 @@
             text-align: center;
             padding: 20px 0;
         }
+        
+        .alert-info-custom {
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: #1e3a8a;
+        }
     </style>
 </head>
 <body>
@@ -195,63 +213,75 @@
     <div class="survey-container">
         <div id="formState">
             <div class="survey-header">
-                <div class="brand-icon"><i class="fa-solid fa-square-poll-vertical"></i></div>
-                <h4 class="fw-bold mb-2">Khảo sát ý kiến</h4>
-                <p class="text-muted mb-0" style="font-size: 15px;">Học nhóm Năm 2 - Khoa Toán & Tin học</p>
+                <div class="brand-icon"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                <h4 class="fw-bold mb-2">Khảo sát Giờ học ban đêm</h4>
+                <p class="text-muted mb-0" style="font-size: 15px;">Hệ thống Học tập - Khoa Toán & Tin học</p>
             </div>
             
             <div class="survey-body">
-                <h5 class="fw-bold mb-4" style="line-height: 1.5;">Bạn muốn sử dụng nền tảng nào làm kênh thảo luận chính cho nhóm?</h5>
+                <div class="alert-info-custom">
+                    <i class="fa-solid fa-circle-info me-2"></i>
+                    Khảo sát này giúp Ban quản trị điều chỉnh lịch bảo trì hệ thống hàng ngày, tránh làm gián đoạn thời gian học tập của bạn.
+                </div>
+                
+                <h5 class="fw-bold mb-4" style="line-height: 1.5;">Ban đêm bạn thường học và sử dụng hệ thống tới mấy giờ?</h5>
                 
                 <form id="surveyForm">
-                    <label class="option-card" onclick="selectOption(this, 'Zalo')">
-                        <input type="radio" name="platform" value="Zalo">
-                        <div class="app-icon icon-zalo"><i class="fa-solid fa-comment-dots"></i></div>
-                        <span class="option-text">Zalo</span>
+                    <label class="option-card" onclick="selectOption(this, 'Trước 22:00')">
+                        <input type="radio" name="nightStudyTime" value="Trước 22:00">
+                        <div class="app-icon icon-level-1"><i class="fa-solid fa-moon"></i></div>
+                        <div class="option-text">
+                            Nghỉ ngơi sớm
+                            <span class="option-subtext">Trước 22:00</span>
+                        </div>
                         <div class="radio-circle"></div>
                     </label>
 
-                    <label class="option-card" onclick="selectOption(this, 'Messenger')">
-                        <input type="radio" name="platform" value="Messenger">
-                        <div class="app-icon icon-messenger"><i class="fa-brands fa-facebook-messenger"></i></div>
-                        <span class="option-text">Messenger</span>
+                    <label class="option-card" onclick="selectOption(this, '22:00 - 00:00')">
+                        <input type="radio" name="nightStudyTime" value="22:00 - 00:00">
+                        <div class="app-icon icon-level-2"><i class="fa-regular fa-clock"></i></div>
+                        <div class="option-text">
+                            Học vừa phải
+                            <span class="option-subtext">Khoảng 22:00 đến 00:00 (Nửa đêm)</span>
+                        </div>
                         <div class="radio-circle"></div>
                     </label>
 
-                    <label class="option-card" onclick="selectOption(this, 'Discord')">
-                        <input type="radio" name="platform" value="Discord">
-                        <div class="app-icon icon-discord"><i class="fa-brands fa-discord"></i></div>
-                        <span class="option-text">Discord</span>
+                    <label class="option-card" onclick="selectOption(this, '00:00 - 02:00')">
+                        <input type="radio" name="nightStudyTime" value="00:00 - 02:00">
+                        <div class="app-icon icon-level-3"><i class="fa-solid fa-mug-hot"></i></div>
+                        <div class="option-text">
+                            Thức khá khuya
+                            <span class="option-subtext">Từ 00:00 đến 02:00 sáng</span>
+                        </div>
                         <div class="radio-circle"></div>
                     </label>
 
-                    <label class="option-card" onclick="selectOption(this, 'MS Teams')">
-                        <input type="radio" name="platform" value="MS Teams">
-                        <div class="app-icon icon-teams"><i class="fa-brands fa-microsoft"></i></div>
-                        <span class="option-text">MS Teams</span>
+                    <label class="option-card" onclick="selectOption(this, 'Sau 02:00')">
+                        <input type="radio" name="nightStudyTime" value="Sau 02:00">
+                        <div class="app-icon icon-level-4"><i class="fa-solid fa-star-and-crescent"></i></div>
+                        <div class="option-text">
+                            Cú đêm chính hiệu
+                            <span class="option-subtext">Sau 02:00 sáng</span>
+                        </div>
                         <div class="radio-circle"></div>
                     </label>
 
                     <label class="option-card" onclick="selectOption(this, 'Khác')">
-                        <input type="radio" name="platform" value="Khác">
+                        <input type="radio" name="nightStudyTime" value="Khác">
                         <div class="app-icon icon-other"><i class="fa-solid fa-ellipsis"></i></div>
-                        <span class="option-text">Nền tảng khác</span>
+                        <span class="option-text">Khung giờ khác</span>
                         <div class="radio-circle"></div>
                     </label>
 
                     <div id="otherInputBox" class="mt-3 mb-4 d-none">
-                        <input type="text" id="txtOtherPlatform" class="form-control form-control-custom w-100" placeholder="Vui lòng ghi rõ tên ứng dụng bạn muốn...">
+                        <input type="text" id="txtOtherTime" class="form-control form-control-custom w-100" placeholder="Vui lòng ghi rõ bạn thường thức đến mấy giờ...">
                     </div>
 
                     <div class="mt-4 pt-2 border-top">
                         <button type="button" class="btn-submit mt-2" id="btnSubmitSurvey" onclick="submitSurvey()">
                             Gửi bình chọn
                         </button>
-                        <div class="text-center mt-3">
-                            <a href="hocnhomnam2khoatoan.html" class="text-muted fw-bold" style="font-size: 14px; text-decoration: none;">
-                               
-                            </a>
-                        </div>
                     </div>
                 </form>
             </div>
@@ -261,9 +291,8 @@
             <div style="font-size: 70px; color: #10b981; margin-bottom: 20px;">
                 <i class="fa-regular fa-circle-check"></i>
             </div>
-            <h4 class="fw-bold mb-3">Cảm ơn bạn đã góp ý!</h4>
-            <p class="text-muted mb-4">Lựa chọn của bạn đã được ghi nhận. Ban quản trị sẽ tổng hợp và thông báo kết quả sớm nhất.</p>
-
+            <h4 class="fw-bold mb-3">Cảm ơn bạn đã hỗ trợ!</h4>
+            <p class="text-muted mb-4">Thông tin của bạn đã được ghi nhận. Hệ thống sẽ dựa vào kết quả này để thiết lập khung giờ bảo trì hợp lý nhất, đảm bảo quá trình học tập không bị ảnh hưởng.</p>
         </div>
     </div>
 
@@ -283,7 +312,7 @@
             // Xử lý hiển thị ô nhập "Khác"
             if (value === 'Khác') {
                 document.getElementById('otherInputBox').classList.remove('d-none');
-                document.getElementById('txtOtherPlatform').focus();
+                document.getElementById('txtOtherTime').focus();
             } else {
                 document.getElementById('otherInputBox').classList.add('d-none');
             }
@@ -295,15 +324,15 @@
 
             // Validate (Kiểm tra lỗi)
             if (!finalSelection) {
-                alert("Vui lòng chọn một nền tảng trước khi gửi!");
+                alert("Vui lòng chọn một khung giờ trước khi gửi!");
                 return;
             }
 
             if (finalSelection === 'Khác') {
-                let otherVal = document.getElementById('txtOtherPlatform').value.trim();
+                let otherVal = document.getElementById('txtOtherTime').value.trim();
                 if (!otherVal) {
-                    alert("Vui lòng ghi rõ nền tảng khác mà bạn muốn sử dụng!");
-                    document.getElementById('txtOtherPlatform').focus();
+                    alert("Vui lòng ghi rõ bạn thường thức đến mấy giờ!");
+                    document.getElementById('txtOtherTime').focus();
                     return;
                 }
                 finalSelection = "Khác: " + otherVal;
@@ -314,43 +343,63 @@
             btn.disabled = true;
 
             // ==========================================
-            // TÍCH HỢP VỚI GOOGLE SHEETS (GAS) CỦA BẠN TẠI ĐÂY
-            // Hiện tại mình đang mô phỏng thời gian gửi (1.5 giây)
+            // TÍCH HỢP VỚI GOOGLE SHEETS (GAS)
             // ==========================================
-// Xóa đoạn setTimeout(...) và thay bằng đoạn này:
+            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWSw85sNrKawlh9BPFmjeGoW4Hcy9HdqmJ2B3r510yVQ0FE9WXFTaADN_2WyuPMaBq/exec';
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwWSw85sNrKawlh9BPFmjeGoW4Hcy9HdqmJ2B3r510yVQ0FE9WXFTaADN_2WyuPMaBq/exec';
+            // Lấy thông tin user nếu có đăng nhập (từ localStorage)
+            let currentUser = JSON.parse(localStorage.getItem('currentUser')) || { mssv: "Khách", name: "Ẩn danh" };
 
-// Lấy thông tin user nếu có đăng nhập (từ localStorage)
-let currentUser = JSON.parse(localStorage.getItem('currentUser')) || { mssv: "Khách", name: "Ẩn danh" };
+           $.ajax({
+                url: SCRIPT_URL,
+                method: "POST",
+                data: JSON.stringify({
+                    action: "submitSurvey",
+                    mssv: currentUser.mssv,
+                    name: currentUser.name,
+                    platform: finalSelection
+                }),
+                contentType: "text/plain;charset=utf-8",
+                success: function(response) {
+                    // ==========================================
+                    // 1. ĐÁNH DẤU LÀ ĐÃ LÀM KHẢO SÁT VÀO MÁY
+                    // ==========================================
+                    if (currentUser && currentUser.mssv !== "Khách") {
+                        localStorage.setItem('survey_done_' + currentUser.mssv, 'true');
+                    }
 
-$.ajax({
-    url: SCRIPT_URL,
-    method: "POST",
-    data: JSON.stringify({
-        action: "submitSurvey",
-        mssv: currentUser.mssv,
-        name: currentUser.name,
-        platform: finalSelection
-    }),
-    contentType: "text/plain;charset=utf-8",
-    success: function(response) {
-        // Thành công thì chuyển sang màn hình Success
-        document.getElementById('formState').style.display = 'none';
-        document.getElementById('successState').style.display = 'block';
-    },
-    error: function() {
-        alert("Lỗi kết nối máy chủ! Vui lòng thử lại.");
-        let btn = document.getElementById('btnSubmitSurvey');
-        btn.innerHTML = 'Gửi bình chọn';
-        btn.disabled = false;
-    }
-});
+                    // 2. Chuyển sang màn hình Success
+                    document.getElementById('formState').style.display = 'none';
+                    document.getElementById('successState').style.display = 'block';
+
+                    // ==========================================
+                    // 3. TỰ ĐỘNG CHUYỂN HƯỚNG QUAY LẠI TRANG CHÍNH 
+                    // (Đổi "appliedmathematics.html" thành tên file trang chủ của bạn)
+                    // ==========================================
+                    let countdown = 3;
+                    let successState = document.getElementById('successState');
+                    let redirectMsg = document.createElement('p');
+                    redirectMsg.className = "text-primary fw-bold mt-4";
+                    redirectMsg.innerHTML = `Đang quay lại trang chính sau <span id="redirCount">${countdown}</span> giây...`;
+                    successState.appendChild(redirectMsg);
+
+                    let timer = setInterval(function() {
+                        countdown--;
+                        document.getElementById('redirCount').innerText = countdown;
+                        if (countdown <= 0) {
+                            clearInterval(timer);
+                            window.location.href = "../appliedmathematics.html"; // Lùi 1 thư mục để về trang gốc
+                        }
+                    }, 1000);
+                },
+                error: function() {
+                    alert("Lỗi kết nối máy chủ! Vui lòng thử lại.");
+                    let btn = document.getElementById('btnSubmitSurvey');
+                    btn.innerHTML = 'Gửi bình chọn';
+                    btn.disabled = false;
+                }
+            });
         }
-// ==========================================
-// API LƯU KHẢO SÁT NỀN TẢNG
-// ==========================================
-
     </script>
 </body>
 </html>
