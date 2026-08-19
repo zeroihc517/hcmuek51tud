@@ -2790,11 +2790,11 @@ body.dark-mode .mini-dl-title {
 /* =========================================================
    FIX TRỆT ĐỂ LỖI DỒN LỀ TRÊN IPAD / TABLET / BÀN PHÍM XOAY
    ========================================================= */
-@media (max-width: 1199.98px) {
-    /* Khi Sidebar ẩn/thu gọn, bỏ margin-left 200px và căn giữa nội dung */
+@media (max-width: 991.98px) {
+    /* Khi Sidebar ẩn/thu gọn, bỏ margin-left và căn giữa nội dung */
     .main-content {
         margin-left: 0 !important;
-        padding: 75px 20px 70px 20px !important; /* Dành khoảng trống 75px cho mobile-header trên cùng */
+        padding: 75px 20px 70px 20px !important; 
         width: 100% !important;
         max-width: 100% !important;
     }

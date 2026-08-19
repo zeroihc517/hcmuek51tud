@@ -3477,13 +3477,13 @@ function renderDeadlinesOnNoticePage() {
             deadlineHtml += `
             <div class="mini-dl-capsule mb-2" onclick="jumpToTKBFromNotice('${d.dateStart}')" title="Nhấn để xem Lịch học tuần này">
                 <div class="d-flex align-items-center justify-content-between gap-2 px-3 py-2">
-                    <div class="d-flex align-items-center gap-2 overflow-hidden">
-                        <span class="mini-dl-emoji">${emoji}</span>
-                        <div class="text-truncate">
-                            <span class="fw-bold mini-dl-title">${cleanTitle}</span>
-                            <small class="mini-dl-time ms-2"><i class="fa-regular fa-clock me-1"></i>${d.duration || d.dateStart}</small>
-                        </div>
-                    </div>
+                   <div class="d-flex align-items-center gap-2 overflow-hidden">
+    <span class="mini-dl-emoji align-self-start mt-1">${emoji}</span> <!-- Căn emoji lên trên cùng nếu chữ nhiều dòng -->
+    <div class="text-wrap" style="word-break: break-word;"> <!-- Thay text-truncate bằng text-wrap -->
+        <span class="fw-bold mini-dl-title">${cleanTitle}</span>
+        <small class="mini-dl-time ms-2 d-inline-block mt-1 mb-1"><i class="fa-regular fa-clock me-1"></i>${d.duration || d.dateStart}</small>
+    </div>
+</div>
                     
                     <button class="btn btn-sm btn-mini-done flex-shrink-0" onclick="quickMarkDone('${d.sheetRowIndex}', event)" title="Đánh dấu đã hoàn thành">
                         <i class="fa-solid fa-check me-1"></i>Xong
