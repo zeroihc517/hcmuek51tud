@@ -311,15 +311,34 @@ body {
         <!-- BẢN TEXT THỨ NHẤT -->
         <div class="maintenance-text">
             <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> 
-            <strong>THÔNG BÁO HỆ THỐNG:</strong> Trang web sẽ được bảo trì định kỳ từ 00:00 đến 05:00 mỗi ngày để cập nhật, nâng cấp và cải thiện hệ thống. Trong thời gian này, web có thể tạm thời không truy cập được. Mọi người thông cảm và quay lại sau giờ bảo trì nhé! ❤️
+           ----------
+            <span class="spacer">✦</span>
+        </div>
+        <!-- BẢN TEXT THỨ NHẤT -->
+        <div class="maintenance-text">
+            <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> 
+            <strong>THÔNG BÁO 1:</strong> Trang web sẽ được bảo trì định kỳ từ 01:00 đến 05:00 mỗi ngày để cập nhật, nâng cấp và cải thiện hệ thống. Trong thời gian này, web có thể tạm thời không truy cập được. Mọi người thông cảm và quay lại sau giờ bảo trì nhé! ❤️
             <span class="spacer">✦</span>
         </div>
         <!-- BẢN TEXT THỨ HAI (Nối đuôi ngay lập tức để không bị ngắt quãng) -->
         <div class="maintenance-text">
             <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> 
-            <strong>THÔNG BÁO HỆ THỐNG:</strong> Trang web sẽ được bảo trì định kỳ từ 00:00 đến 05:00 mỗi ngày để cập nhật, nâng cấp và cải thiện hệ thống. Trong thời gian này, web có thể tạm thời không truy cập được. Mọi người thông cảm và quay lại sau giờ bảo trì nhé! ❤️
+           <strong>THÔNG BÁO 2:</strong> Thông thường, từ 11:00–16:00, Google Apps Script có thể xử lý chậm khiến website phản hồi chậm hoặc lag. Mong các bạn thông cảm, hạn chế thao tác liên tục và thử lại sau khi hệ thống ổn định.
             <span class="spacer">✦</span>
         </div>
+<div class="maintenance-text">
+            <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> 
+            <strong>THÔNG BÁO 1:</strong> Trang web sẽ được bảo trì định kỳ từ 01:00 đến 05:00 mỗi ngày để cập nhật, nâng cấp và cải thiện hệ thống. Trong thời gian này, web có thể tạm thời không truy cập được. Mọi người thông cảm và quay lại sau giờ bảo trì nhé! ❤️
+            <span class="spacer">✦</span>
+        </div>
+        <!-- BẢN TEXT THỨ HAI (Nối đuôi ngay lập tức để không bị ngắt quãng) -->
+        <div class="maintenance-text">
+            <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> 
+           <strong>THÔNG BÁO 2:</strong> Thông thường, từ 11:00–16:00, Google Apps Script có thể xử lý chậm khiến website phản hồi chậm hoặc lag. Mong các bạn thông cảm, hạn chế thao tác liên tục và thử lại sau khi hệ thống ổn định.
+            <span class="spacer">✦</span>
+        </div>
+
+
     </div>
 </div>
     <!-- Thư viện cần thiết -->
@@ -334,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentHour = new Date().getHours();
     
     // Kiểm tra: Nếu từ 20h tối  đến trước 5h sáng (0, 1, 2, 3, 4)
-    if (currentHour >= 20 || currentHour < 5) {
+    if (currentHour >= 20 || currentHour < 20) {
         // Tìm và hiển thị thanh thông báo
         let banner = document.getElementById('maintenanceBanner');
         if (banner) {

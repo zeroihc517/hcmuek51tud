@@ -2692,7 +2692,7 @@ $(document).ready(function() {
             const currentHour = now.getHours();
 
             // Khung giờ từ 0h (00:00) đến trước 5h sáng (05:59:59)
-            const isMaintenanceTime = (currentHour >= 0 && currentHour < 5);
+            const isMaintenanceTime = (currentHour >= 1 && currentHour < 5);
 
             if (isMaintenanceTime) {
                 if (!isMaintenancePage) {
