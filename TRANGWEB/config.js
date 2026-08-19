@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7cf5e41Mr080uNFgL4duXnakSNdjvb0u0BMS-yBsazlXdndfrF54lWfJR6o91gIw6/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwfb4NOLOttgiowOPsjWxfJhPkXHt4aSDYqD6g0Jnwk1VnPrX8uWCagMIx97wpNgb09/exec'; 
 
      let isAdmin = false;
         let currentSheetName = "";

@@ -1460,6 +1460,15 @@ if (localStorage.getItem('isAdmin') === 'true') {
 $(document).ready(function() {
     // Lấy dữ liệu từ localStorage (lưu ý không dùng 'let' để ghi đè thẳng vào biến toàn cục)
     currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+if (currentUser && !currentUser.isGuest) {
+        let isSurveyDone = localStorage.getItem('survey_done_' + currentUser.mssv);
+        let isAdminAcc = (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+        
+        if (!isSurveyDone && !isAdminAcc) {
+            window.location.href = "TUD_HK1_2627/khaosat01.html";
+            return; // Chặn đứng việc load trang chính
+        }
+    }
     if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
         isAdmin = false;
         localStorage.setItem('isAdmin', 'false');
