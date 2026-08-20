@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Làm bài tập Lý thuyết & Lập trình | Học nhóm APMA</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- CSS hệ thống -->
+    <link href="../../TRANGWEB/styleweb.css" rel="stylesheet">
+    <link href="baitap.css" rel="stylesheet">
+
+    <!-- CSS GIAO DIỆN CARDS & SKELETON -->
+    <style>
+        /* ================= CARD MENU DASHBOARD ================= */
+        .menu-dashboard {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+            border: 1px solid #f1f5f9;
+        }
+
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .topic-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            border: 1.5px solid #f1f5f9;
+            padding: 35px 20px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+        .topic-card:hover {
+            box-shadow: 0 15px 35px rgba(15, 76, 129, 0.15);
+            transform: translateY(-6px);
+            border-color: #bae6fd;
+        }
+
+        /* Hiệu ứng chấm bi (Dot Pattern) */
+        .topic-card::before, .topic-card::after {
+            content: '';
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background-image: radial-gradient(#bfdbfe 2.5px, transparent 2.5px);
+            background-size: 14px 14px;
+            opacity: 0.5;
+            z-index: 0;
+            border-radius: 50%;
+        }
+        .topic-card::before { bottom: -30px; left: -30px; }
+        .topic-card::after { top: -30px; right: -30px; }
+
+        .topic-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .topic-icon {
+            font-size: 48px;
+            color: #17548b;
+            margin-bottom: 18px;
+            display: inline-block;
+        }
+
+        .topic-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: #0f2c59;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            line-height: 1.4;
+        }
+
+        .topic-badge {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background-color: #0284c7;
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            z-index: 2;
+            letter-spacing: 0.5px;
+        }
+        .topic-badge.game { background-color: #ea580c; }
+        .topic-badge.theory { background-color: #16a34a; }
+        .topic-badge.collection { background-color: #8b5cf6; }
+
+        /* ================= SKELETON LOADING ================= */
+        .skeleton-card {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 12px;
+            animation: skeleton-pulse 1.2s infinite ease-in-out;
+        }
+
+        .skeleton-line {
+            height: 12px;
+            background: #cbd5e1;
+            border-radius: 6px;
+        }
+
+        @keyframes skeleton-pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body style="background-color: #f0f4f8; font-family: 'Inter', sans-serif;">
+
+  <div class="container-fluid px-3 px-md-5 py-5">
+    
+    <!-- ================= VIEW 0: MENU TỔNG CHÍNH ================= -->
+    <div id="menuView">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold" style="color: #0f2c59;">HỆ THỐNG BÀI TẬP & LUYỆN TẬP</h2>
+            <p class="text-muted fs-5">Học phần: <strong>Cấu trúc dữ liệu</strong></p>
+        </div>
+
+        <div class="menu-dashboard mx-auto" style="max-width: 1200px;">
+            <div class="topic-grid">
+                
+                <div class="topic-card" onclick="openTopic('Cây AVL', 'Lý thuyết: Cây AVL')">
+                    <div class="topic-badge theory">LÝ THUYẾT</div>
+                    <div class="topic-content">
+                        <div class="topic-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                        <div class="topic-title">LÝ THUYẾT<br>CÂY AVL</div>
+                    </div>
+                </div>
+
+                <div class="topic-card" onclick="openTopic('BT Lý thuyết Cây nhị phân', 'Lý thuyết: Cây nhị phân')">
+                    <div class="topic-badge theory">LÝ THUYẾT</div>
+                    <div class="topic-content">
+                        <div class="topic-icon"><i class="fa-solid fa-code-branch"></i></div>
+                        <div class="topic-title">LÝ THUYẾT<br>CÂY NHỊ PHÂN</div>
+                    </div>
+                </div>
+
+                <!-- Ô Gộp Minigame -->
+                <div class="topic-card" style="border: 2px solid #8b5cf6;" onclick="openSubMenu()">
+                    <div class="topic-badge collection">TỔNG HỢP</div>
+                    <div class="topic-content">
+                        <div class="topic-icon" style="color: #8b5cf6;"><i class="fa-solid fa-layer-group"></i></div>
+                        <div class="topic-title" style="color: #4c1d95;">TỔNG HỢP MINIGAME<br><span style="font-size: 11px; font-weight: 600; opacity: 0.8;">(Đề Thực Chiến & Demo)</span></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= VIEW 0.5: SUB-MENU (DANH SÁCH CÁC ĐỀ MINIGAME) ================= -->
+    <div id="subMenuView" class="d-none">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold" style="color: #0f2c59;">TỔNG HỢP MINIGAME</h2>
+            <p class="text-muted fs-5">Các đề thi thử, thực chiến và demo</p>
+        </div>
+
+        <div class="menu-dashboard mx-auto" style="max-width: 1200px;">
+            <button class="btn btn-light border fw-bold shadow-sm mb-4" onclick="closeSubMenu()" style="border-radius: 8px; color: #0f2c59;">
+                <i class="fa-solid fa-arrow-left me-2"></i> Trở về Menu Chính
+            </button>
+            
+            <div class="topic-grid">
+                
+                <div class="topic-card" onclick="openTopic('minigame ctdl đề 01', 'Minigame CTDL Đề 01')">
+                    <div class="topic-badge game">ĐỀ DEMO</div>
+                    <div class="topic-content">
+                        <div class="topic-icon"><i class="fa-solid fa-gamepad"></i></div>
+                        <div class="topic-title">MINIGAME CTDL<br>ĐỀ SỐ 01</div>
+                    </div>
+                </div>
+
+                <div class="topic-card" onclick="openTopic('minigame ctdl đề 02', 'Minigame CTDL Đề 02')">
+                    <div class="topic-badge game">ĐỀ DEMO</div>
+                    <div class="topic-content">
+                        <div class="topic-icon"><i class="fa-solid fa-puzzle-piece"></i></div>
+                        <div class="topic-title">MINIGAME CTDL<br>ĐỀ SỐ 02</div>
+                    </div>
+                </div>
+
+                <div class="topic-card" onclick="openTopic('minigame ctdl đề 03', 'Minigame CTDL Đề 03')">
+                    <div class="topic-badge game" style="background: #ef4444;">THỰC CHIẾN</div>
+                    <div class="topic-content">
+                        <div class="topic-icon"><i class="fa-solid fa-chess-knight"></i></div>
+                        <div class="topic-title">MINIGAME CTDL<br>ĐỀ SỐ 03</div>
+                    </div>
+                </div>
+
+                <div class="topic-card" onclick="openTopic('minigame ctdl đề 04', 'Minigame CTDL Đề 04')">
+                    <div class="topic-badge game" style="background: #ef4444;">THỰC CHIẾN</div>
+                    <div class="topic-content">
+                        <div class="topic-icon"><i class="fa-solid fa-cubes"></i></div>
+                        <div class="topic-title">MINIGAME CTDL<br>ĐỀ SỐ 04</div>
+                    </div>
+                </div>
+
+                <div class="topic-card" onclick="openTopic('minigame ctdl đề 05', 'Minigame CTDL Đề 05')">
+                    <div class="topic-badge game" style="background: #ef4444;">THỰC CHIẾN</div>
+                    <div class="topic-content">
+                        <div class="topic-icon"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="topic-title">MINIGAME CTDL<br>ĐỀ SỐ 05</div>
+                    </div>
+                </div>
+
+                <div class="topic-card" onclick="openTopic('minigame ctdl đề 06', 'Minigame CTDL Đề 06')">
+                    <div class="topic-badge game" style="background: #ef4444;">THỰC CHIẾN</div>
+                    <div class="topic-content">
+                        <div class="topic-icon"><i class="fa-solid fa-laptop-code"></i></div>
+                        <div class="topic-title">MINIGAME CTDL<br>ĐỀ SỐ 06</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= VIEW 1: DANH SÁCH BÀI TẬP CỦA CHƯƠNG ================= -->
+    <div id="homeView" class="d-none">
+        
+        <button class="btn btn-light border fw-bold shadow-sm mb-3" onclick="backToMenu()" style="border-radius: 8px; color: #0f2c59;">
+            <i class="fa-solid fa-arrow-left me-2"></i> Trở về Menu Chọn Đề
+        </button>
+
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; border-left: 6px solid #0f4c81 !important; background: #ffffff;">
+            <div class="card-body p-4">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <span class="badge mb-2 px-3 py-1.5 text-white" style="font-size: 13px; background-color: #0f4c81;" id="badgeCourseHome">Cấu trúc dữ liệu</span>
+                        <h3 class="fw-bold text-dark m-0" id="currentTopicTitle">Đang tải...</h3>
+                    </div>
+                    <span class="badge bg-light text-dark border fw-normal fs-6 px-3 py-2" id="labelTotalQuestions">0 câu</span>
+                </div>
+                
+                <!-- SKELETON LOADING -->
+                <div id="loadingQuestionsIndicator" class="py-4">
+                    <div class="d-flex align-items-center justify-content-center text-primary mb-4" style="font-weight: 600;">
+                        <i class="fa-solid fa-circle-notch fa-spin fs-5 me-2"></i> Đang đồng bộ dữ liệu bài tập...
+                    </div>
+                    <div class="home-question-grid">
+                        <div class="skeleton-card"><div class="skeleton-line" style="width: 40%;"></div><div class="skeleton-line" style="width: 70%;"></div></div>
+                        <div class="skeleton-card"><div class="skeleton-line" style="width: 45%;"></div><div class="skeleton-line" style="width: 60%;"></div></div>
+                        <div class="skeleton-card"><div class="skeleton-line" style="width: 35%;"></div><div class="skeleton-line" style="width: 80%;"></div></div>
+                        <div class="skeleton-card"><div class="skeleton-line" style="width: 50%;"></div><div class="skeleton-line" style="width: 65%;"></div></div>
+                        <div class="skeleton-card"><div class="skeleton-line" style="width: 40%;"></div><div class="skeleton-line" style="width: 70%;"></div></div>
+                        <div class="skeleton-card"><div class="skeleton-line" style="width: 45%;"></div><div class="skeleton-line" style="width: 60%;"></div></div>
+                        <div class="skeleton-card"><div class="skeleton-line" style="width: 35%;"></div><div class="skeleton-line" style="width: 80%;"></div></div>
+                        <div class="skeleton-card"><div class="skeleton-line" style="width: 50%;"></div><div class="skeleton-line" style="width: 65%;"></div></div>
+                    </div>
+                </div>
+
+                <div id="questionContentAreaError"></div>
+                <!-- Lưới danh sách các câu hỏi -->
+                <div class="home-question-grid" id="homeQuestionList"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================= VIEW 2: GIAO DIỆN BÀI LÀM VÀ CODE ================= -->
+    <div id="workingView" class="d-none">
+        
+        <button class="btn btn-light border fw-bold shadow-sm mb-3" onclick="goBackToHome()" style="border-radius: 8px; color: #0f2c59;">
+            <i class="fa-solid fa-arrow-left me-2"></i> Trở về danh sách câu hỏi
+        </button>
+
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; border-left: 6px solid #0f4c81 !important; background: #ffffff;">
+            <div class="card-body p-4">
+                <span class="badge mb-2 px-3 py-1.5 text-white" style="font-size: 13px; background-color: #0f4c81;" id="badgeCourse">Cấu trúc dữ liệu</span>
+                <h3 class="fw-bold text-dark m-0" id="titleMaBai">Bài tập: ---</h3>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- CỘT TRÁI ĐỀ BÀI -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; background-color: #ffffff;">
+                    <div class="card-header bg-light border-0 pt-3 px-4 d-flex align-items-center justify-content-between">
+                        <h6 class="fw-bold text-primary m-0"><i class="fa-solid fa-circle-question me-2"></i>Đề bài chi tiết</h6>
+                        <span class="badge bg-danger px-3 py-1" id="labelCurrentMaBai" style="font-size: 12px;">Mã bài: ---</span>
+                    </div>
+                    <div class="card-body p-4 fs-6 text-secondary" id="questionContentArea" style="line-height: 1.6;">
+                        Đang tải đề bài...
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI BÀI LÀM -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; overflow: hidden;" id="mainSubmissionCard">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center py-3 px-4" style="background-color: #0f4c81;">
+                        <h6 class="m-0 fw-bold" id="formSubmissionTitle"><i class="fa-solid fa-pen-to-square me-2"></i>Bài làm của sinh viên</h6>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small opacity-75">MSSV:</span>
+                            <input type="text" id="txtExerciseMSSV" class="form-control form-control-sm fw-bold border-0 text-center" style="width: 120px; background: rgba(255,255,255,0.2); color: #fff;" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2 mt-3 px-4">
+                        <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" onclick="toggleDrawingTool()">
+                            <i class="fa-solid fa-pencil text-primary me-1"></i> Bật bảng vẽ phác thảo (Bút chì)
+                        </button>
+                    </div>
+                    
+                    <div id="drawingContainer" class="card mx-4 p-3 mb-3 d-none border bg-light">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold small text-dark"><i class="fa-solid fa-paintbrush me-1"></i> Bảng vẽ phác thảo tự do:</span>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-dark" onclick="setDrawMode('pen')" title="Bút chì"><i class="fa-solid fa-pen"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDrawMode('eraser')" title="Cục tẩy"><i class="fa-solid fa-eraser"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="undoCanvas()" title="Hoàn tác"><i class="fa-solid fa-rotate-left"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="redoCanvas()" title="Làm lại"><i class="fa-solid fa-rotate-right"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearCanvas()">Xóa sạch</button>
+                                <button type="button" class="btn btn-sm btn-primary" onclick="insertDrawingToEditor()">Chèn vào bài làm</button>
+                            </div>
+                        </div>
+                        <div id="canvasWrapper" class="shadow-sm rounded" style="resize: vertical; overflow: hidden; min-height: 250px; border: 1px solid #cbd5e1; background: #ffffff; position: relative;">
+                            <canvas id="sketchCanvas" style="cursor: crosshair; display: block; width: 100%; height: 100%;"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark" style="font-size: 15px;">
+                                    <i class="fa-solid fa-align-left text-primary me-2"></i>1. TRẢ LỜI / LỜI GIẢI LÝ THUYẾT:
+                                </label>
+                                <textarea id="theoryEditor" class="form-control" rows="6" placeholder="Trình bày lời giải hoặc câu trả lời lý thuyết..."></textarea>
+                            </div>
+
+                            <div class="mb-4" id="codeSectionWrapper">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label fw-bold text-dark m-0" style="font-size: 15px;">
+                                        <i class="fa-solid fa-code text-success me-2"></i>2. MÃ NGUỒN CHƯƠNG TRÌNH (CODE):
+                                    </label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="small text-muted">Ngôn ngữ:</span>
+                                        <select id="selectLang" class="form-select form-select-sm fw-bold" style="width: 120px;" onchange="changeEditorLang()">
+                                            <option value="cpp">C / C++</option>
+                                            <option value="python">Python</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="exerciseCodeEditor" style="height: 320px; border: 1px solid #cbd5e1; border-radius: 8px;"></div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted small"><i class="fa-solid fa-circle-info me-1"></i>Bài làm sẽ được lưu trực tiếp vào Thảo luận.</span>
+                                <button type="button" class="btn btn-sm btn-outline-danger fw-bold d-none" id="btnCancelEditMode" onclick="cancelEditMode()">
+                                    <i class="fa-solid fa-xmark me-1"></i> Hủy sửa
+                                </button>
+                            </div>
+                            <button type="button" class="btn text-white fw-bold px-5 py-2.5 shadow-sm" style="background-color: #0f4c81; border-radius: 12px; font-size: 15px;" onclick="submitExerciseSolution()" id="btnSubmitExercise">
+                                <i class="fa-solid fa-paper-plane me-2"></i> Nộp bài & Đăng lên Thảo luận
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MỤC LỊCH SỬ BÀI NỘP CỦA TÔI -->
+        <div class="card border-0 shadow-sm" style="border-radius: 16px; background-color: #ffffff;">
+            <div class="card-header bg-light border-0 pt-3 px-4 d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold text-success m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử bài nộp của tôi</h6>
+                <button class="btn btn-sm btn-outline-success fw-bold" onclick="loadSubmissionHistory(true)" style="border-radius: 8px;">
+                    <i class="fa-solid fa-rotate-right me-1"></i> Làm mới lịch sử
+                </button>
+            </div>
+            <div class="card-body p-4" id="submissionHistoryContainer">
+                <div class="text-center text-muted py-3">
+                    <i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải lịch sử bài nộp...
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+    <!-- Thư viện JS -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
+    
+    <!-- Config -->
+    <script src="../../TRANGWEB/config.js"></script>
+
+    <!-- JS XỬ LÝ CHUYỂN ĐỔI VIEWS & LOGIC -->
+    <script>
+        window.EXERCISE_COURSE_NAME = "Cấu trúc dữ liệu";
+        
+        // Kiểm tra nếu URL có chứa ?de=...
+        document.addEventListener('DOMContentLoaded', function() {
+            let urlParams = new URLSearchParams(window.location.search);
+            let currentKeyword = urlParams.get('de');
+            
+            if (currentKeyword) {
+                let displayTitle = "Chủ đề: " + currentKeyword;
+                if (currentKeyword.toLowerCase().includes("minigame")) displayTitle = "Minigame CTDL";
+                if (currentKeyword.toLowerCase().includes("lý thuyết")) displayTitle = "Lý thuyết CTDL";
+                
+                openTopic(currentKeyword, displayTitle, false);
+            }
+        });
+
+        // ================= HÀM ĐIỀU HƯỚNG MỚI =================
+
+        // 1. Mở danh mục con (Minigames)
+        function openSubMenu() {
+            $('#menuView').addClass('d-none');
+            $('#subMenuView').removeClass('d-none');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 2. Đóng danh mục con, về menu chính
+        function closeSubMenu() {
+            $('#subMenuView').addClass('d-none');
+            $('#menuView').removeClass('d-none');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 3. Mở danh sách câu hỏi của một Đề/Chương
+        function openTopic(keyword, title, pushState = true) {
+            if (pushState) {
+                let newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?de=' + encodeURIComponent(keyword);
+                window.history.pushState({path: newUrl}, '', newUrl);
+            }
+
+            filterKeyword = keyword;
+            $('#currentTopicTitle').text(title);
+
+            // Ẩn toàn bộ menu
+            $('#menuView').addClass('d-none');
+            $('#subMenuView').addClass('d-none');
+            
+            // Hiện giao diện bài tập
+            $('#homeView').removeClass('d-none');
+            $('#workingView').addClass('d-none');
+            
+            // Reset & gọi hiệu ứng Skeleton loading
+            $('#homeQuestionList').html('');
+            $('#labelTotalQuestions').text('0 câu');
+            $('#questionContentAreaError').html('');
+            $('#loadingQuestionsIndicator').removeClass('d-none');
+            
+            loadQuestionsData();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 4. Trở về màn hình Menu từ Danh sách bài tập
+        function backToMenu() {
+            let newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+            window.history.pushState({path: newUrl}, '', newUrl);
+
+            $('#homeView').addClass('d-none');
+            
+            // Logic quay về đúng nơi đã xuất phát (Nếu là Minigame thì quay về SubMenu)
+            if (filterKeyword && filterKeyword.toLowerCase().includes("minigame")) {
+                $('#subMenuView').removeClass('d-none');
+            } else {
+                $('#menuView').removeClass('d-none');
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 5. Trở về danh sách câu hỏi từ màn hình làm bài (Ghi đè hàm của baitap.js)
+        function goBackToHome() {
+            $('#workingView').addClass('d-none');
+            $('#homeView').removeClass('d-none');
+            checkCompletedQuestions(); 
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+    
+    <script src="baitap.js"></script>
+    
+    <!-- MathJax -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../TRANGWEB/qa.js"></script>
+</body>
+</html>
