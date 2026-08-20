@@ -113,11 +113,16 @@
             color: white;
         }
         
-        .icon-level-1 { background: #3b82f6; } /* Xanh dương */
-        .icon-level-2 { background: #6366f1; } /* Indigo */
-        .icon-level-3 { background: #8b5cf6; } /* Tím */
-        .icon-level-4 { background: #1e3a8a; } /* Đen xanh - rất khuya */
-        .icon-other { background: #94a3b8; }   /* Xám */
+        /* Bổ sung dải màu cho các lựa chọn */
+        .icon-level-1 { background: #38bdf8; } /* Xanh lơ nhạt */
+        .icon-level-2 { background: #3b82f6; } /* Xanh dương */
+        .icon-level-3 { background: #6366f1; } /* Indigo */
+        .icon-level-4 { background: #8b5cf6; } /* Tím nhạt */
+        .icon-level-5 { background: #7c3aed; } /* Tím đậm */
+        .icon-level-6 { background: #1e3a8a; } /* Đen xanh */
+        .icon-level-7 { background: #0f172a; } /* Đen xám - rất khuya */
+        .icon-lazy    { background: #f59e0b; } /* Màu cam - Lười học */
+        .icon-other   { background: #94a3b8; } /* Xám */
 
         .option-text {
             font-size: 16px;
@@ -224,45 +229,86 @@
                     Khảo sát này giúp Ban quản trị điều chỉnh lịch bảo trì hệ thống hàng ngày, tránh làm gián đoạn thời gian học tập của bạn.
                 </div>
                 
-                <h5 class="fw-bold mb-4" style="line-height: 1.5;">Ban đêm bạn thường học và sử dụng hệ thống tới mấy giờ?</h5>
+                <h5 class="fw-bold mb-4" style="line-height: 1.5;">Ban đêm bạn thường học và kết thúc lúc mấy giờ?</h5>
                 
                 <form id="surveyForm">
-                    <label class="option-card" onclick="selectOption(this, 'Trước 22:00')">
-                        <input type="radio" name="nightStudyTime" value="Trước 22:00">
-                        <div class="app-icon icon-level-1"><i class="fa-solid fa-moon"></i></div>
+                    <label class="option-card" onclick="selectOption(this, 'Trước 20h')">
+                        <input type="radio" name="nightStudyTime" value="Trước 20h">
+                        <div class="app-icon icon-level-1"><i class="fa-solid fa-cloud-sun"></i></div>
                         <div class="option-text">
                             Nghỉ ngơi sớm
-                            <span class="option-subtext">Trước 22:00</span>
+                            <span class="option-subtext">Trước 20:00</span>
                         </div>
                         <div class="radio-circle"></div>
                     </label>
 
-                    <label class="option-card" onclick="selectOption(this, '22:00 - 00:00')">
-                        <input type="radio" name="nightStudyTime" value="22:00 - 00:00">
-                        <div class="app-icon icon-level-2"><i class="fa-regular fa-clock"></i></div>
+                    <label class="option-card" onclick="selectOption(this, '21h')">
+                        <input type="radio" name="nightStudyTime" value="21h">
+                        <div class="app-icon icon-level-2"><i class="fa-solid fa-moon"></i></div>
+                        <div class="option-text">
+                            Buổi tối thư giãn
+                            <span class="option-subtext">Khoảng 21:00</span>
+                        </div>
+                        <div class="radio-circle"></div>
+                    </label>
+
+                    <label class="option-card" onclick="selectOption(this, '22h')">
+                        <input type="radio" name="nightStudyTime" value="22h">
+                        <div class="app-icon icon-level-3"><i class="fa-regular fa-clock"></i></div>
                         <div class="option-text">
                             Học vừa phải
-                            <span class="option-subtext">Khoảng 22:00 đến 00:00 (Nửa đêm)</span>
+                            <span class="option-subtext">Khoảng 22:00</span>
                         </div>
                         <div class="radio-circle"></div>
                     </label>
 
-                    <label class="option-card" onclick="selectOption(this, '00:00 - 02:00')">
-                        <input type="radio" name="nightStudyTime" value="00:00 - 02:00">
-                        <div class="app-icon icon-level-3"><i class="fa-solid fa-mug-hot"></i></div>
+                    <label class="option-card" onclick="selectOption(this, '23h')">
+                        <input type="radio" name="nightStudyTime" value="23h">
+                        <div class="app-icon icon-level-4"><i class="fa-solid fa-book-open"></i></div>
+                        <div class="option-text">
+                            Học tập trung
+                            <span class="option-subtext">Khoảng 23:00</span>
+                        </div>
+                        <div class="radio-circle"></div>
+                    </label>
+
+                    <label class="option-card" onclick="selectOption(this, '0h')">
+                        <input type="radio" name="nightStudyTime" value="0h">
+                        <div class="app-icon icon-level-5"><i class="fa-solid fa-mug-hot"></i></div>
                         <div class="option-text">
                             Thức khá khuya
-                            <span class="option-subtext">Từ 00:00 đến 02:00 sáng</span>
+                            <span class="option-subtext">Khoảng 00:00 (Nửa đêm)</span>
                         </div>
                         <div class="radio-circle"></div>
                     </label>
 
-                    <label class="option-card" onclick="selectOption(this, 'Sau 02:00')">
-                        <input type="radio" name="nightStudyTime" value="Sau 02:00">
-                        <div class="app-icon icon-level-4"><i class="fa-solid fa-star-and-crescent"></i></div>
+                    <label class="option-card" onclick="selectOption(this, '1h')">
+                        <input type="radio" name="nightStudyTime" value="1h">
+                        <div class="app-icon icon-level-6"><i class="fa-regular fa-lightbulb"></i></div>
+                        <div class="option-text">
+                            Cày cuốc đêm
+                            <span class="option-subtext">Khoảng 01:00 sáng</span>
+                        </div>
+                        <div class="radio-circle"></div>
+                    </label>
+
+                    <label class="option-card" onclick="selectOption(this, '2h')">
+                        <input type="radio" name="nightStudyTime" value="2h">
+                        <div class="app-icon icon-level-7"><i class="fa-solid fa-star-and-crescent"></i></div>
                         <div class="option-text">
                             Cú đêm chính hiệu
-                            <span class="option-subtext">Sau 02:00 sáng</span>
+                            <span class="option-subtext">Khoảng 02:00 sáng</span>
+                        </div>
+                        <div class="radio-circle"></div>
+                    </label>
+
+                    <!-- Lựa chọn mới được thêm vào -->
+                    <label class="option-card" onclick="selectOption(this, 'Lười học lắm')">
+                        <input type="radio" name="nightStudyTime" value="Lười học lắm">
+                        <div class="app-icon icon-lazy"><i class="fa-solid fa-bed"></i></div>
+                        <div class="option-text">
+                            Lười học lắm
+                            <span class="option-subtext">Hầu như không học buổi tối</span>
                         </div>
                         <div class="radio-circle"></div>
                     </label>
@@ -270,7 +316,7 @@
                     <label class="option-card" onclick="selectOption(this, 'Khác')">
                         <input type="radio" name="nightStudyTime" value="Khác">
                         <div class="app-icon icon-other"><i class="fa-solid fa-ellipsis"></i></div>
-                        <span class="option-text">Khung giờ khác</span>
+                        <div class="option-text">Phương án khác</div>
                         <div class="radio-circle"></div>
                     </label>
 
@@ -374,7 +420,6 @@
 
                     // ==========================================
                     // 3. TỰ ĐỘNG CHUYỂN HƯỚNG QUAY LẠI TRANG CHÍNH 
-                    // (Đổi "appliedmathematics.html" thành tên file trang chủ của bạn)
                     // ==========================================
                     let countdown = 3;
                     let successState = document.getElementById('successState');
@@ -388,7 +433,7 @@
                         document.getElementById('redirCount').innerText = countdown;
                         if (countdown <= 0) {
                             clearInterval(timer);
-                            window.location.href = "../appliedmathematics.html"; // Lùi 1 thư mục để về trang gốc
+                            window.location.href = "../appliedmathematics.html"; 
                         }
                     }, 1000);
                 },
