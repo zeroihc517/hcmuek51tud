@@ -1107,17 +1107,19 @@
     
     <!-- Tạo một hàng chứa 2 cột con -->
     <div class="row g-2">
-        <!-- Cột Trái: Học phần chuyên môn -->
-        <div class="col-md-6">
-            <select id="qaTopicHocPhan" class="form-select p-2.5 fw-bold" style="border-radius: 8px; border-color: #cbd5e1; color: #334155;" onchange="handleTopicSelection('hocphan')">
-                <option value="">-- 📚 Học phần chuyên môn --</option>
-                <option value="MATH1417-Hình học vi phân">MATH1417-Hình học vi phân</option>
-                <option value="APMA1803-Cấu trúc đại số và ứng dụng">APMA1803-Cấu trúc đại số và ứng dụng</option>
-                <option value="MATH1817-Phương trình vi phân và đạo hàm riêng">MATH1817-Phương trình vi phân và đạo hàm riêng</option>
-                <option value="MATH1413-Độ đo và tích phân">MATH1413-Độ đo và tích phân</option>
-                <option value="APMA1817-Toán rời rạc">APMA1817-Toán rời rạc</option>
-            </select>
-        </div>
+       <!-- Cột Trái: Học phần chuyên môn -->
+<div class="col-md-6">
+    <div class="form-control p-2.5 fw-bold d-flex justify-content-between align-items-center shadow-sm"
+         style="border-radius: 8px; border-color: #cbd5e1; color: #334155; cursor: pointer; background: #f8fafc; transition: 0.2s;"
+         onclick="openQaCourseModal()"
+         onmouseover="this.style.background='#eff6ff'; this.style.borderColor='#93c5fd';"
+         onmouseout="this.style.background='#f8fafc'; this.style.borderColor='#cbd5e1';">
+        <span id="qaSelectedCourseText" class="text-truncate"><i class="fa-solid fa-book-open text-primary me-2"></i>-- 📚 Chọn học phần chuyên môn --</span>
+        <i class="fa-solid fa-magnifying-glass text-muted"></i>
+    </div>
+    <!-- Input ẩn lưu giá trị thực sự để hàm sendQuestion() đọc được -->
+    <input type="hidden" id="qaTopicHocPhan" value="">
+</div>
         
         <!-- Cột Phải: Hỗ trợ & Học vụ -->
         <div class="col-md-6">
@@ -1763,7 +1765,30 @@
     <div class="modal fade" id="insertRowModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-success text-white"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-plus me-2"></i>Chèn nội dung xuống dưới hàng này</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="insertCol1" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="insertCol2" class="form-control" rows="3"></textarea></div><div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="insertCol3" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="insertCol4" class="form-control"></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-success px-4 fw-bold" onclick="saveInsertRow()" id="btnSaveInsertRow">Chèn nội dung</button></div></div></div></div>
     <div class="modal fade" id="editRowModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa nội dung</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Cột 1</label><input type="text" id="editCol1" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 2</label><textarea id="editCol2" class="form-control" rows="3"></textarea></div><div class="mb-3"><label class="form-label fw-bold">Cột 3</label><input type="text" id="editCol3" class="form-control"></div><div class="mb-3"><label class="form-label fw-bold">Cột 4</label><input type="text" id="editCol4" class="form-control"></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditRow()" id="btnSaveEditRow">Lưu thay đổi</button></div></div></div></div>
     <div class="modal fade" id="editQAModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content border-0 shadow"><div class="modal-header bg-warning text-dark"><h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa câu trả lời Q&A</h6><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body p-4"><div class="mb-3"><label class="form-label fw-bold">Nội dung câu trả lời</label><textarea id="editQAText" class="form-control" rows="6"></textarea></div></div><div class="modal-footer border-0"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button><button type="button" class="btn btn-warning px-4 fw-bold" onclick="saveEditQA()" id="btnSaveEditQA">Lưu thay đổi</button></div></div></div></div>
-
+<!-- MODAL CHỌN HỌC PHẦN Q&A -->
+<div class="modal fade" id="qaCourseSelectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-layer-group me-2"></i>Chọn Học Phần Chuyên Môn</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="background-color: #f1f5f9;">
+                <!-- Thanh tìm kiếm dính (sticky) -->
+                <div class="p-3 border-bottom shadow-sm" style="background: #ffffff; position: sticky; top: 0; z-index: 10;">
+                    <div class="input-group" style="height: 45px;">
+                        <span class="input-group-text bg-light border-end-0" style="border-radius: 12px 0 0 12px;"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" id="qaSearchCourseInput" class="form-control border-start-0 ps-0 fw-bold bg-light" placeholder="Nhập mã hoặc tên môn học để tìm nhanh..." onkeyup="filterQaCourseModal()" style="border-radius: 0 12px 12px 0; outline: none; box-shadow: none;">
+                    </div>
+                </div>
+                <!-- Danh sách môn học -->
+                <div id="qaCourseModalList" class="p-4" style="max-height: 60vh; overflow-y: auto;">
+                    <!-- JS sẽ tự động đổ các thẻ Card môn học vào đây -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
   <!-- BẢNG ĐỒNG BỘ HỌC PHẦN HỆ THỐNG -->
 <div class="modal fade" id="systemTkbModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen"> 
