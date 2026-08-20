@@ -28,12 +28,14 @@ function loginStudent() {
             localStorage.removeItem('isAdmin');
             localStorage.setItem('lastActiveTime', Date.now().toString());
 
-            // --- BẮT ĐẦU: NẠP DỮ LIỆU KHẢO SÁT TỪ MÁY CHỦ VÀO TRÌNH DUYỆT KHÁC ---
+// --- BẮT ĐẦU: NẠP DỮ LIỆU KHẢO SÁT TỪ MÁY CHỦ VÀO TRÌNH DUYỆT KHÁC ---
             if (response.isSurveyDone === true) {
                 localStorage.setItem('survey_done_' + response.mssv, 'true');
+            } else {
+                // Nếu Server báo chưa làm (hoặc dữ liệu đã bị Admin xóa), lập tức xóa cờ trong bộ nhớ
+                localStorage.removeItem('survey_done_' + response.mssv);
             }
             // ----------------------------------------------------------------------
-
             let isSurveyDone = localStorage.getItem('survey_done_' + response.mssv);
             let isAdminAcc = (response.mssv === "51.01.108.008" || response.mssv === "5101108008");
 

@@ -1445,9 +1445,23 @@ checkNewDatLichGlobal();
             dataType: "json",
             success: function(res) {
                 if (res && res.success) {
-		if (res.name) {
-        currentUser.name = res.name;
-    }
+                    // --- BẮT ĐẦU KIỂM TRA ÉP BUỘC KHẢO SÁT ---
+                    let isAdminAcc = (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+                    
+                    if (res.isSurveyDone === false && !isAdminAcc) {
+                        // Nếu server báo chưa làm (do Admin xóa), thu hồi quyền và đẩy về trang khảo sát ngay lập tức
+                        localStorage.removeItem('survey_done_' + currentUser.mssv);
+                        window.location.href = "TUD_HK1_2627/khaosat01.html";
+                        return; // Ngắt hàm, không render các giao diện khác nữa
+                    } else if (res.isSurveyDone === true) {
+                        // Khôi phục cờ nếu lỡ bị mất
+                        localStorage.setItem('survey_done_' + currentUser.mssv, 'true');
+                    }
+                    // --- KẾT THÚC KIỂM TRA ---
+
+                    if (res.name) {
+                        currentUser.name = res.name;
+                    }
                     // Cập nhật lại bộ nhớ đệm nội bộ với dữ liệu mới nhất
                     currentUser.chuyenNganh = res.chuyenNganh;
                     currentUser.khoa = res.khoa;
