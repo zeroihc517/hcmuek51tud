@@ -1487,37 +1487,56 @@ if (localStorage.getItem('isAdmin') === 'true') {
     }
 }
 $(document).ready(function() {
-    // Lấy dữ liệu từ localStorage (lưu ý không dùng 'let' để ghi đè thẳng vào biến toàn cục)
+    // Lấy dữ liệu từ localStorage
     currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-if (currentUser && !currentUser.isGuest) {
+    
+    if (currentUser && !currentUser.isGuest) {
         let isSurveyDone = localStorage.getItem('survey_done_' + currentUser.mssv);
         let isAdminAcc = (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
         
         if (!isSurveyDone && !isAdminAcc) {
-            window.location.href = "TUD_HK1_2627/khaosat01.html";
-            return; // Chặn đứng việc load trang chính
+            // TẠO CHỐT CHẶN NGẦM: Tận dụng màn hình Loading gốc của web, không vẽ thêm gì cả
+            $.ajax({
+                url: SCRIPT_URL + "?action=getUserProfile&mssv=" + currentUser.mssv,
+                method: "GET",
+                dataType: "json",
+                success: function(res) {
+                    if (res && res.success && res.isSurveyDone) {
+                        // Nếu Google Sheets xác nhận ĐÃ LÀM -> Lưu vào máy
+                        localStorage.setItem('survey_done_' + currentUser.mssv, 'true');
+                        // CHẠY THẲNG VÀO WEB, KHÔNG RELOAD TRANG NỮA ĐỂ TẠO CẢM GIÁC SIÊU MƯỢT
+                        initGlobalApp(); 
+                    } else {
+                        // Nếu CHƯA LÀM -> Đá sang form khảo sát
+                        window.location.href = "TUD_HK1_2627/khaosat01.html";
+                    }
+                },
+                error: function() {
+                    window.location.href = "TUD_HK1_2627/khaosat01.html";
+                }
+            });
+            return; // Chặn đứng việc load trang chính để chờ kết quả
         }
     }
+    
     if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
         isAdmin = false;
         localStorage.setItem('isAdmin', 'false');
         
-        // Mở sẵn các nút giao diện Admin
         $('#btnAdminLoginToggle').html('<i class="fa-solid fa-unlock text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Dành cho bản quản trị').css('color', 'var(--accent-red)');
         $('#btnManageCategories').removeClass('d-none');
         $('#adminDatabaseLink').removeClass('d-none');
         $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex');
         $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
     }
+    
     if (!currentUser) {
-        // 1. Tạo tài khoản Khách ảo để web có thể chạy được các tính năng xem
         currentUser = {
             mssv: "Khách",
             name: "Khách",
             isGuest: true
         };
 
-        // 2. Vẫn giữ nguyên logic của Web dự phòng: Mở Modal đăng nhập
         if (window.location.pathname.includes("webduphong")) {
             let modalEl = document.getElementById('userAuthModal');
             if (modalEl) {
@@ -1527,15 +1546,13 @@ if (currentUser && !currentUser.isGuest) {
             }
         } 
         
-        // Bỏ lệnh window.location.href = "login.html"; ở đây để Khách không bị văng
-        // 3. Khởi chạy app với tư cách Khách
         initGlobalApp();
-        
     } else { 
-        // Nếu đã đăng nhập thì khởi chạy bình thường
         initGlobalApp(); 
     }
-});renderUserInfo
+});
+
+renderUserInfo
 
 // ==========================================
 // TÍNH NĂNG TÍNH ĐIỂM GPA (BẢN CHUẨN CUỐI CÙNG)

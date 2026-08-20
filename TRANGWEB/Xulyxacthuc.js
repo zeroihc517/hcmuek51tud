@@ -21,21 +21,28 @@ function loginStudent() {
                 khoa: response.khoa,
                 khoaHoc: response.khoaHoc,
                 nhom: response.nhom,
-		avatar: response.avatar || ""
+                avatar: response.avatar || ""
             };
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-		isAdmin = false;
-localStorage.removeItem('isAdmin');
+            isAdmin = false;
+            localStorage.removeItem('isAdmin');
             localStorage.setItem('lastActiveTime', Date.now().toString());
-let isSurveyDone = localStorage.getItem('survey_done_' + response.mssv);
-let isAdminAcc = (response.mssv === "51.01.108.008" || response.mssv === "5101108008");
 
-// Nếu chưa làm khảo sát VÀ KHÔNG PHẢI là Admin thì bắt buộc chuyển hướng
-if (!isSurveyDone && !isAdminAcc) {
-    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang chuyển đến bài khảo sát...');
-    window.location.href = "TUD_HK1_2627/khaosat01.html";
-    return; // Ngắt hàm, không load trang chính nữa
-}
+            // --- BẮT ĐẦU: NẠP DỮ LIỆU KHẢO SÁT TỪ MÁY CHỦ VÀO TRÌNH DUYỆT KHÁC ---
+            if (response.isSurveyDone === true) {
+                localStorage.setItem('survey_done_' + response.mssv, 'true');
+            }
+            // ----------------------------------------------------------------------
+
+            let isSurveyDone = localStorage.getItem('survey_done_' + response.mssv);
+            let isAdminAcc = (response.mssv === "51.01.108.008" || response.mssv === "5101108008");
+
+            // Nếu chưa làm khảo sát VÀ KHÔNG PHẢI là Admin thì bắt buộc chuyển hướng
+            if (!isSurveyDone && !isAdminAcc) {
+                btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang chuyển đến bài khảo sát...');
+                window.location.href = "TUD_HK1_2627/khaosat01.html";
+                return; // Ngắt hàm, không load trang chính nữa
+            }
             let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
             savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
             savedAccounts.unshift({ mssv: response.mssv, name: response.name });
