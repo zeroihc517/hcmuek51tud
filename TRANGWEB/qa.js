@@ -1736,3 +1736,144 @@ window.deleteGroupLinkDirect = function(rowIndex) {
         alert("Lỗi kết nối máy chủ!");
     });
 };
+function loadDynamicHocPhanQA() {
+    let filterTopic = $('#filterQATopic'); // Đổ cho bộ lọc tìm kiếm danh sách Q&A bên dưới
+    let modalList = $('#qaCourseModalList');
+    
+    if (typeof SYSTEM_COURSE_DATABASE !== 'undefined') {
+        let groupedCourses = {};
+        
+        // Gom nhóm theo Học kỳ
+        SYSTEM_COURSE_DATABASE.forEach(course => {
+            let groupKey = `${course.hocKy} (${course.namHoc})`;
+            if (!groupedCourses[groupKey]) groupedCourses[groupKey] = [];
+            if (!groupedCourses[groupKey].some(c => c.code === course.code)) {
+                groupedCourses[groupKey].push(course);
+            }
+        });
+        
+        let modalHtml = '';
+        let optionsHtml = '';
+        
+        // Vẽ giao diện bên trong Modal
+        for (let group in groupedCourses) {
+            optionsHtml += `<optgroup label="🎓 ${group}">`;
+            
+            // Header của từng Học kỳ
+            modalHtml += `<div class="qa-course-group mb-4">`;
+            modalHtml += `<h6 class="fw-bold text-primary border-bottom pb-2 mb-3" style="font-size: 15px; text-transform: uppercase;"><i class="fa-solid fa-caret-right me-2"></i>${group}</h6>`;
+            modalHtml += `<div class="row g-3">`;
+            
+            groupedCourses[group].forEach(course => {
+                let optionValue = `${course.code}-${course.name}`;
+                optionsHtml += `<option value="${optionValue}">${optionValue}</option>`;
+                
+                // Thẻ Môn học tuyệt đẹp (Card UI)
+                modalHtml += `
+                <div class="col-md-6 qa-course-item">
+                    <div class="p-3 border rounded shadow-sm d-flex align-items-center gap-3 h-100" 
+                         style="cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); background: #ffffff;"
+                         onclick="selectQaCourse('${optionValue}')"
+                         onmouseover="this.style.background='#f0f7ff'; this.style.borderColor='#0f4c81'; this.style.transform='translateY(-2px)';"
+                         onmouseout="this.style.background='#ffffff'; this.style.borderColor='#dee2e6'; this.style.transform='translateY(0)';">
+                        <div class="bg-light text-primary rounded d-flex align-items-center justify-content-center fw-bold font-monospace shadow-sm" style="min-width: 85px; height: 40px; font-size: 13.5px; border: 1px dashed #cbd5e1;">
+                            ${course.code}
+                        </div>
+                        <div class="fw-bold text-dark flex-grow-1" style="font-size: 14.5px; line-height: 1.4;">
+                            ${course.name}
+                        </div>
+                    </div>
+                </div>`;
+            });
+            
+            modalHtml += `</div></div>`;
+            optionsHtml += `</optgroup>`;
+        }
+        
+        modalList.html(modalHtml);
+        
+        // Tạo Optgroup Lọc Q&A
+        let supportHtml = `
+            <optgroup label="📌 Hỗ trợ & Học vụ">
+                <option value="Hệ thống">Hệ thống</option>
+                <option value="Đăng ký học phần">Đăng ký học phần</option>
+                <option value="Chương trình đào tạo">Chương trình đào tạo</option>
+                <option value="Tốt nghiệp">Tốt nghiệp</option>
+                <option value="Kết quả học tập">Kết quả học tập</option>
+                <option value="Kết quả rèn luyện">Kết quả rèn luyện</option>
+                <option value="Sự kiện">Sự kiện</option>
+                <option value="Khác">Các chủ đề khác</option>
+            </optgroup>`;
+        filterTopic.html('<option value="">-- Tất cả chủ đề --</option>' + optionsHtml + supportHtml);
+    }
+}
+
+// Hàm mở Modal Khung chọn môn
+window.openQaCourseModal = function() {
+    $('#qaSearchCourseInput').val(''); // Reset thanh tìm kiếm
+    filterQaCourseModal(); // Reset bộ lọc hiện tất cả
+    $('#qaCourseSelectModal').modal('show');
+    setTimeout(() => $('#qaSearchCourseInput').focus(), 400);
+};
+
+// Hàm khi Sinh viên bấm chọn 1 môn học trong khung
+window.selectQaCourse = function(courseValue) {
+    // 1. Cập nhật chữ hiển thị
+    $('#qaSelectedCourseText').html(`<i class="fa-solid fa-check-circle text-success me-2"></i><span class="text-primary">${courseValue}</span>`);
+    // 2. Gán giá trị vào Input ẩn
+    $('#qaTopicHocPhan').val(courseValue);
+    
+    // 3. Reset lại ô "Hỗ trợ & Học vụ" nếu nó đang được chọn
+    $('#qaTopicHoTro').val(''); 
+    $('#qaTopicOther').addClass('d-none').val('');
+    
+    // 4. Đóng khung
+    $('#qaCourseSelectModal').modal('hide');
+};
+
+// Lọc môn học trực tiếp bằng gõ phím bên trong Khung (Cực mượt)
+window.filterQaCourseModal = function() {
+    let keyword = $('#qaSearchCourseInput').val().toLowerCase().trim();
+    
+    $('.qa-course-group').each(function() {
+        let hasVisibleItem = false;
+        
+        $(this).find('.qa-course-item').each(function() {
+            let text = $(this).text().toLowerCase();
+            if (text.includes(keyword)) {
+                $(this).removeClass('d-none');
+                hasVisibleItem = true;
+            } else {
+                $(this).addClass('d-none');
+            }
+        });
+        
+        // Ẩn luôn Tiêu đề học kỳ nếu không có môn nào bên trong khớp với từ khóa
+        if (hasVisibleItem) {
+            $(this).removeClass('d-none');
+        } else {
+            $(this).addClass('d-none');
+        }
+    });
+};
+
+// Cập nhật lại logic chọn ô "Hỗ trợ" thì Reset ô "Học phần"
+window.handleTopicSelection = function(type) {
+    if (type === 'hotro') {
+        // Đã xóa giá trị thật
+        $('#qaTopicHocPhan').val(''); 
+        // Đổi màu hiển thị của ô chọn giả lập về mặc định
+        $('#qaSelectedCourseText').html('<i class="fa-solid fa-book-open text-primary me-2"></i>-- 📚 Chọn học phần chuyên môn --');
+        
+        let selected = $('#qaTopicHoTro').val();
+        if (selected === 'Khác') {
+            $('#qaTopicOther').removeClass('d-none').focus();
+        } else {
+            $('#qaTopicOther').addClass('d-none').val('');
+        }
+    }
+};
+
+$(document).ready(function() {
+    loadDynamicHocPhanQA();
+});
