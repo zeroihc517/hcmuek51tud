@@ -265,9 +265,9 @@ function renderSidebarCategories() {
     }
     // 1. Cấu hình phân nhóm danh mục (Bạn tự thêm tên Sheet thực tế vào mảng tương ứng)
     const categoryGroups = {
-	'HK1 - Năm 2': ['Hình học vi phân', 'Cấu trúc đại số', 'Cấu trúc dữ liệu', 'Lập trình hướng đối tượng', 'Tư tưởng Hồ Chí Minh'], 
-	'Năm 1': ["Năm 1", "Đại số tuyến tính"],
 	'HK2 - Năm 2': ["Độ đo và tích phân", "Toán rời rạc", "Lập trình Python", "Phương trình vi phân và đạo hàm riêng", "Trí tuệ nhân tạo", "Lịch sử Đảng"],
+	'HK1 - Năm 2': ['Hình học vi phân', 'Cấu trúc đại số', 'Cấu trúc dữ liệu', 'Lập trình hướng đối tượng', 'Tư tưởng Hồ Chí Minh'], 
+	'Năm 1': ["Năm 1"],
     'Khác': [],
     };
 
@@ -327,12 +327,41 @@ for (const [groupName, html] of Object.entries(groupHtml)) {
 
        
 
-        function fetchAndRenderCategories() {
-            $('#dynamicCourseList').html('<span class="text-muted small px-2">Đang tải danh sách...</span>');
-            $.ajax({ url: SCRIPT_URL + "?action=getHocPhanList", method: "GET", dataType: "json",
-                success: function(list) { globalCategories = list; renderSidebarCategories(); if ($('#manageCategoryModal').is(':visible')) { renderCategoryManager(); } }
-            });
-        }
+      function fetchAndRenderCategories() {
+    // 1. Danh sách gõ sẵn (Load tức thì)
+    let hardcodedCategories = [ 
+        'Hình học vi phân', 
+        'Cấu trúc đại số', 
+        'Cấu trúc dữ liệu', 
+        'Lập trình hướng đối tượng', 
+        'Tư tưởng Hồ Chí Minh',
+        'Năm 1',
+    ];
+
+    // 2. Chỉ khi nào Admin bật "Dành cho bản quản trị" (isAdmin = true) mới load từ Sheet
+    if (isAdmin) {
+        $('#dynamicCourseList').html('<span class="text-muted small px-2">Đang tải toàn bộ dữ liệu...</span>');
+        $.ajax({ 
+            url: SCRIPT_URL + "?action=getHocPhanList", 
+            method: "GET", 
+            dataType: "json",
+            success: function(list) { 
+                globalCategories = list; // Cập nhật mảng thành danh sách đầy đủ
+                renderSidebarCategories(); 
+                if ($('#manageCategoryModal').is(':visible')) { renderCategoryManager(); } 
+            },
+            error: function() {
+                globalCategories = hardcodedCategories;
+                renderSidebarCategories();
+            }
+        });
+    } else {
+        // Trạng thái bình thường: Sinh viên, Khách, và Admin chưa bật chế độ quản trị
+        globalCategories = hardcodedCategories;
+        renderSidebarCategories(); 
+        if ($('#manageCategoryModal').is(':visible')) { renderCategoryManager(); }
+    }
+}
 
 function generateChessLoaderHTML() {
     let pieces = ['fa-chess-knight', 'fa-chess-pawn', 'fa-chess-rook', 'fa-chess-bishop', 'fa-chess-queen', 'fa-chess-king'];

@@ -191,7 +191,7 @@ function verifyAdmin() {
         $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex');
         $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
         
-        renderSidebarCategories(); 
+        fetchAndRenderCategories();
         if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
         if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); } 
 	pingOnlineStatus();
@@ -208,7 +208,7 @@ function openAdminModal() {
         $('#btnAdminLoginToggle').html('<i class="fa-solid fa-user-shield text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Dành cho bản quản trị').css('color', '#e61d4a');
         $('#btnManageCategories').addClass('d-none');
         
-        renderSidebarCategories(); 
+        fetchAndRenderCategories();
         
         if (!currentUser || (currentUser.mssv !== "51.01.108.008" && currentUser.mssv !== "5101108008")) {
             $('#adminDatabaseLink').addClass('d-none');
@@ -235,7 +235,7 @@ function openAdminModal() {
             $('#btnAdminManageUsers').removeClass('d-none').addClass('d-flex');
             $('#btnAdminMasterTkb').removeClass('d-none').addClass('d-flex');
             
-            renderSidebarCategories(); 
+            fetchAndRenderCategories();
             if (!$('#qaSection').hasClass('d-none')) { loadQAData(); } 
             if (!$('#courseSection').hasClass('d-none')) { loadDataByHocPhan(currentSheetName); } 
             pingOnlineStatus();
