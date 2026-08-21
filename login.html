@@ -8,273 +8,335 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="TRANGWEB/styleweb.css" rel="stylesheet">
-   <style>
+<style>
+/* =========================================================
+   NỀN HỆ THỐNG (NEON TỐI & LƯỚI TOÁN HỌC)
+========================================================= */
+:root {
+    --bg-dark: #030812;
+    --neon-blue: rgba(56, 189, 248, 0.18);
+    --neon-orange: rgba(245, 158, 11, 0.15);
+    --grid-line: rgba(255, 255, 255, 0.03);
+    --pyramid-glow: #b24bf3;
+}
+
 body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
+    margin: 0;
     position: relative;
     overflow-x: hidden;
-
-    /* Thêm 3 lớp ảnh background: 2 ảnh bên trái (trên & dưới) + 1 ảnh bên phải */
+    background-color: var(--bg-dark);
     background-image: 
-        /* 1. Lớp phủ dải màu làm dịu nền */
-        linear-gradient(
-            to right, 
-            rgba(15, 23, 42, 0.65) 0%, 
-            rgba(15, 23, 42, 0.45) 48%, 
-            rgba(15, 23, 42, 0.10) 55%, 
-            rgba(255, 255, 255, 0.05) 100%
-        ),
-        /* 2. Ảnh góc TRÊN - TRÁI */
-        url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=2070&auto=format&fit=crop'),
-        /* 3. Ảnh góc DƯỚI - TRÁI (Thay link nếu muốn ảnh khác) */
-        url('https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop'),
-        /* 4. Ảnh BÊN PHẢI (Google Drive) */
-        url('https://lh3.googleusercontent.com/d/17akZmGaju-Rt_UnRJ2zfZPTJpNIlOAZ8');
-
-    /* Vị trí tương ứng: Lớp phủ, Trái Trên, Trái Dưới, Phải */
-    background-position: left center, left top, left bottom, right center;
-
-    /* Kích thước tương ứng: Lớp phủ full, Trái Trên (50% x 50%), Trái Dưới (50% x 50%), Phải (50% x 100%) */
-    background-size: cover, 50% 50%, 50% 50%, 50% 100%;
-
-    background-repeat: no-repeat;
+        radial-gradient(circle at 50% 50%, transparent 20%, var(--bg-dark) 100%),
+        radial-gradient(circle at 15% 35%, var(--neon-blue) 0%, transparent 50%),
+        radial-gradient(circle at 85% 65%, var(--neon-orange) 0%, transparent 50%),
+        linear-gradient(var(--grid-line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px;
     background-attachment: fixed;
 }
 
+/* =========================================================
+   KHUNG ANIMATION BÊN TRÁI (KIM TỰ THÁP & CODE)
+========================================================= */
+.left-visual-container {
+    position: absolute;
+    left: 8%;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 1;
+    width: 320px;
+}
 
-        .login-card-wrapper {
-            position: relative;
-            z-index: 2;
-            max-width: 520px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(15, 76, 129, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-            animation: fadeInCard 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+.pyramid-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+.pyramid-row {
+    display: flex;
+    justify-content: center;
+}
+.pyramid-box {
+    width: 45px;
+    height: 45px;
+    border: 2px solid var(--pyramid-glow);
+    background: transparent;
+    margin: -1px;
+    opacity: 0.1;
+    transition: all 0.3s ease;
+}
+.pyramid-box.glow {
+    opacity: 1;
+    background: #ffffff;
+    box-shadow: 0 0 15px var(--pyramid-glow), inset 0 0 10px var(--pyramid-glow);
+    border-color: #ffffff;
+}
 
-        @keyframes fadeInCard {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+.typing-code-box {
+    width: 100%;
+    background: rgba(10, 15, 30, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    backdrop-filter: blur(5px);
+}
+.typing-code-box .window-controls {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+.typing-code-box .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+}
+.dot-red { background: #ff5f56; }
+.dot-yellow { background: #ffbd2e; }
+.dot-green { background: #27c93f; }
 
-        .login-header-modern {
-            padding: 35px 30px 15px;
-            text-align: center;
-        }
+#code-content {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    color: #38bdf8;
+    white-space: pre-wrap;
+    margin: 0;
+    line-height: 1.5;
+}
+.cursor {
+    display: inline-block;
+    width: 8px;
+    height: 15px;
+    background-color: #38bdf8;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+}
+@keyframes blink { 50% { opacity: 0; } }
 
-        .login-logo-circle {
-            width: 70px;
-            height: 70px;
-            background: linear-gradient(135deg, #154c79, #0f4c81);
-            color: #ffffff;
-            font-size: 30px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 18px;
-            box-shadow: 0 8px 20px rgba(21, 76, 121, 0.25);
-            animation: floatIcon 3.5s ease-in-out infinite;
-        }
+@media (max-width: 1100px) {
+    .left-visual-container { display: none; }
+}
 
-        @keyframes floatIcon {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-6px) rotate(2deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
-        }
+/* =========================================================
+   FORM ĐĂNG NHẬP
+========================================================= */
+.login-card-wrapper {
+    position: relative;
+    z-index: 2;
+    max-width: 480px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(15, 76, 129, 0.15);
+    animation: fadeInCard 0.8s ease;
+}
+@keyframes fadeInCard {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 
-        .form-control-modern {
-            background: #f8fafc !important;
-            border: 1.5px solid #cbd5e1 !important;
-            color: #1e293b !important;
-            border-radius: 14px !important;
-            padding: 14px 16px 14px 48px !important;
-            font-size: 15px !important;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
+.login-header-modern { padding: 35px 30px 15px; text-align: center; }
+.login-logo-circle {
+    width: 70px; height: 70px;
+    background: #154c79; /* Màu icon giống trong ảnh mẫu */
+    color: #ffffff; font-size: 30px;
+    border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 18px;
+    box-shadow: 0 8px 20px rgba(21, 76, 121, 0.25);
+    animation: floatIcon 3.5s ease-in-out infinite;
+}
+@keyframes floatIcon {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-6px); }
+}
 
-        .form-control-modern::placeholder {
-            color: #94a3b8;
-        }
+.form-control-modern {
+    background: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    border-radius: 14px !important;
+    padding: 14px 16px 14px 48px !important;
+    font-size: 15px !important;
+    font-weight: 500;
+}
+.form-control-modern:focus {
+    border-color: #154c79 !important;
+    box-shadow: 0 0 0 4px rgba(21, 76, 121, 0.1) !important;
+}
 
-        .form-control-modern:focus {
-            border-color: #154c79 !important;
-            background: #ffffff !important;
-            box-shadow: 0 0 0 4px rgba(21, 76, 121, 0.1) !important;
-        }
+.input-group-icon { position: relative; }
+.input-group-icon i {
+    position: absolute; top: 50%; left: 18px; transform: translateY(-50%);
+    color: #94a3b8; font-size: 18px; z-index: 10;
+}
 
-        .input-group-icon {
-            position: relative;
-        }
+.btn-login-modern {
+    background: #154c79;
+    border: none; border-radius: 14px;
+    padding: 14px; font-size: 16px; font-weight: 700; color: #ffffff;
+    transition: all 0.3s ease;
+}
+.btn-login-modern:hover { 
+    transform: translateY(-2px); 
+    box-shadow: 0 12px 25px rgba(21, 76, 121, 0.35); 
+    color: #fff;
+}
 
-        .input-group-icon i {
-            position: absolute;
-            top: 50%;
-            left: 18px;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 18px;
-            z-index: 10;
-            transition: color 0.3s;
-        }
+/* =========================================================
+   SỬA LẠI: TÀI KHOẢN ĐĂNG NHẬP GẦN ĐÂY (GIỐNG ẢNH MẪU)
+========================================================= */
+#savedAccountsContainer .saved-acc-item {
+    background: transparent !important;
+    border: none !important;
+    padding: 6px 4px; /* Thu gọn padding để căn lề sát với chữ */
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+#savedAccountsContainer .saved-acc-item:hover {
+    background: rgba(15, 76, 129, 0.05) !important; /* Chỉ hiện nhẹ màu nền khi trỏ chuột vào */
+}
+#savedAccountsContainer .btn-close-acc {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 14px;
+    padding: 5px;
+    transition: color 0.2s;
+}
+#savedAccountsContainer .btn-close-acc:hover {
+    color: #ef4444;
+}
 
-        .input-group-icon .form-control-modern:focus ~ i {
-            color: #154c79;
-        }
-
-        .btn-login-modern {
-            background: linear-gradient(135deg, #154c79, #0f4c81);
-            border: none;
-            border-radius: 14px;
-            padding: 14px;
-            font-size: 16px;
-            font-weight: 700;
-            color: #ffffff;
-            box-shadow: 0 8px 20px rgba(21, 76, 121, 0.25);
-            transition: all 0.3s ease;
-        }
-
-        .btn-login-modern:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(21, 76, 121, 0.35);
-            background: linear-gradient(135deg, #0f4c81, #0b365b);
-            color: #ffffff;
-        }
-
-        #savedAccountsContainer .saved-acc-item {
-            background: #f8fafc !important;
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 12px !important;
-            padding: 10px 14px;
-            transition: all 0.25s ease;
-            cursor: pointer;
-        }
-        #savedAccountsContainer .saved-acc-item:hover {
-            background: #f1f5f9 !important;
-            border-color: #154c79 !important;
-            transform: scale(1.01);
-        }
-/* --- CSS THANH THÔNG BÁO BẢO TRÌ PREMIUM & LIÊN TỤC --- */
+/* =========================================================
+   BẢNG THÔNG BÁO BÊN PHẢI
+========================================================= */
 .maintenance-banner-premium {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    /* Hiệu ứng kính mờ (Glassmorphism) đồng bộ với form đăng nhập */
-    background: rgba(15, 76, 129, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    color: #ffffff;
-    padding: 12px 0;
-    font-size: 15px;
-    font-weight: 500;
+    top: 50%; right: 25px;
+    transform: translateY(-50%);
+    width: 340px; height: 480px; max-height: 80vh;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 20px;
+    color: #1e293b; 
+    padding: 20px;
+    font-size: 14px; font-weight: 500;
     z-index: 10999;
     overflow: hidden;
-    box-shadow: 0 -4px 25px rgba(15, 76, 129, 0.4);
+    box-shadow: -10px 10px 30px rgba(0, 0, 0, 0.15);
+    display: none;
+    flex-direction: column;
 }
-
-.marquee-wrapper {
-    display: flex;
-    width: max-content;
-    /* Thời gian 35s. Số càng nhỏ chạy càng nhanh */
-    animation: marqueeContinuous 35s linear infinite;
+.maintenance-banner-premium::before {
+    content: "📣 BẢNG TIN HỆ THỐNG";
+    display: block; text-align: center;
+    font-size: 16px; font-weight: 800;
+    color: #154c79; 
+    margin-bottom: 15px; padding-bottom: 15px;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
 }
-
+.marquee-wrapper { display: flex; flex-direction: column; height: max-content; }
+.scrolling-active { animation: marqueeVertical 15s linear infinite; }
 .maintenance-text {
-    white-space: nowrap;
-    display: flex;
-    align-items: center;
+    display: flex; flex-direction: column;
+    background: #f1f5f9; 
+    border-radius: 12px;
+    padding: 15px; margin-bottom: 15px;
+    border: 1px solid #e2e8f0;
+    line-height: 1.5;
 }
-
 .maintenance-text strong {
-    color: #fcd34d; /* Màu vàng nổi bật chữ "THÔNG BÁO HỆ THỐNG" */
-    margin: 0 6px;
-    letter-spacing: 0.5px;
+    color: #0f4c81; font-size: 14px; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 8px;
 }
-
-.spacer {
-    margin: 0 40px; /* Khoảng cách nối đuôi giữa 2 câu */
-    color: #94a3b8;
-    font-size: 12px;
+.pulse-icon { color: #ef4444; animation: pulseIcon 1.5s infinite; }
+@keyframes marqueeVertical {
+    0% { transform: translateY(10%); }
+    100% { transform: translateY(-60%); } 
 }
-
-.pulse-icon {
-    color: #ef4444; /* Màu đỏ cảnh báo */
-    animation: pulseIcon 1.5s infinite;
-}
-
-/* Kỹ thuật dịch chuyển 50% để lặp vô tận mượt mà */
-@keyframes marqueeContinuous {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); } 
-}
-
 @keyframes pulseIcon {
-    0% { transform: scale(1); opacity: 1; }
+    0%, 100% { transform: scale(1); opacity: 1; }
     50% { transform: scale(1.2); opacity: 0.7; }
-    100% { transform: scale(1); opacity: 1; }
 }
-
-/* Hover chuột vào thì dừng lại để đọc */
-.maintenance-banner-premium:hover .marquee-wrapper {
-    animation-play-state: paused;
-}
-    </style>
+.maintenance-banner-premium:hover .scrolling-active { animation-play-state: paused; }
+@media (max-width: 1024px) { .maintenance-banner-premium { display: none !important; } }
+</style>
 </head>
 <body class="d-flex align-items-center justify-content-center vh-100 p-3">
 
+    <!-- HIỆU ỨNG BÊN TRÁI: KHỐI KIM TỰ THÁP VÀ CODE -->
+    <div class="left-visual-container">
+        <!-- Kim Tự Tháp -->
+        <div class="pyramid-wrapper" id="pyramid-wrapper">
+            <div class="pyramid-row"><div class="pyramid-box"></div></div>
+            <div class="pyramid-row"><div class="pyramid-box"></div><div class="pyramid-box"></div></div>
+            <div class="pyramid-row"><div class="pyramid-box"></div><div class="pyramid-box"></div><div class="pyramid-box"></div></div>
+            <div class="pyramid-row"><div class="pyramid-box"></div><div class="pyramid-box"></div><div class="pyramid-box"></div><div class="pyramid-box"></div></div>
+            <div class="pyramid-row"><div class="pyramid-box"></div><div class="pyramid-box"></div><div class="pyramid-box"></div><div class="pyramid-box"></div><div class="pyramid-box"></div></div>
+        </div>
+
+        <!-- Khung Code -->
+        <div class="typing-code-box">
+            <div class="window-controls">
+                <div class="dot dot-red"></div>
+                <div class="dot dot-yellow"></div>
+                <div class="dot dot-green"></div>
+            </div>
+            <div id="code-content"></div><span class="cursor"></span>
+        </div>
+    </div>
+
+    <!-- KHUNG ĐĂNG NHẬP -->
     <div class="login-card-wrapper">
         <div class="login-header-modern">
             <div class="login-logo-circle">
                 <i class="fa-solid fa-graduation-cap"></i>
             </div>
             <h3 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">Applied Mathematics</h3>
-            <p class="text-primary small m-0 fw-bold opacity-85">Năm học: 2026 - 2027</p>
+            <p class="text-primary small m-0 fw-bold opacity-85" style="color: #0d6efd !important;">Năm học: 2026 - 2027</p>
         </div>
 
         <div class="card-body px-4 pb-4 pt-0">
-            <!-- Nơi hiển thị tài khoản đã lưu kèm icon học thuật -->
-            <div id="savedAccountsContainer" class="mb-3"></div>
+            <!-- Nơi hiển thị tài khoản đã lưu -->
+            <div id="savedAccountsContainer" class="mb-2"></div>
 
-            <div class="input-group-icon mb-3">
+            <div class="input-group-icon mb-3 mt-3">
                 <input type="text" id="txtUserMSSV" class="form-control form-control-modern" placeholder="Mã số sinh viên (VD: 51.01...)">
-                <i class="fa-solid fa-id-card"></i>
+                <i class="fa-regular fa-address-card"></i>
             </div>
-            
             <div class="input-group-icon mb-3">
                 <input type="password" id="txtUserPass" class="form-control form-control-modern" placeholder="Mật khẩu (Mặc định: 123)">
                 <i class="fa-solid fa-lock"></i>
             </div>
-            
             <small class="text-danger text-center d-block d-none mb-3 fw-bold" id="userAuthError"></small>
-            
             <button type="button" class="btn w-100 btn-login-modern mt-2" onclick="loginStudentPage()" id="btnLoginStudent">
                 Đăng nhập hệ thống
             </button>
         </div>
     </div>
-<!-- NÚT BẬT/TẮT NHẠC NỀN -->
-<div id="bgMusicWidget" class="bg-music-widget" onclick="toggleBgMusic()">
-    <i class="fa-solid fa-compact-disc fa-spin-slow music-icon" id="musicIcon"></i>
-    <span class="music-tooltip">Nhạc nền</span>
-</div>
 
-<!-- IFRAME NHẠC ẨN NỀN -->
-<div style="display: none;">
-    <iframe id="bgMusicPlayer" 
-        src="about:blank" 
-        title="Music Player" 
-        allow="autoplay; encrypted-media">
-    </iframe>
-</div>
+    <!-- KHUNG THÔNG BÁO BÊN PHẢI -->
+    <div id="maintenanceBanner" class="maintenance-banner-premium" style="display: none;">
+        <div class="marquee-wrapper" id="marqueeWrapper">
+            <div class="maintenance-text">
+                <strong><i class="fa-solid fa-triangle-exclamation pulse-icon"></i> THÔNG BÁO 1:</strong>
+                <span>Trang web sẽ được bảo trì định kỳ từ 01:00 đến 05:00 mỗi ngày để cập nhật, nâng cấp. Mọi người thông cảm nhé! ❤️</span>
+            </div>
+            <div class="maintenance-text">
+                <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 2:</strong>
+                <span>Hệ thống xử lý có thể chậm vào khung giờ cao điểm. Vui lòng không click liên tục.</span>
+            </div>
+        </div>
+    </div>
+
+<!-- PHẦN MODAL CẢNH BÁO SOI CODE -->
 <div class="modal fade" id="tauntSourceModal" tabindex="-1" aria-hidden="true" style="z-index: 10900;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
@@ -304,110 +366,140 @@ body {
         </div>
     </div>
 </div>
-<!-- THANH THÔNG BÁO BẢO TRÌ LIÊN TỤC & ĐẸP MẮT -->
-<!-- THANH THÔNG BÁO BẢO TRÌ (Đã được ẩn mặc định) -->
-<div id="maintenanceBanner" class="maintenance-banner-premium" style="display: none;">
-    <div class="marquee-wrapper">
-        <!-- BẢN TEXT THỨ NHẤT -->
-        <div class="maintenance-text">
-            <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> 
-           ----------
-            <span class="spacer">✦</span>
-        </div>
-        <!-- BẢN TEXT THỨ NHẤT -->
-        <div class="maintenance-text">
-            <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> 
-            <strong>THÔNG BÁO 1:</strong> Trang web sẽ được bảo trì định kỳ từ 01:00 đến 05:00 mỗi ngày để cập nhật, nâng cấp và cải thiện hệ thống. Trong thời gian này, web có thể tạm thời không truy cập được. Mọi người thông cảm và quay lại sau giờ bảo trì nhé! ❤️
-            <span class="spacer">✦</span>
-        </div>
-        <!-- BẢN TEXT THỨ HAI (Nối đuôi ngay lập tức để không bị ngắt quãng) -->
-        <div class="maintenance-text">
-            <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> 
-           <strong>THÔNG BÁO 2:</strong> Thông thường, từ 11:00–16:00, Google Apps Script có thể xử lý chậm khiến website phản hồi chậm hoặc lag. Mong các bạn thông cảm, hạn chế thao tác liên tục và thử lại sau khi hệ thống ổn định.
-            <span class="spacer">✦</span>
-        </div>
-<div class="maintenance-text">
-            <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> 
-            <strong>THÔNG BÁO 1:</strong> Trang web sẽ được bảo trì định kỳ từ 01:00 đến 05:00 mỗi ngày để cập nhật, nâng cấp và cải thiện hệ thống. Trong thời gian này, web có thể tạm thời không truy cập được. Mọi người thông cảm và quay lại sau giờ bảo trì nhé! ❤️
-            <span class="spacer">✦</span>
-        </div>
-        <!-- BẢN TEXT THỨ HAI (Nối đuôi ngay lập tức để không bị ngắt quãng) -->
-        <div class="maintenance-text">
-            <i class="fa-solid fa-triangle-exclamation pulse-icon"></i> 
-           <strong>THÔNG BÁO 2:</strong> Thông thường, từ 11:00–16:00, Google Apps Script có thể xử lý chậm khiến website phản hồi chậm hoặc lag. Mong các bạn thông cảm, hạn chế thao tác liên tục và thử lại sau khi hệ thống ổn định.
-            <span class="spacer">✦</span>
-        </div>
 
-
-    </div>
-</div>
-    <!-- Thư viện cần thiết -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // XỬ LÝ GIAO DIỆN VÀ ANIMATION BÊN TRÁI & PHẢI
+        document.addEventListener('DOMContentLoaded', function() {
+            let banner = document.getElementById('maintenanceBanner');
+            if (banner) banner.style.display = 'flex';
+
+            let marqueeWrapper = document.getElementById('marqueeWrapper');
+            if (marqueeWrapper) {
+                let msgCount = marqueeWrapper.querySelectorAll('.maintenance-text').length;
+                if (msgCount > 2) {
+                    marqueeWrapper.classList.add('scrolling-active');
+                }
+            }
+
+            const boxes = document.querySelectorAll('.pyramid-box');
+            let currentBox = 0;
+            
+            function lightUpBoxes() {
+                if(currentBox >= boxes.length) {
+                    boxes.forEach(b => b.classList.remove('glow'));
+                    currentBox = 0;
+                    setTimeout(lightUpBoxes, 500);
+                    return;
+                }
+                boxes[currentBox].classList.add('glow');
+                currentBox++;
+                setTimeout(lightUpBoxes, 200);
+            }
+            setTimeout(lightUpBoxes, 1000);
+
+            const codeLines = [
+                "#include <iostream>",
+                "using namespace std;",
+                "",
+                "int main() {",
+                "  cout << \"Chào mừng bạn đến với vùng trời\" << endl;",
+                "  cout << \"Analysis và Phản ví dụ\"<<endl;",
+		"  cout << \"Chúc bạn học tập thật tốt, luôn vui vẻ và có thật nhiều kỷ niệm đẹp trong những năm tháng đại học!\";",
+                "  return 0;",
+                "}"
+            ];
+            
+            const codeContainer = document.getElementById('code-content');
+            let lineIndex = 0;
+            let charIndex = 0;
+
+            function typeCode() {
+                if (lineIndex < codeLines.length) {
+                    if (charIndex < codeLines[lineIndex].length) {
+                        codeContainer.innerHTML += codeLines[lineIndex].charAt(charIndex);
+                        charIndex++;
+                        setTimeout(typeCode, 40);
+                    } else {
+                        codeContainer.innerHTML += "<br>";
+                        lineIndex++;
+                        charIndex = 0;
+                        setTimeout(typeCode, 200);
+                    }
+                } else {
+                    setTimeout(() => {
+                        codeContainer.innerHTML = "";
+                        lineIndex = 0;
+                        typeCode();
+                    }, 5000);
+                }
+            }
+            setTimeout(typeCode, 500);
+        });
+    </script>
+
     <script src="TRANGWEB/config.js"></script>
     <script src="TRANGWEB/Xulyxacthuc.js"></script>
     <script>
-// --- SCRIPT KIỂM TRA GIỜ ĐỂ HIỂN THỊ BẢO TRÌ ---
-document.addEventListener('DOMContentLoaded', function() {
-    // Lấy giờ hiện tại (từ 0 đến 23)
-    let currentHour = new Date().getHours();
-    
-    // Kiểm tra: Nếu từ 20h tối  đến trước 5h sáng (0, 1, 2, 3, 4)
-    if (currentHour >= 20 || currentHour < 20) {
-        // Tìm và hiển thị thanh thông báo
-        let banner = document.getElementById('maintenanceBanner');
-        if (banner) {
-            banner.style.display = 'block';
-        }
-    }
-});
-        $(document).ready(function() {
-    // 1. KIỂM TRẢ TỰ ĐỘNG ĐĂNG NHẬP
-    let currentUser = localStorage.getItem('currentUser');
-    if (currentUser) {
-        try {
-            let userData = JSON.parse(currentUser);
-            // Nếu đã có dữ liệu MSSV hợp lệ, tự động chuyển sang trang ứng dụng
-            if (userData && userData.mssv) {
-                window.location.replace("appliedmathematics.html"); // hoặc "index.html" tùy tên file chính của bạn
-                return;
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentHour = new Date().getHours();
+            if (currentHour >= 20 || currentHour < 20) {
+                let banner = document.getElementById('maintenanceBanner');
+                if (banner) {
+                    banner.style.display = 'flex';
+                }
             }
-        } catch (e) {
-            // Nếu dữ liệu localStorage bị lỗi, xóa bỏ để tránh lặp vô hạn
-            localStorage.removeItem('currentUser');
-        }
-    }
+        });
 
-    // 2. Render danh sách tài khoản đã lưu nếu chưa đăng nhập
-    renderSavedAccountsWithIcons();
-});
+        $(document).ready(function() {
+            let currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                try {
+                    let userData = JSON.parse(currentUser);
+                    if (userData && userData.mssv) {
+                        window.location.replace("appliedmathematics.html"); 
+                        return;
+                    }
+                } catch (e) {
+                    localStorage.removeItem('currentUser');
+                }
+            }
+            renderSavedAccountsWithIcons();
+        });
 
+        // ========================================================
+        // SỬA LẠI: RENDER GIAO DIỆN LỊCH SỬ ĐĂNG NHẬP NHƯ ẢNH MẪU
+        // ========================================================
         function renderSavedAccountsWithIcons() {
             let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || []; 
             let container = $('#savedAccountsContainer');
             if (savedAccounts.length === 0) { container.hide(); return; }
             container.show();
             
-            let html = '<div class="text-muted small mb-2 fw-bold" style="font-size: 12px;"><i class="fa-solid fa-clock-rotate-left me-1"></i> Tài khoản đã truy cập gần đây:</div><div class="d-flex flex-column gap-2 mb-3">';
+            // Xóa border dư thừa, làm sạch text và icon
+            let html = '<div class="text-dark mb-2" style="font-size: 13.5px;"><i class="fa-solid fa-clock-rotate-left me-1 opacity-75"></i> Tài khoản đã truy cập gần đây:</div><div class="d-flex flex-column gap-1 mb-2">';
             
             savedAccounts.forEach((acc) => {
                 html += `
                 <div class="d-flex align-items-center justify-content-between saved-acc-item" onclick="selectSavedAccount('${acc.mssv}')">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm" style="width: 36px; height: 36px; background-color: #154c79; font-size: 15px;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 38px; height: 38px; background-color: #154c79; font-size: 16px;">
                             <i class="fa-solid fa-user-graduate"></i>
                         </div>
-                        <div style="line-height: 1.3;">
-                            <div class="fw-bold text-dark" style="font-size: 14px;">${acc.name}</div>
-                            <div class="text-muted small" style="font-size: 11.5px;">${acc.mssv}</div>
+                        <div style="line-height: 1.2; text-align: left;">
+                            <div class="fw-bold text-dark" style="font-size: 15px;">${acc.name}</div>
+                            <div class="text-secondary" style="font-size: 12px; margin-top: 2px;">${acc.mssv}</div>
                         </div>
                     </div>
-                    <button class="btn btn-sm text-secondary hover-text-danger" onclick="removeSavedAccount('${acc.mssv}', event)" title="Xóa">
+                    <button class="btn-close-acc" onclick="removeSavedAccount('${acc.mssv}', event)" title="Xóa">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>`;
             });
-            html += '</div><hr class="my-3 opacity-15" style="border-color: #cbd5e1;">'; 
+            // Thêm vạch phân cách mỏng màu nhạt ở dưới cùng
+            html += '</div><hr class="mt-2 mb-4 opacity-25" style="border-color: #cbd5e1;">'; 
             container.html(html);
         }
 
@@ -424,32 +516,28 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang xác thực...').prop('disabled', true);
             
             postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
-    let response = typeof res === 'string' ? JSON.parse(res) : res;
-    if (response.success) {
-        let currentUser = { 
-            mssv: response.mssv, 
-            name: response.name,
-            chuyenNganh: response.chuyenNganh,
-            khoa: response.khoa,
-            khoaHoc: response.khoaHoc,
-            nhom: response.nhom
-        };
-        
-        // 1. Lưu thông tin đăng nhập
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        
-        // --- THÊM DÒNG NÀY ĐỂ SỬA LỖI ---
-        localStorage.setItem('lastActiveTime', Date.now().toString()); 
-        // --------------------------------
+                let response = typeof res === 'string' ? JSON.parse(res) : res;
+                if (response.success) {
+                    let currentUser = { 
+                        mssv: response.mssv, 
+                        name: response.name,
+                        chuyenNganh: response.chuyenNganh,
+                        khoa: response.khoa,
+                        khoaHoc: response.khoaHoc,
+                        nhom: response.nhom
+                    };
+                    
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    localStorage.setItem('lastActiveTime', Date.now().toString()); 
 
-        let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
-        savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
-        savedAccounts.unshift({ mssv: response.mssv, name: response.name });
-        if (savedAccounts.length > 3) savedAccounts.pop(); 
-        localStorage.setItem('savedAccounts', JSON.stringify(savedAccounts));
+                    let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
+                    savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
+                    savedAccounts.unshift({ mssv: response.mssv, name: response.name });
+                    if (savedAccounts.length > 3) savedAccounts.pop(); 
+                    localStorage.setItem('savedAccounts', JSON.stringify(savedAccounts));
 
-        window.location.href = "appliedmathematics.html";
-    } else {
+                    window.location.href = "appliedmathematics.html";
+                } else {
                     $('#userAuthError').removeClass('d-none').text(response.message); 
                     btn.html('Đăng nhập hệ thống').prop('disabled', false); 
                 }
@@ -468,13 +556,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 1. Chặn click chuột phải
     document.addEventListener('contextmenu', function(e) {
         e.preventDefault();
         showTauntModal();
     });
 
-    // 2. Chặn các phím tắt F12, Ctrl+U, Ctrl+Shift+I/J/C, Ctrl+S
     document.addEventListener('keydown', function(e) {
         if (
             e.key === 'F12' || 
