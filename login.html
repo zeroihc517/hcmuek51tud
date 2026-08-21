@@ -400,43 +400,56 @@ body {
             }
             setTimeout(lightUpBoxes, 1000);
 
-            const codeLines = [
-                "#include <iostream>",
-                "using namespace std;",
-                "",
-                "int main() {",
-                "  cout << \"Chào mừng bạn đến với vùng trời\" << endl;",
-                "  cout << \"Analysis và Phản ví dụ\"<<endl;",
-		"  cout << \"Chúc bạn học tập thật tốt, luôn vui vẻ và có thật nhiều kỷ niệm đẹp trong những năm tháng đại học!\";",
-                "  return 0;",
-                "}"
-            ];
-            
-            const codeContainer = document.getElementById('code-content');
-            let lineIndex = 0;
-            let charIndex = 0;
+           // Animation Gõ code HTML
+const codeLines = [
+    "<!DOCTYPE html>",
+    "<html>",
+    "  <head>",
+    "    <title>Chào bạn</title>",
+    "  </head>",
+    "  <body>",
+    "    <h1>Chào mừng bạn đến với vùng trời \"Analysis và Phản ví dụ\"</h1>",
+    "    <p>Chúc bạn học tập thật tốt, luôn vui vẻ và có thật nhiều kỷ niệm đẹp trong những năm tháng đại học!</p>",
+    "  </body>",
+    "</html>"
+];
 
-            function typeCode() {
-                if (lineIndex < codeLines.length) {
-                    if (charIndex < codeLines[lineIndex].length) {
-                        codeContainer.innerHTML += codeLines[lineIndex].charAt(charIndex);
-                        charIndex++;
-                        setTimeout(typeCode, 40);
-                    } else {
-                        codeContainer.innerHTML += "<br>";
-                        lineIndex++;
-                        charIndex = 0;
-                        setTimeout(typeCode, 200);
-                    }
-                } else {
-                    setTimeout(() => {
-                        codeContainer.innerHTML = "";
-                        lineIndex = 0;
-                        typeCode();
-                    }, 5000);
-                }
-            }
-            setTimeout(typeCode, 500);
+const codeContainer = document.getElementById('code-content');
+let lineIndex = 0;
+let charIndex = 0;
+
+function escapeHtml(text) {
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function typeCode() {
+    if (lineIndex < codeLines.length) {
+        if (charIndex < codeLines[lineIndex].length) {
+            let char = codeLines[lineIndex].charAt(charIndex);
+            codeContainer.innerHTML += escapeHtml(char);
+            charIndex++;
+            setTimeout(typeCode, 35);
+        } else {
+            codeContainer.innerHTML += "<br>";
+            lineIndex++;
+            charIndex = 0;
+            setTimeout(typeCode, 150);
+        }
+    } else {
+        setTimeout(() => {
+            codeContainer.innerHTML = "";
+            lineIndex = 0;
+            charIndex = 0;
+            typeCode();
+        }, 5000);
+    }
+}
+setTimeout(typeCode, 500);
         });
     </script>
 
