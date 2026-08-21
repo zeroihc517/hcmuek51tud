@@ -185,7 +185,13 @@ body {
     color: #ffffff !important;
     background-color: #154c79 !important;
 }
-
+/* Thêm đoạn này vào dưới class .btn-login-modern:hover */
+.btn-login-modern:disabled {
+    background-color: #154c79 !important;
+    color: #ffffff !important;
+    opacity: 0.9 !important; /* Bạn có thể để 1 để sáng hoàn toàn, hoặc 0.9 để hơi làm dịu một chút */
+    cursor: not-allowed;
+}
 /* =========================================================
    SỬA LẠI: TÀI KHOẢN ĐĂNG NHẬP GẦN ĐÂY (GIỐNG ẢNH MẪU)
 ========================================================= */
@@ -214,47 +220,57 @@ body {
 
 /* =========================================================
    BẢNG THÔNG BÁO BÊN PHẢI
-========================================================= */
+========================================================= *//* Tìm và thay thế các class tương ứng bằng đoạn CSS này */
+
 .maintenance-banner-premium {
     position: fixed;
     top: 50%; right: 25px;
     transform: translateY(-50%);
-    width: 340px; height: 480px; max-height: 80vh;
+    width: 380px; /* Mở rộng bảng từ 340px lên 380px để chứa chữ to */
+    height: 480px; max-height: 80vh;
     background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 20px;
     color: #1e293b; 
-    padding: 20px;
-    font-size: 14px; font-weight: 500;
+    padding: 24px; /* Tăng lề bên trong lên một chút */
+    font-size: 16px; /* Tăng cỡ chữ cơ bản từ 14px lên 16px */
+    font-weight: 500;
     z-index: 10999;
     overflow: hidden;
     box-shadow: -10px 10px 30px rgba(0, 0, 0, 0.15);
     display: none;
     flex-direction: column;
 }
+
 .maintenance-banner-premium::before {
     content: "📣 BẢNG TIN HỆ THỐNG";
     display: block; text-align: center;
-    font-size: 16px; font-weight: 800;
+    font-size: 20px; /* Tăng tiêu đề chính từ 16px lên 20px */
+    font-weight: 800;
     color: #154c79; 
     margin-bottom: 15px; padding-bottom: 15px;
     border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
 }
-.marquee-wrapper { display: flex; flex-direction: column; height: max-content; }
-.scrolling-active { animation: marqueeVertical 15s linear infinite; }
+
 .maintenance-text {
     display: flex; flex-direction: column;
     background: #f1f5f9; 
     border-radius: 12px;
-    padding: 15px; margin-bottom: 15px;
+    padding: 16px; margin-bottom: 15px;
     border: 1px solid #e2e8f0;
-    line-height: 1.5;
+    line-height: 1.6; /* Giãn dòng ra một chút cho dễ đọc */
+    font-size: 15px; /* Cỡ chữ nội dung thông báo to hơn */
 }
+
 .maintenance-text strong {
-    color: #0f4c81; font-size: 14px; margin-bottom: 6px;
+    color: #0f4c81; 
+    font-size: 16px; /* Tăng tiêu đề của từng thông báo từ 14px lên 16px */
+    margin-bottom: 8px;
     display: flex; align-items: center; gap: 8px;
 }
+.marquee-wrapper { display: flex; flex-direction: column; height: max-content; }
+.scrolling-active { animation: marqueeVertical 15s linear infinite; }
 .pulse-icon { color: #ef4444; animation: pulseIcon 1.5s infinite; }
 @keyframes marqueeVertical {
     0% { transform: translateY(10%); }
