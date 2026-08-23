@@ -1405,17 +1405,23 @@ function renderSystemCoursesList() {
         return;
     }
 
-    let mergedClasses = {};
-    // ... (Đoạn gộp mergedClasses giữ nguyên như cũ) ...
+let mergedClasses = {};
+    
     filteredCourses.forEach(course => {
+        // 1. Tách và loại bỏ hoàn toàn đường dẫn URL (nếu có)
+        let rawHt = course.hinhThuc || "";
+        let extractedUrl = checkAndExtractUrl(rawHt);
+        let cleanHt = extractedUrl ? rawHt.replace(extractedUrl, '').trim() : rawHt.trim();
+
         if (!mergedClasses[course.id]) {
             mergedClasses[course.id] = {
                 id: course.id, mon: course.mon, gv: course.gv,
-                phongList: [], thoiGianList: [], rawSchedules: [],
-                hinhThuc: course.hinhThuc, ngayBatDau: course.ngayBatDau, ngayKetThuc: course.ngayKetThuc,
-		ngayNgoaiLe: course.ngayNgoaiLe || "",
-		ghiChu: course.ghiChu || ""
+                phongList: [], thoiGianList: [], rawSchedules: [], hinhThucList: [], // Thêm mảng chứa danh sách Cơ sở
+                hinhThuc: "", ngayBatDau: course.ngayBatDau, ngayKetThuc: course.ngayKetThuc,
+                ngayNgoaiLe: course.ngayNgoaiLe || "",
+                ghiChu: course.ghiChu || ""
             };
+            if (cleanHt) mergedClasses[course.id].hinhThucList.push(cleanHt);
         } else {
             let currentStart = parseDateString(mergedClasses[course.id].ngayBatDau);
             let currentEnd = parseDateString(mergedClasses[course.id].ngayKetThuc);
@@ -1423,10 +1429,15 @@ function renderSystemCoursesList() {
             let newEnd = parseDateString(course.ngayKetThuc);
             if (newStart && (!currentStart || newStart < currentStart)) mergedClasses[course.id].ngayBatDau = course.ngayBatDau;
             if (newEnd && (!currentEnd || newEnd > currentEnd)) mergedClasses[course.id].ngayKetThuc = course.ngayKetThuc;
+            
+            // Đẩy Cơ sở sạch (không link) vào danh sách nếu chưa có
+            if (cleanHt && !mergedClasses[course.id].hinhThucList.includes(cleanHt)) {
+                mergedClasses[course.id].hinhThucList.push(cleanHt);
+            }
         }
 
         let timeStr = (!course.thu || !course.tietBd || isNaN(course.tietBd)) 
-            ? "Thời gian tự do (VLE)" 
+            ? "VLE" 
             : `Thứ ${course.thu} (Tiết ${course.tietBd}-${course.tietBd + course.soTiet - 1})`;
         
         if (!mergedClasses[course.id].thoiGianList.includes(timeStr)) {
@@ -1436,7 +1447,25 @@ function renderSystemCoursesList() {
         if (!mergedClasses[course.id].phongList.includes(course.phong)) mergedClasses[course.id].phongList.push(course.phong);
     });
 
+    // 2. Xử lý Logic Hiển thị: Ẩn VLE nếu có cơ sở khác & Mỗi cơ sở 1 dòng
+    for (let id in mergedClasses) {
+        let classObj = mergedClasses[id];
+        let htList = classObj.hinhThucList;
+        
+        // Kiểm tra xem có cơ sở nào khác VLE không
+        let hasNonVle = htList.some(ht => !ht.toUpperCase().includes('VLE'));
+        
+        if (hasNonVle) {
+            // Nếu có cơ sở offline thật, loại bỏ "VLE" ra khỏi danh sách
+            htList = htList.filter(ht => !ht.toUpperCase().includes('VLE'));
+        }
+        
+        // Gộp các cơ sở lại bằng thẻ <br> để mỗi cái tự xuống 1 dòng
+        classObj.hinhThuc = htList.join('<br>');
+    }
+
     groupedSystemCourses = {};
+    // ...
     for (let id in mergedClasses) {
         let c = mergedClasses[id];
         let subjectName = getBaseSubjectName(c.mon); 
@@ -1570,7 +1599,7 @@ window.openSubjectDetail = function(subjectKey) {
 
         let isCopied = !isSynced && (copiedRowIndices.length > 0);
         let rowBg = (isSynced || isCopied) ? "background-color: #f8fafc;" : "background-color: #ffffff;";
-        let dateDisplay = (c.ngayBatDau && c.ngayKetThuc) ? `<span class="fw-bold text-dark">${c.ngayBatDau}</span><br>đến <span class="fw-bold text-dark">${c.ngayKetThuc}</span>` : '-';
+       let dateDisplay = (c.ngayBatDau && c.ngayKetThuc) ? `<span style="font-weight: 500; color: #1e293b;">Từ ${c.ngayBatDau}</span><br>đến <span style="font-weight: 500; color: #1e293b;">${c.ngayKetThuc}</span>` : '-';
 // --- XỬ LÝ NỘI DUNG CỘT GHI CHÚ ---
         let ghiChuParts = [];
         if (c.ngayNgoaiLe && c.ngayNgoaiLe.trim() !== "") {
@@ -1600,18 +1629,24 @@ window.openSubjectDetail = function(subjectKey) {
             statusHtml = `<span class="text-muted small">Chưa đăng ký</span>`;
         }
 
-        html += `
+      html += `
         <tr style="cursor: pointer; ${rowBg}" onclick="handleRowClick('${c.id}', '${subjectKey}', ${isSynced}, ${isCopied}, event)">
             <td class="text-center align-middle">${checkboxHtml}</td>
             <td class="text-center fw-bold text-secondary align-middle">${c.id}</td>
             <td class="text-center align-middle">${c.hinhThuc || '-'}</td>
-            <td class="text-center fw-bold text-success align-middle">${c.phongList.join(', ')}</td>
+            
+            <td class="text-center fw-bold text-success align-middle">${c.phongList.join('<br>')}</td>
+            
             <td class="text-center align-middle">
-                <small class="fw-bold text-muted">${c.thoiGianList.join('<br>')}</small>
+                <span style="font-size: 14.5px; font-weight: 500; color: #1e293b;">${c.thoiGianList.join('<br>')}</span>
             </td>
+            
             <td class="text-center text-warning-emphasis fw-bold align-middle">${c.gv || '-'}</td>
-            <td class="text-center align-middle" style="font-size: 13px;">${dateDisplay}</td>
-		<td class="text-center align-middle" style="font-size: 13px;">${ghiChuDisplay}</td> <!-- CỘT GHI CHÚ MỚI -->
+            
+            <!-- ĐÃ SỬA CỘT NGÀY HỌC: Chỉnh font-size to lên 14.5px -->
+            <td class="text-center align-middle" style="font-size: 14.5px;">${dateDisplay}</td>
+            
+            <td class="text-center align-middle" style="font-size: 13px;">${ghiChuDisplay}</td>
             <td class="text-center align-middle">${statusHtml}</td>
         </tr>
         `;
