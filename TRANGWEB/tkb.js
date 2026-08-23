@@ -1408,7 +1408,6 @@ function renderSystemCoursesList() {
 let mergedClasses = {};
     
     filteredCourses.forEach(course => {
-        // 1. Tách và loại bỏ hoàn toàn đường dẫn URL (nếu có)
         let rawHt = course.hinhThuc || "";
         let extractedUrl = checkAndExtractUrl(rawHt);
         let cleanHt = extractedUrl ? rawHt.replace(extractedUrl, '').trim() : rawHt.trim();
@@ -1416,7 +1415,8 @@ let mergedClasses = {};
         if (!mergedClasses[course.id]) {
             mergedClasses[course.id] = {
                 id: course.id, mon: course.mon, gv: course.gv,
-                phongList: [], thoiGianList: [], rawSchedules: [], hinhThucList: [], // Thêm mảng chứa danh sách Cơ sở
+                phongList: [], thoiGianList: [], rawSchedules: [], hinhThucList: [], 
+                thoiGianPhongList: [], // Danh sách chuỗi Thứ | Tiết | Phòng
                 hinhThuc: "", ngayBatDau: course.ngayBatDau, ngayKetThuc: course.ngayKetThuc,
                 ngayNgoaiLe: course.ngayNgoaiLe || "",
                 ghiChu: course.ghiChu || ""
@@ -1430,40 +1430,52 @@ let mergedClasses = {};
             if (newStart && (!currentStart || newStart < currentStart)) mergedClasses[course.id].ngayBatDau = course.ngayBatDau;
             if (newEnd && (!currentEnd || newEnd > currentEnd)) mergedClasses[course.id].ngayKetThuc = course.ngayKetThuc;
             
-            // Đẩy Cơ sở sạch (không link) vào danh sách nếu chưa có
             if (cleanHt && !mergedClasses[course.id].hinhThucList.includes(cleanHt)) {
                 mergedClasses[course.id].hinhThucList.push(cleanHt);
             }
         }
 
         let timeStr = (!course.thu || !course.tietBd || isNaN(course.tietBd)) 
-            ? "VLE" 
+            ? "Thời gian tự do (VLE)" 
             : `Thứ ${course.thu} (Tiết ${course.tietBd}-${course.tietBd + course.soTiet - 1})`;
-        
+
+        // --- ĐỊNH DẠNG: Thứ 2 | Tiết 1-3 | Phòng A.313 ---
+       // Định dạng chuẩn: Thứ 2 | Tiết 1-3 | Phòng A.313
+        let isVle = (!course.thu || !course.tietBd || isNaN(course.tietBd));
+        let timeRoomStr = "";
+
+        if (isVle) {
+            timeRoomStr = course.phong ? `VLE ` : "Thời gian tự do (VLE)";
+        } else {
+            let thuStr = course.thu == 8 ? "Chủ nhật" : `Thứ ${course.thu}`;
+            let tietEnd = parseInt(course.tietBd) + parseInt(course.soTiet || 1) - 1;
+            let tietStr = `Tiết ${course.tietBd}-${tietEnd}`;
+            let phongStr = course.phong ? `Phòng ${course.phong}` : "";
+
+            // Ghép lại và ngăn cách bằng dấu gạch đứng " | "
+            timeRoomStr = [thuStr, tietStr, phongStr].filter(Boolean).join(' | ');
+        }
+
         if (!mergedClasses[course.id].thoiGianList.includes(timeStr)) {
             mergedClasses[course.id].thoiGianList.push(timeStr);
             mergedClasses[course.id].rawSchedules.push({ thu: course.thu, tietBd: course.tietBd, soTiet: course.soTiet });
         }
         if (!mergedClasses[course.id].phongList.includes(course.phong)) mergedClasses[course.id].phongList.push(course.phong);
+        
+        if (!mergedClasses[course.id].thoiGianPhongList.includes(timeRoomStr)) {
+            mergedClasses[course.id].thoiGianPhongList.push(timeRoomStr);
+        }
     });
 
-    // 2. Xử lý Logic Hiển thị: Ẩn VLE nếu có cơ sở khác & Mỗi cơ sở 1 dòng
     for (let id in mergedClasses) {
         let classObj = mergedClasses[id];
         let htList = classObj.hinhThucList;
-        
-        // Kiểm tra xem có cơ sở nào khác VLE không
         let hasNonVle = htList.some(ht => !ht.toUpperCase().includes('VLE'));
-        
         if (hasNonVle) {
-            // Nếu có cơ sở offline thật, loại bỏ "VLE" ra khỏi danh sách
             htList = htList.filter(ht => !ht.toUpperCase().includes('VLE'));
         }
-        
-        // Gộp các cơ sở lại bằng thẻ <br> để mỗi cái tự xuống 1 dòng
         classObj.hinhThuc = htList.join('<br>');
     }
-
     groupedSystemCourses = {};
     // ...
     for (let id in mergedClasses) {
@@ -1635,21 +1647,18 @@ window.openSubjectDetail = function(subjectKey) {
             <td class="text-center fw-bold text-secondary align-middle">${c.id}</td>
             <td class="text-center align-middle">${c.hinhThuc || '-'}</td>
             
-            <td class="text-center fw-bold text-success align-middle">${c.phongList.join('<br>')}</td>
-            
+            <!-- ĐÃ GỘP CỘT THỨ TIẾT VÀ PHÒNG -->
             <td class="text-center align-middle">
-                <span style="font-size: 14.5px; font-weight: 500; color: #1e293b;">${c.thoiGianList.join('<br>')}</span>
+                <span style="font-size: 14.5px; font-weight: 500; color: #1e293b;">${c.thoiGianPhongList.join('<br>')}</span>
             </td>
             
             <td class="text-center text-warning-emphasis fw-bold align-middle">${c.gv || '-'}</td>
-            
-            <!-- ĐÃ SỬA CỘT NGÀY HỌC: Chỉnh font-size to lên 14.5px -->
             <td class="text-center align-middle" style="font-size: 14.5px;">${dateDisplay}</td>
-            
             <td class="text-center align-middle" style="font-size: 13px;">${ghiChuDisplay}</td>
             <td class="text-center align-middle">${statusHtml}</td>
         </tr>
         `;
+
     });
 
     $('#systemClassesContainer').html(html);
