@@ -173,6 +173,38 @@
         </div>
 </div>
     </div>
+<!-- MODAL BẢNG ĐĂNG NHẬP TRÊN TRANG BÀI TẬP -->
+<div class="modal fade" id="userAuthModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header text-white text-center p-4 d-block" style="background-color: #0f4c81;">
+                <i class="fa-solid fa-graduation-cap fs-1 mb-2"></i>
+                <h5 class="fw-bold m-0">ĐĂNG NHẬP HỆ THỐNG</h5>
+            </div>
+            <div class="modal-body p-4 p-md-5">
+                <div class="input-group mb-4 shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                    <span class="input-group-text bg-light border-0"><i class="fa-solid fa-id-card text-muted"></i></span>
+                    <input type="text" id="txtUserMSSV" class="form-control border-0 bg-light py-2" placeholder="Mã số sinh viên (VD: 51.01...)">
+                </div>
+                <div class="input-group mb-3 shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                    <span class="input-group-text bg-light border-0"><i class="fa-solid fa-lock text-muted"></i></span>
+                    <!-- QUAN TRỌNG: Gọi hàm loginStudentExercise() -->
+                    <input type="password" id="txtUserPass" class="form-control border-0 bg-light py-2" placeholder="Mật khẩu" onkeypress="if(event.key === 'Enter') loginStudentExercise()">
+                </div>
+                
+                <small class="text-danger text-center d-block d-none mb-3 fw-bold" id="userAuthError"></small>
+                
+                <!-- QUAN TRỌNG: Gọi hàm loginStudentExercise() -->
+                <button type="button" class="btn text-white w-100 fw-bold py-2.5 mb-2 shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" id="btnLoginStudent" onclick="loginStudentExercise()">
+                    Đăng nhập ngay
+                </button>
+                <button type="button" class="btn btn-light w-100 fw-bold py-2 border shadow-sm" style="border-radius: 8px;" data-bs-dismiss="modal">
+                    Hủy bỏ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- Thư viện JS -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
