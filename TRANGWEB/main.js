@@ -395,7 +395,11 @@ function loadDataByHocPhan(sheetName, element) {
     resetNavActive(); 
     if(element) $(element).addClass('active');
     $('#courseHeaderTitle').html(`<i class="fa-solid fa-book-open me-2"></i> ${sheetName}`);
-    
+    if (currentSheetName.toLowerCase() !== 'thông báo') {
+    $('#groupLinkWrapper').removeClass('d-none');
+} else {
+    $('#groupLinkWrapper').addClass('d-none');
+}
     // Reset giao diện trước khi tải
     $('#courseSection').removeClass('d-none'); 
     $('#tableWrapper').addClass('d-none'); 
