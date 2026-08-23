@@ -1515,7 +1515,7 @@ window.saveGroupLink = function() {
     let platform = $('#glPlatform').val();
     let url = $('#glUrl').val().trim();
     let desc = $('#glDesc').val().trim();
-    let assigned = isAdmin ? $('#glAssigned').val().trim() : "";
+    let assigned = $('#glAssigned').val().trim();
     
     if (!title || !url) {
         alert("Vui lòng nhập đầy đủ Môn học/Chủ đề nhóm và Link tham gia!");
@@ -2311,4 +2311,26 @@ if (typeof window.cancelUserCountdown !== 'undefined') {
         $('#linkWarningModal').modal('hide');
         $('#closeWarningModal').modal('hide');
     };
+}
+// Khai báo biến âm thanh (link âm thanh chuông báo chuẩn, nhẹ nhàng)
+let alarmSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3'); 
+alarmSound.loop = true; // Cho phép chuông reo liên tục đến khi sinh viên tắt
+
+function triggerTimeUpAlert() {
+    let timerModalElement = document.getElementById('timerExpiredModal');
+    if (timerModalElement) {
+        let timerModal = new bootstrap.Modal(timerModalElement);
+        timerModal.show();
+        
+        // Bật chuông báo thức khi hiện bảng (có catch lỗi nếu trình duyệt chặn tự động phát âm)
+        alarmSound.play().catch(function(e) {
+            console.log("Trình duyệt chặn tự động phát âm thanh. Hãy tương tác với trang web trước.");
+        });
+    }
+}
+
+// Hàm được gọi khi nhấn nút "Đã rõ" để tắt nhạc báo thức
+function stopAlarmSound() {
+    alarmSound.pause();
+    alarmSound.currentTime = 0; // Đưa bản nhạc về lại thời gian đầu
 }

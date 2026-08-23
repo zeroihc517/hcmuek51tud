@@ -2539,6 +2539,41 @@
         </div>
     </div>
 </div>
+<!-- MODAL THÔNG BÁO HẾT GIỜ (ĐỒNG BỘ GIAO DIỆN) -->
+<div class="modal fade" id="timerExpiredModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" style="z-index: 10700;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <!-- Header Modal -->
+            <div class="modal-header text-white" style="background-color: #e61d4a;">
+                <h6 class="modal-title m-0 fw-bold text-uppercase"><i class="fa-solid fa-stopwatch fa-shake me-2"></i>Báo thức cá nhân</h6>
+            </div>
+            
+            <!-- Thân Modal -->
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle" style="width: 80px; height: 80px; background-color: #fff1f2; color: #e61d4a; font-size: 38px; box-shadow: 0 0 20px rgba(230, 29, 74, 0.15);">
+                        <i class="fa-regular fa-bell fa-shake"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2 text-danger" style="font-size: 22px; text-transform: uppercase; letter-spacing: 1px;">Đã hết giờ!</h5>
+                <p class="text-secondary mb-3" style="font-size: 15px; line-height: 1.6;">
+                    Thời gian hẹn giờ đếm ngược của bạn đã kết thúc. Hãy nghỉ ngơi một chút hoặc thiết lập mục tiêu mới nhé!
+                </p>
+                <div class="alert alert-danger border-0 p-2 small text-danger m-0" style="background-color: #fff5f5; border-radius: 10px;">
+                    <i class="fa-solid fa-circle-info me-1"></i> Bấm "Đã rõ" để tắt chuông báo thức.
+                </div>
+            </div>
+            
+            <!-- Chân Modal -->
+            <div class="modal-footer border-0 d-flex justify-content-center pb-4 bg-light">
+                <button type="button" class="btn text-white fw-bold px-5 py-2" data-bs-dismiss="modal" onclick="stopAlarmSound()" style="background-color: #e61d4a; border-radius: 50px; box-shadow: 0 4px 12px rgba(230, 29, 74, 0.25); font-size: 16px;">
+                    <i class="fa-solid fa-check me-2"></i> Đã rõ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
