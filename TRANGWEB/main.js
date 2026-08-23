@@ -1095,28 +1095,34 @@ headHtml += `<th style="width: 130px;" class="text-center">Tiến độ</th><th 
                     }
 
                     // --- BẮT ĐẦU: XỬ LÝ TIẾN ĐỘ & NOTE CHO MINIGAME ---
-                    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
-                    let progVal = localStorage.getItem(`prog_${mssv}_${currentSheetName}_${sheetRowIndexDrag}`) || 'white';
-                    let bgProgColor = getProgressColor(progVal);
+                   // Tạo một khóa cố định (Stable Key) từ Tên bài học (bỏ hết ký tự đặc biệt)
+let stableKey = titleText.replace(/<[^>]*>?/gm, '').replace(/[^a-zA-Z0-9_]/g, '');
+if (!stableKey) stableKey = sheetRowIndexDrag; // Dự phòng nếu tên rỗng
 
-                    let noteData = JSON.parse(localStorage.getItem(`note_${mssv}_${currentSheetName}_${sheetRowIndexDrag}`));
-                    let hasNote = noteData && noteData.content && noteData.content.trim() !== '';
+// --- BẮT ĐẦU: XỬ LÝ TIẾN ĐỘ & NOTE CHO MINIGAME ---
+let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+// Dùng stableKey thay cho sheetRowIndexDrag
+let progVal = localStorage.getItem(`prog_${mssv}_${currentSheetName}_${stableKey}`) || 'white';
+let bgProgColor = getProgressColor(progVal);
 
-                    let noteBtnClass = hasNote ? 'btn-primary text-white' : 'btn-outline-secondary bg-white';
-                    let noteBtnIcon = hasNote ? '<i class="fa-solid fa-clipboard-check fs-6"></i>' : '<i class="fa-regular fa-clipboard fs-6"></i>';
+let noteData = JSON.parse(localStorage.getItem(`note_${mssv}_${currentSheetName}_${stableKey}`));
+let hasNote = noteData && noteData.content && noteData.content.trim() !== '';
 
-                    let extraControls = `
-                    <div class="d-flex align-items-center justify-content-between mt-2 gap-2 w-100">
-                        <select class="form-select form-select-sm fw-bold border-secondary shadow-sm flex-grow-1" style="background-color: ${bgProgColor}; color: #334155; border-radius: 8px; font-size: 12px; cursor: pointer; padding: 2px 10px;" onchange="updateProgress(this, '${currentSheetName}', ${sheetRowIndexDrag})">
-                            <option value="white" ${progVal === 'white' ? 'selected' : ''}>Chưa làm</option>
-                            <option value="yellow" ${progVal === 'yellow' ? 'selected' : ''}>Đang làm</option>
-                            <option value="green" ${progVal === 'green' ? 'selected' : ''}>Đã xong</option>
-                        </select>
-                        <button id="btnNote_${sheetRowIndexDrag}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center flex-shrink-0" style="border-radius: 8px; width: 30px; height: 26px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', ${sheetRowIndexDrag})" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
-                            ${noteBtnIcon}
-                        </button>
-                    </div>`;
-                    // --- KẾT THÚC ---
+let noteBtnClass = hasNote ? 'btn-primary text-white' : 'btn-outline-secondary bg-white';
+let noteBtnIcon = hasNote ? '<i class="fa-solid fa-clipboard-check fs-6"></i>' : '<i class="fa-regular fa-clipboard fs-6"></i>';
+
+let extraControls = `
+<div class="d-flex align-items-center justify-content-between mt-2 gap-2 w-100">
+    <select class="form-select form-select-sm fw-bold border-secondary shadow-sm flex-grow-1" style="background-color: ${bgProgColor}; color: #334155; border-radius: 8px; font-size: 12px; cursor: pointer; padding: 2px 10px;" onchange="updateProgress(this, '${currentSheetName}', '${stableKey}')">
+        <option value="white" ${progVal === 'white' ? 'selected' : ''}>Chưa làm</option>
+        <option value="yellow" ${progVal === 'yellow' ? 'selected' : ''}>Đang làm</option>
+        <option value="green" ${progVal === 'green' ? 'selected' : ''}>Đã xong</option>
+    </select>
+    <button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center flex-shrink-0" style="border-radius: 8px; width: 30px; height: 26px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
+        ${noteBtnIcon}
+    </button>
+</div>`;
+// --- KẾT THÚC ---
 
                     examCardsHtml += `
                     <div class="position-relative drag-handle-row d-flex flex-column h-100" ${dragAttrTb}>
@@ -1343,14 +1349,18 @@ if (isUpdating && !isAdmin) {
                     }
 
                     // Ghép vào 3 ô TD hiển thị
-                    // Khởi tạo các giá trị Tiến độ & Ghi chú từ localStorage
-// Khởi tạo các giá trị Tiến độ & Ghi chú từ localStorage
+                  // Khởi tạo các giá trị Tiến độ & Ghi chú từ localStorage
 let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
-let progKey = `prog_${mssv}_${currentSheetName}_${sheetRowIndex}`;
+
+// Tạo Stable Key từ cột Nội dung bài học (c2)
+let rawLessonName = String(row[1] || row[0] || '').replace(/<[^>]*>?/gm, '').replace(/[^a-zA-Z0-9_]/g, '');
+let stableKey = rawLessonName ? rawLessonName : sheetRowIndex;
+
+let progKey = `prog_${mssv}_${currentSheetName}_${stableKey}`;
 let progVal = localStorage.getItem(progKey) || 'white';
 let bgProgColor = getProgressColor(progVal);
 
-let noteKey = `note_${mssv}_${currentSheetName}_${sheetRowIndex}`;
+let noteKey = `note_${mssv}_${currentSheetName}_${stableKey}`;
 let noteData = JSON.parse(localStorage.getItem(noteKey));
 let hasNote = noteData && noteData.content && noteData.content.trim() !== '';
 
@@ -1373,7 +1383,7 @@ if (isPart || isChapter || isLesson) {
     tdProg = '<td></td>';
     tdNote = `
         <td class="text-center align-middle" onclick="event.stopPropagation();">
-            <button id="btnNote_${sheetRowIndex}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', ${sheetRowIndex})" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
+            <button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
                 ${noteBtnIcon}
             </button>
         </td>`;
@@ -1382,7 +1392,7 @@ if (isPart || isChapter || isLesson) {
     // 3. Các hàng Nội dung bình thường: Hiển thị đầy đủ cả Tiến độ và Ghi chú
     tdProg = `
         <td class="text-center align-middle" onclick="event.stopPropagation();">
-            <select class="form-select form-select-sm fw-bold border-secondary shadow-sm" style="background-color: ${bgProgColor}; color: #334155; border-radius: 8px; font-size: 13px; cursor: pointer;" onchange="updateProgress(this, '${currentSheetName}', ${sheetRowIndex})">
+            <select class="form-select form-select-sm fw-bold border-secondary shadow-sm" style="background-color: ${bgProgColor}; color: #334155; border-radius: 8px; font-size: 13px; cursor: pointer;" onchange="updateProgress(this, '${currentSheetName}', '${stableKey}')">
                 <option value="white" ${progVal === 'white' ? 'selected' : ''}>Chưa học</option>
                 <option value="yellow" ${progVal === 'yellow' ? 'selected' : ''}>Còn học</option>
                 <option value="green" ${progVal === 'green' ? 'selected' : ''}>Đã xong</option>
@@ -1391,7 +1401,7 @@ if (isPart || isChapter || isLesson) {
         
     tdNote = `
         <td class="text-center align-middle" onclick="event.stopPropagation();">
-            <button id="btnNote_${sheetRowIndex}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', ${sheetRowIndex})" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
+            <button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
                 ${noteBtnIcon}
             </button>
         </td>`;
