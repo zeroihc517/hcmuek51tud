@@ -1036,6 +1036,7 @@ headHtml += `<th style="width: 130px;" class="text-center">Tiến độ</th><th 
                 }
 
                 // 3. Trích xuất thẻ bài kiểm tra/minigame
+               // 3. Trích xuất thẻ bài kiểm tra/minigame
                 let isSpecialExam = /(đề thi thử|đề demo|minigame tuần|minigame hè|minigame số)/i.test(fullRowText);
                 if (isSpecialExam) {
                     hasExamCards = true; 
@@ -1066,16 +1067,11 @@ headHtml += `<th style="width: 130px;" class="text-center">Tiến độ</th><th 
 
                     // Dọn dẹp dấu nháy để không làm gãy sự kiện onclick
                     let safeTitle = titleText.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-
-                    // TẠO CHUỖI TRACKING CHO ĐỀ THI
                     let trackStr = `${currentSheetName} - Minigame/Đề thi: ${safeTitle}`;
 
-                    // --- BỔ SUNG KHỐI KÉO THẢ & NÚT ADMIN (ĐÃ FIX LỖI GIAO DIỆN & KÉO THẢ) ---
                     let sheetRowIndexDrag = rowIndex + 1;
                     let isDragEnabled = window.isAdminActionsEnabled ? 'true' : 'false';
                     let dragStyleTb = window.isAdminActionsEnabled ? 'cursor: grab;' : '';
-                    
-                    // Gắn cờ bắt sự kiện kéo thả giống hệ thống hàng bảng (table rows)
                     let dragAttrTb = (isAdmin && window.innerWidth >= 992) ? ` draggable="${isDragEnabled}" ondragstart="handleDragStart(event, ${sheetRowIndexDrag})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndexDrag}, '${currentSheetName}')" style="${dragStyleTb}"` : '';
 
                     let adminMinigameBtns = '';
@@ -1083,7 +1079,6 @@ headHtml += `<th style="width: 130px;" class="text-center">Tiến độ</th><th 
                         let escapedCells = row.map(c => String(c || '').replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, ""));
                         while(escapedCells.length < 7) escapedCells.push(''); 
                         
-                        // Fix giao diện: Đổi thành lớp mờ phủ toàn bộ card để xếp 4 nút 2x2 ngay chính giữa
                         adminMinigameBtns = `
                         <div class="admin-action-col d-none position-absolute w-100 h-100" style="top: 0; left: 0; z-index: 10; pointer-events: none;">
                             <div class="d-flex flex-column justify-content-center align-items-center gap-2 w-100 h-100 p-2" style="background: rgba(255,255,255,0.85); border-radius: 12px; border: 2px dashed var(--accent-red); pointer-events: auto;" onclick="event.stopPropagation();">
@@ -1099,14 +1094,38 @@ headHtml += `<th style="width: 130px;" class="text-center">Tiến độ</th><th 
                         </div>`;
                     }
 
-                    // Bao bọc toàn bộ thẻ bằng thẻ div có class "drag-handle-row" để kích hoạt tính năng kéo thẻ
+                    // --- BẮT ĐẦU: XỬ LÝ TIẾN ĐỘ & NOTE CHO MINIGAME ---
+                    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+                    let progVal = localStorage.getItem(`prog_${mssv}_${currentSheetName}_${sheetRowIndexDrag}`) || 'white';
+                    let bgProgColor = getProgressColor(progVal);
+
+                    let noteData = JSON.parse(localStorage.getItem(`note_${mssv}_${currentSheetName}_${sheetRowIndexDrag}`));
+                    let hasNote = noteData && noteData.content && noteData.content.trim() !== '';
+
+                    let noteBtnClass = hasNote ? 'btn-primary text-white' : 'btn-outline-secondary bg-white';
+                    let noteBtnIcon = hasNote ? '<i class="fa-solid fa-clipboard-check fs-6"></i>' : '<i class="fa-regular fa-clipboard fs-6"></i>';
+
+                    let extraControls = `
+                    <div class="d-flex align-items-center justify-content-between mt-2 gap-2 w-100">
+                        <select class="form-select form-select-sm fw-bold border-secondary shadow-sm flex-grow-1" style="background-color: ${bgProgColor}; color: #334155; border-radius: 8px; font-size: 12px; cursor: pointer; padding: 2px 10px;" onchange="updateProgress(this, '${currentSheetName}', ${sheetRowIndexDrag})">
+                            <option value="white" ${progVal === 'white' ? 'selected' : ''}>Chưa làm</option>
+                            <option value="yellow" ${progVal === 'yellow' ? 'selected' : ''}>Đang làm</option>
+                            <option value="green" ${progVal === 'green' ? 'selected' : ''}>Đã xong</option>
+                        </select>
+                        <button id="btnNote_${sheetRowIndexDrag}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center flex-shrink-0" style="border-radius: 8px; width: 30px; height: 26px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', ${sheetRowIndexDrag})" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
+                            ${noteBtnIcon}
+                        </button>
+                    </div>`;
+                    // --- KẾT THÚC ---
+
                     examCardsHtml += `
-                    <div class="position-relative drag-handle-row" ${dragAttrTb} style="height: 100%;">
+                    <div class="position-relative drag-handle-row d-flex flex-column h-100" ${dragAttrTb}>
                         ${adminMinigameBtns}
-                        <a href="javascript:void(0)" onclick="setDetailedView('${trackStr}'); openDocumentViewer('${linkUrl}', '${safeTitle}')" class="card-minigame-box" title="${titleText}">
+                        <a href="javascript:void(0)" onclick="setDetailedView('${trackStr}'); openDocumentViewer('${linkUrl}', '${safeTitle}')" class="card-minigame-box flex-grow-1" title="${titleText}" style="margin-bottom: 0;">
                             ${imgDisplayHtml}
                             <div class="card-minigame-title">${titleText}</div>
                         </a>
+                        ${extraControls}
                     </div>`;
                     return; 
                 }
