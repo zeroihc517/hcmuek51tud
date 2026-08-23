@@ -2066,3 +2066,192 @@ function syncLearningDataToServer() {
         console.error("Lỗi đồng bộ:", err);
     });
 }
+
+// ========================================================
+// TÍNH NĂNG RÀNG BUỘC TOÀN MÀN HÌNH & CHẶN MỞ TAB MỚI (V4)
+// ========================================================
+
+let isEnforcedFullscreen = false;
+let pendingUrlToOpen = "";
+
+// 1. Bảng 1: Cảnh báo khi bấm mở link (ChatGPT, Gemini...)
+const linkWarningModalHtml = `
+<div class="modal fade" id="linkWarningModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" style="z-index: 10600;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header text-white" style="background-color: #f59e0b;">
+                <h6 class="modal-title fw-bold text-uppercase"><i class="fa-solid fa-triangle-exclamation fa-fade me-2"></i>Cảnh Báo Chuyển Tab</h6>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle" style="width: 70px; height: 70px; background-color: #fef3c7; color: #f59e0b; font-size: 32px;">
+                        <i class="fa-solid fa-up-right-from-square"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2 text-warning-emphasis" style="font-size: 18px;">Bạn sắp mở một liên kết ngoài!</h5>
+                <p class="text-secondary mb-3" style="font-size: 15px; line-height: 1.6;">
+                    Việc mở ChatGPT, Gemini hoặc liên kết khác sẽ chuyển bạn sang Tab mới. Bạn có chắc chắn muốn mở không?
+                </p>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-center gap-2 pb-4 bg-light">
+                <button type="button" class="btn btn-light fw-bold px-4 py-2" style="border-radius: 50px; border: 1.5px solid #cbd5e1;" data-bs-dismiss="modal">Hủy, ở lại học</button>
+                <button type="button" class="btn text-white fw-bold px-4 py-2" id="btnConfirmOpenLink" style="background-color: #f59e0b; border-radius: 50px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);">
+                    <i class="fa-solid fa-check me-1"></i> Đồng ý mở
+                </button>
+            </div>
+        </div>
+    </div>
+</div>`;
+
+// 2. Bảng 2: Bắt quả tang khi lén sang tab khác và quay về
+const returnStudyModalHtml = `
+<div class="modal fade" id="returnStudyModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" style="z-index: 10605;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header text-white" style="background-color: #e61d4a;">
+                <h6 class="modal-title fw-bold text-uppercase"><i class="fa-solid fa-bell fa-shake me-2"></i>Hệ thống ghi nhận</h6>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle" style="width: 70px; height: 70px; background-color: #fff1f2; color: #e61d4a; font-size: 32px;">
+                        <i class="fa-solid fa-person-walking-arrow-right"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2 text-danger" style="font-size: 18px;">Bạn vừa rời khỏi bài học!</h5>
+                <p class="text-secondary mb-3" style="font-size: 15px; line-height: 1.6;">
+                    Vui lòng nhấn xác nhận để bung toàn màn hình và tiếp tục quá trình học tập.
+                </p>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-center gap-2 pb-4 bg-light">
+                <button type="button" class="btn btn-light fw-bold px-4 py-2" style="border-radius: 50px; border: 1.5px solid #cbd5e1;" id="btnCancelStudy">Kết thúc bài học</button>
+                <button type="button" class="btn text-white fw-bold px-4 py-2" id="btnResumeStudy" style="background-color: #0f4c81; border-radius: 50px; box-shadow: 0 4px 12px rgba(15, 76, 129, 0.25);">
+                    <i class="fa-solid fa-expand me-1"></i> Quay lại học tập
+                </button>
+            </div>
+        </div>
+    </div>
+</div>`;
+
+$('body').append(linkWarningModalHtml).append(returnStudyModalHtml);
+
+// 3. Hàm tiện ích
+function isTimerActive() {
+    let targetStr = localStorage.getItem('user_countdown_target');
+    return targetStr && parseInt(targetStr) > Date.now();
+}
+
+function enterFullScreen() {
+    let elem = document.documentElement;
+    if (elem.requestFullscreen) { elem.requestFullscreen().catch(e => {}); } 
+    else if (elem.webkitRequestFullscreen) { elem.webkitRequestFullscreen().catch(e => {}); }
+}
+
+function exitFullScreen() {
+    if (document.fullscreenElement || document.webkitFullscreenElement) {
+        if (document.exitFullscreen) { document.exitFullscreen().catch(e => {}); } 
+        else if (document.webkitExitFullscreen) { document.webkitExitFullscreen().catch(e => {}); }
+    }
+}
+
+// 4. Kích hoạt full screen tự động khi mở tài liệu
+if (typeof window.openDocumentViewer !== 'undefined') {
+    const originalOpenDocumentViewer = window.openDocumentViewer;
+    window.openDocumentViewer = function(url, title) {
+        originalOpenDocumentViewer(url, title);
+        if (isTimerActive()) {
+            isEnforcedFullscreen = true;
+            enterFullScreen();
+        }
+    };
+}
+
+$(document).ready(function() {
+    // --- NÚT ĐỒNG Ý MỞ LINK CHATGPT/GEMINI ---
+    $('#btnConfirmOpenLink').on('click', function() {
+        $('#linkWarningModal').modal('hide');
+        if (pendingUrlToOpen) {
+            window.open(pendingUrlToOpen, '_blank');
+            pendingUrlToOpen = "";
+        }
+    });
+
+    // --- NÚT QUAY LẠI HỌC (BUNG FULL MÀN HÌNH) ---
+    $('#btnResumeStudy').on('click', function() {
+        $('#returnStudyModal').modal('hide');
+        enterFullScreen();
+    });
+
+    // --- NÚT KẾT THÚC BÀI HỌC (NẾU KHÔNG MUỐN HỌC NỮA) ---
+    $('#btnCancelStudy').on('click', function() {
+        $('#returnStudyModal').modal('hide');
+        isEnforcedFullscreen = false;
+        exitFullScreen();
+        $('#documentViewerModal').modal('hide'); // Đóng iframe bài học
+    });
+
+    $('#documentViewerModal').on('hidden.bs.modal', function () {
+        isEnforcedFullscreen = false;
+        exitFullScreen();
+    });
+
+    // 5. Đánh chặn Click vào link ChatGPT, Gemini và nút "Mở tab mới"
+    $('#documentViewerModal .modal-header').on('click', 'a[target="_blank"], button#btnOpenInNewTab', function(e) {
+        if (isEnforcedFullscreen && isTimerActive()) {
+            e.preventDefault(); // Chặn tức thì
+            
+            let url = $(this).attr('href');
+            if ($(this).attr('id') === 'btnOpenInNewTab') {
+                url = $('#docViewerIframe').attr('src');
+            }
+            
+            if (url && url !== '#') {
+                pendingUrlToOpen = url;
+                $('#linkWarningModal').modal('show'); 
+            }
+        }
+    });
+    
+    // Nếu sinh viên bấm vào menu trái (chuyển mục khác) trong lúc học -> Hiện bảng bắt quay lại
+    $(document).on('click', 'a, button, .btn-course', function(e) {
+        if (isEnforcedFullscreen && isTimerActive()) {
+            // Cho phép các thao tác nội bộ trong các bảng Modal
+            if ($(this).closest('#documentViewerModal, #linkWarningModal, #returnStudyModal').length > 0) return; 
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            $('#returnStudyModal').modal('show');
+            return false;
+        }
+    });
+});
+
+// 6. Xử lý khi sinh viên LÉN SANG TAB KHÁC
+document.addEventListener("visibilitychange", function() {
+    if (!isEnforcedFullscreen || !isTimerActive()) return;
+
+    if (document.hidden) {
+        // Sinh viên rời tab -> Trình duyệt tự tắt Full màn hình, ta cắm cờ vào bộ nhớ
+        exitFullScreen();
+        localStorage.setItem('tab_switched_during_study', 'true');
+    } else {
+        // Sinh viên quay lại tab -> Hiện bảng tự tạo bắt họ nhấn nút
+        if (localStorage.getItem('tab_switched_during_study') === 'true') {
+            localStorage.removeItem('tab_switched_during_study');
+            setTimeout(() => {
+                $('#returnStudyModal').modal('show');
+            }, 300);
+        }
+    }
+});
+
+// 7. Gỡ bỏ mọi ràng buộc khi tắt hẹn giờ
+if (typeof window.cancelUserCountdown !== 'undefined') {
+    const originalCancelUserCountdown = window.cancelUserCountdown;
+    window.cancelUserCountdown = function() {
+        originalCancelUserCountdown();
+        isEnforcedFullscreen = false;
+        exitFullScreen();
+        $('#returnStudyModal').modal('hide');
+        $('#linkWarningModal').modal('hide');
+    };
+}
