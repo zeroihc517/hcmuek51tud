@@ -2068,13 +2068,14 @@ function syncLearningDataToServer() {
 }
 
 // ========================================================
-// TÍNH NĂNG RÀNG BUỘC TOÀN MÀN HÌNH & CHẶN MỞ TAB MỚI (V4)
+// TÍNH NĂNG RÀNG BUỘC TOÀN MÀN HÌNH & CHẶN MỞ TAB MỚI (V5)
 // ========================================================
 
 let isEnforcedFullscreen = false;
 let pendingUrlToOpen = "";
+let allowLessonClose = false; // Biến cờ cho phép đóng bài học
 
-// 1. Bảng 1: Cảnh báo khi bấm mở link (ChatGPT, Gemini...)
+// 1. Bảng 1: Cảnh báo khi bấm mở link ngoài (ChatGPT, Gemini...)
 const linkWarningModalHtml = `
 <div class="modal fade" id="linkWarningModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" style="z-index: 10600;">
     <div class="modal-dialog modal-dialog-centered">
@@ -2103,7 +2104,36 @@ const linkWarningModalHtml = `
     </div>
 </div>`;
 
-// 2. Bảng 2: Bắt quả tang khi lén sang tab khác và quay về
+// 2. Bảng 2: Cảnh báo khi bấm nút X đóng bài học
+const closeWarningModalHtml = `
+<div class="modal fade" id="closeWarningModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" style="z-index: 10600;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header text-white" style="background-color: #f59e0b;">
+                <h6 class="modal-title fw-bold text-uppercase"><i class="fa-solid fa-triangle-exclamation fa-fade me-2"></i>Cảnh Báo Đóng Bài Học</h6>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle" style="width: 70px; height: 70px; background-color: #fef3c7; color: #f59e0b; font-size: 32px;">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </div>
+                </div>
+                <h5 class="fw-bold mb-2 text-warning-emphasis" style="font-size: 18px;">Bạn muốn kết thúc bài học?</h5>
+                <p class="text-secondary mb-3" style="font-size: 15px; line-height: 1.6;">
+                    Đồng hồ hẹn giờ vẫn đang chạy. Việc đóng tài liệu này sẽ làm gián đoạn quá trình học tập. Bạn có chắc chắn muốn đóng không?
+                </p>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-center gap-2 pb-4 bg-light">
+                <button type="button" class="btn btn-light fw-bold px-4 py-2" style="border-radius: 50px; border: 1.5px solid #cbd5e1;" data-bs-dismiss="modal">Hủy, ở lại học</button>
+                <button type="button" class="btn text-white fw-bold px-4 py-2" id="btnConfirmCloseLesson" style="background-color: #f59e0b; border-radius: 50px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);">
+                    <i class="fa-solid fa-check me-1"></i> Đồng ý đóng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>`;
+
+// 3. Bảng 3: Bắt quả tang khi lén sang tab khác và quay về
 const returnStudyModalHtml = `
 <div class="modal fade" id="returnStudyModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" style="z-index: 10605;">
     <div class="modal-dialog modal-dialog-centered">
@@ -2119,7 +2149,7 @@ const returnStudyModalHtml = `
                 </div>
                 <h5 class="fw-bold mb-2 text-danger" style="font-size: 18px;">Bạn vừa rời khỏi bài học!</h5>
                 <p class="text-secondary mb-3" style="font-size: 15px; line-height: 1.6;">
-                    Vui lòng nhấn xác nhận để bung toàn màn hình và tiếp tục quá trình học tập.
+                    Hệ thống nhận thấy bạn đã bấm sang mục khác. Vui lòng nhấn xác nhận để bung toàn màn hình và tiếp tục học tập.
                 </p>
             </div>
             <div class="modal-footer border-0 d-flex justify-content-center gap-2 pb-4 bg-light">
@@ -2132,9 +2162,9 @@ const returnStudyModalHtml = `
     </div>
 </div>`;
 
-$('body').append(linkWarningModalHtml).append(returnStudyModalHtml);
+$('body').append(linkWarningModalHtml).append(closeWarningModalHtml).append(returnStudyModalHtml);
 
-// 3. Hàm tiện ích
+// 4. Hàm tiện ích Toàn Màn Hình
 function isTimerActive() {
     let targetStr = localStorage.getItem('user_countdown_target');
     return targetStr && parseInt(targetStr) > Date.now();
@@ -2153,13 +2183,14 @@ function exitFullScreen() {
     }
 }
 
-// 4. Kích hoạt full screen tự động khi mở tài liệu
+// 5. KÍCH HOẠT FULL SCREEN TỰ ĐỘNG KHI MỞ BÀI HỌC
 if (typeof window.openDocumentViewer !== 'undefined') {
     const originalOpenDocumentViewer = window.openDocumentViewer;
     window.openDocumentViewer = function(url, title) {
         originalOpenDocumentViewer(url, title);
         if (isTimerActive()) {
             isEnforcedFullscreen = true;
+            allowLessonClose = false; // Reset cờ chặn đóng
             enterFullScreen();
         }
     };
@@ -2175,26 +2206,48 @@ $(document).ready(function() {
         }
     });
 
-    // --- NÚT QUAY LẠI HỌC (BUNG FULL MÀN HÌNH) ---
+    // --- NÚT ĐỒNG Ý ĐÓNG BÀI HỌC (KHI BẤM NÚT X) ---
+    $('#btnConfirmCloseLesson').on('click', function() {
+        $('#closeWarningModal').modal('hide');
+        allowLessonClose = true; // Mở khóa cho phép đóng Iframe
+        $('#documentViewerModal').modal('hide'); // Đóng iframe bài học thành công
+    });
+
+    // --- NÚT QUAY LẠI HỌC (BUNG FULL MÀN HÌNH SAU KHI LÉN CHUYỂN TAB) ---
     $('#btnResumeStudy').on('click', function() {
         $('#returnStudyModal').modal('hide');
         enterFullScreen();
     });
 
-    // --- NÚT KẾT THÚC BÀI HỌC (NẾU KHÔNG MUỐN HỌC NỮA) ---
+    // --- NÚT KẾT THÚC BÀI HỌC (KHI BỊ BẮT QUẢ TANG MẤT TẬP TRUNG) ---
     $('#btnCancelStudy').on('click', function() {
         $('#returnStudyModal').modal('hide');
         isEnforcedFullscreen = false;
         exitFullScreen();
-        $('#documentViewerModal').modal('hide'); // Đóng iframe bài học
+        
+        allowLessonClose = true; // Cho phép đóng iframe
+        $('#documentViewerModal').modal('hide'); 
     });
 
+    // ========================================================
+    // ĐÁNH CHẶN NÚT ĐÓNG IFRAME (NÚT X HOẶC CLICK RA NGOÀI)
+    // ========================================================
+    $('#documentViewerModal').on('hide.bs.modal', function (e) {
+        // Nếu hẹn giờ đang chạy và Cờ cho phép đóng chưa mở -> Chặn lệnh đóng!
+        if (isEnforcedFullscreen && isTimerActive() && !allowLessonClose) {
+            e.preventDefault(); // Lệnh này chặn Iframe không bị đóng
+            $('#closeWarningModal').modal('show'); // Đẩy bảng cảnh báo Vàng lên
+        }
+    });
+
+    // Khi iframe đã đóng thực sự thành công
     $('#documentViewerModal').on('hidden.bs.modal', function () {
         isEnforcedFullscreen = false;
+        allowLessonClose = false; // Khóa lại cho lần sau
         exitFullScreen();
     });
 
-    // 5. Đánh chặn Click vào link ChatGPT, Gemini và nút "Mở tab mới"
+    // 6. ĐÁNH CHẶN CLICK VÀO LINK CHATGPT, GEMINI
     $('#documentViewerModal .modal-header').on('click', 'a[target="_blank"], button#btnOpenInNewTab', function(e) {
         if (isEnforcedFullscreen && isTimerActive()) {
             e.preventDefault(); // Chặn tức thì
@@ -2211,30 +2264,30 @@ $(document).ready(function() {
         }
     });
     
-    // Nếu sinh viên bấm vào menu trái (chuyển mục khác) trong lúc học -> Hiện bảng bắt quay lại
+    // 7. ĐÁNH CHẶN CLICK CHUYỂN MENU BÊN TRONG WEB
     $(document).on('click', 'a, button, .btn-course', function(e) {
         if (isEnforcedFullscreen && isTimerActive()) {
-            // Cho phép các thao tác nội bộ trong các bảng Modal
-            if ($(this).closest('#documentViewerModal, #linkWarningModal, #returnStudyModal').length > 0) return; 
+            // Cho phép thao tác nội bộ trong Modal để tránh kẹt hệ thống
+            if ($(this).closest('#documentViewerModal, #linkWarningModal, #closeWarningModal, #returnStudyModal').length > 0) return; 
 
             e.preventDefault();
             e.stopImmediatePropagation();
-            $('#returnStudyModal').modal('show');
+            $('#returnStudyModal').modal('show'); // Hiện bảng bắt quay lại
             return false;
         }
     });
 });
 
-// 6. Xử lý khi sinh viên LÉN SANG TAB KHÁC
+// 8. XỬ LÝ KHI SINH VIÊN LÉN SANG TAB TRÌNH DUYỆT KHÁC
 document.addEventListener("visibilitychange", function() {
     if (!isEnforcedFullscreen || !isTimerActive()) return;
 
     if (document.hidden) {
-        // Sinh viên rời tab -> Trình duyệt tự tắt Full màn hình, ta cắm cờ vào bộ nhớ
+        // Rời tab -> Trình duyệt tự tắt Full màn hình, ta cắm cờ
         exitFullScreen();
         localStorage.setItem('tab_switched_during_study', 'true');
     } else {
-        // Sinh viên quay lại tab -> Hiện bảng tự tạo bắt họ nhấn nút
+        // Quay lại tab -> Hiện bảng đỏ bắt nhấn nút
         if (localStorage.getItem('tab_switched_during_study') === 'true') {
             localStorage.removeItem('tab_switched_during_study');
             setTimeout(() => {
@@ -2244,14 +2297,18 @@ document.addEventListener("visibilitychange", function() {
     }
 });
 
-// 7. Gỡ bỏ mọi ràng buộc khi tắt hẹn giờ
+// 9. GỠ BỎ MỌI RÀNG BUỘC KHI TẮT HẸN GIỜ BẰNG TAY HOẶC HẾT GIỜ
 if (typeof window.cancelUserCountdown !== 'undefined') {
     const originalCancelUserCountdown = window.cancelUserCountdown;
     window.cancelUserCountdown = function() {
         originalCancelUserCountdown();
+        
         isEnforcedFullscreen = false;
+        allowLessonClose = true; // Mở khóa
+        
         exitFullScreen();
         $('#returnStudyModal').modal('hide');
         $('#linkWarningModal').modal('hide');
+        $('#closeWarningModal').modal('hide');
     };
 }
