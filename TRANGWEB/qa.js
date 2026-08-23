@@ -1877,3 +1877,192 @@ window.handleTopicSelection = function(type) {
 $(document).ready(function() {
     loadDynamicHocPhanQA();
 });
+// --- BỘ CÔNG CỤ TIẾN ĐỘ & GHI CHÚ BÀI HỌC CÁ NHÂN ---
+
+// 1. Hàm lấy màu nền theo trạng thái tiến độ
+function getProgressColor(val) {
+    if (val === 'yellow') return '#fef08a'; // Vàng nhạt (Còn học)
+    if (val === 'green') return '#bbf7d0';  // Xanh lá (Hoàn thành)
+    return '#ffffff';                       // Trắng (Chưa học)
+}
+
+// 2. Hàm lưu trạng thái tiến độ
+function updateProgress(selectEl, sheetName, rowIndex) {
+    let val = $(selectEl).val();
+    $(selectEl).css('background-color', getProgressColor(val));
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    localStorage.setItem(`prog_${mssv}_${sheetName}_${rowIndex}`, val);
+    
+    // Đẩy lên Server
+    syncLearningDataToServer();
+}
+// --- BỘ SOẠN THẢO RICH TEXT CHO GHI CHÚ CÁ NHÂN ---
+$(document).ready(function() {
+    tinymce.init({
+        selector: '#pnContentEditor',
+        height: 300,
+        menubar: false,
+        plugins: 'lists link table textcolor colorpicker',
+        toolbar: 'undo redo | fontfamily fontsize | bold italic underline strikethrough | forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | table link | removeformat',
+        toolbar_mode: 'wrap',
+        branding: false,
+        setup: function (editor) {
+            editor.on('change', function () {
+                editor.save(); 
+            });
+        }
+    });
+});
+
+// --- CẬP NHẬT LOGIC LƯU/MỞ/XÓA BẰNG TINYMCE ---
+
+// 1. Hàm mở Modal nhập Ghi chú cá nhân
+window.openPersonalNoteModal = function(sheetName, rowIndex) {
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    let noteData = JSON.parse(localStorage.getItem(`note_${mssv}_${sheetName}_${rowIndex}`)) || null;
+    
+    $('#pnSheetName').val(sheetName);
+    $('#pnRowIndex').val(rowIndex);
+    
+    if (noteData && noteData.content) {
+        // Nạp dữ liệu vào khung soạn thảo nâng cao
+        if (tinymce.get('pnContentEditor')) {
+            tinymce.get('pnContentEditor').setContent(noteData.content);
+        } else {
+            $('#pnContentEditor').val(noteData.content);
+        }
+        $('#pnLastUpdated span').text(noteData.updatedAt);
+        $('#pnLastUpdated').removeClass('d-none');
+    } else {
+        if (tinymce.get('pnContentEditor')) {
+            tinymce.get('pnContentEditor').setContent('');
+        } else {
+            $('#pnContentEditor').val('');
+        }
+        $('#pnLastUpdated').addClass('d-none');
+    }
+    $('#personalNoteModal').modal('show');
+};
+
+// 2. Hàm Lưu Ghi chú cá nhân
+window.savePersonalNote = function() {
+    let sheetName = $('#pnSheetName').val();
+    let rowIndex = $('#pnRowIndex').val();
+    
+    // Lấy nội dung từ TinyMCE
+    let content = "";
+    if (tinymce.get('pnContentEditor')) {
+        content = tinymce.get('pnContentEditor').getContent().trim();
+    } else {
+        content = $('#pnContentEditor').val().trim();
+    }
+    
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    let now = new Date();
+    let pad = (n) => String(n).padStart(2, '0');
+    let timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    
+    if (content && content !== "<p></p>") {
+        let noteData = { content: content, updatedAt: timeStr };
+        localStorage.setItem(`note_${mssv}_${sheetName}_${rowIndex}`, JSON.stringify(noteData));
+        alert("Đã lưu ghi chú cá nhân thành công!");
+        
+       $(`#btnNote_${rowIndex}`)
+    .removeClass('btn-outline-secondary')
+    .addClass('btn-primary text-white')
+    .html('<i class="fa-solid fa-clipboard-check fs-6"></i>')
+    .attr('title', 'Xem ghi chú');
+    } else {
+        localStorage.removeItem(`note_${mssv}_${sheetName}_${rowIndex}`);
+        $(`#btnNote_${rowIndex}`).removeClass('btn-primary').addClass('btn-outline-secondary').html('<i class="fa-solid fa-clipboard"></i> Ghi chú');
+    }
+    $('#personalNoteModal').modal('hide');
+    
+    if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+};
+
+// 3. Hàm Xóa Ghi chú cá nhân
+window.deletePersonalNote = function() {
+    let sheetName = $('#pnSheetName').val();
+    let rowIndex = $('#pnRowIndex').val();
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    
+    if (confirm("Bạn có chắc chắn muốn xóa ghi chú này?")) {
+        localStorage.removeItem(`note_${mssv}_${sheetName}_${rowIndex}`);
+        
+        if (tinymce.get('pnContentEditor')) {
+            tinymce.get('pnContentEditor').setContent('');
+        } else {
+            $('#pnContentEditor').val('');
+        }
+        $('#pnLastUpdated').addClass('d-none');
+       $(`#btnNote_${rowIndex}`)
+    .removeClass('btn-primary text-white')
+    .addClass('btn-outline-secondary')
+    .html('<i class="fa-regular fa-clipboard fs-6"></i>')
+    .attr('title', 'Thêm ghi chú');
+        $('#personalNoteModal').modal('hide');
+        
+        if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+    }
+};
+
+
+// 6. Hàm TẢI dữ liệu từ Google Sheets về máy khi sinh viên Đăng nhập
+function fetchLearningDataFromServer() {
+    if (!currentUser || currentUser.isGuest) return;
+
+    $.ajax({
+        url: SCRIPT_URL + "?action=getLearningData&mssv=" + currentUser.mssv,
+        method: "GET",
+        dataType: "json",
+        success: function(res) {
+            if (res && Object.keys(res).length > 0) {
+                // Quét và nạp dữ liệu từ Server vào localStorage của trình duyệt hiện tại
+                if (res.progress) {
+                    for (let key in res.progress) {
+                        localStorage.setItem(key, res.progress[key]);
+                    }
+                }
+                if (res.notes) {
+                    for (let key in res.notes) {
+                        localStorage.setItem(key, JSON.stringify(res.notes[key]));
+                    }
+                }
+                // Tải lại giao diện bảng nếu đang mở để cập nhật màu sắc ngay lập tức
+                if (!$('#courseSection').hasClass('d-none') && typeof currentSheetName !== 'undefined') {
+                    loadDataByHocPhan(currentSheetName);
+                }
+            }
+        }
+    });
+}
+
+// 7. Hàm GỬI dữ liệu từ máy lên Google Sheets (Chạy ngầm)
+function syncLearningDataToServer() {
+    if (!currentUser || currentUser.isGuest) return;
+    
+    let mssv = currentUser.mssv;
+    let learningData = { progress: {}, notes: {} };
+    
+    // Gom tất cả các ghi chú và tiến độ của user này trên máy
+    for (let i = 0; i < localStorage.length; i++) {
+        let key = localStorage.key(i);
+        if (key && key.startsWith(`prog_${mssv}_`)) {
+            learningData.progress[key] = localStorage.getItem(key);
+        } else if (key && key.startsWith(`note_${mssv}_`)) {
+            learningData.notes[key] = JSON.parse(localStorage.getItem(key));
+        }
+    }
+    
+    // Đẩy ngầm lên server (không làm phiền giao diện người dùng)
+    postToGAS({
+        action: "saveLearningData",
+        mssv: mssv,
+        dataStr: JSON.stringify(learningData)
+    }, function(res) {
+        console.log("Đã đồng bộ lên đám mây:", res);
+    }, function(err) {
+        console.error("Lỗi đồng bộ:", err);
+    });
+}

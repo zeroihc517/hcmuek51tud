@@ -2011,7 +2011,41 @@
         </div>
     </div>
 </div>
-    
+    <!-- MODAL GHI CHÚ CÁ NHÂN CHO BÀI HỌC (NÂNG CẤP) -->
+<div class="modal fade" id="personalNoteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg"> <!-- Thêm modal-lg để nới rộng bảng -->
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-clipboard-list me-2"></i>Ghi chú cá nhân</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="pnSheetName">
+                <input type="hidden" id="pnRowIndex">
+                
+                <div class="mb-3">
+                    <label class="fw-bold text-primary mb-2"><i class="fa-solid fa-pen-nib me-1"></i> Nội dung ghi chú</label>
+                    <textarea id="pnContentEditor" class="form-control"></textarea>
+                </div>
+                
+                <div id="pnLastUpdated" class="text-muted small fw-bold mt-2 d-none">
+                    <i class="fa-solid fa-clock-rotate-left me-1"></i> Cập nhật lần cuối: <span></span>
+                </div>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-between bg-light" style="border-radius: 0 0 16px 16px;">
+                <button type="button" class="btn btn-outline-danger fw-bold shadow-sm" style="border-radius: 8px;" onclick="deletePersonalNote()">
+                    <i class="fa-solid fa-trash me-1"></i>Xóa ghi chú
+                </button>
+                <div>
+                    <button type="button" class="btn btn-light fw-bold border shadow-sm" style="border-radius: 8px;" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" onclick="savePersonalNote()">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Lưu ghi chú
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- BẢNG THÔNG BÁO "ĐANG CẬP NHẬT" -->
 <div class="modal fade" id="updatingModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">

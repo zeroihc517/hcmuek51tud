@@ -1021,6 +1021,8 @@ $('#loadingStatus').addClass('d-none');
         let h4 = String(row[3] || 'Ghi chú');
         
         headHtml += `<th style="width: 105px;">${h1}</th><th>${h2}</th><th style="width: 250px;">${h4}</th>`;
+// THÊM 2 CỘT MỚI: TIẾN ĐỘ & GHI CHÚ
+headHtml += `<th style="width: 130px;" class="text-center">Tiến độ</th><th style="width: 120px;" class="text-center">Note cá nhân</th>`;
     }
                     if (isAdmin) headHtml += `<th class="admin-action-col d-none" style="width: 180px; min-width: 180px;">Thao tác</th>`;
                     return; 
@@ -1322,9 +1324,66 @@ if (isUpdating && !isAdmin) {
                     }
 
                     // Ghép vào 3 ô TD hiển thị
-                    bodyHtml += `<td style="font-weight: 600;">${iconPrefix}${c1}</td>`;
-                    bodyHtml += `<td>${finalCol2}</td>`; 
-                    bodyHtml += `<td>${col4Html}</td>`;                }
+                    // Khởi tạo các giá trị Tiến độ & Ghi chú từ localStorage
+// Khởi tạo các giá trị Tiến độ & Ghi chú từ localStorage
+let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+let progKey = `prog_${mssv}_${currentSheetName}_${sheetRowIndex}`;
+let progVal = localStorage.getItem(progKey) || 'white';
+let bgProgColor = getProgressColor(progVal);
+
+let noteKey = `note_${mssv}_${currentSheetName}_${sheetRowIndex}`;
+let noteData = JSON.parse(localStorage.getItem(noteKey));
+let hasNote = noteData && noteData.content && noteData.content.trim() !== '';
+
+let noteBtnClass = hasNote ? 'btn-primary text-white' : 'btn-outline-secondary';
+let noteBtnIcon = hasNote ? '<i class="fa-solid fa-clipboard-check fs-6"></i>' : '<i class="fa-regular fa-clipboard fs-6"></i>';
+
+let tdProg = '';
+let tdNote = '';
+
+// Nhận diện hàng có chữ "Mục tiêu" ở cột STT
+let isMucTieu = firstCellText.includes('mụctiêu');
+
+if (isPart || isChapter || isLesson) {
+    // 1. Hàng "PHẦN": Ẩn hoàn toàn cả Tiến độ và Ghi chú
+    tdProg = '<td></td>';
+    tdNote = '<td></td>';
+    
+} else if (isMucTieu) {
+    // 2. Hàng "CHƯƠNG", "BÀI", "MỤC TIÊU": Ẩn Tiến độ, CHỈ HIỆN Ghi chú
+    tdProg = '<td></td>';
+    tdNote = `
+        <td class="text-center align-middle" onclick="event.stopPropagation();">
+            <button id="btnNote_${sheetRowIndex}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', ${sheetRowIndex})" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
+                ${noteBtnIcon}
+            </button>
+        </td>`;
+        
+} else {
+    // 3. Các hàng Nội dung bình thường: Hiển thị đầy đủ cả Tiến độ và Ghi chú
+    tdProg = `
+        <td class="text-center align-middle" onclick="event.stopPropagation();">
+            <select class="form-select form-select-sm fw-bold border-secondary shadow-sm" style="background-color: ${bgProgColor}; color: #334155; border-radius: 8px; font-size: 13px; cursor: pointer;" onchange="updateProgress(this, '${currentSheetName}', ${sheetRowIndex})">
+                <option value="white" ${progVal === 'white' ? 'selected' : ''}>Chưa học</option>
+                <option value="yellow" ${progVal === 'yellow' ? 'selected' : ''}>Còn học</option>
+                <option value="green" ${progVal === 'green' ? 'selected' : ''}>Đã xong</option>
+            </select>
+        </td>`;
+        
+    tdNote = `
+        <td class="text-center align-middle" onclick="event.stopPropagation();">
+            <button id="btnNote_${sheetRowIndex}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', ${sheetRowIndex})" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
+                ${noteBtnIcon}
+            </button>
+        </td>`;
+}
+
+// Ghép vào các ô TD hiển thị chính
+bodyHtml += `<td style="font-weight: 600;">${iconPrefix}${c1}</td>`;
+bodyHtml += `<td>${finalCol2}</td>`; 
+bodyHtml += `<td>${col4Html}</td>`;
+bodyHtml += tdProg;
+bodyHtml += tdNote;               }
 
                 // (Đoạn Render nút Admin giữ nguyên...)
 
@@ -1438,6 +1497,7 @@ checkNewDatLichGlobal();
 	checkNewDatLichGlobal();
     fetchAndRenderCategories();
     renderUserInfo();
+fetchLearningDataFromServer(); // Đồng bộ tiến độ bài học về máy
 	if (currentUser && currentUser.mssv) {
         $.ajax({
             url: SCRIPT_URL + "?action=getUserProfile&mssv=" + currentUser.mssv,
