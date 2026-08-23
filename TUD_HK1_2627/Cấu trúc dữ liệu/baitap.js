@@ -1088,3 +1088,49 @@ function requireLogin() {
         }
     }
 }
+// HÀM ĐĂNG NHẬP DÀNH RIÊNG CHO TRANG BÀI TẬP
+function loginStudentExercise() {
+    let mssv = $('#txtUserMSSV').val().trim(); 
+    let pass = $('#txtUserPass').val().trim();
+    
+    if (!mssv || !pass) { 
+        $('#userAuthError').removeClass('d-none').text("Vui lòng nhập đầy đủ thông tin!"); 
+        return; 
+    }
+
+    let btn = $('#btnLoginStudent'); 
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang xử lý...').prop('disabled', true);
+    
+    // Gọi hàm postToGAS từ config.js để gửi dữ liệu
+    postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
+        let response = typeof res === 'string' ? JSON.parse(res) : res;
+        
+        if (response.success) {
+            // 1. Lưu thông tin người dùng vào bộ nhớ trình duyệt
+            let currentUser = { 
+                mssv: response.mssv, 
+                name: response.name,
+                chuyenNganh: response.chuyenNganh,
+                khoa: response.khoa,
+                khoaHoc: response.khoaHoc,
+                nhom: response.nhom,
+                avatar: response.avatar || ""
+            };
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            localStorage.removeItem('isAdmin'); // Xóa quyền admin cũ nếu có
+            localStorage.setItem('lastActiveTime', Date.now().toString());
+
+            // 2. Tải lại trang ngay lập tức. Trang bài tập sẽ tự động load lại và nhận diện MSSV.
+            window.location.reload();
+            
+        } else { 
+            // Báo lỗi sai mật khẩu hoặc tài khoản không tồn tại
+            $('#userAuthError').removeClass('d-none').text(response.message); 
+            btn.html('Đăng nhập hệ thống').prop('disabled', false); 
+        }
+    }, function() { 
+        // Báo lỗi mất kết nối mạng
+        $('#userAuthError').removeClass('d-none').text("Lỗi kết nối đến máy chủ!"); 
+        btn.html('Đăng nhập hệ thống').prop('disabled', false); 
+    });
+}

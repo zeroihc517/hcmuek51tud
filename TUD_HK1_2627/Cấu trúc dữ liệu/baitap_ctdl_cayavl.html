@@ -78,6 +78,9 @@
                         <div class="d-flex align-items-center gap-2">
                             <span class="small opacity-75">MSSV:</span>
                             <input type="text" id="txtExerciseMSSV" class="form-control form-control-sm fw-bold border-0 text-center" style="width: 120px; background: rgba(255,255,255,0.2); color: #fff;" readonly>
+				<button type="button" class="btn btn-sm btn-light fw-bold text-primary shadow-sm" onclick="requireLogin()" title="Đăng nhập tài khoản">
+        <i class="fa-solid fa-right-to-bracket"></i>
+    </button>
                         </div>
                     </div>
 <div class="mb-2">
@@ -170,7 +173,31 @@
         </div>
 </div>
     </div>
-
+<!-- MODAL ĐĂNG NHẬP TRỰC TIẾP -->
+<div class="modal fade" id="userAuthModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content auth-modal-content border-0">
+            <div class="auth-header text-center p-4 bg-light rounded-top">
+                <i class="fa-solid fa-graduation-cap fs-1 text-primary mb-2"></i>
+                <h5 class="fw-bold m-0 text-dark">ĐĂNG NHẬP HỆ THỐNG</h5>
+            </div>
+            <div class="modal-body p-4">
+                <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
+                    <input type="text" id="txtUserMSSV" class="form-control" placeholder="Mã số sinh viên (VD: 51.01...)">
+                </div>
+                <div class="input-group mb-3">
+                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                   <input type="password" id="txtUserPass" class="form-control" placeholder="Mật khẩu" onkeypress="if(event.key === 'Enter') loginStudentExercise()">
+                </div>
+                <small class="text-danger text-center d-block d-none mb-3 fw-bold" id="userAuthError"></small>
+                <button type="button" class="btn text-white w-100 fw-bold" style="background-color: #0f4c81;" id="btnLoginStudent" onclick="loginStudentExercise()">
+    Đăng nhập hệ thống
+</button>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Thư viện JS -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
