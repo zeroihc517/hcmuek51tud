@@ -450,14 +450,18 @@ if (sub.code && window.ace) {
     let q = questionsList[currentQuestionIndex];
     
     if (!q || !mssv || mssv === "Khách") {
-        $('#submissionHistoryContainer').html(`
-            <div class="text-center text-muted py-3">
-                <i class="fa-solid fa-lock text-secondary fs-4 mb-2 d-block"></i>
-                Vui lòng đăng nhập tài khoản để xem lịch sử nộp bài cá nhân.
-            </div>
-        `);
-        return;
-    }
+    $('#submissionHistoryContainer').html(`
+        <div class="text-center text-muted py-4">
+            <i class="fa-solid fa-lock text-secondary fs-2 mb-3 d-block"></i>
+            <h6 class="fw-bold text-dark">Chưa đăng nhập</h6>
+            <p class="small mb-3">Vui lòng đăng nhập tài khoản để xem lịch sử nộp bài cá nhân của bạn.</p>
+            <button class="btn text-white fw-bold px-4 py-2 shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" onclick="requireLogin()">
+                <i class="fa-solid fa-right-to-bracket me-2"></i>Đăng nhập ngay
+            </button>
+        </div>
+    `);
+    return;
+}
 
     const processHistoryData = (data) => {
         currentSubmissionsList = [];
@@ -588,10 +592,11 @@ if (sub.code && window.ace) {
                 return;
             }
 
-            if (!mssv || mssv === "Khách") {
-                alert("Vui lòng đăng nhập tài khoản trước khi nộp bài!");
-                return;
-            }
+            if (!studentMssv || studentMssv === "Khách") {
+    requireLogin();
+    return;
+}
+
             if (!theoryText && !rawCode) {
                 alert("Bạn chưa nhập nội dung bài làm!");
                 return;
@@ -1069,4 +1074,17 @@ function goBackToHome() {
     // Cập nhật lại màu sắc đề phòng lúc làm bài có nộp thêm bài mới
     checkCompletedQuestions(); 
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function requireLogin() {
+    // Nếu trang baitap.html có chứa sẵn modal đăng nhập (userAuthModal)
+    if ($('#userAuthModal').length > 0) {
+        $('#userAuthModal').modal('show');
+    } else {
+        // Nếu không có modal, xác nhận và chuyển hướng về trang đăng nhập
+        if (confirm("Phiên làm việc dành cho Khách bị giới hạn. Bạn có muốn chuyển đến trang Đăng nhập ngay bây giờ không?")) {
+            // Đổi 'login.html' thành đường dẫn thực tế đến trang đăng nhập của bạn
+            window.location.href = '../../login.html'; 
+        }
+    }
 }
