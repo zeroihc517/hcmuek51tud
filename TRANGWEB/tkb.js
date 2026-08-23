@@ -2302,6 +2302,29 @@ window.openExportCalendarModal = function() {
     $('input[name="exportDataOption"]').off('change').on('change', window.renderSyncCourseList);
 
     window.renderSyncCourseList();
+let isRootAdmin = (currentUser && String(currentUser.mssv).trim() === "51.01.108.008");
+    
+    let directSyncButtonHtml = '';
+    if (isRootAdmin) {
+        // Chỉ hiện nút này nếu là admin 51.01.108.008
+        directSyncButtonHtml = `
+            <button type="button" class="btn text-white fw-bold px-4 flex-grow-1" style="background-color: #16a34a; border-radius: 50px;" id="btnDirectSync" onclick="processDirectCalendarSync()">
+                <i class="fa-brands fa-google me-2"></i> Sao chép trực tiếp qua Google
+            </button>
+        `;
+    }
+
+    // Tự động render lại phần chân Modal (.modal-footer) cho phù hợp với phân quyền
+    let modalFooterHtml = `
+        <button type="button" class="btn btn-light fw-bold px-4" data-bs-dismiss="modal" style="border-radius: 50px;">Hủy</button>
+        ${directSyncButtonHtml}
+        <button type="button" class="btn text-white fw-bold px-4 flex-grow-1" style="background-color: #0f4c81; border-radius: 50px;" onclick="processExportCalendar()">
+            <i class="fa-solid fa-file-export me-2"></i> Tải File (.ics)
+        </button>
+    `;
+    
+    // Gắn vào phần footer của modal xuất lịch trong DOM
+    $('#exportCalendarModal .modal-footer').html(modalFooterHtml);
     $('#exportCalendarModal').modal('show');
 };
 
@@ -2856,3 +2879,37 @@ window.exportHocNhomTKBToImage = function(event) {
         });
     }, 100); 
 };
+let tokenClient;
+let studentAccessToken = null;
+
+// Khởi tạo OAuth 2.0 Client khi trang load xong
+window.onload = function () {
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com', // Thay Client ID của bạn vào đây
+    scope: 'https://www.googleapis.com/auth/calendar.events', // Quyền thao tác lịch
+    callback: (tokenResponse) => {
+      if (tokenResponse && tokenResponse.access_token) {
+        studentAccessToken = tokenResponse.access_token;
+        // Gọi hàm đồng bộ lịch của bạn với token của sinh viên
+        syncToStudentCalendar(studentAccessToken); 
+      }
+    },
+  });
+};
+
+// Hàm kích hoạt khi sinh viên bấm nút Đồng bộ
+function handleSyncCalendarClick() {
+  if (!studentAccessToken) {
+    // Sẽ bật popup yêu cầu sinh viên đăng nhập và cấp quyền Google Calendar
+    tokenClient.requestAccessToken();
+  } else {
+    syncToStudentCalendar(studentAccessToken);
+  }
+}
+
+// Gửi token xuống Backend hoặc dùng trực tiếp fetch API để thêm lịch
+function syncToStudentCalendar(token) {
+  // Logic gọi API đến https://www.googleapis.com/calendar/v3/calendars/primary/events
+  // Đính kèm header: Authorization: 'Bearer ' + token
+  console.log("Đã lấy được token của SV, đang tiến hành đồng bộ...");
+}
