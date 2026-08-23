@@ -218,23 +218,21 @@ body {
     color: #ef4444;
 }
 
-/* =========================================================
-   BẢNG THÔNG BÁO BÊN PHẢI
-========================================================= *//* Tìm và thay thế các class tương ứng bằng đoạn CSS này */
 
 .maintenance-banner-premium {
     position: fixed;
     top: 50%; right: 25px;
     transform: translateY(-50%);
-    width: 380px; /* Mở rộng bảng từ 340px lên 380px để chứa chữ to */
-    height: 480px; max-height: 80vh;
+    width: 400px; /* Tăng chiều rộng lên 420px (hoặc tùy chỉnh theo ý bạn) */
+    height: 680px; /* Tăng chiều cao khung bảng thông báo */
+    max-height: 85vh;
     background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.5);
     border-radius: 20px;
     color: #1e293b; 
-    padding: 24px; /* Tăng lề bên trong lên một chút */
-    font-size: 16px; /* Tăng cỡ chữ cơ bản từ 14px lên 16px */
+    padding: 28px; /* Tăng padding để có khoảng thở rộng rãi hơn */
+    font-size: 16px;
     font-weight: 500;
     z-index: 10999;
     overflow: hidden;
@@ -257,10 +255,11 @@ body {
     display: flex; flex-direction: column;
     background: #f1f5f9; 
     border-radius: 12px;
-    padding: 16px; margin-bottom: 15px;
+    padding: 18px; /* Tăng padding bên trong từng khối thông báo */
+    margin-bottom: 18px; /* Khoảng cách giữa các thông báo */
     border: 1px solid #e2e8f0;
-    line-height: 1.6; /* Giãn dòng ra một chút cho dễ đọc */
-    font-size: 15px; /* Cỡ chữ nội dung thông báo to hơn */
+    line-height: 1.6;
+    font-size: 15px;
 }
 
 .maintenance-text strong {
@@ -343,12 +342,39 @@ body {
            
             <div class="maintenance-text">
                 <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 1:</strong>
-                <span>Từ 11:00–16:00, Google Apps Script có thể xử lý chậm khiến website phản hồi chậm hoặc lag. Mong các bạn thông cảm, hạn chế thao tác liên tục và thử lại sau khi hệ thống ổn định.</span>
+                <span>Từ 13:00–16:00, Google Apps Script có thể xử lý chậm khiến website phản hồi chậm hoặc lag. Mong các bạn thông cảm, hạn chế thao tác liên tục và thử lại sau khi hệ thống ổn định.</span>
             </div>
 
 		<div class="maintenance-text">
                 <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 2:</strong>
                 <span>Từ ngày 23/08/2026, các bạn có thể truy cập website vào ban đêm để học tập và sử dụng các tính năng trên web một cách thuận tiện hơn.</span>
+            </div>
+<div class="maintenance-text">
+                <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 3:</strong>
+                <span>Do tính bảo mật của Google Scprits nên không thể đồng bộ trực tiếp TKB qua Google Lịch, bạn chỉ có thể dùng file .ics để đồng bộ TKB</span>
+            </div>
+<div class="maintenance-text">
+                <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 4:</strong>
+                <span>Đã thêm tính năng Cảnh báo khi thoát khỏi trình duyệt (áp dụng khi bật đồng hồ đếm ngược)</span>
+            </div>
+
+
+            <div class="maintenance-text">
+                <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 1:</strong>
+                <span>Từ 13:00–16:00, Google Apps Script có thể xử lý chậm khiến website phản hồi chậm hoặc lag. Mong các bạn thông cảm, hạn chế thao tác liên tục và thử lại sau khi hệ thống ổn định.</span>
+            </div>
+
+		<div class="maintenance-text">
+                <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 2:</strong>
+                <span>Từ ngày 23/08/2026, các bạn có thể truy cập website vào ban đêm để học tập và sử dụng các tính năng trên web một cách thuận tiện hơn.</span>
+            </div>
+<div class="maintenance-text">
+                <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 3:</strong>
+                <span>Do tính bảo mật của Google Scprits nên không thể đồng bộ trực tiếp TKB qua Google Lịch, bạn chỉ có thể dùng file .ics để đồng bộ TKB</span>
+            </div>
+<div class="maintenance-text">
+                <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 4:</strong>
+                <span>Đã thêm tính năng Cảnh báo khi thoát khỏi trình duyệt (áp dụng khi bật đồng hồ đếm ngược)</span>
             </div>
 
         </div>
