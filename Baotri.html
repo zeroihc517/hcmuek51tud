@@ -1,334 +1,213 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bảo trì hệ thống - Đừng cố quá, đi ngủ đi!</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        min-height: 100vh;
-        overflow: hidden;
-        background: #090d16;
-        color: #f8fafc;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bảo trì hệ thống</title>
+  <style>
+    :root{
+      --bg: #0f172a;        /* slate-900 */
+      --card: #111827;      /* gray-900 */
+      --text: #e5e7eb;      /* gray-200 */
+      --muted:#9ca3af;      /* gray-400 */
+      --accent:#38bdf8;     /* sky-400 */
+      --ring:#1f2937;       /* gray-800 */
     }
-
-    /* Ambient Background Glow (Nền tối huyền ảo) */
-    .bg-blob {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(110px);
-        opacity: 0.45;
-        animation: float 12s ease-in-out infinite alternate;
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#f1f5f9;       /* slate-100 */
+        --card:#ffffff;
+        --text:#0f172a;
+        --muted:#475569;
+        --accent:#0284c7;   /* sky-600 */
+        --ring:#e5e7eb;
+      }
     }
-    .blob-1 {
-        width: 600px;
-        height: 600px;
-        background: #3b82f6;
-        top: -150px;
-        left: -150px;
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      background: radial-gradient(1200px 800px at 50% -10%, rgba(56,189,248,.18), transparent 60%) , var(--bg);
+      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      display:flex; align-items:center; justify-content:center;
+      padding: 24px;
     }
-    .blob-2 {
-        width: 550px;
-        height: 550px;
-        background: #8b5cf6;
-        bottom: -150px;
-        right: -150px;
-        animation-delay: -6s;
+    .card{
+      width: 100%;
+      max-width: 620px;
+      background: var(--card);
+      border: 1px solid var(--ring);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      padding: 32px 28px;
+      text-align: center;
     }
-    .blob-3 {
-        width: 450px;
-        height: 450px;
-        background: #06b6d4;
-        top: 30%;
-        left: 50%;
-        animation-delay: -3s;
+    .icon{
+      width: 84px; height: 84px; margin: 0 auto 16px;
+      display:block;
+      filter: drop-shadow(0 6px 16px rgba(2,132,199,.25));
     }
-    @keyframes float {
-        0% { transform: translate(0, 0) scale(1); }
-        100% { transform: translate(50px, 40px) scale(1.15); }
+    .gear{ transform-origin: 50% 50%; animation: slowspin 8s linear infinite; }
+    @keyframes slowspin{ to{ transform: rotate(360deg);} }
+    h1{
+      font-size: clamp(22px, 3.4vw, 28px);
+      margin: 0 0 10px;
+      letter-spacing: .2px;
     }
-
-    /* Card Nền Tối Glassmorphism - RỘNG HƠN (max-width 880px) */
-    .card {
-        position: relative;
-        z-index: 2;
-        width: min(92%, 880px);
-        padding: 50px 48px;
-        border-radius: 36px;
-        background: rgba(15, 23, 42, 0.7);
-        backdrop-filter: blur(25px);
-        -webkit-backdrop-filter: blur(25px);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-        text-align: center;
+    p{
+      color: var(--muted);
+      margin: 0;
+      font-size: clamp(14px, 2.4vw, 16px);
+      line-height: 1.6;
     }
-
-    /* Icon Ngủ / Bảo trì TO HƠN */
-    .sleep-icon {
-        font-size: 95px;
-        display: inline-block;
-        animation: pulseSleep 3s ease-in-out infinite;
-        filter: drop-shadow(0 0 25px rgba(99, 102, 241, 0.5));
-        margin-bottom: 12px;
+    .time-badge{
+      display: inline-block;
+      margin: 16px 0 10px;
+      padding: 8px 18px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px dashed var(--accent);
+      border-radius: 50px;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 15px;
     }
-    @keyframes pulseSleep {
-        0%, 100% { transform: scale(1) rotate(-5deg); }
-        50% { transform: scale(1.08) rotate(5deg); }
+    .countdown-text{
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 8px;
     }
-
-    /* Tiêu đề TO HƠN */
-    h1 {
-        font-size: 42px;
-        font-weight: 800;
-        color: #ffffff;
-        margin-bottom: 18px;
-        letter-spacing: -0.5px;
-        text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    .btn{
+      margin-top: 14px;
+      display:inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 12px;
+      border: 1px solid var(--accent);
+      background: linear-gradient(180deg, rgba(56,189,248,.18), rgba(56,189,248,.08));
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
     }
-
-    /* Thông báo nghiêm túc TO HƠN & RÕ HƠN */
-    .sub {
-        color: #cbd5e1;
-        font-size: 17px;
-        line-height: 1.7;
-        background: rgba(255, 255, 255, 0.04);
-        padding: 16px 28px;
-        border-radius: 18px;
-        margin-bottom: 24px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+    .btn:hover{
+      background: rgba(56,189,248,.25);
+      transform: translateY(-1px);
     }
-
-    /* Badge Hài hước nhắc nhở TO HƠN */
-    .funny-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        justify-content: center;
-        margin-bottom: 24px;
+    .tips{
+      margin-top: 20px;
+      font-size: 13px;
+      color: var(--muted);
+      opacity: .85;
     }
-    .tag {
-        font-size: 15px;
-        font-weight: 700;
-        padding: 10px 22px;
-        border-radius: 25px;
-        backdrop-filter: blur(10px);
-        transition: transform 0.2s ease;
-    }
-    .tag:hover {
-        transform: translateY(-2px);
-    }
-    .tag-1 { color: #fecdd3; background: rgba(225, 29, 72, 0.2); border: 1px solid rgba(244, 63, 94, 0.4); }
-    .tag-2 { color: #fef08a; background: rgba(217, 119, 6, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); }
-    .tag-3 { color: #bfdbfe; background: rgba(37, 99, 235, 0.2); border: 1px solid rgba(59, 130, 246, 0.4); }
-    .tag-4 { color: #ddd6fe; background: rgba(124, 58, 237, 0.2); border: 1px solid rgba(139, 92, 246, 0.4); }
-
-    /* Slogan truyền cảm hứng TO HƠN */
-    .slogan-box {
-        margin: 20px 0 28px 0;
-        font-size: 17px;
-        font-style: italic;
-        color: #e0f2fe;
-        background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(139, 92, 246, 0.12));
-        padding: 22px 30px;
-        border-radius: 20px;
-        border-left: 5px solid #38bdf8;
-        line-height: 1.7;
-        text-align: left;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    }
-
-    /* Đồng hồ đếm ngược TO HƠN */
-    .count {
-        margin: 22px 0;
-        font-size: 32px;
-        font-weight: 800;
-        color: #38bdf8;
-        letter-spacing: 1px;
-        background: rgba(15, 23, 42, 0.8);
-        display: inline-block;
-        padding: 14px 36px;
-        border-radius: 50px;
-        box-shadow: 0 0 30px rgba(56, 189, 248, 0.25);
-        border: 1px solid rgba(56, 189, 248, 0.3);
-    }
-
-    /* Button quay lại TO HƠN */
-    a {
-        display: inline-block;
-        padding: 16px 40px;
-        border-radius: 18px;
-        background: linear-gradient(135deg, #2563eb, #7c3aed);
-        color: #fff;
-        text-decoration: none;
-        font-weight: 700;
-        font-size: 17px;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 30px rgba(124, 58, 237, 0.4);
-    }
-    a:hover {
-        transform: translateY(-3px) scale(1.03);
-        box-shadow: 0 15px 40px rgba(124, 58, 237, 0.6);
-    }
-
-    small {
-        display: block;
-        margin-top: 26px;
-        font-size: 14px;
-        color: #64748b;
-        font-weight: 600;
-    }
-
-    canvas { position: fixed; inset: 0; pointer-events: none; }
-    </style>
+  </style>
 </head>
 <body>
-    <canvas id="p"></canvas>
-    
-    <!-- Background Blobs Nền Tối -->
-    <div class="bg-blob blob-1"></div>
-    <div class="bg-blob blob-2"></div>
-    <div class="bg-blob blob-3"></div>
+  <main class="card" role="main" aria-labelledby="maintitle">
+    <svg class="icon" viewBox="0 0 128 128" aria-hidden="true">
+      <circle cx="64" cy="64" r="48" fill="rgba(56,189,248,.10)" stroke="var(--accent)" stroke-width="2"/>
+      <g class="gear" fill="none" stroke="var(--accent)" stroke-width="4">
+        <circle cx="64" cy="64" r="16"/>
+        <g>
+          <path d="M64 34 v-10"/>
+          <path d="M64 104 v10"/>
+          <path d="M34 64 h-10"/>
+          <path d="M104 64 h10"/>
+          <path d="M44 44 l-7 -7"/>
+          <path d="M91 91 l7 7"/>
+          <path d="M44 84 l-7 7"/>
+          <path d="M91 37 l7 -7"/>
+        </g>
+      </g>
+      <path d="M28 90c-2 2-2 5 0 7l3 3c2 2 5 2 7 0l30-30c4 2 9 1 12-2 4-4 4-10 0-14-3-3-8-4-12-2l-30 30z"
+            fill="currentColor" style="color: var(--text); opacity:.9"/>
+    </svg>
 
-    <div class="card">
-        <div class="sleep-icon">😴💤</div>
-        <h1>Thông Báo Bảo Trì Hệ Thống</h1>
-        
-        <!-- Thông báo bảo trì nghiêm túc -->
-        <div class="sub">
-            Hệ thống thực hiện bảo trì định kỳ từ 01:00 đến 05:00 sáng hàng ngày nhằm nâng cao chất lượng dịch vụ và tối ưu hóa trải nghiệm người dùng.
-        </div>
+    <h1 id="maintitle">Hệ thống đang bảo trì</h1>
+    <p>Hệ thống đang được nâng cấp để phục vụ bạn tốt hơn.</p>
 
-        <!-- Các câu tag hài hước nhắc nhở -->
-        <div class="funny-tags">
-            <span class="tag tag-1">🚫 Đừng cố quá kẻo "quá cố"!</span>
-            <span class="tag tag-2">📖 Giờ này đừng học nữa!</span>
-            <span class="tag tag-3">🛌 Lên giường đi ngủ đi bạn ơi!</span>
-            <span class="tag tag-4">🌙 Sức khỏe là quan trọng nhất</span>
-        </div>
+    <!-- Hiển thị thời gian lấy từ LocalStorage -->
+    <div>
+      <span class="time-badge" id="lblMaintenanceTime">Quay lại lúc: Đang cập nhật...</span>
+    </div>
+    <span class="countdown-text" id="lblCountdownRemaining"></span>
 
-        <!-- Ô Slogan truyền cảm hứng -->
-        <div class="slogan-box">
-            "Đừng nỗ lực lấy một tấm bằng chỉ để người khác trầm trồ. Hãy lấy nó để khi đứng trước những người tài giỏi, bạn đủ năng lực và tự tin bắt tay họ." 🤝
-        </div>
-
-        <!-- Bộ đếm ngược -->
-        <div class="count" id="c">⏳ Đang tính thời gian...</div>
-
-        <div>
-            <a href="appliedmathematics.html" id="btnReturn">Vui lòng quay lại sau</a>
-        </div>
-
-        <small>© 2026 Applied Mathematics • Chúc bạn có một giấc ngủ ngon!</small>
+    <!-- Nút kiểm tra & Vào lại ngay -->
+    <div>
+      <button class="btn" onclick="checkAndRedirect(true)" aria-label="Kiểm tra và vào lại">
+        ↻ Thử vào lại
+      </button>
     </div>
 
-    <!-- 1. Script tạo hiệu ứng sao rơi đêm (Canvas) -->
-    <script>
-        const cv = document.getElementById('p'), x = cv.getContext('2d');
-        function rs() { cv.width = innerWidth; cv.height = innerHeight; }
-        rs(); onresize = rs;
+    <div class="tips" role="note">
+      Hệ thống sẽ tự động chuyển hướng khi hoàn tất bảo trì.
+    </div>
+  </main>
 
-        let pts = [...Array(100)].map(() => ({
-            x: Math.random() * cv.width,
-            y: Math.random() * cv.height,
-            r: Math.random() * 1.8 + 0.5,
-            v: Math.random() * 0.8 + 0.2,
-            o: Math.random() * 0.7 + 0.3
-        }));
+  <script>
+    const savedConfig = JSON.parse(localStorage.getItem("maintenanceConfig") || "{}");
+    const targetUrl = savedConfig.targetUrl || "appliedmathematics.html";
+    const endTime = savedConfig.endTime || 0;
+    const textShow = savedConfig.textShow;
 
-        (function a() {
-            x.clearRect(0, 0, cv.width, cv.height);
-            pts.forEach(o => {
-                o.y += o.v;
-                if (o.y > cv.height) { o.y = 0; o.x = Math.random() * cv.width; }
-                x.beginPath();
-                x.arc(o.x, o.y, o.r, 0, Math.PI * 2);
-                x.fillStyle = `rgba(255, 255, 255, ${o.o})`;
-                x.fill();
-            });
-            requestAnimationFrame(a);
-        })();
-    </script>
+    const lblTime = document.getElementById("lblMaintenanceTime");
+    const lblRemaining = document.getElementById("lblCountdownRemaining");
 
-    <!-- 2. Script chống F12, Chuột phải -->
-    <script>
-        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
-        document.onkeydown = function(e) {
-            if (e.keyCode == 123) return false;
-            if (e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
-        };
-    </script>
+    // 1. Hiển thị thông báo mốc thời gian
+    if (textShow) {
+      lblTime.textContent = `Quay lại lúc: ${textShow}`;
+    } else {
+      lblTime.textContent = "Quay lại lúc: Vui lòng thử lại sau";
+    }
 
-    <!-- 3. Script Tự động đếm ngược & Đẩy về trang chủ lúc 6h00 AM -->
-    <script>
-        const mainPage = "appliedmathematics.html"; 
-        const pad = (n) => n.toString().padStart(2, '0');
-
-        function getTargetEndTime() {
-            let configStr = localStorage.getItem("maintenanceConfig");
-            if (configStr) {
-                try {
-                    let parsed = JSON.parse(configStr);
-                    if (parsed.end > Date.now()) return parsed;
-                } catch(e){}
-            }
-
-            // Mốc mở lại lúc 05:00 sáng hoặc 06:00 sáng gần nhất
-            let now = new Date();
-            let target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 6, 0, 0, 0);
-            
-            if (now >= target) {
-                target.setDate(target.getDate() + 1);
-            }
-
-            let textShow = `05:00 Ngày ${pad(target.getDate())}/${pad(target.getMonth() + 1)}/${target.getFullYear()}`;
-            let newConfig = { end: target.getTime(), textShow: textShow };
-            localStorage.setItem("maintenanceConfig", JSON.stringify(newConfig));
-            return newConfig;
+    // 2. Hàm kiểm tra trạng thái và chuyển trang
+    function checkAndRedirect(isManualClick = false) {
+      const now = Date.now();
+      
+      if (!endTime || now >= endTime) {
+        // Đã hết giờ bảo trì -> Xóa config và vào lại trang chủ
+        localStorage.removeItem("maintenanceConfig");
+        window.location.replace(targetUrl);
+      } else {
+        // Chưa hết giờ mà người dùng bấm thử vào lại
+        if (isManualClick) {
+          const diff = Math.ceil((endTime - now) / 1000);
+          const mins = Math.floor(diff / 60);
+          const secs = diff % 60;
+          alert(`Hệ thống vẫn đang bảo trì!\nCòn lại khoảng: ${mins} phút ${secs} giây nữa.`);
         }
+      }
+    }
 
-        function updateCountdown() {
-            const config = getTargetEndTime();
-            const now = Date.now();
-            const diff = config.end - now;
+    // 3. Đếm ngược tự động mỗi giây
+    function updateCountdown() {
+      const now = Date.now();
+      if (!endTime) return;
 
-            // ĐÃ HẾT GIỜ BẢO TRÌ -> Xóa cấu hình và chuyển về Trang Chủ
-            if (diff <= 0) {
-                localStorage.removeItem("maintenanceConfig");
-                location.replace(mainPage);
-                return;
-            }
+      const diff = Math.floor((endTime - now) / 1000);
 
-            // Tính Toán Giờ, Phút, Giây
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      if (diff <= 0) {
+        lblRemaining.textContent = "Đang mở lại hệ thống...";
+        checkAndRedirect(false);
+      } else {
+        const hours = Math.floor(diff / 3600);
+        const mins = Math.floor((diff % 3600) / 60);
+        const secs = diff % 60;
+        
+        let timeStr = "";
+        if (hours > 0) timeStr += `${hours} giờ `;
+        timeStr += `${mins} phút ${secs} giây`;
+        
+        lblRemaining.textContent = `(Tự động mở lại sau: ${timeStr})`;
+      }
+    }
 
-            // Cập nhật bộ đếm
-            const countEl = document.getElementById('c');
-            if (countEl) {
-                countEl.innerHTML = `⏳ Thời gian còn lại: ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
-            }
-
-            // Cập nhật nút bấm
-            const btnReturn = document.getElementById('btnReturn');
-            if (btnReturn) {
-                btnReturn.innerHTML = `Vui lòng quay lại sau<br><span style="display: block; margin-top: 6px; font-size: 13px; font-weight: normal; opacity: 0.9; text-transform: none;">Dự kiến mở lại: ${config.textShow}</span>`;
-            }
-        }
-
-        // Chạy cập nhật ngay khi mở trang
-        updateCountdown();
-
-        // Chạy bộ đếm ngược liên tục mỗi 1 giây
-        setInterval(updateCountdown, 1000);
-    </script>
+    // Khởi chạy vòng lặp kiểm tra
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  </script>
 </body>
 </html>
