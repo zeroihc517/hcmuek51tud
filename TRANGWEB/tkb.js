@@ -376,14 +376,19 @@ function renderTkbToolBar() {
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openManageTkbListModal()"><i class="fa-solid fa-calendar-days text-info"></i> Lịch học</button>
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #dc2626;" onclick="openManageDeadlineListModal()"><i class="fa-solid fa-thumbtack text-warning"></i> Deadline</button>
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openAddTkbModal(false)"><i class="fa-solid fa-plus"></i> Thêm lịch mới</button>
-<button class="btn btn-sm text-white fw-bold" style="background-color: #16a34a;" onclick="openExportCalendarModal()"><i class="fa-solid fa-calendar-plus"></i> Xuất Google Lịch</button>
-<button class="btn btn-sm text-white fw-bold" style="background-color: #10b981;" onclick="exportHocNhomTKBToImage(event)">
+                
+                <!-- NÚT ĐẶT LỊCH HẸN VỪA ĐƯỢC THÊM VÀO -->
+                <button class="btn btn-sm text-white fw-bold" style="background-color: #8b5cf6;" onclick="loadDatLichHenView()"><i class="fa-solid fa-calendar-check"></i> Đặt lịch hẹn</button>
+
+                <button class="btn btn-sm text-white fw-bold" style="background-color: #16a34a;" onclick="openExportCalendarModal()"><i class="fa-solid fa-calendar-plus"></i> Xuất Google Lịch</button>
+                <button class="btn btn-sm text-white fw-bold" style="background-color: #10b981;" onclick="exportHocNhomTKBToImage(event)">
                     <i class="fa-solid fa-camera"></i> Xuất Ảnh
                 </button>
             </div>
         </div>`;
     $('.table-box').before(toolbarHtml);
 }
+
 function getBaseSubjectName(name) {
     if (!name) return "KHÁC";
     
