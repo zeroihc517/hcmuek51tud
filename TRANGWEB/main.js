@@ -2193,10 +2193,22 @@ window.isGpaDataLoaded = false;
 // 1. Hàm trích xuất mã gốc (VD: "2611COMP101301" -> "COMP1013")
 function extractBaseCourseCode(classId) {
     if (!classId) return null;
-    let match = classId.match(/[A-Za-z]{3,4}\d{3,4}/);
-    return match ? match[0].toUpperCase() : null;
-}
+    let upperClassId = String(classId).toUpperCase();
 
+    // ƯU TIÊN 1: Quét trực tiếp xem chuỗi nhập vào có chứa mã học phần nào trong kho CSDL không
+    if (typeof SYSTEM_COURSE_DATABASE !== 'undefined') {
+        for (let course of SYSTEM_COURSE_DATABASE) {
+            if (course.code && upperClassId.includes(course.code.toUpperCase())) {
+                // Chỉ cần trong chuỗi có chứa mã nguyên vẹn không bị tách rời là lấy luôn
+                return course.code.toUpperCase();
+            }
+        }
+    }
+
+    // ƯU TIÊN 2: Dự phòng bằng Regex (Bắt 3-4 chữ cái đi liền 3-4 chữ số ở bất kỳ vị trí nào)
+    let match = upperClassId.match(/[A-Z]{3,4}\d{3,4}/);
+    return match ? match[0] : null;
+}
 // 2. Hàm Đồng bộ TKB sang Bảng điểm GPA (CHỈ THÊM MỚI, KHÔNG XÓA)
 function autoSyncTkbToGpa() {
     // BẢO VỆ 1: Khóa an toàn - Tránh ghi đè khi GPA chưa tải xong từ Server
