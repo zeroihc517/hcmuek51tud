@@ -3429,4 +3429,133 @@ body.dark-mode .chess-loader-container {
 }
 body.dark-mode .chess-square { background-color: #0f172a; }
 body.dark-mode .chess-square:nth-child(even) { background-color: #1e293b; }
+/* =========================================================
+   HIỆU ỨNG VUỐT NGANG CHO MINIGAME VÀ DANH MỤC HỌC PHẦN TRÊN MOBILE
+   ========================================================= */
+@media (max-width: 767.98px) {
+    /* 1. Khu vực Minigame */
+    .grid-7-cols {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 15px !important;
+        scroll-snap-type: x mandatory;
+    }
+    .grid-7-cols > div, 
+    .grid-7-cols > a {
+        flex: 0 0 30% !important; /* ĐÃ GIẢM XUỐNG 45%: Thẻ hẹp lại, hiện 2 thẻ 1 lúc */
+        max-width: 30% !important;
+        scroll-snap-align: start; /* Canh lề trái khi vuốt */
+    }
 
+    /* 2. Khu vực Danh mục học phần (Trong Thảo luận Code & Tổng hợp Link) */
+    #shareCategoryView .row.row-cols-2,
+    #tongHopSection .row.row-cols-2 {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 15px !important;
+        scroll-snap-type: x mandatory;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        gap: 12px; /* Khoảng cách giữa các thẻ */
+    }
+    
+    #shareCategoryView .row.row-cols-2 > .col,
+    #tongHopSection .row.row-cols-2 > .col {
+        flex: 0 0 60% !important; /* ĐÃ GIẢM XUỐNG 60%: Thẻ hẹp lại nhưng vẫn đủ đọc chữ */
+        max-width: 60% !important;
+        scroll-snap-align: start; /* Canh lề trái khi vuốt */
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* 3. Tùy chỉnh thanh cuộn ngang (Scrollbar) cho gọn gàng, tinh tế */
+    .grid-7-cols::-webkit-scrollbar,
+    #shareCategoryView .row.row-cols-2::-webkit-scrollbar,
+    #tongHopSection .row.row-cols-2::-webkit-scrollbar {
+        height: 6px !important;
+    }
+    
+    .grid-7-cols::-webkit-scrollbar-track,
+    #shareCategoryView .row.row-cols-2::-webkit-scrollbar-track,
+    #tongHopSection .row.row-cols-2::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 10px;
+    }
+    
+    .grid-7-cols::-webkit-scrollbar-thumb,
+    #shareCategoryView .row.row-cols-2::-webkit-scrollbar-thumb,
+    #tongHopSection .row.row-cols-2::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+}
+
+/* =========================================================
+   FIX GIAO DIỆN BẢNG HỌC PHẦN TRÊN MOBILE (CHO PHÉP VUỐT NGANG)
+   ========================================================= */
+@media (max-width: 991.98px) {
+    /* 1. Mở khóa chiều rộng, ép bảng phải đủ dài để không bị dồn cục */
+    .custom-portal-table {
+        min-width: 750px !important; 
+        table-layout: fixed !important;
+    }
+    
+    /* 2. Cấm rớt dọc chữ ở các cột ngắn (STT, Tiến độ, Note cá nhân) */
+    .custom-portal-table th:nth-child(1), .custom-portal-table td:nth-child(1) {
+        white-space: normal !important; /* Mở khóa xuống dòng */
+        word-break: break-word !important;
+        width: 85px !important; 
+        min-width: 85px !important;
+    }
+    
+    /* Các cột Tiến độ, Note cá nhân vẫn giữ nguyên một hàng */
+    .custom-portal-table th:nth-child(4), .custom-portal-table td:nth-child(4),
+    .custom-portal-table th:nth-child(5), .custom-portal-table td:nth-child(5) {
+        white-space: nowrap !important;
+        width: 100px !important; 
+    }
+    
+    /* 3. Phân bổ lại độ rộng cho cột Nội dung và Ghi chú (được phép rớt dòng bình thường) */
+    .custom-portal-table th:nth-child(2), .custom-portal-table td:nth-child(2) {
+        width: 320px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+    .custom-portal-table th:nth-child(3), .custom-portal-table td:nth-child(3) {
+        width: 170px !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+    }
+    
+    /* 4. Đảm bảo khung chứa bảng hiển thị thanh cuộn ngang mượt mà */
+    #tableWrapper {
+        display: block !important;
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding-bottom: 10px !important;
+    }
+    
+    /* 5. Tùy chỉnh thanh cuộn (Scrollbar) cho đẹp trên điện thoại */
+    #tableWrapper::-webkit-scrollbar {
+        height: 6px !important;
+        display: block !important;
+    }
+    #tableWrapper::-webkit-scrollbar-track {
+        background: #f1f5f9 !important;
+        border-radius: 8px !important;
+    }
+    #tableWrapper::-webkit-scrollbar-thumb {
+        background: #cbd5e1 !important;
+        border-radius: 8px !important;
+    }
+
+    /* Bật lại dòng thông báo "Vuốt ngang để xem..." (Nãy bị ẩn) */
+    #swipeHint {
+        display: block !important; 
+    }
+}
