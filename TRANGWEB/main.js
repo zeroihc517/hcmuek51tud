@@ -1318,9 +1318,15 @@ if (!isChapter && !isLesson && !isPart) {
 }
 let safeTrackStr = trackStr.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
+// THÊM BIẾN NHẬN DIỆN TỪ KHÓA MINIGAME / LÀM ĐỀ THỰC CHIẾN
+let isMinigamePrompt = col2Html.toLowerCase().includes('hãy làm đề') || col2Html.toLowerCase().includes('minigame');
+
 if (isUpdating && !isAdmin) {
     // Trường hợp đang cập nhật
     col2Html = `<span onclick="$('#updatingModal').modal('show'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Đang cập nhật">${lessonIcon}${col2Html || "Đang cập nhật"}</span>`;
+} else if (isMinigamePrompt) {
+    // TRƯỜNG HỢP MỚI: Nếu chứa từ khóa "hãy làm đề", "minigame" -> Cuộn lên Top và mở khung Minigame
+    col2Html = `<span onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); $('#collapseMinigames').collapse('show'); event.stopPropagation();" style="cursor: pointer; color: #ef4444; font-weight: 700; text-decoration: none;" title="Nhấn để về đầu trang và mở khung Minigame"><i class="fa-solid fa-gamepad me-2" style="color: #ef4444; font-size: 16px;"></i>${col2Html}</span>`;
 } else if (isLinkOnly) {
     // CỘT 3 CHỈ CHỨA LINK -> Mở File Drive/PDF như cũ
     col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${safeUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem tài liệu trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`; 
