@@ -1837,8 +1837,11 @@ resetNavActive = function() {
 };
 
 function convertGradeToSystem(score10, type) {
-    // Làm tròn chính xác đến 1 chữ số thập phân trước khi đối chiếu
-    let roundedScore = parseFloat((Math.round((score10 + Number.EPSILON) * 100) / 100).toFixed(1));
+    // Bước 1: Khử sai số dấu phẩy động của JS (VD: 5.449999999999999 -> 5.45)
+    let cleanScore = Number(Math.round(score10 + 'e3') + 'e-3');
+    
+    // Bước 2: Làm tròn chuẩn xác đến 1 chữ số thập phân (VD: 5.45 -> 5.5, 5.44 -> 5.4)
+    let roundedScore = Number(Math.round(cleanScore + 'e1') + 'e-1');
     
     let scale4 = 0, letter = "F";
     if (roundedScore >= 8.5) { scale4 = 4.0; letter = "A"; }
@@ -1851,11 +1854,10 @@ function convertGradeToSystem(score10, type) {
     else if (roundedScore >= 3.0) { scale4 = 0.0; letter = "F+"; }
     else { scale4 = 0.0; letter = "F"; }
 
-    // SỬA LỖI: Đồng bộ hóa biến type và t
     let t = type || ''; 
     let passed = false;
     
-    // Mức qua môn chuẩn
+    // Xét điều kiện qua môn
     if (t.startsWith('cn_') || t === 'chuyen_nganh') {
         passed = roundedScore >= 5.5; 
     } else if (t.startsWith('mc_') || t === 'mon_chung') {
@@ -1863,7 +1865,7 @@ function convertGradeToSystem(score10, type) {
     } else if (t.startsWith('gdtc_') || t === 'ngoai_le') {
         passed = roundedScore >= 5.0; 
     } else {
-        passed = roundedScore >= 4.0; // Mặc định nếu không thuộc các loại trên
+        passed = roundedScore >= 4.0; 
     }
 
     return { scale4, letter, passed, roundedScore };
@@ -1886,25 +1888,22 @@ function computeStatsForDataset(dataset) {
             let currentScore10 = 0;
             let hasAnyColumn = course.columns.length > 0;
 
-course.columns.forEach(col => {
-    let val = parseFloat(col['score' + i]);
-    
-    // Tương thích ngược: Ưu tiên đọc % của lần thi hiện tại (percent1, percent2...), 
-    // nếu không có thì lấy % dùng chung (percent) của cấu trúc cũ.
-    let percentVal = parseFloat(col['percent' + i]);
-    if (isNaN(percentVal)) {
-        percentVal = parseFloat(col.percent) || 0;
-    }
+            course.columns.forEach(col => {
+                let val = parseFloat(col['score' + i]);
+                let percentVal = parseFloat(col['percent' + i]);
+                if (isNaN(percentVal)) {
+                    percentVal = parseFloat(col.percent) || 0;
+                }
 
-   if(isNaN(val) || col['score' + i] === '') { 
-        hasAllScores = false; // Chỉ cần 1 ô điểm trống là bỏ qua không tính môn này
-    } else {
-        currentScore10 += (val * percentVal) / 100;
-    }
-});
+                if(isNaN(val) || col['score' + i] === '') { 
+                    hasAllScores = false; 
+                } else {
+                    // Nhân 10000 thay vì chia 100 để không sinh ra chuỗi float ảo
+                    currentScore10 += (val * 10) * (percentVal * 10) / 10000;
+                }
+            });
 
-           if(hasAllScores && hasAnyColumn) {
-                // Sửa chữ 't' thành 'type' để tránh lỗi ReferenceError
+            if(hasAllScores && hasAnyColumn) {
                 let conv = convertGradeToSystem(currentScore10, course.type);
                 if(conv.scale4 > maxScore4 || (conv.scale4 === maxScore4 && conv.roundedScore > maxScore10)) {
                     maxScore4 = conv.scale4; 
@@ -1915,7 +1914,6 @@ course.columns.forEach(col => {
             }
         }
 
-        // Gán trạng thái đậu rớt vào object môn học
         if (maxScore10 >= 0) {
             course.finalScore10 = maxScore10.toFixed(1);
             course.finalScore4 = bestConv.scale4.toFixed(1);
@@ -1931,14 +1929,14 @@ course.columns.forEach(col => {
         course.bestAttempt = maxScore10 >= 0 ? bestAttempt : 1;
         let creds = parseInt(course.credits) || 0;
 
-       if (course.type !== 'ngoai_le' && !(course.type || '').startsWith('gdtc_')) {
+        if (course.type !== 'ngoai_le' && !(course.type || '').startsWith('gdtc_')) {
             if (maxScore10 >= 0) { 
-                // Cộng dồn để chia trung bình GPA (Bao gồm cả môn Rớt)
                 totalAttemptedCredits += creds; 
-                totalScore4 += (maxScore4 * creds);
-                totalScore10 += (maxScore10 * creds);
                 
-                // CHỈ TÍNH TÍN CHỈ TÍCH LŨY NẾU ĐÃ QUA MÔN (ĐẠT)
+                // Khử sai số tích lũy bằng cách ép tròn 3 chữ số thập phân sau mỗi lần cộng
+                totalScore4 = Number(Math.round((totalScore4 + (maxScore4 * creds)) + 'e3') + 'e-3');
+                totalScore10 = Number(Math.round((totalScore10 + (maxScore10 * creds)) + 'e3') + 'e-3');
+                
                 if (course.passed) {
                     totalAccumulatedCredits += creds;
                 }
@@ -1946,11 +1944,17 @@ course.columns.forEach(col => {
         }
     });
 
-    let gpa4 = totalAttemptedCredits > 0 ? (totalScore4 / totalAttemptedCredits).toFixed(2) : "0.00";
-    let gpa10 = totalAttemptedCredits > 0 ? (totalScore10 / totalAttemptedCredits).toFixed(2) : "0.00";
+    // Làm tròn 2 chữ số thập phân chuẩn xác cho điểm tổng (VD: 3.145 -> 3.15)
+    let gpa4 = "0.00";
+    let gpa10 = "0.00";
+    if (totalAttemptedCredits > 0) {
+        gpa4 = Number(Math.round((totalScore4 / totalAttemptedCredits) + 'e2') + 'e-2').toFixed(2);
+        gpa10 = Number(Math.round((totalScore10 / totalAttemptedCredits) + 'e2') + 'e-2').toFixed(2);
+    }
 
     return { gpa4, gpa10, credits: totalAccumulatedCredits };
 }
+
 (function() {
     let oldRenderDetail = renderAdminUserDetail;
     window.renderAdminUserDetail = function(mssv, data) {
