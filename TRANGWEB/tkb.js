@@ -880,6 +880,7 @@ function processTKBData(data) {
     }).filter(c => (c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1) || (c.hinhThuc || '').toUpperCase().includes('VLE'));
     
     filterAndRenderTKB();
+autoSyncTkbToGpa();
 }
 function openAddTkbModal(triggerAuthModal = false) {
     if (triggerAuthModal) { $('#userAuthModal').modal('show'); return; }

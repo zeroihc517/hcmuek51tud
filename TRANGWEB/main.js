@@ -2179,6 +2179,122 @@ function renderGPAStats() {
         statsContainer.html(html);
     }
 }
+// 1. Hàm trích xuất mã gốc (VD: "2611COMP101301" -> "COMP1013")
+function extractBaseCourseCode(classId) {
+    if (!classId) return null;
+    let match = classId.match(/[A-Za-z]{3,4}\d{3,4}/);
+    return match ? match[0].toUpperCase() : null;
+}
+
+// 2. Hàm kiểm tra xem sinh viên đã nhập điểm chưa
+// 2. Hàm kiểm tra xem sinh viên đã can thiệp vào dữ liệu chưa (Bản nâng cấp)
+function hasUserEnteredData(course) {
+    if (!course || !course.columns) return false;
+    
+    // a. Nếu người dùng thêm hoặc xóa bớt cột -> Chắc chắn đã can thiệp
+    if (course.columns.length !== 2) return true;
+
+    // Danh sách các tên cột mặc định hệ thống tự tạo
+    const defaultNames = ["Quá trình", "Cuối kỳ", "Cột 1", "Cột 2"];
+    let isModified = false;
+
+    course.columns.forEach(col => {
+        // b. Kiểm tra Tên cột có bị thay đổi không
+        if (col.name && !defaultNames.includes(col.name.trim())) {
+            isModified = true;
+        }
+
+        // c. Kiểm tra đã nhập Tỷ lệ % chưa
+        if (col.percent1 !== undefined && col.percent1.toString().trim() !== "") isModified = true;
+        if (col.percent2 !== undefined && col.percent2.toString().trim() !== "") isModified = true;
+        if (col.percent3 !== undefined && col.percent3.toString().trim() !== "") isModified = true;
+        if (col.percent !== undefined && col.percent.toString().trim() !== "") isModified = true; // Dành cho dữ liệu cũ
+
+        // d. Kiểm tra đã nhập Điểm số chưa
+        if (col.score1 !== undefined && col.score1.toString().trim() !== "") isModified = true;
+        if (col.score2 !== undefined && col.score2.toString().trim() !== "") isModified = true;
+        if (col.score3 !== undefined && col.score3.toString().trim() !== "") isModified = true;
+    });
+
+    return isModified;
+}
+
+// 3. Hàm Đồng bộ TKB sang Bảng điểm GPA (Bản an toàn)
+function autoSyncTkbToGpa() {
+    if (typeof globalTkbData === 'undefined' || typeof myGPADataset === 'undefined') return;
+
+    let tkbCourseCounts = {};
+    
+    // Đếm số lần xuất hiện của các mã học phần trong Lịch học
+    globalTkbData.forEach(course => {
+        let baseCode = extractBaseCourseCode(course.classId);
+        if (baseCode) {
+            tkbCourseCounts[baseCode] = (tkbCourseCounts[baseCode] || 0) + 1;
+        }
+    });
+
+    let isGpaChanged = false;
+
+    // A. THÊM MÔN VÀO GPA HOẶC BẬT CHẾ ĐỘ CẢI THIỆN NẾU CÓ TRONG LỊCH HỌC
+    for (let code in tkbCourseCounts) {
+        let count = tkbCourseCounts[code];
+        let existingIndex = myGPADataset.findIndex(c => c.code === code);
+
+        if (existingIndex === -1) {
+            // TÌNH HUỐNG 1: Chưa có trong GPA -> Tạo mới hoàn toàn
+            let courseTemplate = SYSTEM_COURSE_DATABASE.find(c => c.code === code);
+            if (courseTemplate) {
+                let newCourse = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                    code: courseTemplate.code,
+                    name: courseTemplate.name,
+                    credits: courseTemplate.credits,
+                    type: courseTemplate.type,
+                    note: courseTemplate.groupNote || "Tự động đồng bộ từ Lịch học",
+                    columns: [
+                        { name: "Quá trình", percent1: "", score1: "", percent2: "", score2: "", percent3: "", score3: "" },
+                        { name: "Cuối kỳ", percent1: "", score1: "", percent2: "", score2: "", percent3: "", score3: "" }
+                    ],
+                    majors: ['1'],
+                    isAutoRetake: count >= 2 
+                };
+                myGPADataset.push(newCourse);
+                isGpaChanged = true;
+            }
+        } else {
+            // TÌNH HUỐNG 2: Đã có trong GPA -> Cập nhật cờ cải thiện (Không đụng chạm điểm số đã nhập)
+            let currentRetakeStatus = myGPADataset[existingIndex].isAutoRetake;
+            if (count >= 2 && !currentRetakeStatus) {
+                myGPADataset[existingIndex].isAutoRetake = true;
+                isGpaChanged = true;
+            } else if (count < 2 && currentRetakeStatus) {
+                myGPADataset[existingIndex].isAutoRetake = false;
+                isGpaChanged = true;
+            }
+        }
+    }
+
+    // B. HỦY MÔN BÊN GPA NẾU SINH VIÊN HỦY LỚP (BẢO VỆ DỮ LIỆU)
+    for (let i = myGPADataset.length - 1; i >= 0; i--) {
+        let gpaCourse = myGPADataset[i];
+        let gpaCode = gpaCourse.code;
+        
+        // Nếu môn học không còn trong Lịch học nữa
+        if (gpaCode && !tkbCourseCounts[gpaCode]) {
+            // KIỂM TRA BẢO VỆ: Nếu chưa nhập điểm nào thì mới cho phép xóa tự động
+            if (!hasUserEnteredData(gpaCourse)) {
+                myGPADataset.splice(i, 1);
+                isGpaChanged = true;
+            }
+        }
+    }
+
+    // C. LƯU LẠI VÀ RENDER NẾU CÓ SỰ THAY ĐỔI
+    if (isGpaChanged) {
+        renderGPAList(true); // Lưu lên Server và vẽ lại bảng GPA
+    }
+}
+
 // 3. HÀM RENDER TỔNG THỂ (ĐƯỢC GỌI KHI CẬP NHẬT GIAO DIỆN)
 function renderGPAList(syncToServer = true) {
     applyGpaConfigUI();
@@ -2473,8 +2589,9 @@ function editGPACourse(id) {
     $('#gpaBelongsToMajor1').prop('checked', courseMajors.includes('1')).prop('disabled', false);
     $('#gpaBelongsToMajor2').prop('checked', courseMajors.includes('2')).prop('disabled', false);
 
-    let hasRetake = course.columns.some(col => (col.score2 && col.score2 !== '') || (col.score3 && col.score3 !== ''));
-    $('#gpaIsRetake').prop('checked', hasRetake);
+   // Tự động bật nếu có nhập điểm Lần 2, Lần 3 HOẶC được đánh dấu là Học cải thiện từ TKB
+let hasRetake = course.isAutoRetake || course.columns.some(col => (col.score2 && col.score2 !== '') || (col.score3 && col.score3 !== ''));
+$('#gpaIsRetake').prop('checked', hasRetake);
     
     $('#gpaColumnsContainer').html('');
     course.columns.forEach(col => { 
