@@ -226,24 +226,31 @@ function pingOnlineStatus() {
                         let hasLeave = false;
 
                         // 1. Kiểm tra người mới vào
-                        for (let mssv in newUsersMap) {
-                            if (!oldUsersMap[mssv]) {
-                                let fullName = newUsersMap[mssv];
-                                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
-                                window.alert(`${shortName} đã tham gia`);
-                                hasJoin = true;
-                            }
-                        }
-                        
-                        // 2. Kiểm tra người vừa rời đi
-                        for (let mssv in oldUsersMap) {
-                            if (!newUsersMap[mssv]) {
-                                let fullName = oldUsersMap[mssv];
-                                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
-                                window.alert(`${shortName} đã rời`);
-                                hasLeave = true;
-                            }
-                        }
+                       // 1. Kiểm tra người mới vào
+for (let mssv in newUsersMap) {
+    if (!oldUsersMap[mssv]) {
+        // Bỏ qua nếu là chính tài khoản Admin
+        if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
+
+        let fullName = newUsersMap[mssv];
+        let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
+        window.alert(`${shortName} đã tham gia`);
+        hasJoin = true;
+    }
+}
+
+// 2. Kiểm tra người vừa rời đi
+for (let mssv in oldUsersMap) {
+    if (!newUsersMap[mssv]) {
+        // Bỏ qua nếu là chính tài khoản Admin
+        if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
+
+        let fullName = oldUsersMap[mssv];
+        let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
+        window.alert(`${shortName} đã rời`);
+        hasLeave = true;
+    }
+}
 
                         // PHÁT ÂM THANH (Bắt lỗi catch để phòng trường hợp trình duyệt chặn Autoplay)
                         if (hasJoin) {
