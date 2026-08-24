@@ -90,7 +90,9 @@ $.ajax({
             });
             // Tải ngầm Bảng điểm GPA (và cấu hình song ngành)
             $.ajax({ url: SCRIPT_URL + "?action=getGPAConfig&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(configRes) { if (configRes) { try { gpaConfig = typeof configRes === 'string' ? JSON.parse(configRes) : configRes; localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig)); } catch(e){} } } });
-            $.ajax({ url: SCRIPT_URL + "?action=getGPAUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(res) { try { myGPADataset = typeof res === 'string' ? JSON.parse(res) : res; if(!Array.isArray(myGPADataset)) myGPADataset = []; } catch(e){ myGPADataset = []; } } });
+           // Tải ngầm Bảng điểm GPA (và cấu hình song ngành)
+$.ajax({ url: SCRIPT_URL + "?action=getGPAConfig&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(configRes) { if (configRes) { try { gpaConfig = typeof configRes === 'string' ? JSON.parse(configRes) : configRes; localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig)); } catch(e){} } } });
+$.ajax({ url: SCRIPT_URL + "?action=getGPAUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(res) { try { myGPADataset = typeof res === 'string' ? JSON.parse(res) : res; if(!Array.isArray(myGPADataset)) myGPADataset = []; } catch(e){ myGPADataset = []; } window.isGpaDataLoaded = true; autoSyncTkbToGpa(); } });
 
             // 4. KIỂM TRA ĐIỀU KIỆN HOÀN TẤT ĐỂ ĐÓNG MODAL
             let checkLoaded = setInterval(function() {

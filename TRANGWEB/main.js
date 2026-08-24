@@ -1805,22 +1805,26 @@ function loadGPAView() {
                 }
             },
             complete: function() {
-                // 2. Sau khi đã cập nhật cấu hình xong, tiến hành tải danh sách môn học
-                $.ajax({
-                    url: SCRIPT_URL + "?action=getGPAUser&mssv=" + currentUser.mssv,
-                    method: "GET", dataType: "json",
-                    success: function(res) {
-                        try {
-                            myGPADataset = typeof res === 'string' ? JSON.parse(res) : res;
-                            if(!Array.isArray(myGPADataset)) myGPADataset = [];
-                        } catch(e) { myGPADataset = []; }
-                        renderGPAList(false); 
-                    },
-                    error: function() {
-                        myGPADataset = JSON.parse(localStorage.getItem('myGPADataset_' + currentUser.mssv)) || [];
-                        renderGPAList(false);
-                    }
-                });
+              // 2. Sau khi đã cập nhật cấu hình xong, tiến hành tải danh sách môn học
+$.ajax({
+    url: SCRIPT_URL + "?action=getGPAUser&mssv=" + currentUser.mssv,
+    method: "GET", dataType: "json",
+    success: function(res) {
+        try {
+            myGPADataset = typeof res === 'string' ? JSON.parse(res) : res;
+            if(!Array.isArray(myGPADataset)) myGPADataset = [];
+        } catch(e) { myGPADataset = []; }
+        window.isGpaDataLoaded = true; // MỞ KHÓA BẢO VỆ
+        renderGPAList(false); 
+        autoSyncTkbToGpa(); // GỌI ĐỒNG BỘ
+    },
+    error: function() {
+        myGPADataset = JSON.parse(localStorage.getItem('myGPADataset_' + currentUser.mssv)) || [];
+        window.isGpaDataLoaded = true; // MỞ KHÓA BẢO VỆ
+        renderGPAList(false);
+        autoSyncTkbToGpa(); // GỌI ĐỒNG BỘ
+    }
+});
             }
         });
     } else {
@@ -2183,6 +2187,9 @@ function renderGPAStats() {
         statsContainer.html(html);
     }
 }
+// Cờ khóa bảo vệ dữ liệu (Ngăn ghi đè khi chưa tải xong)
+window.isGpaDataLoaded = false;
+
 // 1. Hàm trích xuất mã gốc (VD: "2611COMP101301" -> "COMP1013")
 function extractBaseCourseCode(classId) {
     if (!classId) return null;
@@ -2190,6 +2197,68 @@ function extractBaseCourseCode(classId) {
     return match ? match[0].toUpperCase() : null;
 }
 
+// 2. Hàm Đồng bộ TKB sang Bảng điểm GPA (CHỈ THÊM MỚI, KHÔNG XÓA)
+function autoSyncTkbToGpa() {
+    // BẢO VỆ 1: Khóa an toàn - Tránh ghi đè khi GPA chưa tải xong từ Server
+    if (typeof globalTkbData === 'undefined' || typeof myGPADataset === 'undefined') return;
+    if (!window.isGpaDataLoaded) return; 
+
+    let tkbCourseCounts = {};
+    
+    // Đếm số lần xuất hiện của các mã học phần trong Lịch học
+    globalTkbData.forEach(course => {
+        let baseCode = extractBaseCourseCode(course.classId);
+        if (baseCode) {
+            tkbCourseCounts[baseCode] = (tkbCourseCounts[baseCode] || 0) + 1;
+        }
+    });
+
+    let isGpaChanged = false;
+
+    // BẢO VỆ 2: CHỈ THÊM MỚI HOẶC CẬP NHẬT CỜ LẦN 2, TUYỆT ĐỐI KHÔNG XÓA DỮ LIỆU CŨ ("Tạo 1 lần")
+    for (let code in tkbCourseCounts) {
+        let count = tkbCourseCounts[code];
+        let existingIndex = myGPADataset.findIndex(c => c.code === code);
+
+        if (existingIndex === -1) {
+            // Tình huống 1: Chưa có -> Tạo mới hoàn toàn với 2 cột mặc định
+            let courseTemplate = SYSTEM_COURSE_DATABASE.find(c => c.code === code);
+            if (courseTemplate) {
+                let newCourse = {
+                    id: Date.now().toString() + Math.random().toString(36).substr(2, 5),
+                    code: courseTemplate.code,
+                    name: courseTemplate.name,
+                    credits: courseTemplate.credits,
+                    type: courseTemplate.type,
+                    note: courseTemplate.groupNote || "Đồng bộ từ Lịch học",
+                    columns: [
+                        { name: "Quá trình", percent1: "", score1: "", percent2: "", score2: "", percent3: "", score3: "" },
+                        { name: "Cuối kỳ", percent1: "", score1: "", percent2: "", score2: "", percent3: "", score3: "" }
+                    ],
+                    majors: ['1'],
+                    isAutoRetake: count >= 2 
+                };
+                myGPADataset.push(newCourse);
+                isGpaChanged = true;
+            }
+        } else {
+            // Tình huống 2: Đã có -> Tuyệt đối giữ nguyên Dữ liệu, chỉ cập nhật cờ Học cải thiện (nếu trùng TKB 2 lần)
+            let currentRetakeStatus = myGPADataset[existingIndex].isAutoRetake;
+            if (count >= 2 && !currentRetakeStatus) {
+                myGPADataset[existingIndex].isAutoRetake = true;
+                isGpaChanged = true;
+            } else if (count < 2 && currentRetakeStatus) {
+                myGPADataset[existingIndex].isAutoRetake = false;
+                isGpaChanged = true;
+            }
+        }
+    }
+
+    // Nếu có môn mới được thêm vào, tự động lưu lên Server và vẽ lại bảng
+    if (isGpaChanged) {
+        renderGPAList(true); 
+    }
+}
 // 2. Hàm kiểm tra xem sinh viên đã nhập điểm chưa
 // 2. Hàm kiểm tra xem sinh viên đã can thiệp vào dữ liệu chưa (Bản nâng cấp)
 function hasUserEnteredData(course) {
