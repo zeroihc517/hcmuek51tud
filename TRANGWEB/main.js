@@ -1319,7 +1319,7 @@ if (!isChapter && !isLesson && !isPart) {
 let safeTrackStr = trackStr.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
 // THÊM BIẾN NHẬN DIỆN TỪ KHÓA MINIGAME / LÀM ĐỀ THỰC CHIẾN
-let isMinigamePrompt = col2Html.toLowerCase().includes('hãy làm đề') || col2Html.toLowerCase().includes('minigame');
+let isMinigamePrompt = col2Html.toLowerCase().includes('hãy làm đề') || col2Html.toLowerCase().includes('hãy làm minigame đề') || col2Html.toLowerCase().includes('hãy tiến hành làm đề') ;
 
 if (isUpdating && !isAdmin) {
     // Trường hợp đang cập nhật
