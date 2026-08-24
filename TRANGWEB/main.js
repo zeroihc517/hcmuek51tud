@@ -4850,12 +4850,14 @@ $(document).ready(function() {
 window.datLichCache = [];
 
 // 1. Hàm chuyển sang màn hình Giao diện Đặt lịch hẹn
-// 1. Hàm chuyển sang màn hình Giao diện Đặt lịch hẹn
 window.loadDatLichHenView = function() {
     document.title = "Đặt lịch hẹn | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
     $('#btnNavShareCode').addClass('active'); // Đổi từ btnNavDatLich sang btnNavShareCode
     $('#datLichSection').removeClass('d-none');
+    
+    // THÊM DÒNG NÀY ĐỂ GHI NHẬN ĐÚNG LỊCH SỬ TRUY CẬP:
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - Đặt lịch hẹn");
     
     updateSystemUrl('view', 'datlich'); // Đổi URL thành ?view=datlich
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
