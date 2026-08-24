@@ -4090,6 +4090,14 @@ function loadProfileView() {
     
     updateSystemUrl('view', 'profile'); // Đổi URL thành ?view=profile
     
+    // --- BỔ SUNG: Ép hệ thống ghi nhận Lịch sử truy cập ---
+    if (typeof window.setDetailedView === 'function') {
+        window.setDetailedView("Hồ sơ cá nhân");
+    } else {
+        window.userDetailedView = "Hồ sơ cá nhân";
+    }
+    // -------------------------------------------------------
+    
     // Đóng Menu Popover/Dropdown
     let dropdownMenu = document.querySelector('#sidebarUserInfo .dropdown-menu');
     if (dropdownMenu) dropdownMenu.classList.remove('show');
