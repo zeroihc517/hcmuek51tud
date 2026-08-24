@@ -202,6 +202,7 @@ function pingOnlineStatus() {
             const allowedGpaAccounts = [
     "51.01.108.008", 
     "ihcspt517",
+	"51.01.108.042",
 ];
             // CHỈ HIỂN THỊ NÚT KẾT QUẢ HỌC TẬP CHO ADMIN
             if (allowedGpaAccounts.includes(userObj.mssv)) {
@@ -2038,28 +2039,38 @@ window.filterAdminUserTkb = function() {
         else { $(this).addClass('d-none'); }
     });
 };
-// 2. HÀM HIỂN THỊ CÁC Ô CARD THỐNG KÊ LÊN GIAO DIỆN
-// 2. HÀM HIỂN THỊ CÁC Ô CARD THỐNG KÊ LÊN GIAO DIỆN (ĐÃ FIX SONG NGÀNH)
+// 2. HÀM HIỂN THỊ CÁC Ô CARD THỐNG KÊ LÊN GIAO DIỆN (ĐÃ FIX SONG NGÀNH VÀ THÊM XẾP LOẠI)
 function renderGPAStats() {
     let statsContainer = $('#gpaStatsArea');
     
+    // Hàm phụ trợ tính Xếp loại Tốt nghiệp
+    function getRank(stats) {
+        // Nếu chưa có điểm hoặc chưa có tín chỉ nào thì trả về "-" (Chưa xếp loại)
+        if (stats.gpa4 === "0.00" && stats.gpa10 === "0.00" && stats.credits === 0) {
+            return "-"; 
+        }
+        
+        let score = parseFloat(stats.gpa4);
+        if (isNaN(score)) return "-";
+        if (score >= 3.6) return "Xuất sắc";
+        if (score >= 3.2) return "Giỏi";
+        if (score >= 2.5) return "Khá";
+        if (score >= 2.0) return "Trung bình";
+        if (score >= 1.0) return "Yếu";
+        return "Kém";
+    }
+
     // NẾU BẬT SONG NGÀNH VÀ ĐANG XEM TAB "TẤT CẢ" -> HIỂN THỊ CHIA ĐÔI
     if (gpaConfig.isDoubleMajor && currentMajorFilter === 'all') {
         let ds1 = myGPADataset.filter(c => {
             let m = c.majors || ['1'];
-            // FIX: Tự động gán môn chung và ngoại lệ cho cả 2 ngành để tính điểm
-            if (c.type === 'mon_chung' || c.type === 'ngoai_le') {
-                m = ['1', '2'];
-            }
+            if (c.type === 'mon_chung' || c.type === 'ngoai_le') m = ['1', '2'];
             return m.includes('1');
         });
         
         let ds2 = myGPADataset.filter(c => {
             let m = c.majors || ['1'];
-            // FIX: Tự động gán môn chung và ngoại lệ cho cả 2 ngành để tính điểm
-            if (c.type === 'mon_chung' || c.type === 'ngoai_le') {
-                m = ['1', '2'];
-            }
+            if (c.type === 'mon_chung' || c.type === 'ngoai_le') m = ['1', '2'];
             return m.includes('2');
         });
 
@@ -2069,8 +2080,12 @@ function renderGPAStats() {
         let n1 = gpaConfig.name1;
         let n2 = gpaConfig.name2;
 
+        // Truyền cả object điểm vào hàm getRank
+        let rank1 = getRank(s1);
+        let rank2 = getRank(s2);
+
         let html = `
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-3">
                 <div class="online-card text-center shadow-sm border px-2 py-3 h-100">
                     <h6 class="text-muted fw-bold mb-3">GPA (Hệ 4.0)</h6>
                     <div class="d-flex justify-content-center align-items-center">
@@ -2080,7 +2095,7 @@ function renderGPAStats() {
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-3">
                 <div class="online-card text-center shadow-sm border px-2 py-3 h-100">
                     <h6 class="text-muted fw-bold mb-3">Trung bình (Hệ 10)</h6>
                     <div class="d-flex justify-content-center align-items-center">
@@ -2090,7 +2105,7 @@ function renderGPAStats() {
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6 col-lg-3">
                 <div class="online-card text-center shadow-sm border px-2 py-3 h-100">
                     <h6 class="text-muted fw-bold mb-3">Tín chỉ (Đã qua)</h6>
                     <div class="d-flex justify-content-center align-items-center">
@@ -2100,17 +2115,23 @@ function renderGPAStats() {
                     </div>
                 </div>
             </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="online-card text-center shadow-sm border px-2 py-3 h-100">
+                    <h6 class="text-muted fw-bold mb-3">Xếp loại Tốt nghiệp</h6>
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="w-50 text-center"><h4 class="text-info fw-bold m-0" style="font-size: 20px;">${rank1}</h4><small class="text-muted d-block text-truncate mt-1" style="font-size: 11px;">${n1}</small></div>
+                        <div style="width: 1px; height: 35px; background-color: #e2e8f0; margin: 0 10px;"></div>
+                        <div class="w-50 text-center"><h4 class="text-info fw-bold m-0" style="font-size: 20px;">${rank2}</h4><small class="text-muted d-block text-truncate mt-1" style="font-size: 11px;">${n2}</small></div>
+                    </div>
+                </div>
+            </div>
         `;
         statsContainer.html(html);
     } else {
         // HIỂN THỊ 1 GIÁ TRỊ (Khi không bật Song ngành hoặc đang click Lọc xem 1 ngành cụ thể)
         let displayDataset = myGPADataset.filter(c => {
             let cMajors = c.majors || ['1']; 
-            
-            // FIX: Tự động gán môn chung và ngoại lệ cho cả 2 ngành để tính điểm
-            if (c.type === 'mon_chung' || c.type === 'ngoai_le') {
-                cMajors = ['1', '2'];
-            }
+            if (c.type === 'mon_chung' || c.type === 'ngoai_le') cMajors = ['1', '2'];
 
             if (currentMajorFilter === 'all') return true;
             if (currentMajorFilter === '1') return cMajors.includes('1');
@@ -2119,29 +2140,38 @@ function renderGPAStats() {
         });
         
         let s = computeStatsForDataset(displayDataset);
+        let rank = getRank(s); // Truyền đối tượng s vào
+        
         let labelSuffix = "";
         if (gpaConfig.isDoubleMajor && currentMajorFilter === '1') labelSuffix = `<br><span class="badge bg-primary mt-2" style="font-size:10px;">${gpaConfig.name1}</span>`;
         if (gpaConfig.isDoubleMajor && currentMajorFilter === '2') labelSuffix = `<br><span class="badge bg-success mt-2" style="font-size:10px;">${gpaConfig.name2}</span>`;
 
         let html = `
-            <div class="col-md-4">
-                <div class="online-card text-center shadow-sm border h-100">
+            <div class="col-md-6 col-lg-3">
+                <div class="online-card text-center shadow-sm border h-100 d-flex flex-column justify-content-center">
                     <h6 class="text-muted fw-bold mb-2">GPA (Hệ 4.0)</h6>
                     <h2 class="text-danger fw-bold m-0">${s.gpa4}</h2>
                     ${labelSuffix}
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="online-card text-center shadow-sm border h-100">
+            <div class="col-md-6 col-lg-3">
+                <div class="online-card text-center shadow-sm border h-100 d-flex flex-column justify-content-center">
                     <h6 class="text-muted fw-bold mb-2">Trung bình (Hệ 10)</h6>
                     <h2 class="text-primary fw-bold m-0">${s.gpa10}</h2>
                     ${labelSuffix}
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="online-card text-center shadow-sm border h-100">
+            <div class="col-md-6 col-lg-3">
+                <div class="online-card text-center shadow-sm border h-100 d-flex flex-column justify-content-center">
                     <h6 class="text-muted fw-bold mb-2">Tín chỉ tích lũy (Đã qua)</h6>
                     <h2 class="text-success fw-bold m-0">${s.credits}</h2>
+                    ${labelSuffix}
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="online-card text-center shadow-sm border h-100 d-flex flex-column justify-content-center">
+                    <h6 class="text-muted fw-bold mb-2">Xếp loại Tốt nghiệp</h6>
+                    <h2 class="text-info fw-bold m-0">${rank}</h2>
                     ${labelSuffix}
                 </div>
             </div>
