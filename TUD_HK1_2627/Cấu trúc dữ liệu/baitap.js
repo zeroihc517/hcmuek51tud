@@ -592,7 +592,7 @@ if (sub.code && window.ace) {
                 return;
             }
 
-            if (!studentMssv || studentMssv === "Khách") {
+            if (!mssv || mssv === "Khách") {
     requireLogin();
     return;
 }
