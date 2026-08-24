@@ -1385,30 +1385,13 @@ if (isPart || isChapter || isLesson) {
 } else if (isMucTieu) {
     // 2. Hàng "CHƯƠNG", "BÀI", "MỤC TIÊU": Ẩn Tiến độ, CHỈ HIỆN Ghi chú
     tdProg = '<td></td>';
-    tdNote = `
-        <td class="text-center align-middle" onclick="event.stopPropagation();">
-            <button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
-                ${noteBtnIcon}
-            </button>
-        </td>`;
+    tdNote = `<td class="text-center align-middle" style="padding-top: 6px !important; padding-bottom: 6px !important;" onclick="event.stopPropagation();"><button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center m-0" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">${noteBtnIcon}</button></td>`;
         
 } else {
     // 3. Các hàng Nội dung bình thường: Hiển thị đầy đủ cả Tiến độ và Ghi chú
-    tdProg = `
-        <td class="text-center align-middle" onclick="event.stopPropagation();">
-            <select class="form-select form-select-sm fw-bold border-secondary shadow-sm" style="background-color: ${bgProgColor}; color: #334155; border-radius: 8px; font-size: 13px; cursor: pointer;" onchange="updateProgress(this, '${currentSheetName}', '${stableKey}')">
-                <option value="white" ${progVal === 'white' ? 'selected' : ''}>Chưa học</option>
-                <option value="yellow" ${progVal === 'yellow' ? 'selected' : ''}>Còn học</option>
-                <option value="green" ${progVal === 'green' ? 'selected' : ''}>Đã xong</option>
-            </select>
-        </td>`;
+    tdProg = `<td class="text-center align-middle" style="padding-top: 6px !important; padding-bottom: 6px !important;" onclick="event.stopPropagation();"><select class="form-select form-select-sm fw-bold border-secondary shadow-sm m-0" style="background-color: ${bgProgColor}; color: #334155; border-radius: 8px; font-size: 13px; cursor: pointer; padding-top: 2px; padding-bottom: 2px; height: 32px; min-height: 32px;" onchange="updateProgress(this, '${currentSheetName}', '${stableKey}')"><option value="white" ${progVal === 'white' ? 'selected' : ''}>Chưa học</option><option value="yellow" ${progVal === 'yellow' ? 'selected' : ''}>Còn học</option><option value="green" ${progVal === 'green' ? 'selected' : ''}>Đã xong</option></select></td>`;
         
-    tdNote = `
-        <td class="text-center align-middle" onclick="event.stopPropagation();">
-            <button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
-                ${noteBtnIcon}
-            </button>
-        </td>`;
+    tdNote = `<td class="text-center align-middle" style="padding-top: 6px !important; padding-bottom: 6px !important;" onclick="event.stopPropagation();"><button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center m-0" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">${noteBtnIcon}</button></td>`;
 }
 
 // Ghép vào các ô TD hiển thị chính
