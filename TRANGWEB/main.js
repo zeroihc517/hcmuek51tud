@@ -67,17 +67,17 @@ function toggleAdminNameDisplay() {
     adminDisplayMode = (adminDisplayMode + 1) % 4; // Xoay vòng 0 -> 1 -> 2 -> 3 -> 0
     renderOnlineFooterUI(); // Render lại ngay từ RAM (0ms)
 }
-
-// 4. Hàm vẽ giao diện Footer từ dữ liệu trong RAM
 // 4. Hàm vẽ giao diện Footer từ dữ liệu trong RAM
 function renderOnlineFooterUI() {
     if (!cachedOnlineList || cachedOnlineList.length === 0) return;
 
+    // Hệ thống nhận diện tài khoản Admin (kể cả khi chưa gạt nút bật quản trị)
     let currentIsAdmin = isAdmin || (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008"));
 
     let guestCount = 0;
     let studentList = [];
-	let processedMssv = new Set();
+    let processedMssv = new Set();
+    
     // Tách riêng Khách và Sinh viên đăng nhập để đếm
     cachedOnlineList.forEach(userStr => {
         let str = String(userStr).trim();
@@ -91,18 +91,53 @@ function renderOnlineFooterUI() {
         let parts = str.split("|");
         let userMssv = parts[0]; 
         let userName = parts[1];
-let userIsAdminActive = parts[2] === "1";
-if (processedMssv.has(userMssv)) return;
+        let userIsAdminActive = parts[2] === "1";
+        
+        if (processedMssv.has(userMssv)) return;
         processedMssv.add(userMssv);
-      if ((userMssv === "51.01.108.008" || userMssv === "5101108008") && userIsAdminActive) {
-            studentList.push(`<span class="fw-bold" style="color: #facc15; text-transform: uppercase;"><i class="fa-solid fa-user-shield me-1"></i>Admin</span>`);
+
+        // --- KIỂM TRA CÓ PHẢI CHÍNH TÀI KHOẢN CỦA BẢN THÂN KHÔNG ---
+        let isCurrentUser = false;
+        if (currentUser && currentUser.mssv) {
+            let myCleanMssv = String(currentUser.mssv).replace(/\./g, "");
+            let targetCleanMssv = String(userMssv).replace(/\./g, "");
+            if (myCleanMssv === targetCleanMssv) {
+                isCurrentUser = true;
+            }
+        }
+
+        let isAdminAccount = (userMssv === "51.01.108.008" || userMssv === "5101108008");
+
+        // --- Ưu tiên 1: TÀI KHOẢN ADMIN ĐANG TỰ XEM CHÍNH MÌNH ---
+        if (isAdminAccount && isCurrentUser) {
+            if (userIsAdminActive) {
+                // Đã bật chế độ quản trị -> Hiện "Admin (Bạn)" màu vàng có icon
+                studentList.push(`<span class="fw-bold" style="color: #facc15;"><i class="fa-solid fa-user-shield me-1"></i>ADMIN (Bạn)</span>`);
+            } else {
+                // Mặc định gốc (chưa bật) -> Hiện "Tên (Bạn)" (Ví dụ: Bảo Chí (Bạn)) màu xanh lá giống sinh viên
+                let shortName = getNaturalShortName(userName);
+                studentList.push(`<span class="fw-bold" style="color: #86efac;">${shortName} (Bạn)</span>`);
+            }
             return;
         }
 
-        // --- B. XỬ LÝ 4 NẤC HIỂN THỊ CHO SINH VIÊN KHÁC ---
-      if (currentIsAdmin) {
+        // --- Ưu tiên 2: NGƯỜI KHÁC NHÌN THẤY ADMIN (Chỉ khi Admin bật chế độ quản trị) ---
+        if (isAdminAccount && userIsAdminActive) {
+            studentList.push(`<span class="fw-bold" style="color: #facc15;"><i class="fa-solid fa-user-shield me-1"></i>ADMIN</span>`);
+            return;
+        }
+
+        // --- Ưu tiên 3: SINH VIÊN BÌNH THƯỜNG TỰ XEM CHÍNH MÌNH ---
+        if (isCurrentUser) {
+            studentList.push(`<span class="fw-bold" style="color: #86efac;">${userMssv} (Bạn)</span>`);
+            return;
+        }
+
+        // --- Ưu tiên 4: XỬ LÝ CÁC NẤC HIỂN THỊ (Dành cho Admin xem sinh viên khác) ---
+        // Do currentIsAdmin = true đối với tài khoản Admin, nên mặc định vòng lặp sẽ rớt vào đây
+        if (currentIsAdmin) {
             if (adminDisplayMode === 0) {
-                // Mặc định của Admin: Hiện Tên rút gọn (Lấy 2 chữ cuối)
+                // Mặc định của Admin: Hiện Tên rút gọn (Lấy 2 chữ cuối) tự nhiên
                 studentList.push(getNaturalShortName(userName));
                 return;
             } else if (adminDisplayMode === 1) {
@@ -120,10 +155,11 @@ if (processedMssv.has(userMssv)) return;
             }
         }
         
-        // Mặc định (mode = 0) hoặc không phải Admin: Che MSSV (Đồng bộ gọi đúng hàm maskMSSV)
+        // Mặc định: Sinh viên thường xem người khác -> Che MSSV
         studentList.push(maskMSSV(userMssv));
     });
-let realTotalOnline = studentList.length + guestCount;
+    
+    let realTotalOnline = studentList.length + guestCount;
     // Ghép danh sách sinh viên đăng nhập
     let displayList = studentList.join(", ");
 
@@ -137,15 +173,15 @@ let realTotalOnline = studentList.length + guestCount;
         }
     }
 
-let iconHtml = currentIsAdmin 
+    let iconHtml = currentIsAdmin 
         ? `<i class="fa-solid fa-users me-2" onclick="toggleAdminNameDisplay()" style="cursor: pointer;" title="Bấm để xoay vòng chế độ hiển thị danh sách"></i>`
         : `<i class="fa-solid fa-users me-2"></i>`;
 
     // Đổ dữ liệu ra ngoài giao diện
     $('#footerOnlineStatus').html(`
-    ${iconHtml} 
-    ${realTotalOnline} người: <strong>${displayList}</strong>
-`);
+        ${iconHtml} 
+        ${realTotalOnline} người: <strong>${displayList}</strong>
+    `);
 }
 window.userDetailedView = ""; 
 
