@@ -247,10 +247,10 @@ function pingOnlineStatus() {
 
                         // PHÁT ÂM THANH (Bắt lỗi catch để phòng trường hợp trình duyệt chặn Autoplay)
                         if (hasJoin) {
-                            let joinSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2578/2578-preview.mp3');
+                            let joinSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3');
                             joinSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
                         } else if (hasLeave) {
-                            let leaveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3');
+                            let leaveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2868/2868-preview.mp3');
                             leaveSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
                         }
                     }
