@@ -3444,8 +3444,8 @@ body.dark-mode .chess-square:nth-child(even) { background-color: #1e293b; }
     }
     .grid-7-cols > div, 
     .grid-7-cols > a {
-        flex: 0 0 30% !important; /* ĐÃ GIẢM XUỐNG 45%: Thẻ hẹp lại, hiện 2 thẻ 1 lúc */
-        max-width: 30% !important;
+        flex: 0 0 45% !important; /* ĐÃ GIẢM XUỐNG 45%: Thẻ hẹp lại, hiện 2 thẻ 1 lúc */
+        max-width: 45% !important;
         scroll-snap-align: start; /* Canh lề trái khi vuốt */
     }
 
@@ -3512,11 +3512,13 @@ body.dark-mode .chess-square:nth-child(even) { background-color: #1e293b; }
         min-width: 85px !important;
     }
     
-    /* Các cột Tiến độ, Note cá nhân vẫn giữ nguyên một hàng */
+   /* 3. Cột Tiến độ, Note cá nhân: Bỏ ép 1 dòng, cho phép xuống dòng tự nhiên */
     .custom-portal-table th:nth-child(4), .custom-portal-table td:nth-child(4),
     .custom-portal-table th:nth-child(5), .custom-portal-table td:nth-child(5) {
-        white-space: nowrap !important;
-        width: 100px !important; 
+        white-space: normal !important; /* Mở khóa để cho phép chữ rớt xuống dòng */
+        word-break: break-word !important;
+        width: 95px !important; /* Độ rộng vừa phải để nút và dropdown hiển thị tốt */
+        min-width: 80px !important;
     }
     
     /* 3. Phân bổ lại độ rộng cho cột Nội dung và Ghi chú (được phép rớt dòng bình thường) */
