@@ -155,7 +155,6 @@ window.setDetailedView = function(viewString) {
     pingOnlineStatus(); // Gọi hàm ping để cập nhật lên bảng Admin ngay lập tức
 };
 // 5. Hàm gửi request lấy dữ liệu mới từ Server (chạy ngầm định kỳ)
-// 5. Hàm gửi request lấy dữ liệu mới từ Server (chạy ngầm định kỳ)
 function pingOnlineStatus() {
     let savedUser = localStorage.getItem('currentUser');
     let mssvParam = "Khách"; 
@@ -179,38 +178,85 @@ function pingOnlineStatus() {
         $('#gpaNavContainer').addClass('d-none');
     }
 
-    if (mssvParam === "Khách" && currentUser && currentUser.mssv) { 
-        mssvParam = currentUser.mssv + "|" + currentUser.name; 
-    }
-
     // --- LOGIC LẤY TÊN MỤC ĐANG XEM (CHUẨN XÁC THEO MENU) ---
-   let currentView = "Trang chủ"; 
+    let currentView = "Trang chủ"; 
     let activeMenuText = $('#sidebarMenu .active').text().trim();
     
-    // ƯU TIÊN 1: Lấy view chi tiết (Nếu sinh viên vừa click vào bài học)
     if (window.userDetailedView !== "") {
         currentView = window.userDetailedView;
-    } 
-    // ƯU TIÊN 2: Lấy theo Sidebar Menu
-    else if (activeMenuText) {
+    } else if (activeMenuText) {
         currentView = activeMenuText; 
-    } 
-    // ƯU TIÊN 3 & 4: Tên môn hoặc Tab
-    else if (typeof currentSheetName !== 'undefined' && currentSheetName !== "") {
+    } else if (typeof currentSheetName !== 'undefined' && currentSheetName !== "") {
         currentView = currentSheetName; 
     } else {
         currentView = document.title.split('|')[0].trim(); 
     }
-    // -------------------------------------------------------------
 
     $.ajax({ 
-        // ĐÃ BỔ SUNG &lastView VÀO URL GỬI LÊN MÁY CHỦ
         url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID + "&mssv=" + encodeURIComponent(mssvParam) + "&lastView=" + encodeURIComponent(currentView), 
         method: "GET", 
         dataType: "json", 
         cache: false,
         success: function(res) { 
             if (res && res.list) { 
+                
+                // BẮT ĐẦU THÊM MỚI: THÔNG BÁO VÀ ÂM THANH CHO ADMIN
+                if (currentUser && currentUser.mssv === "51.01.108.008") {
+                    if (typeof cachedOnlineList !== 'undefined' && cachedOnlineList.length > 0) {
+                        let oldUsersMap = {};
+                        let newUsersMap = {};
+                        
+                        // Ánh xạ danh sách cũ
+                        cachedOnlineList.forEach(u => {
+                            if (u !== "Khách" && u.includes("|")) {
+                                let parts = u.split("|");
+                                oldUsersMap[parts[0]] = parts[1];
+                            }
+                        });
+                        
+                        // Ánh xạ danh sách mới
+                        res.list.forEach(u => {
+                            if (u !== "Khách" && u.includes("|")) {
+                                let parts = u.split("|");
+                                newUsersMap[parts[0]] = parts[1];
+                            }
+                        });
+                        
+                        let hasJoin = false;
+                        let hasLeave = false;
+
+                        // 1. Kiểm tra người mới vào
+                        for (let mssv in newUsersMap) {
+                            if (!oldUsersMap[mssv]) {
+                                let fullName = newUsersMap[mssv];
+                                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
+                                window.alert(`${shortName} đã tham gia`);
+                                hasJoin = true;
+                            }
+                        }
+                        
+                        // 2. Kiểm tra người vừa rời đi
+                        for (let mssv in oldUsersMap) {
+                            if (!newUsersMap[mssv]) {
+                                let fullName = oldUsersMap[mssv];
+                                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
+                                window.alert(`${shortName} đã rời`);
+                                hasLeave = true;
+                            }
+                        }
+
+                        // PHÁT ÂM THANH (Bắt lỗi catch để phòng trường hợp trình duyệt chặn Autoplay)
+                        if (hasJoin) {
+                            let joinSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2578/2578-preview.mp3');
+                            joinSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
+                        } else if (hasLeave) {
+                            let leaveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2572/2572-preview.mp3');
+                            leaveSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
+                        }
+                    }
+                }
+                // KẾT THÚC THÊM MỚI
+
                 // Cập nhật dữ liệu mới vào RAM
                 cachedOnlineList = res.list;
                 cachedOnlineCount = res.count;
@@ -221,6 +267,7 @@ function pingOnlineStatus() {
         } 
     });
 }
+
 function loadWebLinks() { 
     $('#webLinksContainer').html(`
         <div class="col-12 w-100">
