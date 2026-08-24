@@ -163,13 +163,16 @@ function pingOnlineStatus() {
         try {
             let userObj = JSON.parse(savedUser);
             mssvParam = userObj.mssv + "|" + userObj.name + "|" + (isAdmin ? "1" : "0"); 
-            
+            const allowedGpaAccounts = [
+    "51.01.108.008", 
+    "ihcspt517",
+];
             // CHỈ HIỂN THỊ NÚT KẾT QUẢ HỌC TẬP CHO ADMIN
-            if (userObj.mssv === "51.01.108.008" || userObj.mssv === "ihcspt517") {
-                $('#gpaNavContainer').removeClass('d-none');
-            } else {
-                $('#gpaNavContainer').addClass('d-none');
-            }
+            if (allowedGpaAccounts.includes(userObj.mssv)) {
+    $('#gpaNavContainer').removeClass('d-none');
+} else {
+    $('#gpaNavContainer').addClass('d-none');
+}
         } catch(e) {
             mssvParam = "Khách"; 
             $('#gpaNavContainer').addClass('d-none');
