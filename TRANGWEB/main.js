@@ -3735,7 +3735,21 @@ function jumpToTKBFromNotice(dateStartStr) {
         }
     }
 }
-
+// HÀM TẠO KHÓA CỐ ĐỊNH ĐỂ CHỐNG LỖI NHẢY DỮ LIỆU KHI XÓA DÒNG
+function getDlKey(item) {
+    // Nếu là dữ liệu hệ thống (có chữ SYS_) thì bản thân nó đã cố định
+    if (item.isSystem || String(item.sheetRowIndex).startsWith('SYS_')) {
+        return String(item.sheetRowIndex);
+    }
+    // Lấy tiêu đề và ngày (hỗ trợ cả format của TKB và Deadline)
+    let rawTitle = item.title || item.mon || ""; 
+    let rawDate = item.dateStart || item.ngayBatDau || "";
+    let rawStr = rawTitle + "_" + rawDate;
+    
+    // Xóa bỏ mọi ký tự đặc biệt, chỉ giữ lại chữ và số
+    let key = rawStr.replace(/[^a-zA-Z0-9]/g, '');
+    return key ? "DL_" + key : String(item.sheetRowIndex);
+}
 // HÀM ĐÁNH DẤU XONG NHANH NGAY TẠI TRANG THÔNG BÁO
 function quickMarkDone(sheetRowIndex, event) {
     event.stopPropagation();

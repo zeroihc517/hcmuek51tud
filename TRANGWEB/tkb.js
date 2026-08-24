@@ -188,8 +188,8 @@ function renderDeadlines() {
 
     // 3. SẮP XẾP ƯU TIÊN
     filtered.sort((a, b) => {
-        let isDoneA = completedList.includes(String(a.sheetRowIndex)) ? 1 : 0;
-        let isDoneB = completedList.includes(String(b.sheetRowIndex)) ? 1 : 0;
+        let isDoneA = completedList.includes(getDlKey(a)) ? 1 : 0;
+        let isDoneB = completedList.includes(getDlKey(b)) ? 1 : 0;
         if (isDoneA !== isDoneB) return isDoneA - isDoneB;
 
         let startA = getTimeFast(a.dateStart) || 0;
@@ -206,7 +206,7 @@ function renderDeadlines() {
 
     // 4. HIỂN THỊ RA GIAO DIỆN
     container.innerHTML = filtered.map(item => {
-        let isDone = completedList.includes(String(item.sheetRowIndex));
+        let isDone = completedList.includes(getDlKey(item));
         
         let extLinkTitle = checkAndExtractUrl(item.title);
         let extLinkTag = checkAndExtractUrl(item.tag);
@@ -242,7 +242,7 @@ if (!item.isSystem) {
         let cardStyle = extLink ? "cursor: pointer; transition: 0.2s; border: 1px dashed var(--primary-color);" : "";
         
         let doneBtnHtml = `
-            <button class="btn-dl-done ${isDone ? 'is-done' : ''}" onclick="toggleDeadlineComplete('${item.sheetRowIndex}', event)" title="Đánh dấu trạng thái">
+            <button class="btn-dl-done ${isDone ? 'is-done' : ''}" onclick="toggleDeadlineComplete('${getDlKey(item)}', event)" title="Đánh dấu trạng thái">
                 <i class="fa-solid ${isDone ? 'fa-circle-check' : 'fa-circle'} me-1"></i> ${isDone ? 'Đã xong' : 'Chưa xong'}
             </button>
         `;
@@ -583,8 +583,8 @@ for (let g of groupOrder) {
         }
         
         if (c.isDeadline) {
-            let isDone = completedList.includes(String(c.sheetRowIndex));
-            let doneBtnHtml = `<button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${c.sheetRowIndex}', event)"><i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}</button>`;
+            let isDone = completedList.includes(getDlKey(c));
+            let doneBtnHtml = `<button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${getDlKey(c)}', event)"><i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}</button>`;
 
             tkbHtml += `
                 <td class="text-center align-middle fw-bold text-dark">-</td>
@@ -604,8 +604,8 @@ for (let g of groupOrder) {
             
             let phongDisplayHtml = c.phong || '-';
             if ((c.hinhThuc || '').toUpperCase().includes('VLE')) {
-                let isDone = completedList.includes(String(c.sheetRowIndex));
-                phongDisplayHtml = `<button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${c.sheetRowIndex}', event)"><i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}</button>`;
+                let isDone = completedList.includes(getDlKey(c));
+                phongDisplayHtml = `<button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${getDlKey(c)}', event)"><i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}</button>`;
             }
 
             tkbHtml += `
@@ -740,8 +740,8 @@ if ((searchStr.includes('vle') || searchStr.includes('tiểu luận')) && tkbSub
     } else {
         // SẮP XẾP ƯU TIÊN: Đang diễn ra -> Chưa làm -> Đã xong
         filteredDeadlines.sort((a, b) => {
-            let isDoneA = completedList.includes(String(a.sheetRowIndex)) ? 1 : 0;
-            let isDoneB = completedList.includes(String(b.sheetRowIndex)) ? 1 : 0;
+            let isDoneA = completedList.includes(getDlKey(a)) ? 1 : 0;
+            let isDoneB = completedList.includes(getDlKey(b)) ? 1 : 0;
 
             // 1. Đã xong đẩy xuống cuối
             if (isDoneA !== isDoneB) return isDoneA - isDoneB;
@@ -761,7 +761,7 @@ if ((searchStr.includes('vle') || searchStr.includes('tiểu luận')) && tkbSub
         });
 
         filteredDeadlines.forEach(c => {
-            let isDone = completedList.includes(String(c.sheetRowIndex));
+            let isDone = completedList.includes(getDlKey(c));
             let startT = getTimeFast(c.dateStart) || 0;
             let endT = getTimeFast(c.dateEnd) || startT;
             let isHappeningNow = (nowTime >= startT && nowTime <= endT);
@@ -804,7 +804,7 @@ if ((searchStr.includes('vle') || searchStr.includes('tiểu luận')) && tkbSub
 
             dlHtml += `<tr>
                 <td class="text-center align-middle" style="${rowBgColor}">
-                    <button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${c.sheetRowIndex}', event)">
+                    <button class="btn btn-sm ${isDone ? 'btn-success' : 'btn-outline-secondary'} fw-bold" onclick="toggleDeadlineComplete('${getDlKey(c)}', event)">
                         <i class="fa-solid ${isDone ? 'fa-check-double' : 'fa-square'}"></i> ${isDone ? 'Đã xong' : 'Chưa làm'}
                     </button>
                 </td>
