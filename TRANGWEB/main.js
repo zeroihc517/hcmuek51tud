@@ -3706,7 +3706,42 @@ window.handleDrop = function(e, targetIndex, sheetName) {
         loadDataByHocPhan(sheetName);
     });
 };
+// Khởi tạo âm thanh thông báo ngắn (Thay thế đoạn cũ)
+const warningExitSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3'); 
+// Tuyệt đối không dùng warningExitSound.loop = true;
 
+// Chặn phím F11 khi đang có hẹn giờ và ép toàn màn hình
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'F11') {
+        if (isEnforcedFullscreen && isTimerActive()) {
+            e.preventDefault(); // Chặn thoát toàn màn hình mặc định
+            
+            // Phát chuông cảnh báo
+            warningExitSound.play().catch(err => console.log("Trình duyệt chặn phát âm thanh:", err));
+            
+            // Hiện bảng cảnh báo màu vàng
+            $('#closeWarningModal').modal('show'); 
+        }
+    }
+});
+document.addEventListener('fullscreenchange', function(e) {
+    // Nếu màn hình không còn ở chế độ fullscreen, mà hẹn giờ vẫn chạy và chưa ấn Đồng ý thoát
+    if (!document.fullscreenElement && isEnforcedFullscreen && isTimerActive() && !allowLessonClose) {
+        // Phát chuông
+        warningExitSound.play().catch(err => console.log("Trình duyệt chặn phát âm thanh:", err));
+        
+        // Hiện bảng ép quay lại học tập (đã có sẵn trong hệ thống của bạn)
+        $('#returnStudyModal').modal('show'); 
+    }
+});
+window.addEventListener('beforeunload', function (e) {
+    if (isTimerActive()) {
+        // Hủy thao tác đóng tab và hiển thị cảnh báo
+        e.preventDefault();
+        e.returnValue = 'Đồng hồ hẹn giờ đang chạy. Bạn có chắc chắn muốn rời khỏi trang và gián đoạn quá trình học?';
+        return e.returnValue;
+    }
+});
 // Cứu cánh hiệu ứng khi kéo thả thất bại
 document.addEventListener("dragend", function(e) {
     $('.drag-handle-row').css('opacity', '1');
