@@ -83,15 +83,21 @@
     </button>
                         </div>
                     </div>
-<div class="mb-2">
+<div class="mb-2 d-flex gap-2">
     <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" onclick="toggleDrawingTool()">
         <i class="fa-solid fa-pencil text-primary me-1"></i> Bật bảng vẽ phác thảo (Bút chì)
+    </button>
+    <!-- Nút Cây tùy chỉnh đã được đưa ra ngoài -->
+    <button type="button" class="btn btn-sm btn-outline-info fw-bold" onclick="openCustomTreeModal()" title="Chèn cây nhị phân vào bài làm">
+        <i class="fa-solid fa-sitemap me-1"></i> Chèn Cây Nhị Phân
     </button>
 </div>
 <div id="drawingContainer" class="card p-3 mb-3 d-none border bg-light">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <span class="fw-bold small text-dark"><i class="fa-solid fa-paintbrush me-1"></i> Bảng vẽ phác thảo tự do:</span>
         <div class="d-flex gap-2">
+<!-- CÁC NÚT HỖ TRỢ VẼ CÂY -->
+
             <!-- Nút công cụ vẽ & tẩy -->
             <button type="button" class="btn btn-sm btn-outline-dark" onclick="setDrawMode('pen')" title="Bút chì"><i class="fa-solid fa-pen"></i></button>
             <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDrawMode('eraser')" title="Cục tẩy"><i class="fa-solid fa-eraser"></i></button>
@@ -200,6 +206,77 @@
                 </button>
                 <button type="button" class="btn btn-light w-100 fw-bold py-2 border shadow-sm" style="border-radius: 8px;" data-bs-dismiss="modal">
                     Hủy bỏ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL BẢNG VẼ CÂY NHỊ PHÂN -->
+<!-- MODAL BẢNG VẼ CÂY NHỊ PHÂN (GIAO DIỆN FULL MÀN HÌNH - CHIA CỘT) -->
+<div class="modal fade" id="customTreeModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen"> <!-- Sử dụng modal-fullscreen để bành trướng toàn màn hình -->
+        <div class="modal-content border-0">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-primary"><i class="fa-solid fa-diagram-project me-2"></i>Chèn Cây Nhị Phân (HD)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body bg-secondary bg-opacity-10 p-4">
+                <div class="row h-100 g-4">
+                    <!-- CỘT TRÁI: KHU VỰC NHẬP LIỆU (Chiếm 4 phần) -->
+                    <div class="col-lg-4 d-flex flex-column">
+                        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                            <div class="card-body d-flex flex-column">
+                                <h6 class="fw-bold text-dark mb-3">
+                                    <i class="fa-solid fa-keyboard me-2 text-primary"></i>Nhập dữ liệu từng nút:
+                                </h6>
+                                <!-- Cuộn dọc nếu bảng quá dài -->
+                                <div class="table-responsive flex-grow-1" style="max-height: 70vh; overflow-y: auto;">
+                                    <table class="table table-bordered align-middle text-center" id="customTreeTable">
+                                        <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                                            <tr>
+                                                <th>Nút cha</th>
+                                                <th>Con trái</th>
+                                                <th>Con phải</th>
+                                                <th>Xóa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- JS sẽ tự động chèn dòng vào đây -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="mt-3 text-center">
+                                    <button class="btn btn-sm btn-outline-secondary fw-bold w-100 py-2" onclick="$('#customTreeTable tbody').append('<tr><td><input type=\'text\' class=\'form-control form-control-sm node-parent\'></td><td><input type=\'text\' class=\'form-control form-control-sm node-left\'></td><td><input type=\'text\' class=\'form-control form-control-sm node-right\'></td><td><button class=\'btn btn-sm btn-danger\' onclick=\'removeCustomTreeRow(this)\'><i class=\'fa-solid fa-trash\'></i></button></td></tr>');">
+                                        <i class="fa-solid fa-plus me-1"></i>Thêm dòng
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CỘT PHẢI: BẢN XEM TRƯỚC (Chiếm 8 phần) -->
+                    <div class="col-lg-8 d-flex flex-column">
+                        <div class="card border-0 shadow-sm h-100" style="border-radius: 12px;">
+                            <div class="card-body d-flex flex-column p-0">
+                                <div class="p-3 border-bottom bg-light d-flex justify-content-between align-items-center">
+                                    <h6 class="fw-bold text-success mb-0"><i class="fa-solid fa-eye me-2"></i>Bản xem trước trực tiếp:</h6>
+                                </div>
+                                <!-- Vùng chứa canvas hiển thị ảnh xem trước -->
+                                <div class="flex-grow-1 bg-white d-flex justify-content-center align-items-center p-3" style="overflow: auto;">
+                                    <!-- Đã tăng độ phân giải (width=1200, height=800) để nét hơn, dùng max-width/height ép vừa khung -->
+                                    <canvas id="treePreviewCanvas" width="1200" height="800" style="background:#f8fafc; max-width: 100%; max-height: 70vh; border-radius: 8px; border: 1px dashed #cbd5e1; object-fit: contain;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-light border fw-bold" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" onclick="insertTreeDirectlyToEditor()">
+                    <i class="fa-solid fa-check me-1"></i> Chèn trực tiếp vào bài làm
                 </button>
             </div>
         </div>
