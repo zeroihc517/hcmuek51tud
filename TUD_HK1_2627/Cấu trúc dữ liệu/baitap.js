@@ -28,11 +28,12 @@ let langParam = urlParams.get('lang') || "cpp";
                 exerciseEditor.setOptions({ fontSize: "15px", showPrintMargin: false });
             }
 
-            tinymce.init({
+          tinymce.init({
                 selector: '#theoryEditor',
-                height: 250,
+                height: 250,        // Chiều cao mặc định ban đầu
+                resize: 'vertical', // Cho phép người dùng nắm kéo chỉnh chiều cao thủ công ở góc dưới
                 menubar: false,
-                plugins: 'lists link table code image',
+                plugins: 'lists link table code image', // Không dùng plugin autoresize nữa
                 toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | table link image',
                 content_style: 'body { font-family:Inter,sans-serif; font-size:15px }',
                 setup: function(editor) {
@@ -41,12 +42,12 @@ let langParam = urlParams.get('lang') || "cpp";
                     });
                     editor.on('change', function() { editor.save(); });
                     
-                    // --- BỔ SUNG: CLICK ĐÚP VÀO ẢNH ĐỂ MANG XUỐNG BẢNG VẼ SỬA LẠI ---
+                    // --- CLICK ĐÚP VÀO ẢNH ĐỂ MANG XUỐNG BẢNG VẼ SỬA LẠI ---
                     editor.on('dblclick', function(e) {
                         if (e.target.nodeName === 'IMG') {
                             let imgSrc = e.target.src;
                             if (imgSrc.startsWith('data:image')) {
-                                window.editingImageNode = e.target; // Lưu lại ảnh đang được sửa
+                                window.editingImageNode = e.target; 
                                 $('#drawingContainer').removeClass('d-none');
                                 
                                 let img = new Image();
@@ -58,7 +59,6 @@ let langParam = urlParams.get('lang') || "cpp";
                                     ctx.drawImage(img, 0, 0);
                                     saveCanvasState();
                                     
-                                    // Cuộn trang xuống chỗ bảng vẽ
                                     $('html, body').animate({
                                         scrollTop: $("#drawingContainer").offset().top - 80
                                     }, 300);
@@ -1193,10 +1193,8 @@ $(document).on('input', '#customTreeTable input', function() {
     }, 300);
 });
 
-// Khi mở bảng, xóa trắng xem trước
+// Khi mở bảng, xóa trắng xem trước và chỉ thiết lập bảng
 function openCustomTreeModal() {
-    if (!canvas || !ctx) { alert("Bảng vẽ chưa được bật, vui lòng bật bút chì trước!"); return; }
-    $('#quickTreeInput').val('');
     $('#customTreeTable tbody').html(`
         <tr>
             <td><input type="text" class="form-control form-control-sm fw-bold node-parent" placeholder="VD: 10"></td>
@@ -1207,7 +1205,106 @@ function openCustomTreeModal() {
     clearPreviewCanvas();
     $('#customTreeModal').modal('show');
 }
+// Hàm xuất cây ra ảnh chất lượng 4K và chèn thẳng vào bài làm
+function insertTreeDirectlyToEditor() {
+    let nodesMap = {}, childSet = new Set(), parentSet = new Set(), hasData = false;
+    
+    // 1. Quét dữ liệu từ bảng
+    $('#customTreeTable tbody tr').each(function() {
+        let parentVal = $(this).find('.node-parent').val().trim();
+        let leftVal = $(this).find('.node-left').val().trim();
+        let rightVal = $(this).find('.node-right').val().trim();
 
+        if (parentVal !== '') {
+            hasData = true;
+            if (!nodesMap[parentVal]) nodesMap[parentVal] = new CanvasTreeNode(parentVal);
+            parentSet.add(parentVal);
+            if (leftVal !== '') {
+                if (!nodesMap[leftVal]) nodesMap[leftVal] = new CanvasTreeNode(leftVal);
+                nodesMap[parentVal].left = nodesMap[leftVal];
+                childSet.add(leftVal);
+            }
+            if (rightVal !== '') {
+                if (!nodesMap[rightVal]) nodesMap[rightVal] = new CanvasTreeNode(rightVal);
+                nodesMap[parentVal].right = nodesMap[rightVal];
+                childSet.add(rightVal);
+            }
+        }
+    });
+
+    if (!hasData) {
+        alert("Vui lòng nhập dữ liệu để vẽ cây!");
+        return; 
+    }
+
+    // 2. Tìm gốc của cây
+    let rootVal = null;
+    for (let p of parentSet) { if (!childSet.has(p)) { rootVal = p; break; } }
+    if (!rootVal) rootVal = Array.from(parentSet)[0];
+    let root = nodesMap[rootVal];
+
+    // 3. Tạo một Canvas ảo để render ảnh chất lượng cao
+    let offCanvas = document.createElement('canvas');
+    let offCtx = offCanvas.getContext('2d');
+    
+    // Tính toán tọa độ cơ sở (không gian rộng)
+    calculateTreePositions(root, 1000, 50, 400, 70); 
+    
+    let bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
+    getTreeBounds(root, bounds);
+    
+    let treeWidth = bounds.maxX - bounds.minX;
+    let treeHeight = bounds.maxY - bounds.minY;
+    let padding = 40;
+
+    // HỆ SỐ PHÓNG TO ĐỂ ĐẠT CHẤT LƯỢNG 4K
+    let scale = 4; 
+    
+    offCanvas.width = (treeWidth + padding * 2) * scale;
+    offCanvas.height = (treeHeight + padding * 2) * scale;
+    
+    // Vẽ nền trắng
+    offCtx.fillStyle = '#ffffff';
+    offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+    
+    // Áp dụng hệ số phóng to (4K) và di chuyển vào trọng tâm
+    offCtx.scale(scale, scale);
+    offCtx.translate(-bounds.minX + padding, -bounds.minY + padding);
+    
+    // Cài đặt nét vẽ mượt mà
+    offCtx.lineCap = 'round';
+    offCtx.lineJoin = 'round';
+    
+    // Gọi hàm vẽ cây hiện có
+    drawTreeOnCanvas(root, offCtx);
+    
+    // 4. Trích xuất ảnh PNG chất lượng tối đa 100%
+    let dataURL = offCanvas.toDataURL("image/png", 1.0);
+    
+    // 5. Chèn trực tiếp vào trình soạn thảo TinyMCE
+    let editor = (typeof tinymce !== 'undefined') ? (tinymce.get('theoryEditor') || tinymce.activeEditor) : null;
+    if (editor) {
+        let imgHtml = `<p class="text-center"><img src="${dataURL}" alt="Cây Nhị Phân" style="max-width:60%; border-radius:8px;"/></p>`;
+        editor.insertContent(imgHtml);
+        
+        // --- TỰ ĐỘNG MỞ RỘNG KHUNG NẾU ẢNH LỚN ---
+        setTimeout(function() {
+            let body = editor.getBody();
+            let currentHeight = editor.getContainer().offsetHeight;
+            let contentHeight = body.scrollHeight + 100; // Tính tổng chiều cao nội dung bên trong + khoảng đệm
+            
+            // Nếu nội dung cao hơn khung hiện tại thì tự động phình to khung ra cho vừa vặn
+            if (contentHeight > currentHeight) {
+                editor.theme.resizeTo(null, contentHeight);
+            }
+        }, 100);
+        // ----------------------------------------
+
+        $('#customTreeModal').modal('hide');
+    } else {
+        alert("Trình soạn thảo chưa tải xong, vui lòng thử lại!");
+    }
+}
 function clearPreviewCanvas() {
     let pCanvas = document.getElementById('treePreviewCanvas');
     if(pCanvas) {
@@ -1380,23 +1477,27 @@ function triggerDrawAction(root, isPreviewMode) {
     // ========================================================
     // TRƯỜNG HỢP 1: BẢNG XEM TRƯỚC (PREVIEW) - TỰ ĐỘNG SCALE VỪA KHÍT
     // ========================================================
-    if (isPreviewMode) {
+   if (isPreviewMode) {
         targetCtx.fillStyle = '#f8fafc';
         targetCtx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
 
+        // Áp dụng khoảng cách nhỏ gọn cho cả Preview
+        let depth = getTreeDepth(root);
+        let initialOffsetX = Math.max(40, Math.pow(1.8, depth - 2) * 25);
+        
         let baseWidth = targetCanvas.width;
-        calculateTreePositions(root, baseWidth / 2, 50, baseWidth / 4, 70);
+        calculateTreePositions(root, baseWidth / 2, 40, initialOffsetX, 55);
 
         let bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
         getTreeBounds(root, bounds);
 
         let treeWidth = bounds.maxX - bounds.minX;
         let treeHeight = bounds.maxY - bounds.minY;
-        let padding = 35;
+        let padding = 20;
 
         let scaleX = (targetCanvas.width - padding * 2) / treeWidth;
         let scaleY = (targetCanvas.height - padding * 2) / treeHeight;
-        let scale = Math.min(scaleX, scaleY, 1.2);
+        let scale = Math.min(scaleX, scaleY, 1.3); // Giới hạn scale tối đa để xem trước không bị phóng quá to
 
         let treeCenterX = (bounds.minX + bounds.maxX) / 2;
         let treeCenterY = (bounds.minY + bounds.maxY) / 2;
@@ -1410,7 +1511,8 @@ function triggerDrawAction(root, isPreviewMode) {
 
         drawTreeOnCanvas(root, targetCtx);
         targetCtx.restore();
-    } 
+    }
+
     // ========================================================
     // TRƯỜNG HỢP 2: BẢNG VẼ PHÁC THẢO CHÍNH - TỰ ĐỘNG NỚI RỘNG KHUNG
     // ========================================================
@@ -1485,20 +1587,20 @@ function triggerDrawAction(root, isPreviewMode) {
     }
 }
 
-// Hàm vẽ cây với giao diện nâng cấp (Gọn, thẳng, hiện đại)
+// Hàm vẽ cây với giao diện Nho Gọn, Hiện Đại
+// Hàm vẽ cây với giao diện Nhỏ Gọn, Hiện Đại (Đã fix đồng bộ màu đường nối)
 function drawTreeOnCanvas(node, targetCtx) {
     if (!node) return;
     targetCtx = targetCtx || ctx;
 
-    // --- 1. VẼ ĐƯỜNG NỐI TRƯỚC (Để đường nét chìm dưới các nút) ---
-    targetCtx.lineWidth = 2;
-    targetCtx.strokeStyle = '#64748b'; // Màu xám xanh dịu mắt
+    // --- 1. VẼ ĐƯỜNG NỐI (Thanh mảnh, màu xám nhạt) ---
+    targetCtx.lineWidth = 1.5; 
 
     if (node.left) {
         targetCtx.beginPath();
         targetCtx.moveTo(node.x, node.y);
-        // Dùng đường thẳng (lineTo) thay vì đường cong (bezierCurveTo) để dáng cây dứt khoát, gọn gàng
         targetCtx.lineTo(node.left.x, node.left.y);
+        targetCtx.strokeStyle = '#cbd5e1'; // KHÓA MÀU XÁM TRƯỚC KHI VẼ NÉT TRÁI
         targetCtx.stroke();
         drawTreeOnCanvas(node.left, targetCtx);
     }
@@ -1506,44 +1608,122 @@ function drawTreeOnCanvas(node, targetCtx) {
         targetCtx.beginPath();
         targetCtx.moveTo(node.x, node.y);
         targetCtx.lineTo(node.right.x, node.right.y);
+        targetCtx.strokeStyle = '#cbd5e1'; // KHÓA MÀU XÁM TRƯỚC KHI VẼ NÉT PHẢI
         targetCtx.stroke();
         drawTreeOnCanvas(node.right, targetCtx);
     }
 
-    // --- 2. TÍNH TOÁN BÁN KÍNH LINH HOẠT ---
-    // Nút sẽ tự to ra nếu bạn nhập số dài (ví dụ: 1000, 2554...)
+    // --- 2. TÍNH TOÁN BÁN KÍNH NHỎ GỌN ---
     let textLen = node.val.toString().length;
-    let radius = Math.max(18, 12 + textLen * 4); 
+    let radius = Math.max(14, 8 + textLen * 4); 
 
     // --- 3. VẼ HÌNH TRÒN (NÚT) ---
     targetCtx.beginPath();
     targetCtx.arc(node.x, node.y, radius, 0, 2 * Math.PI);
     
-    // Hiệu ứng đổ bóng (Shadow) 3D nhẹ nhàng
-    targetCtx.shadowColor = 'rgba(15, 76, 129, 0.15)'; 
-    targetCtx.shadowBlur = 8;
-    targetCtx.shadowOffsetY = 4;
+    // Bóng mờ (Shadow) siêu nhẹ để tạo cảm giác nổi
+    targetCtx.shadowColor = 'rgba(0, 0, 0, 0.08)'; 
+    targetCtx.shadowBlur = 4;
+    targetCtx.shadowOffsetY = 2;
     
     // Tô nền trắng
     targetCtx.fillStyle = '#ffffff';
     targetCtx.fill();
     
-    // Vẽ viền nút
-    targetCtx.strokeStyle = '#0f4c81';
-    targetCtx.lineWidth = 2.5;
+    // Vẽ viền nút (Màu xanh tinh tế)
+    targetCtx.strokeStyle = '#0ea5e9'; // (Chính màu này lúc nãy bị lem xuống đường nối)
+    targetCtx.lineWidth = 2;
     targetCtx.stroke();
     
-    // Quan trọng: Tắt đổ bóng trước khi vẽ chữ để chữ không bị nhòe
-    targetCtx.shadowColor = 'transparent'; 
+    targetCtx.shadowColor = 'transparent'; // Tắt bóng mờ để chữ không bị nhòe
 
     // --- 4. VẼ CHỮ TRONG NÚT ---
-    targetCtx.fillStyle = '#0f2c59'; // Màu chữ xanh navy đậm
-    targetCtx.font = 'bold 14px Inter, sans-serif';
+    targetCtx.fillStyle = '#0f172a'; // Màu chữ xám đen
+    targetCtx.font = 'bold 13px Inter, sans-serif'; 
     targetCtx.textAlign = 'center';
     targetCtx.textBaseline = 'middle';
-    
-    // Căn chỉnh chữ chính giữa vòng tròn
     targetCtx.fillText(node.val, node.x, node.y);
+}
+
+// Hàm tính toán độ sâu của cây để chia khoảng cách cho chuẩn
+function getTreeDepth(node) {
+    if (!node) return 0;
+    return 1 + Math.max(getTreeDepth(node.left), getTreeDepth(node.right));
+}
+
+// Hàm xuất cây ra ảnh chất lượng HD và chèn thẳng vào bài làm
+function insertTreeDirectlyToEditor() {
+    let nodesMap = {}, childSet = new Set(), parentSet = new Set(), hasData = false;
+    
+    $('#customTreeTable tbody tr').each(function() {
+        let parentVal = $(this).find('.node-parent').val().trim();
+        let leftVal = $(this).find('.node-left').val().trim();
+        let rightVal = $(this).find('.node-right').val().trim();
+
+        if (parentVal !== '') {
+            hasData = true;
+            if (!nodesMap[parentVal]) nodesMap[parentVal] = new CanvasTreeNode(parentVal);
+            parentSet.add(parentVal);
+            if (leftVal !== '') {
+                if (!nodesMap[leftVal]) nodesMap[leftVal] = new CanvasTreeNode(leftVal);
+                nodesMap[parentVal].left = nodesMap[leftVal];
+                childSet.add(leftVal);
+            }
+            if (rightVal !== '') {
+                if (!nodesMap[rightVal]) nodesMap[rightVal] = new CanvasTreeNode(rightVal);
+                nodesMap[parentVal].right = nodesMap[rightVal];
+                childSet.add(rightVal);
+            }
+        }
+    });
+
+    if (!hasData) { alert("Vui lòng nhập dữ liệu để vẽ cây!"); return; }
+
+    let rootVal = null;
+    for (let p of parentSet) { if (!childSet.has(p)) { rootVal = p; break; } }
+    if (!rootVal) rootVal = Array.from(parentSet)[0];
+    let root = nodesMap[rootVal];
+
+    let offCanvas = document.createElement('canvas');
+    let offCtx = offCanvas.getContext('2d');
+    
+    // TÍNH TOÁN KHOẢNG CÁCH NHỎ GỌN TỰ ĐỘNG THEO ĐỘ SÂU
+    let depth = getTreeDepth(root);
+    let initialOffsetX = Math.max(40, Math.pow(1.8, depth - 2) * 25); // Nhánh cây co lại vừa đủ
+    let initialOffsetY = 55; // Khoảng cách dọc (chiều cao tầng) rút ngắn lại
+    
+    calculateTreePositions(root, 1000, 50, initialOffsetX, initialOffsetY); 
+    
+    let bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
+    getTreeBounds(root, bounds);
+    
+    let padding = 15; // Cắt viền sát rạt để hình ảnh nhỏ gọn nhất có thể
+    let treeWidth = bounds.maxX - bounds.minX;
+    let treeHeight = bounds.maxY - bounds.minY;
+    
+    let scale = 3; // Scale 3x là đủ đạt chuẩn HD mà không làm hầm hố khung soạn thảo
+    
+    offCanvas.width = (treeWidth + padding * 2) * scale;
+    offCanvas.height = (treeHeight + padding * 2) * scale;
+    
+    offCtx.fillStyle = '#ffffff';
+    offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+    
+    offCtx.scale(scale, scale);
+    offCtx.translate(-bounds.minX + padding, -bounds.minY + padding);
+    offCtx.lineCap = 'round'; offCtx.lineJoin = 'round';
+    
+    drawTreeOnCanvas(root, offCtx);
+    
+    let dataURL = offCanvas.toDataURL("image/png", 1.0);
+    
+    let editor = (typeof tinymce !== 'undefined') ? (tinymce.get('theoryEditor') || tinymce.activeEditor) : null;
+    if (editor) {
+        // Đặt max-width: 60% để khi hiển thị trong khung bài làm, ảnh tự thu lại nhỏ nhắn và nằm giữa
+        let imgHtml = `<p class="text-center"><img src="${dataURL}" alt="Cây Nhị Phân" style="max-width:60%; border-radius:8px;"/></p>`;
+        editor.insertContent(imgHtml);
+        $('#customTreeModal').modal('hide');
+    }
 }
 // --- CÁC HÀM VÀ CLASS CÒN THIẾU CỦA CÂY NHỊ PHÂN ---
 
