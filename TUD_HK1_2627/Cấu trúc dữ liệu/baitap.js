@@ -32,7 +32,6 @@ let langParam = urlParams.get('lang') || "cpp";
                 selector: '#theoryEditor',
                 height: 250,
                 menubar: false,
-		
                 plugins: 'lists link table code image',
                 toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline forecolor backcolor | alignleft aligncenter alignright alignjustify | bullist numlist | table link image',
                 content_style: 'body { font-family:Inter,sans-serif; font-size:15px }',
@@ -41,6 +40,32 @@ let langParam = urlParams.get('lang') || "cpp";
                         loadQuestionsData();
                     });
                     editor.on('change', function() { editor.save(); });
+                    
+                    // --- BỔ SUNG: CLICK ĐÚP VÀO ẢNH ĐỂ MANG XUỐNG BẢNG VẼ SỬA LẠI ---
+                    editor.on('dblclick', function(e) {
+                        if (e.target.nodeName === 'IMG') {
+                            let imgSrc = e.target.src;
+                            if (imgSrc.startsWith('data:image')) {
+                                window.editingImageNode = e.target; // Lưu lại ảnh đang được sửa
+                                $('#drawingContainer').removeClass('d-none');
+                                
+                                let img = new Image();
+                                img.src = imgSrc;
+                                img.onload = function() {
+                                    if (!canvas) initCanvas();
+                                    ctx.fillStyle = '#ffffff';
+                                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                    ctx.drawImage(img, 0, 0);
+                                    saveCanvasState();
+                                    
+                                    // Cuộn trang xuống chỗ bảng vẽ
+                                    $('html, body').animate({
+                                        scrollTop: $("#drawingContainer").offset().top - 80
+                                    }, 300);
+                                }
+                            }
+                        }
+                    });
                 }
             });
         });
@@ -975,14 +1000,30 @@ function clearCanvas() {
 }
 
 // Chèn hình vẽ từ canvas vào TinyMCE dưới dạng hình ảnh Base64
+// Chèn hình vẽ từ canvas vào TinyMCE
 function insertDrawingToEditor() {
     if (!canvas) return;
-    let dataURL = canvas.toDataURL("image/png");
     
-    let imgHtml = `<p class="text-center"><img src="${dataURL}" alt="Hình vẽ phác thảo" style="max-width:100%; border:1px solid #ddd; border-radius:8px;"/></p>`;
+    // ĐỔI SANG ĐỊNH DẠNG JPEG để nén siêu nhẹ, cho phép lưu nhiều ảnh!
+    let dataURL = canvas.toDataURL("image/jpeg", 0.6);
     
-    if (typeof tinymce !== 'undefined' && tinymce.get('theoryEditor')) {
-        tinymce.get('theoryEditor').insertContent(imgHtml);
+    // Tìm trình soạn thảo an toàn hơn bằng activeEditor
+    let editor = (typeof tinymce !== 'undefined') ? (tinymce.get('theoryEditor') || tinymce.activeEditor) : null;
+    
+    if (window.editingImageNode) {
+        // Cập nhật đè lên ảnh cũ đang sửa
+        window.editingImageNode.src = dataURL;
+        window.editingImageNode = null;
+        if (editor) editor.fire('change'); // Báo cho hệ thống biết bài viết đã thay đổi
+    } else {
+        // Vẽ ảnh mới
+        let imgHtml = `<p class="text-center"><img src="${dataURL}" alt="Hình vẽ phác thảo" title="Click đúp chuột vào ảnh để sửa lại" style="max-width:100%; border:1px solid #ddd; border-radius:8px; cursor:pointer;"/></p>`;
+        
+        if (editor) {
+            editor.insertContent(imgHtml);
+        } else {
+            alert("Trình soạn thảo chưa sẵn sàng, vui lòng thử lại!");
+        }
     }
     
     $('#drawingContainer').addClass('d-none');
@@ -1133,4 +1174,410 @@ function loginStudentExercise() {
         $('#userAuthError').removeClass('d-none').text("Lỗi kết nối đến máy chủ!"); 
         btn.html('Đăng nhập hệ thống').prop('disabled', false); 
     });
+}
+
+// --- BẮT SỰ KIỆN GÕ ĐỂ VẼ XEM TRƯỚC (ĐÃ FIX LAG BẰNG DEBOUNCE) ---
+let previewTimeout = null;
+
+$(document).on('input', '#quickTreeInput', function() {
+    clearTimeout(previewTimeout); // Hủy lệnh vẽ liên tục nếu bạn vẫn đang gõ phím
+    previewTimeout = setTimeout(function() {
+        drawTreeFromQuickInput(true); // Chỉ bắt đầu vẽ xem trước khi bạn ngừng gõ 0.3 giây
+    }, 300); 
+});
+
+$(document).on('input', '#customTreeTable input', function() {
+    clearTimeout(previewTimeout);
+    previewTimeout = setTimeout(function() {
+        drawCustomTree(true); 
+    }, 300);
+});
+
+// Khi mở bảng, xóa trắng xem trước
+function openCustomTreeModal() {
+    if (!canvas || !ctx) { alert("Bảng vẽ chưa được bật, vui lòng bật bút chì trước!"); return; }
+    $('#quickTreeInput').val('');
+    $('#customTreeTable tbody').html(`
+        <tr>
+            <td><input type="text" class="form-control form-control-sm fw-bold node-parent" placeholder="VD: 10"></td>
+            <td><input type="text" class="form-control form-control-sm node-left" placeholder="VD: 5"></td>
+            <td><input type="text" class="form-control form-control-sm node-right" placeholder="VD: 15"></td>
+            <td><button class="btn btn-sm btn-danger" onclick="removeCustomTreeRow(this)"><i class="fa-solid fa-trash"></i></button></td>
+        </tr>`);
+    clearPreviewCanvas();
+    $('#customTreeModal').modal('show');
+}
+
+function clearPreviewCanvas() {
+    let pCanvas = document.getElementById('treePreviewCanvas');
+    if(pCanvas) {
+        let pCtx = pCanvas.getContext('2d');
+        pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+    }
+}
+
+// --- 1. CÁC HÀM TÍNH TOÁN VÀ XOAY CÂY AVL ---
+function getNodeHeight(node) {
+    if (!node) return 0;
+    return 1 + Math.max(getNodeHeight(node.left), getNodeHeight(node.right));
+}
+
+function getBalanceFactor(node) {
+    if (!node) return 0;
+    return getNodeHeight(node.left) - getNodeHeight(node.right);
+}
+
+// Xoay phải (Right Rotation)
+function rotateRight(y) {
+    let x = y.left;
+    let T2 = x.right;
+    x.right = y;
+    y.left = T2;
+    return x;
+}
+
+// Xoay trái (Left Rotation)
+function rotateLeft(x) {
+    let y = x.right;
+    let T2 = y.left;
+    y.left = x;
+    x.right = T2;
+    return y;
+}
+
+// Chèn phần tử vào cây và tự động cân bằng theo quy tắc AVL
+function insertAVL(node, val) {
+    if (!node) return new CanvasTreeNode(val);
+
+    // Chuyển kiểu số để so sánh đúng (nếu nhập số)
+    let numVal = isNaN(val) ? val : Number(val);
+    let currentVal = isNaN(node.val) ? node.val : Number(node.val);
+
+    if (numVal < currentVal) {
+        node.left = insertAVL(node.left, val);
+    } else if (numVal > currentVal) {
+        node.right = insertAVL(node.right, val);
+    } else {
+        return node; // Không chèn giá trị trùng lặp
+    }
+
+    let balance = getBalanceFactor(node);
+
+    // Trường hợp Trái - Trái (Left Left)
+    let leftVal = node.left ? (isNaN(node.left.val) ? node.left.val : Number(node.left.val)) : null;
+    if (balance > 1 && numVal < leftVal) {
+        return rotateRight(node);
+    }
+
+    // Trường hợp Phải - Phải (Right Right)
+    let rightVal = node.right ? (isNaN(node.right.val) ? node.right.val : Number(node.right.val)) : null;
+    if (balance < -1 && numVal > rightVal) {
+        return rotateLeft(node);
+    }
+
+    // Trường hợp Trái - Phải (Left Right)
+    if (balance > 1 && numVal > leftVal) {
+        node.left = rotateLeft(node.left);
+        return rotateRight(node);
+    }
+
+    // Trường hợp Phải - Trái (Right Left)
+    if (balance < -1 && numVal < rightVal) {
+        node.right = rotateRight(node.right);
+        return rotateLeft(node);
+    }
+
+    return node;
+}
+
+// 2. HÀM ĐỌC DỮ LIỆU TỪ Ô NHẬP NHANH (BẢN AVL MỚI NHẤT)
+function drawTreeFromQuickInput(isPreview) {
+    let isPreviewMode = isPreview === true;
+    
+    let inputStr = $('#quickTreeInput').val().trim();
+    if (!inputStr) { if(isPreviewMode) clearPreviewCanvas(); return; }
+    
+    let arr = inputStr.split(/[\s,]+/).filter(v => v !== '' && v.toLowerCase() !== 'null' && v.toLowerCase() !== 'x');
+    if (arr.length === 0) {
+        if(isPreviewMode) clearPreviewCanvas(); return;
+    }
+
+    // Chèn từng phần tử theo thuật toán AVL
+    let root = null;
+    for (let val of arr) {
+        root = insertAVL(root, val);
+    }
+    
+    triggerDrawAction(root, isPreviewMode);
+    
+    if (!isPreviewMode) {
+        $('#customTreeModal').modal('hide');
+    }
+}
+
+// 3. HÀM ĐỌC DỮ LIỆU TỪ BẢNG (BẢN CHUẨN)
+function drawCustomTree(isPreview) {
+    let isPreviewMode = isPreview === true;
+    let nodesMap = {}, childSet = new Set(), parentSet = new Set(), hasData = false;
+    
+    $('#customTreeTable tbody tr').each(function() {
+        let parentVal = $(this).find('.node-parent').val().trim();
+        let leftVal = $(this).find('.node-left').val().trim();
+        let rightVal = $(this).find('.node-right').val().trim();
+
+        if (parentVal !== '') {
+            hasData = true;
+            if (!nodesMap[parentVal]) nodesMap[parentVal] = new CanvasTreeNode(parentVal);
+            parentSet.add(parentVal);
+            if (leftVal !== '') {
+                if (!nodesMap[leftVal]) nodesMap[leftVal] = new CanvasTreeNode(leftVal);
+                nodesMap[parentVal].left = nodesMap[leftVal];
+                childSet.add(leftVal);
+            }
+            if (rightVal !== '') {
+                if (!nodesMap[rightVal]) nodesMap[rightVal] = new CanvasTreeNode(rightVal);
+                nodesMap[parentVal].right = nodesMap[rightVal];
+                childSet.add(rightVal);
+            }
+        }
+    });
+
+    if (!hasData) { if(isPreviewMode) clearPreviewCanvas(); return; }
+    let rootVal = null;
+    for (let p of parentSet) { if (!childSet.has(p)) { rootVal = p; break; } }
+    if (!rootVal) rootVal = Array.from(parentSet)[0];
+
+    triggerDrawAction(nodesMap[rootVal], isPreviewMode);
+    if (!isPreviewMode) {
+        $('#customTreeModal').modal('hide');
+    }
+}
+// Hàm tìm giới hạn biên bao quanh toàn bộ cây (minX, maxX, minY, maxY)
+function getTreeBounds(node, bounds) {
+    if (!node) return;
+    let radius = Math.max(18, 12 + node.val.toString().length * 4);
+    
+    bounds.minX = Math.min(bounds.minX, node.x - radius);
+    bounds.maxX = Math.max(bounds.maxX, node.x + radius);
+    bounds.minY = Math.min(bounds.minY, node.y - radius);
+    bounds.maxY = Math.max(bounds.maxY, node.y + radius);
+
+    getTreeBounds(node.left, bounds);
+    getTreeBounds(node.right, bounds);
+}
+
+// Hàm truyền lệnh vẽ (Fix lỗi mất hình lần đầu bằng Canvas ảo đồng bộ)
+function triggerDrawAction(root, isPreviewMode) {
+    if (!root) return;
+    
+    let targetCanvas = isPreviewMode ? document.getElementById('treePreviewCanvas') : canvas;
+    if (!targetCanvas) return;
+    let targetCtx = targetCanvas.getContext('2d');
+
+    // 1. Reset ma trận biến đổi
+    targetCtx.setTransform(1, 0, 0, 1, 0, 0);
+
+    // ========================================================
+    // TRƯỜNG HỢP 1: BẢNG XEM TRƯỚC (PREVIEW) - TỰ ĐỘNG SCALE VỪA KHÍT
+    // ========================================================
+    if (isPreviewMode) {
+        targetCtx.fillStyle = '#f8fafc';
+        targetCtx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+
+        let baseWidth = targetCanvas.width;
+        calculateTreePositions(root, baseWidth / 2, 50, baseWidth / 4, 70);
+
+        let bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
+        getTreeBounds(root, bounds);
+
+        let treeWidth = bounds.maxX - bounds.minX;
+        let treeHeight = bounds.maxY - bounds.minY;
+        let padding = 35;
+
+        let scaleX = (targetCanvas.width - padding * 2) / treeWidth;
+        let scaleY = (targetCanvas.height - padding * 2) / treeHeight;
+        let scale = Math.min(scaleX, scaleY, 1.2);
+
+        let treeCenterX = (bounds.minX + bounds.maxX) / 2;
+        let treeCenterY = (bounds.minY + bounds.maxY) / 2;
+        let canvasCenterX = targetCanvas.width / 2;
+        let canvasCenterY = targetCanvas.height / 2;
+
+        targetCtx.save();
+        targetCtx.translate(canvasCenterX, canvasCenterY);
+        targetCtx.scale(scale, scale);
+        targetCtx.translate(-treeCenterX, -treeCenterY);
+
+        drawTreeOnCanvas(root, targetCtx);
+        targetCtx.restore();
+    } 
+    // ========================================================
+    // TRƯỜNG HỢP 2: BẢNG VẼ PHÁC THẢO CHÍNH - TỰ ĐỘNG NỚI RỘNG KHUNG
+    // ========================================================
+    else {
+        saveCanvasState(); // Lưu vào Undo trước khi chèn cây
+
+        let maxOffsetX = Math.min(targetCanvas.width / 4, 150); 
+        
+        // Tính toán tọa độ cây
+        calculateTreePositions(root, targetCanvas.width / 2, 50, maxOffsetX, 70);
+
+        let bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
+        getTreeBounds(root, bounds);
+
+        let padding = 50;
+        let requiredWidth = Math.max(targetCanvas.width, (bounds.maxX - bounds.minX) + padding * 2);
+        let requiredHeight = Math.max(targetCanvas.height, bounds.maxY + padding);
+
+        // Hàm phụ để trả lại nét vẽ tự do ban đầu
+        const restorePenSettings = () => {
+            targetCtx.lineCap = 'round';
+            targetCtx.lineJoin = 'round';
+            targetCtx.shadowColor = 'transparent';
+            if (typeof isErasing !== 'undefined' && isErasing) {
+                targetCtx.strokeStyle = '#ffffff'; 
+                targetCtx.lineWidth = 20;
+            } else {
+                targetCtx.strokeStyle = '#000000'; 
+                targetCtx.lineWidth = 2;
+            }
+        };
+
+        // Nếu cây to hơn khung hiện tại -> Nới rộng khung
+        if (requiredWidth > targetCanvas.width || requiredHeight > targetCanvas.height) {
+            // FIX: Dùng Canvas ảo copy ảnh ngay lập tức thay vì dùng toDataURL + img.onload mất thời gian chờ
+            let tempCanvas = document.createElement('canvas');
+            tempCanvas.width = targetCanvas.width;
+            tempCanvas.height = targetCanvas.height;
+            tempCanvas.getContext('2d').drawImage(targetCanvas, 0, 0);
+            
+            // Cập nhật lại khung bọc HTML
+            let wrapper = document.getElementById('canvasWrapper');
+            if (wrapper) {
+                if (requiredWidth > targetCanvas.width) wrapper.style.width = Math.ceil(requiredWidth) + 'px';
+                if (requiredHeight > targetCanvas.height) wrapper.style.height = Math.ceil(requiredHeight) + 'px';
+            }
+
+            // Đổi size làm mất nền Canvas chính
+            targetCanvas.width = Math.ceil(requiredWidth);
+            targetCanvas.height = Math.ceil(requiredHeight);
+
+            // In lại hình cũ ngay lập tức (Đồng bộ)
+            targetCtx.fillStyle = '#ffffff';
+            targetCtx.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
+            targetCtx.drawImage(tempCanvas, 0, 0);
+
+            // Tiến hành vẽ cây mới chồng lên
+            calculateTreePositions(root, targetCanvas.width / 2, 50, maxOffsetX, 70);
+            drawTreeOnCanvas(root, targetCtx);
+            restorePenSettings();
+            
+        } else {
+            // Nếu bảng đủ rộng thì vẽ thẳng luôn
+            drawTreeOnCanvas(root, targetCtx);
+            restorePenSettings(); 
+        }
+
+        // Cuộn trang xuống bảng vẽ
+        $('html, body').animate({
+            scrollTop: $("#drawingContainer").offset().top - 80
+        }, 400);
+    }
+}
+
+// Hàm vẽ cây với giao diện nâng cấp (Gọn, thẳng, hiện đại)
+function drawTreeOnCanvas(node, targetCtx) {
+    if (!node) return;
+    targetCtx = targetCtx || ctx;
+
+    // --- 1. VẼ ĐƯỜNG NỐI TRƯỚC (Để đường nét chìm dưới các nút) ---
+    targetCtx.lineWidth = 2;
+    targetCtx.strokeStyle = '#64748b'; // Màu xám xanh dịu mắt
+
+    if (node.left) {
+        targetCtx.beginPath();
+        targetCtx.moveTo(node.x, node.y);
+        // Dùng đường thẳng (lineTo) thay vì đường cong (bezierCurveTo) để dáng cây dứt khoát, gọn gàng
+        targetCtx.lineTo(node.left.x, node.left.y);
+        targetCtx.stroke();
+        drawTreeOnCanvas(node.left, targetCtx);
+    }
+    if (node.right) {
+        targetCtx.beginPath();
+        targetCtx.moveTo(node.x, node.y);
+        targetCtx.lineTo(node.right.x, node.right.y);
+        targetCtx.stroke();
+        drawTreeOnCanvas(node.right, targetCtx);
+    }
+
+    // --- 2. TÍNH TOÁN BÁN KÍNH LINH HOẠT ---
+    // Nút sẽ tự to ra nếu bạn nhập số dài (ví dụ: 1000, 2554...)
+    let textLen = node.val.toString().length;
+    let radius = Math.max(18, 12 + textLen * 4); 
+
+    // --- 3. VẼ HÌNH TRÒN (NÚT) ---
+    targetCtx.beginPath();
+    targetCtx.arc(node.x, node.y, radius, 0, 2 * Math.PI);
+    
+    // Hiệu ứng đổ bóng (Shadow) 3D nhẹ nhàng
+    targetCtx.shadowColor = 'rgba(15, 76, 129, 0.15)'; 
+    targetCtx.shadowBlur = 8;
+    targetCtx.shadowOffsetY = 4;
+    
+    // Tô nền trắng
+    targetCtx.fillStyle = '#ffffff';
+    targetCtx.fill();
+    
+    // Vẽ viền nút
+    targetCtx.strokeStyle = '#0f4c81';
+    targetCtx.lineWidth = 2.5;
+    targetCtx.stroke();
+    
+    // Quan trọng: Tắt đổ bóng trước khi vẽ chữ để chữ không bị nhòe
+    targetCtx.shadowColor = 'transparent'; 
+
+    // --- 4. VẼ CHỮ TRONG NÚT ---
+    targetCtx.fillStyle = '#0f2c59'; // Màu chữ xanh navy đậm
+    targetCtx.font = 'bold 14px Inter, sans-serif';
+    targetCtx.textAlign = 'center';
+    targetCtx.textBaseline = 'middle';
+    
+    // Căn chỉnh chữ chính giữa vòng tròn
+    targetCtx.fillText(node.val, node.x, node.y);
+}
+// --- CÁC HÀM VÀ CLASS CÒN THIẾU CỦA CÂY NHỊ PHÂN ---
+
+// 1. Class định nghĩa Nút của cây
+class CanvasTreeNode {
+    constructor(val) {
+        this.val = val;
+        this.left = null;
+        this.right = null;
+        this.x = 0;
+        this.y = 0;
+    }
+}
+
+// 2. Hàm tính toán tọa độ (x, y) cho từng nút để vẽ không bị đè lên nhau
+// 2. Hàm tính toán tọa độ (Đã điều chỉnh giãn cách)
+function calculateTreePositions(node, x, y, offsetX, offsetY) {
+    if (!node) return;
+    
+    node.x = x;
+    node.y = y;
+    
+    // Dùng offsetX / 2 thay vì 1.8 để chia đôi chính xác không gian, 
+    // đảm bảo các nút ở tầng dưới cùng không bao giờ đè lên nhau.
+    if (node.left) {
+        calculateTreePositions(node.left, x - offsetX, y + offsetY, offsetX / 2, offsetY);
+    }
+    if (node.right) {
+        calculateTreePositions(node.right, x + offsetX, y + offsetY, offsetX / 2, offsetY);
+    }
+}
+
+// 3. Hàm xóa dòng trong bảng nhập thủ công
+function removeCustomTreeRow(btn) {
+    $(btn).closest('tr').remove();
+    drawCustomTree(true); // Cập nhật lại hình xem trước sau khi xóa
 }
