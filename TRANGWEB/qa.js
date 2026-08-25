@@ -2334,3 +2334,4 @@ function stopAlarmSound() {
     alarmSound.pause();
     alarmSound.currentTime = 0; // Đưa bản nhạc về lại thời gian đầu
 }
+

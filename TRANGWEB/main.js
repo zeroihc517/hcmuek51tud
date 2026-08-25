@@ -5779,3 +5779,112 @@ function generateAdminTableFromModal() {
 
     doInsertAdminContent(tableHtml);
 }
+// =========================================================================
+// TÍNH NĂNG ADMIN: CHUYỂN ĐỔI TOÀN BỘ WEBSITE SANG GÓC NHÌN SINH VIÊN
+// =========================================================================
+window.adminFetchUserData = function() {
+    let targetMSSV = $('#adminSearchMSSV').val().trim();
+    if (!targetMSSV) { alert("Vui lòng nhập MSSV!"); $('#adminSearchMSSV').focus(); return; }
+    
+    let area = $('#adminUserDetailArea');
+    area.removeClass('d-none').html('<div class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang lấy dữ liệu hệ thống của ' + targetMSSV + '...</div>');
+    
+    // 1. Lưu lại MSSV thực sự của Admin (chỉ lưu 1 lần để gọi API)
+    if (!window.realAdminMssv) {
+        window.realAdminMssv = currentUser.mssv;
+    }
+
+    // 2. KÍCH HOẠT CHẾ ĐỘ NHẬP VAI: Chuyển MSSV hiện tại thành MSSV của sinh viên
+    currentUser.mssv = targetMSSV;
+    
+    // Cập nhật nhãn báo hiệu trên thanh Sidebar để Admin không bị nhầm lẫn
+    $('#sidebarUserMSSV').html(`<span class="badge bg-warning text-dark mt-1"><i class="fa-solid fa-eye me-1"></i>Đang xem: ${targetMSSV}</span>`);
+    
+    // Thêm nút Thoát nhanh chế độ xem ở menu cá nhân
+    if ($('#btnExitImpersonate').length === 0) {
+        $('#sidebarUserInfo .dropdown-menu').prepend(`
+            <button id="btnExitImpersonate" class="dropdown-item py-2 mb-1 d-flex align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px; background: #fee2e2;" onclick="location.reload()">
+                <i class="fa-solid fa-right-from-bracket text-danger" style="font-size: 16px; width: 20px; text-align: center;"></i> Thoát Góc nhìn Sinh viên
+            </button>
+        `);
+    }
+
+    $.ajax({
+        url: SCRIPT_URL + "?action=adminGetUserData&targetMssv=" + targetMSSV + "&adminMssv=" + window.realAdminMssv,
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            // Vẽ bảng tóm tắt Admin
+            renderAdminUserDetail(targetMSSV, data);
+            
+            // 3. ĐỒNG BỘ CÁC PHÂN HỆ KHÁC TRONG WEB DƯỚI GÓC NHÌN SINH VIÊN
+            // - Tiến độ & Ghi chú bài học
+            fetchLearningDataFromServer(); 
+            
+            // - Tổng hợp Link cá nhân
+            loadWebLinks();
+            
+            // - TKB & Deadlines
+            if (data.tkb) processTKBData(data.tkb);
+            if (data.deadlines) {
+                globalDeadlineData = data.deadlines.map(function(row) {
+                    return {
+                        title: row[1], duration: row[2], tag: row[3], icon: row[4], emoji: row[5],
+                        dateStart: row[6] || "", dateEnd: row[7] || "", 
+                        sheetRowIndex: row[8], isSystem: String(row[8]).startsWith('SYS_')
+                    };
+                });
+                renderDeadlines();
+            }
+
+            // - Trạng thái Check xong Deadline
+            $.ajax({ 
+                url: SCRIPT_URL + "?action=getCompletedDeadlines&mssv=" + targetMSSV, 
+                method: "GET", 
+                dataType: "json", 
+                success: function(res) {
+                    if (res && !res.error) {
+                        let dataToSave = typeof res === 'string' ? res : JSON.stringify(res);
+                        localStorage.setItem('completed_deadlines_' + targetMSSV, dataToSave);
+                    }
+                }
+            });
+
+            // - Điểm GPA và Cấu hình Song ngành
+            $.ajax({ 
+                url: SCRIPT_URL + "?action=getGPAConfig&mssv=" + targetMSSV, 
+                method: "GET", 
+                dataType: "json", 
+                success: function(configRes) { 
+                    if (configRes) { 
+                        try { 
+                            gpaConfig = typeof configRes === 'string' ? JSON.parse(configRes) : configRes; 
+                            // Lưu tạm cấu hình vào RAM, không ghi đè LocalStorage của Admin
+                            localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig)); 
+                        } catch(e){} 
+                    } 
+                },
+                complete: function() {
+                    $.ajax({ 
+                        url: SCRIPT_URL + "?action=getGPAUser&mssv=" + targetMSSV, 
+                        method: "GET", 
+                        dataType: "json", 
+                        success: function(res) { 
+                            try { 
+                                myGPADataset = typeof res === 'string' ? JSON.parse(res) : res; 
+                                if(!Array.isArray(myGPADataset)) myGPADataset = []; 
+                            } catch(e){ myGPADataset = []; } 
+                            window.isGpaDataLoaded = true; 
+                            autoSyncTkbToGpa(); 
+                        } 
+                    });
+                }
+            });
+
+            alert("✅ Đã chuyển toàn bộ Website sang góc nhìn của sinh viên " + targetMSSV + "!");
+        },
+        error: function() {
+            area.html('<div class="alert alert-danger fw-bold shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> Không thể kết nối đến máy chủ.</div>');
+        }
+    });
+};
