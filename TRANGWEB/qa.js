@@ -2349,34 +2349,3 @@ function stopAlarmSound() {
     alarmSound.currentTime = 0; // Đưa bản nhạc về lại thời gian đầu
 }
 
-// Hàm mở thanh AI Chat bên phải (chia 70-30)
-window.openAiSidebar = function(aiName, aiUrl) {
-    // Thu hẹp bài học còn 70%
-    $('#docViewerWrapper').css('width', '70%');
-    
-    // Hiển thị cột AI (30%)
-    $('#aiSidebarWrapper').removeClass('d-none').addClass('d-flex');
-    
-    // Cập nhật tiêu đề và link Iframe
-    $('#aiSidebarTitle').html(`<i class="fa-solid fa-robot me-2"></i>${aiName}`);
-    $('#aiSidebarIframe').attr('src', aiUrl);
-};
-
-// Hàm đóng thanh AI Chat và trả lại 100% cho bài học
-window.closeAiSidebar = function() {
-    // Ẩn cột AI
-    $('#aiSidebarWrapper').removeClass('d-flex').addClass('d-none');
-    
-    // Trả iframe bài học về lại 100%
-    $('#docViewerWrapper').css('width', '100%');
-    
-    // Xóa bộ nhớ Iframe AI để tránh nặng máy
-    $('#aiSidebarIframe').attr('src', '');
-};
-
-// Bổ sung: Tự động đóng sidebar AI nếu người dùng tắt bảng tài liệu lớn
-$(document).ready(function() {
-    $('#documentViewerModal').on('hidden.bs.modal', function () {
-        closeAiSidebar();
-    });
-});
