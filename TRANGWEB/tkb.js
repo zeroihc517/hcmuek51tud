@@ -1899,11 +1899,22 @@ window.saveSystemTkbSelection = function(syncType = 'system') {
     // 1. CHẾ ĐỘ: CHUYỂN LỚP HỌC
     // ==========================================================
   // CẬP NHẬT TRONG saveSystemTkbSelection (Khối switch_class)
+// CẬP NHẬT TRONG saveSystemTkbSelection (Khối switch_class)
 if (syncType === 'switch_class') {
     let existingSyncedClass = subject.classes.find(c => userRegisteredCourseIds.includes(String(c.id).trim()));
+    
+    // TÌM CHÍNH XÁC LỚP CŨ CỦA ĐÚNG HỌC KỲ NÀY (Dựa vào Mã lớp hoặc Thời gian)
     let existingCopiedClass = subject.classes.find(c => {
-        return globalTkbData.some(tkb => String(tkb.classId).trim() === String(c.id).trim() || 
-           (!tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon)));
+        return globalTkbData.some(tkb => {
+            if (tkb.isSystem) return false;
+            // 1. Trùng mã lớp
+            if (tkb.classId && String(tkb.classId).trim() !== "") {
+                return String(tkb.classId).trim() === String(c.id).trim();
+            }
+            // 2. Dự phòng: Trùng tên VÀ trùng thời gian học kỳ (để không lầm với năm trước)
+            return getBaseSubjectName(tkb.mon) === getBaseSubjectName(c.mon) && 
+                   tkb.ngayBatDau === c.ngayBatDau && tkb.ngayKetThuc === c.ngayKetThuc;
+        });
     });
 
     let oldClassId = existingSyncedClass ? existingSyncedClass.id : (existingCopiedClass ? existingCopiedClass.id : "");
@@ -1924,7 +1935,6 @@ if (syncType === 'switch_class') {
                 userRegisteredCourseIds.push(String(selectedClassId).trim());
             }
             
-            // XÓA NGAY lớp cũ khỏi bộ nhớ đệm (RAM) để tránh lỗi hiển thị "bóng ma"
             globalTkbData = globalTkbData.filter(tkb => !(tkb.isSystem && String(tkb.classId).trim() === String(existingSyncedClass.id).trim()));
             
             postToGAS({ action: "saveSystemTkbSelection", mssv: currentUser.mssv, courseIds: userRegisteredCourseIds.join(',') }, function() {
@@ -1942,11 +1952,25 @@ if (syncType === 'switch_class') {
        } else if (existingCopiedClass) {
             let indicesToDelete = [];
             
-            // QUÉT DỌN TRIỆT ĐỂ LỚP CŨ THEO TÊN MÔN
+            // 2. NẾU LỚP CŨ LÀ SAO CHÉP CÁ NHÂN -> QUÉT DỌN ĐÚNG LỚP ĐÓ
             globalTkbData.forEach(tkb => {
-                let isTarget = !tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(subject.displayName);
-                if (isTarget && tkb.sheetRowIndex && String(tkb.sheetRowIndex).indexOf("TEMP_") === -1) {
-                    indicesToDelete.push(tkb.sheetRowIndex);
+                if (!tkb.isSystem) {
+                    let hasValidClassId = tkb.classId && String(tkb.classId).trim() !== "";
+                    let isTarget = false;
+                    
+                    if (hasValidClassId) {
+                        // Tìm đúng theo mã lớp
+                        isTarget = (String(tkb.classId).trim() === String(oldClassId).trim());
+                    } else {
+                        // Dự phòng: Tìm đúng môn và đúng ngày của kỳ đó
+                        let matchName = getBaseSubjectName(tkb.mon) === getBaseSubjectName(subject.displayName);
+                        let matchDate = (tkb.ngayBatDau === existingCopiedClass.ngayBatDau) && (tkb.ngayKetThuc === existingCopiedClass.ngayKetThuc);
+                        isTarget = matchName && matchDate;
+                    }
+
+                    if (isTarget && tkb.sheetRowIndex && String(tkb.sheetRowIndex).indexOf("TEMP_") === -1) {
+                        indicesToDelete.push(tkb.sheetRowIndex);
+                    }
                 }
             });
 
@@ -1977,13 +2001,12 @@ if (syncType === 'switch_class') {
                     });
 
                     postToGAS({ action: "copySystemTkbToPersonal", mssv: currentUser.mssv, courses: coursesToCopy }, function(res) {
-                        // BẮT BUỘC TẢI LẠI TRỰC TIẾP TỪ SERVER ĐỂ LẤY ID THẬT
                         $.ajax({
                             url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv,
                             method: "GET", dataType: "json", cache: false,
                             success: function(data) {
                                 processTKBData(data);
-				loadDeadlines();
+                                loadDeadlines();
                                 openSubjectDetail(currentSysSubjectKey);
                                 alert("Đã chuyển lớp thành công (Trạng thái: Đã sao chép)!");
                             }
@@ -1996,6 +2019,7 @@ if (syncType === 'switch_class') {
             };
 
             if (indicesToDelete.length > 0) {
+                // Xóa lớp cũ rồi copy lớp mới
                 postToGAS({ action: "deleteMultipleTKBRows", rowIndices: indicesToDelete.join(','), mssv: currentUser.mssv }, function() { copyNewClassFunc(); }, function() { copyNewClassFunc(); });
             } else { 
                 copyNewClassFunc(); 
@@ -2126,19 +2150,25 @@ window.cancelPersonalCopyDirect = function(rowIndicesStr, event) {
     let subjectObj = groupedSystemCourses[currentSysSubjectKey];
     let indicesToDelete = [];
 
-    // QUÉT DỌN TRIỆT ĐỂ: Tìm TẤT CẢ các dòng sao chép cá nhân CÙNG TÊN MÔN
-    if (subjectObj) {
-        globalTkbData.forEach(tkb => {
-            let isTarget = !tkb.isSystem && getBaseSubjectName(tkb.mon) === getBaseSubjectName(subjectObj.displayName);
-            // Loại bỏ các dòng TEMP ảo trên RAM
-            if (isTarget && tkb.sheetRowIndex && String(tkb.sheetRowIndex).indexOf("TEMP_") === -1) {
-                indicesToDelete.push(tkb.sheetRowIndex);
-            }
-        });
+    // ƯU TIÊN LẤY ĐÚNG CÁC DÒNG ĐÃ ĐƯỢC NHẬN DIỆN TỪ GIAO DIỆN CHUYỀN VÀO
+    if (rowIndicesStr) {
+        indicesToDelete = rowIndicesStr.split(',').map(i => String(i).trim()).filter(i => i.indexOf("TEMP_") === -1 && i !== "");
     }
 
-    if (indicesToDelete.length === 0 && rowIndicesStr) {
-        indicesToDelete = rowIndicesStr.split(',').map(i => String(i).trim()).filter(i => i.indexOf("TEMP_") === -1 && i !== "");
+    // DỰ PHÒNG: Nếu không có rowIndicesStr, quét theo đúng Mã Lớp (classId)
+    if (indicesToDelete.length === 0 && subjectObj) {
+        globalTkbData.forEach(tkb => {
+            if (!tkb.isSystem) {
+                let hasValidClassId = tkb.classId && String(tkb.classId).trim() !== "";
+                if (hasValidClassId) {
+                    // Kiểm tra xem classId này có thuộc môn học đang thao tác không
+                    let matchClass = subjectObj.classes.find(c => String(c.id).trim() === String(tkb.classId).trim());
+                    if (matchClass && tkb.sheetRowIndex && String(tkb.sheetRowIndex).indexOf("TEMP_") === -1) {
+                        indicesToDelete.push(tkb.sheetRowIndex);
+                    }
+                }
+            }
+        });
     }
 
     if (indicesToDelete.length === 0) {

@@ -5780,7 +5780,7 @@ function generateAdminTableFromModal() {
     doInsertAdminContent(tableHtml);
 }
 // =========================================================================
-// TÍNH NĂNG ADMIN: CHUYỂN ĐỔI TOÀN BỘ WEBSITE SANG GÓC NHÌN SINH VIÊN
+// TÍNH NĂNG ADMIN: CHUYỂN ĐỔI TOÀN BỘ WEBSITE SANG GÓC NHÌN SINH VIÊN (V3)
 // =========================================================================
 window.adminFetchUserData = function() {
     let targetMSSV = $('#adminSearchMSSV').val().trim();
@@ -5789,18 +5789,52 @@ window.adminFetchUserData = function() {
     let area = $('#adminUserDetailArea');
     area.removeClass('d-none').html('<div class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang lấy dữ liệu hệ thống của ' + targetMSSV + '...</div>');
     
-    // 1. Lưu lại MSSV thực sự của Admin (chỉ lưu 1 lần để gọi API)
+    // 1. Lưu lại MSSV và TÊN thực sự của Admin
     if (!window.realAdminMssv) {
         window.realAdminMssv = currentUser.mssv;
+        window.realAdminName = currentUser.name;
     }
 
-    // 2. KÍCH HOẠT CHẾ ĐỘ NHẬP VAI: Chuyển MSSV hiện tại thành MSSV của sinh viên
+    // 2. KÍCH HOẠT CHẾ ĐỘ NHẬP VAI (MSSV)
     currentUser.mssv = targetMSSV;
+    window.isImpersonating = true;
+    window.impersonatedMSSV = targetMSSV;
+    window.impersonatedName = ""; // Biến này sẽ chứa Tên sinh viên sau khi tải xong API
     
-    // Cập nhật nhãn báo hiệu trên thanh Sidebar để Admin không bị nhầm lẫn
+    // --- BẮT ĐẦU: ẢO HÓA LOCALSTORAGE CẢ MSSV LẪN TÊN ---
+    if (!window.hookedLocalStorage) {
+        window.hookedLocalStorage = true;
+        const originalGetItem = localStorage.getItem;
+        const originalSetItem = localStorage.setItem;
+
+        localStorage.getItem = function(key) {
+            let val = originalGetItem.call(localStorage, key);
+            // Bất cứ khi nào ShareCode/Q&A đòi xem User, ta tráo đổi dữ liệu
+            if (key === 'currentUser' && window.isImpersonating && val) {
+                try {
+                    let userObj = JSON.parse(val);
+                    userObj.mssv = window.impersonatedMSSV; 
+                    if (window.impersonatedName) {
+                        userObj.name = window.impersonatedName; // Ảo hóa luôn cả Tên
+                    }
+                    return JSON.stringify(userObj);
+                } catch(e) {}
+            }
+            return val;
+        };
+
+        // Khóa bảo vệ: Không cho phép lưu lại dữ liệu ảo đè lên tài khoản Admin thật
+        localStorage.setItem = function(key, value) {
+            if (key === 'currentUser' && window.isImpersonating) return; 
+            originalSetItem.call(localStorage, key, value);
+        };
+    }
+    // --- KẾT THÚC ---
+
+    // Cập nhật nhãn báo hiệu trên thanh Sidebar
     $('#sidebarUserMSSV').html(`<span class="badge bg-warning text-dark mt-1"><i class="fa-solid fa-eye me-1"></i>Đang xem: ${targetMSSV}</span>`);
     
-    // Thêm nút Thoát nhanh chế độ xem ở menu cá nhân
+    // Nút thoát chế độ nhập vai
     if ($('#btnExitImpersonate').length === 0) {
         $('#sidebarUserInfo .dropdown-menu').prepend(`
             <button id="btnExitImpersonate" class="dropdown-item py-2 mb-1 d-flex align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px; background: #fee2e2;" onclick="location.reload()">
@@ -5814,17 +5848,24 @@ window.adminFetchUserData = function() {
         method: "GET",
         dataType: "json",
         success: function(data) {
-            // Vẽ bảng tóm tắt Admin
+            // Lấy tên của sinh viên từ Dữ liệu trả về và cập nhật luôn Tên lên Sidebar
+            if (data.profile && data.profile.name) {
+                window.impersonatedName = data.profile.name;
+                currentUser.name = data.profile.name; 
+                $('#sidebarUserName').text(getNaturalShortName(data.profile.name)); 
+            }
+
             renderAdminUserDetail(targetMSSV, data);
             
-            // 3. ĐỒNG BỘ CÁC PHÂN HỆ KHÁC TRONG WEB DƯỚI GÓC NHÌN SINH VIÊN
-            // - Tiến độ & Ghi chú bài học
+            // ĐỒNG BỘ LẠI TẤT CẢ PHÂN HỆ
             fetchLearningDataFromServer(); 
-            
-            // - Tổng hợp Link cá nhân
             loadWebLinks();
             
-            // - TKB & Deadlines
+            // ÉP SHARECODE VÀ Q&A VẼ LẠI VỚI TÊN MỚI
+            if (typeof loadShareCodeData === 'function') loadShareCodeData();
+            if (typeof loadQAData === 'function') loadQAData();
+            if (typeof loadGroupLinks === 'function') loadGroupLinks();
+            
             if (data.tkb) processTKBData(data.tkb);
             if (data.deadlines) {
                 globalDeadlineData = data.deadlines.map(function(row) {
@@ -5837,51 +5878,17 @@ window.adminFetchUserData = function() {
                 renderDeadlines();
             }
 
-            // - Trạng thái Check xong Deadline
-            $.ajax({ 
-                url: SCRIPT_URL + "?action=getCompletedDeadlines&mssv=" + targetMSSV, 
-                method: "GET", 
-                dataType: "json", 
-                success: function(res) {
-                    if (res && !res.error) {
-                        let dataToSave = typeof res === 'string' ? res : JSON.stringify(res);
-                        localStorage.setItem('completed_deadlines_' + targetMSSV, dataToSave);
-                    }
-                }
-            });
+            $.ajax({ url: SCRIPT_URL + "?action=getCompletedDeadlines&mssv=" + targetMSSV, method: "GET", dataType: "json", success: function(res) { if (res && !res.error) localStorage.setItem('completed_deadlines_' + targetMSSV, typeof res === 'string' ? res : JSON.stringify(res)); } });
 
-            // - Điểm GPA và Cấu hình Song ngành
             $.ajax({ 
-                url: SCRIPT_URL + "?action=getGPAConfig&mssv=" + targetMSSV, 
-                method: "GET", 
-                dataType: "json", 
-                success: function(configRes) { 
-                    if (configRes) { 
-                        try { 
-                            gpaConfig = typeof configRes === 'string' ? JSON.parse(configRes) : configRes; 
-                            // Lưu tạm cấu hình vào RAM, không ghi đè LocalStorage của Admin
-                            localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig)); 
-                        } catch(e){} 
-                    } 
-                },
+                url: SCRIPT_URL + "?action=getGPAConfig&mssv=" + targetMSSV, method: "GET", dataType: "json", 
+                success: function(configRes) { if (configRes) { try { gpaConfig = typeof configRes === 'string' ? JSON.parse(configRes) : configRes; localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig)); } catch(e){} } },
                 complete: function() {
-                    $.ajax({ 
-                        url: SCRIPT_URL + "?action=getGPAUser&mssv=" + targetMSSV, 
-                        method: "GET", 
-                        dataType: "json", 
-                        success: function(res) { 
-                            try { 
-                                myGPADataset = typeof res === 'string' ? JSON.parse(res) : res; 
-                                if(!Array.isArray(myGPADataset)) myGPADataset = []; 
-                            } catch(e){ myGPADataset = []; } 
-                            window.isGpaDataLoaded = true; 
-                            autoSyncTkbToGpa(); 
-                        } 
-                    });
+                    $.ajax({ url: SCRIPT_URL + "?action=getGPAUser&mssv=" + targetMSSV, method: "GET", dataType: "json", success: function(res) { try { myGPADataset = typeof res === 'string' ? JSON.parse(res) : res; if(!Array.isArray(myGPADataset)) myGPADataset = []; } catch(e){ myGPADataset = []; } window.isGpaDataLoaded = true; autoSyncTkbToGpa(); } });
                 }
             });
 
-            alert("✅ Đã chuyển toàn bộ Website sang góc nhìn của sinh viên " + targetMSSV + "!");
+            alert(`✅ Đã chuyển sang góc nhìn của sinh viên: ${window.impersonatedName} (${targetMSSV})!`);
         },
         error: function() {
             area.html('<div class="alert alert-danger fw-bold shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> Không thể kết nối đến máy chủ.</div>');
