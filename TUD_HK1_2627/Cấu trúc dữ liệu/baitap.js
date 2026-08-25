@@ -1017,7 +1017,7 @@ function insertDrawingToEditor() {
         if (editor) editor.fire('change'); // Báo cho hệ thống biết bài viết đã thay đổi
     } else {
         // Vẽ ảnh mới
-        let imgHtml = `<p class="text-center"><img src="${dataURL}" alt="Hình vẽ phác thảo" title="Click đúp chuột vào ảnh để sửa lại" style="max-width:100%; border:1px solid #ddd; border-radius:8px; cursor:pointer;"/></p>`;
+        let imgHtml = `<p style="text-align: left;"><img src="${dataURL}" alt="Hình vẽ phác thảo" title="Click đúp chuột vào ảnh để sửa lại" style="max-width:100%; border:1px solid #ddd; border-radius:8px; cursor:pointer;"/></p><p style="text-align: left;"><br></p>`;
         
         if (editor) {
             editor.insertContent(imgHtml);
@@ -1284,7 +1284,7 @@ function insertTreeDirectlyToEditor() {
     // 5. Chèn trực tiếp vào trình soạn thảo TinyMCE
     let editor = (typeof tinymce !== 'undefined') ? (tinymce.get('theoryEditor') || tinymce.activeEditor) : null;
     if (editor) {
-        let imgHtml = `<p class="text-center"><img src="${dataURL}" alt="Cây Nhị Phân" style="max-width:60%; border-radius:8px;"/></p>`;
+        let imgHtml = `<p style="text-align: left;"><img src="${dataURL}" alt="Cây Nhị Phân" style="max-width:100%; border-radius:8px;"/></p><p style="text-align: left;"><br></p>`;
         editor.insertContent(imgHtml);
         
         // --- TỰ ĐỘNG MỞ RỘNG KHUNG NẾU ẢNH LỚN ---
@@ -1651,10 +1651,11 @@ function getTreeDepth(node) {
     return 1 + Math.max(getTreeDepth(node.left), getTreeDepth(node.right));
 }
 
-// Hàm xuất cây ra ảnh chất lượng HD và chèn thẳng vào bài làm
+// Hàm xuất cây ra ảnh và chèn thẳng vào bài làm (ĐÃ FIX LỖI CĂN TRÁI VÀ KÍCH THƯỚC)
 function insertTreeDirectlyToEditor() {
     let nodesMap = {}, childSet = new Set(), parentSet = new Set(), hasData = false;
     
+    // 1. Quét dữ liệu từ bảng
     $('#customTreeTable tbody tr').each(function() {
         let parentVal = $(this).find('.node-parent').val().trim();
         let leftVal = $(this).find('.node-left').val().trim();
@@ -1679,6 +1680,7 @@ function insertTreeDirectlyToEditor() {
 
     if (!hasData) { alert("Vui lòng nhập dữ liệu để vẽ cây!"); return; }
 
+    // 2. Tìm gốc của cây
     let rootVal = null;
     for (let p of parentSet) { if (!childSet.has(p)) { rootVal = p; break; } }
     if (!rootVal) rootVal = Array.from(parentSet)[0];
@@ -1687,21 +1689,21 @@ function insertTreeDirectlyToEditor() {
     let offCanvas = document.createElement('canvas');
     let offCtx = offCanvas.getContext('2d');
     
-    // TÍNH TOÁN KHOẢNG CÁCH NHỎ GỌN TỰ ĐỘNG THEO ĐỘ SÂU
+    // 3. Tính toán khoảng cách (Thu gọn)
     let depth = getTreeDepth(root);
-    let initialOffsetX = Math.max(40, Math.pow(1.8, depth - 2) * 25); // Nhánh cây co lại vừa đủ
-    let initialOffsetY = 55; // Khoảng cách dọc (chiều cao tầng) rút ngắn lại
+    let initialOffsetX = Math.max(40, Math.pow(1.8, depth - 2) * 25);
+    let initialOffsetY = 55;
     
     calculateTreePositions(root, 1000, 50, initialOffsetX, initialOffsetY); 
     
     let bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
     getTreeBounds(root, bounds);
     
-    let padding = 15; // Cắt viền sát rạt để hình ảnh nhỏ gọn nhất có thể
+    let padding = 15;
     let treeWidth = bounds.maxX - bounds.minX;
     let treeHeight = bounds.maxY - bounds.minY;
     
-    let scale = 3; // Scale 3x là đủ đạt chuẩn HD mà không làm hầm hố khung soạn thảo
+    let scale = 3; // Chuẩn HD cho gọn nhẹ
     
     offCanvas.width = (treeWidth + padding * 2) * scale;
     offCanvas.height = (treeHeight + padding * 2) * scale;
@@ -1715,14 +1717,29 @@ function insertTreeDirectlyToEditor() {
     
     drawTreeOnCanvas(root, offCtx);
     
+    // 4. Trích xuất ảnh PNG
     let dataURL = offCanvas.toDataURL("image/png", 1.0);
     
     let editor = (typeof tinymce !== 'undefined') ? (tinymce.get('theoryEditor') || tinymce.activeEditor) : null;
     if (editor) {
-        // Đặt max-width: 60% để khi hiển thị trong khung bài làm, ảnh tự thu lại nhỏ nhắn và nằm giữa
-        let imgHtml = `<p class="text-center"><img src="${dataURL}" alt="Cây Nhị Phân" style="max-width:60%; border-radius:8px;"/></p>`;
+        // FIX QUAN TRỌNG: Ép căn trái, max-width: 50% để hình không bự, và dùng &nbsp; để tạo dòng trống an toàn
+        let imgHtml = `<p style="text-align: left;"><img src="${dataURL}" alt="Cây Nhị Phân" style="max-width:50%; border-radius:8px;"/></p><p style="text-align: left;">&nbsp;</p>`;
+        
         editor.insertContent(imgHtml);
+        
+        // --- TỰ ĐỘNG MỞ RỘNG KHUNG ---
+        setTimeout(function() {
+            let body = editor.getBody();
+            let currentHeight = editor.getContainer().offsetHeight;
+            let contentHeight = body.scrollHeight + 100;
+            if (contentHeight > currentHeight) {
+                editor.theme.resizeTo(null, contentHeight);
+            }
+        }, 100);
+
         $('#customTreeModal').modal('hide');
+    } else {
+        alert("Trình soạn thảo chưa tải xong, vui lòng thử lại!");
     }
 }
 // --- CÁC HÀM VÀ CLASS CÒN THIẾU CỦA CÂY NHỊ PHÂN ---
