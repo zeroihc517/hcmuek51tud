@@ -1203,7 +1203,14 @@ function openCustomTreeModal() {
             <td><button class="btn btn-sm btn-danger" onclick="removeCustomTreeRow(this)"><i class="fa-solid fa-trash"></i></button></td>
         </tr>`);
     clearPreviewCanvas();
-    $('#customTreeModal').modal('show');
+    
+    // Mở khung nội tuyến thay vì Modal
+    $('#customTreeContainer').removeClass('d-none');
+    
+    // Tự động cuộn trang xuống cho vừa tầm nhìn
+    $('html, body').animate({
+        scrollTop: $("#customTreeContainer").offset().top - 80
+    }, 300);
 }
 // Hàm xuất cây ra ảnh chất lượng 4K và chèn thẳng vào bài làm
 function insertTreeDirectlyToEditor() {
@@ -1283,24 +1290,25 @@ function insertTreeDirectlyToEditor() {
     
     // 5. Chèn trực tiếp vào trình soạn thảo TinyMCE
     let editor = (typeof tinymce !== 'undefined') ? (tinymce.get('theoryEditor') || tinymce.activeEditor) : null;
-    if (editor) {
-        let imgHtml = `<p style="text-align: left;"><img src="${dataURL}" alt="Cây Nhị Phân" style="max-width:100%; border-radius:8px;"/></p><p style="text-align: left;"><br></p>`;
+   if (editor) {
+        // FIX QUAN TRỌNG: Ép căn trái, max-width: 50%...
+        let imgHtml = `<p style="text-align: left;"><img src="${dataURL}" alt="Cây Nhị Phân" style="max-width:50%; border-radius:8px;"/></p><p style="text-align: left;">&nbsp;</p>`;
+        
         editor.insertContent(imgHtml);
         
-        // --- TỰ ĐỘNG MỞ RỘNG KHUNG NẾU ẢNH LỚN ---
+        // --- TỰ ĐỘNG MỞ RỘNG KHUNG ---
         setTimeout(function() {
             let body = editor.getBody();
             let currentHeight = editor.getContainer().offsetHeight;
-            let contentHeight = body.scrollHeight + 100; // Tính tổng chiều cao nội dung bên trong + khoảng đệm
-            
-            // Nếu nội dung cao hơn khung hiện tại thì tự động phình to khung ra cho vừa vặn
+            let contentHeight = body.scrollHeight + 100;
             if (contentHeight > currentHeight) {
                 editor.theme.resizeTo(null, contentHeight);
             }
         }, 100);
-        // ----------------------------------------
 
-        $('#customTreeModal').modal('hide');
+        // TÌM VÀ SỬA DÒNG DƯỚI ĐÂY:
+        $('#customTreeModal').modal('hide'); 
+        
     } else {
         alert("Trình soạn thảo chưa tải xong, vui lòng thử lại!");
     }
@@ -1408,7 +1416,7 @@ function drawTreeFromQuickInput(isPreview) {
     triggerDrawAction(root, isPreviewMode);
     
     if (!isPreviewMode) {
-        $('#customTreeModal').modal('hide');
+       $('#customTreeContainer').addClass('d-none');
     }
 }
 
@@ -1446,7 +1454,7 @@ function drawCustomTree(isPreview) {
 
     triggerDrawAction(nodesMap[rootVal], isPreviewMode);
     if (!isPreviewMode) {
-        $('#customTreeModal').modal('hide');
+      $('#customTreeContainer').addClass('d-none');
     }
 }
 // Hàm tìm giới hạn biên bao quanh toàn bộ cây (minX, maxX, minY, maxY)
@@ -1497,7 +1505,7 @@ function triggerDrawAction(root, isPreviewMode) {
 
         let scaleX = (targetCanvas.width - padding * 2) / treeWidth;
         let scaleY = (targetCanvas.height - padding * 2) / treeHeight;
-        let scale = Math.min(scaleX, scaleY, 1.3); // Giới hạn scale tối đa để xem trước không bị phóng quá to
+        let scale = Math.min(scaleX, scaleY, 2.5);
 
         let treeCenterX = (bounds.minX + bounds.maxX) / 2;
         let treeCenterY = (bounds.minY + bounds.maxY) / 2;
@@ -1720,9 +1728,10 @@ function insertTreeDirectlyToEditor() {
     // 4. Trích xuất ảnh PNG
     let dataURL = offCanvas.toDataURL("image/png", 1.0);
     
+    // 5. Chèn trực tiếp vào trình soạn thảo TinyMCE
     let editor = (typeof tinymce !== 'undefined') ? (tinymce.get('theoryEditor') || tinymce.activeEditor) : null;
-    if (editor) {
-        // FIX QUAN TRỌNG: Ép căn trái, max-width: 50% để hình không bự, và dùng &nbsp; để tạo dòng trống an toàn
+   if (editor) {
+        // FIX QUAN TRỌNG: Ép căn trái, max-width: 50%...
         let imgHtml = `<p style="text-align: left;"><img src="${dataURL}" alt="Cây Nhị Phân" style="max-width:50%; border-radius:8px;"/></p><p style="text-align: left;">&nbsp;</p>`;
         
         editor.insertContent(imgHtml);
@@ -1737,7 +1746,9 @@ function insertTreeDirectlyToEditor() {
             }
         }, 100);
 
-        $('#customTreeModal').modal('hide');
+        // ĐÃ ĐỔI ĐÚNG LỆNH ẨN CONTAINER NỘI TUYẾN
+        $('#customTreeContainer').addClass('d-none'); 
+        
     } else {
         alert("Trình soạn thảo chưa tải xong, vui lòng thử lại!");
     }
