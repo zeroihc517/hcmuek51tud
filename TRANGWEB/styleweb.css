@@ -3613,3 +3613,21 @@ body.dark-mode #sidebarTheoryViewerContent table th {
     color: #4ade80 !important; /* Xanh lá */
     margin-left: 1px;
 }
+
+/* 1. Ép tự động co giãn chiều cao và giữ khoảng cách chữ bình thường */
+.tb-detail-body,
+.tb-detail-main-content,
+#latexViewMode,
+#latexEditPreviewArea,
+.qa-question,
+.msg-admin,
+.msg-sv,
+.history-theory-box {
+    height: auto !important; 
+    min-height: fit-content !important; 
+    overflow-wrap: break-word !important; /* Chỉ bẻ dòng khi từ (như link) quá dài */
+    word-break: normal !important;        /* Giữ khoảng cách các chữ bình thường */
+    white-space: normal !important;       /* Loại bỏ khoảng trắng thừa từ đoạn copy */
+    text-align: left !important;          /* Hủy căn đều 2 bên để chữ không bị kéo giãn ngang */
+    line-height: 1.6 !important;          /* Trả về giãn dòng bình thường */
+}
