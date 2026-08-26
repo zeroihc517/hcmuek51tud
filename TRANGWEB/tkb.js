@@ -1056,8 +1056,12 @@ function toggleTkbTimeMode() {
 }
 
 function toggleAllUTkbWeeks() {
-    let allChecked = $('.utkb-week-cb:checked').length === $('.utkb-week-cb').length;
-    $('.utkb-week-cb').prop('checked', !allChecked);
+    // Chỉ đếm và tác động lên các tuần học bình thường (bỏ qua tuần nghỉ lễ)
+    let normalWeeks = $('.utkb-week-cb.is-normal');
+    let allChecked = normalWeeks.filter(':checked').length === normalWeeks.length;
+    
+    normalWeeks.prop('checked', !allChecked);
+    // Tuần nghỉ lễ (.is-break) KHÔNG BỊ TÁC ĐỘNG bởi nút này
 }
 
 function openAddTkbModal(triggerAuthModal = false) {
@@ -1085,22 +1089,41 @@ function openAddTkbModal(triggerAuthModal = false) {
         $('#modeWeek').prop('disabled', true);
     } else {
         $('#modeWeek').prop('disabled', false);
-        let sDate = parseDateString(config[2]); let numAcademicWeeks = parseInt(config[3]); let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+        let sDate = parseDateString(config[2]); 
+        let numAcademicWeeks = parseInt(config[3]); 
+        let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
         if (sDate && numAcademicWeeks) {
             let startMon = getMondayOfDate(sDate); let acadWk = 1; let calWk = 1; 
             let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            
             while (acadWk <= numAcademicWeeks && calWk <= 52) {
                 let m = new Date(startMon); m.setDate(m.getDate() + ((calWk - 1) * 7));
                 let s = new Date(m); s.setDate(s.getDate() + 6); 
-                if (!breakWeeks.includes(calWk)) {
-                    weekHtml += `<div class="form-check border bg-white p-2 rounded shadow-sm d-flex align-items-center" style="width: calc(33.33% - 8px); min-width: 250px;"><input class="form-check-input ms-1 utkb-week-cb border-secondary" type="checkbox" value="${m.getTime()}" id="utkb_wk_${acadWk}" checked style="cursor: pointer;"><label class="form-check-label ms-2 fw-bold text-dark w-100" for="utkb_wk_${acadWk}" style="font-size: 13.5px; cursor: pointer;">Tuần ${acadWk} <br><small class="text-muted fw-normal">(${format(m)} - ${format(s)})</small></label></div>`;
+                
+                if (breakWeeks.includes(calWk)) {
+                    // CẬP NHẬT: Tuần nghỉ lễ (Hiển thị màu đỏ, bỏ tick mặc định, thêm class is-break)
+                    weekHtml += `<div class="form-check border bg-light p-2 rounded shadow-sm d-flex align-items-center" style="width: calc(33.33% - 8px); min-width: 250px; border-color: #fca5a5 !important;">
+                        <input class="form-check-input ms-1 utkb-week-cb is-break" type="checkbox" value="${m.getTime()}" id="utkb_wk_break_${calWk}" style="cursor: pointer; border-color: #ef4444;">
+                        <label class="form-check-label ms-2 fw-bold text-danger w-100" for="utkb_wk_break_${calWk}" style="font-size: 13.5px; cursor: pointer;">
+                            Tuần Nghỉ Lễ <br><small class="text-danger fw-normal">(${format(m)} - ${format(s)})</small>
+                        </label>
+                    </div>`;
+                } else {
+                    // Tuần học bình thường (Tự động tick, thêm class is-normal)
+                    weekHtml += `<div class="form-check border bg-white p-2 rounded shadow-sm d-flex align-items-center" style="width: calc(33.33% - 8px); min-width: 250px;">
+                        <input class="form-check-input ms-1 utkb-week-cb is-normal border-secondary" type="checkbox" value="${m.getTime()}" id="utkb_wk_${acadWk}" checked style="cursor: pointer;">
+                        <label class="form-check-label ms-2 fw-bold text-dark w-100" for="utkb_wk_${acadWk}" style="font-size: 13.5px; cursor: pointer;">
+                            Tuần ${acadWk} <br><small class="text-muted fw-normal">(${format(m)} - ${format(s)})</small>
+                        </label>
+                    </div>`;
                     acadWk++;
                 }
                 calWk++;
             }
         }
     }
-    $('#uTkbWeeksContainer').html(weekHtml); $('#unifiedTkbModal').modal('show');
+    $('#uTkbWeeksContainer').html(weekHtml); 
+    $('#unifiedTkbModal').modal('show');
 }
 
 function openEditTkbModal(sheetRowIndex) {
@@ -1142,7 +1165,6 @@ function openEditTkbModal(sheetRowIndex) {
     $('#uTkbPendingSection, #uTkbQuickBtns').addClass('d-none');
     $('#uTkbTimeModeSelection').removeClass('d-none');
 
-    // --- BƯỚC 1: FIX LỖI 1 - TỰ ĐỘNG RENDER DANH SÁCH TUẦN TRƯỚC KHI TÍCH ---
     let selectedNH = $('#namHocSelect').val(); 
     let selectedHK = $('#hocKySelect').val();
     let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
@@ -1167,8 +1189,22 @@ function openEditTkbModal(sheetRowIndex) {
                 let m = new Date(startMon); m.setDate(m.getDate() + ((calWk - 1) * 7));
                 let s = new Date(m); s.setDate(s.getDate() + 6); 
                 
-                if (!breakWeeks.includes(calWk)) {
-                    weekHtml += `<div class="form-check border bg-white p-2 rounded shadow-sm d-flex align-items-center" style="width: calc(33.33% - 8px); min-width: 250px;"><input class="form-check-input ms-1 utkb-week-cb border-secondary" type="checkbox" value="${m.getTime()}" id="edit_utkb_wk_${acadWk}" style="cursor: pointer;"><label class="form-check-label ms-2 fw-bold text-dark w-100" for="edit_utkb_wk_${acadWk}" style="font-size: 13.5px; cursor: pointer;">Tuần ${acadWk} <br><small class="text-muted fw-normal">(${format(m)} - ${format(s)})</small></label></div>`;
+                if (breakWeeks.includes(calWk)) {
+                    // CẬP NHẬT: Tuần nghỉ lễ (Hiển thị màu đỏ, class is-break)
+                    weekHtml += `<div class="form-check border bg-light p-2 rounded shadow-sm d-flex align-items-center" style="width: calc(33.33% - 8px); min-width: 250px; border-color: #fca5a5 !important;">
+                        <input class="form-check-input ms-1 utkb-week-cb is-break" type="checkbox" value="${m.getTime()}" id="edit_utkb_wk_break_${calWk}" style="cursor: pointer; border-color: #ef4444;">
+                        <label class="form-check-label ms-2 fw-bold text-danger w-100" for="edit_utkb_wk_break_${calWk}" style="font-size: 13.5px; cursor: pointer;">
+                            Tuần Nghỉ Lễ <br><small class="text-danger fw-normal">(${format(m)} - ${format(s)})</small>
+                        </label>
+                    </div>`;
+                } else {
+                    // Tuần học bình thường (class is-normal)
+                    weekHtml += `<div class="form-check border bg-white p-2 rounded shadow-sm d-flex align-items-center" style="width: calc(33.33% - 8px); min-width: 250px;">
+                        <input class="form-check-input ms-1 utkb-week-cb is-normal border-secondary" type="checkbox" value="${m.getTime()}" id="edit_utkb_wk_${acadWk}" style="cursor: pointer;">
+                        <label class="form-check-label ms-2 fw-bold text-dark w-100" for="edit_utkb_wk_${acadWk}" style="font-size: 13.5px; cursor: pointer;">
+                            Tuần ${acadWk} <br><small class="text-muted fw-normal">(${format(m)} - ${format(s)})</small>
+                        </label>
+                    </div>`;
                     acadWk++;
                 }
                 calWk++;
@@ -1176,29 +1212,27 @@ function openEditTkbModal(sheetRowIndex) {
         }
     }
     $('#uTkbWeeksContainer').html(weekHtml);
-    // --------------------------------------------------------------------------
 
     let sDate = parseDateString(course.ngayBatDau);
     let eDate = parseDateString(course.ngayKetThuc);
 
-    // --- BƯỚC 2: FIX LỖI 2 - BỎ ĐIỀU KIỆN diffDays > 6 ---
-    // Cho phép môn học 1 buổi (cùng ngày bắt đầu/kết thúc) cũng được quét và tích vào Tuần tương ứng
     if (sDate && eDate) {
         $('#modeWeek').prop('checked', true); 
         toggleTkbTimeMode();
         
         let exceptions = (course.ngayNgoaiLe || "").split(',').map(d => d.trim());
-        let hasCheckedWeek = false; // Cờ kiểm tra xem có tuần nào khớp hay không
+        let hasCheckedWeek = false; 
         
-        // Quét chọn chính xác các tuần
+        // Quét để phục hồi các tùy chọn đánh dấu Tuần
         $('.utkb-week-cb').each(function() {
             let weekStartMs = parseInt($(this).val());
             let classDate = new Date(weekStartMs);
-            classDate.setDate(classDate.getDate() + (course.thu - 2)); // Ngày diễn ra trong tuần đó
+            classDate.setDate(classDate.getDate() + (course.thu - 2)); 
             
             let formattedDate = formatDateDDMMYYYY(classDate);
             
-            // Chỉ tick nếu nằm trong khoảng ngày bắt đầu-kết thúc và không dính ngày nghỉ
+            // Khôi phục check nếu: Nằm trong Range và KHÔNG dính ngày ngoại lệ
+            // Nếu người dùng CHỦ ĐỘNG check tuần nghỉ lễ ở quá khứ, nó không vào exceptions -> sẽ được khôi phục tick bình thường
             if (classDate >= sDate && classDate <= eDate && !exceptions.includes(formattedDate)) {
                 $(this).prop('checked', true);
                 hasCheckedWeek = true;
@@ -1207,8 +1241,6 @@ function openEditTkbModal(sheetRowIndex) {
             }
         });
 
-        // Tình huống dự phòng: Nếu môn đó nằm hoàn toàn vào ngày nghỉ, 
-        // hoặc ngày tháng nhập vào không khớp bất kỳ tuần nào trong học kỳ -> Trả về chế độ Theo Ngày
         if (!hasCheckedWeek) {
             $('#modeDate').prop('checked', true); 
             toggleTkbTimeMode();
@@ -1220,7 +1252,6 @@ function openEditTkbModal(sheetRowIndex) {
         }
 
     } else {
-        // Sự kiện không có cấu trúc ngày tháng hợp lệ
         $('#modeDate').prop('checked', true); 
         toggleTkbTimeMode();
         
