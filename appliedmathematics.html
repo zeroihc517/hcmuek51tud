@@ -1703,55 +1703,144 @@
     </div>
 </div>
 
-    <div class="modal fade" id="tkbPersonalModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+   <!-- MODAL GỘP: THÊM LỊCH HỌC MỚI & TỰ HỌC -->
+<div class="modal fade" id="unifiedTkbModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" id="tkbModalHeader" style="background-color: #0f4c81;">
-                <h6 class="modal-title m-0 fw-bold" id="tkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân</h6>
+            <div class="modal-header text-white" id="uTkbModalHeader" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold" id="uTkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học / Xếp giờ Tự học</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <input type="hidden" id="pTkbRowIndex" value="">
-                <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label fw-bold">Thứ (VD: 2, 4, 8)</label><input type="text" id="pTkbThu" class="form-control" value="2"></div>
-                    <div class="col-md-4"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="pTkbTiet" class="form-control" min="1" max="15" value="1"></div>
-                    <div class="col-md-4"><label class="form-label fw-bold">Số tiết</label><input type="number" id="pTkbSoTiet" class="form-control" min="1" max="5" value="3"></div>
-                    <div class="col-12 d-none" id="tkbOverlapAlert">
-                        <div class="alert alert-danger d-flex align-items-center m-0 py-2 px-3" style="border-radius: 8px; font-size: 14.5px; font-weight: 600;">
-                            <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
-                            <span id="tkbOverlapMessage"></span>
-                        </div>
+                <input type="hidden" id="uTkbRowIndex" value="">
+                
+                <div class="col-12 d-none mb-3" id="uTkbOverlapAlert">
+                    <div class="alert alert-danger d-flex align-items-center m-0 py-2 px-3" style="border-radius: 8px; font-size: 14.5px; font-weight: 600;">
+                        <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
+                        <span id="uTkbOverlapMessage"></span>
                     </div>
-                    
-                    <!-- BỔ SUNG Ô NHẬP MÃ LỚP HỌC PHẦN Ở ĐÂY -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Mã lớp học phần</label>
-                        <input type="text" id="pTkbMaHP" class="form-control" placeholder="VD: COMP1013">
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label fw-bold">Tên học phần</label>
-                        <input type="text" id="pTkbMon" class="form-control" placeholder="VD: Hình học vi phân">
-                        <div class="mt-2 d-flex gap-2 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Quá trình')">Kiểm tra Quá trình</button>
-                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Giữa học phần')">Kiểm tra Giữa kỳ</button>
-                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Kết thúc học phần')">Kiểm tra Cuối kỳ</button>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6"><label class="form-label fw-bold">Phòng học</label><input type="text" id="pTkbPhong" class="form-control" placeholder="VD: B.112"></div>
-                    <div class="col-md-6"><label class="form-label fw-bold">Thời gian (Giờ)</label><input type="text" id="pTkbThoiGian" class="form-control" placeholder="VD: 6:30-9:00"></div>
-                    <div class="col-md-6"><label class="form-label fw-bold">Cơ sở/Hình thức</label><input type="text" id="pTkbHinhThuc" class="form-control" placeholder="VD: An Dương Vương / Học online / ..."></div>
-                    <div class="col-md-6"><label class="form-label fw-bold text-primary">Đường link địa điểm (nếu có)</label><input type="text" id="pTkbLink" class="form-control" placeholder="https://..."></div>
-                    <div class="col-md-4"><label class="form-label fw-bold">Giảng viên</label><input type="text" id="pTkbGV" class="form-control" placeholder="VD: Nguyễn Văn A"></div>
-                    <div class="col-md-4"><label class="form-label fw-bold">Màu nền lịch</label><input type="color" id="pTkbColor" class="form-control form-control-color w-100" value="#e0f2fe"></div>
-                    <div class="col-md-4"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="pTkbNgayBD" class="form-control" placeholder="DD/MM/YYYY"></div>
-                    <div class="col-md-4"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="pTkbNgayKT" class="form-control" placeholder="DD/MM/YYYY"></div>
-                    <div class="col-md-8"><label class="form-label fw-bold text-danger">Ngày nghỉ / Ngoại lệ</label><input type="text" id="pTkbNgoaiLe" class="form-control" placeholder="VD: 15/04/2026, 01/05/2026"></div>
                 </div>
+
+                <!-- FORM NHẬP LÝ LỊCH -->
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Mã lớp học phần</label>
+                        <input type="text" id="uTkbMaHP" class="form-control" placeholder="VD: 2511COMP101301">
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label fw-bold">Tên học phần / Môn tự học <span class="text-danger">*</span></label>
+                        <input type="text" id="uTkbMon" class="form-control" placeholder="VD: Hình học vi phân / Tự học Giải tích">
+                        
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Thứ (2-8) <span class="text-danger">*</span></label>
+                        <input type="number" id="uTkbThu" class="form-control" min="2" max="8" value="2">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Tiết Bắt đầu <span class="text-danger">*</span></label>
+                        <input type="number" id="uTkbTiet" class="form-control" min="1" max="15" value="1">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Số tiết học <span class="text-danger">*</span></label>
+                        <input type="number" id="uTkbSoTiet" class="form-control" min="1" max="5" value="3">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Giờ học</label>
+                        <input type="text" id="uTkbThoiGian" class="form-control" placeholder="VD: 07:00-09:30">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Màu nền</label>
+                        <input type="color" id="uTkbColor" class="form-control form-control-color w-100" value="#e0f2fe">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Cơ sở/Hình thức</label>
+                        <input type="text" id="uTkbHinhThuc" class="form-control" placeholder="VD: Lê Văn Sỹ / Học online">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold">Phòng học</label>
+                        <input type="text" id="uTkbPhong" class="form-control" placeholder="VD: B.112">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Giảng viên</label>
+                        <input type="text" id="uTkbGV" class="form-control" placeholder="Nguyễn Văn A">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold text-primary">Link địa điểm (URL)</label>
+                        <input type="text" id="uTkbLink" class="form-control" placeholder="https://...">
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                
+                <!-- CHẾ ĐỘ CHỌN THỜI GIAN -->
+                <div id="uTkbTimeModeSelection" class="mb-3">
+                    <label class="form-label fw-bold text-primary"><i class="fa-solid fa-clock me-1"></i> Phạm vi thời gian áp dụng:</label>
+                    <div class="d-flex gap-4 p-2 bg-light border rounded">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="uTkbTimeMode" id="modeDate" value="date" checked onchange="toggleTkbTimeMode()">
+                            <label class="form-check-label fw-bold" for="modeDate" style="cursor: pointer;">Theo Ngày bắt đầu / Kết thúc</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="uTkbTimeMode" id="modeWeek" value="week" onchange="toggleTkbTimeMode()">
+                            <label class="form-check-label fw-bold" for="modeWeek" style="cursor: pointer;">Chọn nhiều Tuần (Theo Học kỳ)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VÙNG 1: THEO NGÀY -->
+                <div class="row g-3" id="uTkbDateArea">
+                    <div class="col-md-4"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="uTkbNgayBD" class="form-control" placeholder="DD/MM/YYYY"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="uTkbNgayKT" class="form-control" placeholder="DD/MM/YYYY"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold text-danger">Ngày ngoại lệ (Nghỉ)</label><input type="text" id="uTkbNgoaiLe" class="form-control" placeholder="VD: 15/04/2026, 01/05/2026"></div>
+                </div>
+
+                <!-- VÙNG 2: THEO TUẦN -->
+                <div id="uTkbWeekArea" class="d-none">
+                    <div class="d-flex align-items-center mb-2 justify-content-between">
+                        <label class="form-label fw-bold text-danger m-0"><i class="fa-solid fa-calendar-week me-1"></i> Tick chọn các tuần áp dụng:</label>
+                        <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2 fw-bold" onclick="toggleAllUTkbWeeks()">Chọn / Bỏ chọn tất cả</button>
+                    </div>
+                    <div id="uTkbWeeksContainer" class="d-flex flex-wrap gap-2 p-3 bg-light border rounded border-secondary-subtle">
+                        <!-- Checkbox Tuần học sẽ render vào đây -->
+                    </div>
+                </div>
+
+                <!-- KHU VỰC THÊM VÀO DANH SÁCH CHỜ -->
+                <div id="uTkbPendingSection">
+                    <div class="mt-4 text-end">
+                        <button type="button" id="btnAddPendingUTkb" class="btn text-white fw-bold px-4" style="background-color: #8b5cf6;" onclick="addPendingUTkb()">
+                            <i class="fa-solid fa-plus me-1"></i> Thêm vào danh sách chờ lưu
+                        </button>
+                    </div>
+
+                    <hr class="my-4">
+                    <h6 class="fw-bold mb-3" style="color: #0f4c81;"><i class="fa-solid fa-list-check me-1"></i> Danh sách các lịch chờ lưu lên hệ thống</h6>
+                    <div class="table-responsive border rounded shadow-sm">
+                        <table class="table table-hover align-middle text-center m-0 bg-white">
+                            <thead style="background-color: #0f4c81; color: white;">
+                                <tr>
+                                    <th>Tên môn</th>
+                                    <th>Thứ & Tiết</th>
+                                    <th>Phạm vi thời gian</th>
+                                    <th>Cơ sở / Phòng</th>
+                                    <th style="width: 150px;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="uTkbPendingTableBody">
+                                <tr><td colspan="5" class="text-muted py-4">Chưa có môn nào được thêm.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
             </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn text-white px-4 fw-bold" style="background-color: #0f4c81;" onclick="promptSavePersonalTkb()" id="btnSavePersonalTkb">Lưu thông tin</button>
+            <div class="modal-footer border-0 bg-light d-flex justify-content-between">
+                <button type="button" class="btn btn-light border fw-bold" data-bs-dismiss="modal">Hủy đóng</button>
+                <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #10b981;" onclick="saveUnifiedTkb()" id="btnSaveUnifiedTkb">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Lưu tất cả lên TKB
+                </button>
             </div>
         </div>
     </div>
@@ -2722,7 +2811,7 @@
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
         const startMaintenance = new Date(2026, 7, 26, 10, 30);  
-        const endMaintenance   = new Date(2026, 7, 26, 17, 00); 
+        const endMaintenance   = new Date(2026, 7, 26, 11, 45); 
 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');

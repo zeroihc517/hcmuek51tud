@@ -23,6 +23,30 @@ function loadTKBView() {
         loadDeadlines();
     }
 }
+function loadTKBView() {
+    document.title = "Thời gian biểu | Học nhóm APMA Khoa Toán";
+    resetNavActive(); 
+    $('#btnNavTKB').addClass('active'); 
+    $('#tkbSection').removeClass('d-none');
+    
+    updateSystemUrl('view', 'tkb'); 
+    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
+
+    if (typeof globalTkbData !== 'undefined' && globalTkbData.length > 0) {
+        filterAndRenderTKB();
+        renderTkbToolBar();
+    } else {
+        loadThoiGianBieu(); 
+    }
+
+    if (typeof globalDeadlineData !== 'undefined' && globalDeadlineData.length > 0) {
+        renderDeadlines();
+        $('#deadlineBox').removeClass('d-none');
+    } else {
+        loadDeadlines();
+    }
+}
+
 function loadThoiGianBieu() {
     $('.tkb-personal-toolbar').remove();
     if (!currentUser) {
@@ -30,7 +54,6 @@ function loadThoiGianBieu() {
         $('#deadlineBox').addClass('d-none'); return;
     }
 
-    // ĐOẠN CODE PHÓNG TO HÌNH TAM GIÁC (ĐÃ ĐỔI COLSPAN=8 ĐỂ KHÔNG BỊ DƯ CỘT)
     let loadingHtml = `
     <tr>
         <td colspan="8" style="text-align: center; padding: 60px 20px; background: #f8fafc;">
@@ -45,16 +68,13 @@ function loadThoiGianBieu() {
                     <g class="pro-node" style="--i: 5; --c: #0f4c81;"><circle cx="62.5" cy="90" r="18" /><text x="62.5" y="96">M</text></g>
                 </svg>
             </div>
-            <div class="fw-bold" style="font-size: 17px; color: #0f4c81; letter-spacing: 0.5px;">
-                Đang đồng bộ Thời khóa biểu...
-            </div>
+            <div class="fw-bold" style="font-size: 17px; color: #0f4c81; letter-spacing: 0.5px;">Đang đồng bộ Thời khóa biểu...</div>
             <div class="text-muted small mt-1">Vui lòng chờ trong giây lát</div>
         </td>
     </tr>`;
     
     $('#tkb-body').html(loadingHtml);
     
-    // THÊM ĐOẠN NÀY: Ép hiển thị lại từ Thứ 2 đến Chủ Nhật (trọng số chia đều / 7) lúc đang load
     for (let thu = 2; thu <= 8; thu++) {
         $(`#th-day-${thu}`).show().css("width", "calc((100% - 60px) / 7)");
     }
@@ -65,8 +85,8 @@ function loadThoiGianBieu() {
         success: function(data) { processTKBData(data); renderTkbToolBar(); },
         error: function() { $('#tkb-body').html('<tr><td colspan="8" class="text-danger text-center">Lỗi khi tải dữ liệu TKB!</td></tr>'); }
     });
-
 }
+
 function loadDeadlines() {
     $('#deadlineBox').removeClass('d-none');
     $('#deadline-container').html('<div class="w-100 text-center text-muted" style="grid-column: 1/-1"><i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải dữ liệu Deadline...</div>');
@@ -113,7 +133,6 @@ function renderDeadlines() {
     let endSunTime = null;
     const getTimeFast = (dateStr) => { let d = parseDateString(dateStr); return d ? d.getTime() : null; };
 
-    // 1. TÍNH TOÁN KHOẢNG THỜI GIAN THEO HỌC KỲ / TUẦN
     if (selectedWeekVal && selectedWeekVal !== "") {
         let weekStart = new Date(currentSelectedMonday); weekStart.setHours(0,0,0,0);
         let weekEnd = new Date(weekStart); weekEnd.setDate(weekStart.getDate() + 6); weekEnd.setHours(23,59,59,999);
@@ -135,7 +154,6 @@ function renderDeadlines() {
         }
     }
 
-    // --- BẮT ĐẦU THÊM MỚI: TẠO DEADLINE ẢO TỪ MÔN VLE TRONG TKB ---
     let virtualDeadlines = [];
     if (typeof globalTkbData !== 'undefined') {
         globalTkbData.forEach(c => {
@@ -143,33 +161,19 @@ function renderDeadlines() {
                 let durationStr = (c.ngayBatDau && c.ngayKetThuc && c.ngayBatDau !== c.ngayKetThuc) ? 
                                   `Từ ${c.ngayBatDau} đến ${c.ngayKetThuc}` : (c.ngayBatDau || "Chưa rõ");
                 virtualDeadlines.push({
-                    title: c.mon,
-                    duration: durationStr,
-                    tag: c.hinhThuc,
-                    icon: "primary",
-                    emoji: "🌐",
-                    dateStart: c.ngayBatDau || "",
-                    dateEnd: c.ngayKetThuc || "",
-                    sheetRowIndex: c.sheetRowIndex,
-                    isSystem: c.isSystem,
-                    isVirtualVLE: true // Cờ nhận diện để ẩn nút Sửa/Xóa bên trong khung Deadline
+                    title: c.mon, duration: durationStr, tag: c.hinhThuc, icon: "primary", emoji: "🌐",
+                    dateStart: c.ngayBatDau || "", dateEnd: c.ngayKetThuc || "", sheetRowIndex: c.sheetRowIndex,
+                    isSystem: c.isSystem, isVirtualVLE: true 
                 });
             }
         });
     }
     let combinedDeadlineData = [...globalDeadlineData, ...virtualDeadlines];
-    // --- KẾT THÚC THÊM MỚI ---
 
-   // LỌC DANH SÁCH DEADLINE THEO KHOẢNG THỜI GIAN ĐÃ XÁC ĐỊNH
     let filtered = combinedDeadlineData.filter(d => {
-        // Nếu là môn VLE ảo mà không có ngày thì luôn hiển thị
         if (d.isVirtualVLE && (!d.dateStart || !d.dateEnd)) return true;
-
         if (!startMonTime || !endSunTime) return true;
-
-        let sDate = getTimeFast(d.dateStart); 
-        let eDate = getTimeFast(d.dateEnd);
-        
+        let sDate = getTimeFast(d.dateStart); let eDate = getTimeFast(d.dateEnd);
         if (!sDate && !eDate) return true; 
         if (sDate && eDate) return sDate <= endSunTime && eDate >= startMonTime;
         if (sDate) return sDate <= endSunTime;
@@ -186,71 +190,56 @@ function renderDeadlines() {
     let completedList = getCompletedDeadlines();
     let nowTime = new Date().setHours(0, 0, 0, 0);
 
-    // 3. SẮP XẾP ƯU TIÊN
     filtered.sort((a, b) => {
         let isDoneA = completedList.includes(getDlKey(a)) ? 1 : 0;
         let isDoneB = completedList.includes(getDlKey(b)) ? 1 : 0;
         if (isDoneA !== isDoneB) return isDoneA - isDoneB;
 
-        let startA = getTimeFast(a.dateStart) || 0;
-        let endA = getTimeFast(a.dateEnd) || startA;
-        let startB = getTimeFast(b.dateStart) || 0;
-        let endB = getTimeFast(b.dateEnd) || startB;
+        let startA = getTimeFast(a.dateStart) || 0; let endA = getTimeFast(a.dateEnd) || startA;
+        let startB = getTimeFast(b.dateStart) || 0; let endB = getTimeFast(b.dateEnd) || startB;
 
         let isHappeningA = (nowTime >= startA && nowTime <= endA) ? 1 : 0;
         let isHappeningB = (nowTime >= startB && nowTime <= endB) ? 1 : 0;
         if (isHappeningA !== isHappeningB) return isHappeningB - isHappeningA;
-
         return startA - startB;
     });
 
-    // 4. HIỂN THỊ RA GIAO DIỆN
     container.innerHTML = filtered.map(item => {
         let isDone = completedList.includes(getDlKey(item));
-        
         let extLinkTitle = checkAndExtractUrl(item.title);
         let extLinkTag = checkAndExtractUrl(item.tag);
         let extLink = extLinkTitle || extLinkTag;
         
-        let displayTitle = item.title;
-        let displayTag = item.tag;
+        let displayTitle = item.title; let displayTag = item.tag;
         if (extLinkTitle) displayTitle = displayTitle.replace(extLinkTitle, '').trim();
         if (extLinkTag) displayTag = displayTag.replace(extLinkTag, '').trim();
         if (displayTag === "") displayTag = "Truy cập Liên kết";
         displayTitle = displayTitle.replace(/^([a-zA-Z0-9_\.]+)\s*-\s*/, '').trim();
-        // --- CẬP NHẬT Ở ĐÂY: Ẩn thao tác nếu là VLE ---
-       let actionButtons = '';
-if (!item.isSystem) {
-    if (item.isVirtualVLE) {
-        actionButtons = `
-            <div class="deadline-actions">
-                <button class="btn-dl-act text-warning shadow-sm" onclick="event.stopPropagation(); openEditTkbModal('${item.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn-dl-act text-danger shadow-sm" onclick="event.stopPropagation(); promptDeletePersonalTkb('${item.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
-            </div>
-        `;
-    } else {
-        actionButtons = `
-            <div class="deadline-actions">
-                <button class="btn-dl-act text-warning shadow-sm" onclick="event.stopPropagation(); openEditDeadlineModal('${item.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
-                <button class="btn-dl-act text-danger shadow-sm" onclick="event.stopPropagation(); deletePersonalDeadline('${item.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
-            </div>
-        `;
-    }
-}
+        
+        let actionButtons = '';
+        if (!item.isSystem) {
+            if (item.isVirtualVLE) {
+                actionButtons = `
+                    <div class="deadline-actions">
+                        <button class="btn-dl-act text-warning shadow-sm" onclick="event.stopPropagation(); openEditTkbModal('${item.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-dl-act text-danger shadow-sm" onclick="event.stopPropagation(); promptDeletePersonalTkb('${item.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
+            } else {
+                actionButtons = `
+                    <div class="deadline-actions">
+                        <button class="btn-dl-act text-warning shadow-sm" onclick="event.stopPropagation(); openEditDeadlineModal('${item.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                        <button class="btn-dl-act text-danger shadow-sm" onclick="event.stopPropagation(); deletePersonalDeadline('${item.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
+            }
+        }
         
         let cardOnClick = extLink ? `onclick="window.open('${extLink}', '_blank')"` : "";
         let cardStyle = extLink ? "cursor: pointer; transition: 0.2s; border: 1px dashed var(--primary-color);" : "";
-        
-        let doneBtnHtml = `
-            <button class="btn-dl-done ${isDone ? 'is-done' : ''}" onclick="toggleDeadlineComplete('${getDlKey(item)}', event)" title="Đánh dấu trạng thái">
-                <i class="fa-solid ${isDone ? 'fa-circle-check' : 'fa-circle'} me-1"></i> ${isDone ? 'Đã xong' : 'Chưa xong'}
-            </button>
-        `;
+        let doneBtnHtml = `<button class="btn-dl-done ${isDone ? 'is-done' : ''}" onclick="toggleDeadlineComplete('${getDlKey(item)}', event)" title="Đánh dấu trạng thái"><i class="fa-solid ${isDone ? 'fa-circle-check' : 'fa-circle'} me-1"></i> ${isDone ? 'Đã xong' : 'Chưa xong'}</button>`;
 
         return `
             <div class="online-card ${isDone ? 'completed-dl' : ''}" ${cardOnClick} style="${cardStyle}" title="${extLink ? 'Bấm để mở liên kết' : ''}">
-                ${doneBtnHtml}
-                ${actionButtons}
+                ${doneBtnHtml} ${actionButtons}
                 <div class="icon-circle ${item.icon}" style="margin-top: 15px;">${item.emoji || '📌'}</div>
                 <h3 class="text-danger mb-2" style="font-size: 15px; font-weight: 800;">${item.duration}</h3>
                 <p class="desc text-dark mb-3" style="font-size: 16px; font-weight: 600;">${displayTitle}</p>
@@ -259,6 +248,7 @@ if (!item.isSystem) {
         `;
     }).join('');
 }
+
 function openAddDeadlineModal() {
     $('#dlModalTitle').html('<i class="fa-solid fa-plus me-2"></i>Thêm Deadline');
     $('#pDlRowIndex').val(''); 
@@ -882,42 +872,8 @@ function processTKBData(data) {
     filterAndRenderTKB();
 autoSyncTkbToGpa();
 }
-function openAddTkbModal(triggerAuthModal = false) {
-    if (triggerAuthModal) { $('#userAuthModal').modal('show'); return; }
-    $('#tkbModalTitle').html('<i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân');
-    $('#pTkbRowIndex').val(''); 
-    $('#pTkbMaHP, #pTkbMon, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink, #pTkbNgoaiLe').val('');
-    $('#pTkbThu').val(2); $('#pTkbTiet').val(1); $('#pTkbSoTiet').val(3); $('#pTkbColor').val('#e0f2fe');
-    $('#pTkbMaHP, #pTkbThu, #pTkbTiet, #pTkbSoTiet, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink').prop('readonly', false).css('background-color', '#fff');
-    $('#tkbOverlapAlert').addClass('d-none');
-    $('#tkbPersonalModal').modal('show');
-}
 
-function openEditTkbModal(sheetRowIndex) {
-    let course = globalTkbData.find(c => String(c.sheetRowIndex) === String(sheetRowIndex)); if (!course) return;
-    $('#tkbModalTitle').html('<i class="fa-solid fa-calendar-check me-2"></i>Chỉnh Sửa Lịch Học');
-    $('#pTkbRowIndex').val(sheetRowIndex); 
-    $('#pTkbMaHP').val(course.classId || ''); // Điền mã lớp HP đã có
-    $('#pTkbThu').val(course.thu); $('#pTkbTiet').val(course.tietBd); $('#pTkbSoTiet').val(course.soTiet);
-    $('#pTkbMon').val(course.mon); $('#pTkbPhong').val(course.phong); $('#pTkbThoiGian').val(course.thoiGian);
-    
-    let rawHinhThuc = course.hinhThuc || ""; let extLink = checkAndExtractUrl(rawHinhThuc); let displayHT = rawHinhThuc;
-    if(extLink) { displayHT = rawHinhThuc.replace(extLink, '').trim(); }
-    $('#pTkbHinhThuc').val(displayHT); $('#pTkbLink').val(extLink || '');
-    $('#pTkbGV').val(course.gv); $('#pTkbColor').val(course.color);
-    $('#pTkbNgayBD').val(course.ngayBatDau); $('#pTkbNgayKT').val(course.ngayKetThuc); $('#pTkbNgoaiLe').val(course.ngayNgoaiLe); 
-    
-    if (course.isSystem) {
-        $('#pTkbMaHP, #pTkbThu, #pTkbTiet, #pTkbSoTiet, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink').prop('readonly', true).css('background-color', '#e9ecef');
-        $('#tkbOverlapAlert').removeClass('d-none');
-        $('#tkbOverlapMessage').html('Học phần hệ thống: Chỉ được phép thêm tiền tố "Kiểm tra...", không thay đổi thời gian/phòng học.');
-    } else {
-        $('#pTkbMaHP, #pTkbThu, #pTkbTiet, #pTkbSoTiet, #pTkbPhong, #pTkbThoiGian, #pTkbGV, #pTkbNgayBD, #pTkbNgayKT, #pTkbHinhThuc, #pTkbLink').prop('readonly', false).css('background-color', '#fff');
-        $('#tkbOverlapAlert').addClass('d-none');
-    }
-    
-    $('#tkbPersonalModal').modal('show');
-}
+
 // Ví dụ trong hàm xử lý nút "Chỉ sự kiện này" hoặc khi chuẩn bị gửi data:
 function getCorrectLocalDateString(dateInput) {
     // Nếu dateInput là đối tượng Date, chuyển về dạng YYYY-MM-DD theo giờ địa phương
@@ -931,21 +887,6 @@ function getCorrectLocalDateString(dateInput) {
 
 // Khi người dùng chọn "Chỉ sự kiện này", hãy gán lại ngày chuẩn:
 pendingEventAction.date = getCorrectLocalDateString(pendingEventAction.date);
-function promptSavePersonalTkb() {
-    let targetRowIndex = $('#pTkbRowIndex').val().trim();
-    if (targetRowIndex !== '') {
-        // Tìm lịch học gốc để lấy chính xác 'thu', phục vụ việc tính đúng targetDate
-        let originalCourse = globalTkbData.find(c => String(c.sheetRowIndex) === targetRowIndex);
-        let originalThu = originalCourse ? originalCourse.thu : (parseInt($('#pTkbThu').val()) || 2);
-        
-        // Bổ sung 'thu' vào biến pendingEventAction
-        pendingEventAction = { type: 'edit', rowIndex: targetRowIndex, thu: originalThu };
-        $('#eventScopeModal').modal('show');
-    } else {
-        pendingEventAction = { type: 'edit', scope: 'all' }; 
-        executeSavePersonalTkb();
-    }
-}
 function promptDeletePersonalTkb(sheetRowIndex) {
     let course = globalTkbData.find(c => String(c.sheetRowIndex) === String(sheetRowIndex));
     if (course && course.isSystem) { alert("Khóa bảo mật: Bạn không thể xóa học phần đã được đồng bộ từ hệ thống Đào tạo."); return; }
@@ -980,15 +921,239 @@ if (scope === 'single' || scope === 'future') {
     }
 }
 
+// ========================================================
+// HỆ THỐNG JAVASCRIPT CHO MODAL GỘP (UNIFIED MODAL)
+// ========================================================
+let pendingTkbSchedules = [];
+
+function toggleTkbTimeMode() {
+    if ($('#modeWeek').is(':checked')) {
+        $('#uTkbDateArea').addClass('d-none');
+        $('#uTkbWeekArea').removeClass('d-none');
+    } else {
+        $('#uTkbDateArea').removeClass('d-none');
+        $('#uTkbWeekArea').addClass('d-none');
+    }
+}
+
+function toggleAllUTkbWeeks() {
+    let allChecked = $('.utkb-week-cb:checked').length === $('.utkb-week-cb').length;
+    $('.utkb-week-cb').prop('checked', !allChecked);
+}
+
+function openAddTkbModal(triggerAuthModal = false) {
+    if (triggerAuthModal) { $('#userAuthModal').modal('show'); return; }
+    $('#uTkbModalTitle').html('<i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học / Xếp giờ Tự học');
+    $('#uTkbRowIndex').val(''); 
+    $('#uTkbMaHP, #uTkbMon, #uTkbPhong, #uTkbThoiGian, #uTkbNgayBD, #uTkbNgayKT, #uTkbHinhThuc, #uTkbLink, #uTkbNgoaiLe').val('');
+    $('#uTkbThu').val(2); $('#uTkbTiet').val(1); $('#uTkbSoTiet').val(3); $('#uTkbColor').val('#e0f2fe');
+    $('#uTkbGV').val('');
+    $('#uTkbMaHP, #uTkbThu, #uTkbTiet, #uTkbSoTiet, #uTkbPhong, #uTkbThoiGian, #uTkbGV, #uTkbNgayBD, #uTkbNgayKT, #uTkbHinhThuc, #uTkbLink').prop('readonly', false).css('background-color', '#fff');
+    $('#uTkbOverlapAlert').addClass('d-none');
+    $('#uTkbTimeModeSelection, #uTkbPendingSection, #uTkbQuickBtns').removeClass('d-none');
+    $('#modeDate').prop('checked', true);
+    toggleTkbTimeMode();
+    $('#btnAddPendingUTkb').html('<i class="fa-solid fa-plus me-1"></i> Thêm vào danh sách chờ lưu').removeClass('btn-warning text-dark').addClass('text-white').css('background-color', '#8b5cf6');
+    $('#btnSaveUnifiedTkb').html('<i class="fa-solid fa-floppy-disk me-1"></i> Lưu tất cả lên TKB').css('background-color', '#10b981');
+    pendingTkbSchedules = []; renderPendingUTkb();
+
+    let selectedNH = $('#namHocSelect').val(); let selectedHK = $('#hocKySelect').val();
+    let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+    let weekHtml = '';
+    
+    if (!config) {
+        weekHtml = '<div class="text-danger small w-100 fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> Vui lòng chọn Năm học và Học kỳ trên thanh công cụ.</div>';
+        $('#modeWeek').prop('disabled', true);
+    } else {
+        $('#modeWeek').prop('disabled', false);
+        let sDate = parseDateString(config[2]); let numAcademicWeeks = parseInt(config[3]); let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+        if (sDate && numAcademicWeeks) {
+            let startMon = getMondayOfDate(sDate); let acadWk = 1; let calWk = 1; 
+            let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            while (acadWk <= numAcademicWeeks && calWk <= 52) {
+                let m = new Date(startMon); m.setDate(m.getDate() + ((calWk - 1) * 7));
+                let s = new Date(m); s.setDate(s.getDate() + 6); 
+                if (!breakWeeks.includes(calWk)) {
+                    weekHtml += `<div class="form-check border bg-white p-2 rounded shadow-sm d-flex align-items-center" style="width: calc(33.33% - 8px); min-width: 250px;"><input class="form-check-input ms-1 utkb-week-cb border-secondary" type="checkbox" value="${m.getTime()}" id="utkb_wk_${acadWk}" checked style="cursor: pointer;"><label class="form-check-label ms-2 fw-bold text-dark w-100" for="utkb_wk_${acadWk}" style="font-size: 13.5px; cursor: pointer;">Tuần ${acadWk} <br><small class="text-muted fw-normal">(${format(m)} - ${format(s)})</small></label></div>`;
+                    acadWk++;
+                }
+                calWk++;
+            }
+        }
+    }
+    $('#uTkbWeeksContainer').html(weekHtml); $('#unifiedTkbModal').modal('show');
+}
+
+function openEditTkbModal(sheetRowIndex) {
+    let course = globalTkbData.find(c => String(c.sheetRowIndex) === String(sheetRowIndex)); if (!course) return;
+    $('#uTkbModalTitle').html('<i class="fa-solid fa-calendar-check me-2"></i>Chỉnh Sửa Lịch Học');
+    $('#uTkbRowIndex').val(sheetRowIndex); 
+    $('#uTkbMaHP').val(course.classId || ''); 
+    $('#uTkbThu').val(course.thu); $('#uTkbTiet').val(course.tietBd); $('#uTkbSoTiet').val(course.soTiet);
+    $('#uTkbMon').val(course.mon); $('#uTkbPhong').val(course.phong); $('#uTkbThoiGian').val(course.thoiGian);
+    
+    let rawHinhThuc = course.hinhThuc || ""; let extLink = checkAndExtractUrl(rawHinhThuc); let displayHT = rawHinhThuc;
+    if(extLink) { displayHT = rawHinhThuc.replace(extLink, '').trim(); }
+    $('#uTkbHinhThuc').val(displayHT.replace(/#[a-zA-Z0-9_]+/g, '').trim()); 
+    $('#uTkbLink').val(extLink || ''); $('#uTkbGV').val(course.gv); $('#uTkbColor').val(course.color);
+    $('#uTkbNgayBD').val(course.ngayBatDau); $('#uTkbNgayKT').val(course.ngayKetThuc); $('#uTkbNgoaiLe').val(course.ngayNgoaiLe); 
+    
+    if (course.isSystem) {
+        $('#uTkbMaHP, #uTkbThu, #uTkbTiet, #uTkbSoTiet, #uTkbPhong, #uTkbThoiGian, #uTkbGV, #uTkbNgayBD, #uTkbNgayKT, #uTkbHinhThuc, #uTkbLink').prop('readonly', true).css('background-color', '#e9ecef');
+        $('#uTkbOverlapAlert').removeClass('d-none');
+        $('#uTkbOverlapMessage').html('Học phần hệ thống: Chỉ được phép thêm tiền tố "Kiểm tra...", không thay đổi thời gian/phòng học.');
+    } else {
+        $('#uTkbMaHP, #uTkbThu, #uTkbTiet, #uTkbSoTiet, #uTkbPhong, #uTkbThoiGian, #uTkbGV, #uTkbNgayBD, #uTkbNgayKT, #uTkbHinhThuc, #uTkbLink').prop('readonly', false).css('background-color', '#fff');
+        $('#uTkbOverlapAlert').addClass('d-none');
+    }
+    
+    $('#uTkbTimeModeSelection, #uTkbPendingSection, #uTkbQuickBtns').addClass('d-none');
+    $('#modeDate').prop('checked', true); toggleTkbTimeMode();
+    $('#btnSaveUnifiedTkb').html('<i class="fa-solid fa-floppy-disk me-1"></i> Lưu thông tin').css('background-color', '#0f4c81');
+    $('#unifiedTkbModal').modal('show');
+}
+
+function addPendingUTkb() {
+    let mon = $('.modal.show #uTkbMon').val() || $('#uTkbMon').val(); mon = mon.trim();
+    let thu = parseInt($('#uTkbThu').val()); let tietBd = parseInt($('#uTkbTiet').val()); let soTiet = parseInt($('#uTkbSoTiet').val());
+    let thoiGian = $('#uTkbThoiGian').val().trim(); let hinhThuc = $('#uTkbHinhThuc').val().trim(); let link = $('#uTkbLink').val().trim();
+    let phong = $('#uTkbPhong').val().trim(); let gv = $('#uTkbGV').val().trim(); let color = $('#uTkbColor').val(); let maHP = $('#uTkbMaHP').val().trim();
+
+    if (!mon || !thu || !tietBd || !soTiet) { alert("Vui lòng nhập Tên học phần, Thứ, Tiết và Số tiết!"); return; }
+    if (thu < 2 || thu > 8) { alert("Thứ học không hợp lệ (Phải từ 2 đến 8)."); return; }
+
+    let finalHinhThuc = hinhThuc; if (link) finalHinhThuc += " " + link;
+    let cleanHinhThuc = finalHinhThuc.replace(/#[a-zA-Z0-9_]+/g, '').trim();
+    finalHinhThuc = maHP !== "" ? cleanHinhThuc + " #" + maHP : cleanHinhThuc;
+
+    let isWeekMode = $('#modeWeek').is(':checked'); let ngayBatDau = "", ngayKetThuc = "", ngayNgoaiLe = "", scopeDisplay = "", selectedWeekMs = [];
+
+    if (isWeekMode) {
+        let selectedDates = [];
+        $('.utkb-week-cb:checked').each(function() {
+            let weekStartMs = parseInt($(this).val()); selectedWeekMs.push(weekStartMs);
+            let d = new Date(weekStartMs); d.setDate(d.getDate() + (thu - 2)); selectedDates.push(d);
+        });
+        if (selectedDates.length === 0) { alert("Vui lòng tick chọn ít nhất 1 tuần!"); return; }
+        selectedDates.sort((a,b) => a.getTime() - b.getTime());
+        ngayBatDau = formatDateDDMMYYYY(selectedDates[0]); ngayKetThuc = formatDateDDMMYYYY(selectedDates[selectedDates.length - 1]);
+        
+        let ngayNgoaiLeArr = []; let curr = new Date(selectedDates[0]);
+        while (curr <= selectedDates[selectedDates.length - 1]) {
+            if (!selectedDates.some(sd => sd.getTime() === curr.getTime())) { ngayNgoaiLeArr.push(formatDateDDMMYYYY(curr)); }
+            curr.setDate(curr.getDate() + 7);
+        }
+        ngayNgoaiLe = ngayNgoaiLeArr.join(', ');
+        scopeDisplay = `<div class="d-flex flex-column align-items-center"><span class="badge bg-success mb-1 shadow-sm" style="font-size: 12px;">${selectedDates.length} tuần</span><small class="text-muted fw-bold">Từ ${ngayBatDau} <br>Đến ${ngayKetThuc}</small></div>`;
+    } else {
+        ngayBatDau = $('#uTkbNgayBD').val().trim(); ngayKetThuc = $('#uTkbNgayKT').val().trim(); ngayNgoaiLe = $('#uTkbNgoaiLe').val().trim();
+        let displayStr = (ngayBatDau && ngayKetThuc && ngayBatDau !== ngayKetThuc) ? `Từ ${ngayBatDau} <br>Đến ${ngayKetThuc}` : (ngayBatDau || "Không rõ");
+        scopeDisplay = `<div class="d-flex flex-column align-items-center"><span class="badge bg-primary mb-1 shadow-sm" style="font-size: 12px;">Theo ngày</span><small class="text-muted fw-bold">${displayStr}</small></div>`;
+    }
+
+    pendingTkbSchedules.push({
+        maHP: maHP, mon: mon, thu: thu, tietBd: tietBd, soTiet: soTiet, thoiGian: thoiGian, hinhThuc: finalHinhThuc, phong: phong,
+        gv: gv, color: color, ngayBatDau: ngayBatDau, ngayKetThuc: ngayKetThuc, ngayNgoaiLe: ngayNgoaiLe, scopeDisplay: scopeDisplay, isWeekMode: isWeekMode, selectedWeekMs: selectedWeekMs
+    });
+
+    $('#uTkbMon').val(''); $('#uTkbThu').focus();
+    $('#btnAddPendingUTkb').html('<i class="fa-solid fa-plus me-1"></i> Thêm vào danh sách chờ lưu').removeClass('btn-warning text-dark').addClass('text-white').css('background-color', '#8b5cf6');
+    renderPendingUTkb();
+}
+
+function renderPendingUTkb() {
+    let tbody = $('#uTkbPendingTableBody');
+    if (pendingTkbSchedules.length === 0) { tbody.html('<tr><td colspan="5" class="text-muted py-4">Chưa có môn nào được thêm.</td></tr>'); return; }
+    
+    let html = '';
+    pendingTkbSchedules.forEach((s, idx) => {
+        let thuTxt = s.thu === 8 ? "Chủ nhật" : `Thứ ${s.thu}`;
+        html += `<tr style="transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+                <td class="fw-bold text-primary align-middle">${s.mon}</td>
+                <td class="fw-bold text-secondary align-middle">${thuTxt} <br><small class="text-muted">(Tiết ${s.tietBd}-${s.tietBd + s.soTiet - 1})</small></td>
+                <td class="align-middle">${s.scopeDisplay}</td>
+                <td class="align-middle"><span class="fw-bold">${s.phong || '-'}</span><br><small class="text-muted">${s.hinhThuc.split('#')[0].trim() || '-'}</small></td>
+                <td class="align-middle">
+                    <div class="d-flex justify-content-center gap-2">
+                        <button class="btn btn-sm btn-outline-warning py-1 px-2 fw-bold" onclick="editPendingUTkb(${idx})"><i class="fa-solid fa-pen"></i> Sửa</button>
+                        <button class="btn btn-sm btn-outline-danger py-1 px-2 fw-bold" onclick="removePendingUTkb(${idx})"><i class="fa-solid fa-trash"></i> Xóa</button>
+                    </div>
+                </td>
+            </tr>`;
+    });
+    tbody.html(html);
+}
+
+function editPendingUTkb(idx) {
+    let s = pendingTkbSchedules[idx]; if (!s) return;
+    $('#uTkbMaHP').val(s.maHP); $('#uTkbMon').val(s.mon); $('#uTkbThu').val(s.thu); $('#uTkbTiet').val(s.tietBd); $('#uTkbSoTiet').val(s.soTiet); $('#uTkbThoiGian').val(s.thoiGian);
+    let rawHinhThuc = s.hinhThuc || ""; let extLink = checkAndExtractUrl(rawHinhThuc); let displayHT = rawHinhThuc;
+    if (extLink) displayHT = rawHinhThuc.replace(extLink, '').trim();
+    $('#uTkbHinhThuc').val(displayHT.replace(/#[a-zA-Z0-9_]+/g, '').trim()); $('#uTkbLink').val(extLink || ""); $('#uTkbPhong').val(s.phong); $('#uTkbGV').val(s.gv); $('#uTkbColor').val(s.color);
+
+    if (s.isWeekMode) {
+        $('#modeWeek').prop('checked', true); toggleTkbTimeMode(); $('.utkb-week-cb').prop('checked', false); 
+        if (s.selectedWeekMs && s.selectedWeekMs.length > 0) { s.selectedWeekMs.forEach(ms => { $(`.utkb-week-cb[value="${ms}"]`).prop('checked', true); }); }
+    } else {
+        $('#modeDate').prop('checked', true); toggleTkbTimeMode();
+        $('#uTkbNgayBD').val(s.ngayBatDau); $('#uTkbNgayKT').val(s.ngayKetThuc); $('#uTkbNgoaiLe').val(s.ngayNgoaiLe);
+    }
+    pendingTkbSchedules.splice(idx, 1); renderPendingUTkb();
+    $('#btnAddPendingUTkb').html('<i class="fa-solid fa-check me-1"></i> Cập nhật vào danh sách chờ').removeClass('text-white').css('background-color', '').addClass('btn-warning text-dark');
+    $('#unifiedTkbModal .modal-body').animate({ scrollTop: 0 }, 300);
+}
+
+function removePendingUTkb(idx) { pendingTkbSchedules.splice(idx, 1); renderPendingUTkb(); }
+
+function saveUnifiedTkb() {
+    let targetRowIndex = $('#uTkbRowIndex').val().trim();
+    if (targetRowIndex !== '') { promptSavePersonalTkb(); return; }
+    
+    let mon = $('.modal.show #uTkbMon').val() || $('#uTkbMon').val();
+    if (mon && mon.trim() !== '') {
+        if (confirm("Bạn đang gõ dở môn học trên khung, bạn có muốn đẩy nó vào danh sách chờ và lưu tất cả cùng lúc không?")) { addPendingUTkb(); } else { return; }
+    }
+    if (pendingTkbSchedules.length === 0) { alert("Danh sách đang chờ trống! Vui lòng điền thông tin và bấm 'Thêm vào danh sách chờ lưu' trước."); return; }
+
+    let btn = $('#btnSaveUnifiedTkb'); let originalText = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang lưu...').prop('disabled', true);
+    postToGAS({ action: "bulkAddTKBUser", mssv: currentUser.mssv, schedules: pendingTkbSchedules }, function(res) {
+        alert(res); $('#unifiedTkbModal').modal('hide'); btn.html(originalText).prop('disabled', false);
+        pendingTkbSchedules = []; loadThoiGianBieu(); 
+    }, function() { alert("Lỗi kết nối máy chủ khi lưu khối lịch học!"); btn.html(originalText).prop('disabled', false); });
+}
+
+// Các hàm phụ trợ gọi lưu/xóa một môn (Giữ lại từ bản gốc)
+function promptSavePersonalTkb() {
+    let targetRowIndex = $('#uTkbRowIndex').val().trim();
+    if (targetRowIndex !== '') {
+        let originalCourse = globalTkbData.find(c => String(c.sheetRowIndex) === targetRowIndex);
+        let originalThu = originalCourse ? originalCourse.thu : (parseInt($('#uTkbThu').val()) || 2);
+        pendingEventAction = { type: 'edit', rowIndex: targetRowIndex, thu: originalThu };
+        $('#eventScopeModal').modal('show');
+    } else {
+        pendingEventAction = { type: 'edit', scope: 'all' }; 
+        executeSavePersonalTkb();
+    }
+}
+
 function executeSavePersonalTkb() {
-    let targetRowIndex = $('#pTkbRowIndex').val().trim(); let isEditMode = targetRowIndex !== '';
-    let thuVal = parseInt($('#pTkbThu').val()); let tietBdVal = parseInt($('#pTkbTiet').val()); let soTietVal = parseInt($('#pTkbSoTiet').val()); let monVal = $('#pTkbMon').val().trim();
-    let maHpVal = $('#pTkbMaHP').val().trim();
-    let ngayBdRaw = $('#pTkbNgayBD').val().trim(); let ngayKtRaw = $('#pTkbNgayKT').val().trim();
+    let targetRowIndex = $('#uTkbRowIndex').val().trim(); 
+    let isEditMode = targetRowIndex !== '';
+    let thuVal = parseInt($('#uTkbThu').val()); 
+    let tietBdVal = parseInt($('#uTkbTiet').val()); 
+    let soTietVal = parseInt($('#uTkbSoTiet').val()); 
+    let monVal = $('#uTkbMon').val().trim();
+    let maHpVal = $('#uTkbMaHP').val().trim();
+    let ngayBdRaw = $('#uTkbNgayBD').val().trim(); 
+    let ngayKtRaw = $('#uTkbNgayKT').val().trim();
     
     if(!thuVal || !tietBdVal || !monVal) { alert("Vui lòng nhập đầy đủ Thứ, Tiết và Tên môn học!"); return; }
-    let tietKtVal = tietBdVal + soTietVal - 1; let isOverlap = false; let overlapCourseName = "";
-    let newStartDate = parseDateString(ngayBdRaw); let newEndDate = parseDateString(ngayKtRaw);
+    let tietKtVal = tietBdVal + soTietVal - 1; 
+    let isOverlap = false; 
+    let overlapCourseName = "";
+    let newStartDate = parseDateString(ngayBdRaw); 
+    let newEndDate = parseDateString(ngayKtRaw);
 
     globalTkbData.forEach(course => {
         if (isEditMode && String(course.sheetRowIndex) === String(targetRowIndex)) return;
@@ -1002,7 +1167,7 @@ function executeSavePersonalTkb() {
                 let isDateOverlap = true;
                 if (newStartDate && newEndDate && course.ngayBatDau && course.ngayKetThuc) {
                     let existingStartDate = parseDateString(course.ngayBatDau); let existingEndDate = parseDateString(course.ngayKetThuc);
-                    let currentExceptions = $('#pTkbNgoaiLe').val().split(',').map(d => d.trim());
+                    let currentExceptions = $('#uTkbNgoaiLe').val().split(',').map(d => d.trim());
                     let existingExceptions = (course.ngayNgoaiLe || "").split(',').map(d => d.trim());
                     let d = new Date(Math.max(newStartDate, existingStartDate)); let end = new Date(Math.min(newEndDate, existingEndDate));
                     let foundOverlap = false;
@@ -1022,16 +1187,15 @@ function executeSavePersonalTkb() {
 
     if (isOverlap) {
         let thuText = thuVal === 8 ? "Chủ nhật" : "Thứ " + thuVal;
-        $('#tkbOverlapMessage').html(`<b>Lỗi:</b> Lịch bị trùng tiết với môn <b>"${overlapCourseName}"</b> (${thuText}). Vui lòng chọn thời gian khác.`);
-        $('#tkbOverlapAlert').removeClass('d-none');
+        $('#uTkbOverlapMessage').html(`<b>Lỗi:</b> Lịch bị trùng tiết với môn <b>"${overlapCourseName}"</b> (${thuText}). Vui lòng chọn thời gian khác.`);
+        $('#uTkbOverlapAlert').removeClass('d-none');
         alert(`Lỗi: Trùng lịch với môn ${overlapCourseName}! Không thể lưu.`); return; 
     }
 
-    let finalHinhThuc = $('#pTkbHinhThuc').val().trim(); 
-    let linkVal = $('#pTkbLink').val().trim();
+    let finalHinhThuc = $('#uTkbHinhThuc').val().trim(); 
+    let linkVal = $('#uTkbLink').val().trim();
     if (linkVal) finalHinhThuc += " " + linkVal;
 
-    // Tự động đính kèm mã lớp HP vào cuối hình thức dưới dạng `#MA_HP`
     let cleanHinhThuc = finalHinhThuc.replace(/#[a-zA-Z0-9_]+/g, '').trim();
     if (maHpVal !== "") {
         finalHinhThuc = cleanHinhThuc + " #" + maHpVal;
@@ -1041,19 +1205,28 @@ function executeSavePersonalTkb() {
 
     let pData = {
         action: isEditMode ? "editTKBUser" : "addTKBUser", 
-        rowIndex: targetRowIndex, mssv: currentUser.mssv, thu: thuVal, tietBd: tietBdVal, soTiet: soTietVal, thoiGian: $('#pTkbThoiGian').val(), 
-        hinhThuc: finalHinhThuc, mon: monVal, phong: $('#pTkbPhong').val(), gv: $('#pTkbGV').val(), color: $('#pTkbColor').val(),
-        ngayBatDau: ngayBdRaw, ngayKetThuc: ngayKtRaw, ngayNgoaiLe: $('#pTkbNgoaiLe').val(),
+        rowIndex: targetRowIndex, mssv: currentUser.mssv, thu: thuVal, tietBd: tietBdVal, soTiet: soTietVal, thoiGian: $('#uTkbThoiGian').val(), 
+        hinhThuc: finalHinhThuc, mon: monVal, phong: $('#uTkbPhong').val(), gv: $('#uTkbGV').val(), color: $('#uTkbColor').val(),
+        ngayBatDau: ngayBdRaw, ngayKetThuc: ngayKtRaw, ngayNgoaiLe: $('#uTkbNgoaiLe').val(),
         editScope: pendingEventAction.scope || "all", 
         targetDate: pendingEventAction.targetDate || ""
     };
 
-    let btn = $('#btnSavePersonalTkb'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
+    let btn = $('#btnSaveUnifiedTkb'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true);
     postToGAS(pData, function(res) { 
-        alert(res); $('#tkbPersonalModal').modal('hide'); btn.html('Lưu thông tin').prop('disabled', false); 
+        alert(res); $('#unifiedTkbModal').modal('hide'); btn.html('<i class="fa-solid fa-floppy-disk me-1"></i> Lưu thông tin').prop('disabled', false); 
         loadThoiGianBieu(); if($('#manageTkbListModal').is(':visible')) { $('#manageTkbListModal').modal('hide'); }
-    }, function() { alert("Giao tiếp máy chủ thất bại!"); btn.html('Lưu thông tin').prop('disabled', false); });
+    }, function() { alert("Giao tiếp máy chủ thất bại!"); btn.html('<i class="fa-solid fa-floppy-disk me-1"></i> Lưu thông tin').prop('disabled', false); });
 }
+
+function promptDeletePersonalTkb(sheetRowIndex) {
+    let course = globalTkbData.find(c => String(c.sheetRowIndex) === String(sheetRowIndex));
+    if (course && course.isSystem) { alert("Khóa bảo mật: Bạn không thể xóa học phần đã được đồng bộ từ hệ thống Đào tạo."); return; }
+    
+    pendingEventAction = { type: 'delete', rowIndex: sheetRowIndex, thu: course.thu };
+    $('#eventScopeModal').modal('show');
+}
+
 function executeDeletePersonalTkb() {
     let sheetRowIndex = pendingEventAction.rowIndex;
     postToGAS({ 
