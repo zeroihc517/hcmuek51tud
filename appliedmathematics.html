@@ -2069,57 +2069,102 @@
     </div>
 </div>
 <!-- MODAL XEM TÀI LIỆU TRỰC TIẾP (FULLSCREEN) -->
-<!-- MODAL XEM TÀI LIỆU TRỰC TIẾP (FULLSCREEN) -->
 <div class="modal fade" id="documentViewerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content border-0">
             <!-- Header Modal -->
-            <div class="modal-header text-white d-flex align-items-center justify-content-between" style="background-color: #0f4c81; padding: 12px 24px;">
+            <div class="modal-header text-white d-flex align-items-center justify-content-between" style="background-color: #0f4c81; padding: 10px 20px;">
                 
                 <!-- Tiêu đề bên trái -->
-                <h6 class="modal-title m-0 fw-bold d-flex align-items-center" id="docViewerTitle" style="font-size: 16px; max-width: 35%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                <h6 class="modal-title m-0 fw-bold d-flex align-items-center" id="docViewerTitle" style="font-size: 15px; max-width: 35%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                     <i class="fa-solid fa-file-lines me-2"></i>Xem tài liệu
                 </h6>
                 
-                <!-- 🔴 ĐỒNG HỒ ĐẾM NGƯỢC CHÍNH GIỮA THANH HEADER IFRAME -->
-               <!-- 🔴 ĐỒNG HỒ ĐẾM NGƯỢC CHÍNH GIỮA THANH HEADER IFRAME (CHỮ MÀU VÀNG) -->
-<div id="viewerCountdownClock" class="d-none px-3 py-1 rounded-pill" style="background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.3); font-family: 'Chakra Petch', sans-serif;">
-    <i class="fa-solid fa-stopwatch fa-spin-slow me-2" style="color: #facc15;"></i>
-    <span class="fw-bold fs-6" id="lblViewerCountdownClock" style="color: #facc15; letter-spacing: 0.5px;">00:00:00</span>
-</div>
+                <!-- Đồng hồ đếm ngược -->
+                <div id="viewerCountdownClock" class="d-none px-3 py-1 rounded-pill" style="background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.3); font-family: 'Chakra Petch', sans-serif;">
+                    <i class="fa-solid fa-stopwatch fa-spin-slow me-2" style="color: #facc15;"></i>
+                    <span class="fw-bold fs-6" id="lblViewerCountdownClock" style="color: #facc15; letter-spacing: 0.5px;">00:00:00</span>
+                </div>
                 
                 <!-- Nhóm nút bên phải -->
                 <div class="d-flex align-items-center gap-2">
-	<a href="https://chatgpt.com/" target="_blank" class="btn btn-sm d-flex align-items-center justify-content-center p-0 shadow-sm" style="width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid rgba(255, 255, 255, 0.7); background-color: #10a37f; color: #ffffff; transition: 0.2s;" title="Mở ChatGPT" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-        <svg style="width: 18px; height: 18px; fill: currentColor;" viewBox="0 0 24 24"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.073zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.8956zm16.0993 3.8558L12.5973 8.3829v-2.3323a.0757.0757 0 0 1 .0332-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66l-.1467-.0852-4.783-2.7582a.7712.7712 0 0 0-.7806 0zM8.3065 12.863l-2.02-1.1686a.071.071 0 0 1-.038-.052V6.06A4.504 4.504 0 0 1 10.743 1.5656a4.4755 4.4755 0 0 1 2.8764 1.0408l-.1419.0804-4.7783 2.7582a.7948.7948 0 0 0-.3927.6813zm10.9973-3.0655a4.485 4.485 0 0 1-2.3655 1.9728V6.0825a.7664.7664 0 0 0-.3879-.6765L10.736 2.0517l2.0201-1.1685a.0757.0757 0 0 1 .071 0l4.8303 2.7865a4.504 4.504 0 0 1 1.6464 6.1276zM9.742 10.9996l2.8485-1.6441 2.8485 1.6441v3.2882l-2.8485 1.6441-2.8485-1.6441z"/></svg>
-    </a>
-
-    <!-- Icon Gemini (Đóng khung nền gradient tím xanh, viền trắng) -->
-    <a href="https://gemini.google.com/" target="_blank" class="btn btn-sm d-flex align-items-center justify-content-center p-0 shadow-sm" style="width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid rgba(255, 255, 255, 0.7); background: linear-gradient(135deg, #1a73e8, #9333ea); color: #ffffff; transition: 0.2s;" title="Mở Gemini" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-        <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 16 16"><path d="M8 0l2.1 5.9L16 8l-5.9 2.1L8 16l-2.1-5.9L0 8l5.9-2.1z"/></svg>
-    </a>
-
-                    <button type="button" id="btnOpenInNewTab" class="btn btn-sm btn-outline-light d-none">
-                        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>
+                    <button type="button" class="btn btn-sm fw-bold d-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleIframeSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
+                        <i class="fa-solid fa-layer-group"></i> Công cụ
                     </button>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" id="btnOpenInNewTab" class="btn btn-sm btn-outline-light d-none" style="border-radius: 6px; border-color: rgba(255,255,255,0.4);">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </button>
+                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
                 </div>
-
             </div>
             
-            <div class="modal-body p-0" style="background-color: #202124; position: relative;">
-                <div class="w-100 h-100 d-flex align-items-center justify-content-center" id="docLoading" style="position: absolute; z-index: 0;">
-                    <div class="text-center text-white opacity-75">
-                        <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải tài liệu...
+            <!-- Thân Modal (Chứa Iframe & Sidebar) -->
+            <div class="modal-body p-0 d-flex" style="background-color: #202124; position: relative; height: 100%;">
+                
+                <!-- Vùng Iframe Bài Học -->
+                <div id="iframeContainer" class="flex-grow-1 position-relative" style="transition: width 0.3s; height: 100%;">
+                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" id="docLoading" style="position: absolute; z-index: 0;">
+                        <div class="text-center text-white opacity-75">
+                            <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải tài liệu...
+                        </div>
                     </div>
+                    <iframe id="docViewerIframe" src="" 
+                            style="width: 100%; height: 100%; border: none; position: relative; z-index: 1;" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            allowfullscreen
+                            onload="document.getElementById('docLoading').style.display='none'">
+                    </iframe>
                 </div>
                 
-                <iframe id="docViewerIframe" src="" 
-                        style="width: 100%; height: 100%; border: none; position: relative; z-index: 1;" 
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                        allowfullscreen
-                        onload="document.getElementById('docLoading').style.display='none'">
-                </iframe>
+                <!-- Vùng Sidebar Công Cụ (Bên phải - Được thiết kế lại) -->
+                <div id="iframeSidebar" class="d-none flex-column" style="width: 32%; min-width: 350px; max-width: 450px; border-left: 1px solid #cbd5e1; background-color: #f8fafc; overflow-y: auto; height: 100%; z-index: 2; box-shadow: -4px 0 15px rgba(0,0,0,0.05);">
+                    
+                    <!-- Header Sidebar -->
+                    <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
+                        <h6 class="fw-bold m-0" style="color: #0f4c81; font-size: 14.5px;"><i class="fa-solid fa-toolbox me-2"></i>Công cụ bài học</h6>
+                        <button class="btn-close" style="font-size: 11px;" onclick="toggleIframeSidebar()"></button>
+                    </div>
+                    
+                    <div class="p-3 d-flex flex-column flex-grow-1 gap-3">
+                        <!-- AI Links (Thiết kế Outline tối giản) -->
+                        <div class="d-flex gap-2">
+                            <a href="https://chatgpt.com/" target="_blank" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #10a37f; border: 1.5px solid #10a37f; border-radius: 6px; font-size: 12.5px; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#10a37f'; this.style.color='#fff';" onmouseout="this.style.backgroundColor='#ffffff'; this.style.color='#10a37f';">
+                                <i class="fa-solid fa-robot"></i> ChatGPT
+                            </a>
+                            <a href="https://gemini.google.com/" target="_blank" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #8b5cf6; border: 1.5px solid #8b5cf6; border-radius: 6px; font-size: 12.5px; transition: all 0.2s;" onmouseover="this.style.background='linear-gradient(135deg, #1a73e8, #9333ea)'; this.style.color='#fff'; this.style.borderColor='transparent';" onmouseout="this.style.background='#ffffff'; this.style.color='#8b5cf6'; this.style.borderColor='#8b5cf6';">
+                                <i class="fa-solid fa-sparkles"></i> Gemini
+                            </a>
+                        </div>
+
+                        <!-- Progress (Tiến độ) -->
+                        <div class="bg-white p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">
+                            <label class="fw-bold mb-2 d-flex align-items-center" style="color: #475569; font-size: 13px;">
+                                <i class="fa-solid fa-chart-line me-2" style="color: #0f4c81;"></i>Tiến độ học tập
+                            </label>
+                            <select id="sidebarProgressSelect" class="form-select form-select-sm fw-bold border-secondary-subtle" style="border-radius: 6px; font-size: 13px; cursor: pointer; color: #334155; transition: all 0.2s;" onchange="updateSidebarProgress(this)">
+                                <option value="white">Chưa học</option>
+                                <option value="yellow">Đang học</option>
+                                <option value="green">Đã hoàn thành</option>
+                            </select>
+                        </div>
+
+                        <!-- Note (Ghi chú) -->
+                        <div class="flex-grow-1 d-flex flex-column bg-white p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">
+                            <label class="fw-bold mb-2 d-flex align-items-center" style="color: #475569; font-size: 13px;">
+                                <i class="fa-solid fa-pen-nib me-2" style="color: #0f4c81;"></i>Ghi chú nhanh
+                            </label>
+                            <div class="flex-grow-1 d-flex flex-column position-relative">
+                                <textarea id="sidebarNoteEditor" class="form-control flex-grow-1" style="resize: none; border-radius: 6px; min-height: 180px; font-size: 13.5px; border-color: #cbd5e1;"></textarea>
+                            </div>
+                            <div class="mt-3 d-flex justify-content-between align-items-center">
+                                <span id="sidebarNoteStatus" class="fw-bold" style="font-size: 11.5px; color: #10b981;"></span>
+                                <button class="btn btn-sm text-white fw-bold px-3" style="background-color: #0f4c81; border-radius: 6px; font-size: 12px; transition: 0.2s;" onclick="saveSidebarNote()" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                                    <i class="fa-solid fa-floppy-disk me-1"></i> Lưu Note
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

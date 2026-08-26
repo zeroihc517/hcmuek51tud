@@ -2248,7 +2248,7 @@ $(document).ready(function() {
     });
 
     // 6. ĐÁNH CHẶN CLICK VÀO LINK CHATGPT, GEMINI
-    $('#documentViewerModal .modal-header').on('click', 'a[target="_blank"], button#btnOpenInNewTab', function(e) {
+   $('#documentViewerModal').on('click', 'a[target="_blank"], button#btnOpenInNewTab', function(e) {
         if (isEnforcedFullscreen && isTimerActive()) {
             e.preventDefault(); // Chặn tức thì
             
@@ -2349,3 +2349,179 @@ function stopAlarmSound() {
     alarmSound.currentTime = 0; // Đưa bản nhạc về lại thời gian đầu
 }
 
+// ========================================================
+// CÁC HÀM XỬ LÝ SIDEBAR CÔNG CỤ TRONG IFRAME
+// ========================================================
+
+window.toggleIframeSidebar = function() {
+    let sidebar = $('#iframeSidebar');
+    if (sidebar.hasClass('d-none')) {
+        sidebar.removeClass('d-none').addClass('d-flex');
+        
+        // Khởi tạo TinyMCE tối giản cho Sidebar để không chiếm diện tích
+        if (!tinymce.get('sidebarNoteEditor')) {
+            tinymce.init({
+                selector: '#sidebarNoteEditor',
+                height: '100%',
+                menubar: false,
+                statusbar: false, // Ẩn thanh trạng thái bên dưới cho gọn
+                plugins: 'lists link textcolor colorpicker',
+                toolbar: 'bold italic underline | forecolor backcolor | bullist numlist',
+                branding: false,
+                setup: function (editor) {
+                    editor.on('change', function () {
+                        editor.save();
+                    });
+                }
+            });
+        }
+    } else {
+        sidebar.removeClass('d-flex').addClass('d-none');
+    }
+};
+
+// 1. Cập nhật Tiến độ từ trong bảng Sidebar
+window.updateSidebarProgress = function(selectEl) {
+    let sheetName = $('#iframeSidebar').attr('data-sheet') || currentSheetName;
+    let stableKey = $('#iframeSidebar').attr('data-key');
+    
+    if (!sheetName || !stableKey) {
+        alert("Lỗi: Không xác định được bài học!"); return;
+    }
+    
+    let val = $(selectEl).val();
+    $(selectEl).css('background-color', getProgressColor(val));
+    
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, val);
+    
+    // Đồng bộ ngược ra thẻ Select ở Bảng bên ngoài trang chủ
+    let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
+    if(outerSelect.length) {
+        outerSelect.val(val).css('background-color', getProgressColor(val));
+    }
+    
+    if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+};
+
+// 2. Lưu Ghi chú từ trong bảng Sidebar
+window.saveSidebarNote = function() {
+    let sheetName = $('#iframeSidebar').attr('data-sheet') || currentSheetName;
+    let stableKey = $('#iframeSidebar').attr('data-key');
+    
+    if (!sheetName || !stableKey) {
+        alert("Lỗi: Không xác định được bài học để lưu ghi chú!"); return;
+    }
+    
+    let content = "";
+    if (tinymce.get('sidebarNoteEditor')) {
+        content = tinymce.get('sidebarNoteEditor').getContent().trim();
+    } else {
+        content = $('#sidebarNoteEditor').val().trim();
+    }
+    
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    let now = new Date();
+    let pad = (n) => String(n).padStart(2, '0');
+    let timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    
+    let btnNote = $(`#btnNote_${stableKey}`); // Nút note ở bảng bên ngoài
+    
+    if (content && content !== "<p></p>" && content !== "") {
+        let noteData = { content: content, updatedAt: timeStr };
+        localStorage.setItem(`note_${mssv}_${sheetName}_${stableKey}`, JSON.stringify(noteData));
+        
+        $('#sidebarNoteStatus').html(`<i class="fa-solid fa-check me-1"></i>Đã lưu`).removeClass('text-danger').addClass('text-success');
+        
+        // Đổi màu nút Note bên ngoài thành Xanh (Đã có note)
+        if(btnNote.length) {
+            btnNote.removeClass('btn-outline-secondary bg-white').addClass('btn-primary text-white').html('<i class="fa-solid fa-clipboard-check fs-6"></i>').attr('title', 'Xem ghi chú');
+        }
+    } else {
+        // Nếu xóa hết chữ thì xóa luôn cache
+        localStorage.removeItem(`note_${mssv}_${sheetName}_${stableKey}`);
+        $('#sidebarNoteStatus').html(`<i class="fa-solid fa-trash me-1"></i>Đã xóa`).removeClass('text-success').addClass('text-danger');
+        
+        // Đổi màu nút Note bên ngoài thành Trắng (Chưa có note)
+        if(btnNote.length) {
+            btnNote.removeClass('btn-primary text-white').addClass('btn-outline-secondary bg-white').html('<i class="fa-regular fa-clipboard fs-6"></i>').attr('title', 'Thêm ghi chú');
+        }
+    }
+    
+    setTimeout(() => $('#sidebarNoteStatus').html(''), 3000);
+    if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+};
+
+// 3. Hàm mở tài liệu (Sửa lại để truyền ĐÚNG data-sheet và data-key vào Sidebar)
+window.openDocumentViewer = function(url, title, sheetName, stableKey) {
+    if (url.includes('test.upcoder.xyz') || url.includes('upcoder.xyz')) {
+        window.open(url, '_blank');
+        return; 
+    }
+
+    let embedUrl = url;
+    if (url.includes('drive.google.com/file/d/')) {
+        embedUrl = url.replace(/\/view.*$/, '/preview');
+    } else if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let videoId = "";
+        if (url.includes('youtu.be/')) {
+            videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
+        } else if (url.includes('youtube.com/shorts/')) {
+            videoId = url.split('youtube.com/shorts/')[1].split('?')[0].split('&')[0];
+        } else if (url.includes('youtube.com/watch')) {
+            try {
+                let urlObj = new URL(url);
+                videoId = urlObj.searchParams.get('v');
+            } catch(e) {
+                let match = url.match(/v=([^&]+)/);
+                if (match) videoId = match[1];
+            }
+        }
+        if (videoId) {
+            let currentOrigin = window.location.origin !== "null" ? window.location.origin : "";
+            embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1${currentOrigin ? '&origin=' + encodeURIComponent(currentOrigin) : ''}`;
+        }
+    }
+    
+    let cleanTitle = $('<div>').html(title).text();
+    $('#docViewerTitle').html(`<i class="fa-solid fa-file-lines me-2"></i> ${cleanTitle || 'Xem tài liệu'}`);
+    
+    if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
+        $('#btnOpenInNewTab').removeClass('d-none').off('click').on('click', function() { window.open(url, '_blank'); });
+    } else {
+        $('#btnOpenInNewTab').addClass('d-none');
+    }
+    
+    // --- GẮN DỮ LIỆU ĐỊNH DANH VÀO SIDEBAR ---
+    // (Bắt buộc phải có đoạn này thì khi bấm "Lưu", hệ thống mới biết đang lưu cho bài nào)
+    if (sheetName && stableKey) {
+        $('#iframeSidebar').attr('data-sheet', sheetName).attr('data-key', stableKey);
+        let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+        
+        // 1. Nạp lại Tiến độ đã lưu từ máy
+        let progVal = localStorage.getItem(`prog_${mssv}_${sheetName}_${stableKey}`) || 'white';
+        $('#sidebarProgressSelect').val(progVal).css('background-color', getProgressColor(progVal));
+        
+        // 2. Nạp lại Ghi chú đã lưu từ máy
+        let noteData = JSON.parse(localStorage.getItem(`note_${mssv}_${sheetName}_${stableKey}`));
+        let content = noteData && noteData.content ? noteData.content : '';
+        
+        if (tinymce.get('sidebarNoteEditor')) {
+            tinymce.get('sidebarNoteEditor').setContent(content);
+        } else {
+            $('#sidebarNoteEditor').val(content);
+        }
+    } else {
+        // Rỗng nếu không truyền tham số
+        $('#iframeSidebar').removeAttr('data-sheet').removeAttr('data-key');
+    }
+
+    $('#docLoading').show(); 
+    $('#docViewerIframe').attr('src', embedUrl);
+    $('#documentViewerModal').modal('show');
+if (typeof isTimerActive === 'function' && isTimerActive()) {
+            isEnforcedFullscreen = true;
+            allowLessonClose = false; // Khóa chốt chặn đóng Iframe
+            if (typeof enterFullScreen === 'function') enterFullScreen();
+        }
+};

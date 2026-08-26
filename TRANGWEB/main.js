@@ -1231,7 +1231,7 @@ let extraControls = `
                     examCardsHtml += `
                     <div class="position-relative drag-handle-row d-flex flex-column h-100" ${dragAttrTb}>
                         ${adminMinigameBtns}
-                        <a href="javascript:void(0)" onclick="setDetailedView('${trackStr}'); openDocumentViewer('${linkUrl}', '${safeTitle}')" class="card-minigame-box flex-grow-1" title="${titleText}" style="margin-bottom: 0;">
+                        <a href="javascript:void(0)" onclick="setDetailedView('${trackStr}'); openDocumentViewer('${linkUrl}', '${safeTitle}', '${currentSheetName}', '${stableKey}')" class="card-minigame-box flex-grow-1" title="${titleText}" style="margin-bottom: 0;">
                             ${imgDisplayHtml}
                             <div class="card-minigame-title">${titleText}</div>
                         </a>
@@ -1392,7 +1392,9 @@ let isUpdating = col4Html.toLowerCase().includes('đang cập nhật');
 
 // --- BẮT ĐẦU CỘT 2: TÊN BÀI HỌC VÀ LOGO ---
 let col2Html = c2.replace(/<\/?(p|div)[^>]*>/gi, '').replace(/&nbsp;/gi, ' ').replace(/(<br\s*\/?>|\n)+/gi, ' ').trim();
-                    
+                    // Tạo Stable Key sớm để truyền vào Iframe
+let rawLessonName = String(row[1] || row[0] || '').replace(/<[^>]*>?/gm, '').replace(/[^a-zA-Z0-9_]/g, '');
+let stableKey = rawLessonName ? rawLessonName : sheetRowIndex;
                     // Thêm Logo tự động: CHỈ hiện logo file tài liệu cho các hàng nội dung nhỏ bên trong
                     let lessonIcon = ''; 
 if (!isChapter && !isLesson && !rowClass.includes('row-part')) {
@@ -1429,7 +1431,7 @@ if (isUpdating && !isAdmin) {
     col2Html = `<span onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); $('#collapseMinigames').collapse('show'); event.stopPropagation();" style="cursor: pointer; color: #ef4444; font-weight: 700; text-decoration: none;" title="Nhấn để về đầu trang và mở khung Minigame"><i class="fa-solid fa-gamepad me-2" style="color: #ef4444; font-size: 16px;"></i>${col2Html}</span>`;
 } else if (isLinkOnly) {
     // CỘT 3 CHỈ CHỨA LINK -> Mở File Drive/PDF như cũ
-    col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${safeUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem tài liệu trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`; 
+  col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${safeUrl}', '${safeTitle}', '${currentSheetName}', '${stableKey}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem tài liệu trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;
 } else if (c3.trim() !== '') {
     // CỘT 3 CÓ CHỨA NỘI DUNG/LATEX -> Bật Modal Xem Chi Tiết
     col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openLatexContentViewer(${rowIndex}); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem nội dung chi tiết">${lessonIcon}${col2Html || "Xem chi tiết"}</span>`;
@@ -1462,9 +1464,6 @@ if (isUpdating && !isAdmin) {
                   // Khởi tạo các giá trị Tiến độ & Ghi chú từ localStorage
 let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
 
-// Tạo Stable Key từ cột Nội dung bài học (c2)
-let rawLessonName = String(row[1] || row[0] || '').replace(/<[^>]*>?/gm, '').replace(/[^a-zA-Z0-9_]/g, '');
-let stableKey = rawLessonName ? rawLessonName : sheetRowIndex;
 
 let progKey = `prog_${mssv}_${currentSheetName}_${stableKey}`;
 let progVal = localStorage.getItem(progKey) || 'white';
