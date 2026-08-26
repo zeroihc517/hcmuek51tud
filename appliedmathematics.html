@@ -1736,9 +1736,17 @@
                    <!-- KHUNG KHAI BÁO THỜI GIAN NHIỀU CA -->
 <div class="col-12 mb-1">
     <div class="d-flex justify-content-between align-items-center mb-1">
-        <label class="form-label fw-bold text-primary m-0"><i class="fa-solid fa-clock"></i> Khai báo Thời gian (Có thể thêm nhiều ca)</label>
-        <button type="button" class="btn btn-sm btn-outline-success fw-bold py-1 shadow-sm" onclick="addTkbTimeSlot()"><i class="fa-solid fa-plus"></i> Thêm ca học</button>
+    <label class="form-label fw-bold text-primary m-0"><i class="fa-solid fa-clock"></i> Khai báo Thời gian (Có thể thêm nhiều ca)</label>
+    <div class="d-flex gap-2">
+        <!-- Nút mới thêm vào -->
+        <button type="button" class="btn btn-sm text-white fw-bold py-1 shadow-sm" style="background-color: #0f4c81;" onclick="autoFillThoiGian()">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Tự điền Giờ
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-success fw-bold py-1 shadow-sm" onclick="addTkbTimeSlot()">
+            <i class="fa-solid fa-plus"></i> Thêm ca học
+        </button>
     </div>
+</div>
     <div id="tkbTimeSlotsContainer" class="d-flex flex-column gap-2 p-3 bg-light border rounded">
         <!-- Hàng nhập ca đầu tiên (Mặc định không xóa được) -->
         <div class="row g-2 align-items-end tkb-time-slot" id="firstTkbSlot">

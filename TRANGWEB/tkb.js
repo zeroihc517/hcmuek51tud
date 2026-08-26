@@ -3502,3 +3502,58 @@ function saveMasterTkbForm() {
         }
     }
 }
+
+window.autoFillThoiGian = function() {
+    // Bộ từ điển ánh xạ thời gian theo tiết của trường
+    const timeMapping = {
+        1:  { start: "06:30", end: "07:20" },
+        2:  { start: "07:20", end: "08:10" },
+        3:  { start: "08:10", end: "09:00" },
+        4:  { start: "09:10", end: "10:00" },
+        5:  { start: "10:00", end: "10:50" },
+        6:  { start: "10:50", end: "11:40" },
+        7:  { start: "12:30", end: "13:20" },
+        8:  { start: "13:20", end: "14:10" },
+        9:  { start: "14:10", end: "15:00" },
+        10: { start: "15:10", end: "16:00" },
+        11: { start: "16:00", end: "16:50" },
+        12: { start: "16:50", end: "17:40" },
+        13: { start: "17:40", end: "18:30" },
+        14: { start: "18:30", end: "19:20" },
+        15: { start: "19:20", end: "20:10" },
+        16: { start: "20:20", end: "21:10" }
+    };
+
+    let filledCount = 0;
+
+    // Lặp qua tất cả các hàng ca học đang có trên form
+    $('.tkb-time-slot').each(function() {
+        let tietBd = parseInt($(this).find('.slot-tiet').val());
+        let soTiet = parseInt($(this).find('.slot-sotiet').val());
+
+        // Kiểm tra dữ liệu đầu vào hợp lệ
+        if (!isNaN(tietBd) && !isNaN(soTiet) && tietBd >= 1 && soTiet >= 1) {
+            let tietKt = tietBd + soTiet - 1; // Tính tiết kết thúc
+
+            // Lấy giờ bắt đầu của tiết đầu, và giờ kết thúc của tiết cuối
+            if (timeMapping[tietBd] && timeMapping[tietKt]) {
+                let startTime = timeMapping[tietBd].start;
+                let endTime = timeMapping[tietKt].end;
+                
+                // Ghi vào ô Giờ học
+                $(this).find('.slot-thoigian').val(`${startTime}-${endTime}`);
+                filledCount++;
+            }
+        }
+    });
+
+    // Thông báo cho người dùng
+    if (filledCount > 0) {
+        // Tùy chọn: Dùng hàm alert custom có sẵn của bạn để thông báo góc màn hình
+        if (typeof alert === 'function') {
+            alert(`Đã tự động điền giờ cho ${filledCount} ca học!`);
+        }
+    } else {
+        alert("Vui lòng nhập 'Tiết Bắt đầu' và 'Số tiết' trước khi tự điền giờ!");
+    }
+};
