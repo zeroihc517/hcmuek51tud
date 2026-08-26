@@ -1403,9 +1403,11 @@ if (!isChapter && !isLesson && !rowClass.includes('row-part')) {
 
         
        // --- LOGIC PHÂN LOẠI HIỂN THỊ: LINK HAY NỘI DUNG LATEX ---
+// --- LOGIC PHÂN LOẠI HIỂN THỊ: LINK HAY NỘI DUNG LATEX ---
 let isLinkOnly = extractedUrl && c3.replace(_urlRegex, '').trim() === '';
 
-let safeTitle = col2Html.replace(/'/g, "\\'").replace(/"/g, "&quot;"); 
+// FIX: Bổ sung replace dọn dẹp ký tự xuống dòng (\n, \r) để không làm gãy lệnh onclick
+let safeTitle = col2Html.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ").replace(/\r/g, ""); 
 let safeUrl = extractedUrl ? extractedUrl.replace(/'/g, "\\'") : ''; 
 
 // TẠO CHUỖI TRACKING ĐA CẤP (Lấy Tên bài thay vì STT)
@@ -1418,7 +1420,9 @@ if (!isChapter && !isLesson && !isPart) {
     let cleanContentName = c2.replace(/<[^>]*>?/gm, '').trim();
     if (cleanContentName) trackStr += ` - ${cleanContentName}`;
 }
-let safeTrackStr = trackStr.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+
+// FIX: Tránh lỗi SyntaxError khi Tracking Name bị kẹt dấu Enter
+let safeTrackStr = trackStr.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ").replace(/\r/g, "");
 
 // THÊM BIẾN NHẬN DIỆN TỪ KHÓA MINIGAME / LÀM ĐỀ THỰC CHIẾN
 let isMinigamePrompt = col2Html.toLowerCase().includes('hãy làm đề') || col2Html.toLowerCase().includes('hãy làm minigame đề') || col2Html.toLowerCase().includes('hãy tiến hành làm đề') ;
