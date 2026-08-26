@@ -1104,18 +1104,31 @@ function openAddTkbModal(triggerAuthModal = false) {
 }
 
 function openEditTkbModal(sheetRowIndex) {
-    let course = globalTkbData.find(c => String(c.sheetRowIndex) === String(sheetRowIndex)); if (!course) return;
+    let course = globalTkbData.find(c => String(c.sheetRowIndex) === String(sheetRowIndex)); 
+    if (!course) return;
+    
     $('#uTkbModalTitle').html('<i class="fa-solid fa-calendar-check me-2"></i>Chỉnh Sửa Lịch Học');
     $('#uTkbRowIndex').val(sheetRowIndex); 
     $('#uTkbMaHP').val(course.classId || ''); 
-    $('#uTkbThu').val(course.thu); $('#uTkbTiet').val(course.tietBd); $('#uTkbSoTiet').val(course.soTiet);
-    $('#uTkbMon').val(course.mon); $('#uTkbPhong').val(course.phong); $('#uTkbThoiGian').val(course.thoiGian);
+    $('#uTkbThu').val(course.thu); 
+    $('#uTkbTiet').val(course.tietBd); 
+    $('#uTkbSoTiet').val(course.soTiet);
+    $('#uTkbMon').val(course.mon); 
+    $('#uTkbPhong').val(course.phong); 
+    $('#uTkbThoiGian').val(course.thoiGian);
     
-    let rawHinhThuc = course.hinhThuc || ""; let extLink = checkAndExtractUrl(rawHinhThuc); let displayHT = rawHinhThuc;
-    if(extLink) { displayHT = rawHinhThuc.replace(extLink, '').trim(); }
+    let rawHinhThuc = course.hinhThuc || ""; 
+    let extLink = checkAndExtractUrl(rawHinhThuc); 
+    let displayHT = rawHinhThuc;
+    
+    if (extLink) { displayHT = rawHinhThuc.replace(extLink, '').trim(); }
     $('#uTkbHinhThuc').val(displayHT.replace(/#[a-zA-Z0-9_]+/g, '').trim()); 
-    $('#uTkbLink').val(extLink || ''); $('#uTkbGV').val(course.gv); $('#uTkbColor').val(course.color);
-    $('#uTkbNgayBD').val(course.ngayBatDau); $('#uTkbNgayKT').val(course.ngayKetThuc); $('#uTkbNgoaiLe').val(course.ngayNgoaiLe); 
+    $('#uTkbLink').val(extLink || ''); 
+    $('#uTkbGV').val(course.gv); 
+    $('#uTkbColor').val(course.color);
+    $('#uTkbNgayBD').val(course.ngayBatDau); 
+    $('#uTkbNgayKT').val(course.ngayKetThuc); 
+    $('#uTkbNgoaiLe').val(course.ngayNgoaiLe); 
     
     if (course.isSystem) {
         $('#uTkbMaHP, #uTkbThu, #uTkbTiet, #uTkbSoTiet, #uTkbPhong, #uTkbThoiGian, #uTkbGV, #uTkbNgayBD, #uTkbNgayKT, #uTkbHinhThuc, #uTkbLink').prop('readonly', true).css('background-color', '#e9ecef');
@@ -1129,18 +1142,55 @@ function openEditTkbModal(sheetRowIndex) {
     $('#uTkbPendingSection, #uTkbQuickBtns').addClass('d-none');
     $('#uTkbTimeModeSelection').removeClass('d-none');
 
+    // --- BƯỚC 1: FIX LỖI 1 - TỰ ĐỘNG RENDER DANH SÁCH TUẦN TRƯỚC KHI TÍCH ---
+    let selectedNH = $('#namHocSelect').val(); 
+    let selectedHK = $('#hocKySelect').val();
+    let config = globalConfigHK.find(item => item[0] === selectedNH && item[1] === selectedHK);
+    let weekHtml = '';
+
+    if (!config) {
+        weekHtml = '<div class="text-danger small w-100 fw-bold"><i class="fa-solid fa-triangle-exclamation"></i> Vui lòng chọn Năm học và Học kỳ trên thanh công cụ.</div>';
+        $('#modeWeek').prop('disabled', true);
+    } else {
+        $('#modeWeek').prop('disabled', false);
+        let confSDate = parseDateString(config[2]); 
+        let numAcademicWeeks = parseInt(config[3]); 
+        let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+        
+        if (confSDate && numAcademicWeeks) {
+            let startMon = getMondayOfDate(confSDate); 
+            let acadWk = 1; 
+            let calWk = 1; 
+            let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+            
+            while (acadWk <= numAcademicWeeks && calWk <= 52) {
+                let m = new Date(startMon); m.setDate(m.getDate() + ((calWk - 1) * 7));
+                let s = new Date(m); s.setDate(s.getDate() + 6); 
+                
+                if (!breakWeeks.includes(calWk)) {
+                    weekHtml += `<div class="form-check border bg-white p-2 rounded shadow-sm d-flex align-items-center" style="width: calc(33.33% - 8px); min-width: 250px;"><input class="form-check-input ms-1 utkb-week-cb border-secondary" type="checkbox" value="${m.getTime()}" id="edit_utkb_wk_${acadWk}" style="cursor: pointer;"><label class="form-check-label ms-2 fw-bold text-dark w-100" for="edit_utkb_wk_${acadWk}" style="font-size: 13.5px; cursor: pointer;">Tuần ${acadWk} <br><small class="text-muted fw-normal">(${format(m)} - ${format(s)})</small></label></div>`;
+                    acadWk++;
+                }
+                calWk++;
+            }
+        }
+    }
+    $('#uTkbWeeksContainer').html(weekHtml);
+    // --------------------------------------------------------------------------
+
     let sDate = parseDateString(course.ngayBatDau);
     let eDate = parseDateString(course.ngayKetThuc);
-    let diffDays = (sDate && eDate) ? (eDate - sDate) / (1000 * 60 * 60 * 24) : 0;
 
-    // --- XỬ LÝ CHECK TỰ ĐỘNG CÁC TUẦN KHI BẬT CHẾ ĐỘ CHỈNH SỬA ---
-    if (sDate && eDate && diffDays > 6) {
+    // --- BƯỚC 2: FIX LỖI 2 - BỎ ĐIỀU KIỆN diffDays > 6 ---
+    // Cho phép môn học 1 buổi (cùng ngày bắt đầu/kết thúc) cũng được quét và tích vào Tuần tương ứng
+    if (sDate && eDate) {
         $('#modeWeek').prop('checked', true); 
         toggleTkbTimeMode();
         
         let exceptions = (course.ngayNgoaiLe || "").split(',').map(d => d.trim());
+        let hasCheckedWeek = false; // Cờ kiểm tra xem có tuần nào khớp hay không
         
-        // Duyệt qua tất cả các tuần học được render trong modal và quét chọn chính xác
+        // Quét chọn chính xác các tuần
         $('.utkb-week-cb').each(function() {
             let weekStartMs = parseInt($(this).val());
             let classDate = new Date(weekStartMs);
@@ -1148,15 +1198,29 @@ function openEditTkbModal(sheetRowIndex) {
             
             let formattedDate = formatDateDDMMYYYY(classDate);
             
-            // Chỉ tick nếu nằm trong khoảng ngày bắt đầu-kết thúc và không dính ngày nghỉ ngoại lệ
+            // Chỉ tick nếu nằm trong khoảng ngày bắt đầu-kết thúc và không dính ngày nghỉ
             if (classDate >= sDate && classDate <= eDate && !exceptions.includes(formattedDate)) {
                 $(this).prop('checked', true);
+                hasCheckedWeek = true;
             } else {
                 $(this).prop('checked', false);
             }
         });
+
+        // Tình huống dự phòng: Nếu môn đó nằm hoàn toàn vào ngày nghỉ, 
+        // hoặc ngày tháng nhập vào không khớp bất kỳ tuần nào trong học kỳ -> Trả về chế độ Theo Ngày
+        if (!hasCheckedWeek) {
+            $('#modeDate').prop('checked', true); 
+            toggleTkbTimeMode();
+            
+            if (course.ngayBatDau) {
+                $('#uTkbNgayBD').val(course.ngayBatDau);
+                $('#uTkbNgayKT').val(course.ngayKetThuc || course.ngayBatDau);
+            }
+        }
+
     } else {
-        // Sự kiện chỉ diễn ra đúng 1 ngày -> Tự động chuyển về chế độ Ngày và điền đúng ngày đó
+        // Sự kiện không có cấu trúc ngày tháng hợp lệ
         $('#modeDate').prop('checked', true); 
         toggleTkbTimeMode();
         
