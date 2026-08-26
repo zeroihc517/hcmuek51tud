@@ -3813,13 +3813,14 @@ function renderGroupStudyTable() {
         }
         
         let thuText = item.thu == 8 ? "Chủ nhật" : "Thứ " + item.thu;
-        let tietEnd = parseInt(item.tietBd) + parseInt(item.soTiet) - 1;
+        
+        // ---> ƯU TIÊN HIỂN THỊ GIỜ HỌC, DỰ PHÒNG LÀ SỐ TIẾT <---
+        let timeDisplay = item.thoiGian ? item.thoiGian : `Tiết ${item.tietBd}-${parseInt(item.tietBd) + parseInt(item.soTiet) - 1}`;
+        
         let shortCreatorName = getNaturalShortName(item.creatorName);
-
-        // Hiển thị chữ undefined thành mờ nếu không có dữ liệu note
         let displayNote = item.note && item.note !== 'undefined' ? `<small class="text-muted fw-normal fst-italic">${item.note}</small>` : '';
 
-        // Hiển thị danh sách đăng ký
+        // Hiển thị danh sách sinh viên đăng ký
         let registeredHtml = '';
         if (isCreator && registeredList.length > 0) {
             let regDetails = registeredList.map(mssv => {
@@ -3837,7 +3838,6 @@ function renderGroupStudyTable() {
             </div>`;
         }
 
-        // ĐOẠN ĐÃ FIX (Nối lại đầy đủ 5 cột của Table)
         html += `
         <tr>
             <td class="text-start fw-bold text-primary">
@@ -3846,7 +3846,8 @@ function renderGroupStudyTable() {
                 ${registeredHtml}
             </td>
             <td>
-                <span class="fw-bold text-danger">${thuText} (Tiết ${item.tietBd}-${tietEnd})</span><br>
+                <!-- ÁP DỤNG THAY ĐỔI VÀO Ô HIỂN THỊ -->
+                <span class="fw-bold text-danger">${thuText} (${timeDisplay})</span><br>
                 <small>${item.ngayBatDau} ${item.ngayKetThuc ? '- ' + item.ngayKetThuc : ''}</small><br>
                 <small class="fw-bold">${item.phong} ${item.hinhThuc ? '(' + item.hinhThuc + ')' : ''}</small>
             </td>
