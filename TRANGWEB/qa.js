@@ -2833,3 +2833,57 @@ window.sendSidebarCodeReply = function() {
         btn.html(originalHtml).prop('disabled', false);
     });
 };
+
+// Hàm chuyển đổi trạng thái Tạm ngưng / Tiếp tục
+// Hàm chuyển đổi trạng thái Tạm ngưng / Tiếp tục
+window.togglePauseUserCountdown = function() {
+    let targetStr = localStorage.getItem('user_countdown_target');
+    let pausedStr = localStorage.getItem('user_countdown_paused_remaining');
+    
+    if (pausedStr) {
+        // ĐANG TẠM NGƯNG -> BẤM TIẾP TỤC ĐẾM
+        let remaining = parseInt(pausedStr);
+        localStorage.setItem('user_countdown_target', (Date.now() + remaining).toString());
+        localStorage.removeItem('user_countdown_paused_remaining');
+        updateCountdownUI();
+
+        // [TÍNH NĂNG MỚI] Kiểm tra nếu đang mở iframe Tài liệu hoặc Latex thì tự động bung Full màn hình lại
+        if ($('#documentViewerModal').is(':visible') || $('#latexViewerModal').is(':visible')) {
+            isEnforcedFullscreen = true; // Bật cờ ép buộc toàn màn hình
+            allowLessonClose = false;    // Khóa nút đóng bài
+            if (typeof enterFullScreen === 'function') enterFullScreen();
+        }
+
+    } else if (targetStr) {
+        // ĐANG CHẠY -> BẤM TẠM NGƯNG
+        let targetTime = parseInt(targetStr);
+        let remaining = targetTime - Date.now();
+        
+        if (remaining > 0) {
+            localStorage.setItem('user_countdown_paused_remaining', remaining.toString());
+            localStorage.removeItem('user_countdown_target');
+            if (userCountdownInterval) clearInterval(userCountdownInterval);
+            updatePausedUI(remaining);
+            
+            // [TÙY CHỌN THÊM] Khi tạm ngưng, cho phép thoát full màn hình để sinh viên nghỉ ngơi
+            if (typeof exitFullScreen === 'function') {
+                exitFullScreen();
+            }
+        }
+    }
+};
+// Hàm cập nhật giao diện tĩnh khi đang bị tạm ngưng
+function updatePausedUI(remaining) {
+    $('.btn-countdown-pause i').removeClass('fa-pause').addClass('fa-play');
+    $('.fa-stopwatch').removeClass('fa-spin-slow'); // Dừng xoay đồng hồ
+
+    let distance = remaining;
+    let hours = Math.floor(distance / (1000 * 60 * 60));
+    let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    let pad = n => String(n).padStart(2, '0');
+    let displayStr = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+    
+    // Cập nhật text cho cả 3 đồng hồ
+    $('#lblCountdownClock, #lblViewerCountdownClock, #lblLatexCountdownClock').text(displayStr);
+}

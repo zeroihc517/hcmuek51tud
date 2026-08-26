@@ -5036,6 +5036,8 @@ function startUserCountdown() {
 function cancelUserCountdown() {
     localStorage.removeItem('user_countdown_target');
     localStorage.removeItem('user_countdown_triggered');
+    localStorage.removeItem('user_countdown_paused_remaining'); // THÊM DÒNG NÀY
+
     if (userCountdownInterval) clearInterval(userCountdownInterval);
     
     // Ẩn Form ở Footer
@@ -5043,14 +5045,16 @@ function cancelUserCountdown() {
     $('#countdownDisplayArea').addClass('d-none');
     $('#txtCountHours, #txtCountMinutes, #txtCountSeconds').val('');
     
-    // Ép ẩn đồng hồ trên 2 thanh IFRAME (Tài liệu & LaTeX)
+    // Ép ẩn đồng hồ trên 2 thanh IFRAME
     $('#viewerCountdownClock, #latexCountdownClock').removeClass('d-flex align-items-center').addClass('d-none');
 }
 
 // 3. Cập nhật giao diện đếm ngược mỗi giây
 function updateCountdownUI() {
     let targetStr = localStorage.getItem('user_countdown_target');
-    if (!targetStr) {
+    let pausedStr = localStorage.getItem('user_countdown_paused_remaining');
+
+    if (!targetStr && !pausedStr) {
         $('#countdownSetupArea').removeClass('d-none');
         $('#countdownDisplayArea').addClass('d-none');
         $('#viewerCountdownClock, #latexCountdownClock').removeClass('d-flex align-items-center').addClass('d-none');
@@ -5058,13 +5062,22 @@ function updateCountdownUI() {
         return;
     }
 
-    let targetTime = parseInt(targetStr);
-    
-    // Ép Bật hiển thị đồng hồ trên Footer và 2 thanh IFRAME
+    // Ép hiển thị đồng hồ trên Footer và 2 thanh IFRAME
     $('#countdownSetupArea').addClass('d-none');
     $('#countdownDisplayArea').removeClass('d-none');
     $('#viewerCountdownClock, #latexCountdownClock').removeClass('d-none').addClass('d-flex align-items-center');
 
+    // Nếu đang trong trạng thái tạm ngưng thì gọi UI Tĩnh
+    if (pausedStr) {
+        updatePausedUI(parseInt(pausedStr));
+        return;
+    }
+
+    // Nếu đang chạy
+    $('.btn-countdown-pause i').removeClass('fa-play').addClass('fa-pause');
+    $('.fa-stopwatch').addClass('fa-spin-slow');
+
+    let targetTime = parseInt(targetStr);
     if (userCountdownInterval) clearInterval(userCountdownInterval);
 
     function tick() {
@@ -5087,7 +5100,6 @@ function updateCountdownUI() {
             let pad = n => String(n).padStart(2, '0');
             let displayStr = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
 
-            // Đổ text thời gian ra tất cả đồng hồ
             $('#lblCountdownClock, #lblViewerCountdownClock, #lblLatexCountdownClock').text(displayStr);
         }
     }
@@ -5097,9 +5109,14 @@ function updateCountdownUI() {
 
 // 4. Lắng nghe đồng bộ Tab
 window.addEventListener('storage', function(e) {
-    if (e.key === 'user_countdown_target') updateCountdownUI();
-    if (e.key === 'user_countdown_triggered' && e.newValue === 'true') triggerTimeUpAlert();
+    if (e.key === 'user_countdown_target' || e.key === 'user_countdown_paused_remaining') {
+        updateCountdownUI();
+    }
+    if (e.key === 'user_countdown_triggered' && e.newValue === 'true') {
+        triggerTimeUpAlert();
+    }
 });
+
 $(document).ready(function() { updateCountdownUI(); });
 
 
