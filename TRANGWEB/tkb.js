@@ -1074,7 +1074,7 @@ function openAddTkbModal(triggerAuthModal = false) {
     $('#uTkbMaHP, #uTkbThu, #uTkbTiet, #uTkbSoTiet, #uTkbPhong, #uTkbThoiGian, #uTkbGV, #uTkbNgayBD, #uTkbNgayKT, #uTkbHinhThuc, #uTkbLink').prop('readonly', false).css('background-color', '#fff');
     $('#uTkbOverlapAlert').addClass('d-none');
     $('#uTkbTimeModeSelection, #uTkbPendingSection, #uTkbQuickBtns').removeClass('d-none');
-    $('#modeDate').prop('checked', true);
+    $('#modeWeek').prop('checked', true); // Thay đổi thành modeWeek
     toggleTkbTimeMode();
     $('#btnAddPendingUTkb').html('<i class="fa-solid fa-plus me-1"></i> Thêm vào danh sách chờ lưu').removeClass('btn-warning text-dark').addClass('text-white').css('background-color', '#8b5cf6');
     $('#btnSaveUnifiedTkb').html('<i class="fa-solid fa-floppy-disk me-1"></i> Lưu tất cả lên TKB').css('background-color', '#10b981');
@@ -1241,8 +1241,9 @@ function openEditTkbModal(sheetRowIndex) {
             }
         });
 
-        if (!hasCheckedWeek) {
-            $('#modeDate').prop('checked', true); 
+       if (!hasCheckedWeek) {
+            // Thay '#modeDate' bằng '#modeWeek'
+            $('#modeWeek').prop('checked', true); 
             toggleTkbTimeMode();
             
             if (course.ngayBatDau) {
@@ -1252,7 +1253,8 @@ function openEditTkbModal(sheetRowIndex) {
         }
 
     } else {
-        $('#modeDate').prop('checked', true); 
+        // Thay '#modeDate' bằng '#modeWeek'
+        $('#modeWeek').prop('checked', true); 
         toggleTkbTimeMode();
         
         if (course.ngayBatDau) {

@@ -1778,14 +1778,16 @@
                 <div id="uTkbTimeModeSelection" class="mb-3">
                     <label class="form-label fw-bold text-primary"><i class="fa-solid fa-clock me-1"></i> Phạm vi thời gian áp dụng:</label>
                     <div class="d-flex gap-4 p-2 bg-light border rounded">
+<div class="form-check">
+    <!-- Đã thêm checked vào đây -->
+    <input class="form-check-input" type="radio" name="uTkbTimeMode" id="modeWeek" value="week" checked onchange="toggleTkbTimeMode()">
+    <label class="form-check-label fw-bold" for="modeWeek" style="cursor: pointer;">Chọn nhiều Tuần (Theo Học kỳ)</label>
+</div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="uTkbTimeMode" id="modeDate" value="date" checked onchange="toggleTkbTimeMode()">
-                            <label class="form-check-label fw-bold" for="modeDate" style="cursor: pointer;">Theo Ngày bắt đầu / Kết thúc</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="uTkbTimeMode" id="modeWeek" value="week" onchange="toggleTkbTimeMode()">
-                            <label class="form-check-label fw-bold" for="modeWeek" style="cursor: pointer;">Chọn nhiều Tuần (Theo Học kỳ)</label>
-                        </div>
+    <input class="form-check-input" type="radio" name="uTkbTimeMode" id="modeDate" value="date" onchange="toggleTkbTimeMode()">
+    <label class="form-check-label fw-bold" for="modeDate" style="cursor: pointer;">Theo Ngày bắt đầu / Kết thúc</label>
+</div>
+
                     </div>
                 </div>
 
@@ -2811,7 +2813,7 @@
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
         const startMaintenance = new Date(2026, 7, 26, 10, 30);  
-        const endMaintenance   = new Date(2026, 7, 26, 17, 00); 
+        const endMaintenance   = new Date(2026, 7, 26, 11, 45); 
 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');
