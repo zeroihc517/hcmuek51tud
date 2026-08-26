@@ -256,7 +256,126 @@ function openAddDeadlineModal() {
     $('#pDlIcon').val('fire');
     $('#deadlinePersonalModal').modal('show');
 }
+function addPendingUTkb() {
+    let mon = $('.modal.show #uTkbMon').val() || $('#uTkbMon').val(); mon = mon.trim();
+    let thu = parseInt($('#uTkbThu').val()); let tietBd = parseInt($('#uTkbTiet').val()); let soTiet = parseInt($('#uTkbSoTiet').val());
+    let thoiGian = $('#uTkbThoiGian').val().trim(); let hinhThuc = $('#uTkbHinhThuc').val().trim(); let link = $('#uTkbLink').val().trim();
+    let phong = $('#uTkbPhong').val().trim(); let gv = $('#uTkbGV').val().trim(); let color = $('#uTkbColor').val(); let maHP = $('#uTkbMaHP').val().trim();
 
+    if (!mon || !thu || !tietBd || !soTiet) { alert("Vui lòng nhập Tên học phần, Thứ, Tiết và Số tiết!"); return; }
+    if (thu < 2 || thu > 8) { alert("Thứ học không hợp lệ (Phải từ 2 đến 8)."); return; }
+
+    let isWeekMode = $('#modeWeek').is(':checked'); 
+    let ngayBatDau = "", ngayKetThuc = "", ngayNgoaiLe = "", scopeDisplay = "", selectedWeekMs = [];
+
+    if (isWeekMode) {
+        let selectedDates = [];
+        $('.utkb-week-cb:checked').each(function() {
+            let weekStartMs = parseInt($(this).val()); selectedWeekMs.push(weekStartMs);
+            let d = new Date(weekStartMs); d.setDate(d.getDate() + (thu - 2)); selectedDates.push(d);
+        });
+        if (selectedDates.length === 0) { alert("Vui lòng tick chọn ít nhất 1 tuần!"); return; }
+        selectedDates.sort((a,b) => a.getTime() - b.getTime());
+        ngayBatDau = formatDateDDMMYYYY(selectedDates[0]); ngayKetThuc = formatDateDDMMYYYY(selectedDates[selectedDates.length - 1]);
+        
+        let ngayNgoaiLeArr = []; let curr = new Date(selectedDates[0]);
+        while (curr <= selectedDates[selectedDates.length - 1]) {
+            if (!selectedDates.some(sd => sd.getTime() === curr.getTime())) { ngayNgoaiLeArr.push(formatDateDDMMYYYY(curr)); }
+            curr.setDate(curr.getDate() + 7);
+        }
+        ngayNgoaiLe = ngayNgoaiLeArr.join(', ');
+        scopeDisplay = `<div class="d-flex flex-column align-items-center"><span class="badge bg-success mb-1 shadow-sm" style="font-size: 12px;">${selectedDates.length} tuần</span><small class="text-muted fw-bold">Từ ${ngayBatDau} <br>Đến ${ngayKetThuc}</small></div>`;
+    } else {
+        ngayBatDau = $('#uTkbNgayBD').val().trim(); ngayKetThuc = $('#uTkbNgayKT').val().trim(); ngayNgoaiLe = $('#uTkbNgoaiLe').val().trim();
+        let displayStr = (ngayBatDau && ngayKetThuc && ngayBatDau !== ngayKetThuc) ? `Từ ${ngayBatDau} <br>Đến ${ngayKetThuc}` : (ngayBatDau || "Không rõ");
+        scopeDisplay = `<div class="d-flex flex-column align-items-center"><span class="badge bg-primary mb-1 shadow-sm" style="font-size: 12px;">Theo ngày</span><small class="text-muted fw-bold">${displayStr}</small></div>`;
+    }
+
+    let newStartDate = parseDateString(ngayBatDau); 
+    let newEndDate = parseDateString(ngayKetThuc);
+    let newExceptions = ngayNgoaiLe.split(',').map(d => d.trim());
+
+    let tietKt = tietBd + soTiet - 1;
+    let isOverlap = false;
+    let overlapCourseName = "";
+
+    const checkOverlapWith = (course) => {
+        if (!course.mon) return false;
+        if (course.thu === thu) {
+            let existingTietBd = parseInt(course.tietBd);
+            let existingTietKt = existingTietBd + parseInt(course.soTiet || 1) - 1;
+
+            if (Math.max(tietBd, existingTietBd) <= Math.min(tietKt, existingTietKt)) {
+                let isChecking = mon.toLowerCase().includes("kiểm tra"); 
+                let isExistingChecking = course.mon.toLowerCase().includes("kiểm tra");
+                if (isChecking !== isExistingChecking && getBaseSubjectName(mon) === getBaseSubjectName(course.mon)) return false; 
+                
+                let isDateOverlap = true;
+                if (newStartDate && newEndDate && course.ngayBatDau && course.ngayKetThuc) {
+                    let exStartDate = parseDateString(course.ngayBatDau); 
+                    let exEndDate = parseDateString(course.ngayKetThuc);
+                    if (exStartDate && exEndDate) {
+                        let d = new Date(Math.max(newStartDate.getTime(), exStartDate.getTime())); 
+                        let end = new Date(Math.min(newEndDate.getTime(), exEndDate.getTime()));
+                        
+                        if (d > end) {
+                            isDateOverlap = false;
+                        } else {
+                            let exExceptions = (course.ngayNgoaiLe || "").split(',').map(d => d.trim());
+                            let foundOverlap = false;
+                            while (d <= end) {
+                                if (d.getDay() === (thu === 8 ? 0 : thu - 1)) {
+                                    let dateStr = formatDateDDMMYYYY(d);
+                                    if (!newExceptions.includes(dateStr) && !exExceptions.includes(dateStr)) { 
+                                        foundOverlap = true; break; 
+                                    }
+                                }
+                                d.setDate(d.getDate() + 1);
+                            }
+                            isDateOverlap = foundOverlap;
+                        }
+                    }
+                }
+                
+                if (isDateOverlap) {
+                    overlapCourseName = course.mon;
+                    return true;
+                }
+            }
+        }
+        return false;
+    };
+
+    for (let c of globalTkbData) { if(checkOverlapWith(c)) { isOverlap = true; break; } }
+    if (!isOverlap) { for (let c of pendingTkbSchedules) { if(checkOverlapWith(c)) { isOverlap = true; break; } } }
+
+    // --- HIỆN KHUNG CẢNH BÁO CHUYÊN NGHIỆP THAY CHO CONFIRM ---
+    if (isOverlap) {
+        let thuText = thu === 8 ? "Chủ nhật" : "Thứ " + thu;
+        $('#uTkbOverlapMessage').html(`<b>Cảnh báo trùng lịch:</b> Môn này bị cấn tiết với <b>"${overlapCourseName}"</b> (${thuText}). Bạn vẫn muốn thêm vào danh sách chờ chứ?`);
+        $('#uTkbOverlapAlert').removeClass('d-none');
+        
+        // Tạo nút xác nhận ngay trong khung cảnh báo hoặc dùng cú pháp mượt hơn
+        let forceAdd = confirm(`Lịch học đang bị trùng với môn "${overlapCourseName}". Bấm OK để vẫn đưa vào danh sách chờ.`);
+        if (!forceAdd) return;
+    } else {
+        $('#uTkbOverlapAlert').addClass('d-none');
+    }
+
+    let finalHinhThuc = hinhThuc; if (link) finalHinhThuc += " " + link;
+    let cleanHinhThuc = finalHinhThuc.replace(/#[a-zA-Z0-9_]+/g, '').trim();
+    finalHinhThuc = maHP !== "" ? cleanHinhThuc + " #" + maHP : cleanHinhThuc;
+
+    pendingTkbSchedules.push({
+        maHP: maHP, mon: mon, thu: thu, tietBd: tietBd, soTiet: soTiet, thoiGian: thoiGian, hinhThuc: finalHinhThuc, phong: phong,
+        gv: gv, color: color, ngayBatDau: ngayBatDau, ngayKetThuc: ngayKetThuc, ngayNgoaiLe: ngayNgoaiLe, scopeDisplay: scopeDisplay, isWeekMode: isWeekMode, selectedWeekMs: selectedWeekMs,
+        overlapWarning: isOverlap ? overlapCourseName : ""
+    });
+
+    $('#uTkbMon').val(''); $('#uTkbThu').focus();
+    $('#btnAddPendingUTkb').html('<i class="fa-solid fa-plus me-1"></i> Thêm vào danh sách chờ lưu').removeClass('btn-warning text-dark').addClass('text-white').css('background-color', '#8b5cf6');
+    renderPendingUTkb();
+}
 function openEditDeadlineModal(rowIndex) {
     let dl = globalDeadlineData.find(d => String(d.sheetRowIndex) === String(rowIndex)); 
     if(!dl) return;
@@ -1007,7 +1126,6 @@ function openEditTkbModal(sheetRowIndex) {
         $('#uTkbOverlapAlert').addClass('d-none');
     }
     
-    // --- KHU VỰC THỜI GIAN: KHÔI PHỤC LẠI NÚT "CHỌN NHIỀU TUẦN" VÀ AUTO-TICK ---
     $('#uTkbPendingSection, #uTkbQuickBtns').addClass('d-none');
     $('#uTkbTimeModeSelection').removeClass('d-none');
 
@@ -1015,22 +1133,22 @@ function openEditTkbModal(sheetRowIndex) {
     let eDate = parseDateString(course.ngayKetThuc);
     let diffDays = (sDate && eDate) ? (eDate - sDate) / (1000 * 60 * 60 * 24) : 0;
 
-    // Nếu khoảng thời gian lớn hơn 6 ngày (từ 2 tuần trở lên) -> Chuyển sang chế độ Tuần
+    // --- XỬ LÝ CHECK TỰ ĐỘNG CÁC TUẦN KHI BẬT CHẾ ĐỘ CHỈNH SỬA ---
     if (sDate && eDate && diffDays > 6) {
         $('#modeWeek').prop('checked', true); 
         toggleTkbTimeMode();
         
         let exceptions = (course.ngayNgoaiLe || "").split(',').map(d => d.trim());
         
-        // Duyệt qua tất cả các checkbox tuần và tích tự động
+        // Duyệt qua tất cả các tuần học được render trong modal và quét chọn chính xác
         $('.utkb-week-cb').each(function() {
             let weekStartMs = parseInt($(this).val());
             let classDate = new Date(weekStartMs);
-            classDate.setDate(classDate.getDate() + (course.thu - 2)); // Tìm ngày học tương ứng trong tuần đó
+            classDate.setDate(classDate.getDate() + (course.thu - 2)); // Ngày diễn ra trong tuần đó
             
             let formattedDate = formatDateDDMMYYYY(classDate);
             
-            // Nếu ngày học nằm trong khoảng bắt đầu-kết thúc và KHÔNG thuộc danh sách ngày nghỉ
+            // Chỉ tick nếu nằm trong khoảng ngày bắt đầu-kết thúc và không dính ngày nghỉ ngoại lệ
             if (classDate >= sDate && classDate <= eDate && !exceptions.includes(formattedDate)) {
                 $(this).prop('checked', true);
             } else {
@@ -1038,9 +1156,14 @@ function openEditTkbModal(sheetRowIndex) {
             }
         });
     } else {
-        // Sự kiện đơn (1 ngày) -> Chế độ Ngày
+        // Sự kiện chỉ diễn ra đúng 1 ngày -> Tự động chuyển về chế độ Ngày và điền đúng ngày đó
         $('#modeDate').prop('checked', true); 
         toggleTkbTimeMode();
+        
+        if (course.ngayBatDau) {
+            $('#uTkbNgayBD').val(course.ngayBatDau);
+            $('#uTkbNgayKT').val(course.ngayKetThuc || course.ngayBatDau);
+        }
     }
 
     $('#btnSaveUnifiedTkb').html('<i class="fa-solid fa-floppy-disk me-1"></i> Lưu thông tin').css('background-color', '#0f4c81');
