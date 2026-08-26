@@ -2829,24 +2829,32 @@
             </div>
             <div class="modal-body p-4">
                 
-                <!-- BỘ LỌC THỜI GIAN (MỚI THÊM) -->
-                <div class="row g-2 mb-3 align-items-end bg-light p-2 rounded border border-primary-subtle mx-0">
-                    <div class="col-md-3">
-                        <label class="form-label fw-bold small text-primary mb-1">Năm học</label>
-                        <select class="form-select form-select-sm fw-bold border-primary-subtle" id="gsListNamHoc" onchange="onGsListNamHocChange()"></select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label fw-bold small text-primary mb-1">Học kỳ</label>
-                        <select class="form-select form-select-sm fw-bold border-primary-subtle" id="gsListHocKy" onchange="onGsListHocKyChange()"></select>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold small text-primary mb-1">Lọc theo Tuần</label>
-                        <select class="form-select form-select-sm fw-bold border-primary-subtle" id="gsListWeek" onchange="renderGroupStudyTable()"></select>
-                    </div>
-                    <div class="col-md-2 text-end">
-                        <button class="btn btn-sm text-white fw-bold shadow-sm w-100 py-1" style="background-color: #10b981; border-radius: 6px; height: 31px;" onclick="openCreateGroupStudyModal()">
-                            <i class="fa-solid fa-plus"></i> Tạo lịch mới
-                        </button>
+               <!-- BỘ LỌC THỜI GIAN ĐÃ ĐƯỢC CHỈNH LẠI GIAO DIỆN -->
+                <div class="nav-week-container bg-white p-3 rounded border border-primary-subtle shadow-sm mb-3 mx-0" style="height: auto;">
+                    <div class="row g-3 w-100 align-items-center m-0">
+                        <div class="col-md-3 ps-0">
+                            <div class="select-floating-box">
+                                <label>Năm học</label>
+                                <select class="form-select" id="gsListNamHoc" onchange="onGsListNamHocChange()"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="select-floating-box">
+                                <label>Học kỳ</label>
+                                <select class="form-select" id="gsListHocKy" onchange="onGsListHocKyChange()"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="select-floating-box">
+                                <label>Tuần</label>
+                                <select class="form-select" id="gsListWeek" onchange="renderGroupStudyTable()"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-2 pe-0 d-flex justify-content-end">
+                            <button class="btn btn-sm text-white fw-bold shadow-sm w-100 d-flex align-items-center justify-content-center gap-2" style="background-color: #10b981; border-radius: 50px; height: 44px; font-size: 14px;" onclick="openCreateGroupStudyModal()">
+                                <i class="fa-solid fa-plus"></i> Tạo lịch mới
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -2854,7 +2862,7 @@
                     <table class="table table-hover align-middle text-center m-0" style="font-size: 14.5px;">
                         <thead style="background: #f1f5f9; color: #0f4c81;">
                             <tr>
-                                <th style="width: 25%;">Chủ đề / Môn học</th>
+                                <th style="width: 25%;">Chủ đề</th>
                                 <th style="width: 20%;">Thời gian & Địa điểm</th>
                                 <th style="width: 15%;">Người tạo</th>
                                 <th style="width: 15%;">Số lượng (Slot)</th>
@@ -2921,6 +2929,15 @@
                     <div class="col-md-4">
                         <label class="form-label fw-bold small text-muted">Phòng / Link Meet</label>
                         <input type="text" id="gsPhong" class="form-control" placeholder="VD: B.112 hoặc Link Meet">
+                    </div>
+<!-- BỔ SUNG HAI TRƯỜNG MỚI THEO YÊU CẦU -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted">Đường link địa điểm (nếu có)</label>
+                        <input type="text" id="gsLink" class="form-control" placeholder="VD: https://meet.google.com/...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted">Tên GV hướng dẫn (nếu có)</label>
+                        <input type="text" id="gsGV" class="form-control" placeholder="VD: Nguyễn Văn A">
                     </div>
                 </div>
 
@@ -2997,7 +3014,7 @@
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
         const startMaintenance = new Date(2026, 7, 26, 10, 30);  
-        const endMaintenance   = new Date(2026, 7, 27, 07, 00); 
+        const endMaintenance   = new Date(2026, 7, 26, 11, 45); 
 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');

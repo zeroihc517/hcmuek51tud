@@ -526,12 +526,11 @@ function renderTkbToolBar() {
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #dc2626;" onclick="openManageDeadlineListModal()"><i class="fa-solid fa-thumbtack text-warning"></i> Deadline</button>
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #0f4c81;" onclick="openAddTkbModal(false)"><i class="fa-solid fa-plus"></i> Thêm lịch mới</button>
                 
-                <!-- NÚT ĐẶT LỊCH HẸN -->
-                <button class="btn btn-sm text-white fw-bold" style="background-color: #8b5cf6;" onclick="loadDatLichHenView()"><i class="fa-solid fa-calendar-check"></i> Đặt lịch hẹn</button>
+             
 
                 <!-- 🌟 NÚT ĐĂNG KÝ HỌC NHÓM MỚI THÊM VÀO ĐÂY 🌟 -->
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #10b981;" onclick="openGroupStudyListModal()">
-                    <i class="fa-solid fa-users-rectangle"></i> Lịch học nhóm
+                    <i class="fa-solid fa-users-rectangle"></i> Đặt lịch hẹn
                 </button>
 
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #16a34a;" onclick="openExportCalendarModal()"><i class="fa-solid fa-calendar-plus"></i> Xuất Google Lịch</button>
@@ -3574,9 +3573,25 @@ window.openGroupStudyListModal = function() {
     // Tự động load Dropdown bộ lọc và đồng bộ với TKB bên ngoài
     buildGsListFilters();
     
-    // Gọi tải dữ liệu
-    loadGroupStudyList();
+    // Tải danh sách user về máy để có cơ sở dữ liệu dò Tên sinh viên nếu chưa có
+    if (!window.allUsersDataForSearch || window.allUsersDataForSearch.length === 0) {
+        $.ajax({
+            url: SCRIPT_URL + "?action=getAllUsers",
+            method: "GET",
+            dataType: "json",
+            success: function(users) {
+                window.allUsersDataForSearch = users;
+                loadGroupStudyList();
+            },
+            error: function() {
+                loadGroupStudyList();
+            }
+        });
+    } else {
+        loadGroupStudyList();
+    }
 };
+
 function buildGsListFilters() {
     if (typeof globalConfigHK === 'undefined' || globalConfigHK.length === 0) return;
     
@@ -3627,7 +3642,9 @@ window.onGsListHocKyChange = function() {
             let startMonday = getMondayOfDate(startDate); 
             let academicWk = 1; let calendarWk = 1; 
             let breakWeeks = (config[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
-            let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+            
+            // ĐÃ THÊM: /${d.getFullYear()} vào định dạng
+            let format = (d) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
             
             while (academicWk <= numAcademicWeeks && calendarWk <= 52) {
                 let m = new Date(startMonday); m.setDate(m.getDate() + ((calendarWk - 1) * 7));
@@ -3644,6 +3661,7 @@ window.onGsListHocKyChange = function() {
     $('#gsListWeek').html(html);
     renderGroupStudyTable();
 }
+
 window.loadGroupStudyList = function() {
     $('#groupStudyListBody').html('<tr><td colspan="5" class="text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải danh sách...</td></tr>');
     
@@ -3801,11 +3819,31 @@ function renderGroupStudyTable() {
         // Hiển thị chữ undefined thành mờ nếu không có dữ liệu note
         let displayNote = item.note && item.note !== 'undefined' ? `<small class="text-muted fw-normal fst-italic">${item.note}</small>` : '';
 
+        // Hiển thị danh sách đăng ký
+        let registeredHtml = '';
+        if (isCreator && registeredList.length > 0) {
+            let regDetails = registeredList.map(mssv => {
+                let user = (window.allUsersDataForSearch || []).find(u => String(u.mssv).trim() === String(mssv).trim());
+                // Mã hóa MSSV theo chuẩn 51***001 (Riêng admin sẽ thấy toàn bộ MSSV)
+                let masked = mssv.length > 6 ? mssv.substring(0, 2) + '***' + mssv.substring(mssv.length - 3) : mssv;
+                let displayMssv = isAdmin ? mssv : masked;
+                let displayName = user ? getNaturalShortName(user.name) : "Sinh viên";
+                return `<div class="d-flex align-items-center gap-1"><i class="fa-solid fa-user-check text-success"></i> ${displayName} (${displayMssv})</div>`;
+            }).join('');
+
+            registeredHtml = `<div class="mt-2 text-start p-2 border rounded" style="font-size: 12px; background-color: #f8fafc; max-height: 120px; overflow-y: auto;">
+                <div class="fw-bold text-primary mb-1">Danh sách đăng ký:</div>
+                ${regDetails}
+            </div>`;
+        }
+
+        // ĐOẠN ĐÃ FIX (Nối lại đầy đủ 5 cột của Table)
         html += `
         <tr>
             <td class="text-start fw-bold text-primary">
                 ${item.mon} <br>
                 ${displayNote}
+                ${registeredHtml}
             </td>
             <td>
                 <span class="fw-bold text-danger">${thuText} (Tiết ${item.tietBd}-${tietEnd})</span><br>
@@ -3819,14 +3857,15 @@ function renderGroupStudyTable() {
     });
     tbody.html(html);
 }
+
 window.openCreateGroupStudyModal = function() {
     $('#groupStudyListModal').modal('hide');
     setTimeout(() => {
         // Reset form
-        $('#gsMon, #gsThu, #gsTietBd, #gsThoiGian, #gsHinhThuc, #gsPhong, #gsNgayBD, #gsNgayKT, #gsNote').val('');
+      $('#gsMon, #gsThu, #gsTietBd, #gsThoiGian, #gsHinhThuc, #gsPhong, #gsNgayBD, #gsNgayKT, #gsNote, #gsLink, #gsGV').val('');
         $('#gsSoTiet').val(3);
         $('#gsSlot').val(5);
-        $('#gsColor').val('#dcfce7'); // Mặc định màu xanh lá nhạt cho dễ nhận diện nhóm
+        $('#gsColor').val('#dcfce7'); 
         $('#createGroupStudyModal').find('.modal-title').html('<i class="fa-solid fa-calendar-plus me-2"></i>Tạo Lịch Học Nhóm Mới');
         $('#btnSaveGroupStudy').html('<i class="fa-solid fa-floppy-disk me-1"></i> Đăng lịch học nhóm');
         // --- Xây dựng giao diện Tuần (Bê nguyên logic từ TKB sang) ---
@@ -3884,7 +3923,7 @@ window.editGroupStudy = function(id) {
     if (!item) return;
 
     // 1. Đổ dữ liệu cũ vào Form
-    $('#gsId').val(item.id);
+   $('#gsId').val(item.id);
     $('#gsMon').val(item.mon);
     $('#gsSlot').val(item.maxSlot);
     $('#gsThu').val(item.thu);
@@ -3897,6 +3936,8 @@ window.editGroupStudy = function(id) {
     $('#gsNgayBD').val(item.ngayBatDau);
     $('#gsNgayKT').val(item.ngayKetThuc);
     $('#gsNote').val(item.note);
+    $('#gsLink').val(item.link || '');
+    $('#gsGV').val(item.gv || '');
 
     // ========================================================
     // 2. LOGIC KHÔI PHỤC VÀ HIỂN THỊ DANH SÁCH TUẦN HỌC KỲ
@@ -4010,7 +4051,7 @@ function toggleAllGsWeeks() {
 }
 
 window.saveGroupStudy = function() {
-    let id = $('#gsId').val().trim(); // Lấy ID xem có đang sửa không
+    let id = $('#gsId').val().trim(); 
     let mon = $('#gsMon').val().trim();
     let thu = parseInt($('#gsThu').val());
     let tietBd = $('#gsTietBd').val();
@@ -4048,7 +4089,6 @@ window.saveGroupStudy = function() {
         ngayKtRaw = $('#gsNgayKT').val().trim();
     }
 
-    // Đổi hành động dựa vào việc có ID hay không
     let actionType = id ? "editGroupStudy" : "addGroupStudy";
     let payload = {
         action: actionType, 
@@ -4062,7 +4102,9 @@ window.saveGroupStudy = function() {
         color: $('#gsColor').val(),
         ngayBatDau: ngayBdRaw,
         ngayKetThuc: ngayKtRaw,
-        slot: slot, note: $('#gsNote').val().trim()
+        slot: slot, note: $('#gsNote').val().trim(),
+        link: $('#gsLink').val().trim(),
+        gv: $('#gsGV').val().trim()
     };
 
     let btn = $('#btnSaveGroupStudy');
