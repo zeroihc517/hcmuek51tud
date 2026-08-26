@@ -3561,3 +3561,33 @@ body.dark-mode .chess-square:nth-child(even) { background-color: #1e293b; }
         display: block !important; 
     }
 }
+
+/* =======================================================
+   CSS CHO BẢNG TRONG PHẦN LÝ THUYẾT (SIDEBAR VIEWER)
+   ======================================================= */
+#sidebarTheoryViewerContent table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12px 0;
+    background-color: #ffffff;
+}
+#sidebarTheoryViewerContent table th, 
+#sidebarTheoryViewerContent table td {
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px 12px;
+    vertical-align: middle;
+}
+#sidebarTheoryViewerContent table th {
+    background-color: #f1f5f9;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: center;
+}
+body.dark-mode #sidebarTheoryViewerContent table th,
+body.dark-mode #sidebarTheoryViewerContent table td {
+    border-color: #334155 !important;
+}
+body.dark-mode #sidebarTheoryViewerContent table th {
+    background-color: #1e293b !important;
+    color: #f8fafc;
+}

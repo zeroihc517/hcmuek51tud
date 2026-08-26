@@ -2152,12 +2152,17 @@ const returnStudyModalHtml = `
                     Hệ thống nhận thấy bạn đã bấm sang mục khác. Vui lòng nhấn xác nhận để bung toàn màn hình và tiếp tục học tập.
                 </p>
             </div>
-            <div class="modal-footer border-0 d-flex justify-content-center gap-2 pb-4 bg-light">
-                <button type="button" class="btn btn-light fw-bold px-4 py-2" style="border-radius: 50px; border: 1.5px solid #cbd5e1;" id="btnCancelStudy">Kết thúc bài học</button>
-                <button type="button" class="btn text-white fw-bold px-4 py-2" id="btnResumeStudy" style="background-color: #0f4c81; border-radius: 50px; box-shadow: 0 4px 12px rgba(15, 76, 129, 0.25);">
-                    <i class="fa-solid fa-expand me-1"></i> Quay lại học tập
-                </button>
-            </div>
+           <div class="modal-footer border-0 d-flex justify-content-center gap-2 pb-4 bg-light flex-wrap">
+   <button type="button" class="btn btn-light fw-bold px-4 py-2" style="border-radius: 50px; border: 1.5px solid #cbd5e1;" id="btnCancelStudy">Kết thúc bài </button>
+    <!-- Lựa chọn mới: Thoát tạm thời -->
+    <button type="button" class="btn btn-warning fw-bold px-4 py-2 text-dark" id="btnTempExitFullscreen" style="border-radius: 50px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);">
+        <i class="fa-solid fa-compress me-1"></i> Thoát tạm thời
+    </button>
+
+    <button type="button" class="btn text-white fw-bold px-4 py-2" id="btnResumeStudy" style="background-color: #0f4c81; border-radius: 50px; box-shadow: 0 4px 12px rgba(15, 76, 129, 0.25);">
+        <i class="fa-solid fa-expand me-1"></i> Tiếp tục học
+    </button>
+</div>
         </div>
     </div>
 </div>`;
@@ -2228,7 +2233,21 @@ $(document).ready(function() {
         allowLessonClose = true; // Cho phép đóng iframe
         $('#documentViewerModal').modal('hide'); 
     });
+// --- NÚT THOÁT TẠM THỜI (VẪN HỌC Ở CHẾ ĐỘ CỬA SỔ) ---
+    $('#btnTempExitFullscreen').on('click', function() {
+        // Chỉ đóng bảng cảnh báo, không kích hoạt lại Fullscreen
+        $('#returnStudyModal').modal('hide');
+        
+        // Tắt âm thanh cảnh báo (nếu có đang phát lỡ dở)
+        if (typeof warningExitSound !== 'undefined') {
+            warningExitSound.pause();
+            warningExitSound.currentTime = 0;
+        }
 
+        // LƯU Ý BÍ QUYẾT: KHÔNG gán isEnforcedFullscreen = false
+        // Nhờ vậy hệ thống vẫn giám sát, nếu sinh viên ấn chuyển sang Tab khác 
+        // rồi quay lại Web, hệ thống vẫn sẽ hiện lại bảng cảnh báo này!
+    });
     // ========================================================
     // ĐÁNH CHẶN NÚT ĐÓNG IFRAME (NÚT X HOẶC CLICK RA NGOÀI)
     // ========================================================
@@ -2265,10 +2284,10 @@ $(document).ready(function() {
     });
     
     // 7. ĐÁNH CHẶN CLICK CHUYỂN MENU BÊN TRONG WEB
-    $(document).on('click', 'a, button, .btn-course', function(e) {
+$(document).on('click', 'a, button, .btn-course', function(e) {
         if (isEnforcedFullscreen && isTimerActive()) {
-            // Cho phép thao tác nội bộ trong Modal để tránh kẹt hệ thống
-            if ($(this).closest('#documentViewerModal, #linkWarningModal, #closeWarningModal, #returnStudyModal').length > 0) return; 
+            // FIX LỖI: Bổ sung "#sidebarCodeViewerModal" vào danh sách "Vùng an toàn" để không bị cảnh báo
+            if ($(this).closest('#documentViewerModal, #linkWarningModal, #closeWarningModal, #returnStudyModal, #sidebarCodeViewerModal').length > 0) return; 
 
             e.preventDefault();
             e.stopImmediatePropagation();
@@ -2374,6 +2393,7 @@ window.toggleIframeSidebar = function() {
                     });
                 }
             });
+if (typeof loadSidebarCodeSnippets === 'function') loadSidebarCodeSnippets();
         }
     } else {
         sidebar.removeClass('d-flex').addClass('d-none');
@@ -2524,4 +2544,292 @@ if (typeof isTimerActive === 'function' && isTimerActive()) {
             allowLessonClose = false; // Khóa chốt chặn đóng Iframe
             if (typeof enterFullScreen === 'function') enterFullScreen();
         }
+};
+
+// Biến lưu trữ Toàn bộ mã nguồn trên RAM
+window.allSidebarSnippets = [];
+window.sidebarCodeCache = [];
+
+
+// 2. LỌC SIÊU TỐC TRONG RAM: Không gọi AJAX nữa, gõ tới đâu là hiện tức thì tới đó
+window.searchSidebarCode = function() {
+    let maBaiSearch = $('#txtSidebarSearchCode').val().trim().toLowerCase();
+    let container = $('#sidebarCodeList');
+
+    if (!maBaiSearch) {
+        container.html(`
+            <div class="text-muted small text-center py-4">
+                <i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>
+                Nhập từ khóa mã bài để tìm kiếm...
+            </div>
+        `);
+        return;
+    }
+
+    // Bộ lọc siêu tốc .includes() tìm kiếm tương đối
+    window.sidebarCodeCache = window.allSidebarSnippets.filter(item => item.maBai.toLowerCase().includes(maBaiSearch));
+
+    let html = '';
+    if (window.sidebarCodeCache.length > 0) {
+        window.sidebarCodeCache.forEach((item, idx) => {
+            let badgeHtml = item.isMine ? `<span class="badge bg-success shadow-sm ms-1" style="font-size: 10px;"><i class="fa-solid fa-user-check me-1"></i>Của bạn</span>` : ``;
+            let borderLeftColor = item.isMine ? '#22c55e' : '#0ea5e9'; 
+
+            html += `
+            <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-white shadow-sm" style="border: 1px solid #cbd5e1; border-left: 3px solid ${borderLeftColor}; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';" onclick="openSidebarCodeViewer(${idx})">
+                <div class="text-truncate" style="max-width: 80%;">
+                    <strong style="font-size: 13px; color: #1e293b;">${item.maBai} ${badgeHtml}</strong><br>
+                    <small class="text-muted" style="font-size: 11px;"><i class="fa-solid fa-user me-1"></i>${item.author}</small>
+                </div>
+                <i class="fa-solid fa-up-right-from-square text-primary" style="font-size: 12px;"></i>
+            </div>`;
+        });
+    } else {
+        html = `<div class="text-muted small text-center py-4"><i class="fa-regular fa-folder-open fs-3 mb-2 d-block"></i>Không tìm thấy dữ liệu cho "${maBaiSearch}".</div>`;
+    }
+    container.html(html);
+};
+
+// 1. TẢI NGẦM 1 LẦN (Đã cập nhật để lấy Bình luận)
+window.loadSidebarCodeSnippets = function() {
+    let courseName = $('#iframeSidebar').attr('data-sheet') || currentSheetName;
+    if (!courseName) return;
+
+    $('#txtSidebarSearchCode').val('');
+    let container = $('#sidebarCodeList');
+    container.html('<div class="text-center text-muted small py-4"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2 d-block text-secondary"></i>Đang tải dữ liệu bộ nhớ...</div>');
+
+    $.ajax({
+        url: SCRIPT_URL + "?action=getShareCodeData",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            window.allSidebarSnippets = [];
+            let activeUserObj = JSON.parse(localStorage.getItem('currentUser')) || null;
+            let myCleanMssv = activeUserObj ? activeUserObj.mssv.replace(/\./g, "") : "";
+
+            let myCodes = [];
+            let otherCodes = [];
+
+            if (data && data.length > 0) {
+                data.forEach(row => {
+                    let contentRaw = row[2] || '';
+                    let targetTag = `[SHARECODE|${courseName}`;
+                    
+                    if (contentRaw.startsWith(targetTag)) {
+                        let maBaiMatch = contentRaw.match(/^\[SHARECODE\|.*?\|(.*?)\]/);
+                        let maBai = maBaiMatch && maBaiMatch[1] ? maBaiMatch[1].trim() : "";
+                        
+                        let cleanContent = contentRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '').trim();
+                        let theoryPart = "";
+                        let codePart = "";
+                        let langMatch = "cpp";
+
+                        let codeMatch = cleanContent.match(/```(cpp|python|c\+\+|c)?([\s\S]*?)```/i);
+                        if (codeMatch) {
+                            let rawLang = (codeMatch[1] || "cpp").toLowerCase();
+                            langMatch = (rawLang === 'python' || rawLang === 'py') ? 'python' : 'cpp';
+                            codePart = codeMatch[2].trim();
+                            theoryPart = cleanContent.replace(codeMatch[0], '').trim();
+                        } else {
+                            theoryPart = cleanContent; 
+                        }
+
+                        theoryPart = theoryPart.replace(/<div class="mb-3"><strong>Lời giải lý thuyết:<\/strong><br>/g, '').replace(/<\/div>$/g, '').replace(/<p><\/p>/g, '').trim();
+                        
+                        let rawAuthor = String(row[1] || '').trim().replace(/[-|]/g, '');
+                        let authorCleanMssv = rawAuthor.replace(/\./g, "");
+                        let authorName = maskMSSV(rawAuthor); 
+                        
+                        let isMyCode = (myCleanMssv !== "" && authorCleanMssv === myCleanMssv);
+                        if (isMyCode) authorName = "Bạn";
+
+                        // LẤY NỘI DUNG BÌNH LUẬN VÀ ROW INDEX
+                        let answerText = row[3] || ''; 
+                        let rowIndex = row[6];
+
+                        if (codePart || theoryPart) {
+                            let codeObj = {
+                                maBai: maBai,
+                                theory: theoryPart,
+                                code: codePart,
+                                lang: langMatch,
+                                author: authorName,
+                                isMine: isMyCode,
+                                answer: answerText, // Truyền bình luận vào
+                                rowIndex: rowIndex  // Vị trí hàng để xuất giao diện
+                            };
+                            if (isMyCode) myCodes.push(codeObj);
+                            else otherCodes.push(codeObj);
+                        }
+                    }
+                });
+            }
+
+            window.allSidebarSnippets = myCodes.concat(otherCodes);
+            
+            container.html(`
+                <div class="text-muted small text-center py-4">
+                    <i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>
+                    Hệ thống đã sẵn sàng.<br>Nhập mã bài (VD: B01) để tìm kiếm...
+                </div>
+            `);
+        },
+        error: function() {
+            container.html('<div class="text-danger small text-center py-2"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi kết nối máy chủ!</div>');
+        }
+    });
+};
+
+// 2. MỞ BẢNG HIỂN THỊ (Gộp Lý thuyết, Code & Bình luận)
+window.openSidebarCodeViewer = function(index) {
+    let item = window.sidebarCodeCache[index];
+    if (!item) return;
+
+    let badgeHtml = item.isMine ? `<span class="badge bg-success ms-2" style="font-size:11px; font-weight:normal;">Của bạn</span>` : `<span class="badge bg-secondary ms-2" style="font-size:11px; font-weight:normal;">${item.author}</span>`;
+    $('#sidebarCodeViewerTitle').html(`<i class="fa-solid fa-file-code me-2"></i> ${item.maBai} ${badgeHtml}`);
+    
+    // Khung hiển thị Lý thuyết
+    let theoryBox = $('#sidebarTheoryViewerContent');
+    if (item.theory && item.theory.trim() !== "") {
+        let formattedTheory = item.theory;
+        if (!/(<p>|<table>|<ul>|<li>|<div>|<br\s*\/?>)/i.test(formattedTheory)) {
+            formattedTheory = formattedTheory.replace(/\n/g, '<br>');
+        } else {
+            formattedTheory = formattedTheory.replace(/\n/g, ' '); 
+        }
+        formattedTheory = formattedTheory.replace(/(<p>&nbsp;<\/p>|<p><\/p>)/gi, '').trim();
+
+        theoryBox.html(`<div class="fw-bold text-success mb-2"><i class="fa-solid fa-align-left me-1"></i> Lý thuyết / Phân tích:</div>${formattedTheory}`).removeClass('d-none');
+    } else {
+        theoryBox.addClass('d-none').html('');
+    }
+
+    // Khung hiển thị Code
+    let codeWrapper = $('#sidebarCodeWrapper');
+    let btnCopy = $('#btnSidebarCopyCode');
+    
+    if (item.code && item.code.trim() !== "") {
+        let escapedCode = item.code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        let codeElem = $('#sidebarCodeViewerContent');
+        codeElem.removeClass().addClass(`language-${item.lang}`);
+        codeElem.html(escapedCode);
+        
+        codeWrapper.removeClass('d-none');
+        btnCopy.removeClass('d-none'); 
+        
+        if (window.Prism) {
+            Prism.highlightElement(document.getElementById('sidebarCodeViewerContent'));
+        }
+    } else {
+        codeWrapper.addClass('d-none');
+        btnCopy.addClass('d-none'); 
+    }
+
+    // XỬ LÝ HIỂN THỊ BÌNH LUẬN
+    // XỬ LÝ HIỂN THỊ BÌNH LUẬN (Đã nâng cấp)
+    let commentsWrapper = $('#sidebarCommentsWrapper');
+    let commentsContent = $('#sidebarCommentsContent');
+
+    if (item.answer && item.answer.trim() !== "") {
+        // Dùng hàm parseThread có sẵn của hệ thống để vẽ các cuộc hội thoại
+        let threadHtml = parseThread(item.answer, item.rowIndex);
+        commentsContent.html(threadHtml);
+    } else {
+        commentsContent.html('<div class="text-muted small italic text-center py-2" id="emptySidebarComments"><i class="fa-regular fa-comment-slash fs-4 mb-2 d-block"></i> Chưa có bình luận / góp ý nào.</div>');
+    }
+    
+    // Gán dữ liệu cho khung soạn thảo bình luận
+    $('#sidebarReplyRowIndex').val(item.rowIndex);
+    $('#txtSidebarReply').val(''); 
+    commentsWrapper.removeClass('d-none'); // Luôn hiện khu vực bình luận để cho phép nhập mới
+
+    $('#sidebarCodeViewerModal').modal('show');
+    
+    if (typeof applyKaTeX === 'function') {
+        setTimeout(() => applyKaTeX('sidebarTheoryViewerContent'), 100);
+    }
+};
+window.copySidebarCode = function(btnElement) {
+    let codeText = $('#sidebarCodeViewerContent').text();
+    navigator.clipboard.writeText(codeText).then(() => {
+        let originalHtml = $(btnElement).html();
+        $(btnElement).html('<i class="fa-solid fa-check"></i> Đã Copy').css({'background-color': '#10b981', 'color': '#ffffff', 'border-color': '#10b981'});
+        setTimeout(() => {
+            $(btnElement).html(originalHtml).css({'background-color': '#f8fafc', 'color': '#0f4c81', 'border-color': '#cbd5e1'});
+        }, 2000);
+    });
+};
+// Hàm Gửi Bình luận từ bảng Code Sidebar
+window.sendSidebarCodeReply = function() {
+    let rowIndex = $('#sidebarReplyRowIndex').val();
+    let replyText = $('#txtSidebarReply').val().trim();
+    
+    if (!replyText) {
+        alert("Vui lòng nhập nội dung bình luận / phản hồi!");
+        $('#txtSidebarReply').focus();
+        return;
+    }
+
+    // Xử lý lấy MSSV người dùng
+    let studentMssv = "Khách";
+    try {
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser && currentUser.mssv) {
+            studentMssv = currentUser.mssv;
+        }
+    } catch (e) {}
+
+    if (!studentMssv || studentMssv === "Khách") {
+        alert("Vui lòng đăng nhập để bình luận!");
+        return;
+    }
+
+    // Khởi tạo thời gian hiện tại
+    let now = new Date();
+    let pad = (n) => String(n).padStart(2, '0');
+    let timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    let formattedReply = `${studentMssv}:::${timeStr}:::${replyText}`;
+
+    let btn = $('#btnSendSidebarReply');
+    let originalHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i>Đang gửi...').prop('disabled', true);
+
+    postToGAS({
+        action: "replyToShareCode",
+        rowIndex: rowIndex,
+        replyText: formattedReply
+    }, function(response) {
+        alert("Đã gửi bình luận thành công!");
+        $('#txtSidebarReply').val('');
+        btn.html(originalHtml).prop('disabled', false);
+
+        // Bổ sung HTML giả lập vào giao diện để sinh viên thấy tin nhắn vừa gửi ngay lập tức
+        let tempName = (typeof currentUser !== 'undefined' && currentUser) ? getNaturalShortName(currentUser.name) : "Sinh viên";
+        let tempMssv = maskMSSV(studentMssv);
+        
+        // Hỗ trợ hiển thị Markdown/Code nếu sinh viên có gõ
+        let formattedContent = formatCodeBlocks(replyText);
+        if (!/(<p>|<table>|<ul>|<li>|<div>|<br\s*\/?>)/i.test(formattedContent)) {
+            formattedContent = formattedContent.replace(/\n/g, '<br>');
+        }
+
+        let newCommentHtml = `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>Sinh viên (${tempMssv} - ${tempName} (Bạn))</strong><span class="text-muted ms-2" style="font-size: 12.5px; font-weight: normal;"><i class="fa-regular fa-clock"></i> ${timeStr}</span>:<br>${formattedContent}</div>`;
+
+        if ($('#emptySidebarComments').length) {
+            $('#sidebarCommentsContent').html(newCommentHtml);
+        } else {
+            $('#sidebarCommentsContent').append(newCommentHtml);
+        }
+
+        // Đồng bộ cập nhật thẳng vào RAM để lần sau bấm mở lên vẫn thấy bình luận
+        let item = window.sidebarCodeCache.find(i => i.rowIndex == rowIndex);
+        if (item) {
+            item.answer = item.answer ? item.answer + "\n\n[SV]" + formattedReply + "[/SV]" : "[SV]" + formattedReply + "[/SV]";
+        }
+        
+    }, function() {
+        alert("Có lỗi xảy ra khi kết nối máy chủ để gửi bình luận.");
+        btn.html(originalHtml).prop('disabled', false);
+    });
 };
