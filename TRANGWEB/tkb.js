@@ -1007,7 +1007,6 @@ function openEditTkbModal(sheetRowIndex) {
         $('#uTkbOverlapAlert').addClass('d-none');
     }
     
-    // --- KHU VỰC THỜI GIAN: KHÔI PHỤC LẠI NÚT "CHỌN NHIỀU TUẦN" VÀ AUTO-TICK ---
     $('#uTkbPendingSection, #uTkbQuickBtns').addClass('d-none');
     $('#uTkbTimeModeSelection').removeClass('d-none');
 
@@ -1015,30 +1014,55 @@ function openEditTkbModal(sheetRowIndex) {
     let eDate = parseDateString(course.ngayKetThuc);
     let diffDays = (sDate && eDate) ? (eDate - sDate) / (1000 * 60 * 60 * 24) : 0;
 
-    // Nếu khoảng thời gian lớn hơn 6 ngày (từ 2 tuần trở lên) -> Chuyển sang chế độ Tuần
     if (sDate && eDate && diffDays > 6) {
         $('#modeWeek').prop('checked', true); 
         toggleTkbTimeMode();
         
+        // --- TỰ ĐỘNG DÒ TÌM HỌC KỲ CHÍNH XÁC CỦA MÔN ĐÓ ĐỂ HIỆN ĐÚNG TUẦN ---
+        let matchedConfig = null;
+        for (let conf of globalConfigHK) {
+            let configStartDate = parseDateString(conf[2]);
+            let numWeeks = parseInt(conf[3]);
+            if (configStartDate && numWeeks) {
+                let totalDays = numWeeks * 7;
+                let configEndDate = new Date(configStartDate);
+                configEndDate.setDate(configEndDate.getDate() + totalDays);
+                
+                // Nếu ngày bắt đầu của môn nằm trong khung thời gian của học kỳ này -> Lấy chuẩn học kỳ đó
+                if (sDate >= configStartDate && sDate <= configEndDate) {
+                    matchedConfig = conf;
+                    break;
+                }
+            }
+        }
+
+        // Nếu dò ra học kỳ tương ứng, tạm thời ép Selectbox đổi theo học kỳ đó để render tuần đúng chuẩn
+        if (matchedConfig) {
+            $('#namHocSelect').val(matchedConfig[0]);
+            onNamHocChange();
+            $('#hocKySelect').val(matchedConfig[1]);
+            onHocKyChange(); // Lệnh này sẽ vẽ lại danh sách tuần chuẩn xác của học kỳ đó vào giao diện
+        }
+        // -----------------------------------------------------------------
+
         let exceptions = (course.ngayNgoaiLe || "").split(',').map(d => d.trim());
         
-        // Duyệt qua tất cả các checkbox tuần và tích tự động
-        $('.utkb-week-cb').each(function() {
-            let weekStartMs = parseInt($(this).val());
-            let classDate = new Date(weekStartMs);
-            classDate.setDate(classDate.getDate() + (course.thu - 2)); // Tìm ngày học tương ứng trong tuần đó
-            
-            let formattedDate = formatDateDDMMYYYY(classDate);
-            
-            // Nếu ngày học nằm trong khoảng bắt đầu-kết thúc và KHÔNG thuộc danh sách ngày nghỉ
-            if (classDate >= sDate && classDate <= eDate && !exceptions.includes(formattedDate)) {
-                $(this).prop('checked', true);
-            } else {
-                $(this).prop('checked', false);
-            }
-        });
+        setTimeout(() => {
+            $('.utkb-week-cb').each(function() {
+                let weekStartMs = parseInt($(this).val());
+                let classDate = new Date(weekStartMs);
+                classDate.setDate(classDate.getDate() + (course.thu - 2)); 
+                let formattedDate = formatDateDDMMYYYY(classDate);
+                
+                if (classDate >= sDate && classDate <= eDate && !exceptions.includes(formattedDate)) {
+                    $(this).prop('checked', true);
+                } else {
+                    $(this).prop('checked', false);
+                }
+            });
+        }, 50);
+
     } else {
-        // Sự kiện đơn (1 ngày) -> Chế độ Ngày
         $('#modeDate').prop('checked', true); 
         toggleTkbTimeMode();
     }
