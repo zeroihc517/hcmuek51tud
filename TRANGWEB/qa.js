@@ -932,25 +932,33 @@ function loadShareCodeData() {
 
               // === BẮT ĐẦU ĐOẠN CODE THAY THẾ ===
                 
-                // 1. Tách danh sách thành 2 mảng: Bài của tôi và Bài của người khác
-                let activeUserObj = JSON.parse(localStorage.getItem('currentUser')) || null;
-                let myCleanMssv = activeUserObj ? activeUserObj.mssv.replace(/\./g, "") : "";
-                
-                let myCodes = [];
-                let otherCodes = [];
-                
-                rawList.forEach(item => {
-                    let authorCleanMssv = item.rawAuthor.replace(/\./g, "");
-                    // Nếu MSSV của tác giả trùng với MSSV đang đăng nhập
-                    if (myCleanMssv !== "" && authorCleanMssv === myCleanMssv) {
-                        myCodes.push(item);
-                    } else {
-                        otherCodes.push(item);
-                    }
-                });
-                
-                // Gộp lại: Đẩy toàn bộ bài của mình lên đầu tiên
-                window.shareCodeList = myCodes.concat(otherCodes);
+// 1. Tách danh sách theo ưu tiên: Mới (Của tôi) -> Mới (Người khác) -> Cũ (Gần nhất)
+let activeUserObj = JSON.parse(localStorage.getItem('currentUser')) || null;
+let myCleanMssv = activeUserObj ? activeUserObj.mssv.replace(/\./g, "") : "";
+
+let newMyCodes = [];
+let newOtherCodes = [];
+let oldCodes = [];
+
+// Duyệt ngược mảng để đảm bảo các bài đăng gần nhất (nằm cuối) luôn được lên đầu
+for (let i = rawList.length - 1; i >= 0; i--) {
+    let item = rawList[i];
+    let authorCleanMssv = item.rawAuthor.replace(/\./g, "");
+    let isMyCode = (myCleanMssv !== "" && authorCleanMssv === myCleanMssv);
+    
+    if (item.isNew) {
+        if (isMyCode) {
+            newMyCodes.push(item);      // [Nhóm 1] Có chữ Mới + Code của Tác giả
+        } else {
+            newOtherCodes.push(item);   // [Nhóm 2] Có chữ Mới + Code của SV khác
+        }
+    } else {
+        oldCodes.push(item);            // [Nhóm 3] Không có chữ Mới (Đã tự động xếp gần nhất do duyệt ngược)
+    }
+}
+
+// Gộp lại: Đẩy toàn bộ vào danh sách hiển thị theo đúng thứ tự ưu tiên
+window.shareCodeList = newMyCodes.concat(newOtherCodes, oldCodes);
 
                 // 2. Render giao diện danh sách thẻ
                 let gridHtml = '<div class="row g-3">'; 
