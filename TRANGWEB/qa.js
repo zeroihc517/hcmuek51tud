@@ -941,7 +941,7 @@ let newOtherCodes = [];
 let oldCodes = [];
 
 // Duyệt ngược mảng để đảm bảo các bài đăng gần nhất (nằm cuối) luôn được lên đầu
-for (let i = rawList.length - 1; i >= 0; i--) {
+for (let i = 0; i <= rawList.length - 1; i++) {
     let item = rawList[i];
     let authorCleanMssv = item.rawAuthor.replace(/\./g, "");
     let isMyCode = (myCleanMssv !== "" && authorCleanMssv === myCleanMssv);
