@@ -2540,10 +2540,13 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
     $('#docViewerIframe').attr('src', embedUrl);
     $('#documentViewerModal').modal('show');
 if (typeof isTimerActive === 'function' && isTimerActive()) {
+        // Delay 150ms để né Event Bubbling gây lỗi hiện bảng đỏ tức thì
+        setTimeout(() => {
             isEnforcedFullscreen = true;
             allowLessonClose = false; // Khóa chốt chặn đóng Iframe
-            if (typeof enterFullScreen === 'function') enterFullScreen();
-        }
+        }, 150);
+        if (typeof enterFullScreen === 'function') enterFullScreen();
+    }
 };
 
 // Biến lưu trữ Toàn bộ mã nguồn trên RAM

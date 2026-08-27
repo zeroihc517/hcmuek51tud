@@ -3853,7 +3853,49 @@ function toggleBgMusic() {
 }
 
 $(document).ready(function() {
+$('#latexViewerModal').on('hide.bs.modal', function (e) {
+        if (isEnforcedFullscreen && isTimerActive() && !allowLessonClose) {
+            e.preventDefault(); // Chặn Iframe không bị đóng
+            $('#closeWarningModal').modal('show'); // Chỉ hiện bảng VÀNG cảnh báo đóng
+        }
+    });
 
+    $('#latexViewerModal').on('hidden.bs.modal', function () {
+        isEnforcedFullscreen = false;
+        allowLessonClose = false; 
+        exitFullScreen();
+    });
+
+    // ========================================================
+    // 2. ĐÁNH CHẶN CLICK VÀO LINK CHATGPT, GEMINI TRONG BẢNG LATEX
+    // ========================================================
+    $('#latexViewerModal').on('click', 'a[target="_blank"]', function(e) {
+        if (isEnforcedFullscreen && isTimerActive()) {
+            e.preventDefault(); // Chặn mở tab ngay lập tức
+            
+            let url = $(this).attr('href');
+            if (url && url !== '#') {
+                pendingUrlToOpen = url;
+                $('#linkWarningModal').modal('show'); // Chỉ hiện bảng VÀNG cảnh báo link
+            }
+        }
+    });
+
+    // ========================================================
+    // 3. ĐÁNH CHẶN CLICK CHUYỂN MENU NHƯNG TRỪ NÚT CÔNG CỤ (Sửa lại danh sách)
+    // ========================================================
+    $(document).off('click', 'a, button, .btn-course'); // Xóa sự kiện cũ để tránh trùng lặp
+    $(document).on('click', 'a, button, .btn-course', function(e) {
+        if (isEnforcedFullscreen && isTimerActive()) {
+            // BỔ SUNG #latexViewerModal VÀO VÙNG AN TOÀN ĐỂ KHÔNG HIỆN BẢNG ĐỎ KHI BẤM "CÔNG CỤ"
+            if ($(this).closest('#documentViewerModal, #latexViewerModal, #linkWarningModal, #closeWarningModal, #returnStudyModal, #sidebarCodeViewerModal').length > 0) return; 
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            $('#returnStudyModal').modal('show'); // Hiện bảng ĐỎ
+            return false;
+        }
+    });
 });
 // HÀM TẢI VÀ RENDER DEADLINE TẠI TRANG THÔNG BÁO
 function fetchAndRenderDeadlinesForNotice() {
@@ -5485,26 +5527,47 @@ window.openLatexContentViewer = function(rowIndex) {
         contentDisplay = contentDisplay.replace(/\n/g, '<br>');
     }
 
-    // Đặt giao diện về trạng thái XEM
     $('#latexViewMode').removeClass('d-none').html(contentDisplay);
     $('#latexEditMode').removeClass('d-flex').addClass('d-none');
-    
-    // Đổ dữ liệu vào Tiêu đề xem và Khung nhập Sửa
     $('#latexViewerTitle').html(`<i class="fa-solid fa-file-signature me-2"></i> ${title}`);
-    $('#latexEditTitleInput').val(title); // Nạp Tiêu đề cũ vào ô input sửa
-    $('#latexEditTextarea').val(contentRaw); // Nạp Nội dung cũ vào ô textarea
+    $('#latexEditTitleInput').val(title); 
+    $('#latexEditTextarea').val(contentRaw); 
     
-    // Check quyền Admin
     if (typeof isAdmin !== 'undefined' && isAdmin) {
-        $('#btnEditLatexModal').removeClass('d-none');
-        $('#btnEditLatexModal').html('<i class="fa-solid fa-pen me-1"></i> Sửa Nội Dung').removeClass('btn-secondary').addClass('btn-warning');
+        $('#btnEditLatexModal').removeClass('d-none').html('<i class="fa-solid fa-pen me-1"></i> Sửa Nội Dung').removeClass('btn-secondary').addClass('btn-warning');
     } else {
         $('#btnEditLatexModal').addClass('d-none');
     }
 
-    $('#latexViewerModal').modal('show');
+    // Nạp Định Danh để Sidebar có thể lưu Tiến Độ và Note
+    let rawLessonName = String(row[1] || row[0] || '').replace(/<[^>]*>?/gm, '').replace(/[^a-zA-Z0-9_]/g, '');
+    let stableKey = rawLessonName ? rawLessonName : (rowIndex + 1);
+
+    $('#latexSidebar').attr('data-sheet', currentSheetName).attr('data-key', stableKey);
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
     
+    // Khôi phục Tiến độ
+    let progVal = localStorage.getItem(`prog_${mssv}_${currentSheetName}_${stableKey}`) || 'white';
+    $('#latexProgressSelect').val(progVal).css('background-color', getProgressColor(progVal));
+    
+    // Khôi phục Ghi chú
+    let noteData = JSON.parse(localStorage.getItem(`note_${mssv}_${currentSheetName}_${stableKey}`));
+    let content = noteData && noteData.content ? noteData.content : '';
+    if (tinymce.get('latexNoteEditor')) {
+        tinymce.get('latexNoteEditor').setContent(content);
+    } else {
+        $('#latexNoteEditor').val(content);
+    }
+
+    $('#latexViewerModal').modal('show');
     setTimeout(() => { applyKaTeX('latexViewMode'); }, 100);
+
+    // Kích hoạt chống mất tập trung nếu đang hẹn giờ
+    if (typeof isTimerActive === 'function' && isTimerActive()) {
+        isEnforcedFullscreen = true;
+        allowLessonClose = false; 
+        if (typeof enterFullScreen === 'function') enterFullScreen();
+    }
 };
 
 // 2. HÀM BẬT/TẮT CHẾ ĐỘ SỬA
@@ -5947,3 +6010,262 @@ window.adminFetchUserData = function() {
         }
     });
 };
+
+$(document).ready(function() {
+    $('#btnConfirmCloseLesson').off('click').on('click', function() {
+        $('#closeWarningModal').modal('hide');
+        allowLessonClose = true; 
+        $('#documentViewerModal').modal('hide'); 
+        $('#latexViewerModal').modal('hide'); // Bổ sung đóng LaTeX Viewer
+    });
+
+    $('#btnCancelStudy').off('click').on('click', function() {
+        $('#returnStudyModal').modal('hide');
+        isEnforcedFullscreen = false;
+        exitFullScreen();
+        allowLessonClose = true; 
+        $('#documentViewerModal').modal('hide'); 
+        $('#latexViewerModal').modal('hide'); // Bổ sung đóng LaTeX Viewer
+    });
+
+    // Ràng buộc khi bấm nút X hoặc Click ra ngoài
+    $('#documentViewerModal, #latexViewerModal').on('hide.bs.modal', function (e) {
+        if (isEnforcedFullscreen && isTimerActive() && !allowLessonClose) {
+            e.preventDefault(); 
+            $('#closeWarningModal').modal('show'); 
+        }
+    });
+
+    $('#documentViewerModal, #latexViewerModal').on('hidden.bs.modal', function () {
+        isEnforcedFullscreen = false;
+        allowLessonClose = false; 
+        exitFullScreen();
+        if (typeof window.setDetailedView === 'function' && typeof currentSheetName !== 'undefined') {
+            window.setDetailedView(currentSheetName);
+        }
+    });
+
+    // Đánh chặn Click Link trên Sidebar của cả 2 Modal
+    $('#documentViewerModal, #latexViewerModal').on('click', 'a[target="_blank"], button#btnOpenInNewTab', function(e) {
+        if (isEnforcedFullscreen && isTimerActive()) {
+            e.preventDefault(); 
+            let url = $(this).attr('href');
+            if ($(this).attr('id') === 'btnOpenInNewTab') {
+                url = $('#docViewerIframe').attr('src');
+            }
+            if (url && url !== '#') {
+                pendingUrlToOpen = url;
+                $('#linkWarningModal').modal('show'); 
+            }
+        }
+    });
+});
+
+window.toggleLatexSidebar = function() {
+    let sidebar = $('#latexSidebar');
+    if (sidebar.hasClass('d-none')) {
+        sidebar.removeClass('d-none').addClass('d-flex');
+        
+        // Khởi tạo TinyMCE tối giản
+        if (!tinymce.get('latexNoteEditor')) {
+            tinymce.init({
+                selector: '#latexNoteEditor',
+                height: '100%',
+                menubar: false,
+                statusbar: false,
+                plugins: 'lists link textcolor colorpicker',
+                toolbar: 'bold italic underline | forecolor backcolor | bullist numlist',
+                branding: false,
+                setup: function (editor) {
+                    editor.on('change', function () { editor.save(); });
+                }
+            });
+            if (typeof loadSidebarCodeSnippets === 'function') loadSidebarCodeSnippets(true);
+        }
+    } else {
+        sidebar.removeClass('d-flex').addClass('d-none');
+    }
+};
+window.updateSidebarProgress = function(selectEl, isLatex = false) {
+    let sidebarId = isLatex ? '#latexSidebar' : '#iframeSidebar';
+    let sheetName = $(sidebarId).attr('data-sheet') || currentSheetName;
+    let stableKey = $(sidebarId).attr('data-key');
+    
+    if (!sheetName || !stableKey) { alert("Lỗi: Không xác định được bài học!"); return; }
+    
+    let val = $(selectEl).val();
+    $(selectEl).css('background-color', getProgressColor(val));
+    
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, val);
+    
+    let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
+    if(outerSelect.length) {
+        outerSelect.val(val).css('background-color', getProgressColor(val));
+    }
+    
+    if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+};
+
+window.saveSidebarNote = function(isLatex = false) {
+    let sidebarId = isLatex ? '#latexSidebar' : '#iframeSidebar';
+    let editorId = isLatex ? 'latexNoteEditor' : 'sidebarNoteEditor';
+    let statusId = isLatex ? '#latexNoteStatus' : '#sidebarNoteStatus';
+
+    let sheetName = $(sidebarId).attr('data-sheet') || currentSheetName;
+    let stableKey = $(sidebarId).attr('data-key');
+    
+    if (!sheetName || !stableKey) { alert("Lỗi bài học để lưu ghi chú!"); return; }
+    
+    let content = "";
+    if (tinymce.get(editorId)) {
+        content = tinymce.get(editorId).getContent().trim();
+    } else {
+        content = $(`#${editorId}`).val().trim();
+    }
+    
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    let now = new Date();
+    let pad = (n) => String(n).padStart(2, '0');
+    let timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    
+    let btnNote = $(`#btnNote_${stableKey}`); 
+    
+    if (content && content !== "<p></p>" && content !== "") {
+        let noteData = { content: content, updatedAt: timeStr };
+        localStorage.setItem(`note_${mssv}_${sheetName}_${stableKey}`, JSON.stringify(noteData));
+        
+        $(statusId).html(`<i class="fa-solid fa-check me-1"></i>Đã lưu`).removeClass('text-danger').addClass('text-success');
+        if(btnNote.length) {
+            btnNote.removeClass('btn-outline-secondary bg-white').addClass('btn-primary text-white').html('<i class="fa-solid fa-clipboard-check fs-6"></i>').attr('title', 'Xem ghi chú');
+        }
+    } else {
+        localStorage.removeItem(`note_${mssv}_${sheetName}_${stableKey}`);
+        $(statusId).html(`<i class="fa-solid fa-trash me-1"></i>Đã xóa`).removeClass('text-success').addClass('text-danger');
+        if(btnNote.length) {
+            btnNote.removeClass('btn-primary text-white').addClass('btn-outline-secondary bg-white').html('<i class="fa-regular fa-clipboard fs-6"></i>').attr('title', 'Thêm ghi chú');
+        }
+    }
+    
+    setTimeout(() => $(statusId).html(''), 3000);
+    if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+};
+
+window.loadSidebarCodeSnippets = function(isLatex = false) {
+    let sidebarId = isLatex ? '#latexSidebar' : '#iframeSidebar';
+    let searchInputId = isLatex ? '#txtLatexSearchCode' : '#txtSidebarSearchCode';
+    let listId = isLatex ? '#latexCodeList' : '#sidebarCodeList';
+
+    let courseName = $(sidebarId).attr('data-sheet') || currentSheetName;
+    if (!courseName) return;
+
+    $(searchInputId).val('');
+    let container = $(listId);
+    container.html('<div class="text-center text-muted small py-4"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2 d-block text-secondary"></i>Đang tải dữ liệu bộ nhớ...</div>');
+
+    $.ajax({
+        url: SCRIPT_URL + "?action=getShareCodeData",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            window.allSidebarSnippets = [];
+            let activeUserObj = JSON.parse(localStorage.getItem('currentUser')) || null;
+            let myCleanMssv = activeUserObj ? activeUserObj.mssv.replace(/\./g, "") : "";
+
+            let myCodes = [];
+            let otherCodes = [];
+
+            if (data && data.length > 0) {
+                data.forEach(row => {
+                    let contentRaw = row[2] || '';
+                    let targetTag = `[SHARECODE|${courseName}`;
+                    
+                    if (contentRaw.startsWith(targetTag)) {
+                        let maBaiMatch = contentRaw.match(/^\[SHARECODE\|.*?\|(.*?)\]/);
+                        let maBai = maBaiMatch && maBaiMatch[1] ? maBaiMatch[1].trim() : "";
+                        
+                        let cleanContent = contentRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '').trim();
+                        let theoryPart = "", codePart = "", langMatch = "cpp";
+
+                        let codeMatch = cleanContent.match(/```(cpp|python|c\+\+|c)?([\s\S]*?)```/i);
+                        if (codeMatch) {
+                            let rawLang = (codeMatch[1] || "cpp").toLowerCase();
+                            langMatch = (rawLang === 'python' || rawLang === 'py') ? 'python' : 'cpp';
+                            codePart = codeMatch[2].trim();
+                            theoryPart = cleanContent.replace(codeMatch[0], '').trim();
+                        } else {
+                            theoryPart = cleanContent; 
+                        }
+                        
+                        theoryPart = theoryPart.replace(/<div class="mb-3"><strong>Lời giải lý thuyết:<\/strong><br>/g, '').replace(/<\/div>$/g, '').replace(/<p><\/p>/g, '').trim();
+                        
+                        let rawAuthor = String(row[1] || '').trim().replace(/[-|]/g, '');
+                        let authorCleanMssv = rawAuthor.replace(/\./g, "");
+                        let authorName = maskMSSV(rawAuthor); 
+                        let isMyCode = (myCleanMssv !== "" && authorCleanMssv === myCleanMssv);
+                        if (isMyCode) authorName = "Bạn";
+
+                        if (codePart || theoryPart) {
+                            let codeObj = {
+                                maBai: maBai, theory: theoryPart, code: codePart, lang: langMatch,
+                                author: authorName, isMine: isMyCode, answer: row[3] || '', rowIndex: row[6] 
+                            };
+                            if (isMyCode) myCodes.push(codeObj);
+                            else otherCodes.push(codeObj);
+                        }
+                    }
+                });
+            }
+
+            window.allSidebarSnippets = myCodes.concat(otherCodes);
+            container.html(`<div class="text-muted small text-center py-4"><i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>Hệ thống đã sẵn sàng.<br>Nhập mã bài (VD: B01) để tìm kiếm...</div>`);
+        },
+        error: function() { container.html('<div class="text-danger small text-center py-2"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi kết nối máy chủ!</div>'); }
+    });
+};
+
+window.searchSidebarCode = function(isLatex = false) {
+    let searchInputId = isLatex ? '#txtLatexSearchCode' : '#txtSidebarSearchCode';
+    let listId = isLatex ? '#latexCodeList' : '#sidebarCodeList';
+
+    let maBaiSearch = $(searchInputId).val().trim().toLowerCase();
+    let container = $(listId);
+
+    if (!maBaiSearch) {
+        container.html(`<div class="text-muted small text-center py-4"><i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>Nhập từ khóa mã bài để tìm kiếm...</div>`);
+        return;
+    }
+
+    window.sidebarCodeCache = window.allSidebarSnippets.filter(item => item.maBai.toLowerCase().includes(maBaiSearch));
+
+    let html = '';
+    if (window.sidebarCodeCache.length > 0) {
+        window.sidebarCodeCache.forEach((item, idx) => {
+            let badgeHtml = item.isMine ? `<span class="badge bg-success shadow-sm ms-1" style="font-size: 10px;"><i class="fa-solid fa-user-check me-1"></i>Của bạn</span>` : ``;
+            let borderLeftColor = item.isMine ? '#22c55e' : '#0ea5e9'; 
+
+            html += `
+            <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-white shadow-sm" style="border: 1px solid #cbd5e1; border-left: 3px solid ${borderLeftColor}; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';" onclick="openSidebarCodeViewer(${idx})">
+                <div class="text-truncate" style="max-width: 80%;">
+                    <strong style="font-size: 13px; color: #1e293b;">${item.maBai} ${badgeHtml}</strong><br>
+                    <small class="text-muted" style="font-size: 11px;"><i class="fa-solid fa-user me-1"></i>${item.author}</small>
+                </div>
+                <i class="fa-solid fa-up-right-from-square text-primary" style="font-size: 12px;"></i>
+            </div>`;
+        });
+    } else {
+        html = `<div class="text-muted small text-center py-4"><i class="fa-regular fa-folder-open fs-3 mb-2 d-block"></i>Không tìm thấy dữ liệu cho "${maBaiSearch}".</div>`;
+    }
+    container.html(html);
+};
+document.addEventListener('fullscreenchange', function() {
+    // Nếu mất trạng thái Fullscreen mà không phải do ấn nút Thoát tạm thời
+    if (isEnforcedFullscreen && isTimerActive() && !document.fullscreenElement) {
+        // Tạm dừng nhạc nếu có và bật ngay bảng ĐỎ
+        if (typeof warningExitSound !== 'undefined') {
+            warningExitSound.pause();
+            warningExitSound.currentTime = 0;
+        }
+        $('#returnStudyModal').modal('show');
+    }
+});
