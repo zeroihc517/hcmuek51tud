@@ -295,9 +295,16 @@ function addPendingUTkb() {
                 selectedDates.sort((a,b) => a.getTime() - b.getTime());
                 ngayBatDau = formatDateDDMMYYYY(selectedDates[0]); ngayKetThuc = formatDateDDMMYYYY(selectedDates[selectedDates.length - 1]);
                 
-                let ngayNgoaiLeArr = []; let curr = new Date(selectedDates[0]);
+                let ngayNgoaiLeArr = []; 
+                // TẠO MẢNG CHUỖI DD/MM/YYYY ĐỂ SO SÁNH CHÍNH XÁC TUYỆT ĐỐI
+                let selectedDateStrs = selectedDates.map(d => formatDateDDMMYYYY(d)); 
+                let curr = new Date(selectedDates[0]);
+                
                 while (curr <= selectedDates[selectedDates.length - 1]) {
-                    if (!selectedDates.some(sd => sd.getTime() === curr.getTime())) { ngayNgoaiLeArr.push(formatDateDDMMYYYY(curr)); }
+                    let dStr = formatDateDDMMYYYY(curr);
+                    if (!selectedDateStrs.includes(dStr)) { // Không nằm trong các tuần được tick -> Là ngày nghỉ
+                        ngayNgoaiLeArr.push(dStr); 
+                    }
                     curr.setDate(curr.getDate() + 7);
                 }
                 ngayNgoaiLe = ngayNgoaiLeArr.join(', ');
@@ -755,6 +762,10 @@ for (let g of groupOrder) {
         } else {
             let noteBadge = getNoteFromSubject(c); 
             
+            if (c.ngayNgoaiLe && c.ngayNgoaiLe.trim() !== "") {
+                noteBadge += `<br><span class="text-danger small mt-1 d-block" style="font-size: 11.5px; font-weight: 600;"><i class="fa-solid fa-calendar-xmark me-1"></i>Nghỉ: ${c.ngayNgoaiLe}</span>`;
+            }
+
             let phongDisplayHtml = c.phong || '-';
             if ((c.hinhThuc || '').toUpperCase().includes('VLE')) {
                 let isDone = completedList.includes(getDlKey(c));
@@ -1094,6 +1105,7 @@ function toggleTkbTimeMode() {
         $('#uTkbDateArea').addClass('d-none');
         $('#uTkbWeekArea').removeClass('d-none');
     } else {
+        updateDateInputsFromWeeks('tkb'); // <--- Tự động điền khi chuyển chế độ
         $('#uTkbDateArea').removeClass('d-none');
         $('#uTkbWeekArea').addClass('d-none');
     }
@@ -1415,7 +1427,7 @@ function executeSavePersonalTkb() {
     let isWeekMode = $('#modeWeek').is(':checked');
     let ngayBdRaw = "", ngayKtRaw = "", finalNgoaiLe = "";
     
-    if (isWeekMode) {
+  if (isWeekMode) {
         let selectedDates = [];
         $('.utkb-week-cb:checked').each(function() {
             let weekStartMs = parseInt($(this).val()); 
@@ -1426,9 +1438,18 @@ function executeSavePersonalTkb() {
         ngayBdRaw = formatDateDDMMYYYY(selectedDates[0]); 
         ngayKtRaw = formatDateDDMMYYYY(selectedDates[selectedDates.length - 1]);
         
-        let ngayNgoaiLeArr = []; let curr = new Date(selectedDates[0]);
+        let existingExceptions = $('#uTkbNgoaiLe').val().split(',').map(d => d.trim()).filter(d => d !== "");
+        let ngayNgoaiLeArr = [...existingExceptions]; 
+        
+        // TẠO MẢNG CHUỖI DD/MM/YYYY ĐỂ SO SÁNH
+        let selectedDateStrs = selectedDates.map(d => formatDateDDMMYYYY(d));
+        let curr = new Date(selectedDates[0]);
+        
         while (curr <= selectedDates[selectedDates.length - 1]) {
-            if (!selectedDates.some(sd => sd.getTime() === curr.getTime())) { ngayNgoaiLeArr.push(formatDateDDMMYYYY(curr)); }
+            let dStr = formatDateDDMMYYYY(curr);
+            if (!selectedDateStrs.includes(dStr)) {
+                if (!ngayNgoaiLeArr.includes(dStr)) ngayNgoaiLeArr.push(dStr);
+            }
             curr.setDate(curr.getDate() + 7);
         }
         finalNgoaiLe = ngayNgoaiLeArr.join(', ');
@@ -3700,6 +3721,7 @@ window.saveGroupStudy = function() {
         color: $('#gsColor').val(),
         ngayBatDau: $('#gsNgayBD').val().trim(),
         ngayKetThuc: $('#gsNgayKT').val().trim(),
+	ngayNgoaiLe: $('#gsNgoaiLe').val().trim(),
         slot: slot,
         note: $('#gsNote').val().trim()
     };
@@ -3791,7 +3813,7 @@ function renderGroupStudyTable() {
         let registeredList = item.registered ? item.registered.split(',').filter(x => x) : [];
         let currentCount = registeredList.length;
         let isFull = currentCount >= parseInt(item.maxSlot);
-        let isRegistered = registeredList.includes(currentUser.mssv);
+       let isRegistered = registeredList.some(r => r.split(':::')[0] === currentUser.mssv);
         let isCreator = item.creatorMssv === currentUser.mssv || isAdmin;
 
         let slotBadge = isFull ? 'bg-danger' : 'bg-success';
@@ -3821,23 +3843,36 @@ function renderGroupStudyTable() {
         let displayNote = item.note && item.note !== 'undefined' ? `<small class="text-muted fw-normal fst-italic">${item.note}</small>` : '';
 
         // Hiển thị danh sách sinh viên đăng ký
-        let registeredHtml = '';
-        if (isCreator && registeredList.length > 0) {
-            let regDetails = registeredList.map(mssv => {
-                let user = (window.allUsersDataForSearch || []).find(u => String(u.mssv).trim() === String(mssv).trim());
-                // Mã hóa MSSV theo chuẩn 51***001 (Riêng admin sẽ thấy toàn bộ MSSV)
-                let masked = mssv.length > 6 ? mssv.substring(0, 2) + '***' + mssv.substring(mssv.length - 3) : mssv;
-                let displayMssv = isAdmin ? mssv : masked;
-                let displayName = user ? getNaturalShortName(user.name) : "Sinh viên";
-                return `<div class="d-flex align-items-center gap-1"><i class="fa-solid fa-user-check text-success"></i> ${displayName} (${displayMssv})</div>`;
-            }).join('');
+       let registeredHtml = '';
+if (isCreator && registeredList.length > 0) {
+    let regDetails = registeredList.map(itemStr => {
+        let parts = itemStr.split(':::');
+        let mssv = parts[0];
+        let note = parts[1] || ''; // Lấy nội dung ghi chú
+        
+        let user = (window.allUsersDataForSearch || []).find(u => String(u.mssv).trim() === String(mssv).trim());
+        let masked = mssv.length > 6 ? mssv.substring(0, 2) + '***' + mssv.substring(mssv.length - 3) : mssv;
+        let displayMssv = isAdmin ? mssv : masked;
+        let displayName = user ? getNaturalShortName(user.name) : "Sinh viên";
+        
+        let noteHtml = note ? `<br><small class="text-muted fst-italic"><i class="fa-solid fa-comment-dots"></i> Ghi chú: ${note}</small>` : '';
+        
+        return `<li class="list-group-item px-2 py-1"><div class="d-flex align-items-start gap-2"><i class="fa-solid fa-user-check text-success mt-1"></i> <div><b>${displayName}</b> (${displayMssv}) ${noteHtml}</div></div></li>`;
+    }).join('');
 
-            registeredHtml = `<div class="mt-2 text-start p-2 border rounded" style="font-size: 12px; background-color: #f8fafc; max-height: 120px; overflow-y: auto;">
-                <div class="fw-bold text-primary mb-1">Danh sách đăng ký:</div>
+    // Nút xổ (Collapse) xem danh sách thành viên + ghi chú
+    registeredHtml = `
+    <div class="mt-2 text-start">
+        <button class="btn btn-sm btn-outline-primary fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReg_${item.id}" aria-expanded="false">
+            <i class="fa-solid fa-list-ul"></i> Xem danh sách đăng ký (${currentCount})
+        </button>
+        <div class="collapse mt-2" id="collapseReg_${item.id}">
+            <ul class="list-group" style="font-size: 13px; max-height: 150px; overflow-y: auto;">
                 ${regDetails}
-            </div>`;
-        }
-
+            </ul>
+        </div>
+    </div>`;
+}
         html += `
         <tr>
             <td class="text-start fw-bold text-primary">
@@ -3858,12 +3893,53 @@ function renderGroupStudyTable() {
     });
     tbody.html(html);
 }
+window.updateDateInputsFromWeeks = function(type) {
+    let prefix = type === 'tkb' ? 'uTkb' : 'gs';
+    let cbClass = type === 'tkb' ? '.utkb-week-cb' : '.gs-week-cb';
+    
+    let thuRaw = $(`#${prefix}Thu`).val().toString().trim();
+    let thuVal = parseInt(thuRaw.split(',')[0]) || 2; 
+    
+    let selectedDates = [];
+    $(cbClass + ':checked').each(function() {
+        let weekStartMs = parseInt($(this).val()); 
+        let d = new Date(weekStartMs); 
+        d.setDate(d.getDate() + (thuVal - 2)); 
+        selectedDates.push(d);
+    });
+    
+    if (selectedDates.length > 0) {
+        selectedDates.sort((a,b) => a.getTime() - b.getTime());
+        let ngayBd = formatDateDDMMYYYY(selectedDates[0]);
+        let ngayKt = formatDateDDMMYYYY(selectedDates[selectedDates.length - 1]);
+        
+        let existingExceptions = $(`#${prefix}NgoaiLe`).val().split(',').map(d => d.trim()).filter(d => d !== "");
+        let ngayNgoaiLeArr = [...existingExceptions];
 
+        // TẠO MẢNG CHUỖI DD/MM/YYYY ĐỂ SO SÁNH
+        let selectedDateStrs = selectedDates.map(d => formatDateDDMMYYYY(d));
+        let curr = new Date(selectedDates[0]);
+        
+        while (curr <= selectedDates[selectedDates.length - 1]) {
+            let dStr = formatDateDDMMYYYY(curr);
+            if (!selectedDateStrs.includes(dStr)) {
+                if (!ngayNgoaiLeArr.includes(dStr)) {
+                    ngayNgoaiLeArr.push(dStr); 
+                }
+            }
+            curr.setDate(curr.getDate() + 7);
+        }
+        
+        $(`#${prefix}NgayBD`).val(ngayBd);
+        $(`#${prefix}NgayKT`).val(ngayKt);
+        $(`#${prefix}NgoaiLe`).val(ngayNgoaiLeArr.join(', '));
+    }
+};
 window.openCreateGroupStudyModal = function() {
     $('#groupStudyListModal').modal('hide');
     setTimeout(() => {
         // Reset form
-      $('#gsMon, #gsThu, #gsTietBd, #gsThoiGian, #gsHinhThuc, #gsPhong, #gsNgayBD, #gsNgayKT, #gsNote, #gsLink, #gsGV').val('');
+      $('#gsMon, #gsThu, #gsTietBd, #gsThoiGian, #gsHinhThuc, #gsPhong, #gsNgayBD, #gsNgayKT, #gsNgoaiLe, #gsNote, #gsLink, #gsGV').val('');
         $('#gsSoTiet').val(3);
         $('#gsSlot').val(5);
         $('#gsColor').val('#dcfce7'); 
@@ -3924,7 +4000,7 @@ window.editGroupStudy = function(id) {
     if (!item) return;
 
     // 1. Đổ dữ liệu cũ vào Form
-   $('#gsId').val(item.id);
+    $('#gsId').val(item.id);
     $('#gsMon').val(item.mon);
     $('#gsSlot').val(item.maxSlot);
     $('#gsThu').val(item.thu);
@@ -3936,13 +4012,12 @@ window.editGroupStudy = function(id) {
     $('#gsPhong').val(item.phong);
     $('#gsNgayBD').val(item.ngayBatDau);
     $('#gsNgayKT').val(item.ngayKetThuc);
+    $('#gsNgoaiLe').val(item.ngayNgoaiLe || '');
     $('#gsNote').val(item.note);
     $('#gsLink').val(item.link || '');
     $('#gsGV').val(item.gv || '');
 
-    // ========================================================
     // 2. LOGIC KHÔI PHỤC VÀ HIỂN THỊ DANH SÁCH TUẦN HỌC KỲ
-    // ========================================================
     let selectedNH = $('#namHocSelect').val(); 
     let selectedHK = $('#hocKySelect').val();
     let config = globalConfigHK.find(c => c[0] === selectedNH && c[1] === selectedHK);
@@ -3987,29 +4062,28 @@ window.editGroupStudy = function(id) {
             }
         }
     }
-    // Gắn danh sách tuần ra HTML
     $('#gsWeeksContainer').html(weekHtml);
 
-    // ========================================================
     // 3. TỰ ĐỘNG TÍNH TOÁN & TICK VÀO CÁC TUẦN CŨ ĐÃ CHỌN
-    // ========================================================
     let sDate = parseDateString(item.ngayBatDau);
     let eDate = parseDateString(item.ngayKetThuc);
     let hasCheckedWeek = false;
 
     if (sDate && eDate) {
-        // Ưu tiên hiển thị Theo Tuần
         $('#gsModeWeek').prop('checked', true); 
         toggleGsTimeMode();
+        
+        let exceptions = (item.ngayNgoaiLe || "").split(',').map(d => d.trim()); // Đã sửa: Nhận diện mảng ngày ngoại lệ
         
         $('.gs-week-cb').each(function() {
             let weekStartMs = parseInt($(this).val());
             let classDate = new Date(weekStartMs);
-            // Quy chiếu ngày bắt đầu tuần đó + Thứ học = Ngày học thực tế
             classDate.setDate(classDate.getDate() + (item.thu - 2)); 
             
-            // Nếu ngày học thực tế nằm trong khoảng Ngày BĐ -> Ngày KT của dữ liệu cũ thì Tick vào
-            if (classDate >= sDate && classDate <= eDate) {
+            let formattedDate = formatDateDDMMYYYY(classDate); // Đã sửa: Tính ra chuỗi ngày của tuần đó
+            
+            // Đã sửa: Phải nằm trong khoảng Start-End VÀ KHÔNG NẰM TRONG MẢNG NGOẠI LỆ
+            if (classDate >= sDate && classDate <= eDate && !exceptions.includes(formattedDate)) {
                 $(this).prop('checked', true);
                 hasCheckedWeek = true;
             } else {
@@ -4017,7 +4091,6 @@ window.editGroupStudy = function(id) {
             }
         });
 
-        // Nếu quét qua không khớp tuần nào (VD dữ liệu tùy chỉnh ngoài học kỳ) thì chuyển về hiển thị Ngày
         if (!hasCheckedWeek) {
             $('#gsModeDate').prop('checked', true); 
             toggleGsTimeMode();
@@ -4035,11 +4108,13 @@ window.editGroupStudy = function(id) {
         $('#createGroupStudyModal').modal('show');
     }, 400);
 };
+
 function toggleGsTimeMode() {
     if ($('#gsModeWeek').is(':checked')) {
         $('#gsDateArea').addClass('d-none');
         $('#gsWeekArea').removeClass('d-none');
     } else {
+        updateDateInputsFromWeeks('gs'); // <--- Tự động điền khi chuyển chế độ
         $('#gsDateArea').removeClass('d-none');
         $('#gsWeekArea').addClass('d-none');
     }
@@ -4069,7 +4144,7 @@ window.saveGroupStudy = function() {
         return;
     }
 
-    let ngayBdRaw = "", ngayKtRaw = "";
+    let ngayBdRaw = "", ngayKtRaw = "", ngayNgoaiLe = "";
     let isWeekMode = $('#gsModeWeek').is(':checked');
 
     if (isWeekMode) {
@@ -4085,11 +4160,28 @@ window.saveGroupStudy = function() {
         selectedDates.sort((a,b) => a.getTime() - b.getTime());
         ngayBdRaw = formatDateDDMMYYYY(selectedDates[0]); 
         ngayKtRaw = formatDateDDMMYYYY(selectedDates[selectedDates.length - 1]);
+        
+        let existingExceptions = $('#gsNgoaiLe').val().split(',').map(d => d.trim()).filter(d => d !== "");
+        let ngayNgoaiLeArr = [...existingExceptions]; 
+        
+        // TẠO MẢNG CHUỖI DD/MM/YYYY ĐỂ SO SÁNH
+        let selectedDateStrs = selectedDates.map(d => formatDateDDMMYYYY(d));
+        let curr = new Date(selectedDates[0]);
+        
+        while (curr <= selectedDates[selectedDates.length - 1]) {
+            let dStr = formatDateDDMMYYYY(curr);
+            if (!selectedDateStrs.includes(dStr)) {
+                if (!ngayNgoaiLeArr.includes(dStr)) ngayNgoaiLeArr.push(dStr);
+            }
+            curr.setDate(curr.getDate() + 7);
+        }
+        ngayNgoaiLe = ngayNgoaiLeArr.join(', ');
     } else {
         ngayBdRaw = $('#gsNgayBD').val().trim(); 
         ngayKtRaw = $('#gsNgayKT').val().trim();
+        ngayNgoaiLe = $('#gsNgoaiLe').val().trim();
     }
-
+    
     let actionType = id ? "editGroupStudy" : "addGroupStudy";
     let payload = {
         action: actionType, 
@@ -4103,6 +4195,7 @@ window.saveGroupStudy = function() {
         color: $('#gsColor').val(),
         ngayBatDau: ngayBdRaw,
         ngayKetThuc: ngayKtRaw,
+        ngayNgoaiLe: ngayNgoaiLe, // Đã sửa: Truyền đúng biến đã tính toán
         slot: slot, note: $('#gsNote').val().trim(),
         link: $('#gsLink').val().trim(),
         gv: $('#gsGV').val().trim()
@@ -4124,21 +4217,27 @@ window.saveGroupStudy = function() {
 };
 
 window.toggleGroupStudyReg = function(id, actionType, btnElement) {
+    let note = "";
+    if (actionType === 'register') {
+        note = prompt("Bạn có muốn ghi chú gì khi đăng ký học nhóm không?\n(VD: Muốn học nhóm học phần nào, mục tiêu... Có thể để trống):");
+        if (note === null) return; // Hủy nếu người dùng bấm Cancel
+    }
+    
     let btn = $(btnElement);
     let originText = btn.html();
     
-    // Khóa nút bấm và hiện Spinner
     btn.closest('tr').find('button').prop('disabled', true);
     btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...');
 
-    postToGAS({ action: "toggleGroupStudyReg", id: id, mssv: currentUser.mssv, type: actionType }, function(res) {
+    // Đính kèm p.note gửi lên máy chủ
+    postToGAS({ action: "toggleGroupStudyReg", id: id, mssv: currentUser.mssv, type: actionType, note: note }, function(res) {
         alert(res); 
-        loadGroupStudyList(); // Tự động mở khóa nút nhờ load lại bảng mới
-        loadThoiGianBieu();   // Cập nhật lại TKB
+        loadGroupStudyList(); 
+        loadThoiGianBieu();   
     }, function() {
         alert("Lỗi máy chủ! Vui lòng thử lại.");
         btn.html(originText);
-        btn.closest('tr').find('button').prop('disabled', false); // Mở khóa nút nếu lỗi
+        btn.closest('tr').find('button').prop('disabled', false); 
     });
 };
 
