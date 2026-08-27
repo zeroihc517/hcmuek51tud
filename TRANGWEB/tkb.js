@@ -4217,21 +4217,50 @@ window.saveGroupStudy = function() {
     });
 };
 
+// Biến toàn cục để lưu tạm nút đang bấm
+window.currentRegBtnElement = null;
+
+// 1. Hàm được gọi khi bấm nút Đăng ký / Hủy đăng ký ở bảng
 window.toggleGroupStudyReg = function(id, actionType, btnElement) {
-    let note = "";
-    if (actionType === 'register') {
-        note = prompt("Bạn có muốn ghi chú gì khi đăng ký học nhóm không?\n(VD: Muốn học nhóm học phần nào, mục tiêu... Có thể để trống):");
-        if (note === null) return; // Hủy nếu người dùng bấm Cancel
-    }
+    window.currentRegBtnElement = btnElement; // Lưu vết nút vừa bấm
     
-    let btn = $(btnElement);
+    if (actionType === 'register') {
+        // Thay vì dùng prompt xấu xí, ta mở Modal xịn xò
+        $('#gsRegTargetId').val(id);
+        $('#gsRegNoteInput').val(''); // Làm sạch ô nhập
+        $('#groupStudyNoteModal').modal('show');
+    } else {
+        // Nếu là Hủy đăng ký thì cho chạy lệnh thẳng luôn, không cần hỏi ghi chú
+        executeGroupStudyAction(id, actionType, "");
+    }
+};
+
+// 2. Hàm được gọi khi sinh viên bấm "Xác nhận Đăng ký" trên Modal
+window.confirmGroupStudyReg = function() {
+    let id = $('#gsRegTargetId').val();
+    let note = $('#gsRegNoteInput').val().trim();
+    
+    $('#groupStudyNoteModal').modal('hide'); // Đóng khung nhập liệu
+    executeGroupStudyAction(id, 'register', note); // Gửi dữ liệu đi
+};
+
+// 3. Hàm xử lý API gửi dữ liệu lên Google Sheets
+function executeGroupStudyAction(id, actionType, note) {
+    let btn = $(window.currentRegBtnElement);
     let originText = btn.html();
     
+    // Khóa nút và hiện hiệu ứng xoay
     btn.closest('tr').find('button').prop('disabled', true);
     btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...');
 
-    // Đính kèm p.note gửi lên máy chủ
-    postToGAS({ action: "toggleGroupStudyReg", id: id, mssv: currentUser.mssv, type: actionType, note: note }, function(res) {
+    // Gửi data lên máy chủ
+    postToGAS({ 
+        action: "toggleGroupStudyReg", 
+        id: id, 
+        mssv: currentUser.mssv, 
+        type: actionType, 
+        note: note 
+    }, function(res) {
         alert(res); 
         loadGroupStudyList(); 
         loadThoiGianBieu();   
@@ -4240,7 +4269,7 @@ window.toggleGroupStudyReg = function(id, actionType, btnElement) {
         btn.html(originText);
         btn.closest('tr').find('button').prop('disabled', false); 
     });
-};
+}
 
 window.deleteGroupStudy = function(id) {
     if (!confirm("Bạn có chắc chắn muốn xóa lịch học nhóm này?")) return;
