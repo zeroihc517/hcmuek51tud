@@ -251,7 +251,8 @@ function renderDeadlines() {
 
 function openAddDeadlineModal() {
     $('#dlModalTitle').html('<i class="fa-solid fa-plus me-2"></i>Thêm Deadline');
-    $('#pDlRowIndex').val(''); 
+    $('#pDlRowIndex').val('');
+	$('#datLichRowIndex').val('');
     $('#pDlMaHP, #pDlTitle, #pDlTag, #pDlLink, #pDlEmoji, #pDlStartDate, #pDlEndDate').val(''); 
     $('#pDlIcon').val('fire');
     $('#deadlinePersonalModal').modal('show');
