@@ -421,6 +421,11 @@ if (sub.code && window.ace) {
     });
 
     $('#submissionHistoryContainer').html(historyHtml);
+if (window.MathJax && window.MathJax.typesetPromise) {
+        MathJax.typesetPromise([document.getElementById('submissionHistoryContainer')]).catch(function (err) {
+            console.log('MathJax error in history: ' + err.message);
+        });
+    }
 }
 
         function editSubmissionToForm(subIndex) {
