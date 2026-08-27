@@ -176,7 +176,17 @@ function renderQuestion(index) {
 
     $('#badgeCourse').text(courseName);    $('#titleMaBai').text(`Bài tập: ${q.title}`);
     $('#labelCurrentMaBai').text(`Mã bài: ${q.maBai}`);
-    
+    // --- HIỂN THỊ NÚT SỬA CHO ADMIN ---
+    $('#btnAdminEditQuestion').remove(); // Xóa nút cũ nếu có để tránh trùng lặp
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    if (currentUser && currentUser.mssv === "51.01.108.008") {
+        $('#labelCurrentMaBai').after(`
+            <button id="btnAdminEditQuestion" class="btn btn-sm btn-warning ms-2 fw-bold shadow-sm" onclick="openAdminEditQuestion()" style="border-radius: 6px;">
+                <i class="fa-solid fa-pen"></i> Sửa đề
+            </button>
+        `);
+    }
+    // ----------------------------------
     let processedContent = q.content || '';
 
     // 1. LUÔN HIỂN THỊ KHUNG NỘP CODE
@@ -1793,4 +1803,128 @@ function calculateTreePositions(node, x, y, offsetX, offsetY) {
 function removeCustomTreeRow(btn) {
     $(btn).closest('tr').remove();
     drawCustomTree(true); // Cập nhật lại hình xem trước sau khi xóa
+}
+// ========================================================
+// HÀM DÀNH RIÊNG CHO ADMIN: CHỈNH SỬA ĐỀ BÀI VÀ XEM TRƯỚC (TỐI ƯU TỐC ĐỘ)
+// ========================================================
+
+let adminMathJaxTimeout = null;
+
+// Bắt sự kiện gõ phím vào khung nhập nội dung
+$(document).on('input', '#adminEditContent', function() {
+    let rawContent = $(this).val() || '';
+    
+    // Chuẩn hóa nội dung
+    let processedContent = rawContent
+        .replace(/\\\\\[\d+pt\]/g, '<br>')
+        .replace(/\\\\/g, '<br>')
+        .replace(/\[\d+pt\]/g, '')
+        .replace(/\\vspace\{.*?\}/g, '')
+        .replace(/\\hspace\{.*?\}/g, '')
+        .replace(/\\begin\{enumerate\}/g, '')
+        .replace(/\\end\{enumerate\}/g, '')
+        .replace(/\\begin\{center\}/g, '<div class="my-3">')
+        .replace(/\\end\{center\}/g, '</div>')
+        .replace(/\\small/g, '')
+        .replace(/\\begin\{tabular\}\{.*?\}/g, '<table class="table table-bordered align-middle my-3" style="width:100%; border-color:#cbd5e1;"><thead class="table-light"><tr><th style="width:40%;">Input</th><th style="width:60%;">Output</th></tr></thead><tbody><tr><td>')
+        .replace(/\\end\{tabular\}/g, '</td></tr></tbody></table>')
+        .replace(/\\begin\{minipage\}\[.*?\]\{.*?\}/g, '<div>')
+        .replace(/\\end\{minipage\}/g, '</div>')
+        .replace(/\\hline/g, '')
+        .replace(/\\textbf\{Input\}\s*&\s*\\textbf\{Output\}/gi, '')
+        .replace(/Input\s*&\s*Output/gi, '')
+        .replace(/\\textbf\{(.*?)\}/g, '<b>$1</b>')
+        .replace(/\\texttt\{(.*?)\}/g, '<code>$1</code>')
+        .replace(/\\item\[(.*?)\]/g, '<br><b>$1</b> ')
+        .replace(/\\item/g, '<br>• ');
+        
+    if (typeof convertUrlsToLinks === "function") {
+        processedContent = convertUrlsToLinks(processedContent);
+    }
+
+    // 1. HIỂN THỊ VĂN BẢN & HTML NGAY LẬP TỨC (Xóa bỏ độ trễ khi gõ)
+    $('#adminEditPreview').html(processedContent);
+
+    // 2. CHỈ TRÌ HOÃN MATHJAX 0.25s (Vì thư viện vẽ công thức rất nặng)
+    clearTimeout(adminMathJaxTimeout);
+    adminMathJaxTimeout = setTimeout(function() {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise([document.getElementById('adminEditPreview')]).catch(function (err) {
+                console.log('MathJax error in preview: ' + err.message);
+            });
+        }
+    }, 250); 
+});
+
+function openAdminEditQuestion() {
+    let q = questionsList[currentQuestionIndex];
+    if (!q) return;
+    
+    // Đổ dữ liệu hiện tại vào Form
+    $('#adminEditMaBai').val(q.maBai);
+    $('#adminEditTitle').val(q.title);
+    $('#adminEditContent').val(q.content);
+    
+    // Tự động kích hoạt sự kiện gõ phím để render bản xem trước ngay khi mở
+    $('#adminEditContent').trigger('input');
+    
+    // Mở Modal
+    $('#adminEditQuestionModal').modal('show');
+}
+function saveAdminExerciseEdit() {
+    let q = questionsList[currentQuestionIndex];
+    let newMaBai = $('#adminEditMaBai').val().trim();
+    let title = $('#adminEditTitle').val().trim();
+    let content = $('#adminEditContent').val().trim();
+
+    if (!newMaBai || !title || !content) {
+        alert("Vui lòng nhập đầy đủ thông tin đề bài!");
+        return;
+    }
+
+    let btn = $('#adminEditQuestionModal .btn-warning');
+    let originalText = btn.html();
+    // Đổi trạng thái UI sang loading
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang lưu...').prop('disabled', true);
+
+    let postDataObj = {
+        action: "editExerciseQuestion",
+        course: courseName,
+        oldMaBai: q.maBai,
+        newMaBai: newMaBai,
+        title: title,
+        content: content
+    };
+
+    $.ajax({
+        url: SCRIPT_URL,
+        type: "POST",
+        data: JSON.stringify(postDataObj),
+        contentType: "text/plain;charset=utf-8",
+        dataType: "text",
+        timeout: 20000, // Tăng lên 20s phòng trường hợp Google Sheet phản hồi chậm
+        success: function(res) {
+            // Thành công chuẩn 100%
+            btn.html('<i class="fa-solid fa-check me-2"></i>Lưu thành công!').removeClass('btn-warning').addClass('btn-success');
+            setTimeout(function() {
+                $('#adminEditQuestionModal').modal('hide');
+                window.location.reload(); // Dùng reload() an toàn và sạch sẽ hơn
+            }, 600);
+        },
+        error: function(xhr, status, err) {
+            // XỬ LÝ "LỖI GIẢ" TỪ GOOGLE APPS SCRIPT:
+            // Nếu status là 0, nghĩa là GAS đã chạy lệnh lưu xong nhưng bị chặn CORS khi trả kết quả
+            if (xhr.status === 0 || status === "error") {
+                btn.html('<i class="fa-solid fa-check me-2"></i>Đã lưu thành công!').removeClass('btn-warning').addClass('btn-success');
+                setTimeout(function() {
+                    $('#adminEditQuestionModal').modal('hide');
+                    window.location.reload();
+                }, 600);
+            } else {
+                // Các lỗi thực sự khác (Timeout, đứt mạng, 500...)
+                btn.html(originalText).prop('disabled', false);
+                alert("Máy chủ phản hồi quá chậm hoặc có lỗi xảy ra! (Mã lỗi: " + status + ")");
+            }
+        }
+    });
 }

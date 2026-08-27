@@ -268,6 +268,49 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="adminEditQuestionModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen"> 
+        <div class="modal-content border-0">
+            <div class="modal-header bg-warning text-dark border-0">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa đề bài (Admin)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-4 bg-light d-flex flex-column">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold text-dark">Mã bài:</label>
+                        <input type="text" id="adminEditMaBai" class="form-control border-secondary shadow-sm">
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label fw-bold text-dark">Tiêu đề (Tên bài):</label>
+                        <input type="text" id="adminEditTitle" class="form-control border-secondary shadow-sm">
+                    </div>
+                </div>
+                
+                <div class="row g-3 flex-grow-1" style="min-height: 0;">
+                    <div class="col-md-6 d-flex flex-column">
+                        <label class="form-label fw-bold text-dark">Mã nguồn đề bài (HTML/LaTeX):</label>
+                        <textarea id="adminEditContent" class="form-control border-secondary shadow-sm flex-grow-1" style="font-family: 'Consolas', monospace; font-size: 14px; background-color: #1e293b; color: #f8fafc; resize: none;"></textarea>
+                    </div>
+                    <div class="col-md-6 d-flex flex-column">
+                        <label class="form-label fw-bold text-success"><i class="fa-solid fa-eye me-1"></i>Bản xem trước trực tiếp:</label>
+                        <div id="adminEditPreview" class="p-4 bg-white border border-secondary shadow-sm fs-6 text-secondary flex-grow-1" style="border-radius: 6px; overflow-y: auto; line-height: 1.6;">
+                            Đang chờ dữ liệu...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer border-0 bg-white">
+                <button type="button" class="btn btn-light border fw-bold" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-warning fw-bold px-4" onclick="saveAdminExerciseEdit()">
+                    <i class="fa-solid fa-floppy-disk me-2"></i>Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Thư viện JS -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
