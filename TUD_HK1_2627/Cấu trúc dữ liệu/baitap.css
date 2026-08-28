@@ -294,3 +294,20 @@
 .btn-first-link:hover i {
     transform: translate(3px, -3px) scale(1.1);
 }
+/* TRẠNG THÁI TOÀN MÀN HÌNH CHO UPCODER */
+.upcoder-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99999 !important; /* Đảm bảo đè lên mọi thứ */
+    border-radius: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+}
+
+/* Khi full màn hình, trừ đi chiều cao của cái header bên trên (~42px) */
+.upcoder-fullscreen #upcoderIframeWrapper {
+    height: calc(100vh - 42px) !important;
+}

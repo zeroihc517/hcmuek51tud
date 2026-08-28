@@ -83,13 +83,14 @@
     </button>
                         </div>
                     </div>
-<div class="mb-2 d-flex gap-2">
-    <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" onclick="toggleDrawingTool()">
+<div class="mb-2 d-flex gap-2" style="padding: 0 1.5rem;"> <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" onclick="toggleDrawingTool()">
         <i class="fa-solid fa-pencil text-primary me-1"></i> Bật bảng vẽ phác thảo (Bút chì)
     </button>
-    <!-- Nút Cây tùy chỉnh đã được đưa ra ngoài -->
     <button type="button" class="btn btn-sm btn-outline-info fw-bold" onclick="openCustomTreeModal()" title="Chèn cây nhị phân vào bài làm">
         <i class="fa-solid fa-sitemap me-1"></i> Chèn Cây Nhị Phân
+    </button>
+    <button type="button" class="btn btn-sm btn-outline-warning fw-bold text-dark" onclick="toggleUpcoderIframe()" title="Mở trang nộp bài UpCoder">
+        <i class="fa-solid fa-code-compare me-1"></i> Chạy thử code
     </button>
 </div>
 <div id="drawingContainer" class="card p-3 mb-3 d-none border bg-light">
@@ -175,6 +176,37 @@
 </div>
 
                     <div class="card-body p-4 d-flex flex-column justify-content-between">
+<div id="upcoderContainer" class="d-none px-4 mb-2 py-2" style="transition: all 0.2s ease-in-out; background: #f8fafc;">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold text-warning-emphasis"><i class="fa-solid fa-globe me-1"></i> Trình duyệt UpCoder:</span>
+        
+        <!-- NHÓM NÚT ĐIỀU KHIỂN -->
+        <div class="d-flex align-items-center gap-2">
+            <!-- 1. Nút Mở tab mới -->
+            <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" title="Mở trong tab mới" onclick="window.open('http://test.upcoder.xyz/index.php/problems/mysubmit', '_blank')" style="width: 28px; height: 28px; padding: 0;">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </button>
+            
+            <!-- 2. Nút Phóng to / Thu nhỏ -->
+            <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" id="btnFullscreenUpcoder" onclick="toggleFullscreenUpcoder()" title="Mở toàn màn hình" style="width: 28px; height: 28px; padding: 0;">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+            
+            <!-- Vạch phân cách -->
+            <div class="vr mx-1" style="height: 20px; align-self: center;"></div>
+            
+            <!-- 3. Nút Đóng -->
+            <button type="button" class="btn-close" onclick="toggleUpcoderIframe()" title="Đóng"></button>
+        </div>
+    </div>
+
+    <!-- KHUNG IFRAME -->
+   <div id="upcoderIframeWrapper" style="border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; height: 650px; background: #fff;">
+        <iframe id="upcoderIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+    </div>
+</div>
+
+<div class="card-body p-4 d-flex flex-column justify-content-between">
                         <div>
                             <!-- 1. SOẠN THẢO LÝ THUYẾT -->
                             <div class="mb-4">
@@ -198,7 +230,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div id="exerciseCodeEditor" style="height: 320px; border: 1px solid #cbd5e1; border-radius: 8px;"></div>
+                                <div id="exerciseCodeEditor" style="height: 450px; border: 1px solid #cbd5e1; border-radius: 8px;"></div>
                             </div>
                         </div>
 
@@ -311,7 +343,6 @@
         </div>
     </div>
 </div>
-
     <!-- Thư viện JS -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

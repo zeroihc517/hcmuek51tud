@@ -788,7 +788,6 @@ function sendExerciseHistoryReply(rowIndex) {
     });
 }
 // Hàm tự động tìm và chuyển đổi chuỗi dạng URL thành link <a>
-// Hàm tự động tìm và chuyển đổi chuỗi dạng URL thành link <a>
 function convertUrlsToLinks(text) {
     if (!text) return "";
     
@@ -810,13 +809,25 @@ function convertUrlsToLinks(text) {
             href = 'http://' + cleanUrl;
         }
         
-        // Xử lý giao diện cho link
+        // --- KIỂM TRA LINK ĐẶC BIỆT CỦA UPCODER ---
+        let isUpcoder = href.includes('test.upcoder.xyz/index.php/problems/mysubmit');
+
+        if (isUpcoder) {
+            // Đổi href thành javascript:void(0) để không nhảy trang, kích hoạt hàm gọi Iframe
+            if (isFirstLink) {
+                isFirstLink = false;
+                // Đổi màu gradient cam/vàng để nổi bật nút nộp code
+                return `<a href="javascript:void(0)" onclick="toggleUpcoderIframe()" class="tex2jax_ignore btn-first-link" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%);"><i class="fa-solid fa-code-compare me-2"></i>TRUY CẬP LINK</a>${trailingChars}`;
+            } else {
+                return `<a href="javascript:void(0)" onclick="toggleUpcoderIframe()" class="tex2jax_ignore fw-bold text-warning-emphasis text-decoration-underline"><i class="fa-solid fa-code-compare me-1"></i>CHẤM BÀI UPCODER</a>${trailingChars}`;
+            }
+        }
+
+        // --- XỬ LÝ CÁC LINK BÌNH THƯỜNG KHÁC ---
         if (isFirstLink) {
-            isFirstLink = false; // Tắt cờ sau khi đã render link đầu tiên
-            // Thiết kế nút bấm đóng khung chuyên nghiệp cho link đầu tiên
+            isFirstLink = false; 
             return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="tex2jax_ignore btn-first-link"><i class="fa-solid fa-arrow-up-right-from-square me-2"></i>TRUY CẬP LINK</a>${trailingChars}`;
         } else {
-            // Giữ nguyên thiết kế gạch chân bình thường cho các link từ thứ 2 trở đi
             return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="tex2jax_ignore fw-bold text-primary text-decoration-underline"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>TRUY CẬP LINK</a>${trailingChars}`;
         }
     });
@@ -1937,4 +1948,58 @@ function saveAdminExerciseEdit() {
             }
         }
     });
+}
+// Bật/tắt iframe UpCoder
+function toggleUpcoderIframe() {
+    let container = $('#upcoderContainer');
+    let iframe = $('#upcoderIframe');
+    
+    // Nếu đang ở chế độ toàn màn hình mà người dùng bấm nút [X] Đóng -> Tắt toàn màn hình trước
+    if (container.hasClass('upcoder-fullscreen')) {
+        toggleFullscreenUpcoder(); 
+    }
+    
+    container.toggleClass('d-none');
+    
+    if (!container.hasClass('d-none')) {
+        // Gán src nếu chưa có để không load đi load lại
+        if (!iframe.attr('src')) {
+            iframe.attr('src', 'http://test.upcoder.xyz/index.php/problems/mysubmit');
+        }
+        
+        // Tự động cuộn mượt xuống khung iframe
+        $('html, body').animate({
+            scrollTop: container.offset().top - 80
+        }, 300);
+    }
+}
+
+// Bật/tắt chế độ Toàn Màn Hình cho Upcoder
+function toggleFullscreenUpcoder() {
+    let container = $('#upcoderContainer');
+    let icon = $('#btnFullscreenUpcoder i');
+    
+    // Bật/tắt class CSS toàn màn hình
+    container.toggleClass('upcoder-fullscreen');
+    
+    if (container.hasClass('upcoder-fullscreen')) {
+        // Đổi icon thành "Thu nhỏ"
+        icon.removeClass('fa-expand').addClass('fa-compress');
+        $('#btnFullscreenUpcoder').attr('title', 'Thu nhỏ màn hình');
+        
+        // Ẩn thanh cuộn của trang web gốc để không bị cuộn đúp
+        $('body').css('overflow', 'hidden');
+    } else {
+        // Đổi icon về lại "Phóng to"
+        icon.removeClass('fa-compress').addClass('fa-expand');
+        $('#btnFullscreenUpcoder').attr('title', 'Mở toàn màn hình');
+        
+        // Bật lại thanh cuộn của trang web
+        $('body').css('overflow', 'auto');
+        
+        // Cuộn trang lại cho vừa tầm nhìn sau khi thu nhỏ
+        $('html, body').animate({
+            scrollTop: container.offset().top - 80
+        }, 300);
+    }
 }
