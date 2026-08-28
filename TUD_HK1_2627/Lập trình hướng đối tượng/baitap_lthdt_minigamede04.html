@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Làm bài tập Lý thuyết & Lập trình | Học nhóm APMA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Đường dẫn CSS lùi 2 cấp thư mục -->
+    <link href="../../TRANGWEB/styleweb.css" rel="stylesheet">
+    <link href="../Cấu trúc dữ liệu/baitap.css" rel="stylesheet">
+
+</head>
+<body style="background-color: #f8fafc; font-family: 'Inter', sans-serif;">
+
+  <div class="container-fluid px-3 px-md-5 py-4">
+    
+    <!-- VIEW 1: TRANG CHỦ (DANH SÁCH BÀI TẬP) -->
+    <div id="homeView">
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; border-left: 6px solid #0f4c81 !important; background: #ffffff;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <span class="badge bg-primary mb-2 px-3 py-1.5" style="font-size: 13px; background-color: #0f4c81 !important;" id="badgeCourseHome">Đang tải học phần...</span>
+                        <h3 class="fw-bold text-dark m-0">Danh sách bài tập</h3>
+                    </div>
+                    <span class="badge bg-light text-dark border fw-normal" id="labelTotalQuestions">0 câu</span>
+                </div>
+                
+                <div id="loadingQuestionsIndicator" class="text-center py-4 text-primary">
+                    <i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải dữ liệu đề bài...
+                </div>
+                <div id="questionContentAreaError"></div>
+
+                <!-- Lưới danh sách các câu hỏi -->
+                <div class="home-question-grid" id="homeQuestionList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: GIAO DIỆN BÀI LÀM (MẶC ĐỊNH ẨN) -->
+    <div id="workingView" class="d-none">
+        
+        <!-- Nút Trở về -->
+        <button class="btn btn-outline-secondary fw-bold shadow-sm mb-3" onclick="goBackToHome()" style="border-radius: 8px; background: white;">
+            <i class="fa-solid fa-arrow-left me-1"></i> Trở về danh sách
+        </button>
+
+        <!-- Header của bài đang làm -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; border-left: 6px solid #0f4c81 !important; background: #ffffff;">
+            <div class="card-body p-4">
+                <span class="badge bg-primary mb-2 px-3 py-1.5" style="font-size: 13px; background-color: #0f4c81 !important;" id="badgeCourse">Đang tải học phần...</span>
+                <h3 class="fw-bold text-dark m-0" id="titleMaBai">Bài tập: ---</h3>
+            </div>
+        </div>
+
+        <!-- BỐ CỤC CHÍNH: 1/3 TRÁI (ĐỀ BÀI) & 2/3 PHẢI (BÀI LÀM) -->
+        <div class="row g-4 mb-4">
+            <!-- CỘT TRÁI ĐỀ BÀI (Giữ nguyên class cũ của bạn) -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; background-color: #ffffff;">
+                    <div class="card-header bg-light border-0 pt-3 px-4 d-flex align-items-center justify-content-between">
+                        <h6 class="fw-bold text-primary m-0"><i class="fa-solid fa-circle-question me-2"></i>Đề bài chi tiết</h6>
+                        <span class="badge bg-danger px-3 py-1" id="labelCurrentMaBai" style="font-size: 12px;">Mã bài: ---</span>
+                    </div>
+                    <div class="card-body p-4 fs-6 text-secondary" id="questionContentArea" style="line-height: 1.6;">
+                        Đang tải đề bài...
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI BÀI LÀM (Giữ nguyên toàn bộ nội dung cũ của bạn từ <div class="col-lg-7">...) -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; overflow: hidden;" id="mainSubmissionCard">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center py-3 px-4" style="background-color: #0f4c81;">
+                        <h6 class="m-0 fw-bold" id="formSubmissionTitle"><i class="fa-solid fa-pen-to-square me-2"></i>Bài làm của sinh viên</h6>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small opacity-75">MSSV:</span>
+                            <input type="text" id="txtExerciseMSSV" class="form-control form-control-sm fw-bold border-0 text-center" style="width: 120px; background: rgba(255,255,255,0.2); color: #fff;" readonly>
+<button type="button" class="btn btn-sm btn-light fw-bold text-primary shadow-sm" onclick="requireLogin()" title="Đăng nhập tài khoản">
+        <i class="fa-solid fa-right-to-bracket"></i>
+    </button>
+                        </div>
+                    </div>
+<div class="mb-2 d-flex gap-2">
+    <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" onclick="toggleDrawingTool()">
+        <i class="fa-solid fa-pencil text-primary me-1"></i> Bật bảng vẽ phác thảo (Bút chì)
+    </button>
+    <!-- Nút Cây tùy chỉnh đã được đưa ra ngoài -->
+    <button type="button" class="btn btn-sm btn-outline-info fw-bold" onclick="openCustomTreeModal()" title="Chèn cây nhị phân vào bài làm">
+        <i class="fa-solid fa-sitemap me-1"></i> Chèn Cây Nhị Phân
+    </button>
+</div>
+<div id="drawingContainer" class="card p-3 mb-3 d-none border bg-light">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold small text-dark"><i class="fa-solid fa-paintbrush me-1"></i> Bảng vẽ phác thảo tự do:</span>
+        <div class="d-flex gap-2">
+<!-- CÁC NÚT HỖ TRỢ VẼ CÂY -->
+
+            <!-- Nút công cụ vẽ & tẩy -->
+            <button type="button" class="btn btn-sm btn-outline-dark" onclick="setDrawMode('pen')" title="Bút chì"><i class="fa-solid fa-pen"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDrawMode('eraser')" title="Cục tẩy"><i class="fa-solid fa-eraser"></i></button>
+            
+            <!-- Nút Undo / Redo -->
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="undoCanvas()" title="Hoàn tác"><i class="fa-solid fa-rotate-left"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="redoCanvas()" title="Làm lại"><i class="fa-solid fa-rotate-right"></i></button>
+            
+            <!-- Nút mặc định -->
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearCanvas()">Xóa sạch</button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="insertDrawingToEditor()">Chèn vào bài làm</button>
+        </div>
+    </div>
+<!-- Bọc canvas vào thẻ div có thuộc tính resize để kéo tự do -->
+<div id="canvasWrapper" class="shadow-sm rounded" style="resize: vertical; overflow: hidden; min-height: 250px; border: 1px solid #cbd5e1; background: #ffffff; position: relative;">
+    <!-- Bỏ width, height cố định ở đây để canvas tự động co giãn theo thẻ div bọc ngoài -->
+    <canvas id="sketchCanvas" style="cursor: crosshair; display: block; width: 100%; height: 100%;"></canvas>
+</div>
+</div>
+<!-- KHUNG VẼ CÂY NHỊ PHÂN NỘI TUYẾN -->
+<div id="customTreeContainer" class="card p-3 mb-3 d-none border shadow-sm" style="background-color: #f8fafc;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="fw-bold text-primary" style="font-size: 15px;">
+            <i class="fa-solid fa-diagram-project me-2"></i> Bảng chèn Cây Nhị Phân:
+        </span>
+        <button type="button" class="btn-close" onclick="$('#customTreeContainer').addClass('d-none')" title="Đóng"></button>
+    </div>
+    
+    <div class="row g-3">
+        <!-- Cột Nhập Liệu (Bên trái của container) -->
+        <div class="col-lg-5 d-flex flex-column">
+            <h6 class="fw-bold text-dark mb-2" style="font-size: 13.5px;">
+                <i class="fa-solid fa-keyboard me-1 text-secondary"></i>Nhập dữ liệu từng nút:
+            </h6>
+            <div class="table-responsive flex-grow-1" style="max-height: 450px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;">
+                <table class="table table-bordered align-middle text-center mb-0" id="customTreeTable">
+                    <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                        <tr>
+                            <th>Cha</th>
+                            <th>Trái</th>
+                            <th>Phải</th>
+                            <th>Xóa</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- JS tự thêm dòng -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-2 text-center">
+                <button class="btn btn-sm btn-outline-secondary fw-bold w-100 py-2" onclick="$('#customTreeTable tbody').append('<tr><td><input type=\'text\' class=\'form-control form-control-sm node-parent\'></td><td><input type=\'text\' class=\'form-control form-control-sm node-left\'></td><td><input type=\'text\' class=\'form-control form-control-sm node-right\'></td><td><button class=\'btn btn-sm btn-danger\' onclick=\'removeCustomTreeRow(this)\'><i class=\'fa-solid fa-trash\'></i></button></td></tr>');">
+                    <i class="fa-solid fa-plus me-1"></i>Thêm dòng
+                </button>
+            </div>
+        </div>
+
+        <!-- Cột Xem trước (Bên phải của container) -->
+        <div class="col-lg-7 d-flex flex-column">
+            <h6 class="fw-bold text-success mb-2" style="font-size: 13.5px;">
+                <i class="fa-solid fa-eye me-1"></i>Bản xem trước trực tiếp:
+            </h6>
+            <!-- Chỉnh min-height để khung vẽ luôn rộng và hiển thị to -->
+            <div class="flex-grow-1 bg-white d-flex justify-content-center align-items-center p-2" style="overflow: auto; border: 1px dashed #cbd5e1; border-radius: 8px; min-height: 450px;">
+                <canvas id="treePreviewCanvas" width="1200" height="800" style="background:#ffffff; width: 100%; min-height: 450px; object-fit: contain;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-3 gap-2 border-top pt-3">
+        <button type="button" class="btn btn-light border fw-bold" onclick="$('#customTreeContainer').addClass('d-none')">Hủy bỏ</button>
+        <button type="button" class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" onclick="insertTreeDirectlyToEditor()">
+            <i class="fa-solid fa-check me-1"></i> Chèn hình vào bài làm
+        </button>
+    </div>
+</div>
+
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <!-- 1. SOẠN THẢO LÝ THUYẾT -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark" style="font-size: 15px;">
+                                    <i class="fa-solid fa-align-left text-primary me-2"></i>1. TRẢ LỜI / LỜI GIẢI LÝ THUYẾT:
+                                </label>
+                                <textarea id="theoryEditor" class="form-control" rows="6" placeholder="Trình bày lời giải hoặc câu trả lời lý thuyết..."></textarea>
+                            </div>
+
+                            <!-- 2. KHUNG CODE (TỰ ĐỘNG HIỆN/ẨN TÙY THUỘC VÀO CÂU HỎI) -->
+                            <div class="mb-4" id="codeSectionWrapper">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label fw-bold text-dark m-0" style="font-size: 15px;">
+                                        <i class="fa-solid fa-code text-success me-2"></i>2. MÃ NGUỒN CHƯƠNG TRÌNH (CODE):
+                                    </label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="small text-muted">Ngôn ngữ:</span>
+                                        <select id="selectLang" class="form-select form-select-sm fw-bold" style="width: 120px;" onchange="changeEditorLang()">
+                                            <option value="cpp">C / C++</option>
+                                            <option value="python">Python</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="exerciseCodeEditor" style="height: 320px; border: 1px solid #cbd5e1; border-radius: 8px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- NÚT NỘP BÀI -->
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted small"><i class="fa-solid fa-circle-info me-1"></i>Bài làm sẽ được lưu trực tiếp vào Thảo luận.</span>
+                                <button type="button" class="btn btn-sm btn-outline-danger fw-bold d-none" id="btnCancelEditMode" onclick="cancelEditMode()">
+                                    <i class="fa-solid fa-xmark me-1"></i> Hủy sửa
+                                </button>
+                            </div>
+                            <button type="button" class="btn text-white fw-bold px-5 py-2.5 shadow-sm" style="background-color: #0f4c81; border-radius: 12px; font-size: 15px;" onclick="submitExerciseSolution()" id="btnSubmitExercise">
+                                <i class="fa-solid fa-paper-plane me-2"></i> Nộp bài & Đăng lên Thảo luận
+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MỤC LỊCH SỬ BÀI NỘP CỦA TÔI -->
+        <div class="card border-0 shadow-sm" style="border-radius: 16px; background-color: #ffffff;">
+            <div class="card-header bg-light border-0 pt-3 px-4 d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold text-success m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử bài nộp của tôi</h6>
+                <button class="btn btn-sm btn-outline-success fw-bold" onclick="loadSubmissionHistory(true)" style="border-radius: 8px;">
+    <i class="fa-solid fa-rotate-right me-1"></i> Làm mới lịch sử
+</button>
+            </div>
+            <div class="card-body p-4" id="submissionHistoryContainer">
+                <div class="text-center text-muted py-3">
+                    <i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải lịch sử bài nộp...
+                </div>
+            </div>
+        </div>
+</div>
+    </div>
+
+<!-- MODAL BẢNG ĐĂNG NHẬP TRÊN TRANG BÀI TẬP -->
+<div class="modal fade" id="userAuthModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header text-white text-center p-4 d-block" style="background-color: #0f4c81;">
+                <i class="fa-solid fa-graduation-cap fs-1 mb-2"></i>
+                <h5 class="fw-bold m-0">ĐĂNG NHẬP HỆ THỐNG</h5>
+            </div>
+            <div class="modal-body p-4 p-md-5">
+                <div class="input-group mb-4 shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                    <span class="input-group-text bg-light border-0"><i class="fa-solid fa-id-card text-muted"></i></span>
+                    <input type="text" id="txtUserMSSV" class="form-control border-0 bg-light py-2" placeholder="Mã số sinh viên (VD: 51.01...)">
+                </div>
+                <div class="input-group mb-3 shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                    <span class="input-group-text bg-light border-0"><i class="fa-solid fa-lock text-muted"></i></span>
+                    <!-- QUAN TRỌNG: Gọi hàm loginStudentExercise() -->
+                    <input type="password" id="txtUserPass" class="form-control border-0 bg-light py-2" placeholder="Mật khẩu" onkeypress="if(event.key === 'Enter') loginStudentExercise()">
+                </div>
+                
+                <small class="text-danger text-center d-block d-none mb-3 fw-bold" id="userAuthError"></small>
+                
+                <!-- QUAN TRỌNG: Gọi hàm loginStudentExercise() -->
+                <button type="button" class="btn text-white w-100 fw-bold py-2.5 mb-2 shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" id="btnLoginStudent" onclick="loginStudentExercise()">
+                    Đăng nhập ngay
+                </button>
+                <button type="button" class="btn btn-light w-100 fw-bold py-2 border shadow-sm" style="border-radius: 8px;" data-bs-dismiss="modal">
+                    Hủy bỏ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="adminEditQuestionModal" data-bs-backdrop="static" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen"> 
+        <div class="modal-content border-0">
+            <div class="modal-header bg-warning text-dark border-0">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa đề bài (Admin)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-4 bg-light d-flex flex-column">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold text-dark">Mã bài:</label>
+                        <input type="text" id="adminEditMaBai" class="form-control border-secondary shadow-sm">
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label fw-bold text-dark">Tiêu đề (Tên bài):</label>
+                        <input type="text" id="adminEditTitle" class="form-control border-secondary shadow-sm">
+                    </div>
+                </div>
+                
+                <div class="row g-3 flex-grow-1" style="min-height: 0;">
+                    <div class="col-md-6 d-flex flex-column">
+                        <label class="form-label fw-bold text-dark">Mã nguồn đề bài (HTML/LaTeX):</label>
+                        <textarea id="adminEditContent" class="form-control border-secondary shadow-sm flex-grow-1" style="font-family: 'Consolas', monospace; font-size: 14px; background-color: #1e293b; color: #f8fafc; resize: none;"></textarea>
+                    </div>
+                    <div class="col-md-6 d-flex flex-column">
+                        <label class="form-label fw-bold text-success"><i class="fa-solid fa-eye me-1"></i>Bản xem trước trực tiếp:</label>
+                        <div id="adminEditPreview" class="p-4 bg-white border border-secondary shadow-sm fs-6 text-secondary flex-grow-1" style="border-radius: 6px; overflow-y: auto; line-height: 1.6;">
+                            Đang chờ dữ liệu...
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer border-0 bg-white">
+                <button type="button" class="btn btn-light border fw-bold" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-warning fw-bold px-4" onclick="saveAdminExerciseEdit()">
+                    <i class="fa-solid fa-floppy-disk me-2"></i>Lưu thay đổi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+    <!-- Thư viện JS -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
+    <!-- Đường dẫn JS config lùi 2 cấp thư mục -->
+    <script src="../../TRANGWEB/config.js"></script>
+
+<script>
+        window.FILTER_TITLE_KEYWORD = "minigame lthđt đề 04";
+        window.EXERCISE_COURSE_NAME = "Lập trình hướng đối tượng";
+    </script>
+    
+    <!-- File JS dùng chung cho tất cả các trang bài tập -->
+    <script src="../Cấu trúc dữ liệu/baitap.js"></script>
+<!-- Thêm MathJax để đọc công thức LaTeX $n$, \(...\) -->
+<script>
+    window.MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']],
+            displayMath: [['$$', '$$'], ['\\[', '\\]']]
+        }
+    };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="../../TRANGWEB/qa.js"></script>
+</body>
+</html>
