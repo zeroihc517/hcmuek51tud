@@ -236,3 +236,61 @@
 .btn-question-card.completed .q-code {
     color: #15803d !important;
 }
+/* GIAO DIỆN NÚT BẤM CHO LINK ĐẦU TIÊN (BẢN PREMIUM) */
+.btn-first-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    /* Gradient chuyển từ xanh chủ đạo sang xanh sáng mượt mà */
+    background: linear-gradient(135deg, #0f4c81 0%, #1a73e8 100%);
+    color: #ffffff !important;
+    padding: 8px 18px;
+    border-radius: 10px; /* Bo góc tròn trịa hơn */
+    font-size: 14.5px;
+    font-weight: 700;
+    text-decoration: none !important;
+    /* Bóng đổ đa tầng tạo chiều sâu 3D */
+    box-shadow: 0 4px 12px rgba(15, 76, 129, 0.25), 
+                inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    margin: 4px 2px;
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* Hiệu ứng tia sáng lướt ngang (Shine Effect) chạy tự động */
+.btn-first-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    animation: shineEffect 3.5s infinite;
+    z-index: -1;
+}
+
+@keyframes shineEffect {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; } /* Tạo thời gian nghỉ giữa các lần lướt sáng */
+}
+
+/* Hiệu ứng khi di chuột vào (Hover) */
+.btn-first-link:hover {
+    transform: translateY(-3px) scale(1.02); /* Phóng to và nảy lên nhẹ */
+    box-shadow: 0 8px 20px rgba(26, 115, 232, 0.35); /* Tỏa sáng mạnh hơn */
+    background: linear-gradient(135deg, #0c3e69 0%, #1557b0 100%);
+}
+
+/* Hiệu ứng riêng cho Icon bên trong: Nhích chéo lên trên tạo cảm giác mở link */
+.btn-first-link i {
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-first-link:hover i {
+    transform: translate(3px, -3px) scale(1.1);
+}

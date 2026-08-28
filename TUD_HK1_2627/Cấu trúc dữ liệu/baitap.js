@@ -788,11 +788,15 @@ function sendExerciseHistoryReply(rowIndex) {
     });
 }
 // Hàm tự động tìm và chuyển đổi chuỗi dạng URL thành link <a>
+// Hàm tự động tìm và chuyển đổi chuỗi dạng URL thành link <a>
 function convertUrlsToLinks(text) {
     if (!text) return "";
     
     // Regex bắt trọn vẹn chuỗi URL bắt đầu từ http://, https:// hoặc www.
     const urlRegex = /(<a\b[^>]*>[\s\S]*?<\/a>)|(<[^>]+>)|((?:https?:\/\/|www\.)[^\s<>]+)/gi;
+    
+    // Biến cờ để đánh dấu link đầu tiên
+    let isFirstLink = true; 
     
     return text.replace(urlRegex, function(match, aTag, anyTag, rawUrl) {
         if (aTag || anyTag) return match; 
@@ -806,9 +810,15 @@ function convertUrlsToLinks(text) {
             href = 'http://' + cleanUrl;
         }
         
-        // Hiển thị chữ "TRUY CẬP LINK" thay vì hiển thị nguyên chuỗi URL dài
-        // Thêm tex2jax_ignore để MathJax không đụng vào làm méo chữ
-        return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="tex2jax_ignore fw-bold text-primary text-decoration-underline"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>TRUY CẬP LINK</a>${trailingChars}`;
+        // Xử lý giao diện cho link
+        if (isFirstLink) {
+            isFirstLink = false; // Tắt cờ sau khi đã render link đầu tiên
+            // Thiết kế nút bấm đóng khung chuyên nghiệp cho link đầu tiên
+            return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="tex2jax_ignore btn-first-link"><i class="fa-solid fa-arrow-up-right-from-square me-2"></i>TRUY CẬP LINK</a>${trailingChars}`;
+        } else {
+            // Giữ nguyên thiết kế gạch chân bình thường cho các link từ thứ 2 trở đi
+            return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="tex2jax_ignore fw-bold text-primary text-decoration-underline"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>TRUY CẬP LINK</a>${trailingChars}`;
+        }
     });
 }
 
