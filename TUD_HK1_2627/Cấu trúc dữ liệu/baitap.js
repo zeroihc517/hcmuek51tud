@@ -810,7 +810,7 @@ function convertUrlsToLinks(text) {
         }
         
         // --- KIỂM TRA LINK ĐẶC BIỆT CỦA UPCODER ---
-        let isUpcoder = href.includes('test.upcoder.xyz/index.php/problems/mysubmit');
+        let isUpcoder = href.includes('https://test.upcoder.xyz/index.php/problems/mysubmit');
 
         if (isUpcoder) {
             // Đổi href thành javascript:void(0) để không nhảy trang, kích hoạt hàm gọi Iframe
