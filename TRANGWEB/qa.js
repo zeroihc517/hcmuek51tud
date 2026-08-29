@@ -3094,13 +3094,20 @@ window.openPersonalNotifications = function() {
             </div>`;
         });
 
-        window.personalUnreadShareCode.forEach(row => {
+       window.personalUnreadShareCode.forEach(row => {
             let codePreview = String(row[2]).replace(/<[^>]*>?/gm, '');
+            
+            // Bóc tách mã bài
             let maBaiMatch = codePreview.match(/^\[SHARECODE\|.*?\|(.*?)\]/);
             let maBai = maBaiMatch && maBaiMatch[1] ? maBaiMatch[1].trim() : "Mã code";
 
+            // Bóc tách tên danh mục (catName) ngay tại đây để truyền đi an toàn
+            let catMatch = codePreview.match(/^\[SHARECODE\|(.*?)(?:\||\])/);
+            let catName = catMatch && catMatch[1] ? catMatch[1].trim() : "";
+
+            // Truyền biến catName vào onclick thay vì codePreview
             html += `
-            <div class="p-3 border-bottom" style="cursor: pointer; background: #f0fdf4; transition: 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'" onclick="handleNotificationClick('ShareCode', ${row[6]}, '${codePreview}')">
+            <div class="p-3 border-bottom" style="cursor: pointer; background: #f0fdf4; transition: 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'" onclick="handleNotificationClick('ShareCode', ${row[6]}, '${catName}')">
                 <div class="d-flex align-items-start gap-3">
                     <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><i class="fa-solid fa-code"></i></div>
                     <div>
@@ -3115,7 +3122,9 @@ window.openPersonalNotifications = function() {
     $('#personalNotificationModal').modal('show');
 };
 
-window.handleNotificationClick = function(type, rowIndex, codePreview) {
+
+
+ window.handleNotificationClick = function(type, rowIndex, catName) { // Đổi tham số thứ 3 thành catName
     $('#personalNotificationModal').modal('hide');
 
     // Tẩy trạng thái Đã đọc gửi về Server
@@ -3125,7 +3134,6 @@ window.handleNotificationClick = function(type, rowIndex, codePreview) {
         rowIndex: rowIndex,
         mssv: currentUser.mssv
     }, function() {
-        // Tẩy trực tiếp dữ liệu ảo trên RAM
         if (type === 'Q&A') window.personalUnreadQA = window.personalUnreadQA.filter(r => r[6] !== rowIndex);
         else window.personalUnreadShareCode = window.personalUnreadShareCode.filter(r => r[6] !== rowIndex);
         updatePersonalNotificationBell();
@@ -3145,17 +3153,25 @@ window.handleNotificationClick = function(type, rowIndex, codePreview) {
     } 
     else if (type === 'ShareCode') {
         openShareCodeSection();
-        let catMatch = codePreview.match(/^\[SHARECODE\|(.*?)\|/);
-        if (catMatch && catMatch[1]) {
-            let catName = catMatch[1].trim();
-            // Lọc giả lập để lấy ngôn ngữ, sau đó gọi load chi tiết
+        
+        // Sử dụng trực tiếp catName truyền từ trên xuống
+        if (catName) {
             let lang = catName.toLowerCase().includes('python') ? 'python' : 'cpp';
+            
             setTimeout(() => {
                 openShareCategory(catName, lang);
-                setTimeout(() => {
-                    let itemIndex = window.shareCodeList.findIndex(i => i.rowIndex === rowIndex);
-                    if (itemIndex !== -1) openShareCodeDetail(itemIndex);
-                }, 1000);
+                
+                // Quét liên tục chờ dữ liệu tải xong mới mở bài
+                let retryCount = 0;
+                let checkDataInterval = setInterval(() => {
+                    if (window.shareCodeList && window.shareCodeList.length > 0) {
+                        clearInterval(checkDataInterval);
+                        let itemIndex = window.shareCodeList.findIndex(i => i.rowIndex === rowIndex);
+                        if (itemIndex !== -1) openShareCodeDetail(itemIndex);
+                    }
+                    retryCount++;
+                    if (retryCount > 25) clearInterval(checkDataInterval); // Tự tắt sau 5 giây để chống treo
+                }, 200);
             }, 300);
         }
     }
