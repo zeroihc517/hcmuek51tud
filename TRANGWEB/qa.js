@@ -3141,16 +3141,40 @@ window.openPersonalNotifications = function() {
 
     // Dịch chuyển đến đúng màn hình tương ứng
     if (type === 'Q&A') {
+        // Mở phân hệ Giải đáp thắc mắc
         openQASection();
-        setTimeout(() => {
+        
+        // Cơ chế quét chờ dữ liệu Q&A render xong để cuộn tới đúng vị trí câu hỏi
+        let retryCount = 0;
+        let checkQaInterval = setInterval(() => {
+            // Tìm block câu hỏi có chứa nút phản hồi hoặc ID tương ứng với rowIndex
             let targetBlock = $('#replyBox-' + rowIndex).closest('.qa-item');
-            if (targetBlock.length) {
-                $('html, body').animate({ scrollTop: targetBlock.offset().top - 100 }, 600);
-                targetBlock.css({'border-color': '#e61d4a', 'box-shadow': '0 0 15px rgba(230, 29, 74, 0.4)'});
-                setTimeout(() => targetBlock.css({'border-color': '', 'box-shadow': ''}), 4000);
+            
+            if (targetBlock.length > 0) {
+                clearInterval(checkQaInterval); // Dừng quét khi đã tìm thấy
+                
+                // Cuộn mượt mà đưa câu hỏi lên gần đầu màn hình
+                $('html, body').animate({ 
+                    scrollTop: targetBlock.offset().top - 100 
+                }, 600);
+                
+                // Thêm hiệu ứng viền đỏ nháy sáng để người dùng dễ nhận biết câu hỏi mới
+                targetBlock.css({
+                    'border-color': '#e61d4a', 
+                    'box-shadow': '0 0 20px rgba(230, 29, 74, 0.4)',
+                    'transition': 'all 0.5s ease'
+                });
+                
+                // Sau 4 giây tự động gỡ hiệu ứng viền sáng
+                setTimeout(() => { 
+                    targetBlock.css({'border-color': '', 'box-shadow': ''}); 
+                }, 4000);
             }
-        }, 1200); 
-    } 
+            
+            retryCount++;
+            if (retryCount > 30) clearInterval(checkQaInterval); // Quá 6 giây tự ngắt để tránh lặp vô tận nếu mạng lỗi
+        }, 200);
+    }
     else if (type === 'ShareCode') {
         openShareCodeSection();
         
