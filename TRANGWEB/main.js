@@ -365,7 +365,7 @@ function renderSidebarCategories() {
     }
     // 1. Cấu hình phân nhóm danh mục (Bạn tự thêm tên Sheet thực tế vào mảng tương ứng)
     const categoryGroups = {
-	'HK2 - Năm 2': ["Độ đo và tích phân", "Toán rời rạc", "Lập trình Python", "Phương trình vi phân và đạo hàm riêng", "Trí tuệ nhân tạo", "Lịch sử Đảng"],
+	'HK2 - Năm 2': ["Độ đo và tích phân", "Toán rời rạc", "Lập trình Python", "Phương trình vi phân và đạo hàm riêng", "Trí tuệ nhân tạo", "Lịch sử Đảng", "Quốc phòng An ninh"],
 	'HK1 - Năm 2': ['Hình học vi phân', 'Cấu trúc đại số', 'Cấu trúc dữ liệu', 'Lập trình hướng đối tượng', 'Tư tưởng Hồ Chí Minh'], 
 	'Năm 1': ["Năm 1"],
     'Khác': [],
