@@ -2898,3 +2898,47 @@ function updatePausedUI(remaining) {
     // Cập nhật text cho cả 3 đồng hồ
     $('#lblCountdownClock, #lblViewerCountdownClock, #lblLatexCountdownClock').text(displayStr);
 }
+
+// Hàm mở file HTML trực tiếp thay vì Modal
+window.openCustomHtml = function(fileUrl, title) {
+    // Giấu bảng bài học đi
+    $('#courseSection').addClass('d-none');
+    
+    // Hiện khung chứa HTML
+    $('#customHtmlSection').removeClass('d-none');
+    $('#customHtmlTitle').html(`<i class="fa-solid fa-file-code me-2"></i> ${title}`);
+    $('#customHtmlContent').html('<div class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin fs-2 mb-2 text-primary"></i><br>Đang tải nội dung...</div>');
+    
+    // MÃ HÓA ĐƯỜNG DẪN SIÊU CHUẨN CHO GITHUB:
+    // Tách đường dẫn theo dấu '/', bọc an toàn từng thư mục (xử lý triệt để tiếng Việt, khoảng trắng), rồi ghép lại
+    let safeFileUrl = fileUrl.trim().split('/').map(part => encodeURIComponent(part)).join('/');
+    
+    // Dùng jQuery AJAX để nhúng nội dung
+    $('#customHtmlContent').load(safeFileUrl, function(response, status, xhr) {
+        if (status == "error") {
+            let errorMsg = "Lỗi HTTP " + xhr.status + " " + xhr.statusText;
+            
+            // Bắt bệnh và giải thích chi tiết nếu gặp Lỗi 0
+            if (xhr.status === 0) {
+                errorMsg = `
+                    <b class="text-danger">Lỗi 0 (Bị chặn bảo mật hoặc Sai đường dẫn).</b><br>
+                    <ul class="text-start mt-2 mb-0">
+                        <li><b>Nguyên nhân 1:</b> Bạn đang mở file web trực tiếp trên máy tính (địa chỉ <code>file:///</code>). Trình duyệt sẽ chặn tải HTML. <b>Hãy đẩy code lên GitHub rồi mở link GitHub để test.</b></li>
+                        <li><b>Nguyên nhân 2:</b> Sai chữ hoa/chữ thường. GitHub phân biệt hoa/thường rất gắt. Hãy kiểm tra thư mục trên kho GitHub có đúng từng chữ <code>Cấu trúc dữ liệu</code> không.</li>
+                    </ul>
+                `;
+            }
+            
+            $('#customHtmlContent').html('<div class="alert alert-danger m-0 shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> Không thể tải file: <br><br>' + errorMsg + '</div>');
+        } else {
+            // Render lại công thức toán học nếu trong file HTML có chứa LaTeX
+            if (typeof applyKaTeX === 'function') applyKaTeX('customHtmlContent');
+        }
+    });
+};
+// Hàm quay trở lại Bảng bài học
+window.backToCourseTable = function() {
+    $('#customHtmlSection').addClass('d-none');
+    $('#customHtmlContent').html(''); // Xóa RAM
+    $('#courseSection').removeClass('d-none');
+};

@@ -1401,9 +1401,10 @@ if (!isChapter && !isLesson && !rowClass.includes('row-part')) {
     lessonIcon = '<i class="fa-solid fa-file-lines me-2" style="color: #0ea5e9; font-size: 16px;"></i>';
 }
 
-        
-       // --- LOGIC PHÂN LOẠI HIỂN THỊ: LINK HAY NỘI DUNG LATEX ---
-// --- LOGIC PHÂN LOẠI HIỂN THỊ: LINK HAY NỘI DUNG LATEX ---
+     // --- LOGIC PHÂN LOẠI HIỂN THỊ: LINK HAY NỘI DUNG LATEX ---
+let isLoadHtml = c3.trim().startsWith('[LOAD_HTML]');
+let htmlFileUrl = isLoadHtml ? c3.trim().replace('[LOAD_HTML]', '').trim() : '';
+
 let isLinkOnly = extractedUrl && c3.replace(_urlRegex, '').trim() === '';
 
 // FIX: Bổ sung replace dọn dẹp ký tự xuống dòng (\n, \r) để không làm gãy lệnh onclick
@@ -1433,6 +1434,9 @@ if (isUpdating && !isAdmin) {
 } else if (isMinigamePrompt) {
     // TRƯỜNG HỢP MỚI: Nếu chứa từ khóa "hãy làm đề", "minigame" -> Cuộn lên Top và mở khung Minigame
     col2Html = `<span onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); $('#collapseMinigames').collapse('show'); event.stopPropagation();" style="cursor: pointer; color: #ef4444; font-weight: 700; text-decoration: none;" title="Nhấn để về đầu trang và mở khung Minigame"><i class="fa-solid fa-gamepad me-2" style="color: #ef4444; font-size: 16px;"></i>${col2Html}</span>`;
+} else if (isLoadHtml) {
+    // TRƯỜNG HỢP GỌI FILE HTML TÙY CHỈNH
+    col2Html = `<span onclick="openCustomHtml('${htmlFileUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem trang nội dung">${lessonIcon}${col2Html || "Xem nội dung"}</span>`;
 } else if (isLinkOnly) {
     // CỘT 3 CHỈ CHỨA LINK -> Mở File Drive/PDF như cũ
   col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${safeUrl}', '${safeTitle}', '${currentSheetName}', '${stableKey}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem tài liệu trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;
@@ -3463,6 +3467,7 @@ function resetNavActive() {
     $('#gpaSection').addClass('d-none');
     $('#profileSection').addClass('d-none');
 	$('#datLichSection').addClass('d-none');
+$('#customHtmlSection').addClass('d-none');
 }
 
 // Chèn lệnh ẩn vào hàm reset mặc định
