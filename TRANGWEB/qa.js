@@ -2901,24 +2901,43 @@ function updatePausedUI(remaining) {
 
 // Hàm mở file HTML trực tiếp thay vì Modal
 window.openCustomHtml = function(fileUrl, title) {
+    // 1. Giấu bảng bài học đi
     $('#courseSection').addClass('d-none');
+    
+    // 2. Hiện khung chứa HTML
     $('#customHtmlSection').removeClass('d-none');
     $('#customHtmlTitle').html(`<i class="fa-solid fa-file-code me-2"></i> ${title}`);
-    $('#customHtmlContent').html('<div class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin fs-2 mb-2 text-primary"></i><br>Đang tải nội dung...</div>');
     
+    // 3. Xử lý đường dẫn tiếng Việt an toàn cho GitHub
     let safeFileUrl = fileUrl.trim().split('/').map(part => encodeURIComponent(part)).join('/');
     
-    $('#customHtmlContent').load(safeFileUrl, function(response, status, xhr) {
-        if (status == "error") {
-            $('#customHtmlContent').html('<div class="alert alert-danger m-0 shadow-sm"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi không tải được file: ' + xhr.status + " " + xhr.statusText + '</div>');
-        } else {
-            // Ép file HTML phụ chạy hàm nạp dữ liệu (Thay 'tenHamLayDuLieu' bằng tên hàm thực tế trong file phụ)
-            if (typeof tenHamLayDuLieu === 'function') {
-                tenHamLayDuLieu();
+    // 4. Tạo Iframe (chiều cao động theo khung hình) và gắn sự kiện tải xong
+    $('#customHtmlContent').html(`
+        <iframe id="iframeCustomDoc" 
+                src="${safeFileUrl}" 
+                style="width: 100%; height: 75vh; border: none; border-radius: 8px;" 
+                allowfullscreen>
+        </iframe>
+    `);
+    
+    // 5. Cấp cứu dữ liệu Đăng nhập (Truyền tài khoản từ web mẹ xuống web con)
+    let iframeEl = document.getElementById('iframeCustomDoc');
+    iframeEl.onload = function() {
+        try {
+            // Khi iframe tải xong, truyền biến currentUser (nếu có) xuống cho iframe
+            if (typeof currentUser !== 'undefined' && currentUser) {
+                // Set localStorage dùng chung cùng tên miền (phòng hờ)
+                iframeEl.contentWindow.localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                // Cố gắng gọi hàm refresh hoặc login tự động bên trong iframe (nếu có)
+                if (typeof iframeEl.contentWindow.autoLoginFromParent === 'function') {
+                    iframeEl.contentWindow.autoLoginFromParent(currentUser);
+                }
             }
-            if (typeof applyKaTeX === 'function') applyKaTeX('customHtmlContent');
+        } catch(e) {
+            console.log("Cảnh báo: Iframe chặn giao tiếp DOM chéo (do khác domain hoặc chạy local).", e);
         }
-    });
+    };
 };
 
 // Hàm quay trở lại Bảng bài học
