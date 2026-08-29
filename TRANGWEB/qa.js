@@ -2941,11 +2941,11 @@ window.openCustomHtml = function(fileUrl, title) {
 };
 
 window.openDirectWeb = function(safeFileUrl, title) {
-    // 1. Ẩn thanh menu bên trái và phần bảng bài học chính
+    // 1. Chỉ ẩn thanh menu bên trái và phần bảng bài học chính
     $('#sidebarMenu').addClass('d-none');
     $('#courseSection').addClass('d-none');
     
-    // 2. Ép khung chứa #customHtmlSection phủ kín toàn màn hình tuyệt đối
+    // 2. Ép khung chứa phủ kín toàn màn hình tuyệt đối
     let fullScreenContainer = $('#customHtmlSection');
     fullScreenContainer.removeClass('d-none').css({
         'position': 'fixed',
@@ -2956,65 +2956,244 @@ window.openDirectWeb = function(safeFileUrl, title) {
         'z-index': '9999',
         'background': '#ffffff',
         'padding': '0',
-        'margin': '0'
+        'margin': '0',
+        'display': 'flex',
+        'flex-direction': 'column'
     });
     
-    // 3. Thanh Header cố định ở đầu trang (có nút Trở lại và Tên bài)
+    // 3. Tích hợp thanh Header chuẩn (Có tiêu đề, Đồng hồ đếm ngược, Nút Công cụ và Nút X đóng ở bên phải)
     let headerEl = fullScreenContainer.find('header.top-header');
     headerEl.removeClass('d-none').css({
         'display': 'flex',
         'align-items': 'center',
-        'justify-content': 'flex-start',
-        'gap': '15px',
-        'padding': '12px 25px',
+        'justify-content': 'space-between',
+        'padding': '10px 20px',
         'background-color': '#0f4c81', 
         'color': '#ffffff',
-        'height': '65px',
+        'height': '60px',
         'width': '100vw',
         'border-radius': '0',
         'box-shadow': '0 2px 5px rgba(0,0,0,0.1)',
         'margin': '0'
     }).html(`
-        <button onclick="backToCourseTable()" class="btn btn-light fw-bold shadow-sm d-flex align-items-center gap-2" style="border-radius: 50px; padding: 5px 16px; font-size: 14px; border: none; background: #ffffff; color: #0f4c81; cursor: pointer;">
-            <i class="fa-solid fa-arrow-left"></i> Trở lại
-        </button>
-        <h6 class="m-0 fw-bold text-white text-truncate" style="font-size: 16px; letter-spacing: 0.5px;">
-            <i class="fa-solid fa-book-open me-2"></i>${title}
-        </h6>
+        <div class="d-flex align-items-center gap-3" style="max-width: 50%; overflow: hidden;">
+            <h6 class="m-0 fw-bold text-white text-truncate" style="font-size: 15px; letter-spacing: 0.5px;">
+                <i class="fa-solid fa-book-open me-2"></i>${title}
+            </h6>
+        </div>
+        
+        <div id="webViewerCountdownClock" class="d-none px-3 py-1 rounded-pill flex-shrink-0" style="background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.3); font-family: 'Chakra Petch', sans-serif;">
+            <i class="fa-solid fa-stopwatch fa-spin-slow me-2" style="color: #facc15;"></i>
+            <span class="fw-bold fs-6" id="lblWebViewerCountdownClock" style="color: #facc15; letter-spacing: 0.5px;">00:00:00</span>
+            <button class="btn btn-sm btn-link text-white p-0 ms-2 btn-countdown-pause" onclick="togglePauseUserCountdown()" title="Tạm ngưng / Tiếp tục"><i class="fa-solid fa-pause"></i></button>
+        </div>
+
+        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+            <button type="button" class="btn btn-sm fw-bold d-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleDirectWebSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
+                <i class="fa-solid fa-layer-group"></i> Công cụ
+            </button>
+            <button onclick="tryBackToCourseTable()" class="btn btn-light fw-bold shadow-sm d-flex align-items-center justify-content-center" style="border-radius: 50%; width: 36px; height: 36px; font-size: 16px; border: none; background: #ffffff; color: #0f4c81; cursor: pointer;" title="Đóng bài học">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
     `);
 
     $('#btnFloatingBack').remove();
 
-    // 4. Xóa sạch các class tạo khung card trắng và ép iframe tràn viền tuyệt đối 100vw
+    // 4. Tạo cấu trúc thân chứa Iframe và Sidebar công cụ đầy đủ tính năng bên phải
+    let stableKeyFromUrl = encodeURIComponent(safeFileUrl); // Tạo khóa tạm dựa trên URL
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    let progVal = localStorage.getItem(`prog_${mssv}_${currentSheetName}_${stableKeyFromUrl}`) || 'white';
+    let bgProgColor = getProgressColor(progVal);
+
     $('#customHtmlContent').removeClass('bg-white rounded border shadow-sm p-3 p-md-4').css({
         'width': '100vw',
-        'height': 'calc(100vh - 65px)',
+        'height': 'calc(100vh - 60px)',
         'max-width': 'none',
         'padding': '0',
         'margin': '0',
         'border': 'none',
         'border-radius': '0',
         'box-shadow': 'none',
-        'background': '#ffffff',
+        'background': '#202124',
+        'flex-grow': '1',
+        'display': 'flex',
+        'position': 'relative',
         'box-sizing': 'border-box'
     }).html(`
-        <iframe src="${safeFileUrl}" 
-                style="width: 100vw; height: 100%; border: none; display: block; margin: 0; padding: 0; background: #ffffff;" 
-                allowfullscreen>
-        </iframe>
+        <div class="flex-grow-1 position-relative" style="height: 100%;">
+            <iframe id="iframeCustomDoc" 
+                    src="${safeFileUrl}" 
+                    style="width: 100%; height: 100%; border: none; display: block; margin: 0; padding: 0; background: #ffffff;" 
+                    allowfullscreen>
+            </iframe>
+        </div>
+        
+        <div id="directWebSidebar" class="d-none flex-column" style="width: 32%; min-width: 350px; max-width: 450px; border-left: 1px solid #cbd5e1; background-color: #f8fafc; overflow-y: auto; height: 100%; z-index: 2; box-shadow: -4px 0 15px rgba(0,0,0,0.05);">
+            <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
+                <h6 class="fw-bold m-0" style="color: #0f4c81; font-size: 14.5px;"><i class="fa-solid fa-toolbox me-2"></i>Công cụ bài học</h6>
+                <button class="btn-close" style="font-size: 11px;" onclick="toggleDirectWebSidebar()"></button>
+            </div>
+            <div class="p-3 d-flex flex-column flex-grow-1 gap-3">
+                <div class="d-flex gap-2">
+                    <a href="https://chatgpt.com/" target="_blank" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #10a37f; border: 1.5px solid #10a37f; border-radius: 6px; font-size: 12.5px;">ChatGPT</a>
+                    <a href="https://gemini.google.com/" target="_blank" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #8b5cf6; border: 1.5px solid #8b5cf6; border-radius: 6px; font-size: 12.5px;">Gemini</a>
+                </div>
+                
+                <div class="bg-white p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">
+                    <label class="fw-bold mb-2 d-flex align-items-center" style="color: #475569; font-size: 13px;">
+                        <i class="fa-solid fa-chart-line me-2" style="color: #0f4c81;"></i>Tiến độ học tập
+                    </label>
+                    <select id="directWebProgressSelect" class="form-select form-select-sm fw-bold border-secondary shadow-sm" style="background-color: ${bgProgColor}; color: #334155; border-radius: 6px; font-size: 13px; cursor: pointer;" onchange="updateDirectWebProgress(this, '${currentSheetName}', '${stableKeyFromUrl}')">
+                        <option value="white" ${progVal === 'white' ? 'selected' : ''}>Chưa học</option>
+                        <option value="yellow" ${progVal === 'yellow' ? 'selected' : ''}>Còn học</option>
+                        <option value="green" ${progVal === 'green' ? 'selected' : ''}>Đã xong</option>
+                    </select>
+                </div>
+
+                <div class="bg-white p-3 rounded shadow-sm d-flex flex-column" style="border: 1px solid #e2e8f0; max-height: 280px;">
+                    <label class="fw-bold mb-2 d-flex align-items-center" style="color: #475569; font-size: 13px;">
+                        <i class="fa-solid fa-code me-2" style="color: #0f4c81;"></i>Tra cứu code bài giải
+                    </label>
+                    <div class="input-group input-group-sm mb-2">
+                        <input type="text" id="txtDirectWebSearchCode" class="form-control" placeholder="Nhập mã bài (VD: B01)..." onkeyup="searchDirectWebCode()">
+                        <button class="btn btn-primary" onclick="searchDirectWebCode()" style="background: #0f4c81; border: none;"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+                    <div id="directWebCodeList" class="flex-grow-1 overflow-auto" style="border: 1px dashed #cbd5e1; border-radius: 6px; padding: 6px; background: #f8fafc; min-height: 120px;">
+                        <div class="text-muted small text-center py-3">Nhập mã bài để tìm kiếm...</div>
+                    </div>
+                </div>
+
+                <div class="flex-grow-1 d-flex flex-column bg-white p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">
+                    <label class="fw-bold mb-2 d-flex align-items-center" style="color: #475569; font-size: 13px;">
+                        <i class="fa-solid fa-pen-nib me-2" style="color: #0f4c81;"></i>Ghi chú nhanh
+                    </label>
+                    <textarea id="directWebNoteEditor" class="form-control flex-grow-1" style="resize: none; border-radius: 6px; min-height: 120px; font-size: 13.5px; border-color: #cbd5e1;"></textarea>
+                    <div class="mt-2 d-flex justify-content-between align-items-center">
+                        <span id="directWebNoteStatus" class="fw-bold" style="font-size: 11.5px; color: #10b981;"></span>
+                        <button class="btn btn-sm text-white fw-bold px-3" style="background-color: #0f4c81; border-radius: 6px; font-size: 12px;" onclick="saveDirectWebNote('${currentSheetName}', '${stableKeyFromUrl}')">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Lưu Note
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     `);
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Tải sẵn dữ liệu code cho Sidebar nếu có
+    if (typeof loadSidebarCodeSnippets === 'function') {
+        $('#iframeSidebar').attr('data-sheet', currentSheetName).attr('data-key', stableKeyFromUrl);
+        loadSidebarCodeSnippets();
+    }
+
+    // 5. Đồng bộ hiển thị đồng hồ đếm ngược trên thanh Header nếu hẹn giờ đang chạy
+    if (typeof isTimerActive === 'function' && isTimerActive()) {
+        $('#webViewerCountdownClock').removeClass('d-none').addClass('d-flex align-items-center');
+        setTimeout(() => {
+            isEnforcedFullscreen = true;
+            allowLessonClose = false;
+        }, 150);
+        if (typeof enterFullScreen === 'function') enterFullScreen();
+    }
+};
+
+// Hàm cập nhật tiến độ riêng cho LOAD_WEB
+window.updateDirectWebProgress = function(selectEl, sheetName, stableKey) {
+    let val = $(selectEl).val();
+    $(selectEl).css('background-color', getProgressColor(val));
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, val);
+    
+    let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
+    if(outerSelect.length) {
+        outerSelect.val(val).css('background-color', getProgressColor(val));
+    }
+    if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+};
+
+// Hàm lưu ghi chú riêng cho LOAD_WEB
+window.saveDirectWebNote = function(sheetName, stableKey) {
+    let content = $('#directWebNoteEditor').val().trim();
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    let now = new Date();
+    let pad = (n) => String(n).padStart(2, '0');
+    let timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    
+    if (content !== "") {
+        let noteData = { content: content, updatedAt: timeStr };
+        localStorage.setItem(`note_${mssv}_${sheetName}_${stableKey}`, JSON.stringify(noteData));
+        $('#directWebNoteStatus').html('Đã lưu').removeClass('text-danger').addClass('text-success');
+    } else {
+        localStorage.removeItem(`note_${mssv}_${sheetName}_${stableKey}`);
+        $('#directWebNoteStatus').html('Đã xóa').removeClass('text-success').addClass('text-danger');
+    }
+    setTimeout(() => $('#directWebNoteStatus').html(''), 3000);
+    if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+};
+
+// Hàm tìm kiếm code cho LOAD_WEB
+window.searchDirectWebCode = function() {
+    let keyword = $('#txtDirectWebSearchCode').val().toLowerCase().trim();
+    let container = $('#directWebCodeList');
+    if (!keyword) {
+        container.html('<div class="text-muted small text-center py-3">Nhập mã bài để tìm kiếm...</div>');
+        return;
+    }
+    if (typeof window.allSidebarSnippets !== 'undefined' && window.allSidebarSnippets.length > 0) {
+        let matches = window.allSidebarSnippets.filter(item => item.maBai.toLowerCase().includes(keyword));
+        let html = '';
+        if (matches.length > 0) {
+            matches.forEach((item, idx) => {
+                html += `
+                <div class="p-2 mb-2 bg-white shadow-sm rounded border" style="cursor: pointer;" onclick="openSidebarCodeViewer(${idx})">
+                    <strong>${item.maBai}</strong><br><small class="text-muted">${item.author}</small>
+                </div>`;
+            });
+        } else {
+            html = '<div class="text-muted small text-center py-3">Không tìm thấy mã bài.</div>';
+        }
+        container.html(html);
+    } else {
+        container.html('<div class="text-muted small text-center py-3">Đang tải dữ liệu...</div>');
+    }
+};
+
+// Hàm bật/tắt Sidebar công cụ cho [LOAD_WEB]
+window.toggleDirectWebSidebar = function() {
+    let sidebar = $('#directWebSidebar');
+    if (sidebar.hasClass('d-none')) {
+        sidebar.removeClass('d-none').addClass('d-flex');
+    } else {
+        sidebar.removeClass('d-flex').addClass('d-none');
+    }
+};
+// Hàm kiểm tra khi bấm nút Trở lại (Chỉ hiện 1 loại cảnh báo duy nhất, tránh hiện chồng chéo vàng/đỏ)
+window.tryBackToCourseTable = function() {
+    // Nếu đang bật đồng hồ đếm ngược và chưa mở khóa -> Chỉ hiện bảng cảnh báo vàng xác nhận đóng, không hiện bảng đỏ
+    if (typeof isEnforcedFullscreen !== 'undefined' && isEnforcedFullscreen && typeof isTimerActive === 'function' && isTimerActive() && !allowLessonClose) {
+        if (!$('#returnStudyModal').hasClass('show')) {
+            $('#closeWarningModal').modal('show');
+        }
+    } else {
+        backToCourseTable();
+    }
 };
 
 window.backToCourseTable = function() {
+    allowLessonClose = true;
+    isEnforcedFullscreen = false;
+    if (typeof exitFullScreen === 'function') exitFullScreen();
+
+    // Ẩn toàn bộ các bảng cảnh báo có thể đang mở dở
+    $('#closeWarningModal, #returnStudyModal, #linkWarningModal').modal('hide');
+
     let fullScreenContainer = $('#customHtmlSection');
     fullScreenContainer.addClass('d-none').attr('style', '');
     fullScreenContainer.find('header.top-header').attr('style', '').html('');
     
-    // Khôi phục lại class gốc cho #customHtmlContent khi thoát ra
     $('#customHtmlContent').attr('style', '').addClass('bg-white rounded border shadow-sm p-3 p-md-4').html('');
-    
     $('#sidebarMenu').removeClass('d-none');
     $('#courseSection').removeClass('d-none');
 };
