@@ -2940,9 +2940,40 @@ window.openCustomHtml = function(fileUrl, title) {
     };
 };
 
-// Hàm quay trở lại Bảng bài học
+window.openDirectWeb = function(safeFileUrl, title) {
+    $('#customHtmlTitle').html(title);
+    $('#courseSection, #sidebarMenu').addClass('d-none');
+    $('#customHtmlSection').removeClass('d-none');
+    
+    // Ép khung chứa rộng tuyệt đối và loại bỏ khoảng trắng dư thừa
+    $('#customHtmlSection').css({
+        'position': 'fixed',
+        'top': '0',
+        'left': '0',
+        'width': '100vw',
+        'height': '100vh',
+        'z-index': '1040',
+        'background': '#ffffff',
+        'padding': '15px'
+    });
+    
+    $('#customHtmlContent').css({
+        'height': 'calc(100vh - 80px)',
+        'max-height': 'none'
+    }).html('<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin fs-2 text-primary mb-3"></i></div>');
+    
+    $.ajax({
+        url: safeFileUrl, method: "GET", dataType: "html",
+        success: function(data) { 
+            $('#customHtmlContent').html(data); 
+            if (typeof applyKaTeX === 'function') applyKaTeX('customHtmlContent'); 
+        },
+        error: function() { $('#customHtmlContent').html('<div class="text-center text-danger">Lỗi tải trang.</div>'); }
+    });
+};
+
 window.backToCourseTable = function() {
-    $('#customHtmlSection').addClass('d-none');
-    $('#customHtmlContent').html(''); // Xóa RAM
-    $('#courseSection').removeClass('d-none');
+    $('#customHtmlSection').addClass('d-none').attr('style', '');
+    $('#customHtmlContent').attr('style', '').html('');
+    $('#courseSection, #sidebarMenu').removeClass('d-none');
 };

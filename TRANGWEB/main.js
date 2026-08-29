@@ -1402,9 +1402,16 @@ if (!isChapter && !isLesson && !rowClass.includes('row-part')) {
 }
 
      // --- LOGIC PHÂN LOẠI HIỂN THỊ: LINK HAY NỘI DUNG LATEX ---
-let isLoadHtml = c3.trim().startsWith('[LOAD_HTML]');
-let htmlFileUrl = isLoadHtml ? c3.trim().replace('[LOAD_HTML]', '').trim() : '';
+let isLoadWeb = c3.trim().startsWith('[LOAD_WEB]');
+let isLoadIframe = c3.trim().startsWith('[LOAD_IFRAME]');
 
+if (isLoadWeb && typeof isTimerActive === 'function' && isTimerActive()) {
+    isLoadWeb = false; isLoadIframe = true;
+    c3 = c3.replace('[LOAD_WEB]', '[LOAD_IFRAME]');
+}
+
+let webFileUrl = isLoadWeb ? c3.trim().replace('[LOAD_WEB]', '').trim() : '';
+let iframeFileUrl = isLoadIframe ? c3.trim().replace('[LOAD_IFRAME]', '').trim() : '';
 let isLinkOnly = extractedUrl && c3.replace(_urlRegex, '').trim() === '';
 
 // FIX: Bổ sung replace dọn dẹp ký tự xuống dòng (\n, \r) để không làm gãy lệnh onclick
@@ -1434,9 +1441,12 @@ if (isUpdating && !isAdmin) {
 } else if (isMinigamePrompt) {
     // TRƯỜNG HỢP MỚI: Nếu chứa từ khóa "hãy làm đề", "minigame" -> Cuộn lên Top và mở khung Minigame
     col2Html = `<span onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); $('#collapseMinigames').collapse('show'); event.stopPropagation();" style="cursor: pointer; color: #ef4444; font-weight: 700; text-decoration: none;" title="Nhấn để về đầu trang và mở khung Minigame"><i class="fa-solid fa-gamepad me-2" style="color: #ef4444; font-size: 16px;"></i>${col2Html}</span>`;
-} else if (isLoadHtml) {
-    // TRƯỜNG HỢP GỌI FILE HTML TÙY CHỈNH
-    col2Html = `<span onclick="openCustomHtml('${htmlFileUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem trang nội dung">${lessonIcon}${col2Html || "Xem nội dung"}</span>`;
+} else if (isLoadWeb) {
+    // LOAD_WEB: Chèn trực tiếp và phóng to full màn hình ẩn sidebar
+    col2Html = `<span onclick="openDirectWeb('${webFileUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Xem trực tiếp full màn hình">${lessonIcon}${col2Html || "Xem trực tiếp"}</span>`;
+} else if (isLoadIframe) {
+    // LOAD_IFRAME: Mở bảng Modal Iframe chuẩn y như ảnh mẫu của bạn
+    col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${iframeFileUrl}', '${safeTitle}', '${currentSheetName}', '${stableKey}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Xem bằng Iframe">${lessonIcon}${col2Html || "Xem Iframe"}</span>`;
 } else if (isLinkOnly) {
     // CỘT 3 CHỈ CHỨA LINK -> Mở File Drive/PDF như cũ
   col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${safeUrl}', '${safeTitle}', '${currentSheetName}', '${stableKey}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem tài liệu trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;
