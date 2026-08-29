@@ -6032,9 +6032,6 @@ $(document).ready(function() {
         allowLessonClose = true; 
         $('#documentViewerModal').modal('hide'); 
         $('#latexViewerModal').modal('hide'); // Bổ sung đóng LaTeX Viewer
-if ($('#customHtmlSection').is(':visible') && $('#customHtmlSection').css('position') === 'fixed') {
-        backToCourseTable();
-    }
     });
 
     $('#btnCancelStudy').off('click').on('click', function() {
