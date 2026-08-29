@@ -2941,39 +2941,80 @@ window.openCustomHtml = function(fileUrl, title) {
 };
 
 window.openDirectWeb = function(safeFileUrl, title) {
-    $('#customHtmlTitle').html(title);
-    $('#courseSection, #sidebarMenu').addClass('d-none');
-    $('#customHtmlSection').removeClass('d-none');
+    // 1. Ẩn thanh menu bên trái và phần bảng bài học chính
+    $('#sidebarMenu').addClass('d-none');
+    $('#courseSection').addClass('d-none');
     
-    // Ép khung chứa rộng tuyệt đối và loại bỏ khoảng trắng dư thừa
-    $('#customHtmlSection').css({
+    // 2. Ép khung chứa #customHtmlSection phủ kín toàn màn hình tuyệt đối
+    let fullScreenContainer = $('#customHtmlSection');
+    fullScreenContainer.removeClass('d-none').css({
         'position': 'fixed',
         'top': '0',
         'left': '0',
         'width': '100vw',
         'height': '100vh',
-        'z-index': '1040',
+        'z-index': '9999',
         'background': '#ffffff',
-        'padding': '15px'
+        'padding': '0',
+        'margin': '0'
     });
     
-    $('#customHtmlContent').css({
-        'height': 'calc(100vh - 80px)',
-        'max-height': 'none'
-    }).html('<div class="text-center py-5"><i class="fa-solid fa-spinner fa-spin fs-2 text-primary mb-3"></i></div>');
-    
-    $.ajax({
-        url: safeFileUrl, method: "GET", dataType: "html",
-        success: function(data) { 
-            $('#customHtmlContent').html(data); 
-            if (typeof applyKaTeX === 'function') applyKaTeX('customHtmlContent'); 
-        },
-        error: function() { $('#customHtmlContent').html('<div class="text-center text-danger">Lỗi tải trang.</div>'); }
-    });
+    // 3. Thanh Header cố định ở đầu trang (có nút Trở lại và Tên bài)
+    let headerEl = fullScreenContainer.find('header.top-header');
+    headerEl.removeClass('d-none').css({
+        'display': 'flex',
+        'align-items': 'center',
+        'justify-content': 'flex-start',
+        'gap': '15px',
+        'padding': '12px 25px',
+        'background-color': '#0f4c81', 
+        'color': '#ffffff',
+        'height': '65px',
+        'width': '100vw',
+        'border-radius': '0',
+        'box-shadow': '0 2px 5px rgba(0,0,0,0.1)',
+        'margin': '0'
+    }).html(`
+        <button onclick="backToCourseTable()" class="btn btn-light fw-bold shadow-sm d-flex align-items-center gap-2" style="border-radius: 50px; padding: 5px 16px; font-size: 14px; border: none; background: #ffffff; color: #0f4c81; cursor: pointer;">
+            <i class="fa-solid fa-arrow-left"></i> Trở lại
+        </button>
+        <h6 class="m-0 fw-bold text-white text-truncate" style="font-size: 16px; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-book-open me-2"></i>${title}
+        </h6>
+    `);
+
+    $('#btnFloatingBack').remove();
+
+    // 4. Xóa sạch các class tạo khung card trắng và ép iframe tràn viền tuyệt đối 100vw
+    $('#customHtmlContent').removeClass('bg-white rounded border shadow-sm p-3 p-md-4').css({
+        'width': '100vw',
+        'height': 'calc(100vh - 65px)',
+        'max-width': 'none',
+        'padding': '0',
+        'margin': '0',
+        'border': 'none',
+        'border-radius': '0',
+        'box-shadow': 'none',
+        'background': '#ffffff',
+        'box-sizing': 'border-box'
+    }).html(`
+        <iframe src="${safeFileUrl}" 
+                style="width: 100vw; height: 100%; border: none; display: block; margin: 0; padding: 0; background: #ffffff;" 
+                allowfullscreen>
+        </iframe>
+    `);
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 window.backToCourseTable = function() {
-    $('#customHtmlSection').addClass('d-none').attr('style', '');
-    $('#customHtmlContent').attr('style', '').html('');
-    $('#courseSection, #sidebarMenu').removeClass('d-none');
+    let fullScreenContainer = $('#customHtmlSection');
+    fullScreenContainer.addClass('d-none').attr('style', '');
+    fullScreenContainer.find('header.top-header').attr('style', '').html('');
+    
+    // Khôi phục lại class gốc cho #customHtmlContent khi thoát ra
+    $('#customHtmlContent').attr('style', '').addClass('bg-white rounded border shadow-sm p-3 p-md-4').html('');
+    
+    $('#sidebarMenu').removeClass('d-none');
+    $('#courseSection').removeClass('d-none');
 };
