@@ -336,6 +336,20 @@ function maskMSSV(mssv) {
 }
      
             
+// Hàm hỗ trợ format chữ và xuống dòng an toàn (bảo vệ khối Code)
+window.safeFormatTextQA = function(rawText) {
+    if (!rawText) return "";
+    let textParts = rawText.split(/(```[a-zA-Z\+\#]*\n?[\s\S]*?\n?```)/g);
+    for (let i = 0; i < textParts.length; i++) {
+        if (!textParts[i].startsWith("```")) {
+            // Đổi \n thành <br> ở các đoạn văn bản thường
+            textParts[i] = textParts[i].replace(/\n/g, '<br>');
+        }
+    }
+    // Sau khi đổi <br>, mới tiến hành format Code
+    return formatCodeBlocks(textParts.join(''));
+};
+
 function parseThread(text, rowIndex) {
     let parts = text.split(/(\[SV\][\s\S]*?\[\/SV\])/g).filter(p => p.trim() !== ""); 
     window.qaThreadParts[rowIndex] = parts; 
@@ -363,28 +377,18 @@ function parseThread(text, rowIndex) {
                 let rawMssv = splitData[0].trim().replace(/[-|]/g, '');
                 let displayMssv = maskMSSV(rawMssv);
                 
-                // --- XỬ LÝ LẤY TÊN CHO ADMIN HOẶC TÁC GIẢ BÀI VIẾT (PHẦN PHẢN HỒI) ---
                 let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
                 let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
                 
                 if (isSystemAdmin) {
                     let fullName = window.allUsersMap ? window.allUsersMap[rawMssv] : null;
-                    if (fullName) {
-                        let shortName = getNaturalShortName(fullName);
-                        displayMssv = `${rawMssv} - ${shortName}`;
-                    } else {
-                        displayMssv = rawMssv; 
-                    }
+                    displayMssv = fullName ? `${rawMssv} - ${getNaturalShortName(fullName)}` : rawMssv;
                 } else if (activeUser && activeUser.mssv) {
                     let myCleanMssv = activeUser.mssv.replace(/\./g, "");
-                    let authorCleanMssv = rawMssv.replace(/\./g, "");
-                    
-                    if (myCleanMssv === authorCleanMssv) {
-                        let shortName = getNaturalShortName(activeUser.name);
-                        displayMssv = `${rawMssv} - ${shortName} (Bạn)`;
+                    if (myCleanMssv === rawMssv.replace(/\./g, "")) {
+                        displayMssv = `${rawMssv} - ${getNaturalShortName(activeUser.name)} (Bạn)`;
                     }
                 }
-                // -----------------------------------------------------------------
 
                 svName = "Sinh viên (" + displayMssv + ")";
 
@@ -397,21 +401,19 @@ function parseThread(text, rowIndex) {
                 }
             }
             
-            let formattedContent = formatCodeBlocks(svMsg);
-            if (!/(<p>|<table>|<ul>|<li>|<div>|<br\s*\/?>)/i.test(formattedContent)) {
-                formattedContent = formattedContent.replace(/\n/g, '<br>');
-            }
-            let svFormattedMsg = formattedContent;
+            // SỬ DỤNG HÀM XUỐNG DÒNG AN TOÀN
+            let svFormattedMsg = window.safeFormatTextQA(svMsg);
             
-            html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>${svName}</strong>${timeHtml}:<br>${svFormattedMsg}`; 
+            html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>${svName}</strong>${timeHtml}:<br><div class="mt-1" style="font-weight: normal;">${svFormattedMsg}</div>`; 
             
             if (isAdmin) { 
                 html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`; 
             } 
             html += `</div>`; 
         } else { 
-            let adminText = formatCodeBlocks(content).replace(/(?:\r\n|\r|\n)(?!(?:[^<]*<\/pre>))/g, '<br>'); 
-            html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br>${adminText}`; 
+            // SỬ DỤNG HÀM XUỐNG DÒNG AN TOÀN CHO ADMIN
+            let adminText = window.safeFormatTextQA(content);
+            html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br><div class="mt-1" style="font-weight: normal;">${adminText}</div>`; 
             if (isAdmin) { 
                 html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-warning py-0 me-2" onclick="openEditQAModal(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-pen"></i> Sửa</button><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa</button></div>`; 
             } 
@@ -522,7 +524,7 @@ function cleanExternalHTML(html) {
                         rawQuestion = rawQuestion.replace(badgeRegex, ''); 
                     }
                     
-                    let question = formatCodeBlocks(rawQuestion);
+                  let question = window.safeFormatTextQA(rawQuestion);
 
                     let answer = row[3] || ''; 
                     let upvotes = parseInt(row[4]) || 0; 

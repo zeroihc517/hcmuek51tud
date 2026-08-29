@@ -995,28 +995,59 @@ if (!currentUser || currentUser.isGuest) {
         </div>
     `;
 }
-                      let html = `
-                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                            <div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">
-                                [${currentCode}] ${data.c2} ${hiddenNoticeBadge}
-                            </div>
-                        
-                        </div>
-                        <div class="tb-detail-dates mb-2 d-flex align-items-center flex-wrap gap-3" style="font-size: 15px; padding-bottom: 8px; border-bottom: none;">
-                            ${dateDisplay}
-                            ${detailCountdownHtml}
-                        </div>
-                        <div class="tb-detail-main-content" style="font-size: 16px; font-weight: normal; line-height: 1.6; border-top: 2px solid #f3f4f6; padding-top: 16px;">
-                            ${processedContent}
-                        </div>
-                        ${noteHtml}
-                        ${linkHtml}
-                        `;                        
-                        $('#tbDetailContent').html(html);
-                        $('#tbMainView').addClass('d-none');
-                        $('#tbDetailContainer').removeClass('d-none');
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                        applyKaTeX('tbDetailContent');
+                      // Bổ sung xử lý nháy đơn/nháy kép cho tiêu đề để tránh lỗi JavaScript khi truyền vào onclick
+
+// Thay các ký tự nháy để tránh lỗi chuỗi
+let safeTbTitle = data.c2.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+
+let html = `
+<div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+    <div class="tb-detail-title-small" style="font-size: 22px; font-weight: bold;">
+        [${currentCode}] ${data.c2} ${hiddenNoticeBadge}
+    </div>
+</div>
+<div class="tb-detail-dates mb-2 d-flex align-items-center flex-wrap gap-3" style="font-size: 15px; padding-bottom: 8px; border-bottom: none;">
+    ${dateDisplay}
+    ${detailCountdownHtml}
+</div>
+<div class="tb-detail-main-content" style="font-size: 16px; font-weight: normal; line-height: 1.6; border-top: 2px solid #f3f4f6; padding-top: 16px;">
+    ${processedContent}
+</div>
+${noteHtml}
+${linkHtml}
+
+<!-- BẮT ĐẦU: KHUNG BÌNH LUẬN VÀ LỊCH SỬ -->
+<div class="mt-5 pt-4 border-top">
+    
+
+    <!-- Khung nhập bình luận mới -->
+    <div class="bg-light p-3 rounded border border-primary-subtle">
+        <textarea id="txtThongBaoComment" class="form-control mb-3 border-primary-subtle" rows="3" placeholder="Nhập câu hỏi hoặc bình luận của bạn về sự kiện/thông báo này..."></textarea>
+        <div class="d-flex justify-content-end">
+            <button class="btn text-white fw-bold px-4" onclick="submitThongBaoComment('${currentCode}', '${safeTbTitle}')" id="btnSubmitTBComment" style="background: #0f4c81; border:none; border-radius: 8px;">
+                <i class="fa-solid fa-paper-plane me-2"></i>Gửi bình luận
+            </button>
+        </div>
+    </div>
+<br>
+    <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-comments me-2"></i>Bình luận & Thắc mắc về thông báo này</h6>
+    
+    <!-- Lịch sử bình luận -->
+    <div id="tbCommentHistory" class="mb-4">
+        <div class="text-center text-muted small py-3 bg-white rounded border"><i class="fa-solid fa-spinner fa-spin"></i> Đang tải lịch sử bình luận...</div>
+    </div>
+</div>
+<!-- KẾT THÚC: KHUNG BÌNH LUẬN VÀ LỊCH SỬ -->
+`;
+
+$('#tbDetailContent').html(html);
+$('#tbMainView').addClass('d-none');
+$('#tbDetailContainer').removeClass('d-none');
+window.scrollTo({ top: 0, behavior: 'smooth' });
+applyKaTeX('tbDetailContent');
+
+// CHÈN DÒNG NÀY VÀO SAU KHI HTML ĐÃ RENDER ĐỂ LẤY LỊCH SỬ BÌNH LUẬN
+loadThongBaoComments(currentCode);
                     };
 
                     // HÀM TRỞ LẠI -> TỰ ĐỘNG XOÁ BỎ THAM SỐ ?tb= TRÊN BIA ĐỊA CHỈ
@@ -1033,7 +1064,142 @@ if (!currentUser || currentUser.isGuest) {
 			if (typeof window.setDetailedView === 'function') window.setDetailedView("Thông báo");
                         resetUrlToDefault();
                     };
+// 1. Hàm Gửi bình luận
+window.submitThongBaoComment = function(tbCode, tbTitle) {
+    let mssvValue = currentUser ? currentUser.mssv : "Khách";
+    if (mssvValue === "Khách") {
+        alert("Vui lòng đăng nhập Sinh viên để có thể bình luận!");
+        return;
+    }
 
+    let commentText = $('#txtThongBaoComment').val().trim();
+    if (!commentText) {
+        alert("Vui lòng nhập nội dung bình luận!");
+        $('#txtThongBaoComment').focus();
+        return;
+    }
+
+    // ĐỊNH DẠNG THEO Ý BẠN: Tên thông báo in đậm -> Xuống 2 dòng -> Nội dung sinh viên gõ
+    let topic = "Sự kiện";
+    let qText = `<strong>Thông báo [${tbCode}]: ${tbTitle}</strong>\n\n${commentText}`;
+    
+    let finalPayload = `<span class="badge mb-2 shadow-sm" style="background-color: #f1f5f9; color: #475569; font-size: 12.5px; border: 1px solid #e2e8f0;"><i class="fa-solid fa-tag me-1" style="color: #0f4c81;"></i> ${topic}</span>\n\n${qText}`;
+
+    let btn = $('#btnSubmitTBComment');
+    let originalHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
+
+    postToGAS({ action: "submitQuestion", mssv: mssvValue, question: finalPayload }, function(response) {
+        alert("Đã gửi bình luận thành công!");
+        $('#txtThongBaoComment').val('');
+        btn.html(originalHtml).prop('disabled', false);
+        
+        // Cập nhật lại lịch sử hiển thị
+        loadThongBaoComments(tbCode);
+        
+        // Tải ngầm lại data Q&A để cập nhật thông báo badge nếu cần
+        if (typeof loadQAData === 'function') loadQAData();
+        if (typeof checkNewQA === 'function') checkNewQA();
+    }, function() {
+        alert("Lỗi kết nối máy chủ! Vui lòng thử lại sau.");
+        btn.html(originalHtml).prop('disabled', false);
+    });
+};
+
+// Hàm Tải lịch sử bình luận tương ứng với thông báo (Bản UI Đẹp)
+window.loadThongBaoComments = function(tbCode) {
+    let container = $('#tbCommentHistory');
+    container.html('<div class="text-center text-muted small py-4 bg-white rounded border border-primary-subtle"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải bình luận...</div>');
+    
+    $.ajax({ 
+        url: SCRIPT_URL + "?action=getQAData", 
+        method: "GET", 
+        dataType: "json", 
+        success: function(data) {
+            if (!data || data.length === 0) {
+                container.html('<div class="text-center text-muted small py-4 bg-light rounded border border-primary-subtle" style="border-style: dashed !important;"><i class="fa-regular fa-comments fs-3 mb-2 opacity-50"></i><br>Chưa có bình luận nào cho thông báo này.<br>Bạn hãy là người đầu tiên nhé!</div>');
+                return;
+            }
+            
+            let html = '';
+            let commentCount = 0;
+            
+            let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+            let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
+            
+            data.forEach(row => {
+                let rawQuestion = row[2] || '';
+                if (rawQuestion.includes(`[${tbCode}]`)) {
+                    commentCount++;
+                    let time = row[0] || ''; 
+                    let rawMssv = String(row[1] || '').trim().replace(/[-|]/g, ''); 
+                    let displayMssv = maskMSSV(rawMssv); 
+                    
+                    if (isSystemAdmin) {
+                        let fullName = window.allUsersMap ? window.allUsersMap[rawMssv] : null;
+                        displayMssv = fullName ? `${rawMssv} - ${getNaturalShortName(fullName)}` : rawMssv;
+                    } else if (activeUser && activeUser.mssv) {
+                        let myCleanMssv = activeUser.mssv.replace(/\./g, "");
+                        if (myCleanMssv === rawMssv.replace(/\./g, "")) {
+                            displayMssv = `${rawMssv} - ${getNaturalShortName(activeUser.name)} <span class="badge bg-success ms-1" style="font-size: 10px;">Bạn</span>`;
+                        }
+                    }
+
+                    // Dọn dẹp thẻ Tag dư thừa
+                    let badgeRegex = /(<span class="badge[^>]*>.*?<\/span>)\s*/;
+                    rawQuestion = rawQuestion.replace(badgeRegex, ''); 
+
+                    // Cắt bỏ phần "Thông báo [Mã]: Tên thông báo" đi cho đỡ dài dòng trong lịch sử
+                    rawQuestion = rawQuestion.replace(/<strong>Thông báo.*?<\/strong>\s*/i, '').trim();
+                    
+                    // Format chữ và xuống dòng bằng hàm xịn
+                    let questionFormatted = window.safeFormatTextQA(rawQuestion);
+                    
+                    let answer = row[3] || ''; 
+                    let rowIndex = row[6];
+                    
+                    // ============================================
+                    // GIAO DIỆN TIMELINE CHAT HIỆN ĐẠI
+                    // ============================================
+                    html += `
+                    <div class="mb-4" style="border-left: 3px solid #cbd5e1; padding-left: 15px; margin-left: 5px;">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 32px; height: 32px; font-size: 14px;">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold" style="color: #0f4c81; font-size: 14.5px;">SV: ${displayMssv}</div>
+                                <div class="text-muted" style="font-size: 12px;"><i class="fa-regular fa-clock me-1"></i>${time}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white p-3 rounded shadow-sm border border-primary-subtle" style="font-size: 15px; color: #334155; border-radius: 0 12px 12px 12px; font-weight: normal;">
+                            ${questionFormatted}
+                        </div>`;
+                                
+                    if (answer.trim() !== "") {
+                        html += `<div class="mt-2 ms-4 ps-3" style="border-left: 2px dashed #93c5fd;">${parseThread(answer, rowIndex)}</div>`; 
+                    } else {
+                        html += `<div class="mt-2 ms-4 ps-3 text-muted small fst-italic"><i class="fa-solid fa-reply fa-rotate-180 me-2"></i>Đang chờ Admin phản hồi...</div>`;
+                    }
+                    html += `</div>`;
+                }
+            });
+            
+            if (commentCount === 0) {
+                html = '<div class="text-center text-muted small py-4 bg-light rounded border border-primary-subtle" style="border-style: dashed !important;"><i class="fa-regular fa-comments fs-3 mb-2 opacity-50"></i><br>Chưa có bình luận nào cho thông báo này.<br>Bạn hãy là người đầu tiên nhé!</div>';
+            }
+            container.html(html);
+            
+            // Render toán học & code nếu có
+            if (window.Prism) Prism.highlightAllUnder(document.getElementById('tbCommentHistory'));
+            if (typeof applyKaTeX === 'function') applyKaTeX('tbCommentHistory');
+        },
+        error: function() {
+            container.html('<div class="text-danger small text-center py-3 bg-white rounded border"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi tải lịch sử bình luận!</div>');
+        }
+    });
+};
                     window.copyTBLink = function(url) {
                         navigator.clipboard.writeText(url).then(() => {
                             alert("Đã sao chép liên kết thông báo thành công!");
