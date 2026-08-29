@@ -149,10 +149,17 @@ function checkNewQA() {
                 window.isQAUnanswered = false;
             } else {
                 // Kiểm tra xem có câu hỏi nào mà ô trả lời (row[3]) còn trống không
-                window.isQAUnanswered = data.some(row => {
-                    let answer = row[3] ? String(row[3]).trim() : '';
-                    return answer === '';
-                });
+                // Thay thế đoạn window.isQAUnanswered cũ bằng khối này:
+window.isQAUnanswered = data.some(row => { return (row[3] ? String(row[3]).trim() : '') === ''; });
+
+if (currentUser && !currentUser.isGuest) {
+    let myCleanMssv = currentUser.mssv.replace(/\./g, "").toLowerCase();
+    window.personalUnreadQA = data.filter(row => {
+        let authorCleanMssv = String(row[1] || '').trim().replace(/[-|.]/g, '').toLowerCase();
+        return authorCleanMssv === myCleanMssv && row[7] === 'UNREAD';
+    });
+    updatePersonalNotificationBell();
+}
             }
             // Cập nhật hiển thị ra Sidebar
             updateSidebarThaoLuanBadge();
@@ -216,7 +223,14 @@ let cleanCat = category.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace
                     }
                 }
             });
-
+if (currentUser && !currentUser.isGuest) {
+    let myCleanMssv = currentUser.mssv.replace(/\./g, "").toLowerCase();
+    window.personalUnreadShareCode = data.filter(row => {
+        let authorCleanMssv = String(row[1] || '').trim().replace(/[-|.]/g, '').toLowerCase();
+        return authorCleanMssv === myCleanMssv && row[7] === 'UNREAD';
+    });
+    updatePersonalNotificationBell();
+}
             window.isShareCodeNew = hasGlobalNew;
             updateSidebarThaoLuanBadge();
 
@@ -2941,12 +2955,25 @@ window.openCustomHtml = function(fileUrl, title) {
 };
 
 window.openDirectWeb = function(safeFileUrl, title) {
-    // 1. Ẩn thanh menu bên trái và phần bảng bài học chính
+    // --- FIX LỖI: Bắt quả tang Đồng hồ đang chạy thì ép dùng Iframe ---
+    if (typeof isTimerActive === 'function' && isTimerActive()) {
+        if(window.innerWidth < 992) { 
+            $('#sidebarMenu').removeClass('show'); 
+            $('#sidebarOverlay').removeClass('show'); 
+        }
+        if (typeof openDocumentViewer === 'function') {
+            openDocumentViewer(safeFileUrl, title); 
+            return; 
+        }
+    }
+
+    // 1. Ẩn toàn bộ hệ thống gốc để dọn đường
     $('#sidebarMenu').addClass('d-none');
     $('#courseSection').addClass('d-none');
     
-    // 2. Ép khung chứa #customHtmlSection phủ kín toàn màn hình tuyệt đối
     let fullScreenContainer = $('#customHtmlSection');
+    
+    // 2. Ép khung bao phủ toàn màn hình, không trừa 1px nào
     fullScreenContainer.removeClass('d-none').css({
         'position': 'fixed',
         'top': '0',
@@ -2956,39 +2983,45 @@ window.openDirectWeb = function(safeFileUrl, title) {
         'z-index': '9999',
         'background': '#ffffff',
         'padding': '0',
-        'margin': '0'
+        'margin': '0',
+        'display': 'flex',
+        'flex-direction': 'column' 
     });
     
-    // 3. Thanh Header cố định ở đầu trang (có nút Trở lại và Tên bài)
+    // 3. Thanh Header thu nhỏ tối đa, DÍNH CHẶT lên mép trên và XÓA LỀ DƯỚI
     let headerEl = fullScreenContainer.find('header.top-header');
-    headerEl.removeClass('d-none').css({
+    
+    // Xóa class margin mặc định của Bootstrap
+    headerEl.removeClass('d-none mb-4').css({
         'display': 'flex',
         'align-items': 'center',
         'justify-content': 'flex-start',
         'gap': '15px',
-        'padding': '12px 25px',
+        'padding': '0 20px',
         'background-color': '#0f4c81', 
         'color': '#ffffff',
-        'height': '65px',
-        'width': '100vw',
+        'height': '46px',        
+        'flex-shrink': '0',      
+        'width': '100%',
+        'border': 'none',        
         'border-radius': '0',
         'box-shadow': '0 2px 5px rgba(0,0,0,0.1)',
-        'margin': '0'
+        'margin': '0' // Xóa mọi lề
     }).html(`
-        <button onclick="backToCourseTable()" class="btn btn-light fw-bold shadow-sm d-flex align-items-center gap-2" style="border-radius: 50px; padding: 5px 16px; font-size: 14px; border: none; background: #ffffff; color: #0f4c81; cursor: pointer;">
+        <button onclick="backToCourseTable()" class="btn btn-light fw-bold shadow-sm d-flex align-items-center gap-2" style="border-radius: 50px; padding: 4px 14px; font-size: 13px; border: none; background: #ffffff; color: #0f4c81; cursor: pointer;">
             <i class="fa-solid fa-arrow-left"></i> Trở lại
         </button>
-        <h6 class="m-0 fw-bold text-white text-truncate" style="font-size: 16px; letter-spacing: 0.5px;">
-            <i class="fa-solid fa-book-open me-2"></i>${title}
+        <h6 class="m-0 fw-bold text-white text-truncate" style="font-size: 14px; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-globe me-2"></i>${title}
         </h6>
     `);
 
     $('#btnFloatingBack').remove();
 
-    // 4. Xóa sạch các class tạo khung card trắng và ép iframe tràn viền tuyệt đối 100vw
+    // 4. Khung Iframe hiển thị Web nương theo Flexbox, lấp đầy chỗ trống còn lại
     $('#customHtmlContent').removeClass('bg-white rounded border shadow-sm p-3 p-md-4').css({
-        'width': '100vw',
-        'height': 'calc(100vh - 65px)',
+        'flex-grow': '1',        
+        'width': '100%',
         'max-width': 'none',
         'padding': '0',
         'margin': '0',
@@ -2999,7 +3032,7 @@ window.openDirectWeb = function(safeFileUrl, title) {
         'box-sizing': 'border-box'
     }).html(`
         <iframe src="${safeFileUrl}" 
-                style="width: 100vw; height: 100%; border: none; display: block; margin: 0; padding: 0; background: #ffffff;" 
+                style="width: 100%; height: 100%; border: none; display: block; margin: 0; padding: 0; background: #ffffff;" 
                 allowfullscreen>
         </iframe>
     `);
@@ -3010,11 +3043,118 @@ window.openDirectWeb = function(safeFileUrl, title) {
 window.backToCourseTable = function() {
     let fullScreenContainer = $('#customHtmlSection');
     fullScreenContainer.addClass('d-none').attr('style', '');
-    fullScreenContainer.find('header.top-header').attr('style', '').html('');
     
-    // Khôi phục lại class gốc cho #customHtmlContent khi thoát ra
+    // Trả lại class mb-4 cho trạng thái gốc
+    fullScreenContainer.find('header.top-header').attr('style', '').html('').addClass('mb-4');
+    
     $('#customHtmlContent').attr('style', '').addClass('bg-white rounded border shadow-sm p-3 p-md-4').html('');
     
     $('#sidebarMenu').removeClass('d-none');
     $('#courseSection').removeClass('d-none');
+};
+window.personalUnreadQA = [];
+window.personalUnreadShareCode = [];
+
+function updatePersonalNotificationBell() {
+    let total = window.personalUnreadQA.length + window.personalUnreadShareCode.length;
+    let badge = $('#personalNotificationBadge');
+    let bell = $('#bellIconUI');
+    
+    if (total > 0) {
+        badge.text(total).removeClass('d-none');
+        bell.removeClass('text-secondary').addClass('text-danger fa-shake'); // Rung lác cảnh báo
+    } else {
+        badge.addClass('d-none');
+        bell.removeClass('text-danger fa-shake').addClass('text-secondary');
+    }
+}
+window.openPersonalNotifications = function() {
+    if (!currentUser || currentUser.isGuest) {
+        alert("Vui lòng đăng nhập để xem thông báo cá nhân!");
+        return;
+    }
+    
+    let html = '';
+    if (window.personalUnreadQA.length === 0 && window.personalUnreadShareCode.length === 0) {
+        html = '<div class="text-center text-muted p-5"><i class="fa-regular fa-bell-slash fs-1 mb-3"></i><br>Bạn không có thông báo mới nào.</div>';
+    } else {
+        window.personalUnreadQA.forEach(row => {
+            let qPreview = String(row[2]).replace(/<[^>]*>?/gm, '').substring(0, 60) + '...';
+            html += `
+            <div class="p-3 border-bottom" style="cursor: pointer; background: #fffcfc; transition: 0.2s;" onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fffcfc'" onclick="handleNotificationClick('Q&A', ${row[6]})">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><i class="fa-solid fa-comments"></i></div>
+                    <div>
+                        <div class="fw-bold text-danger mb-1" style="font-size: 14.5px;">Phản hồi mới trong Giải đáp thắc mắc</div>
+                        <div class="text-muted small fst-italic">"${qPreview}"</div>
+                    </div>
+                </div>
+            </div>`;
+        });
+
+        window.personalUnreadShareCode.forEach(row => {
+            let codePreview = String(row[2]).replace(/<[^>]*>?/gm, '');
+            let maBaiMatch = codePreview.match(/^\[SHARECODE\|.*?\|(.*?)\]/);
+            let maBai = maBaiMatch && maBaiMatch[1] ? maBaiMatch[1].trim() : "Mã code";
+
+            html += `
+            <div class="p-3 border-bottom" style="cursor: pointer; background: #f0fdf4; transition: 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'" onclick="handleNotificationClick('ShareCode', ${row[6]}, '${codePreview}')">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><i class="fa-solid fa-code"></i></div>
+                    <div>
+                        <div class="fw-bold text-success mb-1" style="font-size: 14.5px;">Bình luận mới trong ShareCode</div>
+                        <div class="text-muted small">Mã bài: <strong class="text-dark">${maBai}</strong></div>
+                    </div>
+                </div>
+            </div>`;
+        });
+    }
+    $('#personalNotificationList').html(html);
+    $('#personalNotificationModal').modal('show');
+};
+
+window.handleNotificationClick = function(type, rowIndex, codePreview) {
+    $('#personalNotificationModal').modal('hide');
+
+    // Tẩy trạng thái Đã đọc gửi về Server
+    postToGAS({
+        action: "markAsRead",
+        sheetName: type,
+        rowIndex: rowIndex,
+        mssv: currentUser.mssv
+    }, function() {
+        // Tẩy trực tiếp dữ liệu ảo trên RAM
+        if (type === 'Q&A') window.personalUnreadQA = window.personalUnreadQA.filter(r => r[6] !== rowIndex);
+        else window.personalUnreadShareCode = window.personalUnreadShareCode.filter(r => r[6] !== rowIndex);
+        updatePersonalNotificationBell();
+    }, function() {});
+
+    // Dịch chuyển đến đúng màn hình tương ứng
+    if (type === 'Q&A') {
+        openQASection();
+        setTimeout(() => {
+            let targetBlock = $('#replyBox-' + rowIndex).closest('.qa-item');
+            if (targetBlock.length) {
+                $('html, body').animate({ scrollTop: targetBlock.offset().top - 100 }, 600);
+                targetBlock.css({'border-color': '#e61d4a', 'box-shadow': '0 0 15px rgba(230, 29, 74, 0.4)'});
+                setTimeout(() => targetBlock.css({'border-color': '', 'box-shadow': ''}), 4000);
+            }
+        }, 1200); 
+    } 
+    else if (type === 'ShareCode') {
+        openShareCodeSection();
+        let catMatch = codePreview.match(/^\[SHARECODE\|(.*?)\|/);
+        if (catMatch && catMatch[1]) {
+            let catName = catMatch[1].trim();
+            // Lọc giả lập để lấy ngôn ngữ, sau đó gọi load chi tiết
+            let lang = catName.toLowerCase().includes('python') ? 'python' : 'cpp';
+            setTimeout(() => {
+                openShareCategory(catName, lang);
+                setTimeout(() => {
+                    let itemIndex = window.shareCodeList.findIndex(i => i.rowIndex === rowIndex);
+                    if (itemIndex !== -1) openShareCodeDetail(itemIndex);
+                }, 1000);
+            }, 300);
+        }
+    }
 };

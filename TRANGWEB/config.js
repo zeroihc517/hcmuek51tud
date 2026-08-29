@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmknql0pwLj0bZJLmMuY8x0rvXc5k9oGMB9id1zWnQ5C29yaM81nrZ6qjXv_5zZMYp/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby9nDJQbY0YFKYBSkkxAxBZTr1vMGe396jXDjYnBR0F_GpEm35QafZICai0YNyXawOw/exec'; 
 
      let isAdmin = false;
         let currentSheetName = "";
@@ -220,12 +220,28 @@ function saveEditRow() {
             if (e.ctrlKey && (e.key === 'S' || e.key === 's' || e.keyCode === 83)) { e.preventDefault(); return false; }
         });
         window.alert = function(message) {
-            let toastEl = document.getElementById('autoToast'); let toastBody = document.getElementById('autoToastMessage');
-            toastBody.innerText = message;
-            if (message.toLowerCase().includes('lỗi') || message.toLowerCase().includes('không')) { toastEl.classList.remove('bg-success', 'bg-primary'); toastEl.classList.add('bg-danger'); } 
-            else { toastEl.classList.remove('bg-danger', 'bg-primary'); toastEl.classList.add('bg-success'); }
-            let toast = new bootstrap.Toast(toastEl, { delay: 2500 }); toast.show();
-        };
+    let toastEl = document.getElementById('autoToast'); 
+    let toastBody = document.getElementById('autoToastMessage');
+    toastBody.innerText = message;
+    
+    // --- FIX LỖI: Ép khung thông báo luôn nổi lên trên cùng (Đè lên cả chế độ LOAD_WEB) ---
+    let toastContainer = toastEl.closest('.toast-container');
+    if (toastContainer) {
+        toastContainer.style.setProperty('z-index', '99999', 'important');
+    }
+    
+    // Đổi màu thông báo tùy theo nội dung
+    if (message.toLowerCase().includes('lỗi') || message.toLowerCase().includes('không')) { 
+        toastEl.classList.remove('bg-success', 'bg-primary'); 
+        toastEl.classList.add('bg-danger'); 
+    } else { 
+        toastEl.classList.remove('bg-danger', 'bg-primary'); 
+        toastEl.classList.add('bg-success'); 
+    }
+    
+    let toast = new bootstrap.Toast(toastEl, { delay: 2500 }); 
+    toast.show();
+};
 function getNaturalShortName(fullName) {
     if (!fullName || typeof fullName !== 'string') return '';
     let parts = fullName.trim().split(/\s+/);

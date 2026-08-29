@@ -191,6 +191,7 @@ window.setDetailedView = function(viewString) {
     pingOnlineStatus(); // Gọi hàm ping để cập nhật lên bảng Admin ngay lập tức
 };
 // 5. Hàm gửi request lấy dữ liệu mới từ Server (chạy ngầm định kỳ)
+// 5. Hàm gửi request lấy dữ liệu mới từ Server (chạy ngầm định kỳ)
 function pingOnlineStatus() {
     let mssvParam = "Khách"; 
     
@@ -270,41 +271,44 @@ function pingOnlineStatus() {
                         
                         let hasJoin = false;
                         let hasLeave = false;
+                        let joinMessage = "";
+                        let leaveMessage = "";
 
                         // 1. Kiểm tra người mới vào
-                       // 1. Kiểm tra người mới vào
-for (let mssv in newUsersMap) {
-    if (!oldUsersMap[mssv]) {
-        // Bỏ qua nếu là chính tài khoản Admin
-        if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
+                        for (let mssv in newUsersMap) {
+                            if (!oldUsersMap[mssv]) {
+                                // Bỏ qua nếu là chính tài khoản Admin
+                                if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
 
-        let fullName = newUsersMap[mssv];
-        let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
-        window.alert(`${shortName} đã tham gia`);
-        hasJoin = true;
-    }
-}
+                                let fullName = newUsersMap[mssv];
+                                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
+                                joinMessage = `${shortName} đã tham gia`;
+                                hasJoin = true;
+                            }
+                        }
 
-// 2. Kiểm tra người vừa rời đi
-for (let mssv in oldUsersMap) {
-    if (!newUsersMap[mssv]) {
-        // Bỏ qua nếu là chính tài khoản Admin
-        if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
+                        // 2. Kiểm tra người vừa rời đi
+                        for (let mssv in oldUsersMap) {
+                            if (!newUsersMap[mssv]) {
+                                // Bỏ qua nếu là chính tài khoản Admin
+                                if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
 
-        let fullName = oldUsersMap[mssv];
-        let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
-        window.alert(`${shortName} đã rời`);
-        hasLeave = true;
-    }
-}
+                                let fullName = oldUsersMap[mssv];
+                                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
+                                leaveMessage = `${shortName} đã rời`;
+                                hasLeave = true;
+                            }
+                        }
 
-                        // PHÁT ÂM THANH (Bắt lỗi catch để phòng trường hợp trình duyệt chặn Autoplay)
+                        // PHÁT ÂM THANH VÀ THÔNG BÁO BẰNG WINDOW.ALERT ĐỂ NỔI LÊN TRÊN LOAD_WEB
                         if (hasJoin) {
                             let joinSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3');
                             joinSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
+                            window.alert(joinMessage); 
                         } else if (hasLeave) {
                             let leaveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2868/2868-preview.mp3');
                             leaveSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
+                            window.alert(leaveMessage);
                         }
                     }
                 }
