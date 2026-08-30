@@ -3083,11 +3083,12 @@ window.openPersonalNotifications = function() {
         window.personalUnreadQA.forEach(row => {
             let qPreview = String(row[2]).replace(/<[^>]*>?/gm, '').substring(0, 60) + '...';
             html += `
-            <div class="p-3 border-bottom" style="cursor: pointer; background: #fffcfc; transition: 0.2s;" onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fffcfc'" onclick="handleNotificationClick('Q&A', ${row[6]})">
+            <div class="p-3 border-bottom" style="cursor: pointer; background: #f8fafc; transition: 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'" onclick="handleNotificationClick('Q&A', ${row[6]})">
                 <div class="d-flex align-items-start gap-3">
-                    <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><i class="fa-solid fa-comments"></i></div>
+                    <!-- Chuyển sang xanh chủ đạo -->
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><i class="fa-solid fa-comments"></i></div>
                     <div>
-                        <div class="fw-bold text-danger mb-1" style="font-size: 14.5px;">Phản hồi mới trong Giải đáp thắc mắc</div>
+                        <div class="fw-bold text-primary mb-1" style="font-size: 14.5px;">Phản hồi mới trong Giải đáp thắc mắc</div>
                         <div class="text-muted small fst-italic">"${qPreview}"</div>
                     </div>
                 </div>
@@ -3096,16 +3097,11 @@ window.openPersonalNotifications = function() {
 
        window.personalUnreadShareCode.forEach(row => {
             let codePreview = String(row[2]).replace(/<[^>]*>?/gm, '');
-            
-            // Bóc tách mã bài
             let maBaiMatch = codePreview.match(/^\[SHARECODE\|.*?\|(.*?)\]/);
             let maBai = maBaiMatch && maBaiMatch[1] ? maBaiMatch[1].trim() : "Mã code";
-
-            // Bóc tách tên danh mục (catName) ngay tại đây để truyền đi an toàn
             let catMatch = codePreview.match(/^\[SHARECODE\|(.*?)(?:\||\])/);
             let catName = catMatch && catMatch[1] ? catMatch[1].trim() : "";
 
-            // Truyền biến catName vào onclick thay vì codePreview
             html += `
             <div class="p-3 border-bottom" style="cursor: pointer; background: #f0fdf4; transition: 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'" onclick="handleNotificationClick('ShareCode', ${row[6]}, '${catName}')">
                 <div class="d-flex align-items-start gap-3">
@@ -3123,11 +3119,9 @@ window.openPersonalNotifications = function() {
 };
 
 
-
- window.handleNotificationClick = function(type, rowIndex, catName) { // Đổi tham số thứ 3 thành catName
+ window.handleNotificationClick = function(type, rowIndex, catName) {
     $('#personalNotificationModal').modal('hide');
 
-    // Tẩy trạng thái Đã đọc gửi về Server
     postToGAS({
         action: "markAsRead",
         sheetName: type,
@@ -3139,62 +3133,43 @@ window.openPersonalNotifications = function() {
         updatePersonalNotificationBell();
     }, function() {});
 
-    // Dịch chuyển đến đúng màn hình tương ứng
     if (type === 'Q&A') {
-        // Mở phân hệ Giải đáp thắc mắc
         openQASection();
-        
-        // Cơ chế quét chờ dữ liệu Q&A render xong để cuộn tới đúng vị trí câu hỏi
         let retryCount = 0;
         let checkQaInterval = setInterval(() => {
-            // Tìm block câu hỏi có chứa nút phản hồi hoặc ID tương ứng với rowIndex
             let targetBlock = $('#replyBox-' + rowIndex).closest('.qa-item');
-            
             if (targetBlock.length > 0) {
-                clearInterval(checkQaInterval); // Dừng quét khi đã tìm thấy
-                
-                // Cuộn mượt mà đưa câu hỏi lên gần đầu màn hình
-                $('html, body').animate({ 
-                    scrollTop: targetBlock.offset().top - 100 
-                }, 600);
-                
-                // Thêm hiệu ứng viền đỏ nháy sáng để người dùng dễ nhận biết câu hỏi mới
-                targetBlock.css({
-                    'border-color': '#e61d4a', 
-                    'box-shadow': '0 0 20px rgba(230, 29, 74, 0.4)',
-                    'transition': 'all 0.5s ease'
-                });
-                
-                // Sau 4 giây tự động gỡ hiệu ứng viền sáng
-                setTimeout(() => { 
-                    targetBlock.css({'border-color': '', 'box-shadow': ''}); 
-                }, 4000);
+                clearInterval(checkQaInterval);
+                $('html, body').animate({ scrollTop: targetBlock.offset().top - 100 }, 600);
+                // Đồng bộ hiệu ứng viền sang màu xanh thay vì đỏ
+                targetBlock.css({'border-color': '#0f4c81', 'box-shadow': '0 0 20px rgba(15, 76, 129, 0.4)', 'transition': 'all 0.5s ease'});
+                setTimeout(() => { targetBlock.css({'border-color': '', 'box-shadow': ''}); }, 4000);
             }
-            
             retryCount++;
-            if (retryCount > 30) clearInterval(checkQaInterval); // Quá 6 giây tự ngắt để tránh lặp vô tận nếu mạng lỗi
+            if (retryCount > 30) clearInterval(checkQaInterval); 
         }, 200);
     }
     else if (type === 'ShareCode') {
         openShareCodeSection();
-        
-        // Sử dụng trực tiếp catName truyền từ trên xuống
         if (catName) {
             let lang = catName.toLowerCase().includes('python') ? 'python' : 'cpp';
             
             setTimeout(() => {
+                // FIX: Xóa sạch dữ liệu cũ để ép Interval chờ dữ liệu danh mục mới tải xong
+                window.shareCodeList = null; 
                 openShareCategory(catName, lang);
                 
-                // Quét liên tục chờ dữ liệu tải xong mới mở bài
                 let retryCount = 0;
                 let checkDataInterval = setInterval(() => {
                     if (window.shareCodeList && window.shareCodeList.length > 0) {
                         clearInterval(checkDataInterval);
                         let itemIndex = window.shareCodeList.findIndex(i => i.rowIndex === rowIndex);
-                        if (itemIndex !== -1) openShareCodeDetail(itemIndex);
+                        if (itemIndex !== -1) {
+                            openShareCodeDetail(itemIndex);
+                        }
                     }
                     retryCount++;
-                    if (retryCount > 25) clearInterval(checkDataInterval); // Tự tắt sau 5 giây để chống treo
+                    if (retryCount > 25) clearInterval(checkDataInterval);
                 }, 200);
             }, 300);
         }
