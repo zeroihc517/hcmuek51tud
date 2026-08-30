@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Tập Tự Do | Học nhóm APMA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Đường dẫn CSS lùi 2 cấp thư mục -->
+    <link href="../../TRANGWEB/styleweb.css" rel="stylesheet">
+    <link href="../Cấu trúc dữ liệu/baitap.css" rel="stylesheet">
+    <style>
+        /* Tăng chiều cao mặc định của khung soạn thảo lý thuyết (TinyMCE) */
+        .tox-tinymce {
+            min-height: 400px !important;
+        }
+    </style>
+</head>
+<body style="background-color: #f8fafc; font-family: 'Inter', sans-serif;">
+
+<div class="container py-4" style="max-width: 1000px;">
+    
+    <!-- HEADER -->
+    <div class="mb-4">
+        <h3 class="fw-bold text-dark m-0"><i class="fa-solid fa-dumbbell text-primary me-2"></i>Khu vực Luyện Tập Tự Do</h3>
+        <p class="text-muted mt-1 mb-0">Tự nhập mã bài và nộp bài để lưu trữ trên hệ thống</p>
+    </div>
+
+    <!-- KHU VỰC BÀI LÀM -->
+    <div id="workingView">
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; overflow: hidden;" id="mainSubmissionCard">
+            <div class="card-header text-white d-flex justify-content-between align-items-center py-3 px-4" style="background-color: #0f4c81;">
+                <h6 class="m-0 fw-bold" id="formSubmissionTitle"><i class="fa-solid fa-pen-to-square me-2"></i>Bài làm của sinh viên</h6>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small opacity-75">MSSV:</span>
+                    <input type="text" id="txtExerciseMSSV" class="form-control form-control-sm fw-bold border-0 text-center" style="width: 120px; background: rgba(255,255,255,0.2); color: #fff;" readonly>
+                    <button type="button" class="btn btn-sm btn-light fw-bold text-primary shadow-sm" onclick="requireLogin()" title="Đăng nhập tài khoản">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- KHUNG CHỌN MÔN HỌC & NHẬP MÃ BÀI -->
+                <div class="row g-3 mb-4 pb-3 border-bottom">
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold text-dark" style="font-size: 14px;">Môn học / Học phần:</label>
+                        <select id="customCourseName" class="form-select fw-bold text-primary shadow-sm" onchange="loadCustomHistory()">
+			    <option value="Lập trình hướng đối tượng">Lập trình hướng đối tượng</option>
+                            <option value="Cấu trúc dữ liệu">Cấu trúc dữ liệu</option>
+                            <option value="Lập trình Python">Lập trình Python</option>
+                            <option value="Lập trình nâng cao">Lập trình nâng cao</option>
+                        </select>
+                    </div>
+                    <div class="col-md-7">
+                        <label class="form-label fw-bold text-dark" style="font-size: 14px;">Mã bài cần nộp <span class="text-danger">*</span>:</label>
+                        <div class="input-group shadow-sm">
+                            <span class="input-group-text text-white fw-bold" style="background-color: #0f4c81; border-color: #0f4c81;"><i class="fa-solid fa-tag me-1"></i> (TỰ HỌC)</span>
+                            <input type="text" id="customMaBai" class="form-control fw-bold" placeholder="VD: AVL_01, DE_THI_2023...">
+                            <button class="btn btn-success fw-bold px-3" onclick="loadCustomHistory()"><i class="fa-solid fa-filter me-1"></i> Tải lịch sử</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- THANH CÔNG CỤ TÍCH HỢP -->
+                <div class="mb-3 d-flex flex-wrap gap-2"> 
+                    <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" onclick="toggleDrawingTool()">
+                        <i class="fa-solid fa-pencil text-primary me-1"></i> Bảng vẽ phác thảo
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-info fw-bold" onclick="openCustomTreeModal()">
+                        <i class="fa-solid fa-sitemap me-1"></i> Chèn Cây Nhị Phân
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-warning fw-bold text-dark" onclick="toggleUpcoderIframe()">
+                        <i class="fa-solid fa-code-compare me-1"></i> Chạy thử code
+                    </button>
+                </div>
+
+                <!-- INCLUDE CÁC KHUNG CHỨC NĂNG ẨN -->
+                <!-- 1. Bảng vẽ -->
+                <div id="drawingContainer" class="card p-3 mb-3 d-none border bg-light">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold small text-dark"><i class="fa-solid fa-paintbrush me-1"></i> Bảng vẽ phác thảo tự do:</span>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-dark" onclick="setDrawMode('pen')" title="Bút chì"><i class="fa-solid fa-pen"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDrawMode('eraser')" title="Cục tẩy"><i class="fa-solid fa-eraser"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="undoCanvas()" title="Hoàn tác"><i class="fa-solid fa-rotate-left"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="redoCanvas()" title="Làm lại"><i class="fa-solid fa-rotate-right"></i></button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearCanvas()">Xóa sạch</button>
+                            <button type="button" class="btn btn-sm btn-primary" onclick="insertDrawingToEditor()">Chèn vào bài làm</button>
+                        </div>
+                    </div>
+                    <div id="canvasWrapper" class="shadow-sm rounded" style="resize: vertical; overflow: hidden; min-height: 250px; border: 1px solid #cbd5e1; background: #ffffff; position: relative;">
+                        <canvas id="sketchCanvas" style="cursor: crosshair; display: block; width: 100%; height: 100%;"></canvas>
+                    </div>
+                </div>
+
+                <!-- 2. Vẽ cây -->
+                <div id="customTreeContainer" class="card p-3 mb-3 d-none border shadow-sm" style="background-color: #f8fafc;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="fw-bold text-primary" style="font-size: 15px;"><i class="fa-solid fa-diagram-project me-2"></i> Bảng chèn Cây Nhị Phân:</span>
+                        <button type="button" class="btn-close" onclick="$('#customTreeContainer').addClass('d-none')" title="Đóng"></button>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-lg-5 d-flex flex-column">
+                            <h6 class="fw-bold text-dark mb-2" style="font-size: 13.5px;"><i class="fa-solid fa-keyboard me-1 text-secondary"></i>Nhập dữ liệu từng nút:</h6>
+                            <div class="table-responsive flex-grow-1" style="max-height: 450px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;">
+                                <table class="table table-bordered align-middle text-center mb-0" id="customTreeTable">
+                                    <thead class="table-light" style="position: sticky; top: 0; z-index: 1;"><tr><th>Cha</th><th>Trái</th><th>Phải</th><th>Xóa</th></tr></thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="mt-2 text-center">
+                                <button class="btn btn-sm btn-outline-secondary fw-bold w-100 py-2" onclick="$('#customTreeTable tbody').append('<tr><td><input type=\'text\' class=\'form-control form-control-sm node-parent\'></td><td><input type=\'text\' class=\'form-control form-control-sm node-left\'></td><td><input type=\'text\' class=\'form-control form-control-sm node-right\'></td><td><button class=\'btn btn-sm btn-danger\' onclick=\'removeCustomTreeRow(this)\'><i class=\'fa-solid fa-trash\'></i></button></td></tr>');"><i class="fa-solid fa-plus me-1"></i>Thêm dòng</button>
+                            </div>
+                        </div>
+                        <div class="col-lg-7 d-flex flex-column">
+                            <h6 class="fw-bold text-success mb-2" style="font-size: 13.5px;"><i class="fa-solid fa-eye me-1"></i>Bản xem trước trực tiếp:</h6>
+                            <div class="flex-grow-1 bg-white d-flex justify-content-center align-items-center p-2" style="overflow: auto; border: 1px dashed #cbd5e1; border-radius: 8px; min-height: 450px;">
+                                <canvas id="treePreviewCanvas" width="1200" height="800" style="background:#ffffff; width: 100%; min-height: 450px; object-fit: contain;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end mt-3 gap-2 border-top pt-3">
+                        <button type="button" class="btn btn-light border fw-bold" onclick="$('#customTreeContainer').addClass('d-none')">Hủy bỏ</button>
+                        <button type="button" class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" onclick="insertTreeDirectlyToEditor()"><i class="fa-solid fa-check me-1"></i> Chèn hình vào bài làm</button>
+                    </div>
+                </div>
+
+                <!-- 3. Upcoder -->
+                <div id="upcoderContainer" class="d-none px-4 mb-3 py-2 border rounded shadow-sm" style="background: #f8fafc;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold text-warning-emphasis"><i class="fa-solid fa-globe me-1"></i> Chạy thử Code:</span>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn-close" onclick="toggleUpcoderIframe()" title="Đóng"></button>
+                        </div>
+                    </div>
+                    <div id="upcoderIframeWrapper" style="border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; height: 650px; background: #fff;">
+                        <iframe id="upcoderIframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+                    </div>
+                </div>
+
+                <!-- TRÌNH SOẠN THẢO VÀ CODE -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-dark" style="font-size: 15px;"><i class="fa-solid fa-align-left text-primary me-2"></i>TRẢ LỜI / LỜI GIẢI LÝ THUYẾT:</label>
+                    <!-- Đã tăng rows lên để rộng rãi hơn nếu CSS không tải kịp -->
+                    <textarea id="theoryEditor" class="form-control" rows="12" placeholder="Trình bày lời giải..."></textarea>
+                </div>
+
+                <div class="mb-4" id="codeSectionWrapper">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-bold text-dark m-0" style="font-size: 15px;"><i class="fa-solid fa-code text-success me-2"></i>NỘP CODE:</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small text-muted">Ngôn ngữ:</span>
+                            <select id="selectLang" class="form-select form-select-sm fw-bold" style="width: 120px;" onchange="changeEditorLang()">
+                                <option value="cpp">C / C++</option>
+                                <option value="python">Python</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="exerciseCodeEditor" style="height: 450px; border: 1px solid #cbd5e1; border-radius: 8px;"></div>
+                </div>
+
+                <!-- NÚT NỘP BÀI -->
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small"><i class="fa-solid fa-circle-info me-1"></i>Bài làm sẽ được lưu trực tiếp vào Thảo luận.</span>
+                        <button type="button" class="btn btn-sm btn-outline-danger fw-bold d-none" id="btnCancelEditMode" onclick="cancelEditMode()">
+                            <i class="fa-solid fa-xmark me-1"></i> Hủy sửa
+                        </button>
+                    </div>
+                    <button type="button" class="btn text-white fw-bold px-5 py-2.5 shadow-sm" style="background-color: #0f4c81; border-radius: 12px; font-size: 15px;" onclick="submitExerciseSolution()" id="btnSubmitExercise">
+                        <i class="fa-solid fa-paper-plane me-2"></i> Lưu bài Tự Học
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MỤC LỊCH SỬ BÀI NỘP -->
+        <div class="card border-0 shadow-sm" style="border-radius: 16px; background-color: #ffffff;">
+            <div class="card-header bg-light border-0 pt-3 px-4 d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold text-success m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử bài nộp Tự Học của môn này</h6>
+                <button class="btn btn-sm btn-outline-success fw-bold" onclick="loadCustomHistory()" style="border-radius: 8px;">
+                    <i class="fa-solid fa-rotate-right me-1"></i> Làm mới lịch sử
+                </button>
+            </div>
+            <div class="card-body p-4" id="submissionHistoryContainer">
+                <div class="text-center text-muted py-3">
+                    Hệ thống sẽ hiển thị toàn bộ lịch sử các bài bạn tự nộp.
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal User (Nếu chưa đăng nhập) -->
+<div class="modal fade" id="userAuthModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header text-white text-center p-4 d-block" style="background-color: #0f4c81;">
+                <i class="fa-solid fa-graduation-cap fs-1 mb-2"></i><h5 class="fw-bold m-0">ĐĂNG NHẬP HỆ THỐNG</h5>
+            </div>
+            <div class="modal-body p-4 p-md-5">
+                <div class="input-group mb-4 shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                    <span class="input-group-text bg-light border-0"><i class="fa-solid fa-id-card text-muted"></i></span>
+                    <input type="text" id="txtUserMSSV" class="form-control border-0 bg-light py-2" placeholder="Mã số sinh viên (VD: 51.01...)">
+                </div>
+                <div class="input-group mb-3 shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                    <span class="input-group-text bg-light border-0"><i class="fa-solid fa-lock text-muted"></i></span>
+                    <input type="password" id="txtUserPass" class="form-control border-0 bg-light py-2" placeholder="Mật khẩu" onkeypress="if(event.key === 'Enter') loginStudentExercise()">
+                </div>
+                <small class="text-danger text-center d-block d-none mb-3 fw-bold" id="userAuthError"></small>
+                <button type="button" class="btn text-white w-100 fw-bold py-2.5 mb-2 shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" id="btnLoginStudent" onclick="loginStudentExercise()">Đăng nhập ngay</button>
+                <button type="button" class="btn btn-light w-100 fw-bold py-2 border shadow-sm" style="border-radius: 8px;" data-bs-dismiss="modal">Hủy bỏ</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thư viện JS -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
+<!-- Cấu hình và File chung -->
+<script src="../../TRANGWEB/config.js"></script>
+<script src="../Cấu trúc dữ liệu/baitap.js"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="../../TRANGWEB/qa.js"></script>
+
+<!-- KHỐI JAVASCRIPT ĐIỀU KHIỂN RIÊNG CHO TRANG TỰ HỌC -->
+<!-- KHỐI JAVASCRIPT ĐIỀU KHIỂN RIÊNG CHO TRANG TỰ HỌC -->
+<script>
+    // Ẩn giao diện danh sách của trang bài tập thông thường
+    window.loadQuestionsData = function() {
+        $('#homeView').addClass('d-none');
+        $('#workingView').removeClass('d-none');
+    };
+    window.renderQuestion = function() {};
+    window.checkCompletedQuestions = function() {};
+
+    // Gắn "câu hỏi ảo" để tránh lỗi thư viện gốc (baitap.js đọc questionsList)
+    window.questionsList = [{ maBai: "TU_HOC", title: "Luyện tập tự do", content: "" }];
+    window.currentQuestionIndex = 0;
+
+    $(document).ready(function() {
+        // Tự động tải lịch sử nếu sinh viên đã đăng nhập
+        setTimeout(function() {
+            if ($('#txtExerciseMSSV').val() && $('#txtExerciseMSSV').val() !== "Khách") {
+                loadCustomHistory();
+            }
+        }, 800);
+    });
+
+    function loadCustomHistory() {
+        loadSubmissionHistory(true); 
+    }
+
+    // 1. GHI ĐÈ HÀM TẢI LỊCH SỬ (LỌC TOÀN BỘ BÀI CÓ CHỮ [TỰ HỌC] CỦA MÔN ĐÓ)
+    window.loadSubmissionHistory = function(forceRefresh = false) {
+        let mssv = $('#txtExerciseMSSV').val().trim();
+        let currentCourse = $('#customCourseName').val().trim();
+        
+        if (!mssv || mssv === "Khách") {
+            $('#submissionHistoryContainer').html(`<div class="text-center text-muted py-4"><i class="fa-solid fa-lock text-secondary fs-2 mb-3 d-block"></i><h6 class="fw-bold text-dark">Chưa đăng nhập</h6><button class="btn text-white fw-bold px-4 py-2 shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" onclick="requireLogin()">Đăng nhập ngay</button></div>`);
+            return;
+        }
+
+        const processHistoryData = (data) => {
+            currentSubmissionsList = [];
+            if (!data || data.length === 0) { renderHistoryUI(); return; }
+
+            // LỌC CHÍNH XÁC: Phải là môn học đó và phải có tag [TỰ HỌC]
+            let targetPrefix = `[SHARECODE|${currentCourse}|(TỰ HỌC)`;
+
+            data.forEach(row => {
+                let time = row[0] || '';
+                let rowMssv = row[1] || '';
+                let contentRaw = row[2] || '';
+                let answerThread = row[3] || '';
+                let rowIndex = row[6];
+
+                if (rowMssv.trim().toLowerCase() === mssv.toLowerCase() && contentRaw.startsWith(targetPrefix)) {
+                    let cleanContent = contentRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '').trim();
+                    
+                    // Bóc tách tên mã bài thực tế để gắn thẻ Tag cho đẹp
+                    let maBaiMatch = contentRaw.match(/^\[SHARECODE\|.*?\|\(TỰ HỌC\)\s*(.*?)\]/);
+                    let actualMaBai = maBaiMatch ? maBaiMatch[1].trim() : "Không tên";
+
+                    let theoryPart = "", codePart = "", langMatch = "CPP";
+                    let codeMatch = cleanContent.match(/```(cpp|python|c\+\+|c)?([\s\S]*?)```/i);
+                    
+                    if (codeMatch) {
+                        langMatch = (codeMatch[1] || "cpp").toLowerCase() === 'python' ? 'PYTHON' : 'CPP';
+                        codePart = codeMatch[2].trim();
+                        theoryPart = cleanContent.replace(codeMatch[0], '').trim();
+                    } else { theoryPart = cleanContent; }
+
+                    theoryPart = theoryPart.replace(/<div class="mb-3"><strong>Lời giải lý thuyết:<\/strong><br>/g, '').replace(/<\/div>$/g, '').trim();
+                    
+                    // Gắn nhãn màu xanh đồng bộ
+                    let displayTime = `${time} &nbsp;<span class="badge text-white shadow-sm" style="background-color: #0f4c81;" data-mabai="${actualMaBai}"><i class="fa-solid fa-tag me-1"></i>(TỰ HỌC) ${actualMaBai}</span>`;
+
+                    currentSubmissionsList.push({ rowIndex, time: displayTime, theory: theoryPart, code: codePart, lang: langMatch, answerThread });
+                }
+            });
+            renderHistoryUI();
+        };
+
+        $('#submissionHistoryContainer').html(`<div class="text-center text-muted py-3"><i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tìm kiếm lịch sử Tự Học môn ${currentCourse}...</div>`);
+
+        if (forceRefresh) {
+            $.ajax({
+                url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
+                method: "GET", dataType: "json", cache: false,
+                success: function(data) { globalSubmissionData = data; processHistoryData(data); },
+                error: function() { $('#submissionHistoryContainer').html(`<div class="text-center text-danger py-3">Lỗi kết nối khi tải lịch sử!</div>`); }
+            });
+        } else if (globalSubmissionData) {
+            processHistoryData(globalSubmissionData);
+        }
+    };
+
+    // 2. GHI ĐÈ NÚT NỘP BÀI (TỰ ĐỘNG GỌI LOAD LẠI SAU KHI LƯU ĐỂ MẤT CHỮ VỪA CẬP NHẬT)
+    window.submitExerciseSolution = function() {
+        let mssv = $('#txtExerciseMSSV').val().trim();
+        let currentMaBai = $('#customMaBai').val().trim();
+        let currentCourse = $('#customCourseName').val().trim();
+        
+        let theoryText = (typeof tinymce !== 'undefined' && tinymce.get('theoryEditor')) ? tinymce.get('theoryEditor').getContent().trim() : $('#theoryEditor').val().trim();
+        let rawCode = (exerciseEditor) ? exerciseEditor.getValue().trim() : "";
+        let lang = $('#selectLang').val();
+
+        if (!mssv || mssv === "Khách") { requireLogin(); return; }
+        if (!currentMaBai) { alert("Vui lòng nhập Mã bài (Tên bài) cần nộp!"); $('#customMaBai').focus(); return; }
+        if (!theoryText && !rawCode) { alert("Bạn chưa nhập nội dung bài làm!"); return; }
+
+        let formattedContent = "";
+        if (theoryText) formattedContent += `<div class="mb-3"><strong>Lời giải lý thuyết:</strong><br>${theoryText}</div>`;
+        if (rawCode) formattedContent += `\n\n\`\`\`${lang}\n${rawCode}\n\`\`\``;
+        
+        let finalMaBai = `(TỰ HỌC) ${currentMaBai}`;
+        let formattedPayload = `[SHARECODE|${currentCourse}|${finalMaBai}] \n${formattedContent}`;
+
+        let btn = $('#btnSubmitExercise');
+        let originalHtml = btn.html();
+        btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang lưu bài...').prop('disabled', true);
+
+        let isUpdating = editingSubIndex !== -1;
+        let targetRowIndex = isUpdating ? (currentSubmissionsList[editingSubIndex] ? currentSubmissionsList[editingSubIndex].rowIndex : -1) : -1;
+        let actionType = (isUpdating && targetRowIndex !== -1) ? "updateShareCodeSubmission" : "submitShareCode";
+
+        let postDataObj = { action: actionType, mssv: mssv, codeData: formattedPayload };
+        if (isUpdating && targetRowIndex !== -1) postDataObj.rowIndex = targetRowIndex;
+
+        $.ajax({
+            url: SCRIPT_URL, type: "POST", data: JSON.stringify(postDataObj), contentType: "text/plain;charset=utf-8", dataType: "text",
+            success: function(res) {
+                btn.html(originalHtml).prop('disabled', false);
+                cancelEditMode();
+                
+                // Tự động kích hoạt tải ngầm lại dữ liệu từ Google Sheets để xóa chữ "Vừa cập nhật"
+                setTimeout(function() {
+                    loadCustomHistory();
+                }, 1000);
+
+                alert(isUpdating ? `✅ CẬP NHẬT THÀNH CÔNG!` : `✅ ĐÃ LƯU BÀI TỰ HỌC THÀNH CÔNG!`);
+            },
+            error: function() {
+                btn.html(originalHtml).prop('disabled', false);
+                cancelEditMode();
+                
+                // Kể cả khi phản hồi lỗi mạng ảo, vẫn gọi tải lại lịch sử cho mượt
+                setTimeout(function() {
+                    loadCustomHistory();
+                }, 1000);
+
+                alert(isUpdating ? `✅ CẬP NHẬT THÀNH CÔNG!` : `✅ ĐÃ LƯU BÀI TỰ HỌC THÀNH CÔNG!`);
+            }
+        });
+    }
+
+    // 3. TỰ ĐỘNG ĐIỀN MÃ BÀI KHI BẤM "SỬA BÀI NÀY" TỪ LỊCH SỬ
+    const originalEdit = window.editSubmissionToForm;
+    window.editSubmissionToForm = function(subIndex) {
+        let sub = currentSubmissionsList[subIndex];
+        if (sub && sub.time) {
+            let match = sub.time.match(/data-mabai="(.*?)"/);
+            if (match && match[1]) {
+                $('#customMaBai').val(match[1].trim());
+            }
+        }
+        originalEdit(subIndex);
+    };
+</script>
+</body>
+</html>
