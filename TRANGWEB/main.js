@@ -6232,6 +6232,9 @@ $(document).ready(function() {
         if (typeof window.setDetailedView === 'function' && typeof currentSheetName !== 'undefined') {
             window.setDetailedView(currentSheetName);
         }
+
+        // THÊM DÒNG NÀY: Tự động đóng và reset Thanh công cụ khi tắt bài học
+        $('#iframeSidebar, #latexSidebar').removeClass('d-flex').addClass('d-none');
     });
 
     // Đánh chặn Click Link trên Sidebar của cả 2 Modal
@@ -6269,12 +6272,16 @@ window.toggleLatexSidebar = function() {
                     editor.on('change', function () { editor.save(); });
                 }
             });
-            if (typeof loadSidebarCodeSnippets === 'function') loadSidebarCodeSnippets(true);
         }
+        
+        // MANG DÒNG NÀY RA NGOÀI LỆNH IF
+        if (typeof loadSidebarCodeSnippets === 'function') loadSidebarCodeSnippets(true);
+        
     } else {
         sidebar.removeClass('d-flex').addClass('d-none');
     }
 };
+
 window.updateSidebarProgress = function(selectEl, isLatex = false) {
     let sidebarId = isLatex ? '#latexSidebar' : '#iframeSidebar';
     let sheetName = $(sidebarId).attr('data-sheet') || currentSheetName;
@@ -6353,9 +6360,11 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
     container.html('<div class="text-center text-muted small py-4"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2 d-block text-secondary"></i>Đang tải dữ liệu bộ nhớ...</div>');
 
     $.ajax({
-        url: SCRIPT_URL + "?action=getShareCodeData",
+        // THÊM ĐUÔI THỜI GIAN ĐỂ ÉP TẢI DỮ LIỆU MỚI TỪ GOOGLE SHEETS
+        url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
         method: "GET",
         dataType: "json",
+        cache: false, // CHỐNG LƯU CACHE CỦA TRÌNH DUYỆT
         success: function(data) {
             window.allSidebarSnippets = [];
             let activeUserObj = JSON.parse(localStorage.getItem('currentUser')) || null;
@@ -6417,7 +6426,7 @@ window.searchSidebarCode = function(isLatex = false) {
     let searchInputId = isLatex ? '#txtLatexSearchCode' : '#txtSidebarSearchCode';
     let listId = isLatex ? '#latexCodeList' : '#sidebarCodeList';
 
-    let maBaiSearch = $(searchInputId).val().trim().toLowerCase();
+    let maBaiSearch = $(searchInputId).val().trim();
     let container = $(listId);
 
     if (!maBaiSearch) {
@@ -6425,7 +6434,17 @@ window.searchSidebarCode = function(isLatex = false) {
         return;
     }
 
-    window.sidebarCodeCache = window.allSidebarSnippets.filter(item => item.maBai.toLowerCase().includes(maBaiSearch));
+    // Chuẩn hóa từ khóa: Đưa về chữ thường và loại bỏ toàn bộ dấu tiếng Việt
+    let cleanSearch = maBaiSearch.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    window.sidebarCodeCache = window.allSidebarSnippets.filter(item => {
+        // Chuẩn hóa dữ liệu của từng bài để so sánh chuẩn xác, thêm phòng hờ lỗi undefined
+        let safeMaBai = (item.maBai || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        let safeAuthor = (item.author || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        
+        // Mở rộng bộ lọc: Tìm theo cả Mã bài HOẶC Tên sinh viên chia sẻ
+        return safeMaBai.includes(cleanSearch) || safeAuthor.includes(cleanSearch);
+    });
 
     let html = '';
     if (window.sidebarCodeCache.length > 0) {
@@ -6436,7 +6455,7 @@ window.searchSidebarCode = function(isLatex = false) {
             html += `
             <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-white shadow-sm" style="border: 1px solid #cbd5e1; border-left: 3px solid ${borderLeftColor}; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';" onclick="openSidebarCodeViewer(${idx})">
                 <div class="text-truncate" style="max-width: 80%;">
-                    <strong style="font-size: 13px; color: #1e293b;">${item.maBai} ${badgeHtml}</strong><br>
+                    <strong style="font-size: 13px; color: #1e293b;">${item.maBai || "Mã code"} ${badgeHtml}</strong><br>
                     <small class="text-muted" style="font-size: 11px;"><i class="fa-solid fa-user me-1"></i>${item.author}</small>
                 </div>
                 <i class="fa-solid fa-up-right-from-square text-primary" style="font-size: 12px;"></i>
@@ -6447,6 +6466,7 @@ window.searchSidebarCode = function(isLatex = false) {
     }
     container.html(html);
 };
+
 document.addEventListener('fullscreenchange', function() {
     // Nếu mất trạng thái Fullscreen mà không phải do ấn nút Thoát tạm thời
     if (isEnforcedFullscreen && isTimerActive() && !document.fullscreenElement) {

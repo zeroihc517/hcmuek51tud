@@ -2417,8 +2417,11 @@ window.toggleIframeSidebar = function() {
                     });
                 }
             });
-if (typeof loadSidebarCodeSnippets === 'function') loadSidebarCodeSnippets();
         }
+        
+        // MANG DÒNG NÀY RA NGOÀI LỆNH IF ĐỂ LUÔN TẢI LẠI MÃ CODE KHI MỞ CÔNG CỤ
+        if (typeof loadSidebarCodeSnippets === 'function') loadSidebarCodeSnippets();
+        
     } else {
         sidebar.removeClass('d-flex').addClass('d-none');
     }
