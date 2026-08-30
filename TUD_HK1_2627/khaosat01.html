@@ -457,88 +457,117 @@
 
         // Hàm Submit
         function submitSurvey() {
-            // Lấy dữ liệu
-            let q1 = document.querySelector('input[name="q1"]:checked')?.value;
-            
-            // Xử lý 3 câu tự luận của câu 2
-            let q2_1 = document.getElementById('q2_1').value.trim();
-            let q2_2 = document.getElementById('q2_2').value.trim();
-            let q2_3 = document.getElementById('q2_3').value.trim();
-            
-            let q3 = document.querySelector('input[name="q3"]:checked')?.value;
-            let q3_text = document.getElementById('q3_text').value.trim();
-            let q4 = document.getElementById('q4_text').value.trim();
-            let q5 = document.querySelector('input[name="q5"]:checked')?.value;
+    // Lấy dữ liệu
+    let q1 = document.querySelector('input[name="q1"]:checked')?.value;
+    
+    // Xử lý 3 câu tự luận của câu 2
+    let q2_1 = document.getElementById('q2_1').value.trim();
+    let q2_2 = document.getElementById('q2_2').value.trim();
+    let q2_3 = document.getElementById('q2_3').value.trim();
+    
+    let q3 = document.querySelector('input[name="q3"]:checked')?.value;
+    let q3_text = document.getElementById('q3_text').value.trim();
+    let q4 = document.getElementById('q4_text').value.trim();
+    let q5 = document.querySelector('input[name="q5"]:checked')?.value;
 
-            // Validate dữ liệu bắt buộc (Đảm bảo nhập ít nhất phần 2.1 và 2.2)
-            if (!q1 || !q2_1 || !q2_2 || !q3 || !q5) {
-                alert("Vui lòng trả lời đầy đủ các câu hỏi trắc nghiệm và câu 2.1, 2.2!");
-                return;
+    // Validate dữ liệu bắt buộc (Đảm bảo nhập ít nhất phần 2.1 và 2.2)
+    if (!q1 || !q2_1 || !q2_2 || !q3 || !q5) {
+        alert("Vui lòng trả lời đầy đủ các câu hỏi trắc nghiệm và câu 2.1, 2.2!");
+        return;
+    }
+
+    // Gộp 3 phần của câu 2 lại thành 1 chuỗi
+    let q2_combined = `Thời gian/ngày: ${q2_1} | Tập trung: ${q2_2} | Phương pháp: ${q2_3 || 'Không có'}`;
+
+    // Đổi trạng thái Nút
+    let btn = document.getElementById('btnSubmitSurvey');
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi dữ liệu...';
+    btn.disabled = true;
+
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwy2gc4Dnyw3qe0nr7GXabFDps4cCoFXNE9vmXJQzbWRYeZMIx9aji1bdM9Bp42dPiS/exec';
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || { mssv: "Khách", name: "Ẩn danh" };
+
+    // ---------------------------------------------------------
+    // BỔ SUNG LOGIC CHUYỂN DỮ LIỆU SANG HỆ THỐNG Q&A
+    // ---------------------------------------------------------
+    
+    // 1. Format lại nội dung các câu hỏi xuống dòng
+    let qText = `Khảo sát tháng 8:
+Câu 1: ${q1}
+Câu 2: ${q2_combined}
+Câu 3: ${q3}${q3_text ? ' - ' + q3_text : ''}
+Câu 4: ${q4 || 'Không có'}
+Câu 5: ${q5}`;
+
+    // 2. Format tiêu đề (Badge) chuẩn của hệ thống Q&A
+    let qaTopic = "Hệ thống";
+    let finalQaPayload = `<span class="badge mb-2 shadow-sm" style="background-color: #f1f5f9; color: #475569; font-size: 12.5px; border: 1px solid #e2e8f0;"><i class="fa-solid fa-tag me-1" style="color: #0f4c81;"></i> ${qaTopic}</span>\n\n${qText}`;
+
+    // 3. Gửi Request song song sang bảng Q&A
+    $.ajax({
+        url: SCRIPT_URL, // Đảm bảo SCRIPT_URL này là URL trỏ đến Hub xử lý chung
+        method: "POST",
+        data: JSON.stringify({ 
+            action: "submitQuestion", 
+            mssv: currentUser.mssv, 
+            question: finalQaPayload 
+        }),
+        contentType: "text/plain;charset=utf-8"
+    });
+    // ---------------------------------------------------------
+
+    // Gói dữ liệu Khảo sát gốc
+    let payload = {
+        action: "submitSurvey",
+        mssv: currentUser.mssv,
+        name: currentUser.name,
+        q1_time: q1,
+        q2_duration: q2_combined,
+        q3_method: q3,
+        q3_method_detail: q3_text,
+        q4_feedback: q4,
+        q5_rewind: q5
+    };
+
+    $.ajax({
+        url: SCRIPT_URL,
+        method: "POST",
+        data: JSON.stringify(payload),
+        contentType: "text/plain;charset=utf-8",
+        success: function(response) {
+            if (currentUser && currentUser.mssv !== "Khách") {
+                localStorage.setItem('survey_done_' + currentUser.mssv, 'true');
             }
 
-            // Gộp 3 phần của câu 2 lại thành 1 chuỗi để gửi API
-            let q2_combined = `Thời gian/ngày: ${q2_1} | Tập trung: ${q2_2} | Phương pháp: ${q2_3 || 'Không có'}`;
+            // Chuyển UI
+            document.getElementById('formState').style.display = 'none';
+            document.getElementById('successState').style.display = 'block';
 
-            // Đổi trạng thái Nút
-            let btn = document.getElementById('btnSubmitSurvey');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi dữ liệu...';
-            btn.disabled = true;
+            // Quay về trang chủ
+            let countdown = 4;
+            let successState = document.getElementById('successState');
+            let redirectMsg = document.createElement('p');
+            redirectMsg.className = "text-primary fw-bold mt-4";
+            redirectMsg.style.fontSize = "18px";
+            redirectMsg.innerHTML = `Hệ thống sẽ chuyển hướng sau <span id="redirCount">${countdown}</span> giây...`;
+            successState.appendChild(redirectMsg);
 
-            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx32GKWRLlZNwu1pqy1JwRiJQQwu26v0ljNekapNmesYyeQMNBe1Tj_8QhrWPdzuFiy/exec';
-            let currentUser = JSON.parse(localStorage.getItem('currentUser')) || { mssv: "Khách", name: "Ẩn danh" };
-
-            // Gói dữ liệu
-            let payload = {
-                action: "submitSurvey",
-                mssv: currentUser.mssv,
-                name: currentUser.name,
-                q1_time: q1,
-                q2_duration: q2_combined,
-                q3_method: q3,
-                q3_method_detail: q3_text,
-                q4_feedback: q4,
-                q5_rewind: q5
-            };
-
-           $.ajax({
-                url: SCRIPT_URL,
-                method: "POST",
-                data: JSON.stringify(payload),
-                contentType: "text/plain;charset=utf-8",
-                success: function(response) {
-                    if (currentUser && currentUser.mssv !== "Khách") {
-                        localStorage.setItem('survey_done_' + currentUser.mssv, 'true');
-                    }
-
-                    // Chuyển UI
-                    document.getElementById('formState').style.display = 'none';
-                    document.getElementById('successState').style.display = 'block';
-
-                    // Quay về trang chủ
-                    let countdown = 4;
-                    let successState = document.getElementById('successState');
-                    let redirectMsg = document.createElement('p');
-                    redirectMsg.className = "text-primary fw-bold mt-4";
-                    redirectMsg.style.fontSize = "18px";
-                    redirectMsg.innerHTML = `Hệ thống sẽ chuyển hướng sau <span id="redirCount">${countdown}</span> giây...`;
-                    successState.appendChild(redirectMsg);
-
-                    let timer = setInterval(function() {
-                        countdown--;
-                        document.getElementById('redirCount').innerText = countdown;
-                        if (countdown <= 0) {
-                            clearInterval(timer);
-                            window.location.href = "../appliedmathematics.html"; 
-                        }
-                    }, 1000);
-                },
-                error: function() {
-                    alert("Lỗi kết nối máy chủ! Vui lòng kiểm tra lại mạng hoặc thử lại sau.");
-                    btn.innerHTML = 'Gửi Khảo Sát <i class="fa-solid fa-paper-plane ms-3"></i>';
-                    btn.disabled = false;
+            let timer = setInterval(function() {
+                countdown--;
+                document.getElementById('redirCount').innerText = countdown;
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    window.location.href = "../appliedmathematics.html"; 
                 }
-            });
+            }, 1000);
+        },
+        error: function() {
+            alert("Lỗi kết nối máy chủ! Vui lòng kiểm tra lại mạng hoặc thử lại sau.");
+            btn.innerHTML = 'Gửi Khảo Sát <i class="fa-solid fa-paper-plane ms-3"></i>';
+            btn.disabled = false;
         }
+    });
+}
     </script>
 </body>
 </html>
