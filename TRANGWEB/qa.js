@@ -3175,3 +3175,30 @@ window.openPersonalNotifications = function() {
         }
     }
 };
+
+window.toggleOneCompiler = function(btn, isShow) {
+    let sidebar = $(btn).closest('#iframeSidebar, #latexSidebar'); 
+    
+    // Thêm hiệu ứng kéo giãn mượt mà
+    sidebar.css('transition', 'all 0.3s ease');
+    
+    if (isShow) {
+        // Ẩn thanh công cụ, Hiện khung Code
+        sidebar.find('.tools-area').removeClass('d-flex').addClass('d-none');
+        sidebar.find('.compiler-area').removeClass('d-none').addClass('d-flex');
+        
+        // Load iframe nếu chưa có
+        let iframe = sidebar.find('iframe');
+        if (!iframe.attr('src')) iframe.attr('src', 'https://onecompiler.com/cpp');
+        
+        // Nới rộng Sidebar ra 3/7 màn hình (~42.85%) và gỡ bỏ giới hạn max-width
+        sidebar.css({'width': '42.85%', 'max-width': 'none'});
+    } else {
+        // Ẩn khung Code, Hiện thanh công cụ
+        sidebar.find('.compiler-area').removeClass('d-flex').addClass('d-none');
+        sidebar.find('.tools-area').removeClass('d-none').addClass('d-flex');
+        
+        // Thu nhỏ Sidebar về lại kích thước mặc định ban đầu
+        sidebar.css({'width': '32%', 'max-width': '450px'});
+    }
+};

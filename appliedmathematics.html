@@ -2264,7 +2264,8 @@
                         <button class="btn-close" style="font-size: 11px;" onclick="toggleIframeSidebar()"></button>
                     </div>
                     
-                    <div class="p-3 d-flex flex-column flex-grow-1 gap-3">
+                   <div class="p-3 d-flex flex-column flex-grow-1 gap-3 tools-area">
+
                         <!-- AI Links (Thiết kế Outline tối giản) -->
                         <div class="d-flex gap-2">
                             <a href="https://chatgpt.com/" target="_blank" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #10a37f; border: 1.5px solid #10a37f; border-radius: 6px; font-size: 12.5px; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#10a37f'; this.style.color='#fff';" onmouseout="this.style.backgroundColor='#ffffff'; this.style.color='#10a37f';">
@@ -2273,6 +2274,7 @@
                             <a href="https://gemini.google.com/" target="_blank" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #8b5cf6; border: 1.5px solid #8b5cf6; border-radius: 6px; font-size: 12.5px; transition: all 0.2s;" onmouseover="this.style.background='linear-gradient(135deg, #1a73e8, #9333ea)'; this.style.color='#fff'; this.style.borderColor='transparent';" onmouseout="this.style.background='#ffffff'; this.style.color='#8b5cf6'; this.style.borderColor='#8b5cf6';">
                                 <i class="fa-solid fa-sparkles"></i> Gemini
                             </a>
+<button type="button" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #ea580c; border: 1.5px solid #ea580c; border-radius: 6px; font-size: 12.5px;" onclick="toggleOneCompiler(this, true)"><i class="fa-solid fa-play"></i> Run Code</button>
                         </div>
 
                         <!-- Progress (Tiến độ) -->
@@ -2322,7 +2324,15 @@
                             </div>
                         </div>
                     </div>
+					<div class="compiler-area d-none flex-column flex-grow-1 w-100 bg-white">
+        <div class="d-flex justify-content-between align-items-center p-2 border-bottom" style="background: #fff7ed;">
+            <span class="fw-bold" style="color: #ea580c; font-size: 13.5px;"><i class="fa-solid fa-terminal me-1"></i> Trình biên dịch C++</span>
+            <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-danger" onclick="toggleOneCompiler(this, false)" style="font-size: 12px; border-radius: 6px;"><i class="fa-solid fa-xmark me-1"></i> Đóng</button>
+        </div>
+        <iframe src="" class="w-100 flex-grow-1 border-0"></iframe>
+    </div>
                 </div>
+				
             </div>
         </div>
     </div>
@@ -2537,7 +2547,7 @@
                         <button class="btn-close" style="font-size: 11px;" onclick="toggleLatexSidebar()"></button>
                     </div>
                     
-                    <div class="p-3 d-flex flex-column flex-grow-1 gap-3">
+                   <div class="p-3 d-flex flex-column flex-grow-1 gap-3 tools-area">
                         <div class="d-flex gap-2">
                             <a href="https://chatgpt.com/" target="_blank" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #10a37f; border: 1.5px solid #10a37f; border-radius: 6px; font-size: 12.5px; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#10a37f'; this.style.color='#fff';" onmouseout="this.style.backgroundColor='#ffffff'; this.style.color='#10a37f';">
                                 <i class="fa-solid fa-robot"></i> ChatGPT
@@ -2545,6 +2555,7 @@
                             <a href="https://gemini.google.com/" target="_blank" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #8b5cf6; border: 1.5px solid #8b5cf6; border-radius: 6px; font-size: 12.5px; transition: all 0.2s;" onmouseover="this.style.background='linear-gradient(135deg, #1a73e8, #9333ea)'; this.style.color='#fff'; this.style.borderColor='transparent';" onmouseout="this.style.background='#ffffff'; this.style.color='#8b5cf6'; this.style.borderColor='#8b5cf6';">
                                 <i class="fa-solid fa-sparkles"></i> Gemini
                             </a>
+							<button type="button" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #ea580c; border: 1.5px solid #ea580c; border-radius: 6px; font-size: 12.5px;" onclick="toggleOneCompiler(this, true)"><i class="fa-solid fa-play"></i> Run Code</button>
                         </div>
 
                         <div class="bg-white p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">
@@ -2588,6 +2599,13 @@
                             </div>
                         </div>
                     </div>
+					<div class="compiler-area d-none flex-column flex-grow-1 w-100 bg-white">
+        <div class="d-flex justify-content-between align-items-center p-2 border-bottom" style="background: #fff7ed;">
+            <span class="fw-bold" style="color: #ea580c; font-size: 13.5px;"><i class="fa-solid fa-terminal me-1"></i> Trình biên dịch C++</span>
+            <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-danger" onclick="toggleOneCompiler(this, false)" style="font-size: 12px; border-radius: 6px;"><i class="fa-solid fa-xmark me-1"></i> Đóng</button>
+        </div>
+        <iframe src="" class="w-100 flex-grow-1 border-0"></iframe>
+    </div>
                 </div>
 
             </div>
@@ -3111,8 +3129,8 @@
 <script>
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
-        const startMaintenance = new Date(2026, 7, 30, 12, 40);  
-        const endMaintenance   = new Date(2026, 7, 30, 13, 20); 
+        const startMaintenance = new Date(2026, 7, 28, 11, 40);  
+        const endMaintenance   = new Date(2026, 7, 28, 12, 30); 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
