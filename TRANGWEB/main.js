@@ -1308,29 +1308,33 @@ headHtml += `<th style="width: 130px;" class="text-center">Tiến độ</th><th 
                     if(info) instructorInfos.push(info); 
                     return; 
                 }
-
-                // 3. Trích xuất thẻ bài kiểm tra/minigame
-               // 3. Trích xuất thẻ bài kiểm tra/minigame
-                let isSpecialExam = /(đề thi thử|đề demo|minigame tuần|minigame hè|minigame số)/i.test(fullRowText);
-                if (isSpecialExam) {
-                    hasExamCards = true; 
-                    let titleText = String(row[1] || row[0]).trim(); 
-                    let _extRegex = /(https?:\/\/[^\s]+)/g; 
-                    let extMatch = row.join(" ").match(_extRegex); 
-                    let linkUrl = '#'; 
-                    let imageUrl = '';   
-                    
-                    if (extMatch) {
-                        linkUrl = extMatch[0]; 
-                        if (extMatch.length > 1) {
-                            imageUrl = extMatch[1];
-                            if (imageUrl.includes("drive.google.com/file/d/")) {
-                                let matchId = imageUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                                if (matchId && matchId[1]) imageUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w400`; 
-                            }
-                        }
-                    }
-                    
+// 3. Trích xuất thẻ bài kiểm tra/minigame
+let isSpecialExam = /(đề thi thử|đề demo|minigame tuần|minigame hè|minigame số)/i.test(fullRowText);
+if (isSpecialExam) {
+    hasExamCards = true; 
+    let titleText = String(row[1] || row[0]).trim(); 
+    
+    // Tách riêng Cột C (Link Game) và Cột D (Link Ảnh)
+    let rawColC = String(row[2] || '').trim(); 
+    let rawColD = String(row[3] || '').trim(); 
+    
+    // Tẩy sạch các thẻ hệ thống ở Cột C
+    let cleanColC = rawColC.replace(/\[LOAD_WEB\]|\[LOAD_IFRAME\]|\[LOAD_MINIGAME\]|\[MINIGAME\]/gi, '').trim();
+    
+    // --- SỬA Ở ĐÂY: KHÔNG ÉP BUỘC HTTP/HTTPS NỮA ---
+    // Lấy toàn bộ phần nội dung còn lại sau khi tẩy Tag làm đường dẫn
+    let linkUrl = cleanColC !== '' ? cleanColC : '#';
+    
+    // Lấy Link Ảnh từ Cột D (Ưu tiên quét http/https, nếu không có thì lấy luôn text thô)
+    let _extRegex = /(https?:\/\/[^\s"']+)/; 
+    let imgMatch = rawColD.match(_extRegex);
+    let imageUrl = imgMatch ? imgMatch[0] : rawColD;
+    
+    // Xử lý thumbnail nếu ảnh lấy từ Google Drive
+    if (imageUrl.includes("drive.google.com/file/d/")) {
+        let matchId = imageUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (matchId && matchId[1]) imageUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w400`; 
+    }                    
                     let imgDisplayHtml = '';
                     if (imageUrl) {
                         imgDisplayHtml = `<div class="card-minigame-img"><img src="${imageUrl}"></div>`;
