@@ -1574,7 +1574,7 @@ if (!isChapter && !isLesson && !rowClass.includes('row-part')) {
      // --- LOGIC PHÂN LOẠI HIỂN THỊ: LINK HAY NỘI DUNG LATEX ---
 let isLoadWeb = c3.trim().startsWith('[LOAD_WEB]');
 let isLoadIframe = c3.trim().startsWith('[LOAD_IFRAME]');
-
+let isLoadMinigame = c3.trim().startsWith('[LOAD_MINIGAME]') || c3.trim().startsWith('[MINIGAME]');
 if (isLoadWeb && typeof isTimerActive === 'function' && isTimerActive()) {
     isLoadWeb = false; isLoadIframe = true;
     c3 = c3.replace('[LOAD_WEB]', '[LOAD_IFRAME]');
@@ -1603,13 +1603,13 @@ if (!isChapter && !isLesson && !isPart) {
 let safeTrackStr = trackStr.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ").replace(/\r/g, "");
 
 // THÊM BIẾN NHẬN DIỆN TỪ KHÓA MINIGAME / LÀM ĐỀ THỰC CHIẾN
-let isMinigamePrompt = col2Html.toLowerCase().includes('hãy làm đề') || col2Html.toLowerCase().includes('hãy làm minigame đề') || col2Html.toLowerCase().includes('hãy tiến hành làm đề') ;
+let isMinigamePrompt = col2Html.toLowerCase().includes('hãy làm đề') || col2Html.toLowerCase().includes('minigame') || col2Html.toLowerCase().includes('hãy tiến hành làm đề') ;
 
 if (isUpdating && !isAdmin) {
     // Trường hợp đang cập nhật
     col2Html = `<span onclick="$('#updatingModal').modal('show'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Đang cập nhật">${lessonIcon}${col2Html || "Đang cập nhật"}</span>`;
-} else if (isMinigamePrompt) {
-    // TRƯỜNG HỢP MỚI: Nếu chứa từ khóa "hãy làm đề", "minigame" -> Cuộn lên Top và mở khung Minigame
+} else if (isMinigamePrompt || isLoadMinigame) {
+    // TRƯỜNG HỢP MỚI: Nếu chứa từ khóa "hãy làm đề", "minigame" HOẶC có tag [MINIGAME]
     col2Html = `<span onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); $('#collapseMinigames').collapse('show'); event.stopPropagation();" style="cursor: pointer; color: #ef4444; font-weight: 700; text-decoration: none;" title="Nhấn để về đầu trang và mở khung Minigame"><i class="fa-solid fa-gamepad me-2" style="color: #ef4444; font-size: 16px;"></i>${col2Html}</span>`;
 } else if (isLoadWeb) {
     // LOAD_WEB: Chèn trực tiếp và phóng to full màn hình ẩn sidebar
