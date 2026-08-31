@@ -823,12 +823,12 @@ function convertUrlsToLinks(text) {
             }
         }
 
-        // --- XỬ LÝ CÁC LINK BÌNH THƯỜNG KHÁC ---
+              // --- XỬ LÝ CÁC LINK BÌNH THƯỜNG KHÁC ---
         if (isFirstLink) {
             isFirstLink = false; 
-            return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="tex2jax_ignore btn-first-link"><i class="fa-solid fa-arrow-up-right-from-square me-2"></i>TRUY CẬP LINK</a>${trailingChars}`;
+            return `<a href="javascript:void(0)" onclick="openGenericIframe('${href}')" class="tex2jax_ignore btn-first-link"><i class="fa-solid fa-arrow-up-right-from-square me-2"></i>TRUY CẬP LINK</a>${trailingChars}`;
         } else {
-            return `<a href="${href}" target="_blank" rel="noopener noreferrer" class="tex2jax_ignore fw-bold text-primary text-decoration-underline"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>TRUY CẬP LINK</a>${trailingChars}`;
+            return `<a href="javascript:void(0)" onclick="openGenericIframe('${href}')" class="tex2jax_ignore fw-bold text-primary text-decoration-underline"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>TRUY CẬP LINK</a>${trailingChars}`;
         }
     });
 }
@@ -2002,4 +2002,120 @@ function toggleFullscreenUpcoder() {
             scrollTop: container.offset().top - 80
         }, 300);
     }
+}
+
+// Bật iframe để xem trực tiếp (GHOST LINK CHUẨN - ÉP MỞ TRONG IFRAME VÀ GIỮ LOGIN)
+function openGenericIframe(url) {
+	resetZoomGenericIframe();
+    let container = $('#genericIframeContainer');
+    let iframe = $('#genericIframe');
+    
+    // KỸ THUẬT GHOST LINK: Ép trình duyệt điều hướng bên trong iframe có sẵn tên
+    if (iframe.attr('data-current-url') !== url) {
+        iframe.attr('data-current-url', url); // Ghi nhớ link
+        
+        // Xóa thẻ link ẩn cũ (nếu có)
+        $('#ghostLinkTarget').remove();
+        
+        // Tạo thẻ <a> tàng hình và ép nó nhắm đích chính xác vào name="genericIframeTarget" của HTML
+        let ghostLink = `<a id="ghostLinkTarget" href="${url}" target="genericIframeTarget" style="display:none;"></a>`;
+        $('body').append(ghostLink);
+        
+        // Kích hoạt click ảo
+        document.getElementById('ghostLinkTarget').click();
+    }
+    
+    // Cập nhật nút Mở tab mới trên thanh công cụ
+    $('#btnOpenNewTab').attr('onclick', `window.open('${url}', '_blank')`);
+    
+    // Đóng iframe upcoder nếu đang mở để tránh chồng chéo
+    if (!$('#upcoderContainer').hasClass('d-none')) {
+        $('#upcoderContainer').addClass('d-none');
+    }
+
+    // Hiển thị khung iframe
+    container.removeClass('d-none');
+    
+    // TỰ ĐỘNG BẬT TOÀN MÀN HÌNH NGAY LẬP TỨC
+    if (!container.hasClass('generic-fullscreen')) {
+        toggleFullscreenGeneric();
+    }
+}
+
+function closeGenericIframe() {
+    let container = $('#genericIframeContainer');
+    
+    // Nếu đang full màn hình thì thu nhỏ lại trước
+    if (container.hasClass('generic-fullscreen')) {
+        toggleFullscreenGeneric();
+    }
+    
+    // Chỉ ẩn khung giao diện (Tạm thoát)
+    container.addClass('d-none');
+    
+    // ĐÃ XÓA DÒNG GÁN src = '' ĐỂ IFRAME VẪN CHẠY NGẦM BÊN DƯỚI, DUY TRÌ ĐĂNG NHẬP
+    
+    // Cuộn nhẹ lên trên vùng bài làm
+    $('html, body').animate({
+        scrollTop: $('#mainSubmissionCard').offset().top - 80
+    }, 300);
+}
+
+// Phóng to / Thu nhỏ cho iframe link chung
+function toggleFullscreenGeneric() {
+    let container = $('#genericIframeContainer');
+    let icon = $('#btnFullscreenGeneric i');
+    
+    container.toggleClass('generic-fullscreen');
+    
+    if (container.hasClass('generic-fullscreen')) {
+        icon.removeClass('fa-expand').addClass('fa-compress');
+        $('#btnFullscreenGeneric').attr('title', 'Thu nhỏ màn hình');
+        $('body').css('overflow', 'hidden'); // Khóa cuộn trang gốc
+    } else {
+        icon.removeClass('fa-compress').addClass('fa-expand');
+        $('#btnFullscreenGeneric').attr('title', 'Mở toàn màn hình');
+        $('body').css('overflow', 'auto');   // Mở lại cuộn trang gốc
+        
+        $('html, body').animate({
+            scrollTop: container.offset().top - 80
+        }, 300);
+    }
+}
+
+// ========================================================
+// CHỨC NĂNG ZOOM CHO IFRAME TRUY CẬP LINK
+// ========================================================
+let genericIframeZoom = 1.0;
+
+function zoomInGenericIframe() {
+    if (genericIframeZoom < 3.0) { // Giới hạn zoom tối đa 300%
+        genericIframeZoom += 0.1;
+        applyGenericIframeZoom();
+    }
+}
+
+function zoomOutGenericIframe() {
+    if (genericIframeZoom > 0.3) { // Giới hạn thu nhỏ tối đa 30%
+        genericIframeZoom -= 0.1;
+        applyGenericIframeZoom();
+    }
+}
+
+function resetZoomGenericIframe() {
+    genericIframeZoom = 1.0;
+    applyGenericIframeZoom();
+}
+
+function applyGenericIframeZoom() {
+    let iframe = $('#genericIframe');
+    
+    // Sử dụng thuộc tính 'zoom' thay vì 'transform: scale' để không bị mờ
+    iframe.css({
+        'zoom': genericIframeZoom,
+        // Reset lại các thuộc tính cũ (phòng khi trước đó đã dùng transform)
+        'transform': 'none',
+        'width': '100%',
+        'height': '100%'
+    });
 }

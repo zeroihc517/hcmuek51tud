@@ -14,7 +14,7 @@
 </head>
 <body style="background-color: #f8fafc; font-family: 'Inter', sans-serif;">
 
- <div class="container-fluid px-2 py-4">
+  <div class="container-fluid px-2 py-4">
     
     <!-- VIEW 1: TRANG CHỦ (DANH SÁCH BÀI TẬP) -->
     <div id="homeView">
@@ -176,6 +176,46 @@
 </div>
 
                     <div class="card-body p-4 d-flex flex-column justify-content-between">
+<div id="genericIframeContainer" class="d-none px-4 mb-2 py-2" style="transition: all 0.2s ease-in-out; background: #f8fafc;">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold text-primary"><i class="fa-solid fa-globe me-1"></i> Nếu làm trực tiếp tại đây, mỗi lần vào bài các bạn chịu khó đăng nhập lại hoặc mở tab mới nhé.
+</span>
+        
+        <div class="d-flex align-items-center gap-2">
+    <button type="button" class="btn btn-sm btn-outline-info d-flex align-items-center justify-content-center" onclick="zoomOutGenericIframe()" title="Thu nhỏ trang" style="width: 28px; height: 28px; padding: 0;">
+        <i class="fa-solid fa-magnifying-glass-minus"></i>
+    </button>
+    
+    <button type="button" class="btn btn-sm btn-outline-info d-flex align-items-center justify-content-center" onclick="resetZoomGenericIframe()" title="Trở về mặc định" style="width: 28px; height: 28px; padding: 0; font-size: 11px; font-weight: bold;">
+        1x
+    </button>
+
+    <button type="button" class="btn btn-sm btn-outline-info d-flex align-items-center justify-content-center" onclick="zoomInGenericIframe()" title="Phóng to trang" style="width: 28px; height: 28px; padding: 0;">
+        <i class="fa-solid fa-magnifying-glass-plus"></i>
+    </button>
+
+    <div class="vr mx-1" style="height: 20px; align-self: center;"></div>
+
+    <button type="button" class="btn btn-sm btn-outline-primary fw-bold" id="btnOpenNewTab" onclick="window.open('', '_blank')">
+        <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Mở tab mới
+    </button>
+    
+    <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center" id="btnFullscreenGeneric" onclick="toggleFullscreenGeneric()" title="Mở toàn màn hình" style="width: 28px; height: 28px; padding: 0;">
+        <i class="fa-solid fa-expand"></i>
+    </button>
+    
+    <div class="vr mx-1" style="height: 20px; align-self: center;"></div>
+    
+    <button type="button" class="btn btn-sm btn-danger fw-bold shadow-sm" onclick="closeGenericIframe()" title="Đóng khung xem trước">
+        <i class="fa-solid fa-arrow-left me-1"></i> Trở lại
+    </button>
+</div>
+    </div>
+
+    <div id="genericIframeWrapper" style="border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; height: 650px; background: #fff;">
+        <iframe id="genericIframe" name="genericIframeTarget" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+    </div>
+</div>
 <div id="upcoderContainer" class="d-none px-4 mb-2 py-2" style="transition: all 0.2s ease-in-out; background: #f8fafc;">
     <div class="d-flex justify-content-between align-items-center mb-2">
         <span class="fw-bold text-warning-emphasis"><i class="fa-solid fa-globe me-1"></i> Chạy thử Code (Nhớ copy code và dán ở khung nộp bài ở bên dưới):</span>
