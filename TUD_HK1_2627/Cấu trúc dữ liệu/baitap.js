@@ -2063,35 +2063,47 @@ function toggleFullscreenUpcoder() {
     }
 }
 
-// Bật iframe để xem trực tiếp (GHOST LINK CHUẨN - ÉP MỞ TRONG IFRAME VÀ GIỮ LOGIN)
 function openGenericIframe(url) {
-	resetZoomGenericIframe();
+    resetZoomGenericIframe();
     let container = $('#genericIframeContainer');
-    let iframe = $('#genericIframe');
-    
-    // KỸ THUẬT GHOST LINK: Ép trình duyệt điều hướng bên trong iframe có sẵn tên
-    if (iframe.attr('data-current-url') !== url) {
-        iframe.attr('data-current-url', url); // Ghi nhớ link
-        
-        // Xóa thẻ link ẩn cũ (nếu có)
-        $('#ghostLinkTarget').remove();
-        
-        // Tạo thẻ <a> tàng hình và ép nó nhắm đích chính xác vào name="genericIframeTarget" của HTML
-        let ghostLink = `<a id="ghostLinkTarget" href="${url}" target="genericIframeTarget" style="display:none;"></a>`;
-        $('body').append(ghostLink);
-        
-        // Kích hoạt click ảo
-        document.getElementById('ghostLinkTarget').click();
-    }
-    
-    // Cập nhật nút Mở tab mới trên thanh công cụ
-    $('#btnOpenNewTab').attr('onclick', `window.open('${url}', '_blank')`);
     
     // Đóng iframe upcoder nếu đang mở để tránh chồng chéo
     if (!$('#upcoderContainer').hasClass('d-none')) {
         $('#upcoderContainer').addClass('d-none');
     }
 
+    // 1. Ẩn tất cả các iframe đang có trong container 
+    container.find('iframe').addClass('d-none');
+    
+    // 2. Tìm xem URL này đã có iframe nào được tạo trước đó chưa
+    let targetIframe = container.find(`iframe[data-current-url="${url}"]`);
+    
+    // 3. Nếu chưa có, tạo mới một iframe riêng cho URL này
+    if (targetIframe.length === 0) {
+        let iframeName = 'iframe_' + new Date().getTime(); // Tạo tên duy nhất
+        targetIframe = $(`<iframe name="${iframeName}" data-current-url="${url}" class="dynamic-ghost-iframe" style="width: 100%; height: 100%; border: none;"></iframe>`);
+        
+        // Chèn iframe mới vào ngay sau iframe gốc để đúng vị trí giao diện
+        if ($('#genericIframe').length > 0) {
+            $('#genericIframe').after(targetIframe);
+            $('#genericIframe').addClass('d-none'); // Đảm bảo iframe gốc cũng bị ẩn
+        } else {
+            container.append(targetIframe);
+        }
+        
+        // KỸ THUẬT GHOST LINK
+        $('#ghostLinkTarget').remove();
+        let ghostLink = `<a id="ghostLinkTarget" href="${url}" target="${iframeName}" style="display:none;"></a>`;
+        $('body').append(ghostLink);
+        document.getElementById('ghostLinkTarget').click();
+    }
+    
+    // 4. Hiển thị lại iframe của URL được chọn (Trạng thái và đăng nhập vẫn còn nguyên)
+    targetIframe.removeClass('d-none');
+    
+    // Cập nhật nút Mở tab mới trên thanh công cụ
+    $('#btnOpenNewTab').attr('onclick', `window.open('${url}', '_blank')`);
+    
     // Hiển thị khung iframe
     container.removeClass('d-none');
     
@@ -2167,12 +2179,12 @@ function resetZoomGenericIframe() {
 }
 
 function applyGenericIframeZoom() {
-    let iframe = $('#genericIframe');
+    // Tìm iframe không bị ẩn (d-none)
+    let iframe = $('#genericIframeContainer iframe:not(.d-none)');
     
     // Sử dụng thuộc tính 'zoom' thay vì 'transform: scale' để không bị mờ
     iframe.css({
         'zoom': genericIframeZoom,
-        // Reset lại các thuộc tính cũ (phòng khi trước đó đã dùng transform)
         'transform': 'none',
         'width': '100%',
         'height': '100%'
