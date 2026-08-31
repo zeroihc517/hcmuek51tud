@@ -43,25 +43,64 @@ let langParam = urlParams.get('lang') || "cpp";
                     editor.on('change', function() { editor.save(); });
                     
                     // --- CLICK ĐÚP VÀO ẢNH ĐỂ MANG XUỐNG BẢNG VẼ SỬA LẠI ---
+                   // --- CLICK ĐÚP VÀO ẢNH ĐỂ MANG XUỐNG BẢNG VẼ SỬA LẠI ---
                     editor.on('dblclick', function(e) {
                         if (e.target.nodeName === 'IMG') {
-                            let imgSrc = e.target.src;
-                            if (imgSrc.startsWith('data:image')) {
-                                window.editingImageNode = e.target; 
-                                $('#drawingContainer').removeClass('d-none');
+                            
+                            // 1. KIỂM TRA NẾU ĐÂY LÀ ẢNH CÂY NHỊ PHÂN
+                            let treeConfig = e.target.getAttribute('data-tree-config');
+                            if (treeConfig) {
+                                // Lưu lại node ảnh cây đang sửa
+                                window.editingTreeImageNode = e.target;
                                 
-                                let img = new Image();
-                                img.src = imgSrc;
-                                img.onload = function() {
-                                    if (!canvas) initCanvas();
-                                    ctx.fillStyle = '#ffffff';
-                                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                                    ctx.drawImage(img, 0, 0);
-                                    saveCanvasState();
+                                // Mở bảng vẽ cây
+                                $('#customTreeContainer').removeClass('d-none');
+                                
+                                // Phục hồi dữ liệu vào bảng nhập liệu
+                                let treeData = JSON.parse(decodeURIComponent(treeConfig));
+                                let tbody = $('#customTreeTable tbody');
+                                tbody.empty(); // Xóa trắng bảng cũ
+                                
+                                treeData.forEach(row => {
+                                    tbody.append(`
+                                        <tr>
+                                            <td><input type="text" class="form-control form-control-sm fw-bold node-parent" value="${row.parent}"></td>
+                                            <td><input type="text" class="form-control form-control-sm node-left" value="${row.left}"></td>
+                                            <td><input type="text" class="form-control form-control-sm node-right" value="${row.right}"></td>
+                                            <td><button class="btn btn-sm btn-danger" onclick="removeCustomTreeRow(this)"><i class="fa-solid fa-trash"></i></button></td>
+                                        </tr>
+                                    `);
+                                });
+                                
+                                // Gọi hàm vẽ lại ảnh xem trước lập tức
+                                drawCustomTree(true);
+                                
+                                // Cuộn màn hình tới bảng vẽ cây
+                                $('html, body').animate({
+                                    scrollTop: $("#customTreeContainer").offset().top - 80
+                                }, 300);
+                                
+                            } 
+                            // 2. NẾU LÀ ẢNH VẼ TỰ DO (BÚT CHÌ)
+                            else {
+                                let imgSrc = e.target.src;
+                                if (imgSrc.startsWith('data:image')) {
+                                    window.editingImageNode = e.target; 
+                                    $('#drawingContainer').removeClass('d-none');
                                     
-                                    $('html, body').animate({
-                                        scrollTop: $("#drawingContainer").offset().top - 80
-                                    }, 300);
+                                    let img = new Image();
+                                    img.src = imgSrc;
+                                    img.onload = function() {
+                                        if (!canvas) initCanvas();
+                                        ctx.fillStyle = '#ffffff';
+                                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                        ctx.drawImage(img, 0, 0);
+                                        saveCanvasState();
+                                        
+                                        $('html, body').animate({
+                                            scrollTop: $("#drawingContainer").offset().top - 80
+                                        }, 300);
+                                    }
                                 }
                             }
                         }
@@ -1231,6 +1270,8 @@ $(document).on('input', '#customTreeTable input', function() {
 
 // Khi mở bảng, xóa trắng xem trước và chỉ thiết lập bảng
 function openCustomTreeModal() {
+    window.editingTreeImageNode = null; // Thêm dòng này để reset cờ
+    
     $('#customTreeTable tbody').html(`
         <tr>
             <td><input type="text" class="form-control form-control-sm fw-bold node-parent" placeholder="VD: 10"></td>
@@ -1695,9 +1736,12 @@ function getTreeDepth(node) {
     return 1 + Math.max(getTreeDepth(node.left), getTreeDepth(node.right));
 }
 
-// Hàm xuất cây ra ảnh và chèn thẳng vào bài làm (ĐÃ FIX LỖI CĂN TRÁI VÀ KÍCH THƯỚC)
+// Hàm xuất cây ra ảnh và chèn thẳng vào bài làm (CÓ HỖ TRỢ CHỈNH SỬA LẠI)
 function insertTreeDirectlyToEditor() {
     let nodesMap = {}, childSet = new Set(), parentSet = new Set(), hasData = false;
+    
+    // MẢNG LƯU TRỮ DỮ LIỆU ĐỂ CHO PHÉP CHỈNH SỬA LẠI SAU NÀY
+    let treeDataToSave = [];
     
     // 1. Quét dữ liệu từ bảng
     $('#customTreeTable tbody tr').each(function() {
@@ -1707,6 +1751,9 @@ function insertTreeDirectlyToEditor() {
 
         if (parentVal !== '') {
             hasData = true;
+            // Đẩy dữ liệu thô vào mảng
+            treeDataToSave.push({ parent: parentVal, left: leftVal, right: rightVal });
+            
             if (!nodesMap[parentVal]) nodesMap[parentVal] = new CanvasTreeNode(parentVal);
             parentSet.add(parentVal);
             if (leftVal !== '') {
@@ -1764,25 +1811,37 @@ function insertTreeDirectlyToEditor() {
     // 4. Trích xuất ảnh PNG
     let dataURL = offCanvas.toDataURL("image/png", 1.0);
     
-    // 5. Chèn trực tiếp vào trình soạn thảo TinyMCE
+    // ĐÓNG GÓI DỮ LIỆU CÂY THÀNH CHUỖI AN TOÀN
+    let encodedTreeData = encodeURIComponent(JSON.stringify(treeDataToSave));
+    
+    // 5. Chèn hoặc Ghi đè vào trình soạn thảo TinyMCE
     let editor = (typeof tinymce !== 'undefined') ? (tinymce.get('theoryEditor') || tinymce.activeEditor) : null;
-   if (editor) {
-        // FIX QUAN TRỌNG: Ép căn trái, max-width: 50%...
-        let imgHtml = `<p style="text-align: left;"><img src="${dataURL}" alt="Cây Nhị Phân" style="max-width:50%; border-radius:8px;"/></p><p style="text-align: left;">&nbsp;</p>`;
+    if (editor) {
         
-        editor.insertContent(imgHtml);
-        
-        // --- TỰ ĐỘNG MỞ RỘNG KHUNG ---
-        setTimeout(function() {
-            let body = editor.getBody();
-            let currentHeight = editor.getContainer().offsetHeight;
-            let contentHeight = body.scrollHeight + 100;
-            if (contentHeight > currentHeight) {
-                editor.theme.resizeTo(null, contentHeight);
-            }
-        }, 100);
+        if (window.editingTreeImageNode) {
+            // NẾU ĐANG CẬP NHẬT ẢNH CŨ: Thay thế Data Base64 và Dữ liệu Tree mới
+            window.editingTreeImageNode.src = dataURL;
+            window.editingTreeImageNode.setAttribute('data-tree-config', encodedTreeData);
+            window.editingTreeImageNode = null; // Xóa cờ trạng thái
+            editor.fire('change'); // Kích hoạt sự kiện lưu thay đổi
+        } else {
+            // NẾU CHÈN MỘT ẢNH MỚI HOÀN TOÀN
+            let imgHtml = `<p style="text-align: left;"><img data-tree-config="${encodedTreeData}" src="${dataURL}" alt="Cây Nhị Phân" title="Click đúp chuột vào ảnh để chỉnh sửa cây" style="max-width:50%; border-radius:8px; cursor:pointer;"/></p><p style="text-align: left;">&nbsp;</p>`;
+            
+            editor.insertContent(imgHtml);
+            
+            // TỰ ĐỘNG MỞ RỘNG KHUNG
+            setTimeout(function() {
+                let body = editor.getBody();
+                let currentHeight = editor.getContainer().offsetHeight;
+                let contentHeight = body.scrollHeight + 100;
+                if (contentHeight > currentHeight) {
+                    editor.theme.resizeTo(null, contentHeight);
+                }
+            }, 100);
+        }
 
-        // ĐÃ ĐỔI ĐÚNG LỆNH ẨN CONTAINER NỘI TUYẾN
+        // Đóng giao diện bảng vẽ
         $('#customTreeContainer').addClass('d-none'); 
         
     } else {
