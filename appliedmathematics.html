@@ -2325,12 +2325,18 @@
                         </div>
                     </div>
 					<div class="compiler-area d-none flex-column flex-grow-1 w-100 bg-white">
-        <div class="d-flex justify-content-between align-items-center p-2 border-bottom" style="background: #fff7ed;">
-            <span class="fw-bold" style="color: #ea580c; font-size: 13.5px;"><i class="fa-solid fa-terminal me-1"></i> Trình biên dịch C++</span>
-            <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-danger" onclick="toggleOneCompiler(this, false)" style="font-size: 12px; border-radius: 6px;"><i class="fa-solid fa-xmark me-1"></i> Đóng</button>
-        </div>
-        <iframe src="" class="w-100 flex-grow-1 border-0"></iframe>
+   <div class="d-flex justify-content-between align-items-center p-2 border-bottom" style="background: #fff7ed;">
+    <span class="fw-bold" style="color: #ea580c; font-size: 13.5px;"><i class="fa-solid fa-terminal me-1"></i> CodePad trên UpCoder</span>
+    <div class="d-flex gap-1">
+        <!-- Nút thu nhỏ / phóng to nội dung bên trong -->
+        <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-secondary" onclick="zoomCompilerContent(this, -0.1)" title="Thu nhỏ nội dung"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+        <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-secondary" onclick="zoomCompilerContent(this, 0.1)" title="Phóng to nội dung"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+	<button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-primary btn-maximize-compiler" onclick="toggleCompilerSize(this)" title="Toàn màn hình"><i class="fa-solid fa-expand"></i></button>
+        <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-danger" onclick="toggleOneCompiler(this, false)" style="font-size: 12px; border-radius: 6px;"><i class="fa-solid fa-xmark me-1"></i> Đóng</button>
     </div>
+</div>
+    <iframe src="" class="w-100 flex-grow-1 border-0"></iframe>
+</div>
                 </div>
 				
             </div>
@@ -2600,12 +2606,18 @@
                         </div>
                     </div>
 					<div class="compiler-area d-none flex-column flex-grow-1 w-100 bg-white">
-        <div class="d-flex justify-content-between align-items-center p-2 border-bottom" style="background: #fff7ed;">
-            <span class="fw-bold" style="color: #ea580c; font-size: 13.5px;"><i class="fa-solid fa-terminal me-1"></i> Trình biên dịch C++</span>
-            <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-danger" onclick="toggleOneCompiler(this, false)" style="font-size: 12px; border-radius: 6px;"><i class="fa-solid fa-xmark me-1"></i> Đóng</button>
-        </div>
-        <iframe src="" class="w-100 flex-grow-1 border-0"></iframe>
+    <div class="d-flex justify-content-between align-items-center p-2 border-bottom" style="background: #fff7ed;">
+    <span class="fw-bold" style="color: #ea580c; font-size: 13.5px;"><i class="fa-solid fa-terminal me-1"></i> CodePad trên UpCoder</span>
+    <div class="d-flex gap-1">
+        <!-- Nút thu nhỏ / phóng to nội dung bên trong -->
+        <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-secondary" onclick="zoomCompilerContent(this, -0.1)" title="Thu nhỏ nội dung"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+        <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-secondary" onclick="zoomCompilerContent(this, 0.1)" title="Phóng to nội dung"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+	<button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-primary btn-maximize-compiler" onclick="toggleCompilerSize(this)" title="Toàn màn hình"><i class="fa-solid fa-expand"></i></button>
+        <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-danger" onclick="toggleOneCompiler(this, false)" style="font-size: 12px; border-radius: 6px;"><i class="fa-solid fa-xmark me-1"></i> Đóng</button>
     </div>
+</div>
+    <iframe src="" class="w-100 flex-grow-1 border-0"></iframe>
+</div>
                 </div>
 
             </div>

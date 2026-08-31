@@ -3181,26 +3181,76 @@ window.openPersonalNotifications = function() {
 window.toggleOneCompiler = function(btn, isShow) {
     let sidebar = $(btn).closest('#iframeSidebar, #latexSidebar'); 
     
-    // Thêm hiệu ứng kéo giãn mượt mà
     sidebar.css('transition', 'all 0.3s ease');
     
     if (isShow) {
-        // Ẩn thanh công cụ, Hiện khung Code
         sidebar.find('.tools-area').removeClass('d-flex').addClass('d-none');
         sidebar.find('.compiler-area').removeClass('d-none').addClass('d-flex');
         
-        // Load iframe nếu chưa có
         let iframe = sidebar.find('iframe');
         if (!iframe.attr('src')) iframe.attr('src', 'https://test.upcoder.xyz/index.php/problems/mysubmit');
         
-        // Nới rộng Sidebar ra 3/7 màn hình (~42.85%) và gỡ bỏ giới hạn max-width
         sidebar.css({'width': '42.85%', 'max-width': 'none'});
     } else {
-        // Ẩn khung Code, Hiện thanh công cụ
+        // ĐOẠN THÊM MỚI: Kiểm tra nếu đang phóng to thì thu nhỏ lại trước khi đóng
+        let compilerArea = sidebar.find('.compiler-area');
+        if (compilerArea.hasClass('compiler-maximized')) {
+            compilerArea.removeClass('compiler-maximized').css({'position':'', 'top':'', 'left':'', 'width':'', 'height':'', 'z-index':''});
+            compilerArea.find('.btn-maximize-compiler').html('<i class="fa-solid fa-expand me-1"></i> Phóng to');
+        }
+
         sidebar.find('.compiler-area').removeClass('d-flex').addClass('d-none');
         sidebar.find('.tools-area').removeClass('d-none').addClass('d-flex');
         
-        // Thu nhỏ Sidebar về lại kích thước mặc định ban đầu
         sidebar.css({'width': '32%', 'max-width': '450px'});
     }
+};
+
+window.toggleCompilerSize = function(btn) {
+    let compilerArea = $(btn).closest('.compiler-area');
+    let isMaximized = compilerArea.hasClass('compiler-maximized');
+    
+    if (!isMaximized) {
+        compilerArea.addClass('compiler-maximized');
+        compilerArea.css({
+            'position': 'fixed',
+            'top': '0',
+            'left': '0',
+            'width': '100vw',
+            'height': '100vh',
+            'z-index': '10800'
+        });
+        $(btn).html('<i class="fa-solid fa-compress"></i>');
+        $(btn).attr('title', 'Thu nhỏ khung');
+    } else {
+        compilerArea.removeClass('compiler-maximized');
+        compilerArea.css({'position': '', 'top': '', 'left': '', 'width': '', 'height': '', 'z-index': ''});
+        $(btn).html('<i class="fa-solid fa-expand"></i>');
+        $(btn).attr('title', 'Toàn màn hình');
+    }
+};
+
+window.zoomCompilerContent = function(btn, zoomChange) {
+    // Tìm đúng iframe đang hiển thị
+    let iframe = $(btn).closest('.compiler-area').find('iframe');
+    
+    // Lấy mức zoom hiện tại (Mặc định là 1.0 ~ 100%)
+    let currentZoom = parseFloat(iframe.attr('data-zoom')) || 1.0;
+    let newZoom = currentZoom + zoomChange;
+    
+    // Khóa giới hạn: Không cho thu nhỏ quá 50% hoặc phóng to quá 250%
+    if (newZoom < 0.5) newZoom = 0.5;
+    if (newZoom > 2.5) newZoom = 2.5;
+    
+    // Lưu lại trạng thái zoom
+    iframe.attr('data-zoom', newZoom);
+    
+    // Áp dụng CSS zoom (Phóng to nét căng như dùng Ctrl + cuộn chuột)
+    iframe.css({
+        'zoom': newZoom,
+        '-moz-transform': `scale(${newZoom})`,      // Dự phòng cho Firefox
+        '-moz-transform-origin': 'top left',
+        'width': navigator.userAgent.toLowerCase().includes('firefox') ? `${100 / newZoom}%` : '100%',
+        'height': navigator.userAgent.toLowerCase().includes('firefox') ? `${100 / newZoom}%` : '100%'
+    });
 };
