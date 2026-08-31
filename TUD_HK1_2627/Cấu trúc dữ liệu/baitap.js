@@ -2178,3 +2178,88 @@ function applyGenericIframeZoom() {
         'height': '100%'
     });
 }
+
+// ========================================================
+// HÀM XUẤT ẢNH CÂY NHỊ PHÂN CHẤT LƯỢNG 4K VÀ TẢI VỀ MÁY
+// ========================================================
+function exportTreeTo4KImage() {
+    let nodesMap = {}, childSet = new Set(), parentSet = new Set(), hasData = false;
+    
+    // 1. Quét dữ liệu từ bảng
+    $('#customTreeTable tbody tr').each(function() {
+        let parentVal = $(this).find('.node-parent').val().trim();
+        let leftVal = $(this).find('.node-left').val().trim();
+        let rightVal = $(this).find('.node-right').val().trim();
+
+        if (parentVal !== '') {
+            hasData = true;
+            if (!nodesMap[parentVal]) nodesMap[parentVal] = new CanvasTreeNode(parentVal);
+            parentSet.add(parentVal);
+            if (leftVal !== '') {
+                if (!nodesMap[leftVal]) nodesMap[leftVal] = new CanvasTreeNode(leftVal);
+                nodesMap[parentVal].left = nodesMap[leftVal];
+                childSet.add(leftVal);
+            }
+            if (rightVal !== '') {
+                if (!nodesMap[rightVal]) nodesMap[rightVal] = new CanvasTreeNode(rightVal);
+                nodesMap[parentVal].right = nodesMap[rightVal];
+                childSet.add(rightVal);
+            }
+        }
+    });
+
+    if (!hasData) { alert("Vui lòng nhập dữ liệu để vẽ cây!"); return; }
+
+    // 2. Tìm gốc của cây
+    let rootVal = null;
+    for (let p of parentSet) { if (!childSet.has(p)) { rootVal = p; break; } }
+    if (!rootVal) rootVal = Array.from(parentSet)[0];
+    let root = nodesMap[rootVal];
+
+    // 3. Tạo Canvas ảo để render
+    let offCanvas = document.createElement('canvas');
+    let offCtx = offCanvas.getContext('2d');
+    
+    let depth = getTreeDepth(root);
+    let initialOffsetX = Math.max(40, Math.pow(1.8, depth - 2) * 25);
+    let initialOffsetY = 55;
+    
+    calculateTreePositions(root, 1000, 50, initialOffsetX, initialOffsetY); 
+    
+    let bounds = { minX: Infinity, maxX: -Infinity, minY: Infinity, maxY: -Infinity };
+    getTreeBounds(root, bounds);
+    
+    let padding = 30; // Tăng khoảng trống viền ảnh
+    let treeWidth = bounds.maxX - bounds.minX;
+    let treeHeight = bounds.maxY - bounds.minY;
+    
+    // HỆ SỐ PHÓNG TO 4K (Scale = 6 lần so với bình thường)
+    let scale = 6; 
+    
+    offCanvas.width = (treeWidth + padding * 2) * scale;
+    offCanvas.height = (treeHeight + padding * 2) * scale;
+    
+    // Tô nền trắng tinh
+    offCtx.fillStyle = '#ffffff';
+    offCtx.fillRect(0, 0, offCanvas.width, offCanvas.height);
+    
+    // Áp dụng hệ số thu phóng và dịch chuyển vào giữa khung hình
+    offCtx.scale(scale, scale);
+    offCtx.translate(-bounds.minX + padding, -bounds.minY + padding);
+    offCtx.lineCap = 'round'; 
+    offCtx.lineJoin = 'round';
+    
+    // Vẽ cây
+    drawTreeOnCanvas(root, offCtx);
+    
+    // 4. Trích xuất ảnh PNG (Chất lượng 100%)
+    let dataURL = offCanvas.toDataURL("image/png", 1.0);
+    
+    // 5. Tự động tải file về máy tính
+    let downloadLink = document.createElement('a');
+    downloadLink.href = dataURL;
+    downloadLink.download = `Cay_Nhi_Phan_4K_${new Date().getTime()}.png`; // Tên file có kèm timestamp
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
