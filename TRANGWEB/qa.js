@@ -3192,7 +3192,7 @@ window.toggleOneCompiler = function(btn, isShow) {
         
         // Load iframe nếu chưa có
         let iframe = sidebar.find('iframe');
-        if (!iframe.attr('src')) iframe.attr('src', 'https://onecompiler.com/cpp');
+        if (!iframe.attr('src')) iframe.attr('src', 'https://test.upcoder.xyz/index.php/problems/mysubmit');
         
         // Nới rộng Sidebar ra 3/7 màn hình (~42.85%) và gỡ bỏ giới hạn max-width
         sidebar.css({'width': '42.85%', 'max-width': 'none'});
