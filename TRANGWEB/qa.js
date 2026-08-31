@@ -2401,13 +2401,13 @@ window.toggleIframeSidebar = function() {
     if (sidebar.hasClass('d-none')) {
         sidebar.removeClass('d-none').addClass('d-flex');
         
-        // Khởi tạo TinyMCE tối giản cho Sidebar để không chiếm diện tích
+        // Khởi tạo TinyMCE tối giản
         if (!tinymce.get('sidebarNoteEditor')) {
             tinymce.init({
                 selector: '#sidebarNoteEditor',
-                height: '100%',
+                height: 400, // <--- SỬA '100%' THÀNH 400 CỐ ĐỊNH Ở ĐÂY
                 menubar: false,
-                statusbar: false, // Ẩn thanh trạng thái bên dưới cho gọn
+                statusbar: false, 
                 plugins: 'lists link textcolor colorpicker',
                 toolbar: 'bold italic underline | forecolor backcolor | bullist numlist',
                 branding: false,
@@ -2419,7 +2419,6 @@ window.toggleIframeSidebar = function() {
             });
         }
         
-        // MANG DÒNG NÀY RA NGOÀI LỆNH IF ĐỂ LUÔN TẢI LẠI MÃ CODE KHI MỞ CÔNG CỤ
         if (typeof loadSidebarCodeSnippets === 'function') loadSidebarCodeSnippets();
         
     } else {

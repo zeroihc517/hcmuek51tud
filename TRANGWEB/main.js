@@ -6262,7 +6262,7 @@ window.toggleLatexSidebar = function() {
         if (!tinymce.get('latexNoteEditor')) {
             tinymce.init({
                 selector: '#latexNoteEditor',
-                height: '100%',
+                height: 400, // <--- SỬA '100%' THÀNH 400 CỐ ĐỊNH Ở ĐÂY
                 menubar: false,
                 statusbar: false,
                 plugins: 'lists link textcolor colorpicker',
@@ -6274,7 +6274,6 @@ window.toggleLatexSidebar = function() {
             });
         }
         
-        // MANG DÒNG NÀY RA NGOÀI LỆNH IF
         if (typeof loadSidebarCodeSnippets === 'function') loadSidebarCodeSnippets(true);
         
     } else {
