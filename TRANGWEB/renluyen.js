@@ -12,15 +12,19 @@ function loadRenLuyenView() {
     resetNavActive();
     $('#btnNavRenLuyen').addClass('active');
     $('#renLuyenSection').removeClass('d-none');
-    updateSystemUrl('view', 'renluyen'); // Hỗ trợ định tuyến URL
+    updateSystemUrl('view', 'renluyen'); 
     
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
     
-    // Tải dữ liệu nếu đã đăng nhập
+    // 1. ĐÓNG BẢNG NGAY LẬP TỨC TẠI ĐÂY (0ms - Không cần chờ mạng)
+    initRenLuyenCollapse();
+
+    // 2. Nạp dữ liệu ngầm từ Server vào sau
     if (currentUser && !currentUser.isGuest) {
         fetchRenLuyenData();
     }
 }
+
 function openActivityModal(parentSubcat, critId, stepScore) {
     $('#actTargetSubcat').val(critId);
     $('#txtActName').val('');
@@ -87,6 +91,10 @@ function renderActivityRows(critId) {
     
     if (activities.length === 0) return;
 
+    // Kiểm tra nếu hàng cha đang đóng thì ẩn luôn hàng hoạt động mới nạp
+    let isParentHidden = parentRow.is(':hidden');
+    let hideStyle = isParentHidden ? 'display: none;' : '';
+
     let rowsHtml = '';
     activities.forEach((act, index) => {
         let safeUrl = act.url ? act.url.replace(/"/g, '&quot;').replace(/'/g, "\\'") : '#';
@@ -94,9 +102,8 @@ function renderActivityRows(critId) {
             ? `<a href="${safeUrl}" target="_blank" class="btn btn-sm btn-light border text-primary py-0 px-2" title="Minh chứng"><i class="fa-brands fa-google-drive"></i> Link</a>` 
             : `<span class="badge bg-light text-muted border">Không</span>`;
         
-        // Hàng hiển thị chi tiết (Nền xám nhạt để thụt lùi so với hàng trắng)
         rowsHtml += `
-        <tr class="act-row-${critId}" style="background-color: #f8fafc;">
+        <tr class="act-row-${critId}" style="background-color: #f8fafc; ${hideStyle}">
             <td></td>
             <td class="ps-5 text-muted small"><i class="fa-solid fa-arrow-turn-up fa-rotate-90 me-2"></i> ${act.name}</td>
             <td></td>
@@ -454,6 +461,95 @@ function fetchRenLuyenData() {
                 
                 calcRenLuyen(); // Tính lại điểm
             }
+        }
+    });
+}
+
+// 1. Trong hàm submitRenLuyen(): Thêm đoạn lưu danh sách minh chứng đính kèm
+$('.rl-proof-data').each(function() {
+    let proofId = $(this).attr('id');
+    try { 
+        rlData[proofId] = JSON.parse($(this).val()); 
+    } catch(e) { 
+        rlData[proofId] = []; 
+    }
+});
+
+// 2. Trong hàm fetchRenLuyenData(): Thêm đoạn nạp và hiển thị lại các link minh chứng
+$('.rl-proof-data').each(function() {
+    let proofId = $(this).attr('id');
+    if (dataObj[proofId]) {
+        $(this).val(JSON.stringify(dataObj[proofId]));
+        renderProofs($(this).closest('td'));
+    }
+});
+
+// HÀM: KHỞI TẠO TÍNH NĂNG THẢ XUỐNG ĐA CẤP (MẶC ĐỊNH ĐÓNG)
+function initRenLuyenCollapse() {
+    // 1. Gắn mũi tên và sự kiện cho dòng Cấp 1 (Mục I, II, III...)
+    $('tr.rl-level-1').each(function() {
+        $(this).css({'cursor': 'pointer', 'user-select': 'none'});
+        let td = $(this).find('td:nth-child(2)');
+        if (td.html() && !td.html().includes('fa-chevron-down')) {
+            td.html('<i class="fa-solid fa-chevron-down me-2 toggle-icon" style="transition: transform 0.3s; display: inline-block; transform: rotate(-90deg);"></i>' + td.html());
+        }
+        $(this).addClass('is-collapsed');
+    });
+
+    // 2. Gắn mũi tên và sự kiện cho dòng Cấp 2 (Màu hồng)
+    $('tr.rl-level-2').each(function() {
+        $(this).css({'cursor': 'pointer', 'user-select': 'none'});
+        let td = $(this).find('td:nth-child(2)');
+        if (td.html() && !td.html().includes('fa-chevron-down')) {
+            td.html('<i class="fa-solid fa-chevron-down me-2 toggle-icon" style="transition: transform 0.3s; display: inline-block; transform: rotate(-90deg);"></i>' + td.html());
+        }
+        $(this).addClass('is-collapsed');
+    });
+
+    // 3. ĐÓNG MẶC ĐỊNH TOÀN BỘ: Ẩn tất cả trừ Cấp 1 và dòng Tổng kết cuối
+    $('#rlTableBody tr').not('.rl-level-1').not('[style*="#fef3c7"]').hide();
+
+    // 4. Click Cấp 1 -> Hiện/Ẩn Cấp 2 (Màu hồng)
+    $('tr.rl-level-1').off('click').on('click', function() {
+        let $row = $(this);
+        let $icon = $row.find('.toggle-icon');
+        let catId = $row.attr('data-cat');
+        let $childLevel2 = $(`tr.rl-level-2[data-parent-cat="${catId}"]`);
+
+        if ($row.hasClass('is-collapsed')) {
+            $row.removeClass('is-collapsed');
+            $icon.css('transform', 'rotate(0deg)');
+            $childLevel2.fadeIn(200); 
+        } else {
+            $row.addClass('is-collapsed');
+            $icon.css('transform', 'rotate(-90deg)');
+            $childLevel2.fadeOut(200);
+            
+            // Nếu thu gọn Cấp 1 thì thu gọn luôn tất cả Cấp 2 bên trong nó
+            $childLevel2.each(function() {
+                $(this).addClass('is-collapsed');
+                $(this).find('.toggle-icon').css('transform', 'rotate(-90deg)');
+                // BẢO VỆ DÒNG TỔNG KẾT BẰNG .not('[style*="#fef3c7"]')
+                $(this).nextUntil('tr.rl-level-1, tr.rl-level-2').not('[style*="#fef3c7"]').fadeOut(200);
+            });
+        }
+    });
+
+    // 5. Click Cấp 2 (Màu hồng) -> Hiện/Ẩn các dòng chi tiết bên trong
+    $('tr.rl-level-2').off('click').on('click', function() {
+        let $row = $(this);
+        let $icon = $row.find('.toggle-icon');
+        // BẢO VỆ DÒNG TỔNG KẾT BẰNG .not('[style*="#fef3c7"]')
+        let $childRows = $row.nextUntil('tr.rl-level-1, tr.rl-level-2').not('[style*="#fef3c7"]');
+
+        if ($row.hasClass('is-collapsed')) {
+            $row.removeClass('is-collapsed');
+            $icon.css('transform', 'rotate(0deg)');
+            $childRows.fadeIn(200);
+        } else {
+            $row.addClass('is-collapsed');
+            $icon.css('transform', 'rotate(-90deg)');
+            $childRows.fadeOut(200);
         }
     });
 }

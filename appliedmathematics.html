@@ -162,7 +162,7 @@
                     <i class="fa-solid fa-clipboard-check"></i> Kết quả học tập
                 </button>
 <button class="btn-course" id="btnNavRenLuyen" onclick="loadRenLuyenView()">
-    <i class="fa-solid fa-medal"></i> Thử nghiệm
+    <i class="fa-solid fa-medal"></i> Rèn luyện
 </button>
             </div>
             
@@ -195,14 +195,22 @@
 <div id="renLuyenSection" class="d-none">
     <header class="top-header d-flex justify-content-between align-items-center">
         <div class="page-title"><i class="fa-solid fa-medal"></i> Mô phỏng web Đánh giá điểm rèn luyện</div>
-        <button class="btn text-white fw-bold shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" onclick="submitRenLuyen()" id="btnSaveRenLuyen">
-            <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Phiếu Đánh Giá
-        </button>
+        
+        <!-- Bọc 2 nút vào thẻ div để nằm ngang hàng bên phải -->
+        <div class="d-flex align-items-center gap-2">
+            <!-- Nút Làm mới -->
+            <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
+                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 8px; padding: 6px 18px; font-size: 14px;" 
+                    onclick="fetchRenLuyenData()">
+                <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
+            </button>
+            
+            <!-- Nút Lưu hiện tại -->
+            <button class="btn text-white fw-bold shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" onclick="submitRenLuyen()" id="btnSaveRenLuyen">
+                <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Phiếu Đánh Giá
+            </button>
+        </div>
     </header>
-
-    <div class="alert alert-info border-primary-subtle mt-3 mb-4 shadow-sm" style="background-color: #e0f2fe;">
-        <i class="fa-solid fa-circle-info me-2"></i> <strong>Chú ý:</strong> Hệ thống còn đang cập nhật dữ liệu, các bạn không sử dụng.
-    </div>
 
     <div class="table-responsive shadow-sm rounded border bg-white mb-5">
         <table class="table table-bordered align-middle m-0" style="font-size: 14.5px;">
@@ -212,7 +220,7 @@
                     <th style="width: 45%;">Nội dung đánh giá</th>
                     <th style="width: 15%;">Điểm quy định</th>
                     <th style="width: 15%;">Điểm đạt được</th>
-                    <th style="width: 20%;">Thao tác / MC</th>
+                    <th style="width: 20%;">Minh chứng</th>
                 </tr>
             </thead>
            <tbody id="rlTableBody">
@@ -273,7 +281,7 @@
                 <i class="fa-solid fa-plus"></i> Thêm Hoạt động
             </button>
             <!-- Khớp với ID 1_2_a và parent 1_2 -->
-            <input type="hidden" id="data_1_2_a" class="rl-crit-data" data-parent-subcat="1_2" data-max="3" value="[]">
+            <input type="hidden" id="data_1_2_a" class="rl-crit-data" data-parent-subcat="1_2" data-max="20" value="[]">
         </td>
     </tr>
 
@@ -288,7 +296,7 @@
                 <i class="fa-solid fa-plus"></i> Thêm Hoạt động
             </button>
             <!-- Khớp với ID 1_2_b và parent 1_2 -->
-            <input type="hidden" id="data_1_2_b" class="rl-crit-data" data-parent-subcat="1_2" data-max="5" value="[]">
+            <input type="hidden" id="data_1_2_b" class="rl-crit-data" data-parent-subcat="1_2" data-max="20" value="[]"> 
         </td>
     </tr>
 
@@ -986,10 +994,132 @@
         <td class="text-center fs-5 fw-bold rl-cat-total" id="cat_total_4">0</td>
         <td></td>
     </tr>
-<tr><td></td><td>Đang cập nhật</td><td></td><td></td><td></td> </tr>
-
-
-
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="4" data-max="5" id="row_subcat_4_1">
+        <td></td>
+        <td class="fw-bold">Ý thức chấp hành và tham gia tuyên truyền các chủ trương của Đảng, chính sách pháp luật của Nhà nước trong cộng đồng (5 điểm)</td>
+        <td class="text-center fw-bold">5 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_4_1">0</td>
+        <td></td>
+    </tr>
+        <tr class="rl-level-3 bg-white" id="row_crit_4_1_a">
+        <td></td>
+        <td class="ps-4 text-dark">Tích cực tìm hiểu và chấp hành tốt chủ trương, đường lối của Đảng, chính sách, pháp luật của Nhà nước</td>
+        <td class="text-center">2.5 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_4_1_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="4_1" data-score="2.5" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+        <tr class="rl-level-3 bg-white" id="row_crit_4_1_b">
+        <td></td>
+        <td class="ps-4 text-dark">Tích cực tham gia hưởng ứng các buổi học tập, triển khai, tuyên truyền các chủ trương, đường lối của Đảng, chính sách, pháp luật của Nhà nước</td>
+        <td class="text-center">2.5 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_4_1_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="4_1" data-score="2.5" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="4" data-max="25" id="row_subcat_4_2">
+        <td></td>
+        <td class="fw-bold">Tham gia các hoạt động tình nguyện vì cộng đồng (25 điểm)</td>
+        <td class="text-center fw-bold">25 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_4_2">0</td>
+        <td></td>
+    </tr>
+<tr class="table-success text-success">
+    <td></td>
+   <td><b>Có ý thức và tham gia các hoạt động tình nguyện vì cộng đồng (25 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_2_a">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp lớp (tương đương)</td>
+        <td class="text-center">2 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_2_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_2', '4_2_a', 2)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_2_a" class="rl-crit-data" data-parent-subcat="4_2" data-max="25" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_2_b">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp khoa (tương đương)</td>
+        <td class="text-center">3 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_2_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_2', '4_2_b', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_2_b" class="rl-crit-data" data-parent-subcat="4_2" data-max="25" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_2_c">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp Trường (tương đương) trở lên</td>
+        <td class="text-center">4 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_2_c">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_2', '4_2_c', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_2_c" class="rl-crit-data" data-parent-subcat="4_2" data-max="25" value="[]">
+        </td>
+    </tr>
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="4" data-max="25" id="row_subcat_4_3">
+        <td></td>
+        <td class="fw-bold">Khen thưởng sinh viên tham gia các hoạt động vì cộng đồng có thành tích được ghi nhận, biểu dương, khen thưởng (25 điểm)</td>
+        <td class="text-center fw-bold">25 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_4_3">0</td>
+        <td></td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_3_a">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp khoa (tương đương)</td>
+        <td class="text-center">3 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_3_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_3', '4_3_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_3_a" class="rl-crit-data" data-parent-subcat="4_3" data-max="25" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_3_b">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Trường (tương đương) trở lên</td>
+        <td class="text-center">4 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_3_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_3', '4_3_b', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_3_b" class="rl-crit-data" data-parent-subcat="4_3" data-max="25" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_3_c">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Tỉnh/Thành phố (tương đương)</td>
+        <td class="text-center">5 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_3_c">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_3', '4_3_c', 5)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_3_c" class="rl-crit-data" data-parent-subcat="4_3" data-max="25" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_3_d">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Trung ương</td>
+        <td class="text-center">6 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_3_d">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_3', '4_3_d', 6)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_3_d" class="rl-crit-data" data-parent-subcat="4_3" data-max="25" value="[]">
+        </td>
+    </tr>
 
  <tr class="rl-level-1" style="background-color: #f97316; color: white;" data-cat="5" data-max="10">
         <td class="text-center fw-bold">V</td>
@@ -998,38 +1128,474 @@
         <td class="text-center fs-5 fw-bold rl-cat-total" id="cat_total_5">0</td>
         <td></td>
     </tr>
-<tr><td></td><td>Đang cập nhật</td><td></td><td></td><td></td> </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="5" data-max="3" id="row_subcat_5_1">
+    <td></td>
+    <td class="fw-bold">Hỗ trợ và tham gia tích cực vào các hoạt động chung của lớp, tập thể, của Trường (3 điểm)</td>
+    <td class="text-center fw-bold">3 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_5_1">0</td>
+    <td></td>
+</tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_5_1_a">
+        <td></td>
+        <td class="ps-4 text-dark"></td>
+        <td class="text-center">3 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_5_1_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_1" data-score="3" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="5" data-max="10" id="row_subcat_5_2">  
+    <td></td>
+    <td class="fw-bold">Đánh giá mức độ hoàn thành nhiệm vụ của sinh viên giữ một trong các chức vụ sau (đối với sinh viên đảm nhiệm nhiều chức vụ thì chọn chức vụ cao nhất) (10 điểm)</td>
+    <td class="text-center fw-bold">10 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_5_2">0</td>
+    <td></td>
+</tr>
+<tr class="table-success text-success">
+    <td></td>
+   <td><b>- Ban cán sự lớp; Ban Chấp hành (BCH) chi đoàn – chi hội; ủy viên BCH Đoàn khoa - Liên Chi hội Sinh viên khoa; Ban chủ nhiệm các CLB-Đ-N; thành viên Ban tự quản KTX (3 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_1_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành Xuất sắc nhiệm vụ</td>
+    <td class="text-center">3 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="bcs_5_2" id="check_5_2_1_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="3" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_1_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành Tốt nhiệm vụ</td>
+    <td class="text-center">2 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="bcs_5_2" id="check_5_2_1_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="2" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_1_c">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành nhiệm vụ</td>
+    <td class="text-center">1 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="bcs_5_2" id="check_5_2_1_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="1" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_1_d">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không hoàn thành nhiệm vụ</td>
+    <td class="text-center">-3 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="bcs_5_2" id="check_5_2_1_d" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="-3" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_1_e">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không thuộc Ban cán sự lớp</td>
+    <td class="text-center">0 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="bcs_5_2" id="check_5_2_1_e" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="0" checked onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+<!-- NHÓM: BÍ THƯ, PHÓ BÍ THƯ ĐOÀN KHOA; LCH TRƯỞNG, PHÓ; UV BCH ĐOÀN - HỘI TRƯỜNG; CHỦ NHIỆM, PHÓ CLB-Đ-N; TRƯỞNG, PHÓ BAN TỰ QUẢN KTX (4 ĐIỂM) -->
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Bí thư, phó Bí thư Đoàn khoa; Liên chi hội trưởng, liên chi hội phó; ủy viên BCH Đoàn Trường – Hội Sinh viên Trường; Chủ nhiệm, phó Chủ nhiệm CLB-Đ-N; Trưởng, Phó Ban tự quản KTX (4 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_cbkhoa_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành Xuất sắc nhiệm vụ</td>
+    <td class="text-center">4 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="cb_khoa_clb_5_2" id="check_5_2_cbkhoa_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="4" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_cbkhoa_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành Tốt nhiệm vụ</td>
+    <td class="text-center">3 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="cb_khoa_clb_5_2" id="check_5_2_cbkhoa_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="3" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_cbkhoa_c">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành nhiệm vụ</td>
+    <td class="text-center">2 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="cb_khoa_clb_5_2" id="check_5_2_cbkhoa_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="2" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_cbkhoa_d">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không hoàn thành nhiệm vụ</td>
+    <td class="text-center">-5 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="cb_khoa_clb_5_2" id="check_5_2_cbkhoa_d" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="-5" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_cbkhoa_e">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không thuộc Ban cán sự lớp</td>
+    <td class="text-center">0 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="cb_khoa_clb_5_2" id="check_5_2_cbkhoa_e" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="0" checked onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
 
 
+<!-- NHÓM: ỦY VIÊN THƯỜNG VỤ ĐOÀN TRƯỜNG – BAN THƯ KÝ HỘI SINH VIÊN TRƯỜNG; CHI ỦY VIÊN CHI BỘ SINH VIÊN (4 ĐIỂM) -->
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Ủy viên Thường vụ Đoàn Trường – Ban Thư ký Hội Sinh viên Trường; Chi ủy viên Chi bộ Sinh viên (4 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
 
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_uvtv_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành Xuất sắc nhiệm vụ</td>
+    <td class="text-center">4 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="uv_thuongvu_5_2" id="check_5_2_uvtv_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="4" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_uvtv_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành Tốt nhiệm vụ</td>
+    <td class="text-center">3 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="uv_thuongvu_5_2" id="check_5_2_uvtv_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="3" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_uvtv_c">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành nhiệm vụ</td>
+    <td class="text-center">2 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="uv_thuongvu_5_2" id="check_5_2_uvtv_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="2" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_uvtv_d">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không hoàn thành nhiệm vụ</td>
+    <td class="text-center">-5 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="uv_thuongvu_5_2" id="check_5_2_uvtv_d" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="-5" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_uvtv_e">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không thuộc Ban cán sự lớp</td>
+    <td class="text-center">0 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="uv_thuongvu_5_2" id="check_5_2_uvtv_e" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="0" checked onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="5" data-max="10" id="row_subcat_5_3">  
+    <td></td>
+    <td class="fw-bold">Sinh viên đạt được các thành tích đặc biệt trong học tập, rèn luyện (chỉ tính mức khen thưởng cao nhất cho 01 nội dung) (10 điểm)</td>
+    <td class="text-center fw-bold">10 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_5_3">0</td>
+    <td></td>
+</tr>
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Khen thưởng cấp Trường (10 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_truong_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Danh hiệu “Sinh viên 5 Tốt”</td>
+    <td class="text-center">4 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_truong_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="4" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_truong_a" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_truong_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Danh hiệu “Thanh niên tiêu biểu làm theo lời Bác”</td>
+    <td class="text-center">4 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_truong_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="4" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_truong_b" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_truong_c">
+    <td></td>
+    <td class="ps-4 text-dark">+ Danh hiệu “Cán bộ Đoàn - Hội xuất sắc”, giấy khen hoàn thành xuất sắc công tác Đoàn – Hội.</td>
+    <td class="text-center">4 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_truong_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="4" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_truong_c" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<!-- ================= 2. KHEN THƯỞNG CẤP TỈNH, THÀNH PHỐ (10 ĐIỂM) ================= -->
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Khen thưởng cấp Tỉnh, Thành phố (tương đương) (10 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tinh_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Danh hiệu “Sinh viên 5 Tốt”</td>
+    <td class="text-center">5 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tinh_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="5" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tinh_a" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tinh_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Đạt giải I, II, III Giải thưởng NCKH cấp Thành</td>
+    <td class="text-center">5 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tinh_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="5" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tinh_b" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tinh_c">
+    <td></td>
+    <td class="ps-4 text-dark">+ Giấy khen của Thành Đoàn - Hội Sinh viên Thành phố về hoàn thành xuất sắc công tác Đoàn - Hội (cá nhân)</td>
+    <td class="text-center">5 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tinh_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="5" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tinh_c" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tinh_d">
+    <td></td>
+    <td class="ps-4 text-dark">+ Các hình thức khen thưởng tương đương khác (do Hội đồng rèn luyện cấp Trường công nhận)</td>
+    <td class="text-center">5 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tinh_d" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="5" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tinh_d" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<!-- ================= 3. KHEN THƯỞNG CẤP TRUNG ƯƠNG (10 ĐIỂM) ================= -->
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Khen thưởng cấp Trung ương (tương đương) (10 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Danh hiệu “Sinh viên 5 Tốt”</td>
+    <td class="text-center">7 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="7" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_a" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Danh hiệu “Sao Tháng Giêng”</td>
+    <td class="text-center">7 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="7" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_b" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_c">
+    <td></td>
+    <td class="ps-4 text-dark">+ Đạt giải I, II, III Giải thưởng NCKH cấp Bộ</td>
+    <td class="text-center">7 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="7" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_c" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_d">
+    <td></td>
+    <td class="ps-4 text-dark">+ Đạt giải Khuyến khích Giải thưởng NCKH cấp Bộ</td>
+    <td class="text-center">6 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_d" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="6" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_d" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_e">
+    <td></td>
+    <td class="ps-4 text-dark">+ Bằng khen của Trung ương Đoàn – Trung ương Hội về hoàn thành xuất sắc công tác Đoàn – Hội (cá nhân)</td>
+    <td class="text-center">6 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_e" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="6" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_e" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_f">
+    <td></td>
+    <td class="ps-4 text-dark">+ Bằng khen cấp Trung ương vì có thành tích xuất sắc trong công tác xã hội, giữ gìn an ninh trật tự, an toàn xã hội, hoạt động tình nguyện vì cộng đồng</td>
+    <td class="text-center">6 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_f" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="6" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_f" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_g">
+    <td></td>
+    <td class="ps-4 text-dark">+ Các hình thức khen thưởng tương đương khác (do Hội đồng rèn luyện cấp Trường công nhận)</td>
+    <td class="text-center">6 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_g" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="6" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_g" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<!-- HÀNG MẶC ĐỊNH: KHÔNG ĐẠT THÀNH TÍCH ĐẶC BIỆT -->
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_none">
+    <td></td>
+    <td class="ps-4 text-dark">Không có thành tích đặc biệt trong học kỳ</td>
+    <td class="text-center">0 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_none" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="0" checked onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
   
 
-    <!-- TRẮNG c) 
-    <tr class="rl-level-3 bg-white" id="row_crit_1_1_c">
-        <td></td>
-        <td class="ps-4 text-danger fw-bold">c) Vi phạm quy chế thi (Trừ điểm)</td>
-        <td class="text-center text-danger fw-bold">-5</td>
-        <td class="text-center">
-            <input type="checkbox" id="check_1_1_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="1_1" data-score="-5" onchange="calcRenLuyen()">
-        </td>
-        <td class="text-center"><span class="badge bg-light text-danger border">Vi phạm</span></td>
-    </tr>-->
-
-
-
- 
-
-    <!-- =============== TỔNG KẾT =============== -->
-    <tr style="background-color: #bae6fd; font-weight: bold; font-size: 16px;">
-        <td colspan="3" class="text-end text-primary pe-4">TỔNG ĐIỂM ĐÁNH GIÁ:</td>
-        <td class="text-center text-danger fs-4" id="rlGrandTotal">0</td>
-        <td></td>
-    </tr>
-    <tr style="background-color: #bae6fd; font-weight: bold; font-size: 16px;">
-        <td colspan="3" class="text-end text-primary pe-4">XẾP LOẠI:</td>
-        <td class="text-center text-success fs-5" id="rlRank">-</td>
-        <td></td>
-    </tr>
+<!-- =============== TỔNG KẾT =============== -->
+<tr style="background-color: #fef3c7; font-weight: bold; font-size: 16px; border-top: 2px solid #f59e0b;">
+    <td colspan="3" class="text-end pe-4" style="color: #92400e;">
+        <i class="fa-solid fa-calculator me-1"></i> TỔNG ĐIỂM ĐÁNH GIÁ:
+    </td>
+    <td class="text-center fs-3 fw-bold" style="color: #dc2626;" id="rlGrandTotal">0</td>
+    <td></td>
+</tr>
+<tr style="background-color: #fef3c7; font-weight: bold; font-size: 16px; border-top: 1px dashed #fcd34d;">
+    <td colspan="3" class="text-end pe-4" style="color: #92400e;">
+        <i class="fa-solid fa-award me-1"></i> XẾP LOẠI:
+    </td>
+    <td class="text-center fs-4 fw-bold" style="color: #0f4c81;" id="rlRank">-</td>
+    <td></td>
+</tr>
 </tbody>
 
   
@@ -4047,8 +4613,8 @@
 <script>
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
-        const startMaintenance = new Date(2026, 7, 28, 11, 40);  
-        const endMaintenance   = new Date(2026, 7, 28, 12, 30); 
+        const startMaintenance = new Date(2026, 8, 01, 18, 00);  
+        const endMaintenance   = new Date(2026, 8, 01, 18, 15); 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
@@ -4182,6 +4748,7 @@ async function initSystemUrlRouter() {
         else if (viewParam === 'profile') loadProfileView();
         else if (viewParam === 'qa') openQASection();
 	else if (viewParam === 'datlich') loadDatLichHenView();
+	else if (viewParam === 'renluyen') loadRenLuyenView();
         else if (viewParam === 'sharecode') {
             openShareCodeSection();
             if (categoryParam) {
