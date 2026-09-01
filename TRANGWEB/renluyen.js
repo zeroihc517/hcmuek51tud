@@ -27,6 +27,7 @@ function loadRenLuyenView() {
 
 function openActivityModal(parentSubcat, critId, stepScore) {
     $('#actTargetSubcat').val(critId);
+    $('#actEditIndex').val(''); // Xóa vị trí lưu (nếu đang bật sửa)
     $('#txtActName').val('');
     $('#txtActUrl').val('');
     
@@ -55,12 +56,60 @@ function openActivityModal(parentSubcat, critId, stepScore) {
     setTimeout(() => $('#txtActName').focus(), 400);
 }
 
-// 2. Lưu hoạt động vào thẻ ẩn và xuất ra hàng màu trắng
+function editActivity(critId, index) {
+    let hiddenInput = $('#data_' + critId);
+    let activities = [];
+    try { activities = JSON.parse(hiddenInput.val()); } catch(e) { activities = []; }
+    
+    if (activities[index]) {
+        let act = activities[index];
+        $('#actTargetSubcat').val(critId);
+        
+        // Tạo thêm element nếu bạn chưa kịp chèn HTML bên trên
+        if ($('#actEditIndex').length === 0) {
+            $('#addActivityModal .modal-body').prepend('<input type="hidden" id="actEditIndex" value="">');
+        }
+        $('#actEditIndex').val(index); // Ghi nhận vị trí đang sửa
+        
+        $('#txtActName').val(act.name);
+        $('#txtActUrl').val(act.url || '');
+        
+        // Thử tìm nút "Thêm Hoạt động" ở hàng cha để lấy lại mức điểm (stepScore)
+        let btnOnclick = $('#row_crit_' + critId).find('button').attr('onclick') || '';
+        let stepScoreMatch = btnOnclick.match(/openActivityModal\([^,]+,\s*[^,]+,\s*(\d+(?:\.\d+)?)\)/);
+        let stepScore = stepScoreMatch ? parseFloat(stepScoreMatch[1]) : 1;
+        
+        let maxScore = parseFloat(hiddenInput.attr('data-max')) || stepScore;
+        $('#maxScoreHint').text(`Mỗi hoạt động ${stepScore} điểm (Tối đa ${maxScore} điểm)`);
+        
+        // Khôi phục lại danh sách điểm
+        let optionsHtml = '';
+        for (let i = 0; i <= maxScore; i += stepScore) {
+            optionsHtml += `<option value="${i}">${i} điểm</option>`;
+        }
+        let lastValue = Math.floor(maxScore / stepScore) * stepScore;
+        if (lastValue < maxScore) {
+            optionsHtml += `<option value="${maxScore}">${maxScore} điểm (Tối đa)</option>`;
+        }
+        
+        $('#txtActScore').html(optionsHtml);
+        
+        // Gắn lại đúng số điểm mà hoạt động đang có
+        if ($('#txtActScore').find(`option[value="${act.score}"]`).length === 0) {
+            $('#txtActScore').append(`<option value="${act.score}">${act.score} điểm</option>`);
+        }
+        $('#txtActScore').val(act.score);
+        
+        $('#addActivityModal').modal('show');
+    }
+}
+
 function saveActivityItem() {
     let critId = $('#actTargetSubcat').val();
     let name = $('#txtActName').val().trim();
     let url = $('#txtActUrl').val().trim();
     let score = parseFloat($('#txtActScore').val());
+    let editIndex = $('#actEditIndex').val(); // Đọc chỉ mục lưu
 
     if (!name || isNaN(score) || score < 0) {
         alert("Vui lòng nhập Tên hoạt động và Số điểm hợp lệ!");
@@ -72,7 +121,13 @@ function saveActivityItem() {
     let activities = [];
     try { activities = JSON.parse(hiddenInput.val()); } catch(e) { activities = []; }
 
-    activities.push({ name: name, url: url, score: score });
+    // Nếu có editIndex => Ghi đè vào mảng cũ, ngược lại thì thêm mới
+    if (editIndex !== '' && editIndex !== undefined) {
+        activities[parseInt(editIndex)] = { name: name, url: url, score: score };
+    } else {
+        activities.push({ name: name, url: url, score: score });
+    }
+    
     hiddenInput.val(JSON.stringify(activities));
 
     $('#addActivityModal').modal('hide');
@@ -105,12 +160,14 @@ function renderActivityRows(critId) {
         rowsHtml += `
         <tr class="act-row-${critId}" style="background-color: #f8fafc; ${hideStyle}">
             <td></td>
-            <td class="ps-5 text-muted small"><i class="fa-solid fa-arrow-turn-up fa-rotate-90 me-2"></i> ${act.name}</td>
+            <td class="ps-5 text-primary fw-bold small"><i class="fa-solid fa-arrow-turn-up fa-rotate-90 text-muted me-2"></i> ${act.name}</td>
             <td></td>
             <td class="text-center fw-bold text-dark">+ ${act.score}</td>
             <td class="text-center">
                 <div class="d-flex justify-content-center align-items-center gap-1">
                     ${linkHtml}
+                    <!-- Nút chỉnh sửa màu xanh -->
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2 shadow-sm" onclick="editActivity('${critId}', ${index})" title="Chỉnh sửa"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button class="btn btn-sm btn-outline-danger py-0 px-2 shadow-sm" onclick="deleteActivity('${critId}', ${index})" title="Xóa"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </td>
@@ -119,13 +176,11 @@ function renderActivityRows(critId) {
     
     parentRow.after(rowsHtml);
 }
-// 3. Render các hàng màu trắng (Hoạt động)
-// Hàm render các hàng màu trắng (Hoạt động chi tiết)
+
 function renderWhiteRows(subcatId) {
     let hiddenInput = $('#data_' + subcatId);
-    let parentRow = $('#row_subcat_' + subcatId); // Hàng màu hồng
+    let parentRow = $('#row_subcat_' + subcatId); 
     
-    // Xóa các hàng trắng cũ của mục này đi để vẽ lại từ đầu
     $('.act-row-' + subcatId).remove();
     
     let activities = [];
@@ -137,28 +192,27 @@ function renderWhiteRows(subcatId) {
     activities.forEach((act, index) => {
         let safeUrl = act.url ? act.url.replace(/"/g, '&quot;').replace(/'/g, "\\'") : '#';
         
-        // Link minh chứng hiển thị trực tiếp ở hàng trắng
         let linkHtml = act.url 
             ? `<a href="${safeUrl}" target="_blank" class="btn btn-sm btn-light border text-primary shadow-sm" title="Mở Minh Chứng"><i class="fa-brands fa-google-drive"></i> Link</a>` 
             : `<span class="badge bg-light text-muted border">Không có</span>`;
         
-        // Thêm class rl-row-white để nhận CSS màu trắng
         rowsHtml += `
         <tr class="act-row-${subcatId} rl-row-white">
             <td></td>
-            <td class="ps-4 text-dark"><i class="fa-solid fa-angle-right text-muted me-2"></i> ${act.name}</td>
+            <td class="ps-4 text-primary fw-bold"><i class="fa-solid fa-angle-right text-muted me-2"></i> ${act.name}</td>
             <td></td>
             <td class="text-center fw-bold text-success">+ ${act.score}</td>
             <td class="text-center">
                 <div class="d-flex justify-content-center align-items-center gap-1">
                     ${linkHtml}
+                    <!-- Nút chỉnh sửa -->
+                    <button class="btn btn-sm btn-outline-primary py-0 px-2 shadow-sm" onclick="editActivity('${subcatId}', ${index})" title="Sửa HĐ này"><i class="fa-solid fa-pen-to-square"></i></button>
                     <button class="btn btn-sm btn-outline-danger py-0 px-2 shadow-sm" onclick="deleteActivity('${subcatId}', ${index})" title="Xóa HĐ này"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </td>
         </tr>`;
     });
     
-    // Chèn nguyên cụm hàng trắng xuống ngay dưới hàng màu hồng
     parentRow.after(rowsHtml);
 }
 
