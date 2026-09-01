@@ -3631,3 +3631,31 @@ body.dark-mode #sidebarTheoryViewerContent table th {
     text-align: left !important;          /* Hủy căn đều 2 bên để chữ không bị kéo giãn ngang */
     line-height: 1.6 !important;          /* Trả về giãn dòng bình thường */
 }
+
+/* Ép màu cho thanh Category (Màu Cam) */
+/* Thanh Cấp 1: Xanh pastel */
+tr.rl-level-1 td {
+    background-color: #eff6ff !important; 
+    color: #1e40af !important; 
+    border-color: #bfdbfe !important;
+}
+
+/* Ép màu cho thanh Sub-category (Màu Hồng) */
+tr.rl-level-2 td {
+    background-color: #fce7f3 !important; 
+    color: #9f1239 !important; 
+    border-color: #fbcfe8 !important;
+}
+
+/* Định dạng cho các hàng hoạt động chi tiết (Màu Trắng) */
+tr.rl-row-white td {
+    background-color: #ffffff !important; 
+    color: #1e293b !important;
+    border-color: #e2e8f0 !important;
+}
+#renLuyenSection table thead th {
+    background-color: #154c79 !important; /* Xanh navy vừa vặn, không quá tối và đúng màu chuẩn của web */
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    font-weight: 600;
+}

@@ -161,6 +161,9 @@
                 <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
                     <i class="fa-solid fa-clipboard-check"></i> Kết quả học tập
                 </button>
+<button class="btn-course" id="btnNavRenLuyen" onclick="loadRenLuyenView()">
+    <i class="fa-solid fa-medal"></i> Thử nghiệm
+</button>
             </div>
             
 
@@ -188,8 +191,366 @@
         </aside>
 
         <main class="main-content">
-            
-<!-- KHU VỰC TỔNG HỢP LINK -->
+           <!-- KHU VỰC ĐÁNH GIÁ ĐIỂM RÈN LUYỆN -->
+<div id="renLuyenSection" class="d-none">
+    <header class="top-header d-flex justify-content-between align-items-center">
+        <div class="page-title"><i class="fa-solid fa-medal"></i> Mô phỏng web Đánh giá điểm rèn luyện</div>
+        <button class="btn text-white fw-bold shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" onclick="submitRenLuyen()" id="btnSaveRenLuyen">
+            <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Phiếu Đánh Giá
+        </button>
+    </header>
+
+    <div class="alert alert-info border-primary-subtle mt-3 mb-4 shadow-sm" style="background-color: #e0f2fe;">
+        <i class="fa-solid fa-circle-info me-2"></i> <strong>Chú ý:</strong> Hệ thống còn đang cập nhật dữ liệu, các bạn không sử dụng.
+    </div>
+
+    <div class="table-responsive shadow-sm rounded border bg-white mb-5">
+        <table class="table table-bordered align-middle m-0" style="font-size: 14.5px;">
+            <thead class="text-center text-white" style="background-color: #0f4c81;">
+                <tr>
+                    <th style="width: 5%;">STT</th>
+                    <th style="width: 45%;">Nội dung đánh giá</th>
+                    <th style="width: 15%;">Điểm quy định</th>
+                    <th style="width: 15%;">Điểm đạt được</th>
+                    <th style="width: 20%;">Thao tác / MC</th>
+                </tr>
+            </thead>
+           <tbody id="rlTableBody">
+    <!-- =============== MỤC I (CAM) - CẤP 1 =============== -->
+    <tr class="rl-level-1" style="background-color: #f97316; color: white;" data-cat="1" data-max="20">
+        <td class="text-center fw-bold">I</td>
+        <td class="fw-bold">ĐÁNH GIÁ VỀ Ý THỨC THAM GIA HỌC TẬP</td>
+        <td class="text-center fw-bold">Tối đa 20 điểm</td>
+        <td class="text-center fs-5 fw-bold rl-cat-total" id="cat_total_1">0</td>
+        <td></td>
+    </tr>
+    
+    <!-- HỒNG 1.1 (TIỂU MỤC) - CẤP 2 (Phải mang data-parent-cat="1" để nhận diện thuộc Mục I cam) -->
+
+
+    <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="1" data-max="3" id="row_subcat_1_1">
+        <td></td>
+        <td class="fw-bold">Tinh thần và thái độ trong học tập (3 điểm)</td>
+        <td class="text-center fw-bold">3 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_1_1">0</td>
+        <td></td>
+    </tr>
+<!-- Mục 1 -->
+        <tr class="rl-level-3 bg-white" id="row_crit_1_1_c">
+        <td></td>
+        <td class="ps-4 text-dark">Vào lớp học đúng giờ, tham gia các giờ học đầy đủ</td>
+        <td class="text-center text-danger fw-bold">1.5 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_1_1_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="1_1" data-score="1.5" onchange="calcRenLuyen()">
+        </td>
+
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_1_c">
+        <td></td>
+        <td class="ps-4 text-dark">Chuẩn bị bài tốt, ý thức trong giờ học nghiêm túc</td>
+        <td class="text-center text-danger fw-bold">1.5 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_1_1_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="1_1" data-score="1.5" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="1" data-max="20" id="row_subcat_1_2">
+        <td></td>
+        <td class="fw-bold">Tham gia các hoạt động học thuật, hoạt động nghiên cứu khoa học (NCKH) (20 điểm)</td>
+        <td class="text-center fw-bold">Tối đa 20</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_1_2">0</td>
+        <td></td>
+    </tr>
+    
+    <!-- TRẮNG 1.2.a (Hoạt động học thuật) -->
+    <tr class="rl-level-3 bg-white" id="row_crit_1_2_a">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia các hoạt động học thuật: Hội thảo, tọa đàm, lớp hướng dẫn NCKH, hoạt động khảo sát của Trường…</td>
+        <td class="text-center">3 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_2_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_2', '1_2_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm HĐ
+            </button>
+            <!-- Khớp với ID 1_2_a và parent 1_2 -->
+            <input type="hidden" id="data_1_2_a" class="rl-crit-data" data-parent-subcat="1_2" data-max="3" value="[]">
+        </td>
+    </tr>
+
+    <!-- TRẮNG 1.2.b (Hoạt động NCKH) -->
+    <tr class="rl-level-3 bg-white" id="row_crit_1_2_b">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia hoạt động NCKH: Có bài báo khoa học, tham luận được đăng tải trên các tạp chí, tạp san uy tín được công nhận; thực hiện đề tài NCKH, bài viết, bài tham luận tại các hội thảo khoa học…</td>
+        <td class="text-center">5 điểm/nghiên cứu</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_2_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_2', '1_2_b', 5)">
+                <i class="fa-solid fa-plus"></i> Thêm HĐ
+            </button>
+            <!-- Khớp với ID 1_2_b và parent 1_2 -->
+            <input type="hidden" id="data_1_2_b" class="rl-crit-data" data-parent-subcat="1_2" data-max="5" value="[]">
+        </td>
+    </tr>
+
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="1" data-max="20" id="row_subcat_1_3">
+        <td></td>
+        <td class="fw-bold">Tham gia các kỳ thi, cuộc thi (20 điểm)</td>
+        <td class="text-center fw-bold">20 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_1_3">0</td>
+        <td></td>
+    </tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_1_3_a">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia cổ vũ các kỳ thi, cuộc thi học thuật</td>
+        <td class="text-center">1 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_3_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_3', '1_3_a', 1)">
+                <i class="fa-solid fa-plus"></i> Thêm HĐ
+            </button>
+   
+            <input type="hidden" id="data_1_3_a" class="rl-crit-data" data-parent-subcat="1_3" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_1_3_b">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia các cuộc thi học thuật cấp Khoa (tương đương)</td>
+        <td class="text-center">3 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_3_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_3', '1_3_b', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm HĐ
+            </button>
+   
+            <input type="hidden" id="data_1_3_b" class="rl-crit-data" data-parent-subcat="1_3" data-max="20" value="[]">
+        </td>
+    </tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_1_3_c">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia các cuộc thi học thuật cấp Trường (tương đương)</td>
+        <td class="text-center">4 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_3_c">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_3', '1_3_c', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm HĐ
+            </button>
+   
+            <input type="hidden" id="data_1_3_c" class="rl-crit-data" data-parent-subcat="1_3" data-max="20" value="[]">
+        </td>
+    </tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_1_3_d">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia các cuộc thi học thuật cấp Tỉnh/Thành (tương đương) trở lên</td>
+        <td class="text-center">5 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_3_d">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_3', '1_3_d', 5)">
+                <i class="fa-solid fa-plus"></i> Thêm HĐ
+            </button>
+   
+            <input type="hidden" id="data_1_3_d" class="rl-crit-data" data-parent-subcat="1_3" data-max="20" value="[]">
+        </td>
+    </tr>
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="1" data-max="10" id="row_subcat_1_4">
+        <td></td>
+        <td class="fw-bold">Kết quả học tập (10 điểm)</td>
+        <td class="text-center fw-bold">10 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_1_4">0</td>
+        <td></td>
+    </tr>
+ <!-- TRẮNG d) -->
+    <tr class="rl-level-3 bg-white" id="row_crit_1_4_a">
+        <td></td>
+        <td class="ps-4 text-dark">Kết quả học tập của học kỳ đạt: (10 điểm)</td>
+        <td class="text-center">10 điểm</td>
+       <td class="text-center">
+    <select id="select_1_4_a" class="form-select form-select-sm mx-auto rl-select-input fw-bold text-success shadow-sm" style="width: 140px;" data-parent-subcat="1_4" onchange="calcRenLuyen()">
+        <option value="0" selected>Kém: 0đ</option>
+        <option value="3">Yếu: 3đ</option>
+        <option value="5">Trung bình: 5đ</option>
+        <option value="6">Khá: 6đ</option>
+        <option value="8">Giỏi: 8đ</option>
+        <option value="10">Xuất sắc: 10đ</option>
+    </select>
+</td>
+<td></td>
+
+        
+    </tr>
+<!-- TRẮNG a) (Phải mang data-parent-subcat="1_4" để thuộc Tiểu mục hồng 1.1) -->
+    <tr class="rl-level-3 bg-white" id="row_crit_1_4_b">
+        <td></td>
+        <td class="ps-4 text-dark">Tinh thần vượt khó, phấn đấu vươn lên trong học tập (3 điểm)</td>
+        <td class="text-center">3 điểm</td>
+        <td class="text-center">
+            <input type="number" id="direct_1_4_b" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" min="0" max="3" step="1" value="0" data-parent-subcat="1_4" data-max="3" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="1" data-max="20" id="row_subcat_1_5">
+        <td></td>
+        <td class="fw-bold">Khen thưởng – kỷ luật (20 điểm)</td>
+        <td class="text-center fw-bold">20 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_1_5">0</td>
+        <td></td>
+    </tr>
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Khen thưởng sinh viên đạt thành tích học thuật (20 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_1_5_a">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Khoa (tương đương)</td>
+        <td class="text-center">3 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_5_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_5', '1_5_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm HĐ
+            </button>
+   
+            <input type="hidden" id="data_1_5_a" class="rl-crit-data" data-parent-subcat="1_5" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_1_5_b">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Trường (tương đương)</td>
+        <td class="text-center">4 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_5_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_5', '1_5_b', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm HĐ
+            </button>
+   
+            <input type="hidden" id="data_1_5_b" class="rl-crit-data" data-parent-subcat="1_5" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_1_5_c">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Tỉnh/Thành phố (tương đương)</td>
+        <td class="text-center">5 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_5_c">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_5', '1_5_c', 5)">
+                <i class="fa-solid fa-plus"></i> Thêm HĐ
+            </button>
+   
+            <input type="hidden" id="data_1_5_c" class="rl-crit-data" data-parent-subcat="1_5" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_1_5_d">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Trung ương</td>
+        <td class="text-center">6 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_5_d">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_5', '1_5_d', 6)">
+                <i class="fa-solid fa-plus"></i> Thêm HĐ
+            </button>
+   
+            <input type="hidden" id="data_1_5_d" class="rl-crit-data" data-parent-subcat="1_5" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Kỷ luật: (-20 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_e">
+        <td></td>
+        <td class="ps-4 text-dark">Không thực hiện các hoạt động hoặc không thực hiện tròn vẹn các bài khảo sát</td>
+        <td class="text-center">-3 điểm/lần</td>
+        <td class="text-center">
+            <input type="number" id="direct_1_5_e" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="3" value="0" data-parent-subcat="1_5" data-max="20" oninput="if(this.value < -20) this.value = -20; calcRenLuyen()">
+        </td>
+    </tr>
+<tr><td></td><td><b style="color: #0284c7;"><i>Vi phạm quy định các kỳ thi và bị lập biên bản hình thức kỷ luật:</i></b></td><td></td><td></td> </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_f">
+        <td></td>
+        <td class="ps-4 text-dark">Khiển trách (lần đầu)</td>
+        <td class="text-center text-danger fw-bold">-2 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_1_5_f" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="1_5" data-score="-2" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_g">
+        <td></td>
+        <td class="ps-4 text-dark">Khiển trách (lần 2 trở lên)</td>
+        <td class="text-center">-4 điểm/lần</td>
+        <td class="text-center">
+            <input type="number" id="direct_1_5_g" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="4" value="0" data-parent-subcat="1_5" data-max="20" oninput="if(this.value < -20) this.value = -20; calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_h">
+        <td></td>
+        <td class="ps-4 text-dark">Cảnh cáo (lần đầu)</td>
+        <td class="text-center text-danger fw-bold">-3 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_1_5_h" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="1_5" data-score="-3" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_i">
+        <td></td>
+        <td class="ps-4 text-dark">Cảnh cáo (lần 2 trở lên)</td>
+        <td class="text-center">-6 điểm/lần</td>
+        <td class="text-center">
+            <input type="number" id="direct_1_5_i" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="6" value="0" data-parent-subcat="1_5" data-max="20" oninput="if(this.value < -20) this.value = -20; calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_j">
+        <td></td>
+        <td class="ps-4 text-dark">Đình chỉ thi (lần đầu)</td>
+        <td class="text-center text-danger fw-bold">-4 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_1_5_j" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="1_5" data-score="-4" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_k">
+        <td></td>
+        <td class="ps-4 text-dark">Đình chỉ thi (lần 2 trở lên)</td>
+        <td class="text-center">-8 điểm/lần</td>
+        <td class="text-center">
+            <input type="number" id="direct_1_5_k" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="8" value="0" data-parent-subcat="1_5" data-max="20" oninput="if(this.value < -20) this.value = -20; calcRenLuyen()">
+        </td>
+    </tr>
+
+
+    
+
+  
+
+    <!-- TRẮNG c) 
+    <tr class="rl-level-3 bg-white" id="row_crit_1_1_c">
+        <td></td>
+        <td class="ps-4 text-danger fw-bold">c) Vi phạm quy chế thi (Trừ điểm)</td>
+        <td class="text-center text-danger fw-bold">-5</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_1_1_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="1_1" data-score="-5" onchange="calcRenLuyen()">
+        </td>
+        <td class="text-center"><span class="badge bg-light text-danger border">Vi phạm</span></td>
+    </tr>-->
+
+   
+
+    <!-- =============== TỔNG KẾT =============== -->
+    <tr style="background-color: #bae6fd; font-weight: bold; font-size: 16px;">
+        <td colspan="3" class="text-end text-primary pe-4">TỔNG ĐIỂM ĐÁNH GIÁ:</td>
+        <td class="text-center text-danger fs-4" id="rlGrandTotal">0</td>
+        <td></td>
+    </tr>
+    <tr style="background-color: #bae6fd; font-weight: bold; font-size: 16px;">
+        <td colspan="3" class="text-end text-primary pe-4">XẾP LOẠI:</td>
+        <td class="text-center text-success fs-5" id="rlRank">-</td>
+        <td></td>
+    </tr>
+</tbody>
+
+  
+        </table>
+    </div>
+</div><!-- KHU VỰC TỔNG HỢP LINK -->
 <div id="tongHopSection" class="d-none">
     <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
@@ -3123,6 +3484,62 @@
         </div>
     </div>
 </div>
+<!-- MODAL THÊM MINH CHỨNG RÈN LUYỆN -->
+<div class="modal fade" id="addProofModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title fw-bold m-0"><i class="fa-solid fa-link me-2"></i>Thêm Minh Chứng</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="proofTargetRow">
+                <div class="mb-3">
+                    <label class="fw-bold small text-muted mb-1">Tên hoạt động/Minh chứng <span class="text-danger">*</span></label>
+                    <input type="text" id="txtProofName" class="form-control fw-bold" placeholder="VD: GCN Mùa Hè Xanh 2026, Sắc Xanh - Hồn Việt...">
+                </div>
+                <div class="mb-2">
+                    <label class="fw-bold small text-muted mb-1">Đường link Drive <span class="text-danger">*</span></label>
+                    <input type="text" id="txtProofUrl" class="form-control" placeholder="https://drive.google.com/...">
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" onclick="saveProofItem()">Thêm vào bảng</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addActivityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header text-white" style="background-color: #e61d4a;">
+                <h6 class="modal-title fw-bold m-0"><i class="fa-solid fa-plus me-2"></i>Thêm Hoạt Động</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="actTargetSubcat">
+                <div class="mb-3">
+                    <label class="fw-bold small text-muted mb-1">Tên hoạt động <span class="text-danger">*</span></label>
+                    <input type="text" id="txtActName" class="form-control fw-bold" placeholder="VD: Tham gia NCKH, Khảo sát...">
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold small text-muted mb-1">Số điểm cộng của HĐ này <span class="text-danger">*</span></label>
+                    <input type="number" id="txtActScore" class="form-control fw-bold text-primary" placeholder="VD: 3" min="0" step="0.5">
+                    <small class="text-danger fw-bold mt-1 d-block" id="maxScoreHint"></small>
+                </div>
+                <div class="mb-2">
+                    <label class="fw-bold small text-muted mb-1">Link Drive Minh chứng (Nếu có)</label>
+                    <input type="text" id="txtActUrl" class="form-control" placeholder="https://drive.google.com/...">
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-light fw-bold shadow-sm" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #e61d4a;" onclick="saveActivityItem()">Lưu hoạt động</button>
+            </div>
+        </div>
+    </div>
+</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
@@ -3131,6 +3548,7 @@
     <script src="TRANGWEB/tkb.js"></script>
     <script src="TRANGWEB/qa.js"></script>
     <script src="TRANGWEB/main.js"></script>
+    <script src="TRANGWEB/renluyen.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
