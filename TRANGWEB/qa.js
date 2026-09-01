@@ -3254,3 +3254,56 @@ window.zoomCompilerContent = function(btn, zoomChange) {
         'height': navigator.userAgent.toLowerCase().includes('firefox') ? `${100 / newZoom}%` : '100%'
     });
 };
+
+// Hàm gửi phản hồi tiếp (Dành cho Sinh viên trong phần Thông báo)
+window.sendThongBaoReplyChain = function(rowIndex) {
+    let replyText = $(`#tb-txtReply-${rowIndex}`).val().trim(); 
+    if (!replyText) { alert("Vui lòng nhập nội dung phản hồi!"); return; } 
+    
+    let studentMssv = currentUser ? currentUser.mssv : "Ẩn danh";
+    let now = new Date();
+    let pad = (n) => String(n).padStart(2, '0');
+    let timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    
+    let formattedReply = studentMssv + ":::" + timeStr + ":::" + replyText;
+    
+    let btn = $(`#tb-btnSendReply-${rowIndex}`); 
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true); 
+    
+    postToGAS({ action: "replyToAdmin", rowIndex: rowIndex, replyText: formattedReply }, function(response) { 
+        alert(response); 
+        
+        // Tải lại khung bình luận thông báo để thấy ngay lập tức
+        let tbCode = new URLSearchParams(window.location.search).get('tb');
+        if (tbCode) loadThongBaoComments(tbCode);
+        
+        // Tải ngầm danh sách Q&A gốc để đồng bộ số lượng badge (nếu cần)
+        if (typeof loadQAData === 'function') loadQAData(); 
+        if (typeof checkNewQA === 'function') checkNewQA(); 
+    }, function() { 
+        alert("Lỗi khi gửi phản hồi."); btn.html('<i class="fa-solid fa-paper-plane me-1"></i> Gửi phản hồi').prop('disabled', false); 
+    }); 
+};
+
+// Hàm gửi phản hồi tiếp (Dành cho Admin trong phần Thông báo)
+window.sendThongBaoAdminReply = function(rowIndex) {
+    let replyText = $(`#tb-txtAdminReply-${rowIndex}`).val().trim(); 
+    if (!replyText) { alert("Vui lòng nhập nội dung trả lời!"); return; } 
+    
+    let btn = $(`#tb-btnAdminSubmit-${rowIndex}`); 
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...').prop('disabled', true); 
+    
+    postToGAS({ action: "adminReplyQuestion", rowIndex: rowIndex, replyText: replyText }, function(response) { 
+        alert(response); 
+        
+        // Tải lại khung bình luận
+        let tbCode = new URLSearchParams(window.location.search).get('tb');
+        if (tbCode) loadThongBaoComments(tbCode);
+        
+        // Tải ngầm đồng bộ
+        if (typeof loadQAData === 'function') loadQAData(); 
+        if (typeof checkNewQA === 'function') checkNewQA();  
+    }, function() { 
+        alert("Lỗi khi gửi trả lời."); btn.html('<i class="fa-solid fa-reply me-1"></i> Đăng câu trả lời').prop('disabled', false); 
+    }); 
+};

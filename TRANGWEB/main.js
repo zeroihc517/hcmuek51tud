@@ -1161,7 +1161,7 @@ window.loadThongBaoComments = function(tbCode) {
                     let rowIndex = row[6];
                     
                     // ============================================
-                    // GIAO DIỆN TIMELINE CHAT HIỆN ĐẠI
+                    // GIAO DIỆN TIMELINE CHAT HIỆN ĐẠI (ĐÃ BỔ SUNG PHẢN HỒI)
                     // ============================================
                     html += `
                     <div class="mb-4" style="border-left: 3px solid #cbd5e1; padding-left: 15px; margin-left: 5px;">
@@ -1184,7 +1184,40 @@ window.loadThongBaoComments = function(tbCode) {
                     } else {
                         html += `<div class="mt-2 ms-4 ps-3 text-muted small fst-italic"><i class="fa-solid fa-reply fa-rotate-180 me-2"></i>Đang chờ Admin phản hồi...</div>`;
                     }
-                    html += `</div>`;
+                    
+                    // --- KHUNG NÚT BẤM VÀ BÌNH LUẬN NỐI TIẾP ---
+                    html += `
+                        <div class="mt-2 ms-4 ps-3">
+                            <button class="btn btn-sm btn-outline-primary fw-bold mt-2 shadow-sm" onclick="$('#tb-replyBox-${rowIndex}').toggleClass('d-none')">
+                                <i class="fa-solid fa-comment-dots"></i> Phản hồi tiếp
+                            </button>
+                            
+                            <div id="tb-replyBox-${rowIndex}" class="d-none mt-3 p-3 bg-light rounded border border-primary-subtle shadow-sm">
+                                <textarea id="tb-txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập bình luận hoặc ý kiến phản hồi của bạn..."></textarea>
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <button class="btn btn-sm btn-light border fw-bold" onclick="$('#tb-replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
+                                    <button class="btn btn-sm text-white fw-bold" onclick="sendThongBaoReplyChain(${rowIndex})" id="tb-btnSendReply-${rowIndex}" style="background: #0f4c81; border:none;">
+                                        <i class="fa-solid fa-paper-plane me-1"></i> Gửi phản hồi
+                                    </button>
+                                </div>
+                            </div>`;
+                            
+                    // Nếu là Admin thì hiện thêm khung trả lời của Admin
+                    if (typeof isAdmin !== 'undefined' && isAdmin) { 
+                        html += `
+                            <div class="mt-3 p-3 rounded bg-white shadow-sm" style="border: 1px dashed var(--accent-red);">
+                                <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
+                                <textarea id="tb-txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
+                                <div class="text-end mt-2">
+                                    <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendThongBaoAdminReply(${rowIndex})" id="tb-btnAdminSubmit-${rowIndex}">
+                                        <i class="fa-solid fa-reply me-1"></i> Đăng câu trả lời
+                                    </button>
+                                </div>
+                            </div>`; 
+                    }
+                    
+                    html += `</div>`; // Đóng div khung chứa phản hồi tiếp
+                    html += `</div>`; // Đóng div khối comment tổng
                 }
             });
             
