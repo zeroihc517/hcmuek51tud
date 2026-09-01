@@ -439,9 +439,14 @@ function fetchRenLuyenData() {
     let namHoc = $('#rlNamHocSelect').val() || "2025-2026";
     let hocKy = $('#rlHocKySelect').val() || "1";
     
-    // Xoá trắng phiếu đánh giá trước khi nạp dữ liệu của kỳ mới
+    // 1. Xoá trắng phiếu đánh giá trước khi nạp dữ liệu của kỳ mới
     clearRenLuyenForm();
 
+    // 2. CHÈN HIỆU ỨNG ĐANG TẢI VÀO Ô TỔNG ĐIỂM VÀ XẾP LOẠI
+    $('#rlGrandTotal').html('<i class="fa-solid fa-spinner fa-spin text-secondary fs-4"></i>');
+    $('#rlRank').html('<i class="fa-solid fa-spinner fa-spin text-secondary fs-5 me-2"></i><span class="text-secondary fs-6">Đang tải...</span>');
+
+    // 3. Gửi yêu cầu lấy dữ liệu
     $.ajax({
         url: SCRIPT_URL + "?action=getRenLuyen&mssv=" + currentUser.mssv + "&namHoc=" + namHoc + "&hocKy=" + hocKy,
         method: "GET",
@@ -486,8 +491,18 @@ function fetchRenLuyenData() {
                     }
                 });
                 
-                calcRenLuyen(); // Tính lại điểm
+                // Dữ liệu đã đổ xong -> Tính lại điểm (Hàm này sẽ tự ghi đè hiệu ứng Đang tải thành Số thật)
+                calcRenLuyen(); 
+            } else {
+                // Nếu sinh viên chưa lưu dữ liệu cho học kỳ này -> Trả về mặc định
+                $('#rlGrandTotal').text('0');
+                $('#rlRank').text('-');
             }
+        },
+        error: function() {
+            // Nếu có lỗi đường truyền
+            $('#rlGrandTotal').text('0');
+            $('#rlRank').html('<span class="text-danger fs-6"><i class="fa-solid fa-triangle-exclamation me-1"></i>Lỗi kết nối</span>');
         }
     });
 }
@@ -605,8 +620,5 @@ function clearRenLuyenForm() {
     // Làm sạch danh sách minh chứng
     $('.rl-proof-list').empty();
     
-    // Trả tổng điểm về 0
-    $('#rlGrandTotal').text('0');
-    $('#rlRank').text('-');
     $('.rl-cat-total, .rl-subcat-total, .rl-crit-total').text('0');
 }
