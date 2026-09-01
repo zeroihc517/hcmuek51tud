@@ -21,12 +21,32 @@ function loadRenLuyenView() {
         fetchRenLuyenData();
     }
 }
-function openActivityModal(parentSubcat, critId, maxScore) {
+function openActivityModal(parentSubcat, critId, stepScore) {
     $('#actTargetSubcat').val(critId);
     $('#txtActName').val('');
     $('#txtActUrl').val('');
-    $('#txtActScore').val('');
-    $('#maxScoreHint').text(`${maxScore} điểm/hoạt động, nghiên cứu`);
+    
+    // Lấy điểm tối đa từ thuộc tính data-max của input ẩn (VD: 20 điểm)
+    let maxScore = parseFloat($('#data_' + critId).attr('data-max')) || stepScore;
+    
+    $('#maxScoreHint').text(`Mỗi hoạt động ${stepScore} điểm (Tối đa ${maxScore} điểm)`);
+    
+    // Tạo danh sách dropdown theo cấp số cộng
+    let optionsHtml = '';
+    for (let i = 0; i <= maxScore; i += stepScore) {
+        // Tự động chọn sẵn mức điểm cơ bản (stepScore) thay vì 0 điểm cho tiện thao tác
+        let isSelected = (i === stepScore) ? 'selected' : '';
+        optionsHtml += `<option value="${i}" ${isSelected}>${i} điểm</option>`;
+    }
+    
+    // Đề phòng trường hợp maxScore không chia hết cho stepScore
+    let lastValue = Math.floor(maxScore / stepScore) * stepScore;
+    if (lastValue < maxScore) {
+        optionsHtml += `<option value="${maxScore}">${maxScore} điểm (Tối đa)</option>`;
+    }
+    
+    $('#txtActScore').html(optionsHtml);
+    
     $('#addActivityModal').modal('show');
     setTimeout(() => $('#txtActName').focus(), 400);
 }

@@ -744,11 +744,240 @@
         <td class="text-center fs-5 fw-bold rl-cat-total" id="cat_total_3">0</td>
         <td></td>
     </tr>
-<tr><td></td><td>Đang cập nhật</td><td></td><td></td><td></td> </tr>
-
-
-
-
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="3" data-max="20" id="row_subcat_3_1">
+    <td></td>
+    <td class="fw-bold">Tham gia các hoạt động rèn luyện về chính trị, xã hội, văn hóa, văn nghệ, thể thao (20 điểm)</td>
+    <td class="text-center fw-bold">20 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_3_1">0</td>
+    <td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_a">
+        <td></td>
+        <td class="ps-4 text-dark">Thành viên các CLB</td>
+        <td class="text-center">3 điểm/CLB</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_1_a" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_b">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia cổ vũ các hoạt động</td>
+        <td class="text-center">2 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_b', 2)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_1_b" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="table-success text-success">
+    <td></td>
+   <td><b>- Tham gia các hoạt động về chính trị, xã hội: (20 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_c">
+        <td></td>
+        <td class="ps-4 text-dark">+ Tham gia các hoạt động, các buổi hội nghị, đại hội do Trường, tổ chức Đoàn – Hội tổ chức, triệu tập (Đại hội, Hội nghị, Hội nghị Lớp trưởng, tọa đàm về tình hình thời sự, chính trị…)</td>
+        <td class="text-center">4 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_c">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_c', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+   
+            <input type="hidden" id="data_3_1_c" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_d">
+        <td></td>
+        <td class="ps-4 text-dark">Không tham gia (không có lý do chính đáng khi được triệu tập)</td>
+        <td class="text-center">-4 điểm/hoạt động</td>
+        <td class="text-center">
+            <input type="number" id="direct_3_1_d" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="4" value="0" data-parent-subcat="3_1" data-max="20" oninput="if(this.value < -20) this.value = -20; calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="table-success text-success">
+    <td></td>
+   <td><b>- Tham gia đầy đủ và nghiêm túc các hoạt động văn hóa, văn nghệ, thể dục thể thao: (20 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_e">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp lớp (tương đương)</td>
+        <td class="text-center">1 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_e">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_e', 1)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_1_e" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_f">
+        <td></td>
+        <td class="ps-4 text-dark">+ Câp khoa (tương đương)</td>
+        <td class="text-center">2 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_f">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_f', 2)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_1_f" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_g">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp Trường (tương đương)</td>
+        <td class="text-center">3 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_g">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_g', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_1_g" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_h">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp Tỉnh/Thành (tương đương) trở lên</td>
+        <td class="text-center">4 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_h">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_h', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_1_h" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<!-- Hàng tiêu đề tiểu mục (Màu hồng) -->
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="3" data-max="20" id="row_subcat_3_2">
+    <td></td>
+    <td class="fw-bold">Tham gia các hoạt động hiến máu, công ích hoặc các hoạt động an sinh xã hội (20 điểm)</td>
+    <td class="text-center fw-bold">20 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_3_2">0</td>
+    <td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_2_a">
+        <td></td>
+        <td class="ps-4 text-dark"></td>
+        <td class="text-center">3 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_2_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_2', '3_2_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_2_a" class="rl-crit-data" data-parent-subcat="3_2" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="3" data-max="20" id="row_subcat_3_3">
+    <td></td>
+    <td class="fw-bold">Tham gia tuyên truyền phòng chống tội phạm và tệ nạn xã hội (20 điểm)</td>
+    <td class="text-center fw-bold">20 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_3_3">0</td>
+    <td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_3_a">
+        <td></td>
+        <td class="ps-4 text-dark"></td>
+        <td class="text-center">3 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_3_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_3', '3_3_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_3_a" class="rl-crit-data" data-parent-subcat="3_3" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="3" data-max="20" id="row_subcat_3_4">
+    <td></td>
+    <td class="fw-bold">Sinh viên được kết nạp Đoàn Thanh niên Cộng sản Hồ Chí Minh (2 điểm)</td>
+    <td class="text-center fw-bold">2 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_3_4">0</td>
+    <td></td>
+</tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_3_4_a">
+        <td></td>
+        <td class="ps-4 text-dark"></td>
+        <td class="text-center">2 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_3_4_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="3_4" data-score="2" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="3" data-max="20" id="row_subcat_3_5">
+    <td></td>
+    <td class="fw-bold">Sinh viên được kết nạp vào Đảng Cộng sản Việt Nam (3 điểm)</td>
+    <td class="text-center fw-bold">3 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_3_5">0</td>
+    <td></td>
+</tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_3_5_a">
+        <td></td>
+        <td class="ps-4 text-dark"></td>
+        <td class="text-center">3 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_3_5_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="3_5" data-score="3" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="3" data-max="20" id="row_subcat_3_6">
+    <td></td>
+    <td class="fw-bold">Khen thưởng sinh viên đạt thành tích hoạt động chính trị, xã hội, văn hóa, văn nghệ, thể thao, phòng chống tội phạm và các tệ nạn xã hội. (20 điểm)</td>
+    <td class="text-center fw-bold">20 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_3_6">0</td>
+    <td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_6_a">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp khoa (tương đương)</td>
+        <td class="text-center">3 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_6_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_6', '3_6_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_6_a" class="rl-crit-data" data-parent-subcat="3_6" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_6_b">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Trường (tương đương) trở lên</td>
+        <td class="text-center">4 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_6_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_6', '3_6_b', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_6_b" class="rl-crit-data" data-parent-subcat="3_6" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_6_c">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Tỉnh/Thành phố (tương đương)</td>
+        <td class="text-center">5 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_6_c">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_6', '3_6_c', 5)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_6_c" class="rl-crit-data" data-parent-subcat="3_6" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_6_d">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Trung ương</td>
+        <td class="text-center">6 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_6_d">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_6', '3_6_d', 6)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_6_d" class="rl-crit-data" data-parent-subcat="3_6" data-max="20" value="[]">
+        </td>
+    </tr>
 
  <tr class="rl-level-1" style="background-color: #f97316; color: white;" data-cat="4" data-max="25">
         <td class="text-center fw-bold">IV</td>
@@ -3779,11 +4008,14 @@
                     <label class="fw-bold small text-muted mb-1">Tên hoạt động <span class="text-danger">*</span></label>
                     <input type="text" id="txtActName" class="form-control fw-bold" placeholder="VD: Tham gia NCKH, Khảo sát...">
                 </div>
+                
+                <!-- THAY ĐỔI Ở KHỐI NÀY: Dùng thẻ <select> thay cho <input> -->
                 <div class="mb-3">
                     <label class="fw-bold small text-muted mb-1">Số điểm cộng của HĐ này <span class="text-danger">*</span></label>
-                    <input type="number" id="txtActScore" class="form-control fw-bold text-primary" placeholder="VD: 3" min="0" step="0.5">
+                    <select id="txtActScore" class="form-select fw-bold text-primary"></select>
                     <small class="text-danger fw-bold mt-1 d-block" id="maxScoreHint"></small>
                 </div>
+                
                 <div class="mb-2">
                     <label class="fw-bold small text-muted mb-1">Link Drive Minh chứng (Nếu có)</label>
                     <input type="text" id="txtActUrl" class="form-control" placeholder="https://drive.google.com/...">
