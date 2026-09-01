@@ -193,6 +193,7 @@
         <main class="main-content">
            <!-- KHU VỰC ĐÁNH GIÁ ĐIỂM RÈN LUYỆN -->
 <div id="renLuyenSection" class="d-none">
+
     <header class="top-header d-flex justify-content-between align-items-center">
         <div class="page-title"><i class="fa-solid fa-medal"></i> Mô phỏng web Đánh giá điểm rèn luyện</div>
         
@@ -211,7 +212,34 @@
             </button>
         </div>
     </header>
-
+<!-- KHU VỰC BỘ LỌC NĂM HỌC VÀ HỌC KỲ CHO RÈN LUYỆN -->
+<div class="nav-week-container bg-white p-3 rounded border shadow-sm mb-4" style="height: auto;">
+    <div class="row g-3 w-100 align-items-center m-0">
+        <div class="col-md-6 ps-0">
+            <div class="select-floating-box">
+                <label>Năm học</label>
+                <select class="form-select" id="rlNamHocSelect" onchange="onRlFilterChange()">
+                    <!-- Bạn có thể thêm bằng JS hoặc để cứng ở đây -->
+                    <option value="2026-2027" selected>2026-2027</option>
+                    <option value="2027-2028">2027-2028</option>
+                    <option value="2028-2029">2028-2029</option>
+		    <option value="2029-2030">2029-2030</option>
+		    <option value="2030-2031">2030-2031</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6 pe-0">
+            <div class="select-floating-box">
+                <label>Học kỳ</label>
+                <select class="form-select" id="rlHocKySelect" onchange="onRlFilterChange()">
+                    <option value="1" selected>Học kỳ 1</option>
+                    <option value="2">Học kỳ 2</option>
+                    <option value="3">Học kỳ hè</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
     <div class="table-responsive shadow-sm rounded border bg-white mb-5">
         <table class="table table-bordered align-middle m-0" style="font-size: 14.5px;">
             <thead class="text-center text-white" style="background-color: #0f4c81;">
@@ -4614,7 +4642,7 @@
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
         const startMaintenance = new Date(2026, 8, 01, 18, 00);  
-        const endMaintenance   = new Date(2026, 8, 01, 18, 15); 
+        const endMaintenance   = new Date(2026, 8, 01, 18, 05); 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;

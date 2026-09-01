@@ -376,6 +376,8 @@ function submitRenLuyen() {
     }
 
     let rlData = {};
+    let namHoc = $('#rlNamHocSelect').val(); // Lấy giá trị năm học
+    let hocKy = $('#rlHocKySelect').val();   // Lấy giá trị học kỳ
     
     // Lưu Hoạt động Minh chứng
     $('.rl-crit-data').each(function() {
@@ -400,6 +402,14 @@ function submitRenLuyen() {
         let critId = $(this).attr('id').replace('select_', '');
         rlData[critId] = parseFloat($(this).val()) || 0;
     });
+	$('.rl-proof-data').each(function() {
+        let proofId = $(this).attr('id');
+        try { 
+            rlData[proofId] = JSON.parse($(this).val()); 
+        } catch(e) { 
+            rlData[proofId] = []; 
+        }
+    });
 
     let totalScore = $('#rlGrandTotal').text();
     let rank = $('#rlRank').text();
@@ -411,6 +421,8 @@ function submitRenLuyen() {
     postToGAS({
         action: "saveRenLuyen",
         mssv: currentUser.mssv,
+        namHoc: namHoc,  // Truyền năm học
+        hocKy: hocKy,    // Truyền học kỳ
         rlData: JSON.stringify(rlData),
         totalScore: totalScore,
         rank: rank
@@ -424,8 +436,14 @@ function submitRenLuyen() {
 }
 
 function fetchRenLuyenData() {
+    let namHoc = $('#rlNamHocSelect').val() || "2025-2026";
+    let hocKy = $('#rlHocKySelect').val() || "1";
+    
+    // Xoá trắng phiếu đánh giá trước khi nạp dữ liệu của kỳ mới
+    clearRenLuyenForm();
+
     $.ajax({
-        url: SCRIPT_URL + "?action=getRenLuyen&mssv=" + currentUser.mssv,
+        url: SCRIPT_URL + "?action=getRenLuyen&mssv=" + currentUser.mssv + "&namHoc=" + namHoc + "&hocKy=" + hocKy,
         method: "GET",
         dataType: "json",
         success: function(res) {
@@ -459,12 +477,20 @@ function fetchRenLuyenData() {
                     if (dataObj[critId] !== undefined) $(this).val(dataObj[critId]);
                 });
                 
+                // Nạp và hiển thị lại các link minh chứng
+                $('.rl-proof-data').each(function() {
+                    let proofId = $(this).attr('id');
+                    if (dataObj[proofId]) {
+                        $(this).val(JSON.stringify(dataObj[proofId]));
+                        renderProofs($(this).closest('td'));
+                    }
+                });
+                
                 calcRenLuyen(); // Tính lại điểm
             }
         }
     });
 }
-
 // 1. Trong hàm submitRenLuyen(): Thêm đoạn lưu danh sách minh chứng đính kèm
 $('.rl-proof-data').each(function() {
     let proofId = $(this).attr('id');
@@ -552,4 +578,35 @@ function initRenLuyenCollapse() {
             $childRows.fadeOut(200);
         }
     });
+}
+
+// Hàm bắt sự kiện khi người dùng thay đổi Năm học hoặc Học kỳ
+function onRlFilterChange() {
+    if (currentUser && !currentUser.isGuest) {
+        fetchRenLuyenData();
+    }
+}
+
+// Hàm xoá trắng bảng điểm trước khi nạp dữ liệu kỳ mới
+function clearRenLuyenForm() {
+    $('.rl-crit-data').val('[]');
+    $('.rl-proof-data').val('[]');
+    
+    // Xóa các hàng hoạt động thêm vào (màu trắng)
+    $('tr[class^="act-row-"]').remove(); 
+    $('.rl-row-white').remove();
+    
+    // Đưa các input trực tiếp về 0
+    $('.rl-direct-input').val(0);
+    // Bỏ check các ô checkbox/radio
+    $('.rl-check-input').prop('checked', false);
+    // Đưa dropdown về mặc định
+    $('.rl-select-input').val(0);
+    // Làm sạch danh sách minh chứng
+    $('.rl-proof-list').empty();
+    
+    // Trả tổng điểm về 0
+    $('#rlGrandTotal').text('0');
+    $('#rlRank').text('-');
+    $('.rl-cat-total, .rl-subcat-total, .rl-crit-total').text('0');
 }
