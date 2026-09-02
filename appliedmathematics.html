@@ -423,14 +423,21 @@
         <input type="hidden" id="proof_1_4_a" class="rl-proof-data" value="[]">
     </td>
     </tr>
-<!-- TRẮNG a) (Phải mang data-parent-subcat="1_4" để thuộc Tiểu mục hồng 1.1) -->
-    <tr class="rl-level-3 bg-white" id="row_crit_1_4_b">
+
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="1" data-max="3" id="row_subcat_1_6">
         <td></td>
-        <td class="ps-4 text-dark">Tinh thần vượt khó, phấn đấu vươn lên trong học tập (3 điểm)</td>
+        <td class="fw-bold">Tinh thần vượt khó, phấn đấu vươn lên trong học tập (3 điểm)</td>
+        <td class="text-center fw-bold">3 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_1_6">0</td>
+        <td></td>
+    </tr>
+
+    <tr class="rl-level-3 bg-white" id="row_crit_1_6_a">
+        <td></td>
+        <td class="ps-4 text-dark"></td>
         <td class="text-center">3 điểm</td>
        <td class="text-center">
-        <!-- Ô chọn điểm, liên kết với data-parent-subcat="1_4" để tính tổng -->
-        <select id="select_1_4_b" class="form-select form-select-sm mx-auto rl-select-input fw-bold text-success shadow-sm" style="width: 120px;" data-parent-subcat="1_4" onchange="calcRenLuyen()">
+               <select id="select_1_6_a" class="form-select form-select-sm mx-auto rl-select-input fw-bold text-success shadow-sm" style="width: 120px;" data-parent-subcat="1_6" onchange="calcRenLuyen()">
             <option value="0" selected>0 điểm</option>
             <option value="1">1 điểm</option>
             <option value="2">2 điểm</option>
@@ -4723,13 +4730,11 @@ async function initSystemUrlRouter() {
 
     // KIỂM TRA QUYỀN KHÁCH NGAY TỪ ĐẦU
     if (currentUser && currentUser.isGuest) {
-        // Nếu không có mã thông báo cụ thể, ĐẨY VỀ TRANG ĐĂNG NHẬP LẬP TỨC
         if (!tbParam) {
             window.location.href = 'login.html';
-            return; // Ngắt luồng ngay
+            return; 
         }
         
-        // Chặn khách xem các phân hệ khác (nếu lọt qua được)
         if (viewParam || courseParam) {
             window.location.href = 'login.html';
             return;
@@ -4738,32 +4743,36 @@ async function initSystemUrlRouter() {
 
     // 1. Mở bài viết Thông báo chi tiết
     if (tbParam) {
-        // Đánh dấu nút Thông báo trên Sidebar cho đẹp
         $('#btnNavThongBao').addClass('active');
-
-        // BÍ QUYẾT Ở ĐÂY: Truyền 'null' thay vì truyền 'document.getElementById...'
-        // Điều này báo cho hệ thống biết là đang load từ Link chia sẻ, tuyệt đối KHÔNG ĐƯỢC reset URL
         loadDataByHocPhan('Thông báo', null);
         
-        // Chờ dữ liệu đổ vào biến window.thongBaoData
         let tbData = await waitForThongBaoData();
-        
         let isFound = false;
-        // Duyệt tìm mã thông báo trùng khớp và kích hoạt hàm mở chi tiết
+        
+        // Chuẩn hóa từ khóa tìm kiếm (bỏ khoảng trắng, viết hoa)
+        let cleanTbParam = tbParam.trim().toUpperCase();
+
         for (let key in tbData) {
-            if (tbData[key] && tbData[key].tbCode === tbParam) {
-                // Trì hoãn 50ms để bảng DOM nền vẽ xong, giúp hiệu ứng bật Popup đè lên mượt hơn
+            if (tbData[key] && tbData[key].tbCode && tbData[key].tbCode.toUpperCase() === cleanTbParam) {
                 setTimeout(() => viewThongBaoDetail(key), 50);
                 isFound = true;
                 break;
             }
         }
 
-        // NẾU KHÔNG TÌM THẤY BÀI VIẾT (Mã sai/Bài đã xóa) MÀ LÀ KHÁCH -> ĐÁ VĂNG VỀ TRANG CHỦ
-        if (!isFound && currentUser && currentUser.isGuest) {
-            alert("Liên kết thông báo không tồn tại hoặc bạn không có quyền xem!");
-            resetUrlToDefault();
-            location.reload(); // Tự động load lại trang để bật màn hình Khóa
+        // NẾU KHÔNG TÌM THẤY BÀI VIẾT -> CHỐNG LỖI MÀN HÌNH TRẮNG
+        if (!isFound) {
+            if (currentUser && currentUser.isGuest) {
+                alert("Liên kết thông báo không tồn tại hoặc bạn không có quyền xem!");
+                resetUrlToDefault();
+                location.reload(); 
+            } else {
+                alert("Liên kết thông báo không tồn tại hoặc đã bị xóa!");
+                resetUrlToDefault();
+                // Phục hồi lại bảng danh sách tổng nếu tìm không ra bài
+                $('#tbMainView').removeClass('d-none');
+                $('#tbMainView').attr('style', ''); 
+            }
         }
         return;
     }
@@ -4775,8 +4784,8 @@ async function initSystemUrlRouter() {
         else if (viewParam === 'gpa') loadGPAView();
         else if (viewParam === 'profile') loadProfileView();
         else if (viewParam === 'qa') openQASection();
-	else if (viewParam === 'datlich') loadDatLichHenView();
-	else if (viewParam === 'renluyen') loadRenLuyenView();
+        else if (viewParam === 'datlich') loadDatLichHenView();
+        else if (viewParam === 'renluyen') loadRenLuyenView();
         else if (viewParam === 'sharecode') {
             openShareCodeSection();
             if (categoryParam) {
@@ -4794,10 +4803,9 @@ async function initSystemUrlRouter() {
     if (courseParam) {
         try {
             let categories = await waitForCategories();
-           // Thay đoạn cũ bằng:
-let matchedCourse = categories.find(name =>
-    name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "").toLowerCase() === courseParam.toLowerCase()
-);
+            let matchedCourse = categories.find(name =>
+                name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "").toLowerCase() === courseParam.toLowerCase()
+            );
             
             if (matchedCourse) {
                 loadDataByHocPhan(matchedCourse);
