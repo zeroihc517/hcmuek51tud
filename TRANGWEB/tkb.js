@@ -569,7 +569,8 @@ function getNoteFromSubject(c) {
     let monLower = (c.mon || "").toLowerCase(); let phongLower = (c.phong || "").toLowerCase(); let hinhThucLower = (c.hinhThuc || "").toLowerCase();
     let dateMatch = (c.mon || "").match(/\d{1,2}\/\d{1,2}/);
     let dateStr = dateMatch ? ` <br><small class="text-muted">(${dateMatch[0]})</small>` : '';
-    if (phongLower.includes('tự học') || hinhThucLower.includes('tự học')) return `<span class="fw-bold" style="color: #9333ea;">Tự học${dateStr}</span>`;
+    if (monLower.includes('tự học') || phongLower.includes('tự học') || hinhThucLower.includes('tự học')) return `<span class="fw-bold" style="color: #9333ea;">Tự học${dateStr}</span>`;
+	
     if (monLower.includes('kiểm tra kết thúc học phần')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra Kết thúc học phần${dateStr}</span>`;
     if (monLower.includes('kiểm tra giữa học phần')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra Giữa học phần${dateStr}</span>`;
     if (monLower.includes('kiểm tra quá trình')) return `<span class="fw-bold" style="color: #dc2626;">Kiểm tra Quá Trình${dateStr}</span>`;
@@ -4276,4 +4277,35 @@ window.deleteGroupStudy = function(id) {
         loadGroupStudyList();
         loadThoiGianBieu();
     });
+};
+
+window.addPrefixToCourseName = function(prefix) {
+    let input = $('#uTkbMon');
+    let currentVal = input.val().trim();
+    
+    // Mảng chứa các tiền tố để kiểm tra và xóa nếu người dùng bấm đổi nút khác
+    let prefixes = [
+        "Kiểm tra Giữa học phần - ", 
+        "Kiểm tra Kết thúc học phần - ", 
+        "Kiểm tra Quá trình - ", 
+        "Tự học - "
+    ];
+    
+    // Xóa tiền tố cũ (nếu có) khỏi chuỗi hiện tại
+    for (let p of prefixes) {
+        if (currentVal.startsWith(p)) {
+            currentVal = currentVal.substring(p.length).trim();
+            break; 
+        }
+    }
+    
+    // Gắn tiền tố mới vào
+    if (currentVal === "") {
+        input.val(prefix + " - ");
+    } else {
+        input.val(prefix + " - " + currentVal);
+    }
+    
+    // Đưa con trỏ chuột về lại ô nhập để người dùng gõ tiếp
+    input.focus();
 };
