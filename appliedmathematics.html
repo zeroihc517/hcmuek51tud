@@ -3192,7 +3192,12 @@
                     <div class="col-md-9">
                         <label class="form-label fw-bold">Tên học phần / Môn tự học <span class="text-danger">*</span></label>
                         <input type="text" id="uTkbMon" class="form-control" placeholder="VD: Hình học vi phân / Tự học Giải tích">
-                        
+                        <div class="mt-2 d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" onclick="addPrefixToCourseName('Kiểm tra Giữa học phần')">Kiểm tra Giữa kỳ</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" onclick="addPrefixToCourseName('Kiểm tra Kết thúc học phần')">Kiểm tra Cuối kỳ</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" onclick="addPrefixToCourseName('Kiểm tra Quá trình')">Kiểm tra Quá trình</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="addPrefixToCourseName('Tự học')">Tự học</button>
+                        </div>
                     </div>
                     
                    <!-- KHUNG KHAI BÁO THỜI GIAN NHIỀU CA -->
