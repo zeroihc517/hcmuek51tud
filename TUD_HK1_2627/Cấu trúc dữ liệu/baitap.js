@@ -713,13 +713,7 @@ if (window.MathJax && window.MathJax.typesetPromise) {
                 postDataObj.rowIndex = targetRowIndex;
             }
 
-            let updatedObj = {
-                rowIndex: targetRowIndex,
-                time: currentTimeStr + " (Vừa cập nhật)",
-                theory: theoryText,
-                code: rawCode,
-                lang: lang.toUpperCase()
-            };
+           // Đã xóa bỏ updatedObj vì không cần chèn dữ liệu ảo nữa
 
             $.ajax({
                 url: SCRIPT_URL,
@@ -727,35 +721,25 @@ if (window.MathJax && window.MathJax.typesetPromise) {
                 data: JSON.stringify(postDataObj),
                 contentType: "text/plain;charset=utf-8",
                 dataType: "text",
-                success: function(res) {
+                // Sử dụng complete thay cho success/error để bao quát luôn trường hợp Google Apps Script trả về lỗi CORS giả
+                complete: function() {
+                    // 1. Khôi phục trạng thái nút bấm
                     btn.html(originalHtml).prop('disabled', false);
 
-                    if (isUpdating) {
-                        currentSubmissionsList[editingSubIndex] = updatedObj;
-                    } else {
-                        currentSubmissionsList.unshift(updatedObj);
-                    }
-
-                    renderHistoryUI();
+                    // 2. Thoát khỏi chế độ chỉnh sửa (nếu có) và dọn dẹp form
                     cancelEditMode();
-		$(`#tabBtnQuestion_${currentQuestionIndex}`).addClass('completed');
-                    $(`#tabBtnQuestion_${currentQuestionIndex}`).find('i').removeClass('fa-file-code').addClass('fa-circle-check');
-                    alert(isUpdating ? `✅ CẬP NHẬT BÀI NỘP THÀNH CÔNG!` : `✅ NỘP BÀI THÀNH CÔNG!`);
-                },
-                error: function(xhr, status, err) {
-                    btn.html(originalHtml).prop('disabled', false);
 
-                    if (isUpdating) {
-                        currentSubmissionsList[editingSubIndex] = updatedObj;
-                    } else {
-                        currentSubmissionsList.unshift(updatedObj);
-                    }
-
-                    renderHistoryUI();
-                    cancelEditMode();
-			$(`#tabBtnQuestion_${currentQuestionIndex}`).addClass('completed');
+                    // 3. Đổi màu giao diện nút bấm thành câu hỏi "Đã hoàn thành" (Xanh lá)
+                    $(`#tabBtnQuestion_${currentQuestionIndex}`).addClass('completed');
                     $(`#tabBtnQuestion_${currentQuestionIndex}`).find('i').removeClass('fa-file-code').addClass('fa-circle-check');
-                    alert(isUpdating ? `✅ CẬP NHẬT BÀI NỘP THÀNH CÔNG!` : `✅ NỘP BÀI THÀNH CÔNG!`);
+
+                    // 4. Gọi lại API tải mới dữ liệu lịch sử thực tế từ máy chủ (forceRefresh = true)
+                    loadSubmissionHistory(true);
+
+                    // 5. Hiển thị thông báo sau một khoảng trễ nhỏ để không làm kẹt giao diện load lịch sử
+                    setTimeout(function() {
+                        alert(isUpdating ? `✅ CẬP NHẬT BÀI NỘP THÀNH CÔNG!` : `✅ NỘP BÀI THÀNH CÔNG!`);
+                    }, 300);
                 }
             });
         }
