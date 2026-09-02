@@ -1431,7 +1431,6 @@ if (isSpecialExam) {
                    // Tạo một khóa cố định (Stable Key) từ Tên bài học (bỏ hết ký tự đặc biệt)
 let stableKey = titleText.replace(/<[^>]*>?/gm, '').replace(/[^a-zA-Z0-9_]/g, '');
 if (!stableKey) stableKey = sheetRowIndexDrag; // Dự phòng nếu tên rỗng
-
 // --- BẮT ĐẦU: XỬ LÝ TIẾN ĐỘ, NOTE & QA CHO MINIGAME ---
 let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
 // Dùng stableKey thay cho sheetRowIndexDrag
@@ -1444,7 +1443,7 @@ let hasNote = noteData && noteData.content && noteData.content.trim() !== '';
 let noteBtnClass = hasNote ? 'btn-primary text-white' : 'btn-outline-secondary bg-white';
 let noteBtnIcon = hasNote ? '<i class="fa-solid fa-clipboard-check fs-6"></i>' : '<i class="fa-regular fa-clipboard fs-6"></i>';
 
-// Xác định Topic QA cho Minigame
+// Xác định Topic QA cho Minigame (Kiểm tra khớp 2 chiều)
 let cleanSheetNameQA = currentSheetName.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').trim();
 let qaTopicForMinigame = cleanSheetNameQA;
 
@@ -1453,12 +1452,26 @@ if (typeof SYSTEM_COURSE_DATABASE !== 'undefined') {
         .map(c => ({...c, cleanName: c.name.replace(/[\u200B-\u200D\uFEFF\u00A0\t]/g, '').trim().toLowerCase()}))
         .sort((a, b) => b.cleanName.length - a.cleanName.length);
     
-    let matchedDeepCourse = sortedDB.find(c => cleanSheetNameQA.toLowerCase().includes(c.cleanName));
+    let candidate = cleanSheetNameQA.toLowerCase();
+
+    let matchedDeepCourse = sortedDB.find(c => {
+        // Chiều 1: Tên sheet chứa Tên môn trong Database
+        if (candidate.includes(c.cleanName)) return true;
+        
+        // Chiều 2: Tên môn trong Database chứa Tên sheet (VD: "Cấu trúc đại số và ứng dụng" chứa "Cấu trúc đại số")
+        let isCommonWord = /^(bài|chương|phần|tài liệu|tuần|buổi)\s*\d*$/i.test(candidate);
+        if (!isCommonWord && candidate.length > 5 && c.cleanName.includes(candidate)) {
+            return true;
+        }
+        return false;
+    });
+
     if (matchedDeepCourse) {
         let cleanOriginalName = matchedDeepCourse.name.replace(/[\u200B-\u200D\uFEFF\u00A0\t]/g, '').trim();
         qaTopicForMinigame = `${matchedDeepCourse.code}-${cleanOriginalName}`;
     }
 }
+
 if (!qaTopicForMinigame.match(/^[A-Z]{3,4}\d{3,4}-/i)) { 
     let lowerName = cleanSheetNameQA.toLowerCase();
     if (lowerName.includes('quốc phòng') || lowerName.includes('an ninh') || lowerName === 'năm 1' || lowerName.includes('tài liệu')) {
