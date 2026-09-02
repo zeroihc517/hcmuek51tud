@@ -1432,7 +1432,7 @@ if (isSpecialExam) {
 let stableKey = titleText.replace(/<[^>]*>?/gm, '').replace(/[^a-zA-Z0-9_]/g, '');
 if (!stableKey) stableKey = sheetRowIndexDrag; // Dự phòng nếu tên rỗng
 
-// --- BẮT ĐẦU: XỬ LÝ TIẾN ĐỘ & NOTE CHO MINIGAME ---
+// --- BẮT ĐẦU: XỬ LÝ TIẾN ĐỘ, NOTE & QA CHO MINIGAME ---
 let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
 // Dùng stableKey thay cho sheetRowIndexDrag
 let progVal = localStorage.getItem(`prog_${mssv}_${currentSheetName}_${stableKey}`) || 'white';
@@ -1444,6 +1444,31 @@ let hasNote = noteData && noteData.content && noteData.content.trim() !== '';
 let noteBtnClass = hasNote ? 'btn-primary text-white' : 'btn-outline-secondary bg-white';
 let noteBtnIcon = hasNote ? '<i class="fa-solid fa-clipboard-check fs-6"></i>' : '<i class="fa-regular fa-clipboard fs-6"></i>';
 
+// Xác định Topic QA cho Minigame
+let cleanSheetNameQA = currentSheetName.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').trim();
+let qaTopicForMinigame = cleanSheetNameQA;
+
+if (typeof SYSTEM_COURSE_DATABASE !== 'undefined') {
+    let sortedDB = [...SYSTEM_COURSE_DATABASE]
+        .map(c => ({...c, cleanName: c.name.replace(/[\u200B-\u200D\uFEFF\u00A0\t]/g, '').trim().toLowerCase()}))
+        .sort((a, b) => b.cleanName.length - a.cleanName.length);
+    
+    let matchedDeepCourse = sortedDB.find(c => cleanSheetNameQA.toLowerCase().includes(c.cleanName));
+    if (matchedDeepCourse) {
+        let cleanOriginalName = matchedDeepCourse.name.replace(/[\u200B-\u200D\uFEFF\u00A0\t]/g, '').trim();
+        qaTopicForMinigame = `${matchedDeepCourse.code}-${cleanOriginalName}`;
+    }
+}
+if (!qaTopicForMinigame.match(/^[A-Z]{3,4}\d{3,4}-/i)) { 
+    let lowerName = cleanSheetNameQA.toLowerCase();
+    if (lowerName.includes('quốc phòng') || lowerName.includes('an ninh') || lowerName === 'năm 1' || lowerName.includes('tài liệu')) {
+        qaTopicForMinigame = cleanSheetNameQA;
+    }
+}
+
+let safeTopic = qaTopicForMinigame.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ").replace(/\r/g, "");
+let safeLessonNameQA = titleText.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ").replace(/\r/g, "");
+
 let extraControls = `
 <div class="d-flex align-items-center justify-content-between mt-2 gap-2 w-100">
     <select class="form-select form-select-sm fw-bold border-secondary shadow-sm flex-grow-1" style="background-color: ${bgProgColor}; color: #334155; border-radius: 8px; font-size: 12px; cursor: pointer; padding: 2px 10px;" onchange="updateProgress(this, '${currentSheetName}', '${stableKey}')">
@@ -1451,12 +1476,16 @@ let extraControls = `
         <option value="yellow" ${progVal === 'yellow' ? 'selected' : ''}>Đang làm</option>
         <option value="green" ${progVal === 'green' ? 'selected' : ''}>Đã xong</option>
     </select>
-    <button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center flex-shrink-0" style="border-radius: 8px; width: 30px; height: 26px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
-        ${noteBtnIcon}
-    </button>
+    <div class="d-flex gap-1 flex-shrink-0">
+        <button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 30px; height: 26px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
+            ${noteBtnIcon}
+        </button>
+        <button class="btn btn-sm btn-outline-info bg-white shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 30px; height: 26px; padding: 0;" onclick="event.stopPropagation(); openCourseQAModal('${safeTopic}', '${safeLessonNameQA}')" title="Trao đổi, giải đáp đề này">
+            <i class="fa-solid fa-comments" style="font-size: 14px;"></i>
+        </button>
+    </div>
 </div>`;
 // --- KẾT THÚC ---
-
                     examCardsHtml += `
                     <div class="position-relative drag-handle-row d-flex flex-column h-100" ${dragAttrTb}>
                         ${adminMinigameBtns}
