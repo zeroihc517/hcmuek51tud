@@ -852,22 +852,22 @@ function convertUrlsToLinks(text) {
         let isUpcoder = href.includes('test.upcoder.xyz/index.php/problems/mysubmit');
 
         if (isUpcoder) {
-            // Đổi href thành javascript:void(0) để không nhảy trang, kích hoạt hàm gọi Iframe
             if (isFirstLink) {
                 isFirstLink = false;
-                // Đổi màu gradient cam/vàng để nổi bật nút nộp code
-                return `<a href="javascript:void(0)" onclick="toggleUpcoderIframe()" class="tex2jax_ignore btn-first-link" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%);"><i class="fa-solid fa-code-compare me-2"></i>TRUY CẬP LINK</a>${trailingChars}`;
+                // Đổi href để mở tab mới thay vì dùng iframe
+                return `<a href="${href}" target="_blank" class="tex2jax_ignore btn-first-link" style="background: linear-gradient(135deg, #d97706 0%, #b45309 100%);"><i class="fa-solid fa-code-compare me-2"></i>TRUY CẬP LINK</a>${trailingChars}`;
             } else {
-                return `<a href="javascript:void(0)" onclick="toggleUpcoderIframe()" class="tex2jax_ignore fw-bold text-warning-emphasis text-decoration-underline"><i class="fa-solid fa-code-compare me-1"></i>CHẤM BÀI UPCODER</a>${trailingChars}`;
+                return `<a href="${href}" target="_blank" class="tex2jax_ignore fw-bold text-warning-emphasis text-decoration-underline"><i class="fa-solid fa-code-compare me-1"></i>CHẤM BÀI UPCODER</a>${trailingChars}`;
             }
         }
 
-              // --- XỬ LÝ CÁC LINK BÌNH THƯỜNG KHÁC ---
+        // --- XỬ LÝ CÁC LINK BÌNH THƯỜNG KHÁC ---
         if (isFirstLink) {
             isFirstLink = false; 
-            return `<a href="javascript:void(0)" onclick="openGenericIframe('${href}')" class="tex2jax_ignore btn-first-link"><i class="fa-solid fa-arrow-up-right-from-square me-2"></i>TRUY CẬP LINK</a>${trailingChars}`;
+            // Đổi href để mở tab mới thay vì dùng iframe
+            return `<a href="${href}" target="_blank" class="tex2jax_ignore btn-first-link"><i class="fa-solid fa-arrow-up-right-from-square me-2"></i>TRUY CẬP LINK</a>${trailingChars}`;
         } else {
-            return `<a href="javascript:void(0)" onclick="openGenericIframe('${href}')" class="tex2jax_ignore fw-bold text-primary text-decoration-underline"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>TRUY CẬP LINK</a>${trailingChars}`;
+            return `<a href="${href}" target="_blank" class="tex2jax_ignore fw-bold text-primary text-decoration-underline"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>TRUY CẬP LINK</a>${trailingChars}`;
         }
     });
 }
