@@ -763,9 +763,7 @@ for (let g of groupOrder) {
         } else {
             let noteBadge = getNoteFromSubject(c); 
             
-            if (c.ngayNgoaiLe && c.ngayNgoaiLe.trim() !== "") {
-                noteBadge += `<br><span class="text-danger small mt-1 d-block" style="font-size: 11.5px; font-weight: 600;"><i class="fa-solid fa-calendar-xmark me-1"></i>Nghỉ: ${c.ngayNgoaiLe}</span>`;
-            }
+            
 
             let phongDisplayHtml = c.phong || '-';
             if ((c.hinhThuc || '').toUpperCase().includes('VLE')) {
