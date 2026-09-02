@@ -1295,7 +1295,26 @@ $('#tbItemsRenLuyen').html(renLuyenItemsHtml);
 renderDeadlinesOnNoticePage();
 applyKaTeX('customViewWrapper');
 $('#loadingStatus').addClass('d-none');
-                return;
+let urlTb = urlParamsTemp.get('tb');
+                    if (urlTb) {
+                        let cleanTb = urlTb.trim().toUpperCase();
+                        let foundIndex = -1;
+                        for (let i = 0; i < detailData.length; i++) {
+                            if (detailData[i] && detailData[i].tbCode && detailData[i].tbCode.toUpperCase() === cleanTb) {
+                                foundIndex = i;
+                                break;
+                            }
+                        }
+                        if (foundIndex !== -1) {
+                            setTimeout(() => viewThongBaoDetail(foundIndex), 50);
+                        } else {
+                            $('#tbMainView').removeClass('d-none').attr('style', '');
+                            resetUrlToDefault();
+                        }
+                    }
+                    // =====================================
+                    
+                    return;
             }
 
         // ==========================================

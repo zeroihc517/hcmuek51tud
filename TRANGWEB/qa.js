@@ -2042,7 +2042,6 @@ function fetchLearningDataFromServer() {
         dataType: "json",
         success: function(res) {
             if (res && Object.keys(res).length > 0) {
-                // Quét và nạp dữ liệu từ Server vào localStorage của trình duyệt hiện tại
                 if (res.progress) {
                     for (let key in res.progress) {
                         localStorage.setItem(key, res.progress[key]);
@@ -2053,8 +2052,9 @@ function fetchLearningDataFromServer() {
                         localStorage.setItem(key, JSON.stringify(res.notes[key]));
                     }
                 }
-                // Tải lại giao diện bảng nếu đang mở để cập nhật màu sắc ngay lập tức
-                if (!$('#courseSection').hasClass('d-none') && typeof currentSheetName !== 'undefined') {
+                
+                // THÊM ĐIỀU KIỆN KHÔNG RENDER LẠI NẾU ĐANG Ở TRANG THÔNG BÁO
+                if (!$('#courseSection').hasClass('d-none') && typeof currentSheetName !== 'undefined' && currentSheetName.toLowerCase() !== 'thông báo') {
                     loadDataByHocPhan(currentSheetName);
                 }
             }
