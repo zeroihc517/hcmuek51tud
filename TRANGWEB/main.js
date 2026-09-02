@@ -1348,11 +1348,12 @@ let urlTb = urlParamsTemp.get('tb');
         let h2 = String(row[1] || 'Nội dung bài học');
         let h4 = String(row[3] || 'Ghi chú');
         
-        headHtml += `<th style="width: 105px;">${h1}</th><th>${h2}</th><th style="width: 250px;">${h4}</th>`;
+       headHtml += `<th style="width: 105px;">${h1}</th><th>${h2}</th><th style="width: 250px;">${h4}</th>`;
 // THÊM 2 CỘT MỚI: TIẾN ĐỘ & GHI CHÚ
-headHtml += `<th style="width: 130px;" class="text-center">Tiến độ</th><th style="width: 120px;" class="text-center">Note cá nhân</th>`;
+headHtml += `<th style="width: 130px;" class="text-center">Tiến độ</th><th style="width: 120px;" class="text-center">Note cá nhân</th><th style="width: 100px;" class="text-center">Trao đổi</th>`;
+
     }
-                    if (isAdmin) headHtml += `<th class="admin-action-col d-none" style="width: 180px; min-width: 180px;">Thao tác</th>`;
+                   if (isAdmin) headHtml += `<th class="admin-action-col d-none" style="width: 180px; min-width: 180px;">Thao tác</th>`;
                     return; 
                 }
                 
@@ -1739,18 +1740,104 @@ if (isPart || isChapter || isLesson) {
     tdNote = `<td class="text-center align-middle" style="padding-top: 6px !important; padding-bottom: 6px !important;" onclick="event.stopPropagation();"><button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center m-0" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">${noteBtnIcon}</button></td>`;
         
 } else {
-    // 3. Các hàng Nội dung bình thường: Hiển thị đầy đủ cả Tiến độ và Ghi chú
-    tdProg = `<td class="text-center align-middle" style="padding-top: 6px !important; padding-bottom: 6px !important;" onclick="event.stopPropagation();"><select class="form-select form-select-sm fw-bold border-secondary shadow-sm m-0" style="background-color: ${bgProgColor}; color: #334155; border-radius: 8px; font-size: 13px; cursor: pointer; padding-top: 2px; padding-bottom: 2px; height: 32px; min-height: 32px;" onchange="updateProgress(this, '${currentSheetName}', '${stableKey}')"><option value="white" ${progVal === 'white' ? 'selected' : ''}>Chưa học</option><option value="yellow" ${progVal === 'yellow' ? 'selected' : ''}>Còn học</option><option value="green" ${progVal === 'green' ? 'selected' : ''}>Đã xong</option></select></td>`;
-        
-    tdNote = `<td class="text-center align-middle" style="padding-top: 6px !important; padding-bottom: 6px !important;" onclick="event.stopPropagation();"><button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center m-0" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">${noteBtnIcon}</button></td>`;
-}
+            // 3. Các hàng Nội dung bình thường: Hiển thị đầy đủ cả Tiến độ và Ghi chú
+            tdProg = `<td class="text-center align-middle" style="padding-top: 6px !important; padding-bottom: 6px !important;" onclick="event.stopPropagation();"><select class="form-select form-select-sm fw-bold border-secondary shadow-sm m-0" style="background-color: ${bgProgColor}; color: #334155; border-radius: 8px; font-size: 13px; cursor: pointer; padding-top: 2px; padding-bottom: 2px; height: 32px; min-height: 32px;" onchange="updateProgress(this, '${currentSheetName}', '${stableKey}')"><option value="white" ${progVal === 'white' ? 'selected' : ''}>Chưa học</option><option value="yellow" ${progVal === 'yellow' ? 'selected' : ''}>Còn học</option><option value="green" ${progVal === 'green' ? 'selected' : ''}>Đã xong</option></select></td>`;
+                
+            tdNote = `<td class="text-center align-middle" style="padding-top: 6px !important; padding-bottom: 6px !important;" onclick="event.stopPropagation();"><button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center m-0" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">${noteBtnIcon}</button></td>`;
+        }
 
-// Ghép vào các ô TD hiển thị chính
-bodyHtml += `<td style="font-weight: 600;">${iconPrefix}${c1}</td>`;
-bodyHtml += `<td>${finalCol2}</td>`; 
-bodyHtml += `<td>${col4Html}</td>`;
-bodyHtml += tdProg;
-bodyHtml += tdNote;               }
+       // ==========================================
+        // TÍCH HỢP CỘT TRAO ĐỔI & NHẬN DIỆN CHỦ ĐỀ ĐA CẤP
+        // ==========================================
+        let cleanSheetName = currentSheetName.replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').trim();
+        let qaTopic = cleanSheetName;
+        
+        // Khử khoảng trắng vô hình cho Tên bài học / Dòng nội dung
+        let rawLessonNameQA = String(row[1] || row[0] || '').replace(/<[^>]*>?/gm, '').replace(/[\u200B-\u200D\uFEFF\u00A0]/g, '').trim();
+        if (!rawLessonNameQA) rawLessonNameQA = "Bài học " + sheetRowIndex;
+
+        // 1. Quét tìm Tên Học Phần trong TẤT CẢ các cấp (Ưu tiên: Tên Danh Mục -> Phần -> Chương -> Bài -> Tên Hàng)
+        if (typeof SYSTEM_COURSE_DATABASE !== 'undefined') {
+            // Chuẩn hóa Database: Xóa tab (\t) và sắp xếp theo độ dài tên môn giảm dần
+            let sortedDB = [...SYSTEM_COURSE_DATABASE]
+                .map(c => ({...c, cleanName: c.name.replace(/[\u200B-\u200D\uFEFF\u00A0\t]/g, '').trim().toLowerCase()}))
+                .sort((a, b) => b.cleanName.length - a.cleanName.length);
+            
+            // ĐẢM BẢO ƯU TIÊN TỪ BAO QUÁT ĐẾN CHI TIẾT CHUẨN XÁC NHẤT
+            let searchCandidates = [
+                cleanSheetName.toLowerCase(),       // 1. Tên danh mục (Tab)
+                trackingPartName.toLowerCase(),     // 2. Tên Phần
+                trackingChapterName.toLowerCase(),  // 3. Tên Chương
+                trackingLessonName.toLowerCase(),   // 4. Tên Bài
+                rawLessonNameQA.toLowerCase()       // 5. Tên Hàng chi tiết
+            ];
+
+            let matchedDeepCourse = null;
+            
+            // Duyệt từng ứng viên, KIỂM TRA KHỚP 2 CHIỀU
+            for (let candidate of searchCandidates) {
+                if (!candidate) continue;
+                
+                matchedDeepCourse = sortedDB.find(c => {
+                    // Chiều 1: Ứng viên chứa trọn vẹn Tên môn (VD: "Chương Cấu trúc dữ liệu" chứa "Cấu trúc dữ liệu")
+                    if (candidate.includes(c.cleanName)) return true;
+                    
+                    // Chiều 2: Tên môn chứa một phần của Ứng viên (VD: "Cấu trúc đại số và ứng dụng" chứa "Cấu trúc đại số")
+                    // Điều kiện: Ứng viên phải đủ dài (>5 ký tự) và không phải các từ chung chung (Chương 1, Bài 2,...)
+                    let isCommonWord = /^(bài|chương|phần|tài liệu|tuần|buổi)\s*\d*$/i.test(candidate);
+                    if (!isCommonWord && candidate.length > 5 && c.cleanName.includes(candidate)) {
+                        return true;
+                    }
+                    
+                    return false;
+                });
+                
+                if (matchedDeepCourse) {
+                    let cleanOriginalName = matchedDeepCourse.name.replace(/[\u200B-\u200D\uFEFF\u00A0\t]/g, '').trim();
+                    qaTopic = `${matchedDeepCourse.code}-${cleanOriginalName}`;
+                    break; // Đã tìm thấy thì dừng quét, chốt hạ luôn
+                }
+            }
+        }
+
+        // 2. Nếu quét Database không ra (không gán được Mã), dùng quy tắc dự phòng
+        if (!qaTopic.match(/^[A-Z]{3,4}\d{3,4}-/i)) { 
+            let lowerName = cleanSheetName.toLowerCase();
+            // Bắt chuẩn các biến thể có chữ quốc phòng, an ninh
+            if (lowerName.includes('quốc phòng') || lowerName.includes('an ninh')) {
+                qaTopic = trackingChapterName || trackingLessonName || cleanSheetName;
+            } else if (lowerName === 'năm 1' || lowerName.includes('tài liệu')) {
+                qaTopic = trackingLessonName || trackingChapterName || trackingPartName || cleanSheetName;
+            }
+        }
+
+        let tdTraoDoi = '';
+
+        if (isPart || isChapter || isLesson || isMucTieu) {
+            tdTraoDoi = ''; 
+        } else {
+            let safeLessonName = rawLessonNameQA.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ").replace(/\r/g, "");
+            let safeTopic = qaTopic.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ").replace(/\r/g, "");
+            
+            // Render giao diện
+            tdTraoDoi = `<td class="text-center align-middle" style="padding-top: 6px !important; padding-bottom: 6px !important;" onclick="event.stopPropagation();"><button class="btn btn-sm btn-outline-info shadow-sm d-inline-flex align-items-center justify-content-center m-0" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openCourseQAModal('${safeTopic}', '${safeLessonName}')" title="Trao đổi, giải đáp bài học này"><i class="fa-solid fa-comments fs-6"></i></button></td>`;
+        }
+
+        // Ghép vào các ô TD hiển thị chính
+        bodyHtml += `<td style="font-weight: 600;">${iconPrefix}${c1}</td>`;
+        bodyHtml += `<td>${finalCol2}</td>`; 
+        
+        if (isPart || isChapter || isLesson) {
+            // Gộp 4 cột (Ghi chú, Tiến độ, Note, Trao đổi) bằng colspan để tô màu nền phủ kín hàng
+            bodyHtml += `<td colspan="4" style="border-left: none;">${col4Html}</td>`;
+        } else {
+            // Khôi phục bù cột cho các hàng nội dung và Mục tiêu để màu nền không bị hụt
+            bodyHtml += `<td>${col4Html}</td>`;
+            bodyHtml += tdProg || `<td></td>`;
+            bodyHtml += tdNote || `<td></td>`;
+            bodyHtml += tdTraoDoi || `<td></td>`;
+        }
+    } // <-- Ngoặc đóng của vòng lặp
 
                 // (Đoạn Render nút Admin giữ nguyên...)
 

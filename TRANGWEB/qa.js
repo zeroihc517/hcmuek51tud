@@ -3307,3 +3307,227 @@ window.sendThongBaoAdminReply = function(rowIndex) {
         alert("Lỗi khi gửi trả lời."); btn.html('<i class="fa-solid fa-reply me-1"></i> Đăng câu trả lời').prop('disabled', false); 
     }); 
 };
+
+// Tự động chèn Giao diện Modal Trao Đổi vào body khi tải trang
+$(document).ready(function() {
+    const courseQAModalHtml = `
+    <div class="modal fade" id="courseQAModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header text-white" style="background-color: #0f4c81;">
+                    <h6 class="modal-title fw-bold" id="courseQAModalTitle"><i class="fa-solid fa-comments me-2"></i> Trao đổi bài học</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    
+                    <div class="p-3 bg-white rounded border border-primary-subtle shadow-sm">
+                        <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-pen-nib me-2"></i>Đặt câu hỏi / Thảo luận mới</h6>
+                        <textarea id="txtCourseNewQA" class="form-control mb-2 border-primary-subtle" rows="3" placeholder="Nhập thắc mắc hoặc nội dung trao đổi của bạn tại đây..."></textarea>
+                        <div class="text-end">
+                            <button class="btn text-white fw-bold px-4" style="background-color: #0f4c81; border-radius: 8px;" onclick="submitCourseNewQA()">
+                                <i class="fa-solid fa-paper-plane me-1"></i> Gửi thảo luận
+                            </button>
+                        </div>
+                    </div>
+<br>
+ <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-pen-nib me-2"></i>Lịch sử trao đổi</h6> <br>
+<div id="courseQAList" class="mb-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>`;
+    $('body').append(courseQAModalHtml);
+});
+
+window.currentCourseQaTopic = "";
+window.currentCourseQaLesson = "";
+
+window.openCourseQAModal = function(topic, lessonName) {
+    window.currentCourseQaTopic = topic;
+    window.currentCourseQaLesson = lessonName;
+    $('#courseQAModalTitle').html(`<i class="fa-solid fa-comments me-2"></i> ${lessonName}`);
+    $('#courseQAList').html('<div class="text-center py-4"><i class="fa-solid fa-spinner fa-spin fs-3 text-muted"></i><br>Đang tải dữ liệu trao đổi...</div>');
+    $('#txtCourseNewQA').val('');
+    $('#courseQAModal').modal('show');
+    loadCourseQAList();
+};
+
+window.loadCourseQAList = function() {
+    $.ajax({
+        url: SCRIPT_URL + "?action=getQAData",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            let html = '';
+            let count = 0;
+            let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+            let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
+
+            if (data && data.length > 0) {
+                data.forEach(row => {
+                    let rawQuestion = row[2] || '';
+                    
+                    // Lọc những câu hỏi có gắn mác [LESSON: Tên bài học]
+                    if (rawQuestion.includes(`[LESSON:${window.currentCourseQaLesson}]`)) {
+                        count++;
+                        let time = row[0];
+                        let rawMssv = String(row[1]).replace(/[-|]/g, '');
+                        let displayMssv = maskMSSV(rawMssv);
+                        
+                        if (isSystemAdmin) {
+                            let fullName = window.allUsersMap ? window.allUsersMap[rawMssv] : null;
+                            displayMssv = fullName ? `${rawMssv} - ${getNaturalShortName(fullName)}` : rawMssv;
+                        } else if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === rawMssv.replace(/\./g, "")) {
+                            displayMssv = `${rawMssv} - ${getNaturalShortName(activeUser.name)} <span class="badge bg-success ms-1" style="font-size: 10px;">Bạn</span>`;
+                        }
+
+                        let answer = row[3] || '';
+                        let rowIndex = row[6];
+
+                        // Dọn dẹp thẻ Tag và Định danh Bài học để giao diện sạch sẽ
+                        let cleanQuestion = rawQuestion.replace(/<span class="badge.*?>.*?<\/span>\s*/g, '')
+                                                       .replace(`[LESSON:${window.currentCourseQaLesson}]`, '')
+                                                       .replace(/<strong>Bài học:.*?<\/strong>\s*/i, '')
+                                                       .trim();
+                        let questionFormatted = window.safeFormatTextQA(cleanQuestion);
+
+                        // Dựng giao diện Timeline tương tự mục Thông báo
+                        html += `
+                        <div class="mb-4" style="border-left: 3px solid #cbd5e1; padding-left: 15px; margin-left: 5px;">
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 32px; height: 32px; font-size: 14px;">
+                                    <i class="fa-solid fa-user"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold" style="color: #0f4c81; font-size: 14.5px;">SV: ${displayMssv}</div>
+                                    <div class="text-muted" style="font-size: 12px;"><i class="fa-regular fa-clock me-1"></i>${time}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white p-3 rounded shadow-sm border border-primary-subtle" style="font-size: 15px; color: #334155; border-radius: 0 12px 12px 12px;">
+                                ${questionFormatted}
+                            </div>`;
+                                    
+                        if (answer.trim() !== "") {
+                            html += `<div class="mt-2 ms-4 ps-3" style="border-left: 2px dashed #93c5fd;">${parseThread(answer, rowIndex)}</div>`; 
+                        } else {
+                            html += `<div class="mt-2 ms-4 ps-3 text-muted small fst-italic"><i class="fa-solid fa-reply fa-rotate-180 me-2"></i>Đang chờ Admin phản hồi...</div>`;
+                        }
+                        
+                        html += `
+                            <div class="mt-2 ms-4 ps-3">
+                                <button class="btn btn-sm btn-outline-primary fw-bold mt-2 shadow-sm" onclick="$('#course-replyBox-${rowIndex}').toggleClass('d-none')">
+                                    <i class="fa-solid fa-comment-dots"></i> Phản hồi tiếp
+                                </button>
+                                
+                                <div id="course-replyBox-${rowIndex}" class="d-none mt-3 p-3 bg-light rounded border border-primary-subtle shadow-sm">
+                                    <textarea id="course-txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập bình luận của bạn..."></textarea>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button class="btn btn-sm btn-light border fw-bold" onclick="$('#course-replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
+                                        <button class="btn btn-sm text-white fw-bold" onclick="sendCourseQAReply(${rowIndex})" id="course-btnSendReply-${rowIndex}" style="background: #0f4c81; border:none;">
+                                            <i class="fa-solid fa-paper-plane me-1"></i> Gửi phản hồi
+                                        </button>
+                                    </div>
+                                </div>`;
+                                
+                        if (typeof isAdmin !== 'undefined' && isAdmin) { 
+                            html += `
+                                <div class="mt-3 p-3 rounded bg-white shadow-sm" style="border: 1px dashed var(--accent-red);">
+                                    <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
+                                    <textarea id="course-txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
+                                    <div class="text-end mt-2">
+                                        <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendCourseQAAdminReply(${rowIndex})" id="course-btnAdminSubmit-${rowIndex}">
+                                            <i class="fa-solid fa-reply me-1"></i> Đăng câu trả lời
+                                        </button>
+                                    </div>
+                                </div>`; 
+                        }
+                        
+                        html += `</div></div>`;
+                    }
+                });
+            }
+
+            if (count === 0) {
+                html = '<div class="text-center text-muted py-4"><i class="fa-regular fa-comments fs-2 mb-2 opacity-50"></i><br>Chưa có thảo luận nào cho bài học này.<br>Bạn hãy là người đầu tiên nhé!</div>';
+            }
+            
+            $('#courseQAList').html(html);
+            if (window.Prism) Prism.highlightAllUnder(document.getElementById('courseQAList'));
+            if (typeof applyKaTeX === 'function') applyKaTeX('courseQAList');
+        }
+    });
+};
+
+window.submitCourseNewQA = function() {
+    let mssvValue = currentUser ? currentUser.mssv : "Khách";
+    if (mssvValue === "Khách") { alert("Vui lòng đăng nhập Sinh viên để thảo luận!"); return; }
+
+    let text = $('#txtCourseNewQA').val().trim();
+    if (!text) { alert("Vui lòng nhập nội dung!"); return; }
+
+    let topic = window.currentCourseQaTopic || currentSheetName;
+    let lesson = window.currentCourseQaLesson;
+
+    // Đóng gói 3 lớp: Thẻ Badge Topic + Mã Ẩn Định Danh Bài + Header in đậm
+    let finalPayload = `<span class="badge mb-2 shadow-sm" style="background-color: #f1f5f9; color: #475569; font-size: 12.5px; border: 1px solid #e2e8f0;"><i class="fa-solid fa-tag me-1" style="color: #0f4c81;"></i> ${topic}</span>\n[LESSON:${lesson}]\n<strong>Bài học: ${lesson}</strong>\n\n${text}`;
+
+    // Fix nút Load bằng ID chính xác
+    let btn = $('#courseQAModal button').last(); 
+    let originalHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...').prop('disabled', true);
+
+    postToGAS({ action: "submitQuestion", mssv: mssvValue, question: finalPayload }, function(res) {
+        alert("Đã gửi nội dung trao đổi thành công!");
+        $('#txtCourseNewQA').val('');
+        btn.html(originalHtml).prop('disabled', false);
+        loadCourseQAList();
+        
+        // Tải ngầm list QA tổng để cập nhật thông báo (nếu có)
+        if (typeof checkNewQA === 'function') checkNewQA();
+    }, function() {
+        alert("Lỗi kết nối máy chủ!");
+        btn.html(originalHtml).prop('disabled', false);
+    });
+};
+
+window.sendCourseQAReply = function(rowIndex) {
+    let replyText = $(`#course-txtReply-${rowIndex}`).val().trim();
+    if (!replyText) { alert("Vui lòng nhập nội dung!"); return; }
+
+    let studentMssv = currentUser ? currentUser.mssv : "Ẩn danh";
+    let now = new Date();
+    let pad = (n) => String(n).padStart(2, '0');
+    let timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+
+    let formattedReply = studentMssv + ":::" + timeStr + ":::" + replyText;
+
+    let btn = $(`#course-btnSendReply-${rowIndex}`);
+    let originalBtnHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
+
+    postToGAS({ action: "replyToAdmin", rowIndex: rowIndex, replyText: formattedReply }, function(response) {
+        alert(response);
+        loadCourseQAList();
+    }, function() {
+        alert("Lỗi khi gửi phản hồi.");
+        btn.html(originalBtnHtml).prop('disabled', false);
+    });
+};
+
+window.sendCourseQAAdminReply = function(rowIndex) {
+    let replyText = $(`#course-txtAdminReply-${rowIndex}`).val().trim();
+    if (!replyText) { alert("Vui lòng nhập trả lời!"); return; }
+
+    let btn = $(`#course-btnAdminSubmit-${rowIndex}`);
+    let originalBtnHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
+
+    postToGAS({ action: "adminReplyQuestion", rowIndex: rowIndex, replyText: replyText }, function(response) {
+        alert(response);
+        loadCourseQAList();
+    }, function() {
+        alert("Lỗi khi gửi trả lời.");
+        btn.html(originalBtnHtml).prop('disabled', false);
+    });
+};
