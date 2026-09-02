@@ -1493,7 +1493,7 @@ let extraControls = `
         <button id="btnNote_${stableKey}" class="btn btn-sm ${noteBtnClass} shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 30px; height: 26px; padding: 0;" onclick="openPersonalNoteModal('${currentSheetName}', '${stableKey}')" title="${hasNote ? 'Xem ghi chú' : 'Thêm ghi chú'}">
             ${noteBtnIcon}
         </button>
-        <button class="btn btn-sm btn-outline-info bg-white shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 30px; height: 26px; padding: 0;" onclick="event.stopPropagation(); openCourseQAModal('${safeTopic}', '${safeLessonNameQA}')" title="Trao đổi, giải đáp đề này">
+        <button id="btnQA_${stableKey}" class="btn btn-sm btn-outline-info bg-white shadow-sm d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 30px; height: 26px; padding: 0;" onclick="event.stopPropagation(); openCourseQAModal('${safeTopic}', '${safeLessonNameQA}')" title="Trao đổi, giải đáp đề này">
             <i class="fa-solid fa-comments" style="font-size: 14px;"></i>
         </button>
     </div>
@@ -1720,9 +1720,9 @@ if (isUpdating && !isAdmin) {
     col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${iframeFileUrl}', '${safeTitle}', '${currentSheetName}', '${stableKey}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Xem bằng Iframe">${lessonIcon}${col2Html || "Xem Iframe"}</span>`;
 } else if (isLinkOnly) {
     // CỘT 3 CHỈ CHỨA LINK -> Mở File Drive/PDF như cũ
-  col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${safeUrl}', '${safeTitle}', '${currentSheetName}', '${stableKey}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem tài liệu trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;
+    col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${safeUrl}', '${safeTitle}', '${currentSheetName}', '${stableKey}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem tài liệu trực tiếp">${lessonIcon}${col2Html || "Xem tài liệu"}</span>`;
 } else if (c3.trim() !== '') {
-    // CỘT 3 CÓ CHỨA NỘI DUNG/LATEX -> Bật Modal Xem Chi Tiết
+    // CỘT 3 CÓ CHỨA NỘI DUNG/LATEX -> Bật Modal Xem Chi Tiết (Thêm ID btnQA_ để đồng bộ với nút Q&A trong sidebar)
     col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openLatexContentViewer(${rowIndex}); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Nhấn để xem nội dung chi tiết">${lessonIcon}${col2Html || "Xem chi tiết"}</span>`;
 } else {
     // TRỐNG HOÀN TOÀN -> Chỉ hiện chữ bình thường không click được
@@ -1862,7 +1862,8 @@ if (isPart || isChapter || isLesson) {
             let safeTopic = qaTopic.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ").replace(/\r/g, "");
             
             // Render giao diện
-            tdTraoDoi = `<td class="text-center align-middle" style="padding-top: 6px !important; padding-bottom: 6px !important;" onclick="event.stopPropagation();"><button class="btn btn-sm btn-outline-info shadow-sm d-inline-flex align-items-center justify-content-center m-0" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openCourseQAModal('${safeTopic}', '${safeLessonName}')" title="Trao đổi, giải đáp bài học này"><i class="fa-solid fa-comments fs-6"></i></button></td>`;
+            // Render giao diện
+tdTraoDoi = `<td class="text-center align-middle" style="padding-top: 6px !important; padding-bottom: 6px !important;" onclick="event.stopPropagation();"><button id="btnQA_${stableKey}" class="btn btn-sm btn-outline-info shadow-sm d-inline-flex align-items-center justify-content-center m-0" style="border-radius: 8px; width: 36px; height: 32px; padding: 0;" onclick="openCourseQAModal('${safeTopic}', '${safeLessonName}')" title="Trao đổi, giải đáp bài học này"><i class="fa-solid fa-comments fs-6"></i></button></td>`;
         }
 
         // Ghép vào các ô TD hiển thị chính
@@ -4259,12 +4260,16 @@ $('#latexViewerModal').on('hide.bs.modal', function (e) {
     $(document).off('click', 'a, button, .btn-course'); // Xóa sự kiện cũ để tránh trùng lặp
     $(document).on('click', 'a, button, .btn-course', function(e) {
         if (isEnforcedFullscreen && isTimerActive()) {
-            // BỔ SUNG #latexViewerModal VÀO VÙNG AN TOÀN ĐỂ KHÔNG HIỆN BẢNG ĐỎ KHI BẤM "CÔNG CỤ"
-            if ($(this).closest('#documentViewerModal, #latexViewerModal, #linkWarningModal, #closeWarningModal, #returnStudyModal, #sidebarCodeViewerModal').length > 0) return; 
+            // 1. Đưa cửa sổ Q&A (#courseQAModal) vào vùng an toàn để không bị chặn khi tương tác
+            if ($(this).closest('#documentViewerModal, #latexViewerModal, #linkWarningModal, #closeWarningModal, #returnStudyModal, #sidebarCodeViewerModal, #courseQAModal').length > 0) return; 
 
+            // 2. Cho phép các nút có ID bắt đầu bằng btnQA_ (Nút mở hỏi đáp) được hoạt động tự do
+            if ($(this).attr('id') && $(this).attr('id').startsWith('btnQA_')) return;
+
+            // Nếu không thuộc vùng an toàn -> Hiện bảng ĐỎ cảnh báo
             e.preventDefault();
             e.stopImmediatePropagation();
-            $('#returnStudyModal').modal('show'); // Hiện bảng ĐỎ
+            $('#returnStudyModal').modal('show'); 
             return false;
         }
     });
