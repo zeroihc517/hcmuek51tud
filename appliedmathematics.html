@@ -3722,6 +3722,9 @@
                                 <i class="fa-solid fa-sparkles"></i> Gemini
                             </a>
 <button type="button" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #ea580c; border: 1.5px solid #ea580c; border-radius: 6px; font-size: 12.5px;" onclick="toggleOneCompiler(this, true)"><i class="fa-solid fa-play"></i> Run Code</button>
+<button type="button" class="btn btn-sm d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="width: calc(50% - 4px); background-color: #ffffff; color: #0284c7; border: 1.5px solid #0284c7; border-radius: 6px; font-size: 12.5px;" onclick="let k = $(this).closest('#iframeSidebar').attr('data-key'); if(k) $('#btnQA_'+k).click();">
+        <i class="fa-solid fa-comments"></i> Q&A
+    </button>
                         </div>
 
                         <!-- Progress (Tiến độ) -->
@@ -4009,6 +4012,9 @@
                                 <i class="fa-solid fa-sparkles"></i> Gemini
                             </a>
 							<button type="button" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #ea580c; border: 1.5px solid #ea580c; border-radius: 6px; font-size: 12.5px;" onclick="toggleOneCompiler(this, true)"><i class="fa-solid fa-play"></i> Run Code</button>
+<button type="button" class="btn btn-sm d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="width: calc(50% - 4px); background-color: #ffffff; color: #0284c7; border: 1.5px solid #0284c7; border-radius: 6px; font-size: 12.5px;" onclick="let k = $(this).closest('#latexSidebar').attr('data-key'); if(k) $('#btnQA_'+k).click();">
+        <i class="fa-solid fa-comments"></i> Q&A
+    </button>
                         </div>
 
                         <div class="bg-white p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">
