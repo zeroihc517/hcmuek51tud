@@ -1855,7 +1855,7 @@ if (isPart || isChapter || isLesson) {
 
         let tdTraoDoi = '';
 
-        if (isPart || isChapter || isLesson || isMucTieu) {
+        if (isPart || isChapter || isLesson) {
             tdTraoDoi = ''; 
         } else {
             let safeLessonName = rawLessonNameQA.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, " ").replace(/\r/g, "");
