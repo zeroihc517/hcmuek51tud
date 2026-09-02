@@ -3391,13 +3391,38 @@ window.loadCourseQAList = function() {
                                                        .trim();
                         let questionFormatted = window.safeFormatTextQA(cleanQuestion);
 
+                        // --- BẮT ĐẦU XỬ LÝ AVATAR ---
+                        let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm flex-shrink-0" style="width: 32px; height: 32px; font-size: 14px;"><i class="fa-solid fa-user"></i></div>`;
+                        
+                        let userAvatar = "";
+                        let cleanRawMssv = rawMssv.replace(/\./g, ""); 
+                        
+                        // Nếu là chính tài khoản đang đăng nhập
+                        if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv) {
+                            userAvatar = activeUser.avatar || "";
+                        } 
+                        // Nếu là sinh viên khác (lấy từ dữ liệu map)
+                        else if (window.allUsersMap && typeof window.allUsersMap[cleanRawMssv] === 'object' && window.allUsersMap[cleanRawMssv].avatar) {
+                            userAvatar = window.allUsersMap[cleanRawMssv].avatar;
+                        }
+                        
+                        if (userAvatar && userAvatar.trim() !== '') {
+                            let cleanUrl = userAvatar.trim();
+                            if (cleanUrl.includes("drive.google.com/file/d/")) {
+                                let matchId = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                                if (matchId && matchId[1]) cleanUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w100`;
+                            } else if (cleanUrl.includes("googleusercontent.com")) {
+                                cleanUrl = cleanUrl.replace(/=w\d+|-h\d+|-p|-no|-k/g, '').replace(/=s\d+/g, '') + "=w100-h100-p";
+                            }
+                           avatarHtml = `<img src="${cleanUrl}" class="rounded-circle me-2 shadow-sm flex-shrink-0" style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid #0f4c81; user-select: none; -webkit-user-drag: none;" draggable="false" oncontextmenu="return false;">`;
+                        }
+                        // --- KẾT THÚC XỬ LÝ AVATAR ---
+
                         // Dựng giao diện Timeline tương tự mục Thông báo
                         html += `
                         <div class="mb-4" style="border-left: 3px solid #cbd5e1; padding-left: 15px; margin-left: 5px;">
                             <div class="d-flex align-items-center mb-2">
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 32px; height: 32px; font-size: 14px;">
-                                    <i class="fa-solid fa-user"></i>
-                                </div>
+                                ${avatarHtml}
                                 <div>
                                     <div class="fw-bold" style="color: #0f4c81; font-size: 14.5px;">SV: ${displayMssv}</div>
                                     <div class="text-muted" style="font-size: 12px;"><i class="fa-regular fa-clock me-1"></i>${time}</div>

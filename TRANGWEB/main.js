@@ -1160,24 +1160,52 @@ window.loadThongBaoComments = function(tbCode) {
                     let answer = row[3] || ''; 
                     let rowIndex = row[6];
                     
-                    // ============================================
-                    // GIAO DIỆN TIMELINE CHAT HIỆN ĐẠI (ĐÃ BỔ SUNG PHẢN HỒI)
-                    // ============================================
-                    html += `
-                    <div class="mb-4" style="border-left: 3px solid #cbd5e1; padding-left: 15px; margin-left: 5px;">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 32px; height: 32px; font-size: 14px;">
-                                <i class="fa-solid fa-user"></i>
-                            </div>
-                            <div>
-                                <div class="fw-bold" style="color: #0f4c81; font-size: 14.5px;">SV: ${displayMssv}</div>
-                                <div class="text-muted" style="font-size: 12px;"><i class="fa-regular fa-clock me-1"></i>${time}</div>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white p-3 rounded shadow-sm border border-primary-subtle" style="font-size: 15px; color: #334155; border-radius: 0 12px 12px 12px; font-weight: normal;">
-                            ${questionFormatted}
-                        </div>`;
+                    // Thay thế đoạn: let html += `<div class="mb-4"... <div class="bg-primary...` bằng khối sau:
+
+// --- BẮT ĐẦU XỬ LÝ AVATAR ---
+let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm flex-shrink-0" style="width: 32px; height: 32px; font-size: 14px;"><i class="fa-solid fa-user"></i></div>`;
+
+let userAvatar = "";
+// Chuẩn hóa xóa hết dấu chấm để so sánh cho chính xác tuyệt đối
+let cleanRawMssv = rawMssv.replace(/\./g, ""); 
+
+// Nếu là chính tài khoản đang đăng nhập
+if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv) {
+    userAvatar = activeUser.avatar || "";
+} 
+// Nếu là sinh viên khác (lấy từ dữ liệu map)
+else if (window.allUsersMap && typeof window.allUsersMap[cleanRawMssv] === 'object' && window.allUsersMap[cleanRawMssv].avatar) {
+    userAvatar = window.allUsersMap[cleanRawMssv].avatar;
+}
+
+if (userAvatar && userAvatar.trim() !== '') {
+    let cleanUrl = userAvatar.trim();
+    // Tự động tối ưu kích thước ảnh (Thumbnail) giúp load bình luận nhanh hơn
+    if (cleanUrl.includes("drive.google.com/file/d/")) {
+        let matchId = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (matchId && matchId[1]) cleanUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w100`;
+    } else if (cleanUrl.includes("googleusercontent.com")) {
+        cleanUrl = cleanUrl.replace(/=w\d+|-h\d+|-p|-no|-k/g, '').replace(/=s\d+/g, '') + "=w100-h100-p";
+    }
+    avatarHtml = `<img src="${cleanUrl}" class="rounded-circle me-2 shadow-sm flex-shrink-0" style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid #0f4c81; user-select: none; -webkit-user-drag: none;" draggable="false" oncontextmenu="return false;">`;
+}
+// --- KẾT THÚC XỬ LÝ AVATAR ---
+// ============================================
+// GIAO DIỆN TIMELINE CHAT HIỆN ĐẠI (ĐÃ BỔ SUNG AVATAR)
+// ============================================
+html += `
+<div class="mb-4" style="border-left: 3px solid #cbd5e1; padding-left: 15px; margin-left: 5px;">
+    <div class="d-flex align-items-center mb-2">
+        ${avatarHtml}
+        <div>
+            <div class="fw-bold" style="color: #0f4c81; font-size: 14.5px;">SV: ${displayMssv}</div>
+            <div class="text-muted" style="font-size: 12px;"><i class="fa-regular fa-clock me-1"></i>${time}</div>
+        </div>
+    </div>
+    
+    <div class="bg-white p-3 rounded shadow-sm border border-primary-subtle" style="font-size: 15px; color: #334155; border-radius: 0 12px 12px 12px; font-weight: normal;">
+        ${questionFormatted}
+    </div>`;
                                 
                     if (answer.trim() !== "") {
                         html += `<div class="mt-2 ms-4 ps-3" style="border-left: 2px dashed #93c5fd;">${parseThread(answer, rowIndex)}</div>`; 
