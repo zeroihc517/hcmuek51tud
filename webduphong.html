@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Học nhóm Năm 2 Khoa Toán</title>
+    <title>Học nhóm APMA Khoa Toán</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="TRANGWEB/styleweb.css" rel="stylesheet">
+    <link href="TRANGWEB/styleweb2.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
@@ -103,6 +103,10 @@
     <div class="text-muted small" id="sidebarUserMSSV" style="font-size: 12px; word-wrap: break-word;">MSSV</div>
 </div>
     </div>
+<div class="position-absolute" style="top: 18px; right: 15px; cursor: pointer; z-index: 10;" onclick="openPersonalNotifications()">
+        <i class="fa-solid fa-bell fs-5 text-secondary" id="bellIconUI"></i>
+        <span id="personalNotificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 9px; padding: 3px 5px;">0</span>
+    </div>
 
     <!-- KHUNG BẢNG NỔI (Dropdown Menu) -->
     <div class="dropdown-menu shadow-lg border-0 p-3" style="width: 260px; border-radius: 16px; margin-top: 10px; z-index: 1050;">
@@ -148,6 +152,7 @@
             		<button class="btn-course" id="btnNavTongHop" onclick="loadTongHopView()">
                 <i class="fa-solid fa-link"></i> Tổng hợp Link
             </button>
+
             <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
                 <i class="fa-solid fa-calendar"></i> Lịch học
             </button>
@@ -156,6 +161,9 @@
                 <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
                     <i class="fa-solid fa-clipboard-check"></i> Kết quả học tập
                 </button>
+<button class="btn-course" id="btnNavRenLuyen" onclick="loadRenLuyenView()">
+    <i class="fa-solid fa-medal"></i> Rèn luyện
+</button>
             </div>
             
 
@@ -183,8 +191,1452 @@
         </aside>
 
         <main class="main-content">
+           <!-- KHU VỰC ĐÁNH GIÁ ĐIỂM RÈN LUYỆN -->
+<div id="renLuyenSection" class="d-none">
+
+    <header class="top-header d-flex justify-content-between align-items-center">
+        <div class="page-title"><i class="fa-solid fa-medal"></i> Mô phỏng web Đánh giá điểm rèn luyện</div>
+        
+        <!-- Bọc 2 nút vào thẻ div để nằm ngang hàng bên phải -->
+        <div class="d-flex align-items-center gap-2">
+            <!-- Nút Làm mới -->
+            <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
+                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 8px; padding: 6px 18px; font-size: 14px;" 
+                    onclick="fetchRenLuyenData()">
+                <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
+            </button>
             
-<!-- KHU VỰC TỔNG HỢP LINK -->
+            <!-- Nút Lưu hiện tại -->
+            <button class="btn text-white fw-bold shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" onclick="submitRenLuyen()" id="btnSaveRenLuyen">
+                <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Phiếu Đánh Giá
+            </button>
+        </div>
+    </header>
+<!-- KHU VỰC BỘ LỌC NĂM HỌC VÀ HỌC KỲ CHO RÈN LUYỆN -->
+<div class="nav-week-container bg-white p-3 rounded border shadow-sm mb-4" style="height: auto;">
+    <div class="row g-3 w-100 align-items-center m-0">
+        <div class="col-md-6 ps-0">
+            <div class="select-floating-box">
+                <label>Năm học</label>
+                <select class="form-select" id="rlNamHocSelect" onchange="onRlFilterChange()">
+                    <!-- Bạn có thể thêm bằng JS hoặc để cứng ở đây -->
+                    <option value="2026-2027" selected>2026-2027</option>
+                    <option value="2027-2028">2027-2028</option>
+                    <option value="2028-2029">2028-2029</option>
+		    <option value="2029-2030">2029-2030</option>
+		    <option value="2030-2031">2030-2031</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-md-6 pe-0">
+            <div class="select-floating-box">
+                <label>Học kỳ</label>
+                <select class="form-select" id="rlHocKySelect" onchange="onRlFilterChange()">
+                    <option value="1" selected>Học kỳ 1</option>
+                    <option value="2">Học kỳ 2</option>
+                    <option value="3">Học kỳ hè</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="table-responsive shadow-sm rounded border bg-white mb-5">
+        <table class="table table-bordered align-middle m-0" style="font-size: 14.5px;">
+            <thead class="text-center text-white" style="background-color: #0f4c81;">
+                <tr>
+                    <th style="width: 5%;">STT</th>
+                    <th style="width: 45%;">Nội dung đánh giá</th>
+                    <th style="width: 15%;">Điểm quy định</th>
+                    <th style="width: 15%;">Điểm đạt được</th>
+                    <th style="width: 20%;">Minh chứng</th>
+                </tr>
+            </thead>
+           <tbody id="rlTableBody">
+    <!-- =============== MỤC I (CAM) - CẤP 1 =============== -->
+    <tr class="rl-level-1" style="background-color: #f97316; color: white;" data-cat="1" data-max="20">
+        <td class="text-center fw-bold">I</td>
+        <td class="fw-bold">ĐÁNH GIÁ VỀ Ý THỨC THAM GIA HỌC TẬP</td>
+        <td class="text-center fw-bold">Tối đa 20 điểm</td>
+        <td class="text-center fs-5 fw-bold rl-cat-total" id="cat_total_1">0</td>
+        <td></td>
+    </tr>
+    
+    <!-- HỒNG 1.1 (TIỂU MỤC) - CẤP 2 (Phải mang data-parent-cat="1" để nhận diện thuộc Mục I cam) -->
+
+
+    <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="1" data-max="3" id="row_subcat_1_1">
+        <td></td>
+        <td class="fw-bold">Tinh thần và thái độ trong học tập (3 điểm)</td>
+        <td class="text-center fw-bold">3 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_1_1">0</td>
+        <td></td>
+    </tr>
+<!-- Mục 1 -->
+        <tr class="rl-level-3 bg-white" id="row_crit_1_1_c">
+        <td></td>
+        <td class="ps-4 text-dark">Vào lớp học đúng giờ, tham gia các giờ học đầy đủ</td>
+        <td class="text-center">1.5 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_1_1_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="1_1" data-score="1.5" onchange="calcRenLuyen()">
+        </td>
+
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_1_c">
+        <td></td>
+        <td class="ps-4 text-dark">Chuẩn bị bài tốt, ý thức trong giờ học nghiêm túc</td>
+        <td class="text-center">1.5 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_1_1_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="1_1" data-score="1.5" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="1" data-max="20" id="row_subcat_1_2">
+        <td></td>
+        <td class="fw-bold">Tham gia các hoạt động học thuật, hoạt động nghiên cứu khoa học (NCKH) (20 điểm)</td>
+        <td class="text-center fw-bold">20 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_1_2">0</td>
+        <td></td>
+    </tr>
+    
+    <!-- TRẮNG 1.2.a (Hoạt động học thuật) -->
+    <tr class="rl-level-3 bg-white" id="row_crit_1_2_a">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia các hoạt động học thuật: Hội thảo, tọa đàm, lớp hướng dẫn NCKH, hoạt động khảo sát của Trường…</td>
+        <td class="text-center">3 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_2_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_2', '1_2_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <!-- Khớp với ID 1_2_a và parent 1_2 -->
+            <input type="hidden" id="data_1_2_a" class="rl-crit-data" data-parent-subcat="1_2" data-max="20" value="[]">
+        </td>
+    </tr>
+
+    <!-- TRẮNG 1.2.b (Hoạt động NCKH) -->
+    <tr class="rl-level-3 bg-white" id="row_crit_1_2_b">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia hoạt động NCKH: Có bài báo khoa học, tham luận được đăng tải trên các tạp chí, tạp san uy tín được công nhận; thực hiện đề tài NCKH, bài viết, bài tham luận tại các hội thảo khoa học…</td>
+        <td class="text-center">5 điểm/nghiên cứu</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_2_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_2', '1_2_b', 5)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <!-- Khớp với ID 1_2_b và parent 1_2 -->
+            <input type="hidden" id="data_1_2_b" class="rl-crit-data" data-parent-subcat="1_2" data-max="20" value="[]"> 
+        </td>
+    </tr>
+
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="1" data-max="20" id="row_subcat_1_3">
+        <td></td>
+        <td class="fw-bold">Tham gia các kỳ thi, cuộc thi (20 điểm)</td>
+        <td class="text-center fw-bold">20 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_1_3">0</td>
+        <td></td>
+    </tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_1_3_a">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia cổ vũ các kỳ thi, cuộc thi học thuật</td>
+        <td class="text-center">1 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_3_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_3', '1_3_a', 1)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+   
+            <input type="hidden" id="data_1_3_a" class="rl-crit-data" data-parent-subcat="1_3" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_1_3_b">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia các cuộc thi học thuật cấp Khoa (tương đương)</td>
+        <td class="text-center">3 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_3_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_3', '1_3_b', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+   
+            <input type="hidden" id="data_1_3_b" class="rl-crit-data" data-parent-subcat="1_3" data-max="20" value="[]">
+        </td>
+    </tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_1_3_c">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia các cuộc thi học thuật cấp Trường (tương đương)</td>
+        <td class="text-center">4 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_3_c">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_3', '1_3_c', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+   
+            <input type="hidden" id="data_1_3_c" class="rl-crit-data" data-parent-subcat="1_3" data-max="20" value="[]">
+        </td>
+    </tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_1_3_d">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia các cuộc thi học thuật cấp Tỉnh/Thành (tương đương) trở lên</td>
+        <td class="text-center">5 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_3_d">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_3', '1_3_d', 5)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+   
+            <input type="hidden" id="data_1_3_d" class="rl-crit-data" data-parent-subcat="1_3" data-max="20" value="[]">
+        </td>
+    </tr>
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="1" data-max="10" id="row_subcat_1_4">
+        <td></td>
+        <td class="fw-bold">Kết quả học tập (10 điểm)</td>
+        <td class="text-center fw-bold">10 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_1_4">0</td>
+        <td></td>
+    </tr>
+ <!-- TRẮNG d) -->
+    <tr class="rl-level-3 bg-white" id="row_crit_1_4_a">
+        <td></td>
+        <td class="ps-4 text-dark">Kết quả học tập của học kỳ đạt: (10 điểm)</td>
+        <td class="text-center">10 điểm</td>
+       <td class="text-center">
+    <select id="select_1_4_a" class="form-select form-select-sm mx-auto rl-select-input fw-bold text-success shadow-sm" style="width: 140px;" data-parent-subcat="1_4" onchange="calcRenLuyen()">
+        <option value="0" selected>Kém: 0đ</option>
+        <option value="3">Yếu: 3đ</option>
+        <option value="5">Trung bình: 5đ</option>
+        <option value="6">Khá: 6đ</option>
+        <option value="8">Giỏi: 8đ</option>
+        <option value="10">Xuất sắc: 10đ</option>
+    </select>
+</td>
+ <td class="text-center">
+        <!-- Nút tải minh chứng, không can thiệp vào logic tính điểm -->
+        <button class="btn btn-sm btn-outline-primary fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <!-- Nơi hiển thị danh sách các link minh chứng đã tải -->
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <!-- Input ẩn chứa dữ liệu minh chứng -->
+        <input type="hidden" id="proof_1_4_a" class="rl-proof-data" value="[]">
+    </td>
+    </tr>
+
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="1" data-max="3" id="row_subcat_1_6">
+        <td></td>
+        <td class="fw-bold">Tinh thần vượt khó, phấn đấu vươn lên trong học tập (3 điểm)</td>
+        <td class="text-center fw-bold">3 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_1_6">0</td>
+        <td></td>
+    </tr>
+
+    <tr class="rl-level-3 bg-white" id="row_crit_1_6_a">
+        <td></td>
+        <td class="ps-4 text-dark"></td>
+        <td class="text-center">3 điểm</td>
+       <td class="text-center">
+               <select id="select_1_6_a" class="form-select form-select-sm mx-auto rl-select-input fw-bold text-success shadow-sm" style="width: 120px;" data-parent-subcat="1_6" onchange="calcRenLuyen()">
+            <option value="0" selected>0 điểm</option>
+            <option value="1">1 điểm</option>
+            <option value="2">2 điểm</option>
+            <option value="3">3 điểm</option>
+        </select>
+    </td>
+    </tr>
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="1" data-max="20" id="row_subcat_1_5">
+        <td></td>
+        <td class="fw-bold">Khen thưởng – kỷ luật (20 điểm)</td>
+        <td class="text-center fw-bold">20 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_1_5">0</td>
+        <td></td>
+    </tr>
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Khen thưởng sinh viên đạt thành tích học thuật (20 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_1_5_a">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp Khoa (tương đương)</td>
+        <td class="text-center">3 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_5_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_5', '1_5_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+   
+            <input type="hidden" id="data_1_5_a" class="rl-crit-data" data-parent-subcat="1_5" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_1_5_b">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp Trường (tương đương)</td>
+        <td class="text-center">4 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_5_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_5', '1_5_b', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+   
+            <input type="hidden" id="data_1_5_b" class="rl-crit-data" data-parent-subcat="1_5" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_1_5_c">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp Tỉnh/Thành phố (tương đương)</td>
+        <td class="text-center">5 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_5_c">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_5', '1_5_c', 5)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+   
+            <input type="hidden" id="data_1_5_c" class="rl-crit-data" data-parent-subcat="1_5" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_1_5_d">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp Trung ương</td>
+        <td class="text-center">6 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_1_5_d">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('1_5', '1_5_d', 6)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+   
+            <input type="hidden" id="data_1_5_d" class="rl-crit-data" data-parent-subcat="1_5" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Kỷ luật: (-20 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_e">
+        <td></td>
+        <td class="ps-4 text-dark">+ Không thực hiện các hoạt động hoặc không thực hiện tròn vẹn các bài khảo sát</td>
+        <td class="text-center">-3 điểm/lần</td>
+        <td class="text-center">
+            <input type="number" id="direct_1_5_e" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="3" value="0" data-parent-subcat="1_5" data-max="20" oninput="if(this.value < -20) this.value = -20; calcRenLuyen()">
+        </td>
+    </tr>
+<tr><td></td><td><b style="color: #0284c7;"><i>  + Vi phạm quy định các kỳ thi và bị lập biên bản hình thức kỷ luật:</i></b></td><td></td><td></td> </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_f">
+        <td></td>
+        <td class="ps-4 text-dark">Khiển trách (lần đầu)</td>
+        <td class="text-center">-2 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_1_5_f" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="1_5" data-score="-2" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_g">
+        <td></td>
+        <td class="ps-4 text-dark">Khiển trách (lần 2 trở lên)</td>
+        <td class="text-center">-4 điểm/lần</td>
+        <td class="text-center">
+            <input type="number" id="direct_1_5_g" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="4" value="0" data-parent-subcat="1_5" data-max="20" oninput="if(this.value < -20) this.value = -20; calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_h">
+        <td></td>
+        <td class="ps-4 text-dark">Cảnh cáo (lần đầu)</td>
+        <td class="text-center">-3 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_1_5_h" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="1_5" data-score="-3" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_i">
+        <td></td>
+        <td class="ps-4 text-dark">Cảnh cáo (lần 2 trở lên)</td>
+        <td class="text-center">-6 điểm/lần</td>
+        <td class="text-center">
+            <input type="number" id="direct_1_5_i" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="6" value="0" data-parent-subcat="1_5" data-max="20" oninput="if(this.value < -20) this.value = -20; calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_j">
+        <td></td>
+        <td class="ps-4 text-dark">Đình chỉ thi (lần đầu)</td>
+        <td class="text-center">-4 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_1_5_j" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="1_5" data-score="-4" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_1_5_k">
+        <td></td>
+        <td class="ps-4 text-dark">Đình chỉ thi (lần 2 trở lên)</td>
+        <td class="text-center">-8 điểm/lần</td>
+        <td class="text-center">
+            <input type="number" id="direct_1_5_k" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="8" value="0" data-parent-subcat="1_5" data-max="20" oninput="if(this.value < -20) this.value = -20; calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-1" style="background-color: #f97316; color: white;" data-cat="2" data-max="25">
+        <td class="text-center fw-bold">II</td>
+        <td class="fw-bold">ĐÁNH GIÁ VỀ Ý THỨC CHẤP HÀNH NỘI QUY, QUY CHẾ, QUY ĐỊNH TRONG TRƯỜNG</td>
+        <td class="text-center fw-bold">Tối đa 25 điểm</td>
+        <td class="text-center fs-5 fw-bold rl-cat-total" id="cat_total_2">0</td>
+        <td></td>
+    </tr>
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="2" data-max="25" id="row_subcat_2_1">
+        <td></td>
+        <td class="fw-bold">Ý thức chấp hành các văn bản chỉ đạo của ngành, của cơ quan chỉ đạo cấp trên, các nội quy, quy chế và các quy định trong Trường (25 điểm)</td>
+        <td class="text-center fw-bold">25 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_2_1">0</td>
+        <td></td>
+    </tr>
+<!-- Mục 1 -->
+        <tr class="rl-level-3 bg-white" id="row_crit_2_1_a">
+        <td></td>
+        <td class="ps-4 text-dark">Không vi phạm quy chế, quy định</td>
+        <td class="text-center">2 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_2_1_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_1" data-score="2" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+        <tr class="rl-level-3 bg-white" id="row_crit_2_1_b">
+        <td></td>
+        <td class="ps-4 text-dark">Vi phạm nội quy học đường (thời gian học tập, không mang thẻ sinh viên,…)</td>
+        <td class="text-center">-3 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_2_1_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_1" data-score="-3" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_2_1_c">
+        <td></td>
+        <td class="ps-4 text-dark">Không thực hiện đúng quy định thời hạn các loại hồ sơ, giấy tờ của Trường</td>
+        <td class="text-center">-3 điểm/lần</td>
+        <td class="text-center">
+            <input type="number" id="direct_2_1_c" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="3" value="0" data-parent-subcat="2_1" data-max="20" oninput="if(this.value < -25) this.value = -25; calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_2_1_d">
+    <td></td>
+    <td class="ps-4 text-dark">Chấp hành tốt nội quy, quy định của Ký túc xá</td>
+    <td class="text-center">3 điểm</td>
+    <td class="text-center">
+        <!-- Sửa data-parent-subcat thành "2_1" -->
+        <input type="radio" name="KTXNT_2_1" id="check_2_1_d" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_1" data-score="3" onchange="calcRenLuyen()">
+    </td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_2_1_l">
+    <td></td>
+    <td class="ps-4 text-dark">Chấp hành tốt nội quy, quy định của Khu ngoại trú</td>
+    <td class="text-center">3 điểm</td>
+    <td class="text-center">
+        <!-- Sửa data-parent-subcat thành "2_1" -->
+        <input type="radio" name="KTXNT_2_1" id="check_2_1_l" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_1" data-score="3" onchange="calcRenLuyen()">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_2_1_e">
+    <td></td>
+    <td class="ps-4 text-dark">Tham gia bảo hiểm y tế đúng hạn theo quy định</td>
+    <td class="text-center">2 điểm</td>
+    <td class="text-center">
+        <input type="checkbox" id="check_2_1_e" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_1" data-score="2" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <!-- Nút tải minh chứng, không can thiệp vào logic tính điểm -->
+        <button class="btn btn-sm btn-outline-primary fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <!-- Nơi hiển thị danh sách các link minh chứng đã tải -->
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <!-- Input ẩn chứa dữ liệu minh chứng -->
+        <input type="hidden" id="proof_2_1_e" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+        <tr class="rl-level-3 bg-white" id="row_crit_2_1_f">
+        <td></td>
+        <td class="ps-4 text-dark">Không tham gia BHYT theo quy định</td>
+        <td class="text-center">-5 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_2_1_f" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_1" data-score="-5" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+        <tr class="rl-level-3 bg-white" id="row_crit_2_1_g">
+        <td></td>
+        <td class="ps-4 text-dark">Đóng lệ phí, học phí đúng thời gian quy định</td>
+        <td class="text-center">3 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_2_1_g" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_1" data-score="3" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+  <tr class="table-success text-success">
+    <td></td>
+   <td><b>- Đăng ký tham gia hoạt động mà không tham gia (-25 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_2_1_h">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp khoa</td>
+        <td class="text-center">-3 điểm/lần</td>
+        <td class="text-center">
+            <input type="number" id="direct_2_1_h" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="3" value="0" data-parent-subcat="2_1" data-max="20" oninput="if(this.value < -25) this.value = -25; calcRenLuyen()">
+        </td>
+    </tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_2_1_i">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp trường</td>
+        <td class="text-center">-4 điểm/lần</td>
+        <td class="text-center">
+            <input type="number" id="direct_2_1_i" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="4" value="0" data-parent-subcat="2_1" data-max="20" oninput="if(this.value < -25) this.value = -25; calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="table-success text-success">
+    <td></td>
+   <td><b>Vi phạm Quy chế, quy định về công tác sinh viên đến mức phải chịu hình thức kỷ luật (có Quyết định của Hội đồng thi đua, khen thưởng, kỷ luật): (-100 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_2_1_j">
+        <td></td>
+        <td class="ps-4 text-dark">+ Khiển trách</td>
+        <td class="text-center">-5 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_2_1_j" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_1" data-score="-5" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_2_1_k">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cảnh cáo</td>
+        <td class="text-center">-10 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_2_1_k" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_1" data-score="-10" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="2" data-max="10" id="row_subcat_2_2">
+    <td></td>
+    <td class="fw-bold">Tham gia Tuần Sinh hoạt công dân – Sinh viên (10 điểm)</td>
+    <td class="text-center fw-bold">10 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_2_2">0</td>
+    <td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_2_2_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Đạt</td>
+    <td class="text-center">10 điểm</td>
+    <td class="text-center">
+        <!-- Đổi thành radio và thêm name="shcd_2_2" -->
+        <input type="radio" name="shcd_2_2" id="check_2_2_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_2" data-score="10" onchange="calcRenLuyen()">
+    </td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_2_2_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không đạt</td>
+    <td class="text-center">0 điểm</td>
+    <td class="text-center">
+        <!-- Đổi thành radio và thêm name="shcd_2_2" -->
+        <input type="radio" name="shcd_2_2" id="check_2_2_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_2" data-score="0" onchange="calcRenLuyen()">
+    </td>
+</tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="2" data-max="2" id="row_subcat_2_3">
+    <td></td>
+    <td class="fw-bold">Đánh giá kết quả rèn luyện sinh viên (2 điểm)</td>
+    <td class="text-center fw-bold">2 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_2_3">0</td>
+    <td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_2_3_a">
+        <td></td>
+        <td class="ps-4 text-dark">Đánh giá đúng tiến độ, thời gian quy định</td>
+        <td class="text-center">2 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_2_3_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_3" data-score="2" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_2_3_b">
+        <td></td>
+        <td class="ps-4 text-dark">	Đánh giá chậm tiến độ, sai quy định, không trung thực</td>
+        <td class="text-center">-3 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_2_3_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="2_3" data-score="-3" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+<!-- Hàng tiêu đề tiểu mục (Màu hồng) -->
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="2" data-max="5" id="row_subcat_2_4">
+    <td></td>
+    <td class="fw-bold">Tham gia sinh hoạt lớp định kỳ (5 điểm)</td>
+    <td class="text-center fw-bold">5 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_2_4">0</td>
+    <td></td>
+</tr>
+
+<!-- Hàng con chứa ô chọn điểm (Màu trắng) -->
+<tr class="rl-level-3 bg-white" id="row_crit_2_4_a">
+    <td></td>
+    <td class="ps-4 text-dark"></td>
+    <td class="text-center">5 điểm</td>
+    <td class="text-center">
+        <!-- Ô chọn điểm, liên kết với data-parent-subcat="2_4" để tính tổng -->
+        <select id="select_2_4_a" class="form-select form-select-sm mx-auto rl-select-input fw-bold text-success shadow-sm" style="width: 120px;" data-parent-subcat="2_4" onchange="calcRenLuyen()">
+            <option value="0" selected>0 điểm</option>
+            <option value="1">1 điểm</option>
+            <option value="2">2 điểm</option>
+            <option value="3">3 điểm</option>
+            <option value="4">4 điểm</option>
+            <option value="5">5 điểm</option>
+        </select>
+    </td>
+    <td></td>
+</tr>
+ <tr class="rl-level-1" style="background-color: #f97316; color: white;" data-cat="3" data-max="20">
+        <td class="text-center fw-bold">III</td>
+        <td class="fw-bold">ĐÁNH GIÁ VỀ Ý THỨC THAM GIA CÁC HOẠT ĐỘNG CHÍNH TRỊ, XÃ HỘI, VĂN HÓA, VĂN NGHỆ, THỂ THAO, PHÒNG CHỐNG TỘI PHẠM VÀ CÁC TỆ NẠN XÃ HỘI</td>
+        <td class="text-center fw-bold">Tối đa 20 điểm</td>
+        <td class="text-center fs-5 fw-bold rl-cat-total" id="cat_total_3">0</td>
+        <td></td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="3" data-max="20" id="row_subcat_3_1">
+    <td></td>
+    <td class="fw-bold">Tham gia các hoạt động rèn luyện về chính trị, xã hội, văn hóa, văn nghệ, thể thao (20 điểm)</td>
+    <td class="text-center fw-bold">20 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_3_1">0</td>
+    <td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_a">
+        <td></td>
+        <td class="ps-4 text-dark">Thành viên các CLB</td>
+        <td class="text-center">3 điểm/CLB</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_1_a" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_b">
+        <td></td>
+        <td class="ps-4 text-dark">Tham gia cổ vũ các hoạt động</td>
+        <td class="text-center">2 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_b', 2)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_1_b" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="table-success text-success">
+    <td></td>
+   <td><b>- Tham gia các hoạt động về chính trị, xã hội: (20 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_c">
+        <td></td>
+        <td class="ps-4 text-dark">+ Tham gia các hoạt động, các buổi hội nghị, đại hội do Trường, tổ chức Đoàn – Hội tổ chức, triệu tập (Đại hội, Hội nghị, Hội nghị Lớp trưởng, tọa đàm về tình hình thời sự, chính trị…)</td>
+        <td class="text-center">4 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_c">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_c', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+   
+            <input type="hidden" id="data_3_1_c" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_d">
+        <td></td>
+        <td class="ps-4 text-dark">Không tham gia (không có lý do chính đáng khi được triệu tập)</td>
+        <td class="text-center">-4 điểm/hoạt động</td>
+        <td class="text-center">
+            <input type="number" id="direct_3_1_d" class="form-control form-control-sm mx-auto rl-direct-input fw-bold text-success text-center shadow-sm" style="width: 70px;" max="0" step="4" value="0" data-parent-subcat="3_1" data-max="20" oninput="if(this.value < -20) this.value = -20; calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="table-success text-success">
+    <td></td>
+   <td><b>- Tham gia đầy đủ và nghiêm túc các hoạt động văn hóa, văn nghệ, thể dục thể thao: (20 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_e">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp lớp (tương đương)</td>
+        <td class="text-center">1 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_e">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_e', 1)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_1_e" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_f">
+        <td></td>
+        <td class="ps-4 text-dark">+ Câp khoa (tương đương)</td>
+        <td class="text-center">2 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_f">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_f', 2)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_1_f" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_g">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp Trường (tương đương)</td>
+        <td class="text-center">3 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_g">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_g', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_1_g" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_1_h">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp Tỉnh/Thành (tương đương) trở lên</td>
+        <td class="text-center">4 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_1_h">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_1', '3_1_h', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_1_h" class="rl-crit-data" data-parent-subcat="3_1" data-max="20" value="[]">
+        </td>
+    </tr>
+<!-- Hàng tiêu đề tiểu mục (Màu hồng) -->
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="3" data-max="20" id="row_subcat_3_2">
+    <td></td>
+    <td class="fw-bold">Tham gia các hoạt động hiến máu, công ích hoặc các hoạt động an sinh xã hội (20 điểm)</td>
+    <td class="text-center fw-bold">20 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_3_2">0</td>
+    <td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_2_a">
+        <td></td>
+        <td class="ps-4 text-dark"></td>
+        <td class="text-center">3 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_2_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_2', '3_2_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_2_a" class="rl-crit-data" data-parent-subcat="3_2" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="3" data-max="20" id="row_subcat_3_3">
+    <td></td>
+    <td class="fw-bold">Tham gia tuyên truyền phòng chống tội phạm và tệ nạn xã hội (20 điểm)</td>
+    <td class="text-center fw-bold">20 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_3_3">0</td>
+    <td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_3_a">
+        <td></td>
+        <td class="ps-4 text-dark"></td>
+        <td class="text-center">3 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_3_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_3', '3_3_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_3_a" class="rl-crit-data" data-parent-subcat="3_3" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="3" data-max="20" id="row_subcat_3_4">
+    <td></td>
+    <td class="fw-bold">Sinh viên được kết nạp Đoàn Thanh niên Cộng sản Hồ Chí Minh (2 điểm)</td>
+    <td class="text-center fw-bold">2 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_3_4">0</td>
+    <td></td>
+</tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_3_4_a">
+        <td></td>
+        <td class="ps-4 text-dark"></td>
+        <td class="text-center">2 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_3_4_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="3_4" data-score="2" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="3" data-max="20" id="row_subcat_3_5">
+    <td></td>
+    <td class="fw-bold">Sinh viên được kết nạp vào Đảng Cộng sản Việt Nam (3 điểm)</td>
+    <td class="text-center fw-bold">3 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_3_5">0</td>
+    <td></td>
+</tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_3_5_a">
+        <td></td>
+        <td class="ps-4 text-dark"></td>
+        <td class="text-center">3 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_3_5_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="3_5" data-score="3" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="3" data-max="20" id="row_subcat_3_6">
+    <td></td>
+    <td class="fw-bold">Khen thưởng sinh viên đạt thành tích hoạt động chính trị, xã hội, văn hóa, văn nghệ, thể thao, phòng chống tội phạm và các tệ nạn xã hội. (20 điểm)</td>
+    <td class="text-center fw-bold">20 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_3_6">0</td>
+    <td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_6_a">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp khoa (tương đương)</td>
+        <td class="text-center">3 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_6_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_6', '3_6_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_6_a" class="rl-crit-data" data-parent-subcat="3_6" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_6_b">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Trường (tương đương) trở lên</td>
+        <td class="text-center">4 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_6_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_6', '3_6_b', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_6_b" class="rl-crit-data" data-parent-subcat="3_6" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_6_c">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Tỉnh/Thành phố (tương đương)</td>
+        <td class="text-center">5 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_6_c">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_6', '3_6_c', 5)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_6_c" class="rl-crit-data" data-parent-subcat="3_6" data-max="20" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_3_6_d">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Trung ương</td>
+        <td class="text-center">6 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_3_6_d">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('3_6', '3_6_d', 6)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_3_6_d" class="rl-crit-data" data-parent-subcat="3_6" data-max="20" value="[]">
+        </td>
+    </tr>
+
+ <tr class="rl-level-1" style="background-color: #f97316; color: white;" data-cat="4" data-max="25">
+        <td class="text-center fw-bold">IV</td>
+        <td class="fw-bold">ĐÁNH GIÁ VỀ Ý THỨC CÔNG DÂN TRONG QUAN HỆ CỘNG ĐỒNG</td>
+        <td class="text-center fw-bold">Tối đa 25 điểm</td>
+        <td class="text-center fs-5 fw-bold rl-cat-total" id="cat_total_4">0</td>
+        <td></td>
+    </tr>
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="4" data-max="5" id="row_subcat_4_1">
+        <td></td>
+        <td class="fw-bold">Ý thức chấp hành và tham gia tuyên truyền các chủ trương của Đảng, chính sách pháp luật của Nhà nước trong cộng đồng (5 điểm)</td>
+        <td class="text-center fw-bold">5 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_4_1">0</td>
+        <td></td>
+    </tr>
+        <tr class="rl-level-3 bg-white" id="row_crit_4_1_a">
+        <td></td>
+        <td class="ps-4 text-dark">Tích cực tìm hiểu và chấp hành tốt chủ trương, đường lối của Đảng, chính sách, pháp luật của Nhà nước</td>
+        <td class="text-center">2.5 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_4_1_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="4_1" data-score="2.5" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+        <tr class="rl-level-3 bg-white" id="row_crit_4_1_b">
+        <td></td>
+        <td class="ps-4 text-dark">Tích cực tham gia hưởng ứng các buổi học tập, triển khai, tuyên truyền các chủ trương, đường lối của Đảng, chính sách, pháp luật của Nhà nước</td>
+        <td class="text-center">2.5 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_4_1_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="4_1" data-score="2.5" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="4" data-max="25" id="row_subcat_4_2">
+        <td></td>
+        <td class="fw-bold">Tham gia các hoạt động tình nguyện vì cộng đồng (25 điểm)</td>
+        <td class="text-center fw-bold">25 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_4_2">0</td>
+        <td></td>
+    </tr>
+<tr class="table-success text-success">
+    <td></td>
+   <td><b>Có ý thức và tham gia các hoạt động tình nguyện vì cộng đồng (25 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_2_a">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp lớp (tương đương)</td>
+        <td class="text-center">2 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_2_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_2', '4_2_a', 2)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_2_a" class="rl-crit-data" data-parent-subcat="4_2" data-max="25" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_2_b">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp khoa (tương đương)</td>
+        <td class="text-center">3 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_2_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_2', '4_2_b', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_2_b" class="rl-crit-data" data-parent-subcat="4_2" data-max="25" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_2_c">
+        <td></td>
+        <td class="ps-4 text-dark">+ Cấp Trường (tương đương) trở lên</td>
+        <td class="text-center">4 điểm/hoạt động</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_2_c">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_2', '4_2_c', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_2_c" class="rl-crit-data" data-parent-subcat="4_2" data-max="25" value="[]">
+        </td>
+    </tr>
+ <tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="4" data-max="25" id="row_subcat_4_3">
+        <td></td>
+        <td class="fw-bold">Khen thưởng sinh viên tham gia các hoạt động vì cộng đồng có thành tích được ghi nhận, biểu dương, khen thưởng (25 điểm)</td>
+        <td class="text-center fw-bold">25 điểm</td>
+        <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_4_3">0</td>
+        <td></td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_3_a">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp khoa (tương đương)</td>
+        <td class="text-center">3 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_3_a">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_3', '4_3_a', 3)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_3_a" class="rl-crit-data" data-parent-subcat="4_3" data-max="25" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_3_b">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Trường (tương đương) trở lên</td>
+        <td class="text-center">4 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_3_b">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_3', '4_3_b', 4)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_3_b" class="rl-crit-data" data-parent-subcat="4_3" data-max="25" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_3_c">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Tỉnh/Thành phố (tương đương)</td>
+        <td class="text-center">5 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_3_c">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_3', '4_3_c', 5)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_3_c" class="rl-crit-data" data-parent-subcat="4_3" data-max="25" value="[]">
+        </td>
+    </tr>
+<tr class="rl-level-3 bg-white" id="row_crit_4_3_d">
+        <td></td>
+        <td class="ps-4 text-dark">Cấp Trung ương</td>
+        <td class="text-center">6 điểm/thành tích</td>
+        <td class="text-center fw-bold text-success rl-crit-total" id="crit_total_4_3_d">0</td>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openActivityModal('4_3', '4_3_d', 6)">
+                <i class="fa-solid fa-plus"></i> Thêm Hoạt động
+            </button>
+            <input type="hidden" id="data_4_3_d" class="rl-crit-data" data-parent-subcat="4_3" data-max="25" value="[]">
+        </td>
+    </tr>
+
+ <tr class="rl-level-1" style="background-color: #f97316; color: white;" data-cat="5" data-max="10">
+        <td class="text-center fw-bold">V</td>
+        <td class="fw-bold">ĐÁNH GIÁ VỀ Ý THỨC VÀ KẾT QUẢ THAM GIA CÔNG TÁC PHỤ TRÁCH LỚP, CÁC ĐOÀN THỂ, TỔ CHỨC TRONG TRƯỜNG; ĐẠT THÀNH TÍCH XUẤT SẮC TRONG HỌC TẬP, RÈN LUYỆN</td>
+        <td class="text-center fw-bold">Tối đa 10 điểm</td>
+        <td class="text-center fs-5 fw-bold rl-cat-total" id="cat_total_5">0</td>
+        <td></td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="5" data-max="3" id="row_subcat_5_1">
+    <td></td>
+    <td class="fw-bold">Hỗ trợ và tham gia tích cực vào các hoạt động chung của lớp, tập thể, của Trường (3 điểm)</td>
+    <td class="text-center fw-bold">3 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_5_1">0</td>
+    <td></td>
+</tr>
+    <tr class="rl-level-3 bg-white" id="row_crit_5_1_a">
+        <td></td>
+        <td class="ps-4 text-dark"></td>
+        <td class="text-center">3 điểm</td>
+        <td class="text-center">
+            <input type="checkbox" id="check_5_1_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_1" data-score="3" onchange="calcRenLuyen()">
+        </td>
+    </tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="5" data-max="10" id="row_subcat_5_2">  
+    <td></td>
+    <td class="fw-bold">Đánh giá mức độ hoàn thành nhiệm vụ của sinh viên giữ một trong các chức vụ sau (đối với sinh viên đảm nhiệm nhiều chức vụ thì chọn chức vụ cao nhất) (10 điểm)</td>
+    <td class="text-center fw-bold">10 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_5_2">0</td>
+    <td></td>
+</tr>
+<tr class="table-success text-success">
+    <td></td>
+   <td><b>- Ban cán sự lớp; Ban Chấp hành (BCH) chi đoàn – chi hội; ủy viên BCH Đoàn khoa - Liên Chi hội Sinh viên khoa; Ban chủ nhiệm các CLB-Đ-N; thành viên Ban tự quản KTX (3 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_1_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành Xuất sắc nhiệm vụ</td>
+    <td class="text-center">3 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="bcs_5_2" id="check_5_2_1_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="3" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_1_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành Tốt nhiệm vụ</td>
+    <td class="text-center">2 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="bcs_5_2" id="check_5_2_1_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="2" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_1_c">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành nhiệm vụ</td>
+    <td class="text-center">1 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="bcs_5_2" id="check_5_2_1_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="1" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_1_d">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không hoàn thành nhiệm vụ</td>
+    <td class="text-center">-3 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="bcs_5_2" id="check_5_2_1_d" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="-3" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_1_e">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không thuộc Ban cán sự lớp</td>
+    <td class="text-center">0 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="bcs_5_2" id="check_5_2_1_e" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="0" checked onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+<!-- NHÓM: BÍ THƯ, PHÓ BÍ THƯ ĐOÀN KHOA; LCH TRƯỞNG, PHÓ; UV BCH ĐOÀN - HỘI TRƯỜNG; CHỦ NHIỆM, PHÓ CLB-Đ-N; TRƯỞNG, PHÓ BAN TỰ QUẢN KTX (4 ĐIỂM) -->
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Bí thư, phó Bí thư Đoàn khoa; Liên chi hội trưởng, liên chi hội phó; ủy viên BCH Đoàn Trường – Hội Sinh viên Trường; Chủ nhiệm, phó Chủ nhiệm CLB-Đ-N; Trưởng, Phó Ban tự quản KTX (4 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_cbkhoa_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành Xuất sắc nhiệm vụ</td>
+    <td class="text-center">4 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="cb_khoa_clb_5_2" id="check_5_2_cbkhoa_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="4" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_cbkhoa_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành Tốt nhiệm vụ</td>
+    <td class="text-center">3 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="cb_khoa_clb_5_2" id="check_5_2_cbkhoa_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="3" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_cbkhoa_c">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành nhiệm vụ</td>
+    <td class="text-center">2 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="cb_khoa_clb_5_2" id="check_5_2_cbkhoa_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="2" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_cbkhoa_d">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không hoàn thành nhiệm vụ</td>
+    <td class="text-center">-5 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="cb_khoa_clb_5_2" id="check_5_2_cbkhoa_d" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="-5" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_cbkhoa_e">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không thuộc Ban cán sự lớp</td>
+    <td class="text-center">0 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="cb_khoa_clb_5_2" id="check_5_2_cbkhoa_e" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="0" checked onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+
+<!-- NHÓM: ỦY VIÊN THƯỜNG VỤ ĐOÀN TRƯỜNG – BAN THƯ KÝ HỘI SINH VIÊN TRƯỜNG; CHI ỦY VIÊN CHI BỘ SINH VIÊN (4 ĐIỂM) -->
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Ủy viên Thường vụ Đoàn Trường – Ban Thư ký Hội Sinh viên Trường; Chi ủy viên Chi bộ Sinh viên (4 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_uvtv_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành Xuất sắc nhiệm vụ</td>
+    <td class="text-center">4 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="uv_thuongvu_5_2" id="check_5_2_uvtv_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="4" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_uvtv_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành Tốt nhiệm vụ</td>
+    <td class="text-center">3 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="uv_thuongvu_5_2" id="check_5_2_uvtv_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="3" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_uvtv_c">
+    <td></td>
+    <td class="ps-4 text-dark">+ Hoàn thành nhiệm vụ</td>
+    <td class="text-center">2 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="uv_thuongvu_5_2" id="check_5_2_uvtv_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="2" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_uvtv_d">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không hoàn thành nhiệm vụ</td>
+    <td class="text-center">-5 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="uv_thuongvu_5_2" id="check_5_2_uvtv_d" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="-5" onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_2_uvtv_e">
+    <td></td>
+    <td class="ps-4 text-dark">+ Không thuộc Ban cán sự lớp</td>
+    <td class="text-center">0 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="uv_thuongvu_5_2" id="check_5_2_uvtv_e" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_2" data-score="0" checked onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+<tr class="rl-level-2" style="background-color: #fce7f3; color: #9f1239;" data-parent-cat="5" data-max="10" id="row_subcat_5_3">  
+    <td></td>
+    <td class="fw-bold">Sinh viên đạt được các thành tích đặc biệt trong học tập, rèn luyện (chỉ tính mức khen thưởng cao nhất cho 01 nội dung) (10 điểm)</td>
+    <td class="text-center fw-bold">10 điểm</td>
+    <td class="text-center text-primary fs-5 fw-bold rl-subcat-total" id="subcat_total_5_3">0</td>
+    <td></td>
+</tr>
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Khen thưởng cấp Trường (10 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_truong_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Danh hiệu “Sinh viên 5 Tốt”</td>
+    <td class="text-center">4 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_truong_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="4" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_truong_a" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_truong_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Danh hiệu “Thanh niên tiêu biểu làm theo lời Bác”</td>
+    <td class="text-center">4 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_truong_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="4" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_truong_b" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_truong_c">
+    <td></td>
+    <td class="ps-4 text-dark">+ Danh hiệu “Cán bộ Đoàn - Hội xuất sắc”, giấy khen hoàn thành xuất sắc công tác Đoàn – Hội.</td>
+    <td class="text-center">4 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_truong_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="4" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_truong_c" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<!-- ================= 2. KHEN THƯỞNG CẤP TỈNH, THÀNH PHỐ (10 ĐIỂM) ================= -->
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Khen thưởng cấp Tỉnh, Thành phố (tương đương) (10 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tinh_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Danh hiệu “Sinh viên 5 Tốt”</td>
+    <td class="text-center">5 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tinh_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="5" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tinh_a" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tinh_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Đạt giải I, II, III Giải thưởng NCKH cấp Thành</td>
+    <td class="text-center">5 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tinh_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="5" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tinh_b" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tinh_c">
+    <td></td>
+    <td class="ps-4 text-dark">+ Giấy khen của Thành Đoàn - Hội Sinh viên Thành phố về hoàn thành xuất sắc công tác Đoàn - Hội (cá nhân)</td>
+    <td class="text-center">5 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tinh_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="5" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tinh_c" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tinh_d">
+    <td></td>
+    <td class="ps-4 text-dark">+ Các hình thức khen thưởng tương đương khác (do Hội đồng rèn luyện cấp Trường công nhận)</td>
+    <td class="text-center">5 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tinh_d" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="5" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tinh_d" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<!-- ================= 3. KHEN THƯỞNG CẤP TRUNG ƯƠNG (10 ĐIỂM) ================= -->
+<tr class="table-success text-success">
+    <td></td>
+    <td><b>- Khen thưởng cấp Trung ương (tương đương) (10 điểm)</b></td>
+    <td></td><td></td><td></td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_a">
+    <td></td>
+    <td class="ps-4 text-dark">+ Danh hiệu “Sinh viên 5 Tốt”</td>
+    <td class="text-center">7 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_a" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="7" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_a" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_b">
+    <td></td>
+    <td class="ps-4 text-dark">+ Danh hiệu “Sao Tháng Giêng”</td>
+    <td class="text-center">7 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_b" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="7" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_b" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_c">
+    <td></td>
+    <td class="ps-4 text-dark">+ Đạt giải I, II, III Giải thưởng NCKH cấp Bộ</td>
+    <td class="text-center">7 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_c" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="7" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_c" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_d">
+    <td></td>
+    <td class="ps-4 text-dark">+ Đạt giải Khuyến khích Giải thưởng NCKH cấp Bộ</td>
+    <td class="text-center">6 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_d" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="6" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_d" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_e">
+    <td></td>
+    <td class="ps-4 text-dark">+ Bằng khen của Trung ương Đoàn – Trung ương Hội về hoàn thành xuất sắc công tác Đoàn – Hội (cá nhân)</td>
+    <td class="text-center">6 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_e" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="6" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_e" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_f">
+    <td></td>
+    <td class="ps-4 text-dark">+ Bằng khen cấp Trung ương vì có thành tích xuất sắc trong công tác xã hội, giữ gìn an ninh trật tự, an toàn xã hội, hoạt động tình nguyện vì cộng đồng</td>
+    <td class="text-center">6 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_f" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="6" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_f" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_tw_g">
+    <td></td>
+    <td class="ps-4 text-dark">+ Các hình thức khen thưởng tương đương khác (do Hội đồng rèn luyện cấp Trường công nhận)</td>
+    <td class="text-center">6 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_tw_g" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="6" onchange="calcRenLuyen()">
+    </td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="openProofModal(this)">
+            <i class="fa-solid fa-upload"></i> Tải minh chứng
+        </button>
+        <div class="rl-proof-list mt-2 d-flex flex-wrap justify-content-center"></div>
+        <input type="hidden" id="proof_5_3_tw_g" class="rl-proof-data" value="[]">
+    </td>
+</tr>
+
+<!-- HÀNG MẶC ĐỊNH: KHÔNG ĐẠT THÀNH TÍCH ĐẶC BIỆT -->
+<tr class="rl-level-3 bg-white" id="row_crit_5_3_none">
+    <td></td>
+    <td class="ps-4 text-dark">Không có thành tích đặc biệt trong học kỳ</td>
+    <td class="text-center">0 điểm</td>
+    <td class="text-center">
+        <input type="radio" name="thanh_tich_5_3" id="check_5_3_none" class="form-check-input rl-check-input mx-auto shadow-sm" style="width: 24px; height: 24px; cursor: pointer;" data-parent-subcat="5_3" data-score="0" checked onchange="calcRenLuyen()">
+    </td>
+    <td></td>
+</tr>
+  
+
+<!-- =============== TỔNG KẾT =============== -->
+<tr style="background-color: #fef3c7; font-weight: bold; font-size: 16px; border-top: 2px solid #f59e0b;">
+    <td colspan="3" class="text-end pe-4" style="color: #92400e;">
+        <i class="fa-solid fa-calculator me-1"></i> TỔNG ĐIỂM ĐÁNH GIÁ:
+    </td>
+    <td class="text-center fs-3 fw-bold" style="color: #dc2626;" id="rlGrandTotal">0</td>
+    <td></td>
+</tr>
+<tr style="background-color: #fef3c7; font-weight: bold; font-size: 16px; border-top: 1px dashed #fcd34d;">
+    <td colspan="3" class="text-end pe-4" style="color: #92400e;">
+        <i class="fa-solid fa-award me-1"></i> XẾP LOẠI:
+    </td>
+    <td class="text-center fs-4 fw-bold" style="color: #0f4c81;" id="rlRank">-</td>
+    <td></td>
+</tr>
+</tbody>
+
+  
+        </table>
+    </div>
+</div><!-- KHU VỰC TỔNG HỢP LINK -->
 <div id="tongHopSection" class="d-none">
     <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
@@ -1141,7 +2593,17 @@
                     </div>
                 </div>
             </div>
-
+<div id="customHtmlSection" class="d-none w-100 h-100">
+    <header class="top-header d-flex align-items-center mb-4">
+        <button class="btn btn-light fw-bold shadow-sm me-3" onclick="backToCourseTable()">
+            <i class="fa-solid fa-arrow-left"></i> Trở lại Bảng
+        </button>
+        <div class="page-title m-0" id="customHtmlTitle">Tiêu đề</div>
+    </header>
+    <div id="customHtmlContent" class="bg-white rounded border shadow-sm p-3 p-md-4" style="min-height: 60vh;">
+        <!-- File HTML sẽ được nhét vào đây -->
+    </div>
+</div>
 <div id="qaSection" class="d-none">
     <header class="top-header d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
@@ -1552,10 +3014,15 @@
             <!-- Màn hình 2: KHI ĐANG ĐẾM NGƯỢC -->
 <div id="countdownDisplayArea" class="d-none d-flex align-items-center gap-2">
     <div class="d-flex align-items-center gap-1">
-        <!-- Đã đổi màu icon fa-stopwatch và màu chữ lblCountdownClock sang màu vàng #facc15 -->
         <i class="fa-solid fa-stopwatch fa-spin-slow" style="color: #facc15;"></i>
         <span class="fw-bold countdown-clock-text" id="lblCountdownClock" style="color: #facc15 !important;">00:00:00</span>
     </div>
+    
+    <!-- THÊM NÚT TẠM NGƯNG VÀO ĐÂY -->
+    <button class="btn btn-sm btn-outline-light btn-countdown-pause" onclick="togglePauseUserCountdown()" title="Tạm ngưng / Tiếp tục">
+        <i class="fa-solid fa-pause"></i>
+    </button>
+
     <button class="btn btn-sm btn-outline-light btn-countdown-cancel" onclick="cancelUserCountdown()" title="Hủy đếm ngược">
         <i class="fa-solid fa-xmark"></i>
     </button>
@@ -1698,55 +3165,174 @@
     </div>
 </div>
 
-    <div class="modal fade" id="tkbPersonalModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+   <!-- MODAL GỘP: THÊM LỊCH HỌC MỚI & TỰ HỌC -->
+<div class="modal fade" id="unifiedTkbModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content border-0 shadow">
-            <div class="modal-header text-white" id="tkbModalHeader" style="background-color: #0f4c81;">
-                <h6 class="modal-title m-0 fw-bold" id="tkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học Cá Nhân</h6>
+            <div class="modal-header text-white" id="uTkbModalHeader" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold" id="uTkbModalTitle"><i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học / Xếp giờ Tự học</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <input type="hidden" id="pTkbRowIndex" value="">
-                <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label fw-bold">Thứ (VD: 2, 4, 8)</label><input type="text" id="pTkbThu" class="form-control" value="2"></div>
-                    <div class="col-md-4"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="pTkbTiet" class="form-control" min="1" max="15" value="1"></div>
-                    <div class="col-md-4"><label class="form-label fw-bold">Số tiết</label><input type="number" id="pTkbSoTiet" class="form-control" min="1" max="5" value="3"></div>
-                    <div class="col-12 d-none" id="tkbOverlapAlert">
-                        <div class="alert alert-danger d-flex align-items-center m-0 py-2 px-3" style="border-radius: 8px; font-size: 14.5px; font-weight: 600;">
-                            <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
-                            <span id="tkbOverlapMessage"></span>
-                        </div>
+                <input type="hidden" id="uTkbRowIndex" value="">
+                
+                <div class="col-12 d-none mb-3" id="uTkbOverlapAlert">
+                    <div class="alert alert-danger d-flex align-items-center m-0 py-2 px-3" style="border-radius: 8px; font-size: 14.5px; font-weight: 600;">
+                        <i class="fa-solid fa-triangle-exclamation me-2 fs-5"></i>
+                        <span id="uTkbOverlapMessage"></span>
                     </div>
-                    
-                    <!-- BỔ SUNG Ô NHẬP MÃ LỚP HỌC PHẦN Ở ĐÂY -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold">Mã lớp học phần</label>
-                        <input type="text" id="pTkbMaHP" class="form-control" placeholder="VD: COMP1013">
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label fw-bold">Tên học phần</label>
-                        <input type="text" id="pTkbMon" class="form-control" placeholder="VD: Hình học vi phân">
-                        <div class="mt-2 d-flex gap-2 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Quá trình')">Kiểm tra Quá trình</button>
-                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Giữa học phần')">Kiểm tra Giữa kỳ</button>
-                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" style="font-size: 12px;" onclick="addExamPrefix('Kiểm tra Kết thúc học phần')">Kiểm tra Cuối kỳ</button>
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-6"><label class="form-label fw-bold">Phòng học</label><input type="text" id="pTkbPhong" class="form-control" placeholder="VD: B.112"></div>
-                    <div class="col-md-6"><label class="form-label fw-bold">Thời gian (Giờ)</label><input type="text" id="pTkbThoiGian" class="form-control" placeholder="VD: 6:30-9:00"></div>
-                    <div class="col-md-6"><label class="form-label fw-bold">Cơ sở/Hình thức</label><input type="text" id="pTkbHinhThuc" class="form-control" placeholder="VD: An Dương Vương / Học online / ..."></div>
-                    <div class="col-md-6"><label class="form-label fw-bold text-primary">Đường link địa điểm (nếu có)</label><input type="text" id="pTkbLink" class="form-control" placeholder="https://..."></div>
-                    <div class="col-md-4"><label class="form-label fw-bold">Giảng viên</label><input type="text" id="pTkbGV" class="form-control" placeholder="VD: Nguyễn Văn A"></div>
-                    <div class="col-md-4"><label class="form-label fw-bold">Màu nền lịch</label><input type="color" id="pTkbColor" class="form-control form-control-color w-100" value="#e0f2fe"></div>
-                    <div class="col-md-4"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="pTkbNgayBD" class="form-control" placeholder="DD/MM/YYYY"></div>
-                    <div class="col-md-4"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="pTkbNgayKT" class="form-control" placeholder="DD/MM/YYYY"></div>
-                    <div class="col-md-8"><label class="form-label fw-bold text-danger">Ngày nghỉ / Ngoại lệ</label><input type="text" id="pTkbNgoaiLe" class="form-control" placeholder="VD: 15/04/2026, 01/05/2026"></div>
                 </div>
+
+                <!-- FORM NHẬP LÝ LỊCH -->
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Mã lớp học phần</label>
+                        <input type="text" id="uTkbMaHP" class="form-control" placeholder="VD: 2511COMP101301">
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label fw-bold">Tên học phần / Môn tự học <span class="text-danger">*</span></label>
+                        <input type="text" id="uTkbMon" class="form-control" placeholder="VD: Hình học vi phân / Tự học Giải tích">
+                        <div class="mt-2 d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" onclick="addPrefixToCourseName('Kiểm tra Giữa học phần')">Kiểm tra Giữa kỳ</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" onclick="addPrefixToCourseName('Kiểm tra Kết thúc học phần')">Kiểm tra Cuối kỳ</button>
+                            <button type="button" class="btn btn-sm btn-outline-danger fw-bold" onclick="addPrefixToCourseName('Kiểm tra Quá trình')">Kiểm tra Quá trình</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="addPrefixToCourseName('Tự học')">Tự học</button>
+                        </div>
+                    </div>
+                    
+                   <!-- KHUNG KHAI BÁO THỜI GIAN NHIỀU CA -->
+<div class="col-12 mb-1">
+    <div class="d-flex justify-content-between align-items-center mb-1">
+    <label class="form-label fw-bold text-primary m-0"><i class="fa-solid fa-clock"></i> Khai báo Thời gian (Có thể thêm nhiều ca)</label>
+    <div class="d-flex gap-2">
+        <!-- Nút mới thêm vào -->
+        <button type="button" class="btn btn-sm text-white fw-bold py-1 shadow-sm" style="background-color: #0f4c81;" onclick="autoFillThoiGian()">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Tự điền Giờ
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-success fw-bold py-1 shadow-sm" onclick="addTkbTimeSlot()">
+            <i class="fa-solid fa-plus"></i> Thêm ca học
+        </button>
+    </div>
+</div>
+    <div id="tkbTimeSlotsContainer" class="d-flex flex-column gap-2 p-3 bg-light border rounded">
+        <!-- Hàng nhập ca đầu tiên (Mặc định không xóa được) -->
+        <div class="row g-2 align-items-end tkb-time-slot" id="firstTkbSlot">
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Thứ (2-8), 8 là Chủ nhật *</label>
+                <input type="text" id="uTkbThu" class="form-control fw-bold slot-thu" placeholder="VD: 2, 4">
             </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn text-white px-4 fw-bold" style="background-color: #0f4c81;" onclick="promptSavePersonalTkb()" id="btnSavePersonalTkb">Lưu thông tin</button>
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Tiết Bắt đầu *</label>
+                <input type="number" id="uTkbTiet" class="form-control fw-bold slot-tiet" min="1" max="15">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">Số tiết *</label>
+                <input type="number" id="uTkbSoTiet" class="form-control fw-bold slot-sotiet" min="1" max="5" value="3">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Giờ học</label>
+                <input type="text" id="uTkbThoiGian" class="form-control slot-thoigian" placeholder="07:00-09:30">
+            </div>
+            <div class="col-md-2 text-end">
+                <!-- Cột trống chừa chỗ cho cân bằng giao diện -->
+            </div>
+        </div>
+    </div>
+</div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Màu nền</label>
+                        <input type="color" id="uTkbColor" class="form-control form-control-color w-100" value="#e0f2fe">
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Cơ sở/Hình thức</label>
+                        <input type="text" id="uTkbHinhThuc" class="form-control" placeholder="VD: Lê Văn Sỹ / Học online">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Phòng học</label>
+                        <input type="text" id="uTkbPhong" class="form-control" placeholder="VD: B.112">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Giảng viên</label>
+                        <input type="text" id="uTkbGV" class="form-control" placeholder="Nguyễn Văn A">
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold text-primary">Link địa điểm (URL), đối với các cơ sở "An Dương Vương, Lê Văn Sỹ, Lạc Long Quân, Nhà thi đấu Phú Thọ, Phân hiệu Long An" không cần chèn link</label>
+                        <input type="text" id="uTkbLink" class="form-control" placeholder="https://...">
+                    </div>
+                </div>
+
+                <hr class="my-4">
+                
+                <!-- CHẾ ĐỘ CHỌN THỜI GIAN -->
+                <div id="uTkbTimeModeSelection" class="mb-3">
+                    <label class="form-label fw-bold text-primary"><i class="fa-solid fa-clock me-1"></i> Phạm vi thời gian áp dụng:</label>
+                    <div class="d-flex gap-4 p-2 bg-light border rounded">
+<div class="form-check">
+    <!-- Đã thêm checked vào đây -->
+    <input class="form-check-input" type="radio" name="uTkbTimeMode" id="modeWeek" value="week" checked onchange="toggleTkbTimeMode()">
+    <label class="form-check-label fw-bold" for="modeWeek" style="cursor: pointer;">Chọn nhiều Tuần (Theo Học kỳ)</label>
+</div>
+                        <div class="form-check">
+    <input class="form-check-input" type="radio" name="uTkbTimeMode" id="modeDate" value="date" onchange="toggleTkbTimeMode()">
+    <label class="form-check-label fw-bold" for="modeDate" style="cursor: pointer;">Theo Ngày bắt đầu / Kết thúc</label>
+</div>
+
+                    </div>
+                </div>
+
+                <!-- VÙNG 1: THEO NGÀY -->
+                <div class="row g-3" id="uTkbDateArea">
+                    <div class="col-md-4"><label class="form-label fw-bold">Ngày bắt đầu</label><input type="text" id="uTkbNgayBD" class="form-control" placeholder="DD/MM/YYYY"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold">Ngày kết thúc</label><input type="text" id="uTkbNgayKT" class="form-control" placeholder="DD/MM/YYYY"></div>
+                    <div class="col-md-4"><label class="form-label fw-bold text-danger">Ngày ngoại lệ (Nghỉ)</label><input type="text" id="uTkbNgoaiLe" class="form-control" placeholder="VD: 15/04/2026, 01/05/2026"></div>
+                </div>
+
+                <!-- VÙNG 2: THEO TUẦN -->
+                <div id="uTkbWeekArea" class="d-none">
+                    <div class="d-flex align-items-center mb-2 justify-content-between">
+                        <label class="form-label fw-bold text-danger m-0"><i class="fa-solid fa-calendar-week me-1"></i> Tick chọn các tuần áp dụng:</label>
+                        <button type="button" class="btn btn-sm btn-outline-primary py-1 px-2 fw-bold" onclick="toggleAllUTkbWeeks()">Chọn / Bỏ chọn tất cả</button>
+                    </div>
+                    <div id="uTkbWeeksContainer" class="d-flex flex-wrap gap-2 p-3 bg-light border rounded border-secondary-subtle">
+                        <!-- Checkbox Tuần học sẽ render vào đây -->
+                    </div>
+                </div>
+
+                <!-- KHU VỰC THÊM VÀO DANH SÁCH CHỜ -->
+                <div id="uTkbPendingSection">
+                    <div class="mt-4 text-end">
+                        <button type="button" id="btnAddPendingUTkb" class="btn text-white fw-bold px-4" style="background-color: #8b5cf6;" onclick="addPendingUTkb()">
+                            <i class="fa-solid fa-plus me-1"></i> Thêm vào danh sách chờ lưu
+                        </button>
+                    </div>
+
+                    <hr class="my-4">
+                    <h6 class="fw-bold mb-3" style="color: #0f4c81;"><i class="fa-solid fa-list-check me-1"></i> Danh sách các lịch chờ lưu lên hệ thống</h6>
+                    <div class="table-responsive border rounded shadow-sm">
+                        <table class="table table-hover align-middle text-center m-0 bg-white">
+                            <thead style="background-color: #0f4c81; color: white;">
+                                <tr>
+                                    <th>Tên môn</th>
+                                    <th>Thứ & Tiết</th>
+                                    <th>Phạm vi thời gian</th>
+                                    <th>Cơ sở / Phòng</th>
+                                    <th style="width: 150px;">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="uTkbPendingTableBody">
+                                <tr><td colspan="5" class="text-muted py-4">Chưa có môn nào được thêm.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer border-0 bg-light d-flex justify-content-between">
+                <button type="button" class="btn btn-light border fw-bold" data-bs-dismiss="modal">Hủy đóng</button>
+                <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #10b981;" onclick="saveUnifiedTkb()" id="btnSaveUnifiedTkb">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Lưu tất cả lên TKB
+                </button>
             </div>
         </div>
     </div>
@@ -1996,7 +3582,10 @@
                 <div class="row g-3">
                     <div class="col-md-4"><label class="form-label fw-bold">Mã học phần (Khóa)</label><input type="text" id="mId" class="form-control"></div>
                     <div class="col-md-8"><label class="form-label fw-bold">Tên học phần</label><input type="text" id="mMon" class="form-control"></div>
-                    <div class="col-md-3"><label class="form-label fw-bold">Thứ (2->8)</label><input type="number" id="mThu" class="form-control"></div>
+                    <div class="col-md-3">
+    <label class="form-label fw-bold">Thứ (2->8)</label>
+    <input type="text" id="mThu" class="form-control" placeholder="VD: 2, 4">
+</div>
                     <div class="col-md-3"><label class="form-label fw-bold">Tiết bắt đầu</label><input type="number" id="mTietBd" class="form-control"></div>
                     <div class="col-md-3"><label class="form-label fw-bold">Số tiết</label><input type="number" id="mSoTiet" class="form-control"></div>
                     <div class="col-md-3"><label class="form-label fw-bold">Phòng</label><input type="text" id="mPhong" class="form-control"></div>
@@ -2082,9 +3671,11 @@
                 
                 <!-- Đồng hồ đếm ngược -->
                 <div id="viewerCountdownClock" class="d-none px-3 py-1 rounded-pill" style="background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.3); font-family: 'Chakra Petch', sans-serif;">
-                    <i class="fa-solid fa-stopwatch fa-spin-slow me-2" style="color: #facc15;"></i>
-                    <span class="fw-bold fs-6" id="lblViewerCountdownClock" style="color: #facc15; letter-spacing: 0.5px;">00:00:00</span>
-                </div>
+    <i class="fa-solid fa-stopwatch fa-spin-slow me-2" style="color: #facc15;"></i>
+    <span class="fw-bold fs-6" id="lblViewerCountdownClock" style="color: #facc15; letter-spacing: 0.5px;">00:00:00</span>
+    <!-- THÊM NÚT VÀO ĐÂY -->
+    <button class="btn btn-sm btn-link text-white p-0 ms-2 btn-countdown-pause" onclick="togglePauseUserCountdown()" title="Tạm ngưng / Tiếp tục"><i class="fa-solid fa-pause"></i></button>
+</div>
                 
                 <!-- Nhóm nút bên phải -->
                 <div class="d-flex align-items-center gap-2">
@@ -2125,7 +3716,8 @@
                         <button class="btn-close" style="font-size: 11px;" onclick="toggleIframeSidebar()"></button>
                     </div>
                     
-                    <div class="p-3 d-flex flex-column flex-grow-1 gap-3">
+                   <div class="p-3 d-flex flex-column flex-grow-1 gap-3 tools-area">
+
                         <!-- AI Links (Thiết kế Outline tối giản) -->
                         <div class="d-flex gap-2">
                             <a href="https://chatgpt.com/" target="_blank" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #10a37f; border: 1.5px solid #10a37f; border-radius: 6px; font-size: 12.5px; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#10a37f'; this.style.color='#fff';" onmouseout="this.style.backgroundColor='#ffffff'; this.style.color='#10a37f';">
@@ -2134,6 +3726,10 @@
                             <a href="https://gemini.google.com/" target="_blank" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #8b5cf6; border: 1.5px solid #8b5cf6; border-radius: 6px; font-size: 12.5px; transition: all 0.2s;" onmouseover="this.style.background='linear-gradient(135deg, #1a73e8, #9333ea)'; this.style.color='#fff'; this.style.borderColor='transparent';" onmouseout="this.style.background='#ffffff'; this.style.color='#8b5cf6'; this.style.borderColor='#8b5cf6';">
                                 <i class="fa-solid fa-sparkles"></i> Gemini
                             </a>
+<button type="button" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #ea580c; border: 1.5px solid #ea580c; border-radius: 6px; font-size: 12.5px;" onclick="toggleOneCompiler(this, true)"><i class="fa-solid fa-play"></i> Run Code</button>
+<button type="button" class="btn btn-sm d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="width: calc(50% - 4px); background-color: #ffffff; color: #0284c7; border: 1.5px solid #0284c7; border-radius: 6px; font-size: 12.5px;" onclick="let k = $(this).closest('#iframeSidebar').attr('data-key'); if(k) $('#btnQA_'+k).click();">
+        <i class="fa-solid fa-comments"></i> Q&A
+    </button>
                         </div>
 
                         <!-- Progress (Tiến độ) -->
@@ -2183,7 +3779,21 @@
                             </div>
                         </div>
                     </div>
+					<div class="compiler-area d-none flex-column flex-grow-1 w-100 bg-white">
+   <div class="d-flex justify-content-between align-items-center p-2 border-bottom" style="background: #fff7ed;">
+    <span class="fw-bold" style="color: #ea580c; font-size: 13.5px;"><i class="fa-solid fa-terminal me-1"></i> CodePad trên UpCoder</span>
+    <div class="d-flex gap-1">
+        <!-- Nút thu nhỏ / phóng to nội dung bên trong -->
+        <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-secondary" onclick="zoomCompilerContent(this, -0.1)" title="Thu nhỏ nội dung"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+        <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-secondary" onclick="zoomCompilerContent(this, 0.1)" title="Phóng to nội dung"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+	<button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-primary btn-maximize-compiler" onclick="toggleCompilerSize(this)" title="Toàn màn hình"><i class="fa-solid fa-expand"></i></button>
+        <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-danger" onclick="toggleOneCompiler(this, false)" style="font-size: 12px; border-radius: 6px;"><i class="fa-solid fa-xmark me-1"></i> Đóng</button>
+    </div>
+</div>
+    <iframe src="" class="w-100 flex-grow-1 border-0"></iframe>
+</div>
                 </div>
+				
             </div>
         </div>
     </div>
@@ -2318,7 +3928,7 @@
     </div>
 </div>
 <!-- MODAL XEM CHI TIẾT NỘI DUNG & LATEX (KHUNG TRẮNG RỘNG TOÀN MÀN HÌNH) -->
-<div class="modal fade" id="latexViewerModal" aria-hidden="true">
+<div class="modal fade" id="latexViewerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-fullscreen">
         <div class="modal-content border-0">
             <!-- Header Modal -->
@@ -2328,20 +3938,15 @@
                     <i class="fa-solid fa-file-signature me-2"></i>Chi tiết Nội dung
                 </h6>
                 <div id="latexCountdownClock" class="d-none px-3 py-1 rounded-pill" style="background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.3); font-family: 'Chakra Petch', sans-serif; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);">
-        <i class="fa-solid fa-stopwatch fa-spin-slow me-2" style="color: #facc15;"></i>
-        <span class="fw-bold fs-6" id="lblLatexCountdownClock" style="color: #facc15; letter-spacing: 0.5px;">00:00:00</span>
-    </div>
+                    <i class="fa-solid fa-stopwatch fa-spin-slow me-2" style="color: #facc15;"></i>
+                    <span class="fw-bold fs-6" id="lblLatexCountdownClock" style="color: #facc15; letter-spacing: 0.5px;">00:00:00</span>
+                    <button class="btn btn-sm btn-link text-white p-0 ms-2 btn-countdown-pause" onclick="togglePauseUserCountdown()" title="Tạm ngưng / Tiếp tục"><i class="fa-solid fa-pause"></i></button>
+                </div>
                 <div class="d-flex gap-2 align-items-center">
-                    <!-- Icon ChatGPT -->
-                    <a href="https://chatgpt.com/" target="_blank" class="btn btn-sm d-flex align-items-center justify-content-center p-0 shadow-sm" style="width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid rgba(255, 255, 255, 0.7); background-color: #10a37f; color: #ffffff; transition: 0.2s;" title="Mở ChatGPT" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                        <svg style="width: 18px; height: 18px; fill: currentColor;" viewBox="0 0 24 24"><path d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.073zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.8956zm16.0993 3.8558L12.5973 8.3829v-2.3323a.0757.0757 0 0 1 .0332-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66l-.1467-.0852-4.783-2.7582a.7712.7712 0 0 0-.7806 0zM8.3065 12.863l-2.02-1.1686a.071.071 0 0 1-.038-.052V6.06A4.504 4.504 0 0 1 10.743 1.5656a4.4755 4.4755 0 0 1 2.8764 1.0408l-.1419.0804-4.7783 2.7582a.7948.7948 0 0 0 .3927.6813zm10.9973-3.0655a4.485 4.485 0 0 1-2.3655 1.9728V6.0825a.7664.7664 0 0 0-.3879-.6765L10.736 2.0517l2.0201-1.1685a.0757.0757 0 0 1 .071 0l4.8303 2.7865a4.504 4.504 0 0 1 1.6464 6.1276zM9.742 10.9996l2.8485-1.6441 2.8485 1.6441v3.2882l-2.8485 1.6441-2.8485-1.6441z"/></svg>
-                    </a>
-
-                    <!-- Icon Gemini -->
-                    <a href="https://gemini.google.com/" target="_blank" class="btn btn-sm d-flex align-items-center justify-content-center p-0 shadow-sm" style="width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid rgba(255, 255, 255, 0.7); background: linear-gradient(135deg, #1a73e8, #9333ea); color: #ffffff; transition: 0.2s;" title="Mở Gemini" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-                        <svg style="width: 16px; height: 16px; fill: currentColor;" viewBox="0 0 16 16"><path d="M8 0l2.1 5.9L16 8l-5.9 2.1L8 16l-2.1-5.9L0 8l5.9-2.1z"/></svg>
-                    </a>
-
+                    <!-- Nút Công cụ -->
+                    <button type="button" class="btn btn-sm fw-bold d-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleLatexSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
+                        <i class="fa-solid fa-layer-group"></i> Công cụ
+                    </button>
                     <!-- Nút Sửa (Chỉ Admin mới thấy) -->
                     <button type="button" id="btnEditLatexModal" class="btn btn-sm btn-warning fw-bold d-none shadow-sm" onclick="toggleLatexEditMode()">
                         <i class="fa-solid fa-pen me-1"></i> Sửa Nội Dung
@@ -2351,70 +3956,133 @@
             </div>
             
             <!-- Thân Modal -->
-            <div class="modal-body p-2 p-md-3 overflow-auto d-flex justify-content-center" style="background-color: #f0f2f5;">
+            <div class="modal-body p-0 d-flex" style="background-color: #f0f2f5; position: relative; height: 100%;">
                 
-                <!-- 1. CHẾ ĐỘ XEM TRƯỚC (Nền trắng mở rộng 100%) -->
-                <div id="latexViewMode" class="w-100 p-4 p-md-5 bg-white border shadow-sm" style="min-height: 100%; border-radius: 8px; border-color: #e2e8f0 !important; font-size: 16px; line-height: 1.8; color: #1e293b; font-family: 'Inter', sans-serif;">
-                    <!-- Nội dung render Toán học -->
-                </div>
-                
-                <!-- 2. CHẾ ĐỘ SỬA TRỰC TIẾP (Nền trắng mở rộng 100%) -->
-                <div id="latexEditMode" class="d-none w-100 flex-column">
-                    <!-- Ô NHẬP SỬA TIÊU ĐỀ -->
-                    <div class="mb-3">
-                        <label class="fw-bold text-primary mb-1"><i class="fa-solid fa-heading me-1"></i> Tiêu đề bài học</label>
-                        <input type="text" id="latexEditTitleInput" class="form-control fw-bold text-dark border-primary-subtle shadow-sm" style="font-size: 16px; padding: 10px 15px;" placeholder="Nhập tiêu đề...">
-                    </div>
-
-                    <!-- KHU VỰC SOẠN THẢO VÀ XEM TRƯỚC -->
-                    <div class="row flex-grow-1 mb-3 g-3">
-                        <!-- Cột soạn thảo -->
-                        <div class="col-lg-6 d-flex flex-column h-100">
-                            <div class="d-flex justify-content-between align-items-end mb-2">
-                                <label class="fw-bold text-primary m-0"><i class="fa-solid fa-code me-1"></i> Soạn thảo mã LaTeX / Nội dung</label>
-                            </div>
-                            
-                            <!-- THÊM 3 NÚT CHÈN MẪU GIAO DIỆN -->
-                            <div class="mb-2 d-flex gap-2 flex-wrap">
-                                <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="insertAdminTemplate('question')">
-                                    <i class="fa-solid fa-bookmark"></i> Bảng Bài Tập
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-success fw-bold" onclick="insertAdminTemplate('title')">
-                                    <i class="fa-solid fa-heading"></i> Bảng Tiêu Đề
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" onclick="insertAdminTemplate('table')">
-                                    <i class="fa-solid fa-table"></i> Bảng Cột/Hàng
-                                </button>
-<button type="button" class="btn btn-sm btn-outline-danger fw-bold" onclick="insertAdminTemplate('image')">
-        <i class="fa-solid fa-image"></i> Chèn Ảnh
-    </button>
-                            </div>
-
-                            <textarea id="latexEditTextarea" class="form-control flex-grow-1 shadow-sm" style="font-family: monospace; font-size: 15px; resize: none; border: 2px solid #cbd5e1; min-height: 300px;"></textarea>
-                        </div>
-                        
-                        <!-- Cột xem trước thời gian thực -->
-                        <div class="col-lg-6 d-flex flex-column h-100">
-                            <label class="fw-bold text-success mb-2"><i class="fa-solid fa-eye me-1"></i> Xem trước trực tiếp</label>
-                            <div id="latexEditPreviewArea" class="flex-grow-1 shadow-sm p-4 bg-white border" style="border-radius: 8px; border-color: #cbd5e1 !important; overflow-y: auto; min-height: 300px;">
-                                <span class="text-muted">Nhập nội dung để xem trước...</span>
-                            </div>
-                        </div>
+                <div id="latexContentContainer" class="flex-grow-1 p-2 p-md-3 overflow-auto d-flex justify-content-center" style="transition: width 0.3s; height: 100%;">
+                    <!-- 1. CHẾ ĐỘ XEM TRƯỚC -->
+                    <div id="latexViewMode" class="w-100 p-4 p-md-5 bg-white border shadow-sm" style="min-height: 100%; border-radius: 8px; border-color: #e2e8f0 !important; font-size: 16px; line-height: 1.8; color: #1e293b; font-family: 'Inter', sans-serif;">
+                        <!-- Nội dung render Toán học -->
                     </div>
                     
-                    <!-- Nhóm nút lưu -->
-                    <div class="d-flex justify-content-end gap-2">
-                        <button class="btn btn-light fw-bold px-4 shadow-sm border" onclick="toggleLatexEditMode()">Hủy Sửa</button>
-                        <button class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #0f4c81;" id="btnSaveLatexModal" onclick="saveLatexContent()">
-                            <i class="fa-solid fa-floppy-disk me-1"></i> Lưu Thay Đổi
-                        </button>
+                    <!-- 2. CHẾ ĐỘ SỬA TRỰC TIẾP -->
+                    <div id="latexEditMode" class="d-none w-100 flex-column">
+                        <div class="mb-3">
+                            <label class="fw-bold text-primary mb-1"><i class="fa-solid fa-heading me-1"></i> Tiêu đề bài học</label>
+                            <input type="text" id="latexEditTitleInput" class="form-control fw-bold text-dark border-primary-subtle shadow-sm" style="font-size: 16px; padding: 10px 15px;" placeholder="Nhập tiêu đề...">
+                        </div>
+                        <div class="row flex-grow-1 mb-3 g-3">
+                            <!-- Cột soạn thảo -->
+                            <div class="col-lg-6 d-flex flex-column h-100">
+                                <div class="d-flex justify-content-between align-items-end mb-2">
+                                    <label class="fw-bold text-primary m-0"><i class="fa-solid fa-code me-1"></i> Soạn thảo mã LaTeX / Nội dung</label>
+                                </div>
+                                <div class="mb-2 d-flex gap-2 flex-wrap">
+                                    <button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="insertAdminTemplate('question')"><i class="fa-solid fa-bookmark"></i> Bảng Bài Tập</button>
+                                    <button type="button" class="btn btn-sm btn-outline-success fw-bold" onclick="insertAdminTemplate('title')"><i class="fa-solid fa-heading"></i> Bảng Tiêu Đề</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary fw-bold" onclick="insertAdminTemplate('table')"><i class="fa-solid fa-table"></i> Bảng Cột/Hàng</button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger fw-bold" onclick="insertAdminTemplate('image')"><i class="fa-solid fa-image"></i> Chèn Ảnh</button>
+                                </div>
+                                <textarea id="latexEditTextarea" class="form-control flex-grow-1 shadow-sm" style="font-family: monospace; font-size: 15px; resize: none; border: 2px solid #cbd5e1; min-height: 300px;"></textarea>
+                            </div>
+                            
+                            <!-- Cột xem trước -->
+                            <div class="col-lg-6 d-flex flex-column h-100">
+                                <label class="fw-bold text-success mb-2"><i class="fa-solid fa-eye me-1"></i> Xem trước trực tiếp</label>
+                                <div id="latexEditPreviewArea" class="flex-grow-1 shadow-sm p-4 bg-white border" style="border-radius: 8px; border-color: #cbd5e1 !important; overflow-y: auto; min-height: 300px;">
+                                    <span class="text-muted">Nhập nội dung để xem trước...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <button class="btn btn-light fw-bold px-4 shadow-sm border" onclick="toggleLatexEditMode()">Hủy Sửa</button>
+                            <button class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #0f4c81;" id="btnSaveLatexModal" onclick="saveLatexContent()"><i class="fa-solid fa-floppy-disk me-1"></i> Lưu Thay Đổi</button>
+                        </div>
                     </div>
+                </div>
+
+                <!-- VÙNG SIDEBAR CÔNG CỤ CHO BẢNG LATEX (ẨN MẶC ĐỊNH) -->
+                <div id="latexSidebar" class="d-none flex-column" style="width: 32%; min-width: 350px; max-width: 450px; border-left: 1px solid #cbd5e1; background-color: #f8fafc; overflow-y: auto; height: 100%; z-index: 2; box-shadow: -4px 0 15px rgba(0,0,0,0.05);">
+                    <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
+                        <h6 class="fw-bold m-0" style="color: #0f4c81; font-size: 14.5px;"><i class="fa-solid fa-toolbox me-2"></i>Công cụ bài học</h6>
+                        <button class="btn-close" style="font-size: 11px;" onclick="toggleLatexSidebar()"></button>
+                    </div>
+                    
+                   <div class="p-3 d-flex flex-column flex-grow-1 gap-3 tools-area">
+                        <div class="d-flex gap-2">
+                            <a href="https://chatgpt.com/" target="_blank" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #10a37f; border: 1.5px solid #10a37f; border-radius: 6px; font-size: 12.5px; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#10a37f'; this.style.color='#fff';" onmouseout="this.style.backgroundColor='#ffffff'; this.style.color='#10a37f';">
+                                <i class="fa-solid fa-robot"></i> ChatGPT
+                            </a>
+                            <a href="https://gemini.google.com/" target="_blank" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #8b5cf6; border: 1.5px solid #8b5cf6; border-radius: 6px; font-size: 12.5px; transition: all 0.2s;" onmouseover="this.style.background='linear-gradient(135deg, #1a73e8, #9333ea)'; this.style.color='#fff'; this.style.borderColor='transparent';" onmouseout="this.style.background='#ffffff'; this.style.color='#8b5cf6'; this.style.borderColor='#8b5cf6';">
+                                <i class="fa-solid fa-sparkles"></i> Gemini
+                            </a>
+							<button type="button" class="btn btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="background-color: #ffffff; color: #ea580c; border: 1.5px solid #ea580c; border-radius: 6px; font-size: 12.5px;" onclick="toggleOneCompiler(this, true)"><i class="fa-solid fa-play"></i> Run Code</button>
+<button type="button" class="btn btn-sm d-flex align-items-center justify-content-center gap-2 fw-bold shadow-sm" style="width: calc(50% - 4px); background-color: #ffffff; color: #0284c7; border: 1.5px solid #0284c7; border-radius: 6px; font-size: 12.5px;" onclick="let k = $(this).closest('#latexSidebar').attr('data-key'); if(k) $('#btnQA_'+k).click();">
+        <i class="fa-solid fa-comments"></i> Q&A
+    </button>
+                        </div>
+
+                        <div class="bg-white p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">
+                            <label class="fw-bold mb-2 d-flex align-items-center" style="color: #475569; font-size: 13px;">
+                                <i class="fa-solid fa-chart-line me-2" style="color: #0f4c81;"></i>Tiến độ học tập
+                            </label>
+                            <select id="latexProgressSelect" class="form-select form-select-sm fw-bold border-secondary-subtle" style="border-radius: 6px; font-size: 13px; cursor: pointer; color: #334155; transition: all 0.2s;" onchange="updateSidebarProgress(this, true)">
+                                <option value="white">Chưa học</option>
+                                <option value="yellow">Đang học</option>
+                                <option value="green">Đã hoàn thành</option>
+                            </select>
+                        </div>
+
+                        <div class="bg-white p-3 rounded shadow-sm flex-grow-1 d-flex flex-column" style="border: 1px solid #e2e8f0; max-height: 60vh;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="fw-bold m-0 d-flex align-items-center" style="color: #475569; font-size: 13px;">
+                                    <i class="fa-solid fa-file-code me-2" style="color: #0f4c81;"></i>Tìm Code tham khảo
+                                </label>
+                            </div>
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" id="txtLatexSearchCode" class="form-control fw-bold" placeholder="Nhập mã bài (VD: B01)..." onkeypress="if(event.key === 'Enter') searchSidebarCode(true)">
+                                <button class="btn text-white fw-bold" style="background-color: #0f4c81;" onclick="searchSidebarCode(true)"><i class="fa-solid fa-magnifying-glass"></i></button>
+                            </div>
+                            <div id="latexCodeList" class="flex-grow-1 overflow-auto" style="border: 1px dashed #cbd5e1; border-radius: 6px; padding: 6px; background: #f8fafc; min-height: 200px;">
+                                <div class="text-muted small text-center italic mt-2">Nhập mã bài để tìm kiếm...</div>
+                            </div>
+                        </div>
+
+                        <div class="flex-grow-1 d-flex flex-column bg-white p-3 rounded shadow-sm" style="border: 1px solid #e2e8f0;">
+                            <label class="fw-bold mb-2 d-flex align-items-center" style="color: #475569; font-size: 13px;">
+                                <i class="fa-solid fa-pen-nib me-2" style="color: #0f4c81;"></i>Ghi chú nhanh
+                            </label>
+                            <div class="flex-grow-1 d-flex flex-column position-relative">
+                                <textarea id="latexNoteEditor" class="form-control flex-grow-1" style="resize: none; border-radius: 6px; min-height: 180px; font-size: 13.5px; border-color: #cbd5e1;"></textarea>
+                            </div>
+                            <div class="mt-3 d-flex justify-content-between align-items-center">
+                                <span id="latexNoteStatus" class="fw-bold" style="font-size: 11.5px; color: #10b981;"></span>
+                                <button class="btn btn-sm text-white fw-bold px-3" style="background-color: #0f4c81; border-radius: 6px; font-size: 12px; transition: 0.2s;" onclick="saveSidebarNote(true)">
+                                    <i class="fa-solid fa-floppy-disk me-1"></i> Lưu Note
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+					<div class="compiler-area d-none flex-column flex-grow-1 w-100 bg-white">
+    <div class="d-flex justify-content-between align-items-center p-2 border-bottom" style="background: #fff7ed;">
+    <span class="fw-bold" style="color: #ea580c; font-size: 13.5px;"><i class="fa-solid fa-terminal me-1"></i> CodePad trên UpCoder</span>
+    <div class="d-flex gap-1">
+        <!-- Nút thu nhỏ / phóng to nội dung bên trong -->
+        <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-secondary" onclick="zoomCompilerContent(this, -0.1)" title="Thu nhỏ nội dung"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+        <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-secondary" onclick="zoomCompilerContent(this, 0.1)" title="Phóng to nội dung"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+	<button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-primary btn-maximize-compiler" onclick="toggleCompilerSize(this)" title="Toàn màn hình"><i class="fa-solid fa-expand"></i></button>
+        <button class="btn btn-sm btn-light py-0 px-2 border shadow-sm fw-bold text-danger" onclick="toggleOneCompiler(this, false)" style="font-size: 12px; border-radius: 6px;"><i class="fa-solid fa-xmark me-1"></i> Đóng</button>
+    </div>
+</div>
+    <iframe src="" class="w-100 flex-grow-1 border-0"></iframe>
+</div>
                 </div>
 
             </div>
         </div>
     </div>
 </div>
+
 <!-- MODAL XUẤT THỜI KHÓA BIỂU & DEADLINE SANG GOOGLE LỊCH -->
 <div class="modal fade" id="exportCalendarModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -2693,73 +4361,285 @@
         </div>
     </div>
 </div>
-<script>
-    // 1. Ghi đè tự động kiểm tra đăng nhập khi vừa tải trang
-    $(document).ready(function() {
-        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-        if (!currentUser) {
-            // Nếu chưa đăng nhập: Mở Modal trực tiếp tại trang này (Không nhảy qua login.html)
-            let authModal = new bootstrap.Modal(document.getElementById('userAuthModal'));
-            authModal.show();
-            if (typeof renderSavedAccounts === 'function') renderSavedAccounts();
-        } else { 
-            // Nếu đã đăng nhập: Chạy ứng dụng trực tiếp
-            initGlobalApp(); 
-        }
-    });
-
-    // 2. Hàm xử lý xác thực tài khoản tại chỗ
-    function loginStudentDirect() {
-        let mssv = $('#txtUserMSSV').val().trim(); 
-        let pass = $('#txtUserPass').val().trim();
-        
-        if (!mssv || !pass) { 
-            $('#userAuthError').removeClass('d-none').text("Vui lòng nhập đầy đủ MSSV và Mật khẩu!"); 
-            return; 
-        }
-
-        let btn = $('#btnLoginStudent'); 
-        btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang xác thực...').prop('disabled', true);
-        
-        postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
-            let response = typeof res === 'string' ? JSON.parse(res) : res;
-            if (response.success) {
-                currentUser = { 
-                    mssv: response.mssv, 
-                    name: response.name,
-                    chuyenNganh: response.chuyenNganh,
-                    khoa: response.khoa,
-                    khoaHoc: response.khoaHoc,
-                    nhom: response.nhom
-                };
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+<!-- MODAL 1: DANH SÁCH LỊCH HỌC NHÓM CHUNG -->
+<div class="modal fade" id="groupStudyListModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-users-rectangle me-2"></i>Đăng ký Lịch Học Nhóm</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
                 
-                let savedAccounts = JSON.parse(localStorage.getItem('savedAccounts')) || [];
-                savedAccounts = savedAccounts.filter(acc => acc.mssv !== response.mssv);
-                savedAccounts.unshift({ mssv: response.mssv, name: response.name });
-                if (savedAccounts.length > 3) savedAccounts.pop(); 
-                localStorage.setItem('savedAccounts', JSON.stringify(savedAccounts));
+               <!-- BỘ LỌC THỜI GIAN ĐÃ ĐƯỢC CHỈNH LẠI GIAO DIỆN -->
+                <div class="nav-week-container bg-white p-3 rounded border border-primary-subtle shadow-sm mb-3 mx-0" style="height: auto;">
+                    <div class="row g-3 w-100 align-items-center m-0">
+                        <div class="col-md-3 ps-0">
+                            <div class="select-floating-box">
+                                <label>Năm học</label>
+                                <select class="form-select" id="gsListNamHoc" onchange="onGsListNamHocChange()"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="select-floating-box">
+                                <label>Học kỳ</label>
+                                <select class="form-select" id="gsListHocKy" onchange="onGsListHocKyChange()"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="select-floating-box">
+                                <label>Tuần</label>
+                                <select class="form-select" id="gsListWeek" onchange="renderGroupStudyTable()"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-2 pe-0 d-flex justify-content-end">
+                            <button class="btn btn-sm text-white fw-bold shadow-sm w-100 d-flex align-items-center justify-content-center gap-2" style="background-color: #10b981; border-radius: 50px; height: 44px; font-size: 14px;" onclick="openCreateGroupStudyModal()">
+                                <i class="fa-solid fa-plus"></i> Tạo lịch mới
+                            </button>
+                        </div>
+                    </div>
+                </div>
 
-                // Ẩn Modal xác thực
-                let authModalEl = document.getElementById('userAuthModal');
-                let authModal = bootstrap.Modal.getInstance(authModalEl);
-                if (authModal) authModal.hide();
+                <div class="table-responsive bg-white rounded border shadow-sm">
+                    <table class="table table-hover align-middle text-center m-0" style="font-size: 14.5px;">
+                        <thead style="background: #f1f5f9; color: #0f4c81;">
+                            <tr>
+                                <th style="width: 25%;">Chủ đề</th>
+                                <th style="width: 20%;">Thời gian & Địa điểm</th>
+                                <th style="width: 15%;">Người tạo</th>
+                                <th style="width: 15%;">Số lượng (Slot)</th>
+                                <th style="width: 25%;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="groupStudyListBody">
+                            <tr><td colspan="5" class="text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải danh sách...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL TẠO LỊCH HỌC NHÓM MỚI (CHUẨN TKB) -->
+<div class="modal fade" id="createGroupStudyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header text-white" style="background-color: #10b981;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-calendar-plus me-2"></i>Tạo Lịch Học Nhóm Mới</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+<input type="hidden" id="gsId" value="">
+                <div class="alert alert-success border-0 p-2 small m-0 mb-3" style="background-color: #dcfce7; border-radius: 8px;">
+                    <i class="fa-solid fa-circle-info me-1"></i> Lịch này sẽ tự động đồng bộ vào Thời khóa biểu của những bạn nhấn nút Đăng ký.
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold small text-muted">Chủ đề / Môn học nhóm <span class="text-danger">*</span></label>
+                        <input type="text" id="gsMon" class="form-control fw-bold" placeholder="VD: Ôn thi Giải tích 2">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small text-muted">Giới hạn số người <span class="text-danger">*</span></label>
+                        <input type="number" id="gsSlot" class="form-control fw-bold text-danger" value="5" min="2" max="50">
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small text-muted">Thứ (2-8) <span class="text-danger">*</span></label>
+                        <input type="number" id="gsThu" class="form-control fw-bold" min="2" max="8" placeholder="VD: 3">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small text-muted">Tiết bắt đầu <span class="text-danger">*</span></label>
+                        <input type="number" id="gsTietBd" class="form-control fw-bold" min="1" max="15">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small text-muted">Số tiết <span class="text-danger">*</span></label>
+                        <input type="number" id="gsSoTiet" class="form-control fw-bold" min="1" max="5" value="3">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold small text-muted">Màu nền TKB</label>
+                        <input type="color" id="gsColor" class="form-control form-control-color w-100" value="#dcfce7">
+                    </div>
 
-                // Nạp dữ liệu hệ thống ngay lập tức
-                initGlobalApp();
-                btn.html('Đăng nhập hệ thống').prop('disabled', false);
-                $('#userAuthError').addClass('d-none');
-            } else { 
-                $('#userAuthError').removeClass('d-none').text(response.message || "Tài khoản hoặc mật khẩu không đúng!"); 
-                btn.html('Đăng nhập hệ thống').prop('disabled', false); 
-            }
-        }, function() { 
-            $('#userAuthError').removeClass('d-none').text("Lỗi kết nối máy chủ!"); 
-            btn.html('Đăng nhập hệ thống').prop('disabled', false); 
-        });
-    }
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small text-muted">Giờ học (07:00-09:30)</label>
+                        <input type="text" id="gsThoiGian" class="form-control" placeholder="VD: 14:00-16:30">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small text-muted">Cơ sở / Hình thức</label>
+                        <input type="text" id="gsHinhThuc" class="form-control" placeholder="VD: Tự học / VLE">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small text-muted">Phòng / Link Meet</label>
+                        <input type="text" id="gsPhong" class="form-control" placeholder="VD: B.112 hoặc Link Meet">
+                    </div>
+<!-- BỔ SUNG HAI TRƯỜNG MỚI THEO YÊU CẦU -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted">Đường link địa điểm (nếu có)</label>
+                        <input type="text" id="gsLink" class="form-control" placeholder="VD: https://meet.google.com/...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted">Tên GV hướng dẫn (nếu có)</label>
+                        <input type="text" id="gsGV" class="form-control" placeholder="VD: Nguyễn Văn A">
+                    </div>
+                </div>
 
-</script>
+                <hr class="my-4">
+
+                <!-- CHẾ ĐỘ CHỌN THỜI GIAN (Thêm mới) -->
+                <div id="gsTimeModeSelection" class="mb-3">
+                    <label class="form-label fw-bold text-success"><i class="fa-solid fa-clock me-1"></i> Phạm vi thời gian áp dụng:</label>
+                    <div class="d-flex gap-4 p-2 bg-light border rounded">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gsTimeMode" id="gsModeWeek" value="week" checked onchange="toggleGsTimeMode()">
+                            <label class="form-check-label fw-bold" for="gsModeWeek" style="cursor: pointer;">Chọn nhiều Tuần (Theo Học kỳ)</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gsTimeMode" id="gsModeDate" value="date" onchange="toggleGsTimeMode()">
+                            <label class="form-check-label fw-bold" for="gsModeDate" style="cursor: pointer;">Theo Ngày bắt đầu / Kết thúc</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VÙNG 1: THEO NGÀY -->
+                <!-- VÙNG 1: THEO NGÀY -->
+<div class="row g-3" id="gsDateArea">
+    <div class="col-md-4">
+        <label class="form-label fw-bold small text-muted">Ngày bắt đầu</label>
+        <input type="text" id="gsNgayBD" class="form-control" placeholder="DD/MM/YYYY">
+    </div>
+    <div class="col-md-4">
+        <label class="form-label fw-bold small text-muted">Ngày kết thúc</label>
+        <input type="text" id="gsNgayKT" class="form-control" placeholder="DD/MM/YYYY">
+    </div>
+    <!-- BỔ SUNG Ô NGÀY NGOẠI LỆ -->
+    <div class="col-md-4">
+        <label class="form-label fw-bold small text-danger">Ngày ngoại lệ</label>
+        <input type="text" id="gsNgoaiLe" class="form-control border-danger-subtle" placeholder="VD: 15/04/2026">
+    </div>
+</div>
+
+                <!-- VÙNG 2: THEO TUẦN -->
+                <div id="gsWeekArea" class="d-none">
+                    <div class="d-flex align-items-center mb-2 justify-content-between">
+                        <label class="form-label fw-bold text-danger m-0"><i class="fa-solid fa-calendar-week me-1"></i> Tick chọn các tuần áp dụng:</label>
+                        <button type="button" class="btn btn-sm btn-outline-success py-1 px-2 fw-bold" onclick="toggleAllGsWeeks()">Chọn / Bỏ chọn tất cả</button>
+                    </div>
+                    <div id="gsWeeksContainer" class="d-flex flex-wrap gap-2 p-3 bg-light border rounded border-secondary-subtle">
+                        <!-- Checkbox Tuần học sẽ render vào đây -->
+                    </div>
+                </div>
+
+                <div class="mt-3">
+                    <label class="form-label fw-bold small text-muted">Ghi chú thêm</label>
+                    <textarea id="gsNote" class="form-control" rows="2" placeholder="Nội dung cần chuẩn bị trước..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 16px 16px;">
+                <button type="button" class="btn btn-light fw-bold shadow-sm" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white fw-bold shadow-sm px-4" style="background-color: #10b981;" onclick="saveGroupStudy()" id="btnSaveGroupStudy">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Đăng lịch học nhóm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL GHI CHÚ KHI ĐĂNG KÝ HỌC NHÓM / ĐẶT LỊCH -->
+<div class="modal fade" id="groupStudyNoteModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-nib me-2"></i>Ghi chú đăng ký</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="gsRegTargetId">
+                <label class="form-label fw-bold text-primary mb-2">Bạn có muốn gửi gắm ghi chú gì không?</label>
+                <textarea id="gsRegNoteInput" class="form-control bg-light border-primary-subtle" rows="3" placeholder="VD: Mình muốn học nhóm phần phương trình vi phân... (Hoặc cứ để trống nhé)"></textarea>
+            </div>
+            <div class="modal-footer border-0 bg-light d-flex justify-content-between" style="border-radius: 0 0 16px 16px;">
+                <button type="button" class="btn btn-light border fw-bold shadow-sm" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn text-white fw-bold shadow-sm px-4" style="background-color: #0f4c81;" onclick="confirmGroupStudyReg()">
+                    <i class="fa-solid fa-check me-1"></i> Xác nhận Đăng ký
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="personalNotificationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <!-- Đã đổi màu nền sang xanh chủ đạo -->
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-bell fa-shake me-2"></i>Thông báo cá nhân</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" style="background: #f8fafc; min-height: 250px;">
+                <div id="personalNotificationList">
+                    <div class="text-center text-muted p-5"><i class="fa-solid fa-spinner fa-spin fs-1 mb-3"></i><br>Đang tải thông báo...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL THÊM MINH CHỨNG RÈN LUYỆN -->
+<div class="modal fade" id="addProofModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title fw-bold m-0"><i class="fa-solid fa-link me-2"></i>Thêm Minh Chứng</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="proofTargetRow">
+                <div class="mb-3">
+                    <label class="fw-bold small text-muted mb-1">Tên hoạt động/Minh chứng <span class="text-danger">*</span></label>
+                    <input type="text" id="txtProofName" class="form-control fw-bold" placeholder="VD: GCN Mùa Hè Xanh 2026, Sắc Xanh - Hồn Việt...">
+                </div>
+                <div class="mb-2">
+                    <label class="fw-bold small text-muted mb-1">Đường link Drive <span class="text-danger">*</span></label>
+                    <input type="text" id="txtProofUrl" class="form-control" placeholder="https://drive.google.com/...">
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light fw-bold" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" onclick="saveProofItem()">Thêm vào bảng</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="addActivityModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header text-white" style="background-color: #e61d4a;">
+                <h6 class="modal-title fw-bold m-0"><i class="fa-solid fa-plus me-2"></i>Thêm/Sửa Hoạt Động</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="actTargetSubcat">
+                <input type="hidden" id="actEditIndex" value=""> <!-- Bổ sung dòng này -->
+                <div class="mb-3">
+                    <label class="fw-bold small text-muted mb-1">Tên hoạt động <span class="text-danger">*</span></label>
+                    <input type="text" id="txtActName" class="form-control fw-bold" placeholder="VD: Tham gia NCKH, Khảo sát...">
+                </div>                
+                <!-- THAY ĐỔI Ở KHỐI NÀY: Dùng thẻ <select> thay cho <input> -->
+                <div class="mb-3">
+                    <label class="fw-bold small text-muted mb-1">Số điểm cộng của HĐ này <span class="text-danger">*</span></label>
+                    <select id="txtActScore" class="form-select fw-bold text-primary"></select>
+                    <small class="text-danger fw-bold mt-1 d-block" id="maxScoreHint"></small>
+                </div>
+                
+                <div class="mb-2">
+                    <label class="fw-bold small text-muted mb-1">Link Drive Minh chứng (Nếu có)</label>
+                    <input type="text" id="txtActUrl" class="form-control" placeholder="https://drive.google.com/...">
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-light fw-bold shadow-sm" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #e61d4a;" onclick="saveActivityItem()">Lưu hoạt động</button>
+            </div>
+        </div>
+    </div>
+</div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
@@ -2768,6 +4648,7 @@
     <script src="TRANGWEB/tkb.js"></script>
     <script src="TRANGWEB/qa.js"></script>
     <script src="TRANGWEB/main.js"></script>
+    <script src="TRANGWEB/renluyen.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
@@ -2776,13 +4657,38 @@
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
 <script>
+    (function() {
+        // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
+        const startMaintenance = new Date(2026, 8, 02, 07, 00);  
+        const endMaintenance   = new Date(2026, 8, 02, 16, 15); 
+        // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
+        const pad = (n) => n.toString().padStart(2, '0');
+        const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
+
+        const maintenancePage = "Baotri.html"; 
+        const now = new Date();
+
+        if (now >= startMaintenance && now <= endMaintenance) {
+            // Đóng gói cả mốc thời gian và chuỗi hiển thị gửi sang LocalStorage
+            localStorage.setItem("maintenanceConfig", JSON.stringify({
+                end: endMaintenance.getTime(), 
+                textShow: endTimeStr
+            }));
+            window.location.replace(maintenancePage);
+        } else {
+            // Xóa dữ liệu nếu chưa tới giờ hoặc đã hết bảo trì
+            localStorage.removeItem("maintenanceConfig");
+        }
+    })();
+</script>
+<script>
 // Hàm đổi URL linh hoạt
 function updateSystemUrl(paramKey, paramValue) {
     let cleanPath = window.location.pathname;
     let newUrl = cleanPath;
     
     if (paramKey && paramValue) {
-        // Thay đoạn cũ bằng:
+       // Thay đoạn cũ bằng:
 let cleanValue = paramValue.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "");
         newUrl += `?${paramKey}=${cleanValue}`;
     }
@@ -2833,20 +4739,50 @@ async function initSystemUrlRouter() {
     let categoryParam = urlParams.get('category');
     let tbParam = urlParams.get('tb');
 
+    // KIỂM TRA QUYỀN KHÁCH NGAY TỪ ĐẦU
+    if (currentUser && currentUser.isGuest) {
+        if (!tbParam) {
+            window.location.href = 'login.html';
+            return; 
+        }
+        
+        if (viewParam || courseParam) {
+            window.location.href = 'login.html';
+            return;
+        }
+    }
+
     // 1. Mở bài viết Thông báo chi tiết
     if (tbParam) {
-        // Cứu cánh vòng lặp: Buộc hệ thống kéo dữ liệu Thông báo về
-        loadDataByHocPhan('Thông báo', document.getElementById('btnNavThongBao'));
+        $('#btnNavThongBao').addClass('active');
+        loadDataByHocPhan('Thông báo', null);
         
-        // Chờ dữ liệu đổ vào biến window.thongBaoData
         let tbData = await waitForThongBaoData();
+        let isFound = false;
         
-        // Duyệt tìm mã thông báo trùng khớp và kích hoạt hàm mở chi tiết
+        // Chuẩn hóa từ khóa tìm kiếm (bỏ khoảng trắng, viết hoa)
+        let cleanTbParam = tbParam.trim().toUpperCase();
+
         for (let key in tbData) {
-            if (tbData[key] && tbData[key].tbCode === tbParam) {
-                // Trì hoãn 50ms để bảng DOM nền vẽ xong, giúp hiệu ứng bật Popup đè lên mượt hơn
+            if (tbData[key] && tbData[key].tbCode && tbData[key].tbCode.toUpperCase() === cleanTbParam) {
                 setTimeout(() => viewThongBaoDetail(key), 50);
+                isFound = true;
                 break;
+            }
+        }
+
+        // NẾU KHÔNG TÌM THẤY BÀI VIẾT -> CHỐNG LỖI MÀN HÌNH TRẮNG
+        if (!isFound) {
+            if (currentUser && currentUser.isGuest) {
+                alert("Liên kết thông báo không tồn tại hoặc bạn không có quyền xem!");
+                resetUrlToDefault();
+                location.reload(); 
+            } else {
+                alert("Liên kết thông báo không tồn tại hoặc đã bị xóa!");
+                resetUrlToDefault();
+                // Phục hồi lại bảng danh sách tổng nếu tìm không ra bài
+                $('#tbMainView').removeClass('d-none');
+                $('#tbMainView').attr('style', ''); 
             }
         }
         return;
@@ -2859,6 +4795,8 @@ async function initSystemUrlRouter() {
         else if (viewParam === 'gpa') loadGPAView();
         else if (viewParam === 'profile') loadProfileView();
         else if (viewParam === 'qa') openQASection();
+        else if (viewParam === 'datlich') loadDatLichHenView();
+        else if (viewParam === 'renluyen') loadRenLuyenView();
         else if (viewParam === 'sharecode') {
             openShareCodeSection();
             if (categoryParam) {
@@ -2876,10 +4814,9 @@ async function initSystemUrlRouter() {
     if (courseParam) {
         try {
             let categories = await waitForCategories();
-            // Thay đoạn cũ bằng:
-let matchedCourse = categories.find(name =>
-    name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "").toLowerCase() === courseParam.toLowerCase()
-);
+            let matchedCourse = categories.find(name =>
+                name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "").toLowerCase() === courseParam.toLowerCase()
+            );
             
             if (matchedCourse) {
                 loadDataByHocPhan(matchedCourse);
@@ -2906,6 +4843,7 @@ $(document).ready(function() {
     initSystemUrlRouter();
 });
 </script>
-
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>
