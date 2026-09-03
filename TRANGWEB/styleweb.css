@@ -1167,18 +1167,23 @@ body.dark-mode .qa-question table td {
 .tb-list-item {
     display: flex;
     align-items: flex-start;
-    padding: 20px 0;
+    padding: 12px 0;
     border-bottom: 1px dashed #ccc;
     cursor: pointer;
     transition: background 0.2s;
 }
+
 .tb-list-item:hover {
     background-color: #fafafa;
 }
 .tb-list-item:last-child {
     border-bottom: none;
 }
-
+@media (max-width: 991.98px) {
+    .tb-list-body {
+        padding: 0 12px !important;
+    }
+}
 /* BIỂU TƯỢNG CÁI CHUÔNG & NHÃN MỚI */
 .tb-icon-wrapper {
     position: relative;
@@ -2579,8 +2584,22 @@ body.dark-mode .mini-dl-title {
 
     /* 3. Thu gọn Padding 2 bên của khung chứa thông báo để vừa vặn màn hình điện thoại */
     .tb-list-body {
-        padding: 10px 12px !important;
+        padding: 0 30px !important;
     }
+	#tbItemsHeThong {
+    padding-top: 12px !important; 
+    margin-bottom: 0 !important;
+}
+#tbItemsHeThong > .mb-4 {
+    margin-bottom: 8px !important; 
+}
+.tb-list-body > .row.g-4 {
+    margin-top: 0 !important;
+    padding-bottom: 16px !important; /* Chừa 1 chút lề đáy cho đẹp */
+}
+.tb-list-body > .row.g-4 > .col-md-6 {
+    margin-top: 0 !important; /* Xóa khoảng trắng do Gutter Bootstrap đẩy xuống */
+}
     
     .tb-icon-wrapper {
         margin-right: 12px !important; /* Thu nhỏ khoảng cách icon chuông */
@@ -2782,10 +2801,6 @@ body.dark-mode .mini-dl-title {
     .custom-portal-table th:nth-child(3),
     .custom-portal-table td:nth-child(3) { width: 25% !important; } /* Ghi chú / Link */
 
-    /* 5. Cân chỉnh khu vực Thông báo hệ thống & Hoạt động rèn luyện */
-    .tb-list-body {
-        padding: 16px 20px !important;
-    }
 }
 /* =========================================================
    FIX TRỆT ĐỂ LỖI DỒN LỀ TRÊN IPAD / TABLET / BÀN PHÍM XOAY
@@ -3658,4 +3673,41 @@ tr.rl-row-white td {
     color: #ffffff !important;
     border-color: rgba(255, 255, 255, 0.15) !important;
     font-weight: 600;
+}
+/* --- FIX KHOẢNG TRẮNG PHÍA TRÊN CÙNG CỦA BẢNG THÔNG BÁO --- */
+
+/* 1. Xóa lề trên của thẻ row bọc bên ngoài */
+#customViewWrapper > .row {
+    margin-top: 0 !important;
+}
+
+/* 2. Triệt tiêu khoảng trống 24px do class g-4 của Bootstrap sinh ra trên cột */
+#tbMainView {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* 3. Bo góc thanh xanh cho khớp với viền bo tròn của thẻ card bên ngoài (tùy chọn cho đẹp) */
+.tb-list-container {
+    border-top: none !important;
+    border-radius: 12px !important; /* Cũ là 8px, đổi lên 12px cho khớp với khung ngoài */
+}
+
+/* Bo góc riêng cho thanh tiêu đề màu xanh */
+.tb-list-container > .tb-header-blue {
+    border-top-left-radius: 12px !important;
+    border-top-right-radius: 12px !important;
+}
+/* --- FIX KHOẢNG TRẮNG PHÍA TRÊN CÙNG CỦA TRANG CHI TIẾT THÔNG BÁO --- */
+
+/* Triệt tiêu lề đỉnh do Gutter Bootstrap (g-4) gây ra trên các cột chứa nội dung */
+#customViewWrapper > .row > .col-12 {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Đảm bảo khung chi tiết không có khoảng lề thừa nào cản trở */
+#tbDetailContainer {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }
