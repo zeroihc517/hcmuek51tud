@@ -384,7 +384,7 @@ function renderSidebarCategories() {
         let lowerName = name.trim().toLowerCase();
         
         // Bỏ qua các sheet dữ liệu hệ thống ẩn
-if (lowerName === 'deadlines_admin' || lowerName === 'deadlines_status' || lowerName === 'tkb_admin' || lowerName === 'khaosat' || lowerName === 'weblinks_personal' || lowerName === 'registrationhistory' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'datlichhen' || lowerName === 'learningdata' || lowerName === 'groupstudybooking'  || lowerName === 'gpa_data' || lowerName === 'exercisequestions' || lowerName === 'sharecode' || lowerName === 'renLuyen_data' || lowerName === 'grouplinks') return;
+if (lowerName === 'deadlines_admin' || lowerName === 'deadlines_status' || lowerName === 'tkb_admin' || lowerName === 'khaosat' || lowerName === 'weblinks_personal' || lowerName === 'registrationhistory' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'datlichhen' || lowerName === 'learningdata' || lowerName === 'groupstudybooking'  || lowerName === 'gpa_data' || lowerName === 'exercisequestions' || lowerName === 'sharecode' || lowerName === 'renLuyen_data' || lowerName === 'grouplinks' || lowerName === 'renluyen_data' || lowerName === 'exercise_status') return;
 
 
         if (lowerName !== 'thông báo') {
