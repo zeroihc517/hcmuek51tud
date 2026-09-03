@@ -50,12 +50,28 @@
         <button class="btn btn-outline-secondary fw-bold shadow-sm mb-3" onclick="goBackToHome()" style="border-radius: 8px; background: white;">
             <i class="fa-solid fa-arrow-left me-1"></i> Trở về danh sách
         </button>
-
+	
         <!-- Header của bài đang làm -->
         <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; border-left: 6px solid #0f4c81 !important; background: #ffffff;">
-            <div class="card-body p-4">
+           <div class="card-body p-4">
                 <span class="badge bg-primary mb-2 px-3 py-1.5" style="font-size: 13px; background-color: #0f4c81 !important;" id="badgeCourse">Đang tải học phần...</span>
-                <h3 class="fw-bold text-dark m-0" id="titleMaBai">Bài tập: ---</h3>
+                
+                <!-- BỌC TIÊU ĐỀ VÀ NHÓM NÚT TRẠNG THÁI VÀO CÙNG 1 HÀNG -->
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h3 class="fw-bold text-dark m-0" id="titleMaBai">Bài tập: ---</h3>
+                    
+                    <div class="btn-group shadow-sm" role="group" aria-label="Trạng thái tiến độ">
+    <input type="radio" class="btn-check" name="statusRadio" id="radioChuaLam" autocomplete="off" onclick="changeExerciseStatus('chualam')">
+    <label class="btn btn-outline-secondary fw-bold px-3" for="radioChuaLam">Chưa làm</label>
+
+    <input type="radio" class="btn-check" name="statusRadio" id="radioConHoc" autocomplete="off" onclick="changeExerciseStatus('conhoc')">
+    <label class="btn btn-outline-warning text-dark fw-bold px-3" for="radioConHoc">Còn học</label>
+
+    <input type="radio" class="btn-check" name="statusRadio" id="radioDaLam" autocomplete="off" onclick="changeExerciseStatus('dalam')">
+    <label class="btn btn-outline-success fw-bold px-3" for="radioDaLam">Đã làm</label>
+</div>
+                </div>
+
             </div>
         </div>
 
@@ -171,7 +187,7 @@
         </div>
     </div>
 
-   <div class="d-flex justify-content-end mt-3 gap-2 border-top pt-3">
+    <div class="d-flex justify-content-end mt-3 gap-2 border-top pt-3">
         <button type="button" class="btn btn-light border fw-bold" onclick="$('#customTreeContainer').addClass('d-none')">Hủy bỏ</button>
         
         <!-- Nút mới: Tải ảnh 4K -->
