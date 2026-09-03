@@ -884,11 +884,10 @@ function loadShareCodeData() {
                 success: function(users) {
                     window.allUsersMap = {};
                     users.forEach(u => { 
-                        // Lưu đồng thời định dạng có chấm và không chấm
-                        let cleanMssv = u.mssv.replace(/\./g, "");
-                        window.allUsersMap[u.mssv] = u; 
-			window.allUsersMap[cleanMssv] = u;
-                    });
+    let cleanMssv = String(u.mssv).replace(/\./g, "").trim();
+    window.allUsersMap[u.mssv] = u; 
+    window.allUsersMap[cleanMssv] = u;
+});
                     resolve();
                 },
                 error: () => resolve() // Lỗi mạng thì vẫn cho chạy tiếp
@@ -3408,11 +3407,11 @@ window.loadCourseQAList = function() {
                 dataType: "json",
                 success: function(users) {
                     window.allUsersMap = {};
-                    users.forEach(u => { 
-                        let cleanMssv = u.mssv.replace(/\./g, "");
-                        window.allUsersMap[u.mssv] = u; 
-                        window.allUsersMap[cleanMssv] = u;
-                    });
+                   users.forEach(u => { 
+    let cleanMssv = String(u.mssv).replace(/\./g, "").trim();
+    window.allUsersMap[u.mssv] = u; 
+    window.allUsersMap[cleanMssv] = u;
+});
                     resolve();
                 },
                 error: () => resolve()

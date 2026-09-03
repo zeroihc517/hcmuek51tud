@@ -1159,17 +1159,26 @@ window.loadThongBaoComments = function(tbCode) {
                         commentCount++;
                         let time = row[0] || ''; 
                         let rawMssv = String(row[1] || '').trim().replace(/[-|]/g, ''); 
+                        let cleanRawMssv = rawMssv.replace(/\./g, ""); 
                         let displayMssv = maskMSSV(rawMssv); 
                         
+                        let authorNameForAvatar = "S";
+
                         if (isSystemAdmin) {
                             let userObj = window.allUsersMap ? window.allUsersMap[rawMssv] : null;
                             let fullName = userObj ? userObj.name : null;
-                            displayMssv = fullName ? `${rawMssv} - ${getNaturalShortName(fullName)}` : rawMssv;
+                            if (fullName) authorNameForAvatar = getNaturalShortName(fullName);
+                            displayMssv = fullName ? `${rawMssv} -${authorNameForAvatar}` : rawMssv;
                         } else if (activeUser && activeUser.mssv) {
                             let myCleanMssv = activeUser.mssv.replace(/\./g, "");
-                            if (myCleanMssv === rawMssv.replace(/\./g, "")) {
-                                displayMssv = `${rawMssv} - ${getNaturalShortName(activeUser.name)} <span class="badge bg-success ms-1" style="font-size: 10px;">Bạn</span>`;
+                            if (myCleanMssv === cleanRawMssv) {
+                                authorNameForAvatar = getNaturalShortName(activeUser.name);
+                                displayMssv = `${rawMssv} -${authorNameForAvatar} <span class="badge bg-success ms-1" style="font-size: 10px;">Bạn</span>`;
+                            } else if (window.allUsersMap && window.allUsersMap[cleanRawMssv]) {
+                                authorNameForAvatar = getNaturalShortName(window.allUsersMap[cleanRawMssv].name);
                             }
+                        } else if (window.allUsersMap && window.allUsersMap[cleanRawMssv]) {
+                            authorNameForAvatar = getNaturalShortName(window.allUsersMap[cleanRawMssv].name);
                         }
 
                         let badgeRegex = /(<span class="badge[^>]*>.*?<\/span>)\s*/;
@@ -1180,9 +1189,9 @@ window.loadThongBaoComments = function(tbCode) {
                         let answer = row[3] || ''; 
                         let rowIndex = row[6];
                         
-                        let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm flex-shrink-0" style="width: 32px; height: 32px; font-size: 14px;"><i class="fa-solid fa-user"></i></div>`;
+                        // XỬ LÝ AVATAR TỐI ƯU CHO SINH VIÊN CÙNG XEM NHAU
+                        let avatarHtml = '';
                         let userAvatar = "";
-                        let cleanRawMssv = rawMssv.replace(/\./g, ""); 
 
                         if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv) {
                             userAvatar = activeUser.avatar || "";
@@ -1190,19 +1199,24 @@ window.loadThongBaoComments = function(tbCode) {
                             userAvatar = window.allUsersMap[cleanRawMssv].avatar;
                         }
 
-                       if (userAvatar && userAvatar.trim() !== '') {
-    let cleanUrl = userAvatar.trim();
-    if (cleanUrl.includes("drive.google.com/file/d/")) {
-        let matchId = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-        if (matchId && matchId[1]) cleanUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w100`;
-    } else if (cleanUrl.includes("googleusercontent.com")) {
-        cleanUrl = cleanUrl.replace(/=w\d+|-h\d+|-p|-no|-k/g, '').replace(/=s\d+/g, '') + "=w100-h100-p";
-    } else if (cleanUrl.includes("photos.google.com") || cleanUrl.includes("photos.app.goo.gl")) {
-        // Mở khóa bằng Proxy cho link Google Photos
-        cleanUrl = `https://wsrv.nl/?url=${encodeURIComponent(cleanUrl)}&w=100&h=100&fit=cover`;
-    }
-    avatarHtml = `<img src="${cleanUrl}" class="rounded-circle me-2 shadow-sm flex-shrink-0 mt-1" style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid #0f4c81; user-select: none; -webkit-user-drag: none;">`;
-}
+                        if (userAvatar && userAvatar.trim() !== '') {
+                            let cleanUrl = userAvatar.trim();
+                            if (cleanUrl.includes("drive.google.com/file/d/")) {
+                                let matchId = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                                if (matchId && matchId[1]) cleanUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w100`;
+                            } else if (cleanUrl.includes("googleusercontent.com")) {
+                                cleanUrl = cleanUrl.replace(/=w\d+|-h\d+|-p|-no|-k/g, '').replace(/=s\d+/g, '') + "=w100-h100-p";
+                            } else if (cleanUrl.includes("photos.google.com") || cleanUrl.includes("photos.app.goo.gl")) {
+                                cleanUrl = `https://wsrv.nl/?url=${encodeURIComponent(cleanUrl)}&w=100&h=100&fit=cover`;
+                            }
+                            avatarHtml = `<img src="${cleanUrl}" class="rounded-circle me-2 shadow-sm flex-shrink-0 mt-1" style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid #0f4c81; user-select: none; -webkit-user-drag: none;">`;
+                        } else {
+                            let firstChar = authorNameForAvatar.charAt(0).toUpperCase();
+                            let bgColors = ['#0f4c81', '#10b981', '#e61d4a', '#f59e0b', '#8b5cf6', '#0ea5e9'];
+                            let colorIndex = firstChar.charCodeAt(0) % bgColors.length;
+                            let selectedColor = bgColors[colorIndex];
+                            avatarHtml = `<div class="text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm flex-shrink-0 mt-1" style="width: 32px; height: 32px; font-size: 15px; font-weight: bold; background-color: ${selectedColor}; user-select: none;">${firstChar}</div>`;
+                        }
 
                         html += `
                         <div class="mb-4" style="border-left: 3px solid #cbd5e1; padding-left: 15px; margin-left: 5px;">
