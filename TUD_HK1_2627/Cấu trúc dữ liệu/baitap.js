@@ -121,6 +121,7 @@ function loadQuestionsData() {
     let mssv = $('#txtExerciseMSSV').val().trim();
     
     // --- 1. Gọi API tải LỊCH SỬ CHẠY NGẦM (Không làm kẹt giao diện hiển thị đề) ---
+    // --- 1. Gọi API tải LỊCH SỬ CHẠY NGẦM (Không làm kẹt giao diện hiển thị đề) ---
     if (mssv && mssv !== "Khách") {
         historyAjaxRequest = $.ajax({
             url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
@@ -130,6 +131,45 @@ function loadQuestionsData() {
         }).done(function(dataH) {
             globalSubmissionData = dataH;
             
+          // TẢI TRẠNG THÁI CÁ NHÂN (CÒN HỌC / CHƯA LÀM) TỪ GOOGLE SHEETS VỀ
+$.ajax({
+    url: SCRIPT_URL + "?action=getExerciseStatus&mssv=" + encodeURIComponent(mssv) + "&course=" + encodeURIComponent(courseName),
+    method: "GET",
+    dataType: "text",
+    cache: false, // QUAN TRỌNG: Tắt cache để trình duyệt không lấy nhầm dữ liệu cũ
+    success: function(statusDataRaw) {
+    if (statusDataRaw) {
+        try {
+            let serverData = JSON.parse(statusDataRaw);
+            
+            // --- THÊM ĐOẠN NÀY: Xử lý triệt để lỗi bọc chuỗi 2 lần ---
+            if (typeof serverData === 'string') {
+                serverData = JSON.parse(serverData);
+            }
+            
+            let localData = JSON.parse(localStorage.getItem(`status_${mssv}_${courseName}`) || '{}');
+            
+            // Thuật toán gộp an toàn: Giữ lại dữ liệu local nếu server lỡ trả về rỗng
+            let mergedData = Object.assign({}, localData, serverData);
+            
+            // Nếu người dùng vừa bấm thao tác, ưu tiên dữ liệu ở local đè lên
+            if (window.hasModifiedStatus) {
+                mergedData = Object.assign({}, serverData, localData);
+            }
+            
+            // Chỉ lưu vào bộ nhớ nếu thực sự có dữ liệu
+            if (Object.keys(mergedData).length > 0) {
+                localStorage.setItem(`status_${mssv}_${courseName}`, JSON.stringify(mergedData));
+            }
+            
+            checkCompletedQuestions(); 
+        } catch(e) {
+            console.error("Lỗi parse JSON status", e);
+        }
+    }
+}
+});
+
             // Sau khi tải ngầm xong, lướt qua để tô màu xanh các câu đã làm
             if (questionsList && questionsList.length > 0) {
                 let completedMaBai = new Set();
@@ -176,12 +216,39 @@ function loadQuestionsData() {
                 return;
             }
 
+           // Đọc bộ nhớ tiến độ thủ công ngay lập tức để render
+            let mssvUser = $('#txtExerciseMSSV').val().trim();
+            let savedStatus = JSON.parse(localStorage.getItem(`status_${mssvUser}_${courseName}`) || '{}');
+
             let tabsHtml = "";
             questionsList.forEach((q, idx) => {
-                // Thay đổi class HTML thành card lưới
+                let maBai = q.maBai.trim();
+                let localStat = savedStatus[maBai] || 'chualam';
+                
+                // Gán class và text mặc định
+                let btnClass = "btn-question-card";
+                let iconClass = "fa-file-code";
+                let badgeClass = "bg-secondary";
+                let badgeText = "Chưa làm";
+
+                // Thay đổi theo tiến độ lưu trong máy ngay lúc vẽ HTML
+                if (localStat === 'dalam') {
+                    btnClass += " completed";
+                    iconClass = "fa-circle-check";
+                    badgeClass = "bg-success";
+                    badgeText = "Đã làm";
+                } else if (localStat === 'conhoc') {
+                    btnClass += " studying";
+                    badgeClass = "bg-warning text-dark";
+                    badgeText = "Còn học";
+                }
+
                 tabsHtml += `
-                    <button class="btn-question-card" id="tabBtnQuestion_${idx}" onclick="switchQuestion(${idx})">
-                        <div class="q-title"><i class="fa-solid fa-file-code me-1"></i> Câu ${idx + 1}</div>
+                    <button class="${btnClass}" id="tabBtnQuestion_${idx}" onclick="switchQuestion(${idx})">
+                        <div class="d-flex justify-content-between align-items-start w-100 mb-1">
+                            <div class="q-title"><i class="fa-solid ${iconClass} me-1"></i> Câu ${idx + 1}</div>
+                            <span class="badge ${badgeClass} status-badge" style="font-size: 11px;" id="statusBadge_${idx}">${badgeText}</span>
+                        </div>
                         <div class="q-code">Mã: ${q.maBai}</div>
                     </button>
                 `;
@@ -209,10 +276,10 @@ function renderQuestion(index) {
     
     index = parseInt(index);
     currentQuestionIndex = index;
-    let q = questionsList[index];
+   let q = questionsList[index];
     if (!q) return;
 
-    cancelEditMode();
+        cancelEditMode();
 
     $('#badgeCourse').text(courseName);    $('#titleMaBai').text(`Bài tập: ${q.title}`);
     $('#labelCurrentMaBai').text(`Mã bài: ${q.maBai}`);
@@ -319,6 +386,7 @@ function renderQuestion(index) {
         }
     });
     processedContent = tempDiv.innerHTML;
+
 }
 	processedContent = convertUrlsToLinks(processedContent);
     // 4. CẬP NHẬT GIAO DIỆN VÀ MATHJAX
@@ -335,6 +403,29 @@ function renderQuestion(index) {
     $(`#tabBtnQuestion_${index}`).addClass('active');
 
     loadSubmissionHistory();
+// --- HIỂN THỊ ĐÚNG TRẠNG THÁI CỦA NÚT "CÒN HỌC" KHI MỞ BÀI ---
+    // --- ĐỒNG BỘ NÚT 3 CHẾ ĐỘ KHI MỞ BÀI ---
+    let mssvUser = $('#txtExerciseMSSV').val().trim();
+    let savedStatus = JSON.parse(localStorage.getItem(`status_${mssvUser}_${courseName}`) || '{}');
+    let currentStatus = savedStatus[q.maBai.trim()] || 'chualam';
+    
+    // Nếu hệ thống ghi nhận là đã nộp (class 'completed' đã được add) mà chưa có tùy chỉnh tay
+    if ($(`#tabBtnQuestion_${index}`).hasClass('completed') && savedStatus[q.maBai.trim()] === undefined) {
+        currentStatus = 'dalam';
+    }
+
+    if (currentStatus === 'dalam') $('#radioDaLam').prop('checked', true);
+    else if (currentStatus === 'conhoc') $('#radioConHoc').prop('checked', true);
+    else $('#radioChuaLam').prop('checked', true);
+    // ----------------------------------------
+    let studyingMaBai = JSON.parse(localStorage.getItem(`studying_${mssvUser}_${courseName}`) || '[]');
+    let btnMark = $('#btnMarkStudying');
+    
+    if (studyingMaBai.includes(q.maBai.trim())) {
+        btnMark.html('<i class="fa-solid fa-check me-1"></i> Đã đánh dấu "Còn học"').removeClass('btn-outline-warning').addClass('btn-warning text-dark');
+    } else {
+        btnMark.html('<i class="fa-solid fa-bookmark me-1"></i> Đánh dấu "Còn học"').removeClass('btn-warning text-dark').addClass('btn-outline-warning');
+    }
 }
 
         function switchQuestion(index) {
@@ -1088,58 +1179,86 @@ function insertDrawingToEditor() {
     
     $('#drawingContainer').addClass('d-none');
 }
-// Hàm kiểm tra toàn bộ dữ liệu để đánh dấu các câu đã nộp
 function checkCompletedQuestions() {
     let mssv = $('#txtExerciseMSSV').val().trim();
     
-    // NẾU LÀ KHÁCH CHƯA ĐĂNG NHẬP: Tắt loading luôn vì không cần chờ quét tiến độ
     if (!mssv || mssv === "Khách") {
         hideFullScreenLoader();
         return; 
     }
 
+    // Lấy bộ nhớ trạng thái thủ công do sinh viên bấm
+    let savedStatus = JSON.parse(localStorage.getItem(`status_${mssv}_${courseName}`) || '{}');
+
     const processCompleted = (data) => {
+        let submittedMaBai = new Set(); // Chứa các bài đã nộp thực tế lên hệ thống
+        
         if (data && data.length > 0) {
-            let completedMaBai = new Set();
-            
             data.forEach(row => {
                 let rowMssv = row[1] || '';
                 let contentRaw = row[2] || '';
                 if (rowMssv.trim().toLowerCase() === mssv.toLowerCase()) {
                     let match = contentRaw.match(/^\[SHARECODE\|(.*?)\|(.*?)\]/);
                     if (match && match[1] === courseName) {
-                        completedMaBai.add(match[2].trim());
+                        submittedMaBai.add(match[2].trim());
                     }
                 }
             });
-
-            questionsList.forEach((q, idx) => {
-                if (completedMaBai.has(q.maBai.trim())) {
-                    let tabBtn = $(`#tabBtnQuestion_${idx}`);
-                    tabBtn.addClass('completed'); 
-                    tabBtn.find('i').removeClass('fa-file-code').addClass('fa-circle-check'); 
-                }
-            });
         }
+
+        questionsList.forEach((q, idx) => {
+            let tabBtn = $(`#tabBtnQuestion_${idx}`);
+            let badge = tabBtn.find('.status-badge');
+            let maBai = q.maBai.trim();
+            
+            // XÁC ĐỊNH TRẠNG THÁI CUỐI CÙNG
+            let finalStatus = 'chualam'; // Mặc định
+            
+            if (savedStatus[maBai] !== undefined) {
+                finalStatus = savedStatus[maBai]; // Ưu tiên cái do sinh viên tự bấm
+            } else if (submittedMaBai.has(maBai)) {
+                finalStatus = 'dalam'; // Nếu không bấm gì mà đã có bài nộp trên hệ thống
+            }
+
+            // CẬP NHẬT GIAO DIỆN NÚT Ở DANH SÁCH BÀI TẬP
+            if (finalStatus === 'dalam') {
+                tabBtn.removeClass('studying').addClass('completed'); 
+                tabBtn.find('.q-title i').removeClass('fa-file-code').addClass('fa-circle-check'); 
+                badge.removeClass('bg-secondary bg-warning text-dark').addClass('bg-success').text('Đã làm');
+            } else if (finalStatus === 'conhoc') {
+                tabBtn.removeClass('completed').addClass('studying');
+                tabBtn.find('.q-title i').removeClass('fa-circle-check').addClass('fa-file-code'); 
+                badge.removeClass('bg-secondary bg-success').addClass('bg-warning text-dark').text('Còn học');
+            } else {
+                tabBtn.removeClass('completed studying');
+                tabBtn.find('.q-title i').removeClass('fa-circle-check').addClass('fa-file-code'); 
+                badge.removeClass('bg-success bg-warning text-dark').addClass('bg-secondary').text('Chưa làm');
+            }
+
+            // ĐỒNG BỘ NÚT CHỌN RADIO TRONG KHUNG LÀM BÀI NẾU ĐANG MỞ CÂU NÀY
+            if (idx === currentQuestionIndex) {
+                if (finalStatus === 'dalam') $('#radioDaLam').prop('checked', true);
+                else if (finalStatus === 'conhoc') $('#radioConHoc').prop('checked', true);
+                else $('#radioChuaLam').prop('checked', true);
+            }
+        });
         
-        // SAU KHI TÔ MÀU XONG XUÔI HẾT -> MỚI GỌI LỆNH TẮT MÀN HÌNH CHỜ
         hideFullScreenLoader();
     };
 
     if (globalSubmissionData) {
         processCompleted(globalSubmissionData);
-    } 
-    else if (historyAjaxRequest) {
+    } else if (historyAjaxRequest) {
         historyAjaxRequest.done(function(data) {
             processCompleted(data);
         }).fail(function() {
-            // Lỗi mạng không quét được thì cũng phải tắt Loading để cho sv làm bài
             hideFullScreenLoader();
         });
     } else {
         hideFullScreenLoader();
     }
 }
+
 // Hàm mở rộng chiều dài bảng vẽ
 function expandCanvas() {
     if (!canvas || !ctx) return;
@@ -2274,4 +2393,100 @@ function hideFullScreenLoader() {
         loader.css('opacity', '0'); // Làm mờ đi
         setTimeout(() => loader.addClass('d-none'), 400); // 0.4s sau thì ẩn hẳn
     }
+}
+// HÀM BẬT / TẮT ĐÁNH DẤU "CÒN HỌC"
+function toggleMarkStudying() {
+    let q = questionsList[currentQuestionIndex];
+    if (!q) return;
+
+    let mssv = $('#txtExerciseMSSV').val().trim();
+    if (!mssv || mssv === "Khách") {
+        alert("Vui lòng đăng nhập để lưu tiến độ học tập!");
+        requireLogin();
+        return;
+    }
+
+    let studyingMaBai = JSON.parse(localStorage.getItem(`studying_${mssv}_${courseName}`) || '[]');
+    let btn = $('#btnMarkStudying');
+
+    if (!studyingMaBai.includes(q.maBai.trim())) {
+        // NẾU CHƯA ĐÁNH DẤU -> BÂY GIỜ ĐÁNH DẤU
+        studyingMaBai.push(q.maBai.trim());
+        localStorage.setItem(`studying_${mssv}_${courseName}`, JSON.stringify(studyingMaBai));
+        
+        btn.html('<i class="fa-solid fa-check me-1"></i> Đã đánh dấu "Còn học"').removeClass('btn-outline-warning').addClass('btn-warning text-dark');
+    } else {
+        // NẾU ĐÃ ĐÁNH DẤU RỒI -> BẤM VÀO ĐỂ HỦY ĐÁNH DẤU
+        studyingMaBai = studyingMaBai.filter(id => id !== q.maBai.trim());
+        localStorage.setItem(`studying_${mssv}_${courseName}`, JSON.stringify(studyingMaBai));
+        
+        btn.html('<i class="fa-solid fa-bookmark me-1"></i> Đánh dấu "Còn học"').removeClass('btn-warning text-dark').addClass('btn-outline-warning');
+    }
+
+    // Quét lại màu sắc bên ngoài màn hình chủ
+    checkCompletedQuestions();
+}
+
+// HÀM CHUYỂN ĐỔI 3 CHẾ ĐỘ BÀI TẬP & ĐỒNG BỘ LÊN GOOGLE SHEETS
+function changeExerciseStatus(newStatus) {
+    window.hasModifiedStatus = true; // THÊM DÒNG NÀY: Bật cờ báo hiệu người dùng vừa thao tác
+    
+    let q = questionsList[currentQuestionIndex];
+    if (!q) return;
+
+    let mssv = $('#txtExerciseMSSV').val().trim();
+    if (!mssv || mssv === "Khách") {
+        alert("Vui lòng đăng nhập để lưu tiến độ học tập!");
+        requireLogin();
+        return;
+    }
+
+    // 1. CẬP NHẬT BỘ NHỚ LƯU TRỮ TRÌNH DUYỆT
+    let savedStatus = JSON.parse(localStorage.getItem(`status_${mssv}_${courseName}`) || '{}');
+    savedStatus[q.maBai.trim()] = newStatus;
+    
+    let stringifiedData = JSON.stringify(savedStatus);
+    localStorage.setItem(`status_${mssv}_${courseName}`, stringifiedData);
+    
+    // 2. ÉP GIAO DIỆN ĐỔI MÀU LẬP TỨC (0 GIÂY ĐỘ TRỄ)
+    let tabBtn = $(`#tabBtnQuestion_${currentQuestionIndex}`);
+    let badge = tabBtn.find('.status-badge');
+    
+    if (newStatus === 'dalam') {
+        tabBtn.removeClass('studying').addClass('completed'); 
+        tabBtn.find('.q-title i').removeClass('fa-file-code').addClass('fa-circle-check'); 
+        badge.removeClass('bg-secondary bg-warning text-dark').addClass('bg-success').text('Đã làm');
+        $('#radioDaLam').prop('checked', true); // Check nút bấm
+    } 
+    else if (newStatus === 'conhoc') {
+        tabBtn.removeClass('completed').addClass('studying');
+        tabBtn.find('.q-title i').removeClass('fa-circle-check').addClass('fa-file-code'); 
+        badge.removeClass('bg-secondary bg-success').addClass('bg-warning text-dark').text('Còn học');
+        $('#radioConHoc').prop('checked', true); // Check nút bấm
+    } 
+    else {
+        tabBtn.removeClass('completed studying');
+        tabBtn.find('.q-title i').removeClass('fa-circle-check').addClass('fa-file-code'); 
+        badge.removeClass('bg-success bg-warning text-dark').addClass('bg-secondary').text('Chưa làm');
+        $('#radioChuaLam').prop('checked', true); // Check nút bấm
+    }
+
+    // 3. ÂM THẦM ĐỒNG BỘ LÊN GOOGLE SHEETS
+    let postDataObj = {
+        action: "saveExerciseStatus",
+        mssv: mssv,
+        course: courseName,
+        statusData: stringifiedData
+    };
+    
+    $.ajax({
+        url: SCRIPT_URL,
+        type: "POST",
+        data: JSON.stringify(postDataObj),
+        contentType: "text/plain;charset=utf-8",
+        dataType: "text",
+        success: function() {
+            console.log("Đã lưu tiến độ lên máy chủ!");
+        }
+    });
 }

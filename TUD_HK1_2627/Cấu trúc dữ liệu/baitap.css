@@ -230,12 +230,20 @@
     background-color: #bbf7d0 !important;
     border-color: #16a34a !important;
 }
-.btn-question-card.completed .q-title {
-    color: #166534 !important;
+.btn-question-card.completed .q-title { color: #166534 !important; }
+.btn-question-card.completed .q-code { color: #15803d !important; }
+
+/* BỔ SUNG: TRẠNG THÁI CÒN HỌC (MÀU VÀNG) */
+.btn-question-card.studying {
+    background-color: #fef9c3 !important;
+    border-color: #eab308 !important;
 }
-.btn-question-card.completed .q-code {
-    color: #15803d !important;
+.btn-question-card.studying:hover {
+    background-color: #fef08a !important;
+    border-color: #ca8a04 !important;
 }
+.btn-question-card.studying .q-title { color: #854d0e !important; }
+.btn-question-card.studying .q-code { color: #a16207 !important; }
 /* GIAO DIỆN NÚT BẤM CHO LINK ĐẦU TIÊN (BẢN PREMIUM) */
 .btn-first-link {
     position: relative;
