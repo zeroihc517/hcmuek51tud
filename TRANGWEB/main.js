@@ -209,7 +209,7 @@ function pingOnlineStatus() {
             try {
                 let userObj = JSON.parse(savedUser);
                 mssvParam = userObj.mssv + "|" + userObj.name + "|" + (isAdmin ? "1" : "0"); 
-                const allowedGpaAccounts = ["51.01.108.008", "ihcspt517", "51.01.108.042"];
+                const allowedGpaAccounts = ["51.01.108.008", "ihcspt517"];
                 if (allowedGpaAccounts.includes(userObj.mssv)) {
                     $('#gpaNavContainer').removeClass('d-none');
                 } else {
