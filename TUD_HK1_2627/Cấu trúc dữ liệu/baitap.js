@@ -2682,6 +2682,11 @@ function loadExerciseQAList(targetExerciseCode) {
                 container.html(html);
                 if (window.Prism) Prism.highlightAllUnder(document.getElementById('exerciseQAListArea'));
                 if (typeof applyKaTeX === 'function') applyKaTeX('exerciseQAListArea');
+		if (window.MathJax && window.MathJax.typesetPromise) {
+                    MathJax.typesetPromise([document.getElementById('exerciseQAListArea')]).catch(function (err) {
+                        console.log('MathJax error in Q&A list: ' + err.message);
+                    });
+                }
             }
         });
     });
