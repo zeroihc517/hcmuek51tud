@@ -2490,3 +2490,290 @@ function changeExerciseStatus(newStatus) {
         }
     });
 }
+// =========================================================
+// CHỨC NĂNG Q&A ĐỒNG BỘ & HIỂN THỊ LỊCH SỬ THEO MÃ BÀI
+// =========================================================
+
+function openExerciseQA() {
+    let q = questionsList[currentQuestionIndex];
+    if (!q) {
+        alert("Lỗi: Không tìm thấy dữ liệu bài tập hiện tại.");
+        return;
+    }
+
+    let courseName = window.EXERCISE_COURSE_NAME || "";
+    let chapterName = window.FILTER_TITLE_KEYWORD || "Bài tập tổng hợp";
+    let exerciseCode = q.maBai || "Không xác định";
+
+    let topicName = courseName; 
+    let cleanCourseName = courseName.trim();
+    
+    // Ánh xạ Mã học phần chuẩn
+    const courseMap = {
+        "Cấu trúc dữ liệu": "COMP1016",
+        "Lập trình hướng đối tượng": "COMP1017",
+        "Lập trình nâng cao": "COMP1013",
+        "Lập trình Python": "COMP1804",
+        "Hình học vi phân": "MATH1417",
+        "Cấu trúc đại số và ứng dụng": "APMA1803",
+        "Độ đo và tích phân": "MATH1413",
+        "Toán rời rạc": "APMA1817",
+        "Phương trình vi phân và đạo hàm riêng": "MATH1817",
+        "Đại số tuyến tính": "APMA1801",
+        "Giải tích hàm một biến": "APMA1804",
+        "Trí tuệ nhân tạo": "COMP1314"
+    };
+    
+    if (courseMap[cleanCourseName]) {
+        topicName = `${courseMap[cleanCourseName]}-${cleanCourseName}`;
+    }
+
+    // Đổ dữ liệu vào Modal
+    $('#lblQA_Topic').text(topicName);
+    $('#lblQA_Chapter').text(chapterName);
+    $('#lblQA_ExerciseCode').text(exerciseCode);
+    $('#txtExerciseQAContent').val('');
+    
+    // Mở Modal và tải lịch sử câu hỏi cùng mã bài
+    $('#exerciseQAModal').modal('show');
+    loadExerciseQAList(exerciseCode);
+}
+
+function loadExerciseQAList(targetExerciseCode) {
+    let container = $('#exerciseQAListArea');
+    container.html('<div class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin fs-3"></i><br>Đang tải dữ liệu thảo luận...</div>');
+
+    let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+
+    let userMapPromise = new Promise((resolve) => {
+        if (!window.allUsersMap) {
+            $.ajax({
+                url: SCRIPT_URL + "?action=getAllUsers",
+                method: "GET",
+                dataType: "json",
+                success: function(users) {
+                    window.allUsersMap = {};
+                    users.forEach(u => { 
+                        let cleanMssv = String(u.mssv).replace(/\./g, "").trim();
+                        window.allUsersMap[u.mssv] = u; 
+                        window.allUsersMap[cleanMssv] = u;
+                    });
+                    resolve();
+                },
+                error: () => resolve()
+            });
+        } else {
+            resolve();
+        }
+    });
+
+    userMapPromise.then(() => {
+        $.ajax({
+            url: SCRIPT_URL + "?action=getQAData&_=" + new Date().getTime(),
+            method: "GET",
+            dataType: "json",
+            cache: false,
+            success: function(data) {
+                let html = '';
+                let count = 0;
+
+                if (data && data.length > 0) {
+                    data.forEach(row => {
+                        let rawQuestion = row[2] || '';
+                        
+                        if (rawQuestion.includes(targetExerciseCode)) {
+                            count++;
+                            let time = row[0];
+                            let rawMssv = String(row[1]).replace(/[-|]/g, '');
+                            let cleanRawMssv = rawMssv.replace(/\./g, ""); 
+                            
+                            let userObj = window.allUsersMap ? window.allUsersMap[cleanRawMssv] : null;
+                            let authorName = userObj ? getNaturalShortName(userObj.name) : "Sinh viên";
+
+                            let displayMssv = `${rawMssv} - ${authorName}`;
+                            if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv) {
+                                displayMssv += ` <span class="badge bg-success ms-1" style="font-size: 10px;">Bạn</span>`;
+                            }
+
+                            let answer = row[3] || '';
+                            let rowIndex = row[6];
+
+                            // ---------------------------------------------------------
+                            // LÀM SẠCH VÀ GOM GỌN KHOẢNG TRẮNG THỪA
+                            // ---------------------------------------------------------
+                            let cleanQuestion = rawQuestion
+                                .replace(/<span class="badge[^>]*>[\s\S]*?<\/span>/gi, '')
+                                .replace(/<strong>\s*Chương\s*:\s*<\/strong>[\s\S]*?(<br\s*\/?>|\n|$)/gi, '')
+                                .replace(/<strong>\s*Mã bài\s*:\s*<\/strong>[\s\S]*?(<br\s*\/?>|\n|$)/gi, '')
+                                .replace(/(<br\s*\/?>|\n)+/g, '<br>') // Gom nhiều thẻ ngắt dòng liên tiếp thành 1
+                                .replace(/^(<br\s*\/?>)+/, '')       // Xóa sạch thẻ ngắt dòng thừa ở đầu
+                                .trim();
+
+                            let questionFormatted = typeof safeFormatTextQA === 'function' ? safeFormatTextQA(cleanQuestion) : cleanQuestion;
+
+                            let avatarHtml = '';
+                            let userAvatar = userObj ? userObj.avatar : "";
+                            
+                            if (userAvatar && userAvatar.trim() !== '') {
+                                let cleanUrl = userAvatar.trim();
+                                if (cleanUrl.includes("drive.google.com/file/d/")) {
+                                    let matchId = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                                    if (matchId && matchId[1]) cleanUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w100`;
+                                } else if (cleanUrl.includes("googleusercontent.com")) {
+                                    cleanUrl = cleanUrl.replace(/=w\d+|-h\d+|-p|-no|-k/g, '').replace(/=s\d+/g, '');
+                                }
+                                avatarHtml = `<img src="${cleanUrl}" class="rounded-circle shadow-sm flex-shrink-0" style="width: 40px; height: 40px; object-fit: cover; border: 2px solid #0f4c81;">`;
+                            } else {
+                                let firstChar = authorName !== "Sinh viên" ? authorName.charAt(0).toUpperCase() : "S";
+                                let bgColors = ['#0f4c81', '#10b981', '#e61d4a', '#f59e0b', '#8b5cf6', '#0ea5e9'];
+                                let colorIndex = firstChar.charCodeAt(0) % bgColors.length;
+                                avatarHtml = `<div class="text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 40px; height: 40px; font-size: 16px; font-weight: bold; background-color: ${bgColors[colorIndex]};">${firstChar}</div>`;
+                            }
+
+                            html += `
+                            <div class="mb-4 bg-white p-4 rounded-4 shadow-sm border" style="border-left: 5px solid #0f4c81 !important; border-color: #e2e8f0;">
+                                <div class="d-flex align-items-center justify-content-between mb-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        ${avatarHtml}
+                                        <div>
+                                            <div class="fw-bold" style="color: #0f4c81; font-size: 15px;">${displayMssv}</div>
+                                            <div class="text-muted small"><i class="fa-regular fa-clock me-1"></i>${time}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-3 rounded-3 mb-3 text-dark" style="font-size: 15px; line-height: 1.6; background-color: #f8fafc; border: 1px solid #f1f5f9;">
+                                    ${questionFormatted}
+                                </div>`;
+                                        
+                            if (answer.trim() !== "") {
+    let threadContent = typeof parseThread === 'function' ? parseThread(answer, rowIndex) : answer;
+    // Đã xóa bỏ style background: #f0fdf4 và border-left màu xanh lá ở đây
+    html += `<div class="mt-3 pt-2">${threadContent}</div>`; 
+} else {
+                                html += `<div class="mt-2 text-muted small fst-italic"><i class="fa-solid fa-hourglass-half me-1"></i> Đang chờ giải đáp từ Admin...</div>`;
+                            }
+                            
+                            html += `
+                                <div class="mt-3 pt-2 border-top">
+                                    <button class="btn btn-sm btn-outline-primary fw-bold shadow-sm" style="border-radius: 8px; font-size: 13px;" onclick="$('#ex-replyBox-${rowIndex}').toggleClass('d-none')">
+                                        <i class="fa-solid fa-comment-dots me-1"></i> Phản hồi tiếp
+                                    </button>
+                                    
+                                    <div id="ex-replyBox-${rowIndex}" class="d-none mt-3 p-3 bg-light rounded-3 border shadow-sm">
+                                        <textarea id="ex-txtReply-${rowIndex}" class="form-control mb-2 bg-white border-primary-subtle" rows="2" placeholder="Nhập bình luận hoặc ý kiến phản hồi..." style="border-radius: 8px;"></textarea>
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button class="btn btn-sm btn-light border fw-bold px-3" style="border-radius: 8px;" onclick="$('#ex-replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
+                                            <button class="btn btn-sm text-white fw-bold px-3 shadow-sm" style="background: #0f4c81; border-radius: 8px;" onclick="sendExerciseQAReply(${rowIndex})" id="ex-btnSendReply-${rowIndex}">
+                                                <i class="fa-solid fa-paper-plane me-1"></i> Gửi phản hồi
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+                        }
+                    });
+                }
+
+                if (count === 0) {
+                    html = '<div class="text-center text-muted py-5 bg-white rounded-4 border shadow-sm"><i class="fa-regular fa-comments fs-2 mb-2 opacity-50"></i><br>Chưa có câu hỏi nào cho mã bài này.<br>Hãy đặt câu hỏi đầu tiên bằng khung phía trên nhé!</div>';
+                }
+                
+                container.html(html);
+                if (window.Prism) Prism.highlightAllUnder(document.getElementById('exerciseQAListArea'));
+                if (typeof applyKaTeX === 'function') applyKaTeX('exerciseQAListArea');
+            }
+        });
+    });
+}
+
+function submitExerciseQA() {
+    let mssvValue = $('#txtExerciseMSSV').val().trim();
+    try {
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser && currentUser.mssv) {
+            mssvValue = currentUser.mssv;
+        }
+    } catch (e) {}
+
+    if (!mssvValue || mssvValue === "Khách") {
+        alert("Vui lòng đăng nhập Sinh viên để có thể đặt câu hỏi Q&A!");
+        requireLogin();
+        return;
+    }
+
+    let textContent = $('#txtExerciseQAContent').val().trim();
+    if (!textContent) {
+        alert("Vui lòng nhập nội dung câu hỏi hoặc thắc mắc của bạn!");
+        $('#txtExerciseQAContent').focus();
+        return;
+    }
+
+    let topicName = $('#lblQA_Topic').text();
+    let chapterName = $('#lblQA_Chapter').text();
+    let exerciseCode = $('#lblQA_ExerciseCode').text();
+
+    // Thu gọn khoảng cách bằng một thẻ <br> duy nhất
+    let qText = `<strong>Chương:</strong> ${chapterName}<br><strong>Mã bài:</strong> ${exerciseCode}<br>${textContent}`;
+    let finalPayload = `<span class="badge mb-2 ms-2 shadow-sm" style="background-color: #f1f5f9; color: #475569; font-size: 12.5px; border: 1px solid #e2e8f0;"><i class="fa-solid fa-tag me-1" style="color: #0f4c81;"></i> ${topicName}</span><br>${qText}`;
+
+    let btn = $('#btnSubmitExerciseQA');
+    let originalHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang gửi...').prop('disabled', true);
+
+    $.ajax({
+        url: SCRIPT_URL,
+        type: "POST",
+        data: JSON.stringify({ action: "submitQuestion", mssv: mssvValue, question: finalPayload }),
+        contentType: "text/plain;charset=utf-8",
+        dataType: "text",
+        complete: function() {
+            btn.html(originalHtml).prop('disabled', false);
+            $('#txtExerciseQAContent').val('');
+            loadExerciseQAList(exerciseCode);
+        }
+    });
+}
+
+function sendExerciseQAReply(rowIndex) {
+    let replyText = $(`#ex-txtReply-${rowIndex}`).val().trim();
+    if (!replyText) {
+        alert("Vui lòng nhập nội dung phản hồi!");
+        return;
+    }
+
+    let studentMssv = "Khách";
+    try {
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser && currentUser.mssv) studentMssv = currentUser.mssv;
+    } catch (e) {}
+
+    let now = new Date();
+    let pad = (n) => String(n).padStart(2, '0');
+    let timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+
+    let formattedReply = `${studentMssv}:::${timeStr}:::${replyText}`;
+    let exerciseCode = $('#lblQA_ExerciseCode').text();
+
+    let btn = $(`#ex-btnSendReply-${rowIndex}`);
+    let originalBtnHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...').prop('disabled', true);
+
+    $.ajax({
+        url: SCRIPT_URL,
+        type: "POST",
+        data: JSON.stringify({ action: "replyToAdmin", rowIndex: rowIndex, replyText: formattedReply }),
+        contentType: "text/plain;charset=utf-8",
+        dataType: "text",
+        complete: function() {
+            // Khôi phục nút bấm ngay lập tức
+            btn.html(originalBtnHtml).prop('disabled', false);
+            
+            // Xóa sạch ô nhập phản hồi
+            $(`#ex-txtReply-${rowIndex}`).val('');
+            
+            // Tải lại ngay lập tức danh sách lịch sử trong Modal
+            loadExerciseQAList(exerciseCode);
+        }
+    });
+}

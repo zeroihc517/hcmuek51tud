@@ -112,6 +112,9 @@
     <button type="button" class="btn btn-sm btn-outline-warning fw-bold text-dark" onclick="toggleUpcoderIframe()" title="Mở trang nộp bài UpCoder">
         <i class="fa-solid fa-code-compare me-1"></i> Chạy thử code
     </button>
+	<button type="button" class="btn btn-sm btn-outline-primary fw-bold" onclick="openExerciseQA()" title="Hỏi đáp về bài tập này trên hệ thống">
+        <i class="fa-solid fa-comments me-1"></i> Hỏi đáp Q&A
+    </button>
 </div>
 <div id="drawingContainer" class="card p-3 mb-3 d-none border bg-light">
     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -409,8 +412,45 @@
         </div>
     </div>
 </div>
-<!-- MODAL BẢNG VẼ CÂY NHỊ PHÂN -->
-<!-- MODAL BẢNG VẼ CÂY NHỊ PHÂN (GIAO DIỆN FULL MÀN HÌNH - CHIA CỘT) -->
+<!-- MODAL ĐẶT CÂU HỎI VÀ XEM LỊCH SỬ Q&A TỪ TRANG BÀI TẬP -->
+<div class="modal fade" id="exerciseQAModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title fw-bold m-0"><i class="fa-solid fa-comments me-2"></i> Thảo luận / Hỏi đáp Bài tập</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="alert alert-info border-0 p-3 mb-3 shadow-sm d-flex flex-column gap-1" style="border-radius: 8px;">
+                    <div><strong><i class="fa-solid fa-book me-1"></i> Chủ đề câu hỏi:</strong> <span id="lblQA_Topic" class="text-primary fw-bold"></span></div>
+                    <div><strong><i class="fa-solid fa-folder-open me-1"></i> Nội dung bài học:</strong> <span id="lblQA_Chapter" class="text-dark"></span></div>
+                    <div><strong><i class="fa-solid fa-hashtag me-1"></i> Mã bài:</strong> <span id="lblQA_ExerciseCode" class="text-danger fw-bold"></span></div>
+                </div>
+                
+                <!-- KHUNG SOẠN THẢO CÂU HỎI MỚI -->
+                <div class="p-3 bg-white rounded border border-primary-subtle shadow-sm mb-4">
+                    <h6 class="fw-bold text-primary mb-2"><i class="fa-solid fa-pen-nib me-2"></i>Đặt câu hỏi / Thảo luận mới về bài này:</h6>
+                    <textarea id="txtExerciseQAContent" class="form-control mb-2 border-primary-subtle shadow-sm" rows="3" placeholder="Nhập thắc mắc của bạn tại đây... (Hỗ trợ gõ công thức Toán LaTeX)" style="border-radius: 8px;"></textarea>
+                    <div class="text-end">
+                        <button class="btn text-white fw-bold px-4 shadow-sm" id="btnSubmitExerciseQA" style="background-color: #0f4c81; border-radius: 8px;" onclick="submitExerciseQA()">
+                            <i class="fa-solid fa-paper-plane me-1"></i> Gửi lên Cộng đồng Q&A
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KHU VỰC HIỂN THỊ LỊCH SỬ CÂU HỎI CỦA CỘNG ĐỒNG CÙNG MÃ BÀI -->
+                <h6 class="fw-bold text-primary mb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử câu hỏi & thảo luận của mã bài này:</h6>
+                <div id="exerciseQAListArea">
+                    <div class="text-center py-4 text-muted"><i class="fa-solid fa-spinner fa-spin fs-3"></i><br>Đang tải lịch sử thảo luận...</div>
+                </div>
+
+            </div>
+            <div class="modal-footer border-0 bg-white py-3">
+                <button class="btn btn-light fw-bold px-4 border shadow-sm" style="border-radius: 8px;" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
     <!-- Thư viện JS -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
