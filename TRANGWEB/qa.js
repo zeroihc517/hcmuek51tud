@@ -364,6 +364,7 @@ function parseThread(text, rowIndex) {
             let svName = "Sinh viên"; 
             let svMsg = svTextRaw;
             let timeHtml = "";
+            let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm flex-shrink-0 mt-1" style="width: 32px; height: 32px; font-size: 14px;"><i class="fa-solid fa-user"></i></div>`;
             
             let timeMatch = svTextRaw.match(/^\((.*?)\)\n/);
             if (timeMatch) {
@@ -379,18 +380,53 @@ function parseThread(text, rowIndex) {
                 
                 let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
                 let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
+                let authorNameForAvatar = "S"; 
                 
                 if (isSystemAdmin) {
-                    let fullName = window.allUsersMap ? window.allUsersMap[rawMssv] : null;
-                    displayMssv = fullName ? `${rawMssv} - ${getNaturalShortName(fullName)}` : rawMssv;
+                    let userObj = window.allUsersMap ? window.allUsersMap[rawMssv] : null;
+                    let fullName = userObj ? userObj.name : null;
+                    if (fullName) authorNameForAvatar = getNaturalShortName(fullName);
+                    displayMssv = fullName ? `${rawMssv} - ${authorNameForAvatar}` : rawMssv;
                 } else if (activeUser && activeUser.mssv) {
                     let myCleanMssv = activeUser.mssv.replace(/\./g, "");
                     if (myCleanMssv === rawMssv.replace(/\./g, "")) {
-                        displayMssv = `${rawMssv} - ${getNaturalShortName(activeUser.name)} (Bạn)`;
+                        authorNameForAvatar = getNaturalShortName(activeUser.name);
+                        displayMssv = `${rawMssv} - ${authorNameForAvatar} (Bạn)`;
+                    } else if (window.allUsersMap && window.allUsersMap[rawMssv.replace(/\./g, "")]) {
+                        authorNameForAvatar = getNaturalShortName(window.allUsersMap[rawMssv.replace(/\./g, "")].name);
                     }
                 }
 
                 svName = "Sinh viên (" + displayMssv + ")";
+
+                // --- BẮT ĐẦU: Lấy Avatar dựa trên Data Map ---
+                let userAvatar = "";
+                let cleanRawMssv = rawMssv.replace(/\./g, ""); 
+                if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv) {
+                    userAvatar = activeUser.avatar || "";
+                } else if (window.allUsersMap && typeof window.allUsersMap[cleanRawMssv] === 'object' && window.allUsersMap[cleanRawMssv].avatar) {
+                    userAvatar = window.allUsersMap[cleanRawMssv].avatar;
+                }
+
+                if (userAvatar && userAvatar.trim() !== '') {
+    let cleanUrl = userAvatar.trim();
+    if (cleanUrl.includes("drive.google.com/file/d/")) {
+        let matchId = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (matchId && matchId[1]) cleanUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w100`;
+    } else if (cleanUrl.includes("googleusercontent.com")) {
+        cleanUrl = cleanUrl.replace(/=w\d+|-h\d+|-p|-no|-k/g, '').replace(/=s\d+/g, '') + "=w100-h100-p";
+    } else if (cleanUrl.includes("photos.google.com") || cleanUrl.includes("photos.app.goo.gl")) {
+        cleanUrl = `https://wsrv.nl/?url=${encodeURIComponent(cleanUrl)}&w=100&h=100&fit=cover`;
+    }
+    avatarHtml = `<img src="${cleanUrl}" class="rounded-circle me-2 shadow-sm flex-shrink-0 mt-1" style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid #0f4c81; user-select: none; -webkit-user-drag: none;">`;
+} else {
+                    // Nếu không có ảnh, dùng Avatar tạo bằng chữ cái
+                    let firstChar = authorNameForAvatar.charAt(0).toUpperCase();
+                    let bgColors = ['#0f4c81', '#10b981', '#e61d4a', '#f59e0b', '#8b5cf6', '#0ea5e9'];
+                    let colorIndex = firstChar.charCodeAt(0) % bgColors.length;
+                    avatarHtml = `<div class="text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm flex-shrink-0 mt-1" style="width: 32px; height: 32px; font-size: 15px; font-weight: bold; background-color: ${bgColors[colorIndex]}; user-select: none;">${firstChar}</div>`;
+                }
+                // --- KẾT THÚC LẤY AVATAR ---
 
                 if (splitData.length >= 3) {
                     let timeStr = splitData[1].trim();
@@ -401,17 +437,21 @@ function parseThread(text, rowIndex) {
                 }
             }
             
-            // SỬ DỤNG HÀM XUỐNG DÒNG AN TOÀN
             let svFormattedMsg = window.safeFormatTextQA(svMsg);
-            
-            html += `<div class="msg-sv"><i class="fa-solid fa-user-graduate me-2"></i><strong>${svName}</strong>${timeHtml}:<br><div class="mt-1" style="font-weight: normal;">${svFormattedMsg}</div>`; 
+
+// Xây dựng Flexbox chứa Avatar
+html += `<div class="msg-sv d-flex align-items-start mb-2">
+            ${avatarHtml}
+            <div class="flex-grow-1">
+                <strong style="color: #0f4c81;">${svName}</strong>${timeHtml}
+                <div class="mt-1 bg-transparent p-0 pt-1" style="font-weight: normal; color: #334155;">${svFormattedMsg}</div>
+            </div>`;
             
             if (isAdmin) { 
-                html += `<div class="mt-2 text-end"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`; 
+                html += `<div class="mt-2 text-end w-100"><button class="btn btn-sm btn-outline-danger py-0" onclick="deleteThreadPart(${rowIndex}, ${index})" style="font-size: 12px;"><i class="fa-solid fa-trash"></i> Xóa phản hồi này</button></div>`; 
             } 
             html += `</div>`; 
         } else { 
-            // SỬ DỤNG HÀM XUỐNG DÒNG AN TOÀN CHO ADMIN
             let adminText = window.safeFormatTextQA(content);
             html += `<div class="msg-admin"><i class="fa-solid fa-user-shield me-2"></i><strong>Admin:</strong><br><div class="mt-1" style="font-weight: normal;">${adminText}</div>`; 
             if (isAdmin) { 
@@ -438,16 +478,14 @@ function cleanExternalHTML(html) {
         // Xóa các thẻ p nằm lồng bên trong td của bảng
         .replace(/<td[^>]*>\s*<p[^>]*>([\s\S]*?)<\/p>\s*<\/td>/gi, "<td>$1<\/td>");
 }
-      function loadQAData() {
+    function loadQAData() {
     $('#qaListArea').html(''); 
     $('#qaLoadingStatus').removeClass('d-none');
     
     let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-    let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
 
-    // Khởi tạo Promise tải danh sách Tên sinh viên (Chỉ gọi 1 lần khi Admin tải)
     let userMapPromise = new Promise((resolve) => {
-        if (isSystemAdmin && !window.allUsersMap) {
+        if (!window.allUsersMap) {
             $.ajax({
                 url: SCRIPT_URL + "?action=getAllUsers",
                 method: "GET",
@@ -456,8 +494,8 @@ function cleanExternalHTML(html) {
                     window.allUsersMap = {};
                     users.forEach(u => { 
                         let cleanMssv = u.mssv.replace(/\./g, "");
-                        window.allUsersMap[u.mssv] = u.name; 
-                        window.allUsersMap[cleanMssv] = u.name;
+                        window.allUsersMap[u.mssv] = u; 
+                        window.allUsersMap[cleanMssv] = u;
                     });
                     resolve();
                 },
@@ -489,43 +527,41 @@ function cleanExternalHTML(html) {
                 data.forEach(row => {
                     let time = row[0] || ''; 
                     let rawMssv = String(row[1] || '').trim().replace(/[-|]/g, ''); 
-                    let displayMssv = maskMSSV(rawMssv); 
+                    let cleanRawMssv = rawMssv.replace(/\./g, ""); 
                     
-                    // ==========================================
-                    // TRÍCH XUẤT TÊN CHO CÂU HỎI Q&A GỐC
-                    // ==========================================
-                    if (isSystemAdmin) {
-                        let fullName = window.allUsersMap ? window.allUsersMap[rawMssv] : null;
-                        if (fullName) {
-                            let shortName = getNaturalShortName(fullName);
-                            displayMssv = `${rawMssv} - ${shortName}`;
-                        } else {
-                            displayMssv = rawMssv; 
-                        }
-                    } else if (activeUser && activeUser.mssv) {
-                        let myCleanMssv = activeUser.mssv.replace(/\./g, "");
-                        let authorCleanMssv = rawMssv.replace(/\./g, "");
-                        
-                        if (myCleanMssv === authorCleanMssv) {
-                            let shortName = getNaturalShortName(activeUser.name);
-                            displayMssv = `${rawMssv} - ${shortName} (Bạn)`;
-                        }
+                    let userObj = window.allUsersMap ? window.allUsersMap[cleanRawMssv] : null;
+                    let authorName = userObj ? getNaturalShortName(userObj.name) : "Sinh viên";
+
+                    let displayMssv = `${rawMssv} - ${authorName}`;
+                    if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv) {
+                        displayMssv += ` (Bạn)`;
                     }
-                    // ==========================================
-                    
-                    // --- XỬ LÝ LỌC THẺ TAG ---
+
+                    // Ghép Avatar vào trang Q&A tổng
+                    let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm flex-shrink-0" style="width: 42px; height: 42px; font-size: 16px;"><i class="fa-solid fa-user"></i></div>`;
+                    let userAvatar = userObj ? userObj.avatar : "";
+
+                    if (userAvatar && userAvatar.trim() !== '') {
+                        let cleanUrl = userAvatar.trim();
+                        if (cleanUrl.includes("drive.google.com/file/d/")) {
+                            let matchId = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                            if (matchId && matchId[1]) cleanUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w100`;
+                        } else if (cleanUrl.includes("googleusercontent.com")) {
+                            cleanUrl = cleanUrl.replace(/=w\d+|-h\d+|-p|-no|-k/g, '').replace(/=s\d+/g, '') + "=w100-h100-p";
+                        }
+                        avatarHtml = `<img src="${cleanUrl}" class="rounded-circle me-3 shadow-sm flex-shrink-0" style="width: 42px; height: 42px; object-fit: cover; border: 2px solid #0f4c81; user-select: none; -webkit-user-drag: none;" draggable="false" oncontextmenu="return false;">`;
+                    }
+
                     let rawQuestion = row[2] || '';
                     let topicBadgeHtml = '';
                     let badgeRegex = /(<span class="badge[^>]*>.*?<\/span>)\s*/;
                     let match = rawQuestion.match(badgeRegex);
-                    
                     if (match) {
                         topicBadgeHtml = match[1].replace('mb-2', 'ms-2'); 
                         rawQuestion = rawQuestion.replace(badgeRegex, ''); 
                     }
                     
-                  let question = window.safeFormatTextQA(rawQuestion);
-
+                    let question = window.safeFormatTextQA(rawQuestion);
                     let answer = row[3] || ''; 
                     let upvotes = parseInt(row[4]) || 0; 
                     let downvotes = parseInt(row[5]) || 0; 
@@ -535,12 +571,19 @@ function cleanExternalHTML(html) {
                     if (isNew) hasUnanswered = true; 
                     let itemClass = isNew ? 'qa-item unanswered-item' : 'qa-item';
 
+                    // Cấu trúc DOM có Avatar
                     html += `<div class="${itemClass}">
                         <div class="d-flex justify-content-between align-items-start">
-                            <div class="qa-time"><i class="fa-regular fa-clock"></i> ${time} <span class="mx-2">|</span> <i class="fa-solid fa-id-card"></i> SV: <strong class="text-secondary">${displayMssv}</strong> ${topicBadgeHtml}</div>`;
+                            <div class="d-flex align-items-center mb-3">
+                                ${avatarHtml}
+                                <div>
+                                    <div class="fw-bold" style="color: #0f4c81; font-size: 15.5px;">SV: ${displayMssv}</div>
+                                    <div class="qa-time mt-1 m-0"><i class="fa-regular fa-clock"></i> ${time} ${topicBadgeHtml}</div>
+                                </div>
+                            </div>`;
                         
                     if (isAdmin) { 
-                        html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ chuỗi này</button>`; 
+                        html += `<button class="btn btn-sm btn-outline-danger fw-bold" onclick="deleteQA(${rowIndex})" id="btnDelQA-${rowIndex}"><i class="fa-solid fa-trash"></i> Xóa toàn bộ</button>`; 
                     }
                         
                     html += `   </div>
@@ -571,14 +614,14 @@ function cleanExternalHTML(html) {
                             </div>
                             
                             <div id="replyBox-${rowIndex}" class="reply-box d-none mt-3">
-                                <textarea id="txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập bình luận hoặc ý kiến của bạn..."></textarea>
+                                <textarea id="txtReply-${rowIndex}" class="form-control mb-2 bg-transparent" rows="2" placeholder="Nhập bình luận hoặc ý kiến của bạn..."></textarea>
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-sm btn-primary fw-bold" onclick="sendReply(${rowIndex})" id="btnSendReply-${rowIndex}" style="background: var(--primary-color); border:none;">Gửi bình luận</button>
                                     <button class="btn btn-sm btn-light border" onclick="$('#replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
                                 </div>
                             </div>`;
                             
-                    if (isAdmin) { 
+                    if (typeof isAdmin !== 'undefined' && isAdmin) { 
                         html += `<div class="mt-3 p-3 rounded" style="background: #fff; border: 1px dashed var(--accent-red);">
                                     <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
                                     <textarea id="txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
@@ -843,8 +886,8 @@ function loadShareCodeData() {
                     users.forEach(u => { 
                         // Lưu đồng thời định dạng có chấm và không chấm
                         let cleanMssv = u.mssv.replace(/\./g, "");
-                        window.allUsersMap[u.mssv] = u.name; 
-                        window.allUsersMap[cleanMssv] = u.name;
+                        window.allUsersMap[u.mssv] = u; 
+			window.allUsersMap[cleanMssv] = u;
                     });
                     resolve();
                 },
@@ -886,7 +929,8 @@ function loadShareCodeData() {
                     // 1. NẾU LÀ ADMIN ĐANG XEM -> LẤY TÊN TỪ MAP
                     // ==========================================
                     if (isSystemAdmin) {
-                        let fullName = window.allUsersMap ? window.allUsersMap[rawAuthor] : null;
+    let userObj = window.allUsersMap ? window.allUsersMap[rawAuthor] : null;
+    let fullName = userObj ? userObj.name : null;
                         if (fullName) {
                             let shortName = getNaturalShortName(fullName);
                             displayMssv = `${rawAuthor} - ${shortName}`;
@@ -1175,7 +1219,8 @@ window.sendShareCodeReply = function(rowIndex) {
                     // 1. NẾU LÀ ADMIN ĐANG XEM -> LẤY TÊN TỪ MAP
                     // ==========================================
                     if (isSystemAdmin) {
-                        let fullName = window.allUsersMap ? window.allUsersMap[rawAuthor] : null;
+    let userObj = window.allUsersMap ? window.allUsersMap[rawAuthor] : null;
+    let fullName = userObj ? userObj.name : null;
                         if (fullName) {
                             let shortName = getNaturalShortName(fullName);
                             displayMssv = `${rawAuthor} - ${shortName}`;
@@ -3353,134 +3398,159 @@ window.openCourseQAModal = function(topic, lessonName) {
 };
 
 window.loadCourseQAList = function() {
-    $.ajax({
-        url: SCRIPT_URL + "?action=getQAData",
-        method: "GET",
-        dataType: "json",
-        success: function(data) {
-            let html = '';
-            let count = 0;
-            let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-            let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
+    let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
 
-            if (data && data.length > 0) {
-                data.forEach(row => {
-                    let rawQuestion = row[2] || '';
-                    
-                    // Lọc những câu hỏi có gắn mác [LESSON: Tên bài học]
-                    if (rawQuestion.includes(`[LESSON:${window.currentCourseQaLesson}]`)) {
-                        count++;
-                        let time = row[0];
-                        let rawMssv = String(row[1]).replace(/[-|]/g, '');
-                        let displayMssv = maskMSSV(rawMssv);
-                        
-                        if (isSystemAdmin) {
-                            let fullName = window.allUsersMap ? window.allUsersMap[rawMssv] : null;
-                            displayMssv = fullName ? `${rawMssv} - ${getNaturalShortName(fullName)}` : rawMssv;
-                        } else if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === rawMssv.replace(/\./g, "")) {
-                            displayMssv = `${rawMssv} - ${getNaturalShortName(activeUser.name)} <span class="badge bg-success ms-1" style="font-size: 10px;">Bạn</span>`;
-                        }
-
-                        let answer = row[3] || '';
-                        let rowIndex = row[6];
-
-                        // Dọn dẹp thẻ Tag và Định danh Bài học để giao diện sạch sẽ
-                        let cleanQuestion = rawQuestion.replace(/<span class="badge.*?>.*?<\/span>\s*/g, '')
-                                                       .replace(`[LESSON:${window.currentCourseQaLesson}]`, '')
-                                                       .replace(/<strong>Bài học:.*?<\/strong>\s*/i, '')
-                                                       .trim();
-                        let questionFormatted = window.safeFormatTextQA(cleanQuestion);
-
-                        // --- BẮT ĐẦU XỬ LÝ AVATAR ---
-                        let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm flex-shrink-0" style="width: 32px; height: 32px; font-size: 14px;"><i class="fa-solid fa-user"></i></div>`;
-                        
-                        let userAvatar = "";
-                        let cleanRawMssv = rawMssv.replace(/\./g, ""); 
-                        
-                        // Nếu là chính tài khoản đang đăng nhập
-                        if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv) {
-                            userAvatar = activeUser.avatar || "";
-                        } 
-                        // Nếu là sinh viên khác (lấy từ dữ liệu map)
-                        else if (window.allUsersMap && typeof window.allUsersMap[cleanRawMssv] === 'object' && window.allUsersMap[cleanRawMssv].avatar) {
-                            userAvatar = window.allUsersMap[cleanRawMssv].avatar;
-                        }
-                        
-                        if (userAvatar && userAvatar.trim() !== '') {
-                            let cleanUrl = userAvatar.trim();
-                            if (cleanUrl.includes("drive.google.com/file/d/")) {
-                                let matchId = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-                                if (matchId && matchId[1]) cleanUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w100`;
-                            } else if (cleanUrl.includes("googleusercontent.com")) {
-                                cleanUrl = cleanUrl.replace(/=w\d+|-h\d+|-p|-no|-k/g, '').replace(/=s\d+/g, '') + "=w100-h100-p";
-                            }
-                           avatarHtml = `<img src="${cleanUrl}" class="rounded-circle me-2 shadow-sm flex-shrink-0" style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid #0f4c81; user-select: none; -webkit-user-drag: none;" draggable="false" oncontextmenu="return false;">`;
-                        }
-                        // --- KẾT THÚC XỬ LÝ AVATAR ---
-
-                        // Dựng giao diện Timeline tương tự mục Thông báo
-                        html += `
-                        <div class="mb-4" style="border-left: 3px solid #cbd5e1; padding-left: 15px; margin-left: 5px;">
-                            <div class="d-flex align-items-center mb-2">
-                                ${avatarHtml}
-                                <div>
-                                    <div class="fw-bold" style="color: #0f4c81; font-size: 14.5px;">SV: ${displayMssv}</div>
-                                    <div class="text-muted" style="font-size: 12px;"><i class="fa-regular fa-clock me-1"></i>${time}</div>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-white p-3 rounded shadow-sm border border-primary-subtle" style="font-size: 15px; color: #334155; border-radius: 0 12px 12px 12px;">
-                                ${questionFormatted}
-                            </div>`;
-                                    
-                        if (answer.trim() !== "") {
-                            html += `<div class="mt-2 ms-4 ps-3" style="border-left: 2px dashed #93c5fd;">${parseThread(answer, rowIndex)}</div>`; 
-                        } else {
-                            html += `<div class="mt-2 ms-4 ps-3 text-muted small fst-italic"><i class="fa-solid fa-reply fa-rotate-180 me-2"></i>Đang chờ Admin phản hồi...</div>`;
-                        }
-                        
-                        html += `
-                            <div class="mt-2 ms-4 ps-3">
-                                <button class="btn btn-sm btn-outline-primary fw-bold mt-2 shadow-sm" onclick="$('#course-replyBox-${rowIndex}').toggleClass('d-none')">
-                                    <i class="fa-solid fa-comment-dots"></i> Phản hồi tiếp
-                                </button>
-                                
-                                <div id="course-replyBox-${rowIndex}" class="d-none mt-3 p-3 bg-light rounded border border-primary-subtle shadow-sm">
-                                    <textarea id="course-txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập bình luận của bạn..."></textarea>
-                                    <div class="d-flex gap-2 justify-content-end">
-                                        <button class="btn btn-sm btn-light border fw-bold" onclick="$('#course-replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
-                                        <button class="btn btn-sm text-white fw-bold" onclick="sendCourseQAReply(${rowIndex})" id="course-btnSendReply-${rowIndex}" style="background: #0f4c81; border:none;">
-                                            <i class="fa-solid fa-paper-plane me-1"></i> Gửi phản hồi
-                                        </button>
-                                    </div>
-                                </div>`;
-                                
-                        if (typeof isAdmin !== 'undefined' && isAdmin) { 
-                            html += `
-                                <div class="mt-3 p-3 rounded bg-white shadow-sm" style="border: 1px dashed var(--accent-red);">
-                                    <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
-                                    <textarea id="course-txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
-                                    <div class="text-end mt-2">
-                                        <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendCourseQAAdminReply(${rowIndex})" id="course-btnAdminSubmit-${rowIndex}">
-                                            <i class="fa-solid fa-reply me-1"></i> Đăng câu trả lời
-                                        </button>
-                                    </div>
-                                </div>`; 
-                        }
-                        
-                        html += `</div></div>`;
-                    }
-                });
-            }
-
-            if (count === 0) {
-                html = '<div class="text-center text-muted py-4"><i class="fa-regular fa-comments fs-2 mb-2 opacity-50"></i><br>Chưa có thảo luận nào cho bài học này.<br>Bạn hãy là người đầu tiên nhé!</div>';
-            }
-            
-            $('#courseQAList').html(html);
-            if (window.Prism) Prism.highlightAllUnder(document.getElementById('courseQAList'));
-            if (typeof applyKaTeX === 'function') applyKaTeX('courseQAList');
+    let userMapPromise = new Promise((resolve) => {
+        if (!window.allUsersMap) {
+            $.ajax({
+                url: SCRIPT_URL + "?action=getAllUsers",
+                method: "GET",
+                dataType: "json",
+                success: function(users) {
+                    window.allUsersMap = {};
+                    users.forEach(u => { 
+                        let cleanMssv = u.mssv.replace(/\./g, "");
+                        window.allUsersMap[u.mssv] = u; 
+                        window.allUsersMap[cleanMssv] = u;
+                    });
+                    resolve();
+                },
+                error: () => resolve()
+            });
+        } else {
+            resolve();
         }
+    });
+
+    userMapPromise.then(() => {
+        $.ajax({
+            url: SCRIPT_URL + "?action=getQAData",
+            method: "GET",
+            dataType: "json",
+            success: function(data) {
+                let html = '';
+                let count = 0;
+
+                if (data && data.length > 0) {
+                    data.forEach(row => {
+                        let rawQuestion = row[2] || '';
+                        
+                        if (rawQuestion.includes(`[LESSON:${window.currentCourseQaLesson}]`)) {
+                            count++;
+                            let time = row[0];
+                            let rawMssv = String(row[1]).replace(/[-|]/g, '');
+                            let cleanRawMssv = rawMssv.replace(/\./g, ""); 
+                            
+                            // Lấy Tên và Avatar từ Map dữ liệu
+                            let userObj = window.allUsersMap ? window.allUsersMap[cleanRawMssv] : null;
+                            let authorName = userObj ? getNaturalShortName(userObj.name) : "Sinh viên";
+
+                            let displayMssv = `${rawMssv} - ${authorName}`;
+                            if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv) {
+                                displayMssv += ` <span class="badge bg-success ms-1" style="font-size: 10px;">Bạn</span>`;
+                            }
+
+                            let answer = row[3] || '';
+                            let rowIndex = row[6];
+
+                            let cleanQuestion = rawQuestion.replace(/<span class="badge.*?>.*?<\/span>\s*/g, '')
+                                                           .replace(`[LESSON:${window.currentCourseQaLesson}]`, '')
+                                                           .replace(/<strong>Bài học:.*?<\/strong>\s*/i, '')
+                                                           .trim();
+                            let questionFormatted = window.safeFormatTextQA(cleanQuestion);
+
+                            // --- BẮT ĐẦU: XỬ LÝ AVATAR TỐI ƯU ---
+                            let avatarHtml = '';
+                            let userAvatar = userObj ? userObj.avatar : "";
+                            
+                            // Kiểm tra xem User này có Avatar hợp lệ không
+                            if (userAvatar && userAvatar.trim() !== '') {
+    let cleanUrl = userAvatar.trim();
+    if (cleanUrl.includes("drive.google.com/file/d/")) {
+        let matchId = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+        if (matchId && matchId[1]) cleanUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w100`;
+    } else if (cleanUrl.includes("googleusercontent.com")) {
+        cleanUrl = cleanUrl.replace(/=w\d+|-h\d+|-p|-no|-k/g, '').replace(/=s\d+/g, '') + "=w100-h100-p";
+    } else if (cleanUrl.includes("photos.google.com") || cleanUrl.includes("photos.app.goo.gl")) {
+        cleanUrl = `https://wsrv.nl/?url=${encodeURIComponent(cleanUrl)}&w=100&h=100&fit=cover`;
+    }
+    avatarHtml = `<img src="${cleanUrl}" class="rounded-circle me-2 shadow-sm flex-shrink-0 mt-1" style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid #0f4c81; user-select: none; -webkit-user-drag: none;">`;
+} else {
+                                // Nếu không có Avatar: Tạo Avatar bằng Chữ cái đầu của Tên
+                                let firstChar = authorName !== "Sinh viên" ? authorName.charAt(0).toUpperCase() : "S";
+                                
+                                // Danh sách màu nền ngẫu nhiên dựa trên mã ASCII của ký tự đầu (giữ cố định màu cho 1 người)
+                                let bgColors = ['#0f4c81', '#10b981', '#e61d4a', '#f59e0b', '#8b5cf6', '#0ea5e9'];
+                                let colorIndex = firstChar.charCodeAt(0) % bgColors.length;
+                                let selectedColor = bgColors[colorIndex];
+
+                                avatarHtml = `<div class="text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm flex-shrink-0" style="width: 32px; height: 32px; font-size: 15px; font-weight: bold; background-color: ${selectedColor}; user-select: none;">${firstChar}</div>`;
+                            }
+                            // --- KẾT THÚC XỬ LÝ AVATAR ---
+
+                            html += `
+                            <div class="mb-4" style="border-left: 3px solid #cbd5e1; padding-left: 15px; margin-left: 5px;">
+                                <div class="d-flex align-items-center mb-2">
+                                    ${avatarHtml}
+                                    <div>
+                                        <div class="fw-bold" style="color: #0f4c81; font-size: 14.5px;">SV: ${displayMssv}</div>
+                                        <div class="text-muted" style="font-size: 12px;"><i class="fa-regular fa-clock me-1"></i>${time}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white p-3 rounded shadow-sm border border-primary-subtle" style="font-size: 15px; color: #334155; border-radius: 0 12px 12px 12px;">
+                                    ${questionFormatted}
+                                </div>`;
+                                        
+                            if (answer.trim() !== "") {
+                                html += `<div class="mt-2 ms-4 ps-3" style="border-left: 2px dashed #93c5fd;">${parseThread(answer, rowIndex)}</div>`; 
+                            } else {
+                                html += `<div class="mt-2 ms-4 ps-3 text-muted small fst-italic"><i class="fa-solid fa-reply fa-rotate-180 me-2"></i>Đang chờ Admin phản hồi...</div>`;
+                            }
+                            
+                            html += `
+                                <div class="mt-2 ms-4 ps-3">
+                                    <button class="btn btn-sm btn-outline-primary fw-bold mt-2 shadow-sm" onclick="$('#course-replyBox-${rowIndex}').toggleClass('d-none')">
+                                        <i class="fa-solid fa-comment-dots"></i> Phản hồi tiếp
+                                    </button>
+                                    
+                                    <div id="course-replyBox-${rowIndex}" class="d-none mt-3 p-3 bg-light rounded border border-primary-subtle shadow-sm">
+                                         <textarea id="course-txtReply-${rowIndex}" class="form-control mb-2 bg-transparent" rows="2" placeholder="Nhập bình luận của bạn..."></textarea>
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button class="btn btn-sm btn-light border fw-bold" onclick="$('#course-replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
+                                            <button class="btn btn-sm text-white fw-bold" onclick="sendCourseQAReply(${rowIndex})" id="course-btnSendReply-${rowIndex}" style="background: #0f4c81; border:none;">
+                                                <i class="fa-solid fa-paper-plane me-1"></i> Gửi phản hồi
+                                            </button>
+                                        </div>
+                                    </div>`;
+                                    
+                            if (typeof isAdmin !== 'undefined' && isAdmin) { 
+                                html += `
+                                    <div class="mt-3 p-3 rounded bg-white shadow-sm" style="border: 1px dashed var(--accent-red);">
+                                        <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
+                                        <textarea id="course-txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
+                                        <div class="text-end mt-2">
+                                            <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendCourseQAAdminReply(${rowIndex})" id="course-btnAdminSubmit-${rowIndex}">
+                                                <i class="fa-solid fa-reply me-1"></i> Đăng câu trả lời
+                                            </button>
+                                        </div>
+                                    </div>`; 
+                            }
+                            
+                            html += `</div></div>`;
+                        }
+                    });
+                }
+
+                if (count === 0) {
+                    html = '<div class="text-center text-muted py-4"><i class="fa-regular fa-comments fs-2 mb-2 opacity-50"></i><br>Chưa có thảo luận nào cho bài học này.<br>Bạn hãy là người đầu tiên nhé!</div>';
+                }
+                
+                $('#courseQAList').html(html);
+                if (window.Prism) Prism.highlightAllUnder(document.getElementById('courseQAList'));
+                if (typeof applyKaTeX === 'function') applyKaTeX('courseQAList');
+            }
+        });
     });
 };
 

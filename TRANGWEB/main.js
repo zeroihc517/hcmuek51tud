@@ -1108,159 +1108,168 @@ window.submitThongBaoComment = function(tbCode, tbTitle) {
     });
 };
 
-// Hàm Tải lịch sử bình luận tương ứng với thông báo (Bản UI Đẹp)
+// Hàm Tải lịch sử bình luận tương ứng với thông báo (Đã mở khóa Avatar toàn hệ thống)
 window.loadThongBaoComments = function(tbCode) {
     let container = $('#tbCommentHistory');
     container.html('<div class="text-center text-muted small py-4 bg-white rounded border border-primary-subtle"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải bình luận...</div>');
     
-    $.ajax({ 
-        url: SCRIPT_URL + "?action=getQAData", 
-        method: "GET", 
-        dataType: "json", 
-        success: function(data) {
-            if (!data || data.length === 0) {
-                container.html('<div class="text-center text-muted small py-4 bg-light rounded border border-primary-subtle" style="border-style: dashed !important;"><i class="fa-regular fa-comments fs-3 mb-2 opacity-50"></i><br>Chưa có bình luận nào cho thông báo này.<br>Bạn hãy là người đầu tiên nhé!</div>');
-                return;
-            }
-            
-            let html = '';
-            let commentCount = 0;
-            
-            let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-            let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
-            
-            data.forEach(row => {
-                let rawQuestion = row[2] || '';
-                if (rawQuestion.includes(`[${tbCode}]`)) {
-                    commentCount++;
-                    let time = row[0] || ''; 
-                    let rawMssv = String(row[1] || '').trim().replace(/[-|]/g, ''); 
-                    let displayMssv = maskMSSV(rawMssv); 
-                    
-                    if (isSystemAdmin) {
-                        let fullName = window.allUsersMap ? window.allUsersMap[rawMssv] : null;
-                        displayMssv = fullName ? `${rawMssv} - ${getNaturalShortName(fullName)}` : rawMssv;
-                    } else if (activeUser && activeUser.mssv) {
-                        let myCleanMssv = activeUser.mssv.replace(/\./g, "");
-                        if (myCleanMssv === rawMssv.replace(/\./g, "")) {
-                            displayMssv = `${rawMssv} - ${getNaturalShortName(activeUser.name)} <span class="badge bg-success ms-1" style="font-size: 10px;">Bạn</span>`;
+    // 1. TẢI TỪ ĐIỂN USERS (CHO TẤT CẢ MỌI NGƯỜI ĐỂ LẤY AVATAR)
+    let userMapPromise = new Promise((resolve) => {
+        if (!window.allUsersMap) {
+            $.ajax({
+                url: SCRIPT_URL + "?action=getAllUsers",
+                method: "GET",
+                dataType: "json",
+                success: function(users) {
+                    window.allUsersMap = {};
+                    users.forEach(u => { 
+                        let cleanMssv = u.mssv.replace(/\./g, "");
+                        window.allUsersMap[u.mssv] = u; // Lưu nguyên Object để lấy avatar
+                        window.allUsersMap[cleanMssv] = u;
+                    });
+                    resolve();
+                },
+                error: () => resolve()
+            });
+        } else {
+            resolve();
+        }
+    });
+
+    userMapPromise.then(() => {
+        $.ajax({ 
+            url: SCRIPT_URL + "?action=getQAData", 
+            method: "GET", 
+            dataType: "json", 
+            success: function(data) {
+                if (!data || data.length === 0) {
+                    container.html('<div class="text-center text-muted small py-4 bg-light rounded border border-primary-subtle" style="border-style: dashed !important;"><i class="fa-regular fa-comments fs-3 mb-2 opacity-50"></i><br>Chưa có bình luận nào cho thông báo này.<br>Bạn hãy là người đầu tiên nhé!</div>');
+                    return;
+                }
+                
+                let html = '';
+                let commentCount = 0;
+                
+                let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+                let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
+                
+                data.forEach(row => {
+                    let rawQuestion = row[2] || '';
+                    if (rawQuestion.includes(`[${tbCode}]`)) {
+                        commentCount++;
+                        let time = row[0] || ''; 
+                        let rawMssv = String(row[1] || '').trim().replace(/[-|]/g, ''); 
+                        let displayMssv = maskMSSV(rawMssv); 
+                        
+                        if (isSystemAdmin) {
+                            let userObj = window.allUsersMap ? window.allUsersMap[rawMssv] : null;
+                            let fullName = userObj ? userObj.name : null;
+                            displayMssv = fullName ? `${rawMssv} - ${getNaturalShortName(fullName)}` : rawMssv;
+                        } else if (activeUser && activeUser.mssv) {
+                            let myCleanMssv = activeUser.mssv.replace(/\./g, "");
+                            if (myCleanMssv === rawMssv.replace(/\./g, "")) {
+                                displayMssv = `${rawMssv} - ${getNaturalShortName(activeUser.name)} <span class="badge bg-success ms-1" style="font-size: 10px;">Bạn</span>`;
+                            }
                         }
-                    }
 
-                    // Dọn dẹp thẻ Tag dư thừa
-                    let badgeRegex = /(<span class="badge[^>]*>.*?<\/span>)\s*/;
-                    rawQuestion = rawQuestion.replace(badgeRegex, ''); 
+                        let badgeRegex = /(<span class="badge[^>]*>.*?<\/span>)\s*/;
+                        rawQuestion = rawQuestion.replace(badgeRegex, ''); 
+                        rawQuestion = rawQuestion.replace(/<strong>Thông báo.*?<\/strong>\s*/i, '').trim();
+                        let questionFormatted = window.safeFormatTextQA(rawQuestion);
+                        
+                        let answer = row[3] || ''; 
+                        let rowIndex = row[6];
+                        
+                        let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm flex-shrink-0" style="width: 32px; height: 32px; font-size: 14px;"><i class="fa-solid fa-user"></i></div>`;
+                        let userAvatar = "";
+                        let cleanRawMssv = rawMssv.replace(/\./g, ""); 
 
-                    // Cắt bỏ phần "Thông báo [Mã]: Tên thông báo" đi cho đỡ dài dòng trong lịch sử
-                    rawQuestion = rawQuestion.replace(/<strong>Thông báo.*?<\/strong>\s*/i, '').trim();
-                    
-                    // Format chữ và xuống dòng bằng hàm xịn
-                    let questionFormatted = window.safeFormatTextQA(rawQuestion);
-                    
-                    let answer = row[3] || ''; 
-                    let rowIndex = row[6];
-                    
-                    // Thay thế đoạn: let html += `<div class="mb-4"... <div class="bg-primary...` bằng khối sau:
+                        if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv) {
+                            userAvatar = activeUser.avatar || "";
+                        } else if (window.allUsersMap && typeof window.allUsersMap[cleanRawMssv] === 'object' && window.allUsersMap[cleanRawMssv].avatar) {
+                            userAvatar = window.allUsersMap[cleanRawMssv].avatar;
+                        }
 
-// --- BẮT ĐẦU XỬ LÝ AVATAR ---
-let avatarHtml = `<div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm flex-shrink-0" style="width: 32px; height: 32px; font-size: 14px;"><i class="fa-solid fa-user"></i></div>`;
-
-let userAvatar = "";
-// Chuẩn hóa xóa hết dấu chấm để so sánh cho chính xác tuyệt đối
-let cleanRawMssv = rawMssv.replace(/\./g, ""); 
-
-// Nếu là chính tài khoản đang đăng nhập
-if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv) {
-    userAvatar = activeUser.avatar || "";
-} 
-// Nếu là sinh viên khác (lấy từ dữ liệu map)
-else if (window.allUsersMap && typeof window.allUsersMap[cleanRawMssv] === 'object' && window.allUsersMap[cleanRawMssv].avatar) {
-    userAvatar = window.allUsersMap[cleanRawMssv].avatar;
-}
-
-if (userAvatar && userAvatar.trim() !== '') {
+                       if (userAvatar && userAvatar.trim() !== '') {
     let cleanUrl = userAvatar.trim();
-    // Tự động tối ưu kích thước ảnh (Thumbnail) giúp load bình luận nhanh hơn
     if (cleanUrl.includes("drive.google.com/file/d/")) {
         let matchId = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
         if (matchId && matchId[1]) cleanUrl = `https://drive.google.com/thumbnail?id=${matchId[1]}&sz=w100`;
     } else if (cleanUrl.includes("googleusercontent.com")) {
         cleanUrl = cleanUrl.replace(/=w\d+|-h\d+|-p|-no|-k/g, '').replace(/=s\d+/g, '') + "=w100-h100-p";
+    } else if (cleanUrl.includes("photos.google.com") || cleanUrl.includes("photos.app.goo.gl")) {
+        // Mở khóa bằng Proxy cho link Google Photos
+        cleanUrl = `https://wsrv.nl/?url=${encodeURIComponent(cleanUrl)}&w=100&h=100&fit=cover`;
     }
-    avatarHtml = `<img src="${cleanUrl}" class="rounded-circle me-2 shadow-sm flex-shrink-0" style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid #0f4c81; user-select: none; -webkit-user-drag: none;" draggable="false" oncontextmenu="return false;">`;
+    avatarHtml = `<img src="${cleanUrl}" class="rounded-circle me-2 shadow-sm flex-shrink-0 mt-1" style="width: 32px; height: 32px; object-fit: cover; border: 1.5px solid #0f4c81; user-select: none; -webkit-user-drag: none;">`;
 }
-// --- KẾT THÚC XỬ LÝ AVATAR ---
-// ============================================
-// GIAO DIỆN TIMELINE CHAT HIỆN ĐẠI (ĐÃ BỔ SUNG AVATAR)
-// ============================================
-html += `
-<div class="mb-4" style="border-left: 3px solid #cbd5e1; padding-left: 15px; margin-left: 5px;">
-    <div class="d-flex align-items-center mb-2">
-        ${avatarHtml}
-        <div>
-            <div class="fw-bold" style="color: #0f4c81; font-size: 14.5px;">SV: ${displayMssv}</div>
-            <div class="text-muted" style="font-size: 12px;"><i class="fa-regular fa-clock me-1"></i>${time}</div>
-        </div>
-    </div>
-    
-    <div class="bg-white p-3 rounded shadow-sm border border-primary-subtle" style="font-size: 15px; color: #334155; border-radius: 0 12px 12px 12px; font-weight: normal;">
-        ${questionFormatted}
-    </div>`;
-                                
-                    if (answer.trim() !== "") {
-                        html += `<div class="mt-2 ms-4 ps-3" style="border-left: 2px dashed #93c5fd;">${parseThread(answer, rowIndex)}</div>`; 
-                    } else {
-                        html += `<div class="mt-2 ms-4 ps-3 text-muted small fst-italic"><i class="fa-solid fa-reply fa-rotate-180 me-2"></i>Đang chờ Admin phản hồi...</div>`;
-                    }
-                    
-                    // --- KHUNG NÚT BẤM VÀ BÌNH LUẬN NỐI TIẾP ---
-                    html += `
-                        <div class="mt-2 ms-4 ps-3">
-                            <button class="btn btn-sm btn-outline-primary fw-bold mt-2 shadow-sm" onclick="$('#tb-replyBox-${rowIndex}').toggleClass('d-none')">
-                                <i class="fa-solid fa-comment-dots"></i> Phản hồi tiếp
-                            </button>
-                            
-                            <div id="tb-replyBox-${rowIndex}" class="d-none mt-3 p-3 bg-light rounded border border-primary-subtle shadow-sm">
-                                <textarea id="tb-txtReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập bình luận hoặc ý kiến phản hồi của bạn..."></textarea>
-                                <div class="d-flex gap-2 justify-content-end">
-                                    <button class="btn btn-sm btn-light border fw-bold" onclick="$('#tb-replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
-                                    <button class="btn btn-sm text-white fw-bold" onclick="sendThongBaoReplyChain(${rowIndex})" id="tb-btnSendReply-${rowIndex}" style="background: #0f4c81; border:none;">
-                                        <i class="fa-solid fa-paper-plane me-1"></i> Gửi phản hồi
-                                    </button>
-                                </div>
-                            </div>`;
-                            
-                    // Nếu là Admin thì hiện thêm khung trả lời của Admin
-                    if (typeof isAdmin !== 'undefined' && isAdmin) { 
+
                         html += `
-                            <div class="mt-3 p-3 rounded bg-white shadow-sm" style="border: 1px dashed var(--accent-red);">
-                                <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
-                                <textarea id="tb-txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
-                                <div class="text-end mt-2">
-                                    <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendThongBaoAdminReply(${rowIndex})" id="tb-btnAdminSubmit-${rowIndex}">
-                                        <i class="fa-solid fa-reply me-1"></i> Đăng câu trả lời
-                                    </button>
+                        <div class="mb-4" style="border-left: 3px solid #cbd5e1; padding-left: 15px; margin-left: 5px;">
+                            <div class="d-flex align-items-center mb-2">
+                                ${avatarHtml}
+                                <div>
+                                    <div class="fw-bold" style="color: #0f4c81; font-size: 14.5px;">SV: ${displayMssv}</div>
+                                    <div class="text-muted" style="font-size: 12px;"><i class="fa-regular fa-clock me-1"></i>${time}</div>
                                 </div>
-                            </div>`; 
+                            </div>
+                            
+                            <div class="bg-white p-3 rounded shadow-sm border border-primary-subtle" style="font-size: 15px; color: #334155; border-radius: 0 12px 12px 12px; font-weight: normal;">
+                                ${questionFormatted}
+                            </div>`;
+                                        
+                        if (answer.trim() !== "") {
+                            html += `<div class="mt-2 ms-4 ps-3" style="border-left: 2px dashed #93c5fd;">${parseThread(answer, rowIndex)}</div>`; 
+                        } else {
+                            html += `<div class="mt-2 ms-4 ps-3 text-muted small fst-italic"><i class="fa-solid fa-reply fa-rotate-180 me-2"></i>Đang chờ Admin phản hồi...</div>`;
+                        }
+                        
+                        html += `
+                            <div class="mt-2 ms-4 ps-3">
+                                <button class="btn btn-sm btn-outline-primary fw-bold mt-2 shadow-sm" onclick="$('#tb-replyBox-${rowIndex}').toggleClass('d-none')">
+                                    <i class="fa-solid fa-comment-dots"></i> Phản hồi tiếp
+                                </button>
+                                
+                                <div id="tb-replyBox-${rowIndex}" class="d-none mt-3 p-3 bg-light rounded border border-primary-subtle shadow-sm">
+                                    <!-- Thêm bg-transparent -->
+<textarea id="tb-txtReply-${rowIndex}" class="form-control mb-2 bg-transparent border-primary-subtle" rows="2" placeholder="Nhập bình luận hoặc ý kiến phản hồi của bạn..."></textarea>
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <button class="btn btn-sm btn-light border fw-bold" onclick="$('#tb-replyBox-${rowIndex}').addClass('d-none')">Hủy</button>
+                                        <button class="btn btn-sm text-white fw-bold" onclick="sendThongBaoReplyChain(${rowIndex})" id="tb-btnSendReply-${rowIndex}" style="background: #0f4c81; border:none;">
+                                            <i class="fa-solid fa-paper-plane me-1"></i> Gửi phản hồi
+                                        </button>
+                                    </div>
+                                </div>`;
+                                
+                        if (typeof isAdmin !== 'undefined' && isAdmin) { 
+                            html += `
+                                <div class="mt-3 p-3 rounded bg-white shadow-sm" style="border: 1px dashed var(--accent-red);">
+                                    <h6 class="mb-2" style="color: var(--accent-red); font-size: 14px; font-weight: 700;"><i class="fa-solid fa-user-shield"></i> Trả lời vào chuỗi (Admin)</h6>
+                                    <textarea id="tb-txtAdminReply-${rowIndex}" class="form-control mb-2" rows="2" placeholder="Nhập trả lời dành cho sinh viên..."></textarea>
+                                    <div class="text-end mt-2">
+                                        <button class="btn btn-sm text-white fw-bold" style="background: var(--accent-red);" onclick="sendThongBaoAdminReply(${rowIndex})" id="tb-btnAdminSubmit-${rowIndex}">
+                                            <i class="fa-solid fa-reply me-1"></i> Đăng câu trả lời
+                                        </button>
+                                    </div>
+                                </div>`; 
+                        }
+                        
+                        html += `</div></div>`; 
                     }
-                    
-                    html += `</div>`; // Đóng div khung chứa phản hồi tiếp
-                    html += `</div>`; // Đóng div khối comment tổng
+                });
+                
+                if (commentCount === 0) {
+                    html = '<div class="text-center text-muted small py-4 bg-light rounded border border-primary-subtle" style="border-style: dashed !important;"><i class="fa-regular fa-comments fs-3 mb-2 opacity-50"></i><br>Chưa có bình luận nào cho thông báo này.<br>Bạn hãy là người đầu tiên nhé!</div>';
                 }
-            });
-            
-            if (commentCount === 0) {
-                html = '<div class="text-center text-muted small py-4 bg-light rounded border border-primary-subtle" style="border-style: dashed !important;"><i class="fa-regular fa-comments fs-3 mb-2 opacity-50"></i><br>Chưa có bình luận nào cho thông báo này.<br>Bạn hãy là người đầu tiên nhé!</div>';
+                container.html(html);
+                
+                if (window.Prism) Prism.highlightAllUnder(document.getElementById('tbCommentHistory'));
+                if (typeof applyKaTeX === 'function') applyKaTeX('tbCommentHistory');
+            },
+            error: function() {
+                container.html('<div class="text-danger small text-center py-3 bg-white rounded border"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi tải lịch sử bình luận!</div>');
             }
-            container.html(html);
-            
-            // Render toán học & code nếu có
-            if (window.Prism) Prism.highlightAllUnder(document.getElementById('tbCommentHistory'));
-            if (typeof applyKaTeX === 'function') applyKaTeX('tbCommentHistory');
-        },
-        error: function() {
-            container.html('<div class="text-danger small text-center py-3 bg-white rounded border"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi tải lịch sử bình luận!</div>');
-        }
+        });
     });
 };
                     window.copyTBLink = function(url) {
