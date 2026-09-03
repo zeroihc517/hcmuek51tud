@@ -327,3 +327,12 @@
 .generic-fullscreen #genericIframeWrapper {
     height: calc(100vh - 42px) !important;
 }
+/* ANIMATION CHO DÒNG CHỮ LOADING */
+.pulse-text {
+    animation: pulseOpacity 1.5s infinite ease-in-out;
+}
+@keyframes pulseOpacity {
+    0% { opacity: 0.4; }
+    50% { opacity: 1; }
+    100% { opacity: 0.4; }
+}

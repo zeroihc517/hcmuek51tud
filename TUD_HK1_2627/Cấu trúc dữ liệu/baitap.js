@@ -197,6 +197,7 @@ function loadQuestionsData() {
         },
         error: function() {
             $('#questionContentArea').html('<div class="text-danger fw-bold py-3">Lỗi kết nối khi tải đề bài!</div>');
+		hideFullScreenLoader();
         }
     });
 }
@@ -1088,47 +1089,55 @@ function insertDrawingToEditor() {
     $('#drawingContainer').addClass('d-none');
 }
 // Hàm kiểm tra toàn bộ dữ liệu để đánh dấu các câu đã nộp
-// Hàm kiểm tra toàn bộ dữ liệu để đánh dấu các câu đã nộp
 function checkCompletedQuestions() {
     let mssv = $('#txtExerciseMSSV').val().trim();
-    if (!mssv || mssv === "Khách") return; // Nếu chưa đăng nhập thì không kiểm tra
+    
+    // NẾU LÀ KHÁCH CHƯA ĐĂNG NHẬP: Tắt loading luôn vì không cần chờ quét tiến độ
+    if (!mssv || mssv === "Khách") {
+        hideFullScreenLoader();
+        return; 
+    }
 
-    // Hàm xử lý chung để duyệt mảng và tô màu
     const processCompleted = (data) => {
-        if (!data || data.length === 0) return;
-        let completedMaBai = new Set();
-        
-        data.forEach(row => {
-            let rowMssv = row[1] || '';
-            let contentRaw = row[2] || '';
-            if (rowMssv.trim().toLowerCase() === mssv.toLowerCase()) {
-                let match = contentRaw.match(/^\[SHARECODE\|(.*?)\|(.*?)\]/);
-                if (match && match[1] === courseName) {
-                    completedMaBai.add(match[2].trim());
+        if (data && data.length > 0) {
+            let completedMaBai = new Set();
+            
+            data.forEach(row => {
+                let rowMssv = row[1] || '';
+                let contentRaw = row[2] || '';
+                if (rowMssv.trim().toLowerCase() === mssv.toLowerCase()) {
+                    let match = contentRaw.match(/^\[SHARECODE\|(.*?)\|(.*?)\]/);
+                    if (match && match[1] === courseName) {
+                        completedMaBai.add(match[2].trim());
+                    }
                 }
-            }
-        });
+            });
 
-        // Duyệt qua danh sách câu hỏi hiện tại, nếu trùng mã bài thì tô xanh
-        questionsList.forEach((q, idx) => {
-            if (completedMaBai.has(q.maBai.trim())) {
-                let tabBtn = $(`#tabBtnQuestion_${idx}`);
-                tabBtn.addClass('completed'); // Thêm viền/nền xanh
-                // Đổi icon thành dấu tick cho đẹp
-                tabBtn.find('i').removeClass('fa-file-code').addClass('fa-circle-check'); 
-            }
-        });
+            questionsList.forEach((q, idx) => {
+                if (completedMaBai.has(q.maBai.trim())) {
+                    let tabBtn = $(`#tabBtnQuestion_${idx}`);
+                    tabBtn.addClass('completed'); 
+                    tabBtn.find('i').removeClass('fa-file-code').addClass('fa-circle-check'); 
+                }
+            });
+        }
+        
+        // SAU KHI TÔ MÀU XONG XUÔI HẾT -> MỚI GỌI LỆNH TẮT MÀN HÌNH CHỜ
+        hideFullScreenLoader();
     };
 
-    // Nếu đã tải xong dữ liệu lịch sử ngầm, dùng ngay
     if (globalSubmissionData) {
         processCompleted(globalSubmissionData);
     } 
-    // Nếu API tải ngầm vẫn đang chạy, thì chờ nó done rồi mới chạy
     else if (historyAjaxRequest) {
         historyAjaxRequest.done(function(data) {
             processCompleted(data);
+        }).fail(function() {
+            // Lỗi mạng không quét được thì cũng phải tắt Loading để cho sv làm bài
+            hideFullScreenLoader();
         });
+    } else {
+        hideFullScreenLoader();
     }
 }
 // Hàm mở rộng chiều dài bảng vẽ
@@ -2258,4 +2267,11 @@ function exportTreeTo4KImage() {
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
+}
+function hideFullScreenLoader() {
+    let loader = $('#fullScreenProgressLoader');
+    if (loader.length && !loader.hasClass('d-none')) {
+        loader.css('opacity', '0'); // Làm mờ đi
+        setTimeout(() => loader.addClass('d-none'), 400); // 0.4s sau thì ẩn hẳn
+    }
 }
