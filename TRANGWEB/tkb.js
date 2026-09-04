@@ -4,34 +4,9 @@ function loadTKBView() {
     $('#btnNavTKB').addClass('active'); 
     $('#tkbSection').removeClass('d-none');
     
-    updateSystemUrl('view', 'tkb'); // Đổi URL thành ?view=tkb
-    if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
-
-    // Kiểm tra: Nếu dữ liệu đã tải ngầm xong thì lấy ra vẽ luôn (0 giây)
-    if (typeof globalTkbData !== 'undefined' && globalTkbData.length > 0) {
-        filterAndRenderTKB();
-        renderTkbToolBar();
-    } else {
-        loadThoiGianBieu(); // Dự phòng mạng lag chưa tải xong
-    }
-
-    // Tương tự với Deadline
-    if (typeof globalDeadlineData !== 'undefined' && globalDeadlineData.length > 0) {
-        renderDeadlines();
-        $('#deadlineBox').removeClass('d-none');
-    } else {
-        loadDeadlines();
-    }
-}
-function loadTKBView() {
-    document.title = "Thời gian biểu | Học nhóm APMA Khoa Toán";
-    resetNavActive(); 
-    $('#btnNavTKB').addClass('active'); 
-    $('#tkbSection').removeClass('d-none');
-    
     updateSystemUrl('view', 'tkb'); 
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
-
+	setTimeout(() => { if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView(); }, 500);
     if (typeof globalTkbData !== 'undefined' && globalTkbData.length > 0) {
         filterAndRenderTKB();
         renderTkbToolBar();
@@ -250,6 +225,7 @@ function renderDeadlines() {
 }
 
 function openAddDeadlineModal() {
+	if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView("Thêm DEADLINE Mới");
     $('#dlModalTitle').html('<i class="fa-solid fa-plus me-2"></i>Thêm Deadline');
     $('#pDlRowIndex').val('');
 	$('#datLichRowIndex').val('');
@@ -585,6 +561,7 @@ function getNoteFromSubject(c) {
 // HÀM 1: MỞ BẢNG TỔNG HỢP TKB (Sắp xếp theo Ngày thực tế diễn ra sớm nhất)
 // ----------------------------------------------------
 function openManageTkbListModal() {
+   if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView("Tổng hợp Lịch học");
     let selectedNH = $('#namHocSelect').val(); let selectedHK = $('#hocKySelect').val();
     let filteredTkbData = globalTkbData; let titleSuffix = '';
     let startMonTime = null; let endSunTime = null;
@@ -797,6 +774,7 @@ for (let g of groupOrder) {
 // HÀM 2: MỞ BẢNG TỔNG HỢP DEADLINE (Đã xóa cột Ngày diễn ra)
 // ----------------------------------------------------
 function openManageDeadlineListModal() {
+	if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView("Tổng hợp Deadline");
     let selectedNH = $('#namHocSelect').val(); let selectedHK = $('#hocKySelect').val();
     let titleSuffix = '';
     let startMonTime = null; let endSunTime = null;
@@ -1121,6 +1099,7 @@ function toggleAllUTkbWeeks() {
 }
 
 function openAddTkbModal(triggerAuthModal = false) {
+   if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView("Thêm Lịch mới");
     if (triggerAuthModal) { $('#userAuthModal').modal('show'); return; }
     $('#uTkbModalTitle').html('<i class="fa-solid fa-calendar-plus me-2"></i>Thêm Lịch Học / Xếp giờ Tự học');
     $('#uTkbRowIndex').val(''); 
@@ -1744,6 +1723,7 @@ function onWeekChange() {
     if (val) {
         currentSelectedMonday = new Date(parseInt(val));
         updateTableHeaders(); filterAndRenderTKB(); renderDeadlines(); 
+	if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView();
     }
 }
 
@@ -1841,6 +1821,7 @@ function buildSystemFilters() {
 }
 
 function openSystemTkbModal() {
+	if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView("Đồng bộ học phần");
     // Đảm bảo bật Màn hình 1, ẩn Màn hình 2
     $('#sysScreen2').addClass('d-none');
     $('#sysFooterActions').addClass('d-none');
@@ -2811,6 +2792,7 @@ window.renderSyncCourseList = function() {
 
 // 2. Mở Modal & Đăng ký sự kiện onChange
 window.openExportCalendarModal = function() {
+	if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView("Xuất Google Lịch");
     if (!currentUser) { alert("Vui lòng đăng nhập để sử dụng tính năng xuất lịch!"); return; }
 
     let now = new Date();
@@ -3323,6 +3305,7 @@ window.buildICSContent = function(events) {
     return icsLines.join('\r\n');
 };
 window.exportHocNhomTKBToImage = function(event) {
+	if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView("Xuất ảnh");
     const tableBox = document.querySelector('.table-box');
     const weekSelect = document.getElementById('weekSelect');
     const namHocSelect = document.getElementById('namHocSelect');
@@ -3588,6 +3571,7 @@ window.autoFillThoiGian = function() {
 window.groupStudyCache = [];
 
 window.openGroupStudyListModal = function() {
+	if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView("Đặt lịch hẹn");
     if (!currentUser) { alert("Vui lòng đăng nhập để xem lịch học nhóm!"); return; }
     $('#groupStudyListModal').modal('show');
     
@@ -4309,3 +4293,32 @@ window.addPrefixToCourseName = function(prefix) {
     // Đưa con trỏ chuột về lại ô nhập để người dùng gõ tiếp
     input.focus();
 };
+// BỔ SUNG: Hàm cập nhật chi tiết góc nhìn TKB
+window.updateTkbDetailedView = function(actionName = "") {
+    if (actionName) {
+        if (typeof setDetailedView === 'function') setDetailedView(`Thời gian biểu - Đang thao tác: ${actionName}`);
+        return;
+    }
+    
+    let nh = $('#namHocSelect').val();
+    let hk = $('#hocKySelect').val();
+    let weekText = $('#weekSelect option:selected').text();
+    
+    if (nh && hk && weekText) {
+        let w = weekText.split('(')[0].trim(); // Tách lấy chữ "Tuần X" hoặc "Tuần Nghỉ Lễ"
+        if (typeof setDetailedView === 'function') {
+            setDetailedView(`Thời gian biểu - ${nh} - ${hk} - ${w}`);
+        }
+    } else {
+        if (typeof setDetailedView === 'function') setDetailedView("Thời gian biểu");
+    }
+};
+
+// BỔ SUNG: Phục hồi trạng thái xem "Tuần" khi sinh viên tắt các bảng chức năng (Modal)
+$(document).ready(function() {
+    $('#systemTkbModal, #manageTkbListModal, #manageDeadlineListModal, #unifiedTkbModal, #deadlinePersonalModal, #exportCalendarModal, #groupStudyListModal').on('hidden.bs.modal', function () {
+        if (!$('#tkbSection').hasClass('d-none')) {
+            updateTkbDetailedView(); 
+        }
+    });
+});
