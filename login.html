@@ -596,6 +596,15 @@ body {
                 }
             }
             renderSavedAccountsWithIcons();
+
+            // --- ĐOẠN CODE MỚI THÊM: Bắt sự kiện nhấn phím Enter ---
+            $('#txtUserMSSV, #txtUserPass').on('keypress', function(e) {
+                if (e.which === 13) { // 13 là mã của phím Enter
+                    e.preventDefault(); // Ngăn hành vi mặc định của form
+                    loginStudentPage(); // Gọi hàm xử lý đăng nhập
+                }
+            });
+            // --------------------------------------------------------
         });
 
         function renderSavedAccountsWithIcons() {
