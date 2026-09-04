@@ -4663,8 +4663,8 @@
 <script>
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
-        const startMaintenance = new Date(2026, 8, 04, 17, 00);  
-        const endMaintenance   = new Date(2026, 8, 04, 18, 15); 
+        const startMaintenance = new Date(2026, 8, 02, 07, 00);  
+        const endMaintenance   = new Date(2026, 8, 02, 16, 15); 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
@@ -4801,7 +4801,7 @@ async function initSystemUrlRouter() {
         else if (viewParam === 'qa') openQASection();
         else if (viewParam === 'datlich') loadDatLichHenView();
         else if (viewParam === 'renluyen') loadRenLuyenView();
-        else if (viewParam === 'sharecode') {
+        else if (viewParam === 'sharecode' || viewParam === 'thaoluan') {
             openShareCodeSection();
             if (categoryParam) {
                 let targetCat = categoryParam.toLowerCase();
