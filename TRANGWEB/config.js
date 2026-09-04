@@ -219,29 +219,42 @@ function saveEditRow() {
             if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) { e.preventDefault(); return false; }
             if (e.ctrlKey && (e.key === 'S' || e.key === 's' || e.keyCode === 83)) { e.preventDefault(); return false; }
         });
-        window.alert = function(message) {
-    let toastEl = document.getElementById('autoToast'); 
-    let toastBody = document.getElementById('autoToastMessage');
-    toastBody.innerText = message;
+       window.alert = function(message) {
+    let originalToast = document.getElementById('autoToast'); 
+    let toastContainer = originalToast.closest('.toast-container');
     
-    // --- FIX LỖI: Ép khung thông báo luôn nổi lên trên cùng (Đè lên cả chế độ LOAD_WEB) ---
-    let toastContainer = toastEl.closest('.toast-container');
     if (toastContainer) {
         toastContainer.style.setProperty('z-index', '99999', 'important');
     }
     
-    // Đổi màu thông báo tùy theo nội dung
-    if (message.toLowerCase().includes('lỗi') || message.toLowerCase().includes('không')) { 
-        toastEl.classList.remove('bg-success', 'bg-primary'); 
-        toastEl.classList.add('bg-danger'); 
+    // Nhân bản toast gốc để tạo các thông báo độc lập xếp chồng lên nhau
+    let newToast = originalToast.cloneNode(true);
+    newToast.removeAttribute('id'); // Xóa ID để tránh xung đột
+    
+    let toastBody = newToast.querySelector('.toast-body');
+    toastBody.innerText = message;
+    
+    // Đổi màu thông báo
+    if (message.toLowerCase().includes('lỗi') || message.toLowerCase().includes('không') || message.toLowerCase().includes('rời')) { 
+        newToast.classList.remove('bg-success', 'bg-primary'); 
+        newToast.classList.add('bg-danger'); 
     } else { 
-        toastEl.classList.remove('bg-danger', 'bg-primary'); 
-        toastEl.classList.add('bg-success'); 
+        newToast.classList.remove('bg-danger', 'bg-primary'); 
+        newToast.classList.add('bg-success'); 
     }
     
-    let toast = new bootstrap.Toast(toastEl, { delay: 2500 }); 
+    // Bơm thẻ mới vào container để xếp dải từ trên xuống
+    toastContainer.appendChild(newToast);
+    
+    let toast = new bootstrap.Toast(newToast, { delay: 2500 }); 
     toast.show();
+
+    // Tự động dọn rác DOM sau khi toast biến mất
+    newToast.addEventListener('hidden.bs.toast', function () {
+        newToast.remove();
+    });
 };
+
 function getNaturalShortName(fullName) {
     if (!fullName || typeof fullName !== 'string') return '';
     let parts = fullName.trim().split(/\s+/);

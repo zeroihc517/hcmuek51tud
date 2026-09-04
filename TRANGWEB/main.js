@@ -247,71 +247,67 @@ function pingOnlineStatus() {
         success: function(res) { 
             if (res && res.list) { 
                 
-                // BẮT ĐẦU THÊM MỚI: THÔNG BÁO VÀ ÂM THANH CHO ADMIN
-                if (currentUser && currentUser.mssv === "51.01.108.008") {
-                    if (typeof cachedOnlineList !== 'undefined' && cachedOnlineList.length > 0) {
-                        let oldUsersMap = {};
-                        let newUsersMap = {};
-                        
-                        // Ánh xạ danh sách cũ
-                        cachedOnlineList.forEach(u => {
-                            if (u !== "Khách" && u.includes("|")) {
-                                let parts = u.split("|");
-                                oldUsersMap[parts[0]] = parts[1];
-                            }
-                        });
-                        
-                        // Ánh xạ danh sách mới
-                        res.list.forEach(u => {
-                            if (u !== "Khách" && u.includes("|")) {
-                                let parts = u.split("|");
-                                newUsersMap[parts[0]] = parts[1];
-                            }
-                        });
-                        
-                        let hasJoin = false;
-                        let hasLeave = false;
-                        let joinMessage = "";
-                        let leaveMessage = "";
+                // PHÁT ÂM THANH VÀ THÔNG BÁO BẰNG WINDOW.ALERT ĐỂ NỔI LÊN TRÊN LOAD_WEB
+if (currentUser && currentUser.mssv === "51.01.108.008") {
+    if (typeof cachedOnlineList !== 'undefined' && cachedOnlineList.length > 0) {
+        let oldUsersMap = {};
+        let newUsersMap = {};
+        
+        cachedOnlineList.forEach(u => {
+            if (u !== "Khách" && u.includes("|")) {
+                let parts = u.split("|");
+                oldUsersMap[parts[0]] = parts[1];
+            }
+        });
+        
+        res.list.forEach(u => {
+            if (u !== "Khách" && u.includes("|")) {
+                let parts = u.split("|");
+                newUsersMap[parts[0]] = parts[1];
+            }
+        });
+        
+        let hasJoin = false;
+        let hasLeave = false;
+        let joinMessages = []; // Dùng mảng thay vì chuỗi đơn
+        let leaveMessages = [];
 
-                        // 1. Kiểm tra người mới vào
-                        for (let mssv in newUsersMap) {
-                            if (!oldUsersMap[mssv]) {
-                                // Bỏ qua nếu là chính tài khoản Admin
-                                if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
+        // 1. Kiểm tra người mới vào
+        for (let mssv in newUsersMap) {
+            if (!oldUsersMap[mssv]) {
+                if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
+                let fullName = newUsersMap[mssv];
+                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
+                joinMessages.push(`${shortName} đã tham gia`);
+                hasJoin = true;
+            }
+        }
 
-                                let fullName = newUsersMap[mssv];
-                                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
-                                joinMessage = `${shortName} đã tham gia`;
-                                hasJoin = true;
-                            }
-                        }
+        // 2. Kiểm tra người vừa rời đi
+        for (let mssv in oldUsersMap) {
+            if (!newUsersMap[mssv]) {
+                if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
+                let fullName = oldUsersMap[mssv];
+                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
+                leaveMessages.push(`${shortName} đã rời`);
+                hasLeave = true;
+            }
+        }
 
-                        // 2. Kiểm tra người vừa rời đi
-                        for (let mssv in oldUsersMap) {
-                            if (!newUsersMap[mssv]) {
-                                // Bỏ qua nếu là chính tài khoản Admin
-                                if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
-
-                                let fullName = oldUsersMap[mssv];
-                                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
-                                leaveMessage = `${shortName} đã rời`;
-                                hasLeave = true;
-                            }
-                        }
-
-                        // PHÁT ÂM THANH VÀ THÔNG BÁO BẰNG WINDOW.ALERT ĐỂ NỔI LÊN TRÊN LOAD_WEB
-                        if (hasJoin) {
-                            let joinSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3');
-                            joinSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
-                            window.alert(joinMessage); 
-                        } else if (hasLeave) {
-                            let leaveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2868/2868-preview.mp3');
-                            leaveSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
-                            window.alert(leaveMessage);
-                        }
-                    }
-                }
+        if (hasJoin) {
+            let joinSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3');
+            joinSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
+            // Gọi toast cho từng người mới vào
+            joinMessages.forEach(msg => window.alert(msg)); 
+        } 
+        if (hasLeave) {
+            let leaveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2868/2868-preview.mp3');
+            leaveSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
+            // Gọi toast cho từng người rời đi
+            leaveMessages.forEach(msg => window.alert(msg));
+        }
+    }
+}
                 // KẾT THÚC THÊM MỚI
 
                 // Cập nhật dữ liệu mới vào RAM
@@ -1991,13 +1987,24 @@ $('#tbMainView').addClass('d-none');
 function initGlobalApp() {
     $('.app-container, .mobile-header').css('display', '');
     setTimeout(pingOnlineStatus, 1000); 
-    setInterval(pingOnlineStatus, 25000);
     
-    // --- BẮT ĐẦU ĐOẠN CẦN CẬP NHẬT/THÊM MỚI ---
+    // --- BẮT ĐẦU FIX: THEO DÕI THAO TÁC CỦA NGƯỜI DÙNG ---
+    window.lastUserActionTime = Date.now();
+    $(document).on('mousemove keydown scroll click touchstart', function() {
+        window.lastUserActionTime = Date.now(); // Cập nhật lại thời gian mỗi khi có cử động
+    });
+
+    // PING THÔNG MINH: Chỉ báo online nếu sinh viên có đụng vào máy trong vòng 10 phút qua
+    setInterval(function() {
+        let now = Date.now();
+        // 10 * 60 * 1000 = 10 phút (Tính bằng mili-giây)
+        if (now - window.lastUserActionTime < 10 * 60 * 1000) {
+            pingOnlineStatus();
+        }
+    }, 25000);
+    // --- KẾT THÚC FIX ---
     
-    // 1. Gọi ngầm kiểm tra dữ liệu Q&A mỗi 5 giây
-// Thay thế vòng lặp setInterval cũ bằng khối này
-// 1. Gọi ngầm kiểm tra dữ liệu Q&A và ShareCode mỗi 5 giây
+    // 1. Gọi ngầm kiểm tra dữ liệu Q&A và ShareCode mỗi 5 giây
     setInterval(function() {
         if (!$('#qaSection').hasClass('d-none')) {
             silentCheckNewQA();
@@ -2007,7 +2014,7 @@ function initGlobalApp() {
         
         // Cập nhật huy hiệu cho ShareCode cực mượt
         checkNewShareCodeGlobal(); 
-checkNewDatLichGlobal();
+        checkNewDatLichGlobal();
     }, 5000);
 
     // 2. ĐỒNG BỘ TRẠNG THÁI DEADLINE TỪ SERVER VỀ MÁY KHI KHỞI ĐỘNG
