@@ -2103,26 +2103,30 @@
     </button>
 </div>
 
+<!-- Bảng Lịch sử Truy cập -->
 <div class="table-responsive bg-white rounded border shadow-sm mb-4">
-    <table class="table table-hover table-bordered align-middle text-center m-0" style="font-size: 14.5px;">
-        <thead class="table-dark">
+    <table class="table table-hover table-bordered align-middle text-center m-0" style="font-size: 15.5px; min-width: 1300px;">
+        <thead class="text-center text-white" style="background-color: #0f4c81; font-size: 15px;">
             <tr>
-                <th style="width: 80px;">STT</th>
-                <th>MSSV</th>
-                <th>Họ và Tên</th>
-                <th>Mục đang xem</th> <!-- THÊM CỘT MỚI Ở ĐÂY -->
-                <th>Lần cuối truy cập</th>
-                <th>Trạng thái</th>
+                <th style="width: 50px; padding: 12px 6px;">STT</th>
+                <th style="width: 100px; padding: 12px 6px;">MSSV</th>
+                <th style="width: 160px; padding: 12px 6px;">Họ và Tên</th>
+                <th style="width: 140px; padding: 12px 6px;">Lần đầu (Đợt này)</th>
+                <th style="width: 150px; padding: 12px 6px;">Phía trước 3</th>
+                <th style="width: 150px; padding: 12px 6px;">Phía trước 2</th>
+                <th style="width: 150px; padding: 12px 6px;">Phía trước 1</th>
+                <th style="width: 160px; padding: 12px 6px;">Đang xem</th>
+                <th style="width: 140px; padding: 12px 6px;">Lần cuối</th>
+                <th style="width: 140px; padding: 12px 6px;">Trạng thái</th>
             </tr>
         </thead>
         <tbody id="accessHistoryTableBody">
             <tr>
-                <!-- Sửa colspan="5" thành colspan="6" -->
-                <td colspan="6" class="text-muted py-3">Bấm "Làm mới danh sách" để tải dữ liệu...</td>
+                <td colspan="10" class="text-muted py-4">Bấm "Làm mới danh sách" để tải dữ liệu...</td>
             </tr>
         </tbody>
     </table>
-</div>            
+</div>          
             <!-- Nơi đổ dữ liệu chi tiết của Sinh viên -->
             <div id="adminUserDetailArea" class="d-none mt-4">
                 <!-- Dữ liệu sẽ được JS render vào đây -->
@@ -4659,8 +4663,8 @@
 <script>
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
-        const startMaintenance = new Date(2026, 8, 04, 16, 40);  
-        const endMaintenance   = new Date(2026, 8, 04, 17, 15); 
+        const startMaintenance = new Date(2026, 8, 02, 07, 00);  
+        const endMaintenance   = new Date(2026, 8, 02, 16, 15); 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;

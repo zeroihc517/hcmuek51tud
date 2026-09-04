@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwyJQ2RPjVQ7B80PrA0HW_ZFYIESYC72e7NDPcY0aBLUmDgN9KynYM_HXF_QPHiDV9m/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxdDHXPlzYl5IcCniqvfBIwPt8wnkaPX6KhWY_uI5PFLMXnGufTNPyjpESo8yo-CSdP/exec'; 
 
      let isAdmin = false;
         let currentSheetName = "";
@@ -476,10 +476,9 @@ function formatVNDateTime(dateStr) {
     return `${pad(vnTime.getDate())}/${pad(vnTime.getMonth() + 1)}/${vnTime.getFullYear()} ${pad(vnTime.getHours())}:${pad(vnTime.getMinutes())}:${pad(vnTime.getSeconds())}`;
 }
 
-// 2. Cập nhật lại hàm gọi API lấy danh sách Lịch sử truy cập
 function fetchUserAccessHistory() {
     let tbody = $('#accessHistoryTableBody');
-    tbody.html('<tr><td colspan="6" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin fs-4 mb-2"></i><br>Đang tải lịch sử truy cập...</td></tr>');
+    tbody.html('<tr><td colspan="10" class="text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải lịch sử truy cập...</td></tr>');
 
     $.ajax({
         url: SCRIPT_URL + "?action=getAllUsersAccessHistory",
@@ -487,19 +486,15 @@ function fetchUserAccessHistory() {
         dataType: "json",
         success: function(users) {
             if (!users || users.length === 0) {
-                tbody.html('<tr><td colspan="6" class="text-center text-muted py-3">Chưa có dữ liệu thành viên.</td></tr>');
+                tbody.html('<tr><td colspan="10" class="text-center text-muted py-4">Chưa có dữ liệu thành viên.</td></tr>');
                 return;
             }
 
-            // Sắp xếp người mới truy cập gần nhất lên đầu
             users.sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive));
 
             let html = '';
             users.forEach((u, index) => {
-                // ----------------------------------------------------
-                // 1. TRẠNG THÁI: Bỏ khung (badge), chỉ dùng màu chữ đậm
-                // ----------------------------------------------------
-                let statusBadge = '<span class="fw-bold text-muted"><i class="fa-solid fa-circle me-1" style="font-size: 8px;"></i> Ngoại tuyến</span>';
+                let statusBadge = '<span class="fw-bold text-muted" style="font-size: 14.5px;"><i class="fa-solid fa-circle me-1" style="font-size: 10px;"></i> Ngoại tuyến</span>';
                 
                 if (u.lastActive && u.lastActive !== "Chưa từng truy cập") {
                     let lastTime = new Date(u.lastActive).getTime();
@@ -507,41 +502,45 @@ function fetchUserAccessHistory() {
                     let diffMinutes = (nowTime - lastTime) / (1000 * 60);
 
                     if (diffMinutes <= 5) {
-                        statusBadge = '<span class="fw-bold text-success"><i class="fa-solid fa-circle fa-beat me-1" style="font-size: 8px;"></i> Đang hoạt động</span>';
+                        statusBadge = '<span class="fw-bold text-success" style="font-size: 14.5px;"><i class="fa-solid fa-circle fa-beat me-1" style="font-size: 10px;"></i> Đang hoạt động</span>';
                     } else if (diffMinutes <= 60) {
-                        statusBadge = `<span class="fw-bold" style="color: #d97706;"><i class="fa-solid fa-clock me-1"></i> ${Math.floor(diffMinutes)} phút trước</span>`;
+                        statusBadge = `<span class="fw-bold" style="color: #d97706; font-size: 14.5px;"><i class="fa-solid fa-clock me-1"></i> ${Math.floor(diffMinutes)} phút trước</span>`;
                     }
                 }
 
-                // ----------------------------------------------------
-                // 2. MỤC ĐANG XEM: Bỏ khung, dùng đúng biến lastView
-                // ----------------------------------------------------
-                // ----------------------------------------------------
-// 2. MỤC ĐANG XEM: Bỏ khung, dùng đúng biến lastView
-// ----------------------------------------------------
-let sectionName = u.lastView || u.currentSection || u.action || u.view || "Không rõ"; 
+                // Hàm định dạng UI cho các Mục xem
+                const formatSection = (sectionName) => {
+                    let formatted = sectionName;
+                    if (sectionName !== "Không rõ" && sectionName !== "Chưa có" && sectionName !== "") {
+                        formatted = sectionName.replace(/\s-\s/g, '<br><i class="fa-solid fa-arrow-turn-up fa-rotate-90 text-secondary ms-2 me-1" style="font-size: 12px;"></i>');
+                        return `<div class="fw-bold text-start d-inline-block" style="color: #0284c7; font-size: 15px; line-height: 1.5;">${formatted}</div>`;
+                    }
+                    return `<span class="fw-bold text-muted" style="font-size: 14.5px;">${sectionName}</span>`;
+                };
 
-// Tách chuỗi tại dấu " - " và ép xuống dòng kèm icon mũi tên phân cấp
-let formattedSectionName = sectionName;
-if (sectionName !== "Không rõ" && sectionName !== "") {
-    formattedSectionName = sectionName.replace(/\s-\s/g, '<br><i class="fa-solid fa-arrow-turn-up fa-rotate-90 text-secondary ms-2 me-1" style="font-size: 11px;"></i>');
-}
-
-// Bọc trong thẻ div căn trái (text-start) để tạo hiệu ứng bậc thang
-let currentSectionText = (sectionName !== "Không rõ" && sectionName !== "") 
-    ? `<div class="fw-bold text-start d-inline-block" style="color: #0ea5e9; line-height: 1.6;">${formattedSectionName}</div>` 
-    : `<span class="fw-bold text-muted">Không rõ</span>`;
+                let currentSectionText = formatSection(u.lastView || "Không rõ");
+                let prevSection1Text = formatSection(u.prevView1 || "Chưa có");
+                let prevSection2Text = formatSection(u.prevView2 || "Chưa có");
+                let prevSection3Text = formatSection(u.prevView3 || "Chưa có");
 
                 html += `
-                <tr>
-                    <td class="fw-bold text-muted">${index + 1}</td>
-                    <td class="fw-bold text-primary">${u.mssv}</td>
-                    <td class="text-start fw-bold">${u.name}</td>
-                    <!-- Cột Mục đang xem -->
+                <tr style="height: 65px;">
+                    <td class="fw-bold text-muted" style="font-size: 15px;">${index + 1}</td>
+                    <td class="fw-bold text-primary" style="font-size: 15px;">${u.mssv}</td>
+                    <td class="text-start fw-bold text-dark" style="font-size: 15px;">${u.name}</td>
+                    
+                    <!-- Lần đầu -->
+                    <td class="font-monospace text-muted fw-bold" style="font-size: 13.5px;">${formatVNDateTime(u.firstAccess)}</td>
+                    
+                    <!-- 3 Mục phía trước -->
+                    <td>${prevSection3Text}</td>
+                    <td>${prevSection2Text}</td>
+                    <td>${prevSection1Text}</td>
+                    
+                    <!-- Mục đang xem -->
                     <td>${currentSectionText}</td>
-                    <!-- Cột Lần cuối truy cập theo giờ VN -->
-                    <td class="font-monospace text-muted">${formatVNDateTime(u.lastActive)}</td>
-                    <!-- Cột Trạng thái -->
+                    
+                    <td class="font-monospace text-muted fw-bold" style="font-size: 13.5px;">${formatVNDateTime(u.lastActive)}</td>
                     <td>${statusBadge}</td>
                 </tr>`;
             });
@@ -549,10 +548,11 @@ let currentSectionText = (sectionName !== "Không rõ" && sectionName !== "")
             tbody.html(html);
         },
         error: function() {
-            tbody.html('<tr><td colspan="6" class="text-center text-danger py-3"><i class="fa-solid fa-triangle-exclamation me-1"></i> Không thể tải dữ liệu!</td></tr>');
+            tbody.html('<tr><td colspan="10" class="text-center text-danger py-4"><i class="fa-solid fa-triangle-exclamation me-1"></i> Không thể tải dữ liệu!</td></tr>');
         }
     });
 }
+
 // PROMISE: Giám sát siêu tốc dữ liệu Thông báo (Đã fix lỗi CPU)
 function waitForThongBaoData() {
     return new Promise((resolve) => {
