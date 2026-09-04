@@ -3711,3 +3711,9 @@ tr.rl-row-white td {
     margin-top: 0 !important;
     padding-top: 0 !important;
 }
+/* Đồng bộ màu xanh tiêu đề bảng Lịch sử truy cập sinh viên */
+#adminUserManageSection .table thead th {
+    background-color: var(--primary-color) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+}
