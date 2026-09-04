@@ -68,24 +68,54 @@ function loginStudent() {
             fetchAndRenderCategories();
             loadWebLinks();
 
-            // Tải ngầm Lịch học TKB & Deadlines
-           $.ajax({ url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(data) { processTKBData(data); } });
-            $.ajax({ url: SCRIPT_URL + "?action=getDeadlinesUser&mssv=" + currentUser.mssv, method: "GET", dataType: "json", success: function(data) { globalDeadlineData = data.map(r => ({ title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5], dateStart: r[6] || "", dateEnd: r[7] || "", sheetRowIndex: r[8] })); } });
-$.ajax({ 
-                url: SCRIPT_URL + "?action=getCompletedDeadlines&mssv=" + currentUser.mssv, 
-                method: "GET", 
-                dataType: "json", // Bắt buộc phải có dòng này để nó hiểu dữ liệu
-                success: function(res) {
-                    // Kiểm tra đảm bảo không lưu cục báo lỗi vào máy
-                    if (res && !res.error) {
-                        // Nếu là mảng thì stringify, nếu đã là chuỗi thì giữ nguyên
-                        let dataToSave = typeof res === 'string' ? res : JSON.stringify(res);
-                        localStorage.setItem('completed_deadlines_' + currentUser.mssv, dataToSave);
-                        renderDeadlines(); // Cập nhật màu trên trang chủ
+          // ========================================================
+            // TẢI NGẦM TOÀN BỘ DỮ LIỆU CÁ NHÂN QUA 1 API GỘP DUY NHẤT
+            // ========================================================
+            $.ajax({
+                url: SCRIPT_URL + "?action=getDashboardData&mssv=" + currentUser.mssv,
+                method: "GET",
+                dataType: "json",
+                success: function(data) {
+                    if (data.error) return;
+
+                    // 1. Xử lý TKB
+                    if (data.tkb && typeof processTKBData === 'function') processTKBData(data.tkb);
+
+                    // 2. Xử lý Deadlines
+                    if (data.deadlines) {
+                        globalDeadlineData = data.deadlines.map(r => ({ 
+                            title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5], 
+                            dateStart: r[6] || "", dateEnd: r[7] || "", sheetRowIndex: r[8] 
+                        }));
                     }
+
+                    // 3. Xử lý Trạng thái Hoàn thành Deadlines
+                    if (data.completedDeadlines) {
+                        let dataToSave = typeof data.completedDeadlines === 'string' ? data.completedDeadlines : JSON.stringify(data.completedDeadlines);
+                        localStorage.setItem('completed_deadlines_' + currentUser.mssv, dataToSave);
+                        if (typeof renderDeadlines === 'function') renderDeadlines();
+                    }
+
+                    // 4. Xử lý Cấu hình GPA Song ngành
+                    if (data.gpaConfig && data.gpaConfig !== "") {
+                        try { 
+                            gpaConfig = typeof data.gpaConfig === 'string' ? JSON.parse(data.gpaConfig) : data.gpaConfig; 
+                            localStorage.setItem('gpaConfig', JSON.stringify(gpaConfig)); 
+                        } catch(e) {}
+                    }
+
+                    // 5. Xử lý Bảng điểm GPA
+                    try { 
+                        myGPADataset = typeof data.gpaUser === 'string' ? JSON.parse(data.gpaUser) : data.gpaUser; 
+                        if(!Array.isArray(myGPADataset)) myGPADataset = []; 
+                    } catch(e) { 
+                        myGPADataset = []; 
+                    }
+                    window.isGpaDataLoaded = true; 
+                    if (typeof autoSyncTkbToGpa === 'function') autoSyncTkbToGpa();
                 },
                 error: function(err) {
-                    console.error("Lỗi kéo dữ liệu Deadline:", err);
+                    console.error("Lỗi khi tải dữ liệu gộp từ máy chủ:", err);
                 }
             });
             // Tải ngầm Bảng điểm GPA (và cấu hình song ngành)

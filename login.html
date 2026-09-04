@@ -639,8 +639,16 @@ body {
             let btn = $('#btnLoginStudent'); 
             btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang xác thực...').prop('disabled', true);
             
-            postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
-                let response = typeof res === 'string' ? JSON.parse(res) : res;
+           postToGAS({ action: "login", mssv: mssv, password: pass }, function(res) {
+    let response;
+    try {
+        response = typeof res === 'string' ? JSON.parse(res) : res;
+    } catch(err) {
+        // Bắt lỗi nếu máy chủ trả về dạng text (Lỗi máy chủ)
+        $('#userAuthError').removeClass('d-none').text(res); 
+        btn.html('Đăng nhập hệ thống').prop('disabled', false); 
+        return;
+    }
                 if (response.success) {
                     let currentUser = { 
                         mssv: response.mssv, 
