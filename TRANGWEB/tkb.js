@@ -1722,8 +1722,12 @@ function onWeekChange() {
     let val = $('#weekSelect').val();
     if (val) {
         currentSelectedMonday = new Date(parseInt(val));
-        updateTableHeaders(); filterAndRenderTKB(); renderDeadlines(); 
-	if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView();
+        updateTableHeaders(); 
+        filterAndRenderTKB(); 
+        renderDeadlines(); 
+        
+        // BỔ SUNG: Ép hệ thống chốt sổ trạng thái ngay lập tức khi đổi tuần
+        if (typeof pingOnlineStatus === 'function') pingOnlineStatus();
     }
 }
 
@@ -4293,25 +4297,27 @@ window.addPrefixToCourseName = function(prefix) {
     // Đưa con trỏ chuột về lại ô nhập để người dùng gõ tiếp
     input.focus();
 };
+
 // BỔ SUNG: Hàm cập nhật chi tiết góc nhìn TKB
 window.updateTkbDetailedView = function(actionName = "") {
+    // 1. NẾU ĐANG THAO TÁC -> CHỈ HIỆN ĐANG THAO TÁC (Bỏ qua đoạn ghép thời gian biểu dài dòng)
     if (actionName) {
-        if (typeof setDetailedView === 'function') setDetailedView(`Thời gian biểu - Đang thao tác: ${actionName}`);
+        if (typeof setDetailedView === 'function') setDetailedView(`Đang thao tác: ${actionName}`);
         return;
     }
     
+    // 2. NẾU KHÔNG CÓ THAO TÁC NÀO -> GHI ĐẦY ĐỦ TGB - NĂM - HK - TUẦN
     let nh = $('#namHocSelect').val();
     let hk = $('#hocKySelect').val();
     let weekText = $('#weekSelect option:selected').text();
     
-    if (nh && hk && weekText) {
-        let w = weekText.split('(')[0].trim(); // Tách lấy chữ "Tuần X" hoặc "Tuần Nghỉ Lễ"
-        if (typeof setDetailedView === 'function') {
-            setDetailedView(`Thời gian biểu - ${nh} - ${hk} - ${w}`);
-        }
-    } else {
-        if (typeof setDetailedView === 'function') setDetailedView("Thời gian biểu");
+    let baseStr = "Thời gian biểu";
+    if (nh && hk && weekText && weekText.indexOf('--') === -1) {
+        let w = weekText.split('(')[0].trim(); // Tách lấy chữ "Tuần X"
+        baseStr += ` - ${nh} - ${hk} - ${w}`;
     }
+    
+    if (typeof setDetailedView === 'function') setDetailedView(baseStr);
 };
 
 // BỔ SUNG: Phục hồi trạng thái xem "Tuần" khi sinh viên tắt các bảng chức năng (Modal)

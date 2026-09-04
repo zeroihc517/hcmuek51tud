@@ -225,12 +225,22 @@ function pingOnlineStatus() {
     }
 
     // --- LOGIC LẤY TÊN MỤC ĐANG XEM (CHUẨN XÁC THEO MENU) ---
-    // (Phần logic phía dưới của bạn giữ nguyên, không thay đổi)
     let currentView = "Trang chủ"; 
     let activeMenuText = $('#sidebarMenu .active').text().trim();
     
     if (window.userDetailedView !== "") {
         currentView = window.userDetailedView;
+    } else if (activeMenuText === "Lịch học" || !$('#tkbSection').hasClass('d-none')) {
+        // Tự động quét dữ liệu TKB nếu đang đứng ở trang này
+        let nh = $('#namHocSelect').val();
+        let hk = $('#hocKySelect').val();
+        let weekText = $('#weekSelect option:selected').text();
+        
+        currentView = "Thời gian biểu";
+        if (nh && hk && weekText && weekText.indexOf('--') === -1) {
+            let w = weekText.split('(')[0].trim();
+            currentView += ` - ${nh} - ${hk} - ${w}`;
+        }
     } else if (activeMenuText) {
         currentView = activeMenuText; 
     } else if (typeof currentSheetName !== 'undefined' && currentSheetName !== "") {
