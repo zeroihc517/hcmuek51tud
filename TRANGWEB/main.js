@@ -6612,71 +6612,84 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
 
     $(searchInputId).val('');
     let container = $(listId);
-    container.html('<div class="text-center text-muted small py-4"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2 d-block text-secondary"></i>Đang tải dữ liệu bộ nhớ...</div>');
 
-    $.ajax({
-        // THÊM ĐUÔI THỜI GIAN ĐỂ ÉP TẢI DỮ LIỆU MỚI TỪ GOOGLE SHEETS
-        url: SCRIPT_URL + "?action=getShareCodeData&_=" + new Date().getTime(),
-        method: "GET",
-        dataType: "json",
-        cache: false, // CHỐNG LƯU CACHE CỦA TRÌNH DUYỆT
-        success: function(data) {
-            window.allSidebarSnippets = [];
-            let activeUserObj = JSON.parse(localStorage.getItem('currentUser')) || null;
-            let myCleanMssv = activeUserObj ? activeUserObj.mssv.replace(/\./g, "") : "";
+    // 1. HIỂN THỊ NGAY LẬP TỨC CÂU LỆNH TÌM KIẾM, BỎ QUA HOÀN TOÀN BƯỚC LOADING UI
+    container.html(`<div class="text-muted small text-center py-4"><i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>Hệ thống đã sẵn sàng.<br>Nhập mã bài (VD: B01) để tìm kiếm...</div>`);
 
-            let myCodes = [];
-            let otherCodes = [];
+    // Khởi tạo mảng trống để bảo vệ ứng dụng (tránh lỗi nếu user gõ tìm kiếm quá nhanh khi dữ liệu chưa kịp tải về)
+    window.allSidebarSnippets = window.allSidebarSnippets || [];
 
-            if (data && data.length > 0) {
-                data.forEach(row => {
-                    let contentRaw = row[2] || '';
-                    let targetTag = `[SHARECODE|${courseName}`;
+    // 2. HÀM XỬ LÝ DỮ LIỆU NGẦM (Không động chạm đến giao diện)
+    const processSnippetsData = (data) => {
+        let activeUserObj = JSON.parse(localStorage.getItem('currentUser')) || null;
+        let myCleanMssv = activeUserObj ? activeUserObj.mssv.replace(/\./g, "") : "";
+
+        let myCodes = [];
+        let otherCodes = [];
+
+        if (data && data.length > 0) {
+            data.forEach(row => {
+                let contentRaw = row[2] || '';
+                let targetTag = `[SHARECODE|${courseName}`;
+                
+                if (contentRaw.startsWith(targetTag)) {
+                    let maBaiMatch = contentRaw.match(/^\[SHARECODE\|.*?\|(.*?)\]/);
+                    let maBai = maBaiMatch && maBaiMatch[1] ? maBaiMatch[1].trim() : "";
                     
-                    if (contentRaw.startsWith(targetTag)) {
-                        let maBaiMatch = contentRaw.match(/^\[SHARECODE\|.*?\|(.*?)\]/);
-                        let maBai = maBaiMatch && maBaiMatch[1] ? maBaiMatch[1].trim() : "";
-                        
-                        let cleanContent = contentRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '').trim();
-                        let theoryPart = "", codePart = "", langMatch = "cpp";
+                    let cleanContent = contentRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '').trim();
+                    let theoryPart = "", codePart = "", langMatch = "cpp";
 
-                        let codeMatch = cleanContent.match(/```(cpp|python|c\+\+|c)?([\s\S]*?)```/i);
-                        if (codeMatch) {
-                            let rawLang = (codeMatch[1] || "cpp").toLowerCase();
-                            langMatch = (rawLang === 'python' || rawLang === 'py') ? 'python' : 'cpp';
-                            codePart = codeMatch[2].trim();
-                            theoryPart = cleanContent.replace(codeMatch[0], '').trim();
-                        } else {
-                            theoryPart = cleanContent; 
-                        }
-                        
-                        theoryPart = theoryPart.replace(/<div class="mb-3"><strong>Lời giải lý thuyết:<\/strong><br>/g, '').replace(/<\/div>$/g, '').replace(/<p><\/p>/g, '').trim();
-                        
-                        let rawAuthor = String(row[1] || '').trim().replace(/[-|]/g, '');
-                        let authorCleanMssv = rawAuthor.replace(/\./g, "");
-                        let authorName = maskMSSV(rawAuthor); 
-                        let isMyCode = (myCleanMssv !== "" && authorCleanMssv === myCleanMssv);
-                        if (isMyCode) authorName = "Bạn";
-
-                        if (codePart || theoryPart) {
-                            let codeObj = {
-                                maBai: maBai, theory: theoryPart, code: codePart, lang: langMatch,
-                                author: authorName, isMine: isMyCode, answer: row[3] || '', rowIndex: row[6] 
-                            };
-                            if (isMyCode) myCodes.push(codeObj);
-                            else otherCodes.push(codeObj);
-                        }
+                    let codeMatch = cleanContent.match(/```(cpp|python|c\+\+|c)?([\s\S]*?)```/i);
+                    if (codeMatch) {
+                        let rawLang = (codeMatch[1] || "cpp").toLowerCase();
+                        langMatch = (rawLang === 'python' || rawLang === 'py') ? 'python' : 'cpp';
+                        codePart = codeMatch[2].trim();
+                        theoryPart = cleanContent.replace(codeMatch[0], '').trim();
+                    } else {
+                        theoryPart = cleanContent; 
                     }
-                });
+                    
+                    theoryPart = theoryPart.replace(/<div class="mb-3"><strong>Lời giải lý thuyết:<\/strong><br>/g, '').replace(/<\/div>$/g, '').replace(/<p><\/p>/g, '').trim();
+                    
+                    let rawAuthor = String(row[1] || '').trim().replace(/[-|]/g, '');
+                    let authorCleanMssv = rawAuthor.replace(/\./g, "");
+                    let authorName = maskMSSV(rawAuthor); 
+                    let isMyCode = (myCleanMssv !== "" && authorCleanMssv === myCleanMssv);
+                    if (isMyCode) authorName = "Bạn";
+
+                    if (codePart || theoryPart) {
+                        let codeObj = {
+                            maBai: maBai, theory: theoryPart, code: codePart, lang: langMatch,
+                            author: authorName, isMine: isMyCode, answer: row[3] || '', rowIndex: row[6] 
+                        };
+                        if (isMyCode) myCodes.push(codeObj);
+                        else otherCodes.push(codeObj);
+                    }
+                }
+            });
+        }
+        window.allSidebarSnippets = myCodes.concat(otherCodes);
+    };
+
+    // 3. CHẠY LÉN VIỆC LẤY DỮ LIỆU TỪ MÁY CHỦ (Background Fetch)
+    if (window.cachedShareCodeData) {
+        // Đã có bộ nhớ đệm RAM thì dịch dữ liệu luôn
+        processSnippetsData(window.cachedShareCodeData);
+    } else {
+        // Chưa có bộ nhớ đệm thì tải lén từ máy chủ
+        $.ajax({
+            url: SCRIPT_URL + "?action=getShareCodeData",
+            method: "GET",
+            dataType: "json",
+            success: function(data) {
+                window.cachedShareCodeData = data; 
+                processSnippetsData(data);
             }
-
-            window.allSidebarSnippets = myCodes.concat(otherCodes);
-            container.html(`<div class="text-muted small text-center py-4"><i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>Hệ thống đã sẵn sàng.<br>Nhập mã bài (VD: B01) để tìm kiếm...</div>`);
-        },
-        error: function() { container.html('<div class="text-danger small text-center py-2"><i class="fa-solid fa-triangle-exclamation"></i> Lỗi kết nối máy chủ!</div>'); }
-    });
+            // Loại bỏ luôn hàm error: function() {...} để nó chạy hoàn toàn im lặng, 
+            // không quấy rầy user bằng các dòng thông báo lỗi trên UI nếu rớt mạng.
+        });
+    }
 };
-
 window.searchSidebarCode = function(isLatex = false) {
     let searchInputId = isLatex ? '#txtLatexSearchCode' : '#txtSidebarSearchCode';
     let listId = isLatex ? '#latexCodeList' : '#sidebarCodeList';
