@@ -1920,9 +1920,9 @@
                             <button class="btn btn-nav-square" onclick="changeWeekBtn(1)" title="Tuần sau">
                                 <i class="fa-solid fa-forward-fast"></i>
                             </button>
-                            <button class="btn btn-hientai d-flex align-items-center justify-content-center gap-2" onclick="jumpToCurrentWeek()" style="flex: 2;">
-                                <i class="fa-regular fa-calendar-days"></i> Hiện tại
-                            </button>
+                            <button class="btn btn-hientai d-flex align-items-center justify-content-center gap-2" onclick="jumpToCurrentWeek(true)" style="flex: 2;">
+    <i class="fa-regular fa-calendar-days"></i> Hiện tại
+</button>
                         </div>
                     </div>
                 </div>
@@ -4699,14 +4699,41 @@
 <script>
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
-        const startMaintenance = new Date(2026, 8, 05, 17, 30);  
-        const endMaintenance   = new Date(2026, 8, 05, 17, 40); 
+        const startMaintenance = new Date(2026, 8, 05, 06, 00);  
+        const endMaintenance   = new Date(2026, 8, 05, 07, 10); 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
 
         const maintenancePage = "Baotri.html"; 
         const now = new Date();
+
+        if (now >= startMaintenance && now <= endMaintenance) {
+            // Đóng gói cả mốc thời gian và chuỗi hiển thị gửi sang LocalStorage
+            localStorage.setItem("maintenanceConfig", JSON.stringify({
+                end: endMaintenance.getTime(), 
+                textShow: endTimeStr
+            }));
+            window.location.replace(maintenancePage);
+        } else {
+            // Xóa dữ liệu nếu chưa tới giờ hoặc đã hết bảo trì
+            localStorage.removeItem("maintenanceConfig");
+        }
+    })();
+</script>
+<script>
+    (function() {
+        const now = new Date();
+        
+        // Thiết lập thời gian bảo trì HÀNG NGÀY: Từ 11:40 đến 12:30
+        const startMaintenance = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0);  
+        const endMaintenance   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30, 0); 
+        
+        // Hàm tạo chuỗi định dạng (VD: 12:30 Ngày 21/07/2026)
+        const pad = (n) => n.toString().padStart(2, '0');
+        const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
+
+        const maintenancePage = "Baotri.html"; 
 
         if (now >= startMaintenance && now <= endMaintenance) {
             // Đóng gói cả mốc thời gian và chuỗi hiển thị gửi sang LocalStorage

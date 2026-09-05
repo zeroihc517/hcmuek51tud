@@ -1773,34 +1773,36 @@ function changeWeekBtn(delta) {
     onWeekChange();
 }
 
-function jumpToCurrentWeek() {
+function jumpToCurrentWeek(forceRealTime = false) {
     let todayTime = new Date().getTime(); 
     let found = false; 
     let targetNH = "", targetHK = "", targetWeekSelectValue = "";
 
     // --- ƯU TIÊN SỐ 1: ÉP VỀ 2026-2027 HK1 NẾU CHƯA TỚI NGÀY BẮT ĐẦU ---
-    let targetConf = globalConfigHK.find(c => c[0] === '2026-2027' && (c[1] === 'Học kỳ 1'));
-    if (targetConf) {
-        let sDate = parseDateString(targetConf[2]);
-        // Nếu đã có ngày bắt đầu và hôm nay NHỎ HƠN ngày bắt đầu đó -> Ép mở Tuần 1 HK1
-        if (sDate && todayTime < sDate.getTime()) {
-            targetNH = targetConf[0];
-            targetHK = targetConf[1];
-	    
-            targetWeekSelectValue = getMondayOfDate(sDate).getTime().toString();
-            
-            $('#namHocSelect').val(targetNH); 
-            onNamHocChange(); 
-            $('#hocKySelect').val(targetHK); 
-            onHocKyChange(); 
-            $('#weekSelect').val(targetWeekSelectValue); 
-            onWeekChange();
-            return; // KẾT THÚC HÀM TẠI ĐÂY, không quét các kỳ cũ nữa
+    // Chỉ kích hoạt khi KHÔNG phải do người dùng bấm nút Hiện tại (forceRealTime = false)
+    if (!forceRealTime) {
+        let targetConf = globalConfigHK.find(c => c[0] === '2026-2027' && (c[1] === 'Học kỳ 1'));
+        if (targetConf) {
+            let sDate = parseDateString(targetConf[2]);
+            // Nếu đã có ngày bắt đầu và hôm nay NHỎ HƠN ngày bắt đầu đó -> Ép mở Tuần 1 HK1
+            if (sDate && todayTime < sDate.getTime()) {
+                targetNH = targetConf[0];
+                targetHK = targetConf[1];
+                targetWeekSelectValue = getMondayOfDate(sDate).getTime().toString();
+                
+                $('#namHocSelect').val(targetNH); 
+                onNamHocChange(); 
+                $('#hocKySelect').val(targetHK); 
+                onHocKyChange(); 
+                $('#weekSelect').val(targetWeekSelectValue); 
+                onWeekChange();
+                return; // KẾT THÚC HÀM TẠI ĐÂY
+            }
         }
     }
     // ---------------------------------------------------------------------
 
-    // --- ƯU TIÊN SỐ 2: TÌM THEO THỜI GIAN THỰC (Nếu đã qua ngày bắt đầu của 26-27 HK1) ---
+    // --- ƯU TIÊN SỐ 2: TÌM THEO THỜI GIAN THỰC TẾ ---
     for (let conf of globalConfigHK) {
         let sDate = parseDateString(conf[2]); 
         let numAcademicWeeks = parseInt(conf[3]); 
