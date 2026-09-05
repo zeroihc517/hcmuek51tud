@@ -1689,6 +1689,7 @@ function onNamHocChange() {
     hks.forEach(hk => html += `<option value="${hk}">${hk}</option>`);
     $('#hocKySelect').html(html).val('');
     $('#weekSelect').html('<option value="">-- Chọn tuần --</option>').val('');
+	if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView();
 }
 
 function onHocKyChange() {
@@ -1715,7 +1716,10 @@ function onHocKyChange() {
         }
     }
     $('#weekSelect').html(html);
-    if ($('#weekSelect option').length > 1) { $('#weekSelect').prop('selectedIndex', 1); onWeekChange(); }
+    if ($('#weekSelect option').length > 1) { $('#weekSelect').prop('selectedIndex', 1); onWeekChange(); } else {
+        // NẾU KHÔNG CÓ TUẦN NÀO, VẪN PHẢI BÁO CÁO TRẠNG THÁI HIỆN TẠI LÊN MÁY CHỦ
+        if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView();
+    }
 }
 
 function onWeekChange() {
@@ -1726,8 +1730,7 @@ function onWeekChange() {
         filterAndRenderTKB(); 
         renderDeadlines(); 
         
-        // BỔ SUNG: Ép hệ thống chốt sổ trạng thái ngay lập tức khi đổi tuần
-        if (typeof pingOnlineStatus === 'function') pingOnlineStatus();
+       if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView();
     }
 }
 
