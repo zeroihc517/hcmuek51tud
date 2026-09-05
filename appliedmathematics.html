@@ -4699,8 +4699,8 @@
 <script>
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
-        const startMaintenance = new Date(2026, 8, 05, 06, 00);  
-        const endMaintenance   = new Date(2026, 8, 05, 07, 10); 
+        const startMaintenance = new Date(2026, 8, 05, 17, 30);  
+        const endMaintenance   = new Date(2026, 8, 05, 17, 40); 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
