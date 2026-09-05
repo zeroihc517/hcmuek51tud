@@ -389,11 +389,15 @@ body {
     <div id="maintenanceBanner" class="maintenance-banner-premium" style="display: none;">
         <div class="marquee-wrapper" id="marqueeWrapper">
             <div class="maintenance-text">
-                <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 1 (27/08):</strong>
-                <span>Đôi lúc Google Scripts có thể xảy ra tình trạng lag hoặc phản hồi chậm. Bạn vui lòng quay lại sau ít phút. Admin không thể can thiệp xử lý vì vấn đề này xuất phát từ máy chủ của Google. Mong bạn thông cảm!</span>
+                <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 1 (05/09):</strong>
+                <span>Website sẽ bảo trì từ 11:40 đến 12:30 hàng ngày</span>
+            </div>
+            <div class="maintenance-text">
+                <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 2 (27/08):</strong>
+                <span>Đôi lúc Google Scripts có thể xảy ra tình trạng lag hoặc phản hồi chậm. Bạn vui lòng quay lại sau ít phút. Admin không thể can thiệp xử lý vì vấn đề này xuất phát từ máy chủ của Google!</span>
             </div>
 <div class="maintenance-text">
-                <strong><i class="fa-solid fa-flag pulse-icon"></i> THÔNG BÁO 2 (03/09)</strong>
+                <strong><i class="fa-solid fa-flag pulse-icon"></i> THÔNG BÁO 3 (03/09)</strong>
                 <span>Nếu phát hiện nội dung có sai sót, các bạn vui lòng bình luận tại mục Trao đổi (biểu tượng cùng hàng) hay Hỏi đáp QA để admin chỉnh sửa nhé!</span>
             </div>
 
@@ -502,7 +506,7 @@ body {
             let marqueeWrapper = document.getElementById('marqueeWrapper');
             if (marqueeWrapper) {
                 let msgCount = marqueeWrapper.querySelectorAll('.maintenance-text').length;
-                if (msgCount > 2) {
+                if (msgCount > 3) {
                     marqueeWrapper.classList.add('scrolling-active');
                 }
             }
