@@ -170,7 +170,7 @@
       if (!endTime || now >= endTime) {
         // Đã hết giờ bảo trì -> Xóa config và vào lại trang chủ
         localStorage.removeItem("maintenanceConfig");
-        window.location.replace(targetUrl);
+        window.top.location.replace(targetUrl); // THÊM .top VÀO ĐÂY
       } else {
         // Chưa hết giờ mà người dùng bấm thử vào lại
         if (isManualClick) {

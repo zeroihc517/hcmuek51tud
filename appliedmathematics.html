@@ -4699,9 +4699,9 @@
 <script>
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
-        const startMaintenance = new Date(2026, 8, 05, 06, 00);  
-        const endMaintenance   = new Date(2026, 8, 05, 07, 10); 
-        // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
+        const startMaintenance = new Date(2026, 8, 05, 17, 40);  
+        const endMaintenance   = new Date(2026, 8, 05, 17, 55); 
+        // Hàm tạo chuỗi định dạng
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
 
@@ -4709,16 +4709,22 @@
         const now = new Date();
 
         if (now >= startMaintenance && now <= endMaintenance) {
-            // Đóng gói cả mốc thời gian và chuỗi hiển thị gửi sang LocalStorage
             localStorage.setItem("maintenanceConfig", JSON.stringify({
-                end: endMaintenance.getTime(), 
+                endTime: endMaintenance.getTime(), 
                 textShow: endTimeStr
             }));
-            window.location.replace(maintenancePage);
-        } else {
-            // Xóa dữ liệu nếu chưa tới giờ hoặc đã hết bảo trì
-            localStorage.removeItem("maintenanceConfig");
+            
+            // Thêm ID để tránh tạo trùng iframe
+            if (!document.getElementById('maintenanceIframe')) {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'maintenanceIframe';
+                iframe.src = maintenancePage;
+                iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; border: none; background-color: #f8fafc;';
+                document.body.appendChild(iframe);
+                document.body.style.overflow = 'hidden'; 
+            }
         }
+        // Đã xóa phần else để không xung đột dữ liệu
     })();
 </script>
 <script>
@@ -4729,25 +4735,31 @@
         const startMaintenance = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0);  
         const endMaintenance   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30, 0); 
         
-        // Hàm tạo chuỗi định dạng (VD: 12:30 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
 
         const maintenancePage = "Baotri.html"; 
 
         if (now >= startMaintenance && now <= endMaintenance) {
-            // Đóng gói cả mốc thời gian và chuỗi hiển thị gửi sang LocalStorage
             localStorage.setItem("maintenanceConfig", JSON.stringify({
-                end: endMaintenance.getTime(), 
+                endTime: endMaintenance.getTime(), 
                 textShow: endTimeStr
             }));
-            window.location.replace(maintenancePage);
-        } else {
-            // Xóa dữ liệu nếu chưa tới giờ hoặc đã hết bảo trì
-            localStorage.removeItem("maintenanceConfig");
+            
+            // Thêm ID để tránh tạo trùng iframe
+            if (!document.getElementById('maintenanceIframe')) {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'maintenanceIframe';
+                iframe.src = maintenancePage;
+                iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; border: none; background-color: #f8fafc;';
+                document.body.appendChild(iframe);
+                document.body.style.overflow = 'hidden'; 
+            }
         }
+        // Đã xóa phần else để không xung đột dữ liệu
     })();
 </script>
+
 <script>
 // Hàm đổi URL linh hoạt
 function updateSystemUrl(paramKey, paramValue) {
