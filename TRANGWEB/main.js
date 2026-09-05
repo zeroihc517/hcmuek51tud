@@ -248,6 +248,18 @@ function pingOnlineStatus() {
     } else {
         currentView = document.title.split('|')[0].trim(); 
     }
+	
+let splitTitle = "";
+    if ($('#splitIframeWrapper').length && !$('#splitIframeWrapper').hasClass('d-none')) {
+        splitTitle = $('#splitIframeTitle').text().trim();
+    } else if ($('#splitLatexWrapper').length && !$('#splitLatexWrapper').hasClass('d-none')) {
+        splitTitle = $('#splitLatexTitle').text().trim();
+    }
+
+    // Bỏ qua nếu tiêu đề là chữ mặc định chưa load xong của hệ thống
+    if (splitTitle && splitTitle !== "Bài học mở thêm") {
+        currentView += " ++ " + splitTitle;
+    }
 
     $.ajax({ 
         url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID + "&mssv=" + encodeURIComponent(mssvParam) + "&lastView=" + encodeURIComponent(currentView), 
@@ -4328,8 +4340,8 @@ $('#latexViewerModal').on('hide.bs.modal', function (e) {
     $(document).off('click', 'a, button, .btn-course'); // Xóa sự kiện cũ để tránh trùng lặp
     $(document).on('click', 'a, button, .btn-course', function(e) {
         if (isEnforcedFullscreen && isTimerActive()) {
-            // 1. Đưa cửa sổ Q&A (#courseQAModal) vào vùng an toàn để không bị chặn khi tương tác
-            if ($(this).closest('#documentViewerModal, #latexViewerModal, #linkWarningModal, #closeWarningModal, #returnStudyModal, #sidebarCodeViewerModal, #courseQAModal').length > 0) return; 
+            // 1. Thêm #splitLessonSelectModal vào danh sách vùng an toàn
+            if ($(this).closest('#documentViewerModal, #latexViewerModal, #linkWarningModal, #closeWarningModal, #returnStudyModal, #sidebarCodeViewerModal, #courseQAModal, #splitLessonSelectModal').length > 0) return; 
 
             // 2. Cho phép các nút có ID bắt đầu bằng btnQA_ (Nút mở hỏi đáp) được hoạt động tự do
             if ($(this).attr('id') && $(this).attr('id').startsWith('btnQA_')) return;
@@ -6481,16 +6493,21 @@ $(document).ready(function() {
         }
     });
 
-    $('#documentViewerModal, #latexViewerModal').on('hidden.bs.modal', function () {
+  $('#documentViewerModal, #latexViewerModal').on('hidden.bs.modal', function () {
         isEnforcedFullscreen = false;
         allowLessonClose = false; 
         exitFullScreen();
+        
+        $('#iframeSidebar, #latexSidebar').removeClass('d-flex').addClass('d-none');
+        if (typeof closeSplitPane === 'function') {
+            // Thêm "true" để chặn Ping rác, ép máy chủ đẩy NGUYÊN VẸN dòng "Bài 1 ++ Bài 2" xuống lịch sử
+            closeSplitPane('iframe', true);
+            closeSplitPane('latex', true);
+        }
+
         if (typeof window.setDetailedView === 'function' && typeof currentSheetName !== 'undefined') {
             window.setDetailedView(currentSheetName);
         }
-
-        // THÊM DÒNG NÀY: Tự động đóng và reset Thanh công cụ khi tắt bài học
-        $('#iframeSidebar, #latexSidebar').removeClass('d-flex').addClass('d-none');
     });
 
     // Đánh chặn Click Link trên Sidebar của cả 2 Modal
@@ -6746,3 +6763,279 @@ document.addEventListener('fullscreenchange', function() {
         $('#returnStudyModal').modal('show');
     }
 });
+
+// =======================================================
+// TÍNH NĂNG MỞ THÊM BÀI (SPLIT SCREEN) TÍCH HỢP TRỰC TIẾP
+// =======================================================
+window.activeSplitModal = '';
+
+window.openSplitLessonModal = function(activeModalType) {
+    window.activeSplitModal = activeModalType;
+    if (!window.currentSubjectData) return;
+
+    let html = '';
+    let minigameHtml = '';
+    let tableHtml = '<div class="table-responsive border rounded shadow-sm mt-3"><table class="custom-portal-table" style="min-width: 100%; width: 100%; background: #fff;"><tbody>';
+    
+    let hasContent = false;
+    let hasMinigame = false;
+
+    let currentChapterId = 0;
+    let currentLessonId = 0;
+    let activeChapterId = 0;
+
+    window.currentSubjectData.forEach((row, index) => {
+        if (index === 0) return; // Bỏ qua Header
+        if (!row || row.length === 0 || row.filter(cell => String(cell).trim() !== "").length === 0) return;
+
+        let fullRowText = row.join(" ").toLowerCase().replace(/\s+/g, ' '); 
+        let firstCellTextRaw = String(row[0]).trim(); 
+        let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
+        
+        // 1. Lọc Thông tin giảng viên -> Thu gọn (Bỏ qua hoàn toàn)
+        if (/mãhọcphần|họcphần|giảngviênphụtrách|emailgiảngviên/.test(fullRowText)) return;
+
+        let titleRaw = String(row[1] || '').replace(/<[^>]*>?/gm, '').replace(/(<br\s*\/?>|\n)+/gi, ' ').trim();
+        if (!titleRaw) titleRaw = String(row[0]).replace(/<[^>]*>?/gm, '').trim();
+        let contentRaw = String(row[2] || '').trim();
+
+        // 2. Lọc Minigame -> Đưa vào khu vực thu gọn trên cùng
+        let isSpecialExam = /(đề thi thử|đề demo|minigame tuần|minigame hè|minigame số)/i.test(fullRowText);
+        if (isSpecialExam) {
+            hasMinigame = true;
+            let iconClass = fullRowText.includes("minigame") ? "fa-gamepad" : "fa-file-lines";
+            minigameHtml += `
+                <div class="col-6 col-md-4 col-lg-3 mb-2">
+                    <div class="p-3 border rounded shadow-sm text-center d-flex flex-column align-items-center justify-content-center h-100" style="cursor: pointer; background: #ffffff; border: 2px solid #ef4444 !important; transition: all 0.2s;" onclick="loadSplitLesson(${index})" onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 20px rgba(239,68,68,0.15)';" onmouseout="this.style.transform='none'; this.style.boxShadow='0 4px 10px rgba(0,0,0,0.03)';">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px; background: linear-gradient(135deg, #fecdd3, #fda4af); color: #be123c; font-size: 24px;">
+                            <i class="fa-solid ${iconClass}"></i>
+                        </div>
+                        <div class="fw-bold text-danger" style="font-size: 13px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${titleRaw}</div>
+                    </div>
+                </div>`;
+            return;
+        }
+
+        // 3. Phân cấp Chương/Bài (Sao chép nguyên bản tính năng gập/mở của Web)
+        let isPart = /phần/.test(firstCellText);
+        let isChapter = /chủđề|chương/.test(firstCellText);
+        let isLesson = /bài/.test(firstCellText);
+        let isMucTieu = /mụctiêu/.test(firstCellText);
+
+        if (isPart) { activeChapterId = 0; currentLessonId = 0; } 
+        else if (isChapter) { currentChapterId = index; activeChapterId = index; currentLessonId = 0; } 
+        else if (isLesson) { currentLessonId = index; }
+
+        let childClass = '';
+        if (isChapter) {
+            // Rỗng
+        } else if (isLesson) {
+            if (activeChapterId > 0) childClass = ` split-child-of-chapter-${activeChapterId} d-none`;
+        } else if (isPart) {
+            // Rỗng
+        } else {
+            if (currentLessonId > 0 && activeChapterId > 0) {
+                childClass = ` split-child-of-chapter-${activeChapterId} split-child-of-lesson-${activeChapterId}-${currentLessonId} d-none`;
+            } else if (currentLessonId > 0 && activeChapterId === 0) {
+                childClass = ` split-child-of-lesson-0-${currentLessonId} d-none`;
+            } else if (activeChapterId > 0) {
+                childClass = ` split-child-of-chapter-${activeChapterId} split-direct-chapter-child d-none`;
+            }
+        }
+
+        let rowClass = 'grid-row';
+        let iconPrefix = '';
+        
+        if (isPart) { rowClass += ' row-part'; } 
+        else if (isChapter) { rowClass += ' row-topic is-chapter'; } 
+        else if (isLesson) { rowClass += ' row-lesson is-lesson'; iconPrefix = '<i class="fa-solid fa-folder-open me-2 text-success"></i>'; }
+
+        // Render cấu trúc hàng Tiêu đề (Phần, Chương, Bài)
+        if (isPart || isChapter || isLesson || isMucTieu) {
+            hasContent = true;
+            let chevronHtml = '';
+            let clickEvent = '';
+            
+            if (isChapter) {
+                chevronHtml = `<button class="btn-expand ms-2" style="background: transparent; border: none; padding: 0; width: 24px; height: 24px; color: inherit; pointer-events: none;"><i class="fa-solid fa-chevron-down" style="transition: transform 0.3s ease; transform: rotate(-90deg);"></i></button>`;
+                clickEvent = ` onclick="toggleSplitChapter(${activeChapterId}, this)" style="cursor: pointer;"`;
+            } else if (isLesson) {
+                chevronHtml = `<button class="btn-expand ms-2" style="background: transparent; border: none; padding: 0; width: 24px; height: 24px; color: inherit; pointer-events: none;"><i class="fa-solid fa-chevron-down" style="transition: transform 0.3s ease; transform: rotate(-90deg);"></i></button>`;
+                clickEvent = ` onclick="toggleSplitLesson(${activeChapterId}, ${currentLessonId}, this)" style="cursor: pointer;"`;
+            }
+
+            tableHtml += `<tr class="${rowClass} ${childClass}" ${clickEvent}>
+                            <td style="width: 100px; border-right: 1px dashed #e5e7eb; font-weight: 600;">${iconPrefix}${firstCellTextRaw}</td>
+                            <td><div class="d-flex align-items-center"><span style="font-weight: 700;">${titleRaw}</span> ${chevronHtml}</div></td>
+                          </tr>`;
+        } 
+        // Render hàng chứa Nội dung có thể bấm vào (Hàng trắng)
+        else {
+            if (contentRaw === '') return; 
+            hasContent = true;
+            
+            let isMinigameInline = titleRaw.toLowerCase().includes('hãy làm đề') || titleRaw.toLowerCase().includes('minigame') || titleRaw.toLowerCase().includes('hãy tiến hành làm đề') || contentRaw.startsWith('[LOAD_MINIGAME]') || contentRaw.startsWith('[MINIGAME]');
+            
+            let iconContent = '<i class="fa-solid fa-file-lines me-2" style="color: #0ea5e9; font-size: 16px;"></i>';
+            if (isMinigameInline) iconContent = '<i class="fa-solid fa-gamepad me-2" style="color: #ef4444; font-size: 16px;"></i>';
+
+            tableHtml += `<tr class="${rowClass} ${childClass}" style="cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='#ffffff';" onclick="loadSplitLesson(${index})">
+                            <td style="width: 100px; border-right: 1px dashed #e5e7eb; font-weight: 600; color: #475569;">${firstCellTextRaw}</td>
+                            <td><span style="font-weight: 700; color: #0f4c81;">${iconContent}${titleRaw}</span></td>
+                          </tr>`;
+        }
+    });
+
+    tableHtml += '</tbody></table></div>';
+
+    // Ghép khối Minigame (dạng Accordion gập mở hệt bên ngoài)
+    if (hasMinigame) {
+        html += `
+        <div>
+            <div class="d-flex justify-content-between align-items-center p-3" data-bs-toggle="collapse" data-bs-target="#splitCollapseMinigames" aria-expanded="false" style="background: #fff1f2; cursor: pointer; transition: background 0.2s; border: 2px solid #ef4444; border-radius: 12px;" onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fff1f2'">
+                <h6 class="m-0 fw-bold" style="color: #ef4444;"><i class="fa-solid fa-gamepad fa-bounce me-2"></i> CÁC ĐỀ MINIGAME-THỰC CHIẾN</h6>
+                <i class="fa-solid fa-chevron-down text-danger minigame-chevron" style="transition: transform 0.3s;"></i>
+            </div>
+            <div class="collapse" id="splitCollapseMinigames">
+                <div class="p-3 mt-2 row g-3">
+                    ${minigameHtml}
+                </div>
+            </div>
+        </div>`;
+    }
+
+    if (hasContent) {
+        html += tableHtml;
+    }
+
+    if (!hasContent && !hasMinigame) {
+        html = '<div class="p-5 text-center text-muted"><i class="fa-solid fa-folder-open fs-1 mb-3 opacity-50"></i><br>Không có dữ liệu bài học nào để chọn.</div>';
+    }
+
+    $('#splitLessonList').html(html);
+    $('#splitLessonSelectModal').modal('show');
+};
+
+// =======================================================
+// HÀM HỖ TRỢ XỬ LÝ GẬP MỞ BẢNG BÊN TRONG MODAL
+// =======================================================
+window.toggleSplitChapter = function(chapterId, rowElement) {
+    let chevronIcon = $(rowElement).find('.fa-chevron-down');
+    let isExpanded = $(rowElement).hasClass('expanded');
+    
+    if (!isExpanded) {
+        $(rowElement).addClass('expanded');
+        chevronIcon.css('transform', 'rotate(0deg)');
+        $(`.split-child-of-chapter-${chapterId}.is-lesson`).removeClass('d-none');
+        $(`.split-child-of-chapter-${chapterId}.split-direct-chapter-child`).removeClass('d-none');
+    } else {
+        $(rowElement).removeClass('expanded');
+        chevronIcon.css('transform', 'rotate(-90deg)');
+        $(`.split-child-of-chapter-${chapterId}`).addClass('d-none');
+        $(`.split-child-of-chapter-${chapterId}.is-lesson`).removeClass('expanded');
+        $(`.split-child-of-chapter-${chapterId}.is-lesson .fa-chevron-down`).css('transform', 'rotate(-90deg)');
+    }
+};
+
+window.toggleSplitLesson = function(chapterId, lessonId, rowElement) {
+    let chevronIcon = $(rowElement).find('.fa-chevron-down');
+    let isExpanded = $(rowElement).hasClass('expanded');
+    if (event) event.stopPropagation();
+
+    if (!isExpanded) {
+        $(rowElement).addClass('expanded');
+        chevronIcon.css('transform', 'rotate(0deg)');
+        $(`.split-child-of-lesson-${chapterId}-${lessonId}`).removeClass('d-none');
+    } else {
+        $(rowElement).removeClass('expanded');
+        chevronIcon.css('transform', 'rotate(-90deg)');
+        $(`.split-child-of-lesson-${chapterId}-${lessonId}`).addClass('d-none');
+    }
+};
+
+// =======================================================
+// HÀM ĐỔ NỘI DUNG VÀO KHUNG SAU KHI SINH VIÊN BẤM CHỌN
+// =======================================================
+window.loadSplitLesson = function(rowIndex) {
+    let row = window.currentSubjectData[rowIndex];
+    let title = String(row[1] || row[0]).replace(/<[^>]*>?/gm, '').trim();
+    let contentRaw = String(row[2] || '').trim();
+
+    let _urlRegex = /(https?:\/\/[^\s<"]+)/g;
+    let isLoadWeb = contentRaw.startsWith('[LOAD_WEB]');
+    let isLoadIframe = contentRaw.startsWith('[LOAD_IFRAME]');
+    let isLoadMinigame = contentRaw.startsWith('[LOAD_MINIGAME]') || contentRaw.startsWith('[MINIGAME]');
+    
+    let extractedUrl = contentRaw.match(_urlRegex) ? contentRaw.match(_urlRegex)[0] : null;
+    let isLinkOnly = extractedUrl && contentRaw.replace(_urlRegex, '').trim() === '';
+
+    let finalHtml = '';
+    
+    if (isLoadIframe || isLoadWeb || isLinkOnly || isLoadMinigame) {
+        let url = extractedUrl;
+        if (isLoadWeb) url = contentRaw.replace('[LOAD_WEB]', '').trim();
+        if (isLoadIframe) url = contentRaw.replace('[LOAD_IFRAME]', '').trim();
+        
+        if (url && url.includes('drive.google.com/file/d/')) {
+            url = url.replace(/\/view.*$/, '/preview');
+        } else if (url && (url.includes('youtube.com') || url.includes('youtu.be'))) {
+            let videoId = "";
+            if (url.includes('youtu.be/')) videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
+            else if (url.includes('youtube.com/shorts/')) videoId = url.split('youtube.com/shorts/')[1].split('?')[0].split('&')[0];
+            else if (url.includes('youtube.com/watch')) {
+                try { let urlObj = new URL(url); videoId = urlObj.searchParams.get('v'); }
+                catch(e) { let match = url.match(/v=([^&]+)/); if (match) videoId = match[1]; }
+            }
+            if (videoId) {
+                let currentOrigin = window.location.origin !== "null" ? window.location.origin : "";
+                url = `https://www.youtube.com/embed/${videoId}?enablejsapi=1${currentOrigin ? '&origin=' + encodeURIComponent(currentOrigin) : ''}`;
+            }
+        }
+
+        finalHtml = `<iframe src="${url}" style="width: 100%; height: 100%; border: none;"></iframe>`;
+    } else {
+        let contentDisplay = contentRaw;
+        if (!/(<p>|<table>|<br>|<br\s*\/?>|<div>)/i.test(contentDisplay)) {
+            contentDisplay = contentDisplay.replace(/\n/g, '<br>');
+        }
+        finalHtml = `<div class="p-3" style="background: #fff; height: 100%;">${contentDisplay}</div>`;
+    }
+
+    let type = window.activeSplitModal; 
+    
+    if (type === 'iframe') {
+        $('#mainIframeWrapper').css('width', '50%');
+        $('#splitIframeWrapper').removeClass('d-none').addClass('d-flex');
+        $('#splitIframeTitle').html(`<i class="fa-solid fa-book-open me-2"></i> ${title}`);
+        $('#splitIframeContent').html(finalHtml);
+        applyKaTeX('splitIframeContent');
+    } else if (type === 'latex') {
+        $('#mainLatexWrapper').css('width', '50%');
+        $('#splitLatexWrapper').removeClass('d-none').addClass('d-flex');
+        $('#splitLatexTitle').html(`<i class="fa-solid fa-book-open me-2"></i> ${title}`);
+        $('#splitLatexContent').html(finalHtml);
+        applyKaTeX('splitLatexContent');
+    }
+
+    $('#splitLessonSelectModal').modal('hide');
+    
+    // Báo cáo ngay cho máy chủ để hiện "++ Bài song song" lập tức
+    pingOnlineStatus();
+};
+
+window.closeSplitPane = function(type, skipPing = false) {
+    if (type === 'iframe') {
+        $('#mainIframeWrapper').css('width', '100%');
+        $('#splitIframeWrapper').addClass('d-none').removeClass('d-flex');
+        $('#splitIframeContent').html('');
+    } else if (type === 'latex') {
+        $('#mainLatexWrapper').css('width', '100%');
+        $('#splitLatexWrapper').addClass('d-none').removeClass('d-flex');
+        $('#splitLatexContent').html('');
+    }
+    
+    // Chỉ ping báo về Bài 1 khi tắt bằng nút [X] nhỏ của bảng song song
+    if (!skipPing) {
+        pingOnlineStatus();
+    }
+};

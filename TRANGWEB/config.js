@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbydWY3e6ZV7QZTspjG3cQAGf8Y1i3U2_wRUvmPa43wi1DQqdRRgectq5j4AnfoA6sVF/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRmksyABMZ4-4AXQhUCr6pRxIMZ9kF2nykEnIHhGHiUDXGdiDzJNmCC-FUtD02XPET/exec'; 
 
      let isAdmin = false;
         let currentSheetName = "";
@@ -464,9 +464,10 @@ if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv ===
 $(document).ready(function() {
     $('#documentViewerModal').on('hidden.bs.modal', function () {
         $('#docViewerIframe').attr('src', '');
-	if (typeof window.setDetailedView === 'function' && typeof currentSheetName !== 'undefined') {
-            window.setDetailedView(currentSheetName);
-        }
+        
+        // ĐÃ XÓA: Lệnh setDetailedView ở đây đã được xóa đi
+        // để nhường cho hàm hidden.bs.modal tổng (ở bên dưới) xử lý,
+        // nhằm chặn triệt để lỗi báo cáo đúp (Double-Ping) sinh ra rác lịch sử.
     });
 });
 $(document).ready(function() {

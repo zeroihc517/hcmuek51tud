@@ -3682,6 +3682,9 @@
                 
                 <!-- Nhóm nút bên phải -->
                 <div class="d-flex align-items-center gap-2">
+			<button type="button" class="btn btn-sm fw-bold d-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('iframe')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
+                        <i class="fa-solid fa-table-columns"></i> Mở thêm bài
+                    </button>
                     <button type="button" class="btn btn-sm fw-bold d-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleIframeSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
                         <i class="fa-solid fa-layer-group"></i> Công cụ
                     </button>
@@ -3696,18 +3699,27 @@
             <div class="modal-body p-0 d-flex" style="background-color: #202124; position: relative; height: 100%;">
                 
                 <!-- Vùng Iframe Bài Học -->
-                <div id="iframeContainer" class="flex-grow-1 position-relative" style="transition: width 0.3s; height: 100%;">
-                    <div class="w-100 h-100 d-flex align-items-center justify-content-center" id="docLoading" style="position: absolute; z-index: 0;">
-                        <div class="text-center text-white opacity-75">
-                            <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải tài liệu...
+               <div id="iframeContainer" class="flex-grow-1 position-relative d-flex" style="transition: width 0.3s; height: 100%;">
+                    <div id="mainIframeWrapper" class="h-100 position-relative" style="width: 100%; transition: width 0.3s;">
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center" id="docLoading" style="position: absolute; z-index: 0;">
+                            <div class="text-center text-white opacity-75">
+                                <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải tài liệu...
+                            </div>
                         </div>
+                        <iframe id="docViewerIframe" src="" 
+                                style="width: 100%; height: 100%; border: none; position: relative; z-index: 1;" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                allowfullscreen
+                                onload="document.getElementById('docLoading').style.display='none'">
+                        </iframe>
                     </div>
-                    <iframe id="docViewerIframe" src="" 
-                            style="width: 100%; height: 100%; border: none; position: relative; z-index: 1;" 
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                            allowfullscreen
-                            onload="document.getElementById('docLoading').style.display='none'">
-                    </iframe>
+                    <div id="splitIframeWrapper" class="d-none flex-column h-100 shadow-sm" style="width: 50%; border-left: 2px solid #cbd5e1; background: #fff; z-index: 2;">
+                        <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
+                            <h6 class="m-0 fw-bold text-primary text-truncate px-2" id="splitIframeTitle"><i class="fa-solid fa-book-open me-2"></i> Bài học mở thêm</h6>
+                            <button type="button" class="btn-close" style="font-size: 12px;" onclick="closeSplitPane('iframe')"></button>
+                        </div>
+                        <div id="splitIframeContent" class="flex-grow-1 position-relative" style="overflow-y: auto;"></div>
+                    </div>
                 </div>
                 
                 <!-- Vùng Sidebar Công Cụ (Bên phải - Được thiết kế lại) -->
@@ -3946,7 +3958,9 @@
                     <button class="btn btn-sm btn-link text-white p-0 ms-2 btn-countdown-pause" onclick="togglePauseUserCountdown()" title="Tạm ngưng / Tiếp tục"><i class="fa-solid fa-pause"></i></button>
                 </div>
                 <div class="d-flex gap-2 align-items-center">
-                    <!-- Nút Công cụ -->
+                    <button type="button" class="btn btn-sm fw-bold d-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('latex')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
+                        <i class="fa-solid fa-table-columns"></i> Mở thêm bài
+                    </button>
                     <button type="button" class="btn btn-sm fw-bold d-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleLatexSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
                         <i class="fa-solid fa-layer-group"></i> Công cụ
                     </button>
@@ -3961,14 +3975,13 @@
             <!-- Thân Modal -->
             <div class="modal-body p-0 d-flex" style="background-color: #f0f2f5; position: relative; height: 100%;">
                 
-                <div id="latexContentContainer" class="flex-grow-1 p-2 p-md-3 overflow-auto d-flex justify-content-center" style="transition: width 0.3s; height: 100%;">
-                    <!-- 1. CHẾ ĐỘ XEM TRƯỚC -->
-                    <div id="latexViewMode" class="w-100 p-4 p-md-5 bg-white border shadow-sm" style="min-height: 100%; border-radius: 8px; border-color: #e2e8f0 !important; font-size: 16px; line-height: 1.8; color: #1e293b; font-family: 'Inter', sans-serif;">
-                        <!-- Nội dung render Toán học -->
-                    </div>
-                    
-                    <!-- 2. CHẾ ĐỘ SỬA TRỰC TIẾP -->
-                    <div id="latexEditMode" class="d-none w-100 flex-column">
+<div id="latexContentContainer" class="flex-grow-1 p-2 p-md-3 overflow-hidden d-flex gap-2" style="transition: width 0.3s; height: 100%;">
+                    <div id="mainLatexWrapper" class="h-100 position-relative d-flex justify-content-center overflow-auto" style="width: 100%; transition: width 0.3s;">
+                        <div class="w-100 d-flex flex-column h-100">
+                            <div id="latexViewMode" class="w-100 p-4 p-md-5 bg-white border shadow-sm flex-grow-1" style="border-radius: 8px; border-color: #e2e8f0 !important; font-size: 16px; line-height: 1.8; color: #1e293b; font-family: 'Inter', sans-serif;">
+                                </div>
+                            
+                            <div id="latexEditMode" class="d-none w-100 flex-column h-100">
                         <div class="mb-3">
                             <label class="fw-bold text-primary mb-1"><i class="fa-solid fa-heading me-1"></i> Tiêu đề bài học</label>
                             <input type="text" id="latexEditTitleInput" class="form-control fw-bold text-dark border-primary-subtle shadow-sm" style="font-size: 16px; padding: 10px 15px;" placeholder="Nhập tiêu đề...">
@@ -4001,6 +4014,16 @@
                             <button class="btn btn-light fw-bold px-4 shadow-sm border" onclick="toggleLatexEditMode()">Hủy Sửa</button>
                             <button class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #0f4c81;" id="btnSaveLatexModal" onclick="saveLatexContent()"><i class="fa-solid fa-floppy-disk me-1"></i> Lưu Thay Đổi</button>
                         </div>
+                    </div>
+                        </div>
+                    </div>
+                    
+                    <div id="splitLatexWrapper" class="d-none flex-column h-100 shadow-sm border" style="width: 50%; border-radius: 8px; background: #fff;">
+                        <div class="d-flex justify-content-between align-items-center p-3 bg-light border-bottom" style="border-radius: 8px 8px 0 0;">
+                            <h6 class="m-0 fw-bold text-primary text-truncate" id="splitLatexTitle"><i class="fa-solid fa-book-open me-2"></i> Bài học mở thêm</h6>
+                            <button type="button" class="btn-close" style="font-size: 12px;" onclick="closeSplitPane('latex')"></button>
+                        </div>
+                        <div id="splitLatexContent" class="flex-grow-1 position-relative p-4 p-md-5" style="overflow-y: auto; font-size: 16px; line-height: 1.8; color: #1e293b; font-family: 'Inter', sans-serif;"></div>
                     </div>
                 </div>
 
@@ -4643,6 +4666,20 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="splitLessonSelectModal" tabindex="-1" style="z-index: 10900;">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+                <div class="modal-header text-white" style="background-color: #f59e0b;">
+                    <h6 class="modal-title fw-bold"><i class="fa-solid fa-list-check me-2"></i>Chọn bài học để mở song song</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0 bg-light">
+                    <div class="list-group list-group-flush" id="splitLessonList">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
@@ -4662,8 +4699,8 @@
 <script>
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
-        const startMaintenance = new Date(2026, 8, 05, 11, 20);  
-        const endMaintenance   = new Date(2026, 8, 05, 11, 35); 
+        const startMaintenance = new Date(2026, 8, 05, 06, 00);  
+        const endMaintenance   = new Date(2026, 8, 05, 07, 10); 
         // Hàm tạo chuỗi định dạng (VD: 07:59 Ngày 21/07/2026)
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
