@@ -1743,10 +1743,26 @@ function getMondayOfDate(d) {
 }
 
 function updateTableHeaders() {
+    let today = new Date();
+    today.setHours(0, 0, 0, 0); // Đưa về 0h để so sánh mốc ngày chuẩn xác
+
     for (let i = 2; i <= 8; i++) {
         let d = new Date(currentSelectedMonday); d.setDate(d.getDate() + (i - 2));
+        d.setHours(0, 0, 0, 0); // Đưa về 0h
+
+        let isToday = (d.getTime() === today.getTime());
         let thName = i === 8 ? "Chủ nhật" : "Thứ " + i;
-        $(`#th-day-${i}`).html(`${thName} <br><small style="font-weight: normal; color: #bae6fd;">(${formatShort(d)})</small>`);
+        
+        if (isToday) {
+            // Hôm nay: Chữ Thứ in đậm, màu vàng (#facc15) và có quầng sáng (text-shadow)
+            $(`#th-day-${i}`).html(`
+                <span style="color: #facc15; font-weight: 900; text-shadow: 0 0 10px rgba(250, 204, 21, 0.8);">${thName}</span> 
+                <br><small style="font-weight: bold; color: #fef08a;">(${formatShort(d)})</small>
+            `);
+        } else {
+            // Cột thường: Thiết kế gốc
+            $(`#th-day-${i}`).html(`${thName} <br><small style="font-weight: normal; color: #bae6fd;">(${formatShort(d)})</small>`);
+        }
     }
 }
 
@@ -1758,20 +1774,51 @@ function changeWeekBtn(delta) {
 }
 
 function jumpToCurrentWeek() {
-    let todayTime = new Date().getTime(); let found = false; let targetNH = "", targetHK = "", targetWeekSelectValue = "";
+    let todayTime = new Date().getTime(); 
+    let found = false; 
+    let targetNH = "", targetHK = "", targetWeekSelectValue = "";
+
+    // --- ƯU TIÊN SỐ 1: ÉP VỀ 2026-2027 HK1 NẾU CHƯA TỚI NGÀY BẮT ĐẦU ---
+    let targetConf = globalConfigHK.find(c => c[0] === '2026-2027' && (c[1] === 'Học kỳ 1'));
+    if (targetConf) {
+        let sDate = parseDateString(targetConf[2]);
+        // Nếu đã có ngày bắt đầu và hôm nay NHỎ HƠN ngày bắt đầu đó -> Ép mở Tuần 1 HK1
+        if (sDate && todayTime < sDate.getTime()) {
+            targetNH = targetConf[0];
+            targetHK = targetConf[1];
+	    
+            targetWeekSelectValue = getMondayOfDate(sDate).getTime().toString();
+            
+            $('#namHocSelect').val(targetNH); 
+            onNamHocChange(); 
+            $('#hocKySelect').val(targetHK); 
+            onHocKyChange(); 
+            $('#weekSelect').val(targetWeekSelectValue); 
+            onWeekChange();
+            return; // KẾT THÚC HÀM TẠI ĐÂY, không quét các kỳ cũ nữa
+        }
+    }
+    // ---------------------------------------------------------------------
+
+    // --- ƯU TIÊN SỐ 2: TÌM THEO THỜI GIAN THỰC (Nếu đã qua ngày bắt đầu của 26-27 HK1) ---
     for (let conf of globalConfigHK) {
-        let sDate = parseDateString(conf[2]); let numAcademicWeeks = parseInt(conf[3]); let breakWeeks = (conf[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
+        let sDate = parseDateString(conf[2]); 
+        let numAcademicWeeks = parseInt(conf[3]); 
+        let breakWeeks = (conf[4] || "").split(',').map(w => parseInt(w.trim())).filter(w => !isNaN(w));
         if (sDate && numAcademicWeeks) {
             let startMon = getMondayOfDate(sDate); let acadWk = 1; let calWk = 1;
             while (acadWk <= numAcademicWeeks && calWk <= 52) {
                 let m = new Date(startMon); m.setDate(m.getDate() + ((calWk - 1) * 7));
                 let nextM = new Date(m); nextM.setDate(nextM.getDate() + 7);
-                if (todayTime >= m.getTime() && todayTime < nextM.getTime()) { targetNH = conf[0]; targetHK = conf[1]; found = true; targetWeekSelectValue = m.getTime().toString(); break; }
+                if (todayTime >= m.getTime() && todayTime < nextM.getTime()) { 
+                    targetNH = conf[0]; targetHK = conf[1]; found = true; targetWeekSelectValue = m.getTime().toString(); break; 
+                }
                 if (!breakWeeks.includes(calWk)) { acadWk++; } calWk++;
             }
             if (found) break;
         }
     }
+
     if (found) {
         $('#namHocSelect').val(targetNH); onNamHocChange(); $('#hocKySelect').val(targetHK); onHocKyChange(); $('#weekSelect').val(targetWeekSelectValue); onWeekChange();
     } else {
