@@ -4573,11 +4573,11 @@ function renderWebLinks(data) {
             </a>
         </div>
         <div class="col mb-3">
-            <a href="https://teams.cloud.microsoft/l/team/19%3AG3AZ0si8ueyRMaXW3zI-siWOxk1cyIA9Aol3zliL8Sw1%40thread.tacv2/conversations?groupId=d88461ae-d3dd-44d2-aae0-e8d021da1e68&tenantId=b1a9fdc0-1d56-4c3d-a481-809fff8a26db" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #464eb8; background: #f8fafc;">
+            <a href="https://discord.com/channels/1516957936650555623/1544962594089992215" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #464eb8; background: #f8fafc;">
                 <div class="link-card-badge bg-danger shadow-sm">ADMIN ONLY</div>
                 <div class="icon-box"><i class="fa-brands fa-microsoft" style="color: #464eb8;"></i></div>
                 <div class="card-text-wrapper">
-                    <h5>MS Teams</h5>
+                    <h5>Discord</h5>
                     <p class="card-desc">Không gian làm việc quản trị</p>
                 </div>
             </a>
