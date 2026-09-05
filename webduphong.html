@@ -2103,26 +2103,29 @@
     </button>
 </div>
 
-<div class="table-responsive bg-white rounded border shadow-sm mb-4">
-    <table class="table table-hover table-bordered align-middle text-center m-0" style="font-size: 14.5px;">
-        <thead class="table-dark">
+<div class="table-responsive bg-white rounded border shadow-sm mb-4" style="width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+    <table class="table table-hover table-bordered align-middle text-center m-0" style="font-size: 14.5px; min-width: 1100px; width: 100%;">
+        <thead class="text-center text-white" style="background-color: #0f4c81; font-size: 14.5px;">
             <tr>
-                <th style="width: 80px;">STT</th>
-                <th>MSSV</th>
-                <th>Họ và Tên</th>
-                <th>Mục đang xem</th> <!-- THÊM CỘT MỚI Ở ĐÂY -->
-                <th>Lần cuối truy cập</th>
-                <th>Trạng thái</th>
+                <th style="width: 5%; padding: 12px 6px;">STT</th>
+                <th style="width: 9%; padding: 12px 6px;">MSSV</th>
+                <th style="width: 16%; padding: 12px 6px;">Họ và Tên</th>
+                <th style="width: 10%; padding: 12px 6px;">Lần đầu</th>
+                <th style="width: 10%; padding: 12px 6px;">Phía trước 3</th>
+                <th style="width: 10%; padding: 12px 6px;">Phía trước 2</th>
+                <th style="width: 10%; padding: 12px 6px;">Phía trước 1</th>
+                <th style="width: 10%; padding: 12px 6px;">Đang xem</th>
+                <th style="width: 10%; padding: 12px 6px;">Lần cuối</th>
+                <th style="width: 10%; padding: 12px 6px;">Trạng thái</th>
             </tr>
         </thead>
         <tbody id="accessHistoryTableBody">
             <tr>
-                <!-- Sửa colspan="5" thành colspan="6" -->
-                <td colspan="6" class="text-muted py-3">Bấm "Làm mới danh sách" để tải dữ liệu...</td>
+                <td colspan="10" class="text-muted py-4">Bấm "Làm mới danh sách" để tải dữ liệu...</td>
             </tr>
         </tbody>
     </table>
-</div>            
+</div>      
             <!-- Nơi đổ dữ liệu chi tiết của Sinh viên -->
             <div id="adminUserDetailArea" class="d-none mt-4">
                 <!-- Dữ liệu sẽ được JS render vào đây -->
