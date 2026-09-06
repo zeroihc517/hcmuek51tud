@@ -6815,6 +6815,7 @@ window.openSplitLessonModal = function(activeModalType) {
 
     let html = '';
     let minigameHtml = '';
+    let instructorInfos = []; // Thêm biến lưu thông tin giảng viên
     let tableHtml = '<div class="table-responsive border rounded shadow-sm mt-3"><table class="custom-portal-table" style="min-width: 100%; width: 100%; background: #fff;"><tbody>';
     
     let hasContent = false;
@@ -6832,8 +6833,12 @@ window.openSplitLessonModal = function(activeModalType) {
         let firstCellTextRaw = String(row[0]).trim(); 
         let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
         
-        // 1. Lọc Thông tin giảng viên -> Thu gọn (Bỏ qua hoàn toàn)
-        if (/mãhọcphần|họcphần|giảngviênphụtrách|emailgiảngviên/.test(fullRowText)) return;
+        // 1. Lọc Thông tin giảng viên -> SỬA LẠI REGEX KHỬ KHOẢNG TRẮNG ĐỂ KHÔNG BỊ LỌT VÀ THU THẬP DỮ LIỆU
+        if (/mãhọcphần|họcphần|giảngviênphụtrách|emailgiảngviên/.test(fullRowText.replace(/\s+/g, ''))) {
+            let info = row.filter(cell => String(cell).trim() !== "").join(" <span class='mx-2 text-black-50'>|</span> "); 
+            if(info) instructorInfos.push(info); 
+            return; 
+        }
 
         let titleRaw = String(row[1] || '').replace(/<[^>]*>?/gm, '').replace(/(<br\s*\/?>|\n)+/gi, ' ').trim();
         if (!titleRaw) titleRaw = String(row[0]).replace(/<[^>]*>?/gm, '').trim();
@@ -6928,16 +6933,36 @@ window.openSplitLessonModal = function(activeModalType) {
 
     tableHtml += '</tbody></table></div>';
 
-    // Ghép khối Minigame (dạng Accordion gập mở hệt bên ngoài)
+    // Ghép khối Thông tin giảng viên (dạng Accordion)
+    if (instructorInfos.length > 0) {
+        let listContent = "";
+        instructorInfos.forEach(info => {
+            listContent += `<div class="col-12 col-md-6 d-flex align-items-start"><i class="fa-solid fa-check text-primary mt-1 me-2"></i> <span style="font-size: 14.5px; font-weight: 500; color: #334155;">${info}</span></div>`;
+        });
+        html += `
+        <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center p-3" data-bs-toggle="collapse" data-bs-target="#splitCollapseInstructor" aria-expanded="false" style="background: #e0f2fe; cursor: pointer; transition: background 0.2s; border: 2px solid #0f4c81; border-radius: 12px;" onmouseover="this.style.background='#bae6fd'" onmouseout="this.style.background='#e0f2fe'">
+                <h6 class="m-0 fw-bold" style="color: #0f4c81;"><i class="fa-solid fa-chalkboard-user me-2"></i> THÔNG TIN GIẢNG VIÊN</h6>
+                <i class="fa-solid fa-chevron-down text-primary instructor-chevron" style="transition: transform 0.3s;"></i>
+            </div>
+            <div class="collapse" id="splitCollapseInstructor">
+                <div class="p-3 mt-2 row g-3 bg-white border rounded shadow-sm mx-0" style="border-color: #bae6fd !important;">
+                    ${listContent}
+                </div>
+            </div>
+        </div>`;
+    }
+
+    // Ghép khối Minigame (dạng Accordion)
     if (hasMinigame) {
         html += `
-        <div>
+        <div class="mb-3">
             <div class="d-flex justify-content-between align-items-center p-3" data-bs-toggle="collapse" data-bs-target="#splitCollapseMinigames" aria-expanded="false" style="background: #fff1f2; cursor: pointer; transition: background 0.2s; border: 2px solid #ef4444; border-radius: 12px;" onmouseover="this.style.background='#ffe4e6'" onmouseout="this.style.background='#fff1f2'">
                 <h6 class="m-0 fw-bold" style="color: #ef4444;"><i class="fa-solid fa-gamepad fa-bounce me-2"></i> CÁC ĐỀ MINIGAME-THỰC CHIẾN</h6>
                 <i class="fa-solid fa-chevron-down text-danger minigame-chevron" style="transition: transform 0.3s;"></i>
             </div>
             <div class="collapse" id="splitCollapseMinigames">
-                <div class="p-3 mt-2 row g-3">
+                <div class="p-3 mt-2 row g-3 bg-white border rounded shadow-sm mx-0" style="border-color: #fecaca !important;">
                     ${minigameHtml}
                 </div>
             </div>
@@ -6948,7 +6973,7 @@ window.openSplitLessonModal = function(activeModalType) {
         html += tableHtml;
     }
 
-    if (!hasContent && !hasMinigame) {
+    if (!hasContent && !hasMinigame && instructorInfos.length === 0) {
         html = '<div class="p-5 text-center text-muted"><i class="fa-solid fa-folder-open fs-1 mb-3 opacity-50"></i><br>Không có dữ liệu bài học nào để chọn.</div>';
     }
 
