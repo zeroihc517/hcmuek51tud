@@ -3108,44 +3108,80 @@
     
 <!-- MODAL SINH VIÊN ĐĂNG THÔNG BÁO -->
 <div class="modal fade" id="studentAddThongBaoModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <!-- Thêm style="max-width: 95vw;" để bảng rộng ra 95% màn hình -->
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 95vw;">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
             <div class="modal-header bg-success text-white" style="border-radius: 16px 16px 0 0;">
                 <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-nib me-2"></i>Đăng Thông Báo Mới (Chờ duyệt)</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4">
+            <div class="modal-body p-4" style="background-color: #f8fafc;">
                 <div class="alert alert-success border-0 p-2 small m-0 mb-3" style="background-color: #dcfce7; border-radius: 8px;">
                     <i class="fa-solid fa-circle-info me-1"></i> Bài viết của bạn sẽ được hiển thị cho tất cả sinh viên sau khi Ban quản trị phê duyệt.
                 </div>
-                <div class="row g-3">
-                    <div class="col-md-8">
-                        <label class="form-label fw-bold text-muted small">Tiêu đề thông báo <span class="text-danger">*</span></label>
-                        <input type="text" id="stuTbTitle" class="form-control fw-bold" placeholder="Nhập tiêu đề...">
+                
+                <!-- Bố cục 2 cột (Trái: Form nhập | Phải: Xem trước) -->
+                <div class="row g-4">
+                    
+                    <!-- CỘT TRÁI: FORM NHẬP LIỆU -->
+                    <div class="col-lg-6">
+                        <div class="bg-white p-3 rounded shadow-sm border border-success-subtle h-100">
+                            <h6 class="fw-bold text-success mb-3 border-bottom pb-2">
+                                <i class="fa-solid fa-keyboard me-2"></i>Nhập nội dung
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-bold text-muted small">Tiêu đề thông báo <span class="text-danger">*</span></label>
+                                    <input type="text" id="stuTbTitle" class="form-control fw-bold" placeholder="Nhập tiêu đề...">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-muted small">Phân loại <span class="text-danger">*</span></label>
+                                    <select id="stuTbCategory" class="form-select fw-bold border-success-subtle text-success">
+                                        <option value="Học thuật">Học thuật & NCKH</option>
+                                        <option value="Rèn luyện">Hoạt động Rèn luyện</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-muted small">Nội dung chi tiết <span class="text-danger">*</span></label>
+                                    <textarea id="studentTbContent" class="form-control" rows="4" placeholder="Nhập nội dung..."></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-muted small">Link đính kèm (nếu có)</label>
+                                    <input type="text" id="stuTbLink" class="form-control" placeholder="https://...">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-muted small">Hết hạn lúc (Deadline)</label>
+                                    <input type="datetime-local" id="stuTbDeadline" class="form-control">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold text-muted small">Chế độ phân loại <span class="text-danger">*</span></label>
-                        <select id="stuTbCategory" class="form-select fw-bold border-success-subtle text-success">
-                            <option value="Học thuật">Học thuật & NCKH</option>
-                            <option value="Rèn luyện">Hoạt động Rèn luyện</option>
-                        </select>
+                    
+                    <!-- CỘT PHẢI: BẢNG XEM TRƯỚC -->
+                    <div class="col-lg-6">
+                        <div class="p-4 rounded shadow-sm border border-primary-subtle bg-white h-100 overflow-auto" id="livePreviewContainer" style="max-height: 75vh;">
+                            <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">
+                                <i class="fa-solid fa-eye me-2"></i>Xem trước bài đăng
+                            </h6>
+                            
+                            <!-- Mô phỏng giao diện chi tiết thông báo -->
+                            <div class="tb-detail-title-small text-danger fw-bold mb-2" id="previewTitle" style="font-size: 20px; word-break: break-word;">
+                                [Tiêu đề sẽ hiển thị ở đây]
+                            </div>
+                            <div class="tb-detail-dates mb-3 text-muted border-bottom pb-2" style="font-size: 14px;">
+                                <i class="fa-regular fa-calendar"></i> Ngày đăng: <span id="previewDate">Vừa xong</span>
+                            </div>
+                            <div class="tb-detail-main-content" id="previewContent" style="font-size: 16px; line-height: 1.6; color: #1e293b; overflow-wrap: break-word;">
+                                <span class="text-muted fst-italic">[Nội dung bài đăng sẽ hiển thị ở đây]</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-12">
-                        <label class="form-label fw-bold text-muted small">Nội dung chi tiết <span class="text-danger">*</span></label>
-                        <textarea id="studentTbContent" class="form-control" rows="4" placeholder="Nhập nội dung..."></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">Link đính kèm (nếu có)</label>
-                        <input type="text" id="stuTbLink" class="form-control" placeholder="https://...">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">Hết hạn lúc (Deadline)</label>
-                        <input type="datetime-local" id="stuTbDeadline" class="form-control">
-                    </div>
+                    
                 </div>
             </div>
+            
             <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 16px 16px;">
-                <button type="button" class="btn btn-light fw-bold shadow-sm" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-light fw-bold shadow-sm border" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #10b981;" onclick="submitStudentThongBao()" id="btnSubmitStuTb">
                     <i class="fa-solid fa-paper-plane me-1"></i> Gửi phê duyệt
                 </button>

@@ -7263,3 +7263,78 @@ window.approveThongBao = function(sheetRowIndex, btnEle) {
         btn.html(originalHtml).prop('disabled', false);
     });
 };
+
+$(document).ready(function() {
+    // 1. Lắng nghe Tiêu đề thông báo
+    $('#stuTbTitle').on('input', function() {
+        let titleVal = $(this).val().trim();
+        $('#previewTitle').text(titleVal !== '' ? titleVal : '[Tiêu đề sẽ hiển thị ở đây]');
+    });
+
+    // 2. Lắng nghe Nội dung TinyMCE
+    setTimeout(function() {
+        let editor = tinymce.get('studentTbContent'); // Bắt đúng ID của Modal Sinh viên đăng thông báo
+        if (editor) {
+            editor.on('input keyup change', function() {
+                let contentHTML = editor.getContent();
+                
+                if (!contentHTML.trim()) {
+                    $('#previewContent').html('[Nội dung bài đăng sẽ hiển thị ở đây]');
+                    return;
+                }
+                
+                let processedContent = contentHTML;
+                if (!/(<p>|<table>|<br>|<br\s*\/?>)/i.test(processedContent)) {
+                    processedContent = processedContent.replace(/\n/g, '<br>');
+                }
+
+                $('#previewContent').html(processedContent);
+                
+                if (typeof applyKaTeX === 'function') {
+                    applyKaTeX('previewContent');
+                }
+            });
+        }
+    }, 2000); 
+});
+
+$(document).ready(function() {
+    
+    // 1. Lắng nghe Tiêu đề thông báo của Admin
+    $('#txtCol2').on('input', function() {
+        let titleVal = $(this).val().trim();
+        $('#adminPreviewTitle').text(titleVal !== '' ? titleVal : '[Tiêu đề sẽ hiển thị ở đây]');
+    });
+
+    // 2. Lắng nghe Ngày đăng của Admin
+    $('#txtCol4').on('input', function() {
+        let dateVal = $(this).val().trim();
+        $('#adminPreviewDate').text(dateVal !== '' ? dateVal : 'Vừa xong');
+    });
+
+    // 3. Lắng nghe Nội dung TinyMCE của Admin
+    setTimeout(function() {
+        let adminEditor = tinymce.get('txtCol3'); 
+        if (adminEditor) {
+            adminEditor.on('input keyup change', function() {
+                let contentHTML = adminEditor.getContent();
+                
+                if (!contentHTML.trim()) {
+                    $('#adminPreviewContent').html('<span class="text-muted fst-italic">[Nội dung bài đăng sẽ hiển thị ở đây]</span>');
+                    return;
+                }
+                
+                let processedContent = contentHTML;
+                if (!/(<p>|<table>|<br>|<br\s*\/?>)/i.test(processedContent)) {
+                    processedContent = processedContent.replace(/\n/g, '<br>');
+                }
+
+                $('#adminPreviewContent').html(processedContent);
+                
+                if (typeof applyKaTeX === 'function') {
+                    applyKaTeX('adminPreviewContent');
+                }
+            });
+        }
+    }, 2000); // Khởi động sau 2s khi TinyMCE nạp xong
+});
