@@ -1191,7 +1191,7 @@ function openEditTkbModal(sheetRowIndex) {
     if (course.isSystem) {
         $('#uTkbMaHP, #uTkbThu, #uTkbTiet, #uTkbSoTiet, #uTkbPhong, #uTkbThoiGian, #uTkbGV, #uTkbNgayBD, #uTkbNgayKT, #uTkbHinhThuc, #uTkbLink').prop('readonly', true).css('background-color', '#e9ecef');
         $('#uTkbOverlapAlert').removeClass('d-none');
-        $('#uTkbOverlapMessage').html('Học phần hệ thống: Chỉ được phép thêm tiền tố "Kiểm tra...", không thay đổi thời gian/phòng học.');
+        $('#uTkbOverlapMessage').html('Học phần/Lịch hẹn hệ thống: Không thay đổi thời gian/phòng học... được, vui lòng admin hoặc người tạo ra lịch hẹn để chỉnh sửa');
     } else {
         $('#uTkbMaHP, #uTkbThu, #uTkbTiet, #uTkbSoTiet, #uTkbPhong, #uTkbThoiGian, #uTkbGV, #uTkbNgayBD, #uTkbNgayKT, #uTkbHinhThuc, #uTkbLink').prop('readonly', false).css('background-color', '#fff');
         $('#uTkbOverlapAlert').addClass('d-none');
