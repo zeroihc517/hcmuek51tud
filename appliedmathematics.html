@@ -2584,6 +2584,14 @@
             </div>
         </div>
     </div>
+<div id="studentPostWrapper" class="widget-wrapper d-none" style="width: 320px; max-width: 100%; transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">
+        <div class="data-card border-0 shadow-sm m-0" style="border: 2px solid #0ea5e9; border-radius: 12px; overflow: hidden; width: 100%; cursor: pointer;" onclick="openStudentCoursePostModal()">
+            <div class="d-flex justify-content-between align-items-center p-3" style="background: #e0f2fe; transition: background 0.2s;" onmouseover="this.style.background='#bae6fd'" onmouseout="this.style.background='#e0f2fe'">
+                <h6 class="m-0 fw-bold" style="color: #0284c7;"><i class="fa-solid fa-pen-nib me-2"></i> ĐĂNG BÀI THẢO LUẬN</h6>
+                <i class="fa-solid fa-plus text-primary ms-3"></i>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- CSS xoay mũi tên và tự động dài ra cho khối mở -->
@@ -4830,6 +4838,43 @@
             </div>
         </div>
     </div>
+<!-- MODAL SINH VIÊN ĐĂNG BÀI VÀO DANH MỤC HỌC PHẦN -->
+<div class="modal fade" id="studentCoursePostModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header bg-success text-white" style="border-radius: 16px 16px 0 0;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-nib me-2"></i>Đăng bài thảo luận (Chờ duyệt)</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-success border-0 p-2 small mb-3">
+                    <i class="fa-solid fa-circle-info me-1"></i> Bài viết của bạn sẽ được Ban quản trị duyệt trước khi hiển thị công khai cho mọi người.
+                </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-bold small text-muted">Tiêu đề bài đăng <span class="text-danger">*</span></label>
+                        <input type="text" id="stuCourseTitle" class="form-control fw-bold" placeholder="Nhập tiêu đề hoặc chủ đề thảo luận...">
+                    </div>
+                                      <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted">Link đính kèm (Nếu có)</label>
+                        <input type="text" id="stuCourseLink" class="form-control" placeholder="https://...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted">Ghi chú thêm</label>
+                        <input type="text" id="stuCourseNote" class="form-control" placeholder="Ghi chú ngắn...">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 16px 16px;">
+                <button type="button" class="btn btn-light fw-bold shadow-sm border" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #10b981;" onclick="submitStudentCoursePost()" id="btnSubmitStuCoursePost">
+                    <i class="fa-solid fa-paper-plane me-1"></i> Gửi phê duyệt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>

@@ -520,10 +520,18 @@ function loadDataByHocPhan(sheetName, element) {
     if(element) $(element).addClass('active');
     $('#courseHeaderTitle').html(`<i class="fa-solid fa-book-open me-2"></i> ${sheetName}`);
     if (currentSheetName.toLowerCase() !== 'thông báo') {
-    $('#groupLinkWrapper').removeClass('d-none');
-} else {
-    $('#groupLinkWrapper').addClass('d-none');
-}
+        $('#groupLinkWrapper').removeClass('d-none');
+        
+        // Ẩn/Hiện nút Đăng bài tùy thuộc vào việc đã đăng nhập hay chưa
+        if (currentUser && !currentUser.isGuest) {
+            $('#studentPostWrapper').removeClass('d-none');
+        } else {
+            $('#studentPostWrapper').addClass('d-none');
+        }
+    } else {
+        $('#groupLinkWrapper').addClass('d-none');
+        $('#studentPostWrapper').addClass('d-none');
+    }
     // Reset giao diện trước khi tải
     $('#courseSection').removeClass('d-none'); 
     $('#tableWrapper').addClass('d-none'); 
@@ -1734,12 +1742,56 @@ let extraControls = `
 // LOGIC MỚI CHO DANH MỤC HỌC PHẦN
                     let c1 = String(row[0] || '').trim(); // Cột 1: STT
                     let c2 = String(row[1] || '').trim(); // Cột 2: Hình thức / Tên bài học
+// KIỂM TRA TRẠNG THÁI BÀI CHỜ DUYỆT (PENDING)
+let isPending = /^pending$/i.test(c1) || c1.toLowerCase().includes('pending');
+let isRealAdmin = currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+let isMyPending = false;
+
+if (currentUser) {
+    let pMatch = c2.match(/\[POSTER:(.*?)\|.*?\]/);
+    if (pMatch && pMatch[1] === currentUser.mssv) isMyPending = true;
+}
+
+// Ẩn bài pending đối với sinh viên khác
+if (isPending && !isRealAdmin && !isMyPending) {
+    return; 
+}
+
+if (isPending) {
+    c1 = '<span class="badge bg-warning text-dark shadow-sm"><i class="fa-solid fa-hourglass-half"></i> Chờ duyệt</span>';
+}
+
+// XỬ LÝ NHẬN DIỆN VÀ RENDER TÊN TÁC GIẢ BÀI ĐĂNG
+let posterHtml = "";
+c2 = c2.replace(/\[POSTER:(.*?)\|(.*?)\]/g, function(match, pMssv, pName) {
+    let shortName = getNaturalShortName(pName); 
+    let displayMssv = pMssv;
+    let nameToDisplay = "";
+    let isMe = currentUser && currentUser.mssv === pMssv;
+    
+    if (isRealAdmin) {
+        displayMssv = pMssv; // Hiện FULL MSSV
+        nameToDisplay = shortName; // Họ tên 2 chữ cuối
+    } else if (isMe) {
+        displayMssv = pMssv; // Hiện FULL MSSV cho chủ bài đăng
+        nameToDisplay = "Bạn";
+    } else {
+        // Che MSSV của sinh viên khác (Dạng 51***001)
+        if (pMssv.length > 6) {
+            displayMssv = pMssv.substring(0, 2) + '***' + pMssv.substring(pMssv.length - 3);
+        }
+        nameToDisplay = "SV"; 
+    }
+    
+    posterHtml = `<br><span class="badge bg-light text-secondary border mt-2" style="font-size: 12px; font-weight: 600;"><i class="fa-solid fa-user-pen me-1"></i>${nameToDisplay} (${displayMssv})</span>`;
+    return ``; 
+});
                     let c3 = String(row[2] || '').trim(); // Cột 3: Link
                     let c4 = String(row[3] || '').trim(); // Cột 4: Ghi chú
                     
                     // --- BẮT ĐẦU: Xử lý tách Ngày đăng và Ngày cập nhật ---
-                    let dangMatch = c4.match(/ĐĂNG=((?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4})/i);
-                    let updateMatch = c4.match(/UPDATE=((?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4})/i);
+                   let dangMatch = c4.match(/ĐĂNG=((?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4})/i);
+let updateMatch = c4.match(/UPDATE=((?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4})/i);
 
                     let dateInfoHtml = '';
                     if (dangMatch) {
@@ -1772,6 +1824,7 @@ let isUpdating = col4Html.toLowerCase().includes('đang cập nhật');
 
 // --- BẮT ĐẦU CỘT 2: TÊN BÀI HỌC VÀ LOGO ---
 let col2Html = c2.replace(/<\/?(p|div)[^>]*>/gi, '').replace(/&nbsp;/gi, ' ').replace(/(<br\s*\/?>|\n)+/gi, ' ').trim();
+
                     // Tạo Stable Key sớm để truyền vào Iframe
 let rawLessonName = String(row[1] || row[0] || '').replace(/<[^>]*>?/gm, '').replace(/[^a-zA-Z0-9_]/g, '');
 let stableKey = rawLessonName ? rawLessonName : sheetRowIndex;
@@ -1840,11 +1893,14 @@ if (isUpdating && !isAdmin) {
 // --- KẾT THÚC CỘT 2 ---
                     // Gói Tên bài học và Ngày tháng vào chung 1 khối (Hiển thị dọc)
                     // margin-left: 24px để hàng ngày tháng dịch vào chuẩn tỉ lệ thẳng hàng chữ tiêu đề bài học
-                   let finalCol2 = dateInfoHtml 
-    ? `<div class="d-flex flex-column align-items-start" style="gap:0;margin:0;padding:0;">
-         <div class="d-flex align-items-center">${col2Html} ${chevronHtml}</div>
-         <div class="d-flex flex-wrap gap-2 mt-1" style="margin-left:24px;">${dateInfoHtml}</div>
-       </div>`
+if (posterHtml) {
+    dateInfoHtml += posterHtml;
+}
+                   let finalCol2 = (dateInfoHtml || posterHtml)
+? `<div class="d-flex flex-column align-items-start w-100" style="gap:0;margin:0;padding:0;">
+     <div class="d-flex align-items-center w-100">${col2Html} ${chevronHtml}</div>
+     <div class="d-flex flex-wrap align-items-center gap-2 mt-1 w-100" style="margin-left:24px;">${dateInfoHtml}</div>
+   </div>`
     : `<div class="d-flex align-items-center" style="margin:0;padding:0;">${col2Html} ${chevronHtml}</div>`;
                     // --- KẾT THÚC CỘT 2 ---
 
@@ -1998,12 +2054,17 @@ tdTraoDoi = `<td class="text-center align-middle" style="padding-top: 6px !impor
                     let escapedCells = row.map(c => String(c || '').replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, ""));
                     while(escapedCells.length < 7) escapedCells.push(''); 
                     
+                    // FIX LỖI TẠI ĐÂY: Quét trực tiếp Cột 1 (row[0]) để lấy trạng thái PENDING
+                    let isRowPending = /^pending$/i.test(String(row[0] || '').trim());
+                    let approveBtnHtml = isRowPending ? `<button class="btn btn-sm btn-primary py-1 px-2 fw-bold text-white shadow-sm" onclick="approveCoursePost(${sheetRowIndex})"><i class="fa-solid fa-check-circle me-1"></i>Duyệt</button>` : '';
+                    
                     bodyHtml += `<td class="admin-action-col d-none" onclick="event.stopPropagation();"><div class="d-flex flex-wrap gap-1">
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
                         <button class="btn btn-sm btn-outline-secondary py-1 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
                         <button class="btn btn-sm btn-outline-success py-1 px-2" title="Chèn" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button>
                         <button class="btn btn-sm btn-outline-warning py-1 px-2" title="Sửa" onclick="openEditRowModal(${sheetRowIndex}, '${escapedCells[0]}', '${escapedCells[1]}', '${escapedCells[2]}', '${escapedCells[3]}', '${escapedCells[4]}', '${escapedCells[5]}', '${escapedCells[6]}')"><i class="fa-solid fa-pen"></i></button>
                         <button class="btn btn-sm btn-outline-danger py-1 px-2" title="Xóa" onclick="deleteRowItem(${sheetRowIndex})"><i class="fa-solid fa-trash"></i></button>
+                        ${approveBtnHtml}
                     </div></td>`;
                 } 
                 bodyHtml += '</tr>';
@@ -7356,3 +7417,77 @@ $(document).ready(function() {
         }
     });
 });
+
+// Mở form đăng bài cho Sinh viên
+window.openStudentCoursePostModal = function() {
+    if (!currentUser || currentUser.isGuest) {
+        alert("Vui lòng đăng nhập để đăng bài thảo luận!");
+        return;
+    }
+    $('#stuCourseTitle, #stuCourseContent, #stuCourseLink, #stuCourseNote').val('');
+    $('#studentCoursePostModal').modal('show');
+};
+
+window.submitStudentCoursePost = function() {
+    let title = $('#stuCourseTitle').val().trim();
+    let link = $('#stuCourseLink').val().trim();
+    let note = $('#stuCourseNote').val().trim();
+    
+    if (!title || !link) { 
+        alert("Vui lòng nhập đầy đủ Tiêu đề bài đăng và Link đính kèm!"); 
+        return; 
+    }
+    
+    let c1 = "PENDING";
+    // Không còn nội dung chi tiết, chỉ gán tiêu đề
+    let c2 = `<p><strong>${title}</strong></p> [POSTER:${currentUser.mssv}|${currentUser.name}]`; 
+    let c3 = link;
+    
+    let now = new Date();
+    let pad = (n) => String(n).padStart(2, '0');
+    let dateStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    let c4 = (note ? note + " | " : "") + "ĐĂNG=" + dateStr;
+
+    let btn = $('#btnSubmitStuCoursePost');
+    let originalText = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang gửi...').prop('disabled', true);
+    
+    postToGAS({
+        action: "insertSheetRowAfter",
+        sheetName: currentSheetName,
+        rowIndex: currentSheetTotalRows, // <-- Đẩy bài viết xuống đáy bảng
+        col1: c1, col2: c2, col3: c3, col4: c4, col5: "", col6: "", col7: ""
+    }, function(res) {
+        alert("Đã gửi bài đăng! Vui lòng chờ Admin phê duyệt để hiển thị công khai.");
+        $('#studentCoursePostModal').modal('hide');
+        btn.html(originalText).prop('disabled', false);
+        refreshCurrentCourseData();
+    }, function() {
+        alert("Lỗi kết nối máy chủ!");
+        btn.html(originalText).prop('disabled', false);
+    });
+};
+// Duyệt bài đăng cho Admin
+window.approveCoursePost = function(rowIndex) {
+    if (!confirm("Bạn có chắc muốn duyệt và hiển thị bài đăng này?")) return;
+    let dataRow = window.currentSubjectData[rowIndex - 1];
+    if (!dataRow) return;
+    
+    postToGAS({
+        action: "editSheetRow",
+        sheetName: currentSheetName,
+        rowIndex: rowIndex,
+        col1: "NEW", // Xóa trạng thái PENDING
+        col2: dataRow[1] || '',
+        col3: dataRow[2] || '',
+        col4: dataRow[3] || '',
+        col5: dataRow[4] || '',
+        col6: dataRow[5] || '',
+        col7: dataRow[6] || ''
+    }, res => {
+        alert("Duyệt bài thành công!");
+        refreshCurrentCourseData();
+    }, err => { 
+        alert("Lỗi kết nối máy chủ!"); 
+    });
+};
