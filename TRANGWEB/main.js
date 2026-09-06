@@ -711,6 +711,8 @@ window.currentSubjectData = data;
     <div class="tb-header-blue">
         <div class="d-flex align-items-center"><i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo mới</div>
         <div class="ms-auto d-flex gap-2">
+            <!-- NÚT ĐĂNG BÀI DÀNH CHO SINH VIÊN -->
+            <button class="btn btn-sm text-white fw-bold px-3" style="background: #10b981; border-radius: 4px;" onclick="openStudentAddTbModal()"><i class="fa-solid fa-plus me-1"></i>Đăng bài</button>
             <input type="text" id="tbSearchInput" class="form-control form-control-sm border-0" placeholder="Tìm kiếm thông báo..." style="width: 220px; border-radius: 4px;" onkeyup="if(event.key === 'Enter') searchThongBao()">
             <button class="btn btn-sm text-white fw-bold px-3" style="background: #e61d4a; border-radius: 4px;" onclick="searchThongBao()">Tìm kiếm</button>
         </div>
@@ -808,7 +810,14 @@ let now = new Date();
     
     let c4 = c4_display; 
     let isNew = /^new$/i.test(c1) || c1.toLowerCase().includes('new');
+    let isPending = /^pending$/i.test(c1) || c1.toLowerCase().includes('pending');
     
+    // Kiểm tra định danh tài khoản Admin thực sự (không phụ thuộc vào việc bật/tắt công cụ quản trị)
+    let isRealAdmin = currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+    
+    if (isPending && !isRealAdmin) {
+        return; // Chặn: Không render bài PENDING cho người dùng thường (Nhưng Admin thì luôn thấy)
+    }
     let isHeThong = c7_raw.toLowerCase().includes('hệ thống');
     let isRenLuyen = c7_raw.toLowerCase().includes('rèn luyện');
     
@@ -858,6 +867,9 @@ if (isHidden && !isAdmin) {
     </div>`;
 
     let badgeHtml = isNew ? `<div class="tb-badge-new">Mới</div>` : '';
+    if (isPending && isRealAdmin) {
+        badgeHtml += `<div class="tb-badge-new bg-warning text-dark ms-1 shadow-sm"><i class="fa-solid fa-hourglass-half"></i> Chờ duyệt</div>`;
+    }
     let countdownHtml = '';
     if (deadlineTime) {
         countdownHtml = `
@@ -867,19 +879,25 @@ if (isHidden && !isAdmin) {
     }
 
     let adminHtml = '';
-   if (isAdmin) {
+  if (isAdmin) {
         let sheetRowIndex = rowIndex + 1;
         const escapeJS = (str) => String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, "");
-        let ec1 = escapeJS(c1); let ec2 = escapeJS(c2); let ec3 = escapeJS(c3_raw); // Đổi c3 thành c3_raw
+        let ec1 = escapeJS(c1); let ec2 = escapeJS(c2); let ec3 = escapeJS(c3_raw); 
         let ec4 = escapeJS(c4); let ec5 = escapeJS(c5); let ec6 = escapeJS(c6); let ec7 = escapeJS(c7_raw);
         
+        // Hiện nút Duyệt bài nếu trạng thái đang là PENDING
+        let approveBtn = isPending ? `<button class="btn btn-sm btn-primary py-0 px-3 fw-bold ms-2" onclick="approveThongBao(${sheetRowIndex}, this)"><i class="fa-solid fa-check-circle me-1"></i>Duyệt bài</button>` : '';
+
         adminHtml = `
 <div class="mt-2 admin-action-col d-none" onclick="event.stopPropagation();">
-    <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
-    <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
-    <button class="btn btn-sm btn-outline-success py-0 px-2 fw-bold" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button>
-    <button class="btn btn-sm btn-outline-warning py-0 px-2 fw-bold" onclick="openEditRowModal(${sheetRowIndex}, '${ec1}', '${ec2}', '${ec3}', '${ec4}', '${ec5}', '${ec6}', '${ec7}')"><i class="fa-solid fa-pen"></i></button>
-    <button class="btn btn-sm btn-outline-danger py-0 px-2 fw-bold" onclick="deleteRowItem(${sheetRowIndex})"><i class="fa-solid fa-trash"></i></button>
+    <div class="d-flex flex-wrap gap-1">
+        <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
+        <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
+        <button class="btn btn-sm btn-outline-success py-0 px-2 fw-bold" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button>
+        <button class="btn btn-sm btn-outline-warning py-0 px-2 fw-bold" onclick="openEditRowModal(${sheetRowIndex}, '${ec1}', '${ec2}', '${ec3}', '${ec4}', '${ec5}', '${ec6}', '${ec7}')"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-sm btn-outline-danger py-0 px-2 fw-bold" onclick="deleteRowItem(${sheetRowIndex})"><i class="fa-solid fa-trash"></i></button>
+        ${approveBtn}
+    </div>
 </div>`;
     }
 
@@ -3401,7 +3419,7 @@ $(document).ready(function() {
 });
 
 tinymce.init({
-    selector: '#txtCol3, #insertCol3, #editCol3',
+    selector: '#txtCol3, #insertCol3, #editCol3, #studentTbContent',
     entity_encoding: 'raw',
     
     // 1. Thêm nhiều plugin nâng cao: hình ảnh, media, xem toàn màn hình, code, tìm kiếm...
@@ -7039,4 +7057,113 @@ window.closeSplitPane = function(type, skipPing = false) {
     if (!skipPing) {
         pingOnlineStatus();
     }
+};
+// HÀM MỞ BẢNG ĐĂNG THÔNG BÁO CHO SINH VIÊN
+window.openStudentAddTbModal = function() {
+    if (!currentUser || currentUser.isGuest) {
+        alert("Vui lòng đăng nhập Sinh viên để có thể đăng thông báo!");
+        return;
+    }
+    // Reset Form
+    $('#stuTbTitle, #stuTbLink, #stuTbDeadline').val('');
+    $('#stuTbCategory').val('Học thuật'); // Mặc định chế độ
+    
+    if (tinymce.get('studentTbContent')) {
+        tinymce.get('studentTbContent').setContent('');
+    } else {
+        $('#studentTbContent').val('');
+    }
+    $('#studentAddThongBaoModal').modal('show');
+};
+
+// HÀM XỬ LÝ ĐẨY BÀI VIẾT LÊN SERVER
+window.submitStudentThongBao = function() {
+    let title = $('#stuTbTitle').val().trim();
+    let category = $('#stuTbCategory').val();
+    let link = $('#stuTbLink').val().trim();
+    let deadline = $('#stuTbDeadline').val();
+    let content = tinymce.get('studentTbContent') ? tinymce.get('studentTbContent').getContent().trim() : $('#studentTbContent').val().trim();
+    
+    if (!title || !content) {
+        alert("Vui lòng nhập đầy đủ tiêu đề và nội dung chi tiết!");
+        return;
+    }
+    
+    // Định dạng lại nội dung, tự động đánh dấu tác giả ở góc phải
+    let signedContent = content + `<br><p style="text-align: right; color: #64748b; font-size: 14px; margin-top: 10px;"><i>Người đăng: <b>${currentUser.name}</b> (${currentUser.mssv})</i></p>`;
+
+    let c1 = "PENDING"; // Chốt cờ PENDING chờ Admin duyệt
+    let c2 = title;
+    let c3 = signedContent;
+    
+    // Ngày giờ đăng
+    let now = new Date();
+    let pad = (n) => String(n).padStart(2, '0');
+    let c4 = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    let c5 = ""; 
+    let c6 = link;
+    
+    // Định tuyến Cột 7: Phân khu + Hạn chót
+    let c7 = category;
+    if (deadline) {
+        let d = new Date(deadline);
+        c7 += ` | DEADLINE=${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
+    }
+
+    let btn = $('#btnSubmitStuTb');
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
+    
+    // Gọi hàm chèn chung của hệ thống (Gắn lên trên cùng)
+    postToGAS({
+        action: "insertSheetRowAfter",
+        sheetName: "Thông báo",
+        rowIndex: 1, 
+        col1: c1, col2: c2, col3: c3, col4: c4, col5: c5, col6: c6, col7: c7
+    }, function(res) {
+        alert("Đã gửi thông báo thành công! Vui lòng chờ Admin phê duyệt để hiển thị công khai.");
+        $('#studentAddThongBaoModal').modal('hide');
+        btn.html('<i class="fa-solid fa-paper-plane me-1"></i> Gửi phê duyệt').prop('disabled', false);
+        loadDataByHocPhan("Thông báo");
+    }, function() {
+        alert("Lỗi kết nối máy chủ! Vui lòng thử lại.");
+        btn.html('<i class="fa-solid fa-paper-plane me-1"></i> Gửi phê duyệt').prop('disabled', false);
+    });
+};
+// ==========================================
+// HÀM DUYỆT BÀI NHANH DÀNH CHO ADMIN
+// ==========================================
+window.approveThongBao = function(sheetRowIndex, btnEle) {
+    if (!confirm("Bạn có chắc chắn muốn duyệt và công khai bài viết này cho tất cả sinh viên?")) return;
+    
+    let btn = $(btnEle);
+    let originalHtml = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang duyệt...').prop('disabled', true);
+    
+    // Truy xuất dữ liệu gốc của hàng để không bị mất khi gửi API
+    let dataRow = window.currentSubjectData[sheetRowIndex - 1];
+    if (!dataRow) {
+        alert("Lỗi dữ liệu, không thể duyệt!");
+        btn.html(originalHtml).prop('disabled', false);
+        return;
+    }
+    
+    // Gọi API sửa dòng để đổi Cột 1 (PENDING) thành NEW
+    postToGAS({ 
+        action: "editSheetRow", 
+        sheetName: "Thông báo", 
+        rowIndex: sheetRowIndex, 
+        col1: "NEW", // Đánh dấu là bài MỚI sau khi duyệt
+        col2: dataRow[1] || '', 
+        col3: dataRow[2] || '', 
+        col4: dataRow[3] || '', 
+        col5: dataRow[4] || '', 
+        col6: dataRow[5] || '', 
+        col7: dataRow[6] || '' 
+    }, res => { 
+        alert("Đã duyệt bài thành công! Bài viết hiện đã được hiển thị công khai."); 
+        loadDataByHocPhan("Thông báo"); 
+    }, err => {
+        alert("Lỗi kết nối máy chủ! Vui lòng thử lại.");
+        btn.html(originalHtml).prop('disabled', false);
+    });
 };
