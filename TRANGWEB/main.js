@@ -780,6 +780,7 @@ data.forEach((row, rowIndex) => {
     let c1 = String(row[0] || '').trim();
     let c2 = String(row[1] || '').trim();
     let c3 = String(row[2] || '').trim();
+    let c3_raw = c3;
     let c4_raw = String(row[3] || '').trim(); 
     let c5 = String(row[4] || '').trim();
     let c6 = String(row[5] || '').trim();
@@ -866,10 +867,10 @@ if (isHidden && !isAdmin) {
     }
 
     let adminHtml = '';
-    if (isAdmin) {
+   if (isAdmin) {
         let sheetRowIndex = rowIndex + 1;
         const escapeJS = (str) => String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, "");
-        let ec1 = escapeJS(c1); let ec2 = escapeJS(c2); let ec3 = escapeJS(c3); 
+        let ec1 = escapeJS(c1); let ec2 = escapeJS(c2); let ec3 = escapeJS(c3_raw); // Đổi c3 thành c3_raw
         let ec4 = escapeJS(c4); let ec5 = escapeJS(c5); let ec6 = escapeJS(c6); let ec7 = escapeJS(c7_raw);
         
         adminHtml = `
@@ -1033,8 +1034,8 @@ let html = `
 <div class="tb-detail-main-content" style="font-size: 16px; font-weight: normal; line-height: 1.6; border-top: 2px solid #f3f4f6; padding-top: 16px;">
     ${processedContent}
 </div>
-${noteHtml}
 ${linkHtml}
+${noteHtml}
 
 <!-- BẮT ĐẦU: KHUNG BÌNH LUẬN VÀ LỊCH SỬ -->
 <div class="mt-5 pt-4 border-top">
