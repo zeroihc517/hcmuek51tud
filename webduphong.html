@@ -2398,27 +2398,95 @@
         </div>
     </div>
 </div>
+<!-- 1. MODAL CHÈN DÒNG (INSERT ROW) CHO ADMIN -->
 <div class="modal fade" id="insertRowModal" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 95vw;">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-success text-white">
                 <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-plus me-2"></i>Chèn dữ liệu xuống dưới hàng này</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4">
-                <div class="row g-3">
-                    <div class="col-md-4"><label class="form-label fw-bold">STT / Trạng thái (Cột 1)</label><input type="text" id="insertCol1" class="form-control"></div>
-                    <div class="col-md-8"><label class="form-label fw-bold">Tiêu đề (Cột 2)</label><input type="text" id="insertCol2" class="form-control"></div>
-                    <div class="col-12"><label class="form-label fw-bold">Nội dung chi tiết (Cột 3)</label><textarea id="insertCol3" class="form-control" rows="3"></textarea></div>
-                    <div class="col-md-6"><label class="form-label fw-bold">Ngày đăng (Cột 4)</label><input type="text" id="insertCol4" class="form-control"></div>
-                    <div class="col-md-6"><label class="form-label fw-bold">Ngày cập nhật (Cột 5)</label><input type="text" id="insertCol5" class="form-control"></div>
-                    <div class="col-md-6"><label class="form-label fw-bold">Đường link đính kèm (Cột 6)</label><input type="text" id="insertCol6" class="form-control"></div>
-                    <div class="col-md-6"><label class="form-label fw-bold">Ghi chú (Cột 7)</label><input type="text" id="insertCol7" class="form-control"></div>
+            <div class="modal-body p-4" style="background-color: #f8fafc;">
+                <div class="row g-4">
+                    <!-- Cột Trái: Form Nhập -->
+                    <div class="col-lg-6">
+                        <div class="bg-white p-3 rounded shadow-sm border border-success-subtle h-100">
+                            <div class="row g-3">
+                                <div class="col-md-4"><label class="form-label fw-bold small text-muted">STT / Trạng thái (Cột 1)</label><input type="text" id="insertCol1" class="form-control"></div>
+                                <div class="col-md-8"><label class="form-label fw-bold small text-muted">Tiêu đề (Cột 2)</label><input type="text" id="insertCol2" class="form-control"></div>
+                                <div class="col-12"><label class="form-label fw-bold small text-muted">Nội dung chi tiết (Cột 3)</label><textarea id="insertCol3" class="form-control" rows="3"></textarea></div>
+                                <div class="col-md-6"><label class="form-label fw-bold small text-muted">Ngày đăng (Cột 4)</label><input type="text" id="insertCol4" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold small text-muted">Ngày cập nhật (Cột 5)</label><input type="text" id="insertCol5" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold small text-muted">Đường link đính kèm (Cột 6)</label><input type="text" id="insertCol6" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold small text-muted">Ghi chú (Cột 7)</label><input type="text" id="insertCol7" class="form-control"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Cột Phải: Xem Trước -->
+                    <div class="col-lg-6">
+                        <div class="p-4 rounded shadow-sm border border-success-subtle bg-white h-100 overflow-auto" style="max-height: 70vh;">
+                            <h6 class="fw-bold text-success mb-3 border-bottom pb-2"><i class="fa-solid fa-eye me-2"></i>Xem trước chèn dữ liệu</h6>
+                            <div class="tb-detail-title-small text-danger fw-bold mb-2" id="insertPreviewTitle" style="font-size: 20px; word-break: break-word;">[Tiêu đề sẽ hiển thị ở đây]</div>
+                            <div class="tb-detail-dates mb-3 text-muted border-bottom pb-2" style="font-size: 14px;">
+                                <i class="fa-regular fa-calendar"></i> Ngày đăng: <span id="insertPreviewDate">Vừa xong</span>
+                            </div>
+                            <div class="tb-detail-main-content" id="insertPreviewContent" style="font-size: 16px; line-height: 1.6; color: #1e293b; overflow-wrap: break-word;">
+                                <span class="text-muted fst-italic">[Nội dung bài đăng sẽ hiển thị ở đây]</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-success px-4 fw-bold" onclick="saveInsertRow()" id="btnSaveInsertRow">Chèn nội dung</button>
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-light fw-bold shadow-sm border" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success px-4 fw-bold shadow-sm" onclick="saveInsertRow()" id="btnSaveInsertRow"><i class="fa-solid fa-check me-1"></i> Chèn nội dung</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. MODAL SỬA DÒNG (EDIT ROW) CHO ADMIN -->
+<div class="modal fade" id="editRowModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 95vw;">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-warning text-dark">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa thông tin hàng dữ liệu</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" style="background-color: #f8fafc;">
+                <div class="row g-4">
+                    <!-- Cột Trái: Form Nhập -->
+                    <div class="col-lg-6">
+                        <div class="bg-white p-3 rounded shadow-sm border border-warning-subtle h-100">
+                            <div class="row g-3">
+                                <div class="col-md-4"><label class="form-label fw-bold small text-muted">STT / Trạng thái (Cột 1)</label><input type="text" id="editCol1" class="form-control"></div>
+                                <div class="col-md-8"><label class="form-label fw-bold small text-muted">Tiêu đề (Cột 2)</label><input type="text" id="editCol2" class="form-control"></div>
+                                <div class="col-12"><label class="form-label fw-bold small text-muted">Nội dung chi tiết (Cột 3)</label><textarea id="editCol3" class="form-control" rows="3"></textarea></div>
+                                <div class="col-md-6"><label class="form-label fw-bold small text-muted">Ngày đăng (Cột 4)</label><input type="text" id="editCol4" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold small text-muted">Ngày cập nhật (Cột 5)</label><input type="text" id="editCol5" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold small text-muted">Đường link đính kèm (Cột 6)</label><input type="text" id="editCol6" class="form-control"></div>
+                                <div class="col-md-6"><label class="form-label fw-bold small text-muted">Ghi chú (Cột 7)</label><input type="text" id="editCol7" class="form-control"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Cột Phải: Xem Trước -->
+                    <div class="col-lg-6">
+                        <div class="p-4 rounded shadow-sm border border-warning-subtle bg-white h-100 overflow-auto" style="max-height: 70vh;">
+                            <h6 class="fw-bold text-warning-emphasis mb-3 border-bottom pb-2"><i class="fa-solid fa-eye me-2"></i>Xem trước chỉnh sửa</h6>
+                            <div class="tb-detail-title-small text-danger fw-bold mb-2" id="editPreviewTitle" style="font-size: 20px; word-break: break-word;">[Tiêu đề sẽ hiển thị ở đây]</div>
+                            <div class="tb-detail-dates mb-3 text-muted border-bottom pb-2" style="font-size: 14px;">
+                                <i class="fa-regular fa-calendar"></i> Ngày đăng: <span id="editPreviewDate">Vừa xong</span>
+                            </div>
+                            <div class="tb-detail-main-content" id="editPreviewContent" style="font-size: 16px; line-height: 1.6; color: #1e293b; overflow-wrap: break-word;">
+                                <span class="text-muted fst-italic">[Nội dung bài đăng sẽ hiển thị ở đây]</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light">
+                <button type="button" class="btn btn-light fw-bold shadow-sm border" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-warning px-4 fw-bold shadow-sm" onclick="saveEditRow()" id="btnSaveEditRow"><i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi</button>
             </div>
         </div>
     </div>

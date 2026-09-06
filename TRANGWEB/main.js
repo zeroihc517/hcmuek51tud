@@ -7299,42 +7299,60 @@ $(document).ready(function() {
 });
 
 $(document).ready(function() {
-    
-    // 1. Lắng nghe Tiêu đề thông báo của Admin
-    $('#txtCol2').on('input', function() {
-        let titleVal = $(this).val().trim();
-        $('#adminPreviewTitle').text(titleVal !== '' ? titleVal : '[Tiêu đề sẽ hiển thị ở đây]');
+    // --- XỬ LÝ LIVE PREVIEW CHO MODAL CHÈN DÒNG (INSERT) ---
+    $('#insertCol2').on('input', function() {
+        let val = $(this).val().trim();
+        $('#insertPreviewTitle').text(val !== '' ? val : '[Tiêu đề sẽ hiển thị ở đây]');
+    });
+    $('#insertCol4').on('input', function() {
+        let val = $(this).val().trim();
+        $('#insertPreviewDate').text(val !== '' ? val : 'Vừa xong');
     });
 
-    // 2. Lắng nghe Ngày đăng của Admin
-    $('#txtCol4').on('input', function() {
-        let dateVal = $(this).val().trim();
-        $('#adminPreviewDate').text(dateVal !== '' ? dateVal : 'Vừa xong');
+    // --- XỬ LÝ LIVE PREVIEW CHO MODAL SỬA DÒNG (EDIT) ---
+    $('#editCol2').on('input', function() {
+        let val = $(this).val().trim();
+        $('#editPreviewTitle').text(val !== '' ? val : '[Tiêu đề sẽ hiển thị ở đây]');
+    });
+    $('#editCol4').on('input', function() {
+        let val = $(this).val().trim();
+        $('#editPreviewDate').text(val !== '' ? val : 'Vừa xong');
     });
 
-    // 3. Lắng nghe Nội dung TinyMCE của Admin
-    setTimeout(function() {
-        let adminEditor = tinymce.get('txtCol3'); 
-        if (adminEditor) {
-            adminEditor.on('input keyup change', function() {
-                let contentHTML = adminEditor.getContent();
-                
+    // --- HÀM CẬP NHẬT TINYMCE DÙNG CHUNG ---
+    function updateTinyMCEPreview(editorId, previewContentId) {
+        let editor = tinymce.get(editorId);
+        if (editor) {
+            editor.on('input keyup change', function() {
+                let contentHTML = editor.getContent();
                 if (!contentHTML.trim()) {
-                    $('#adminPreviewContent').html('<span class="text-muted fst-italic">[Nội dung bài đăng sẽ hiển thị ở đây]</span>');
+                    $('#' + previewContentId).html('<span class="text-muted fst-italic">[Nội dung bài đăng sẽ hiển thị ở đây]</span>');
                     return;
                 }
-                
-                let processedContent = contentHTML;
-                if (!/(<p>|<table>|<br>|<br\s*\/?>)/i.test(processedContent)) {
-                    processedContent = processedContent.replace(/\n/g, '<br>');
+                let processed = contentHTML;
+                if (!/(<p>|<table>|<br>|<br\s*\/?>)/i.test(processed)) {
+                    processed = processed.replace(/\n/g, '<br>');
                 }
-
-                $('#adminPreviewContent').html(processedContent);
+                $('#' + previewContentId).html(processed);
                 
-                if (typeof applyKaTeX === 'function') {
-                    applyKaTeX('adminPreviewContent');
-                }
+                if (typeof applyKaTeX === 'function') applyKaTeX(previewContentId);
             });
         }
-    }, 2000); // Khởi động sau 2s khi TinyMCE nạp xong
+    }
+
+    // Đợi 2s để TinyMCE load xong rồi móc nối
+    setTimeout(function() {
+        updateTinyMCEPreview('insertCol3', 'insertPreviewContent');
+        updateTinyMCEPreview('editCol3', 'editPreviewContent');
+    }, 2000);
+    
+    // Khi Admin bấm nút Sửa, tự động ép chạy render dữ liệu cũ lên khung xem trước
+    $('#editRowModal').on('shown.bs.modal', function () {
+        $('#editCol2').trigger('input');
+        $('#editCol4').trigger('input');
+        let editor = tinymce.get('editCol3');
+        if(editor) {
+            editor.fire('change'); // Ép nạp dữ liệu cũ vào HTML
+        }
+    });
 });
