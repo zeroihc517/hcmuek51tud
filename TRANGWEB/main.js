@@ -7079,12 +7079,24 @@ window.closeSplitPane = function(type, skipPing = false) {
         pingOnlineStatus();
     }
 };
-// HÀM MỞ BẢNG ĐĂNG THÔNG BÁO CHO SINH VIÊN
 window.openStudentAddTbModal = function() {
     if (!currentUser || currentUser.isGuest) {
-        alert("Vui lòng đăng nhập Sinh viên để có thể đăng thông báo!");
+        alert("Vui lòng đăng nhập để có thể đăng thông báo!");
         return;
     }
+    
+    // --- SỬA Ở ĐÂY: Đổi giao diện hiển thị tùy theo quyền của tài khoản ---
+    let isSystemAdmin = currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+    if (isSystemAdmin) {
+        $('#studentAddThongBaoModal .modal-title').html('<i class="fa-solid fa-pen-nib me-2"></i>Đăng Thông Báo Mới');
+        $('#studentAddThongBaoModal .alert-success').html('<i class="fa-solid fa-circle-check me-1"></i> Bài viết của Admin sẽ được hiển thị công khai ngay lập tức trên hệ thống.');
+        $('#btnSubmitStuTb').html('<i class="fa-solid fa-paper-plane me-1"></i> Đăng công khai');
+    } else {
+        $('#studentAddThongBaoModal .modal-title').html('<i class="fa-solid fa-pen-nib me-2"></i>Đăng Thông Báo Mới (Chờ duyệt)');
+        $('#studentAddThongBaoModal .alert-success').html('<i class="fa-solid fa-circle-info me-1"></i> Bài viết của bạn sẽ được hiển thị cho tất cả sinh viên sau khi Ban quản trị phê duyệt.');
+        $('#btnSubmitStuTb').html('<i class="fa-solid fa-paper-plane me-1"></i> Gửi phê duyệt');
+    }
+    
     // Reset Form
     $('#stuTbTitle, #stuTbLink, #stuTbDeadline').val('');
     $('#stuTbCategory').val('Học thuật'); // Mặc định chế độ
@@ -7112,16 +7124,20 @@ window.submitStudentThongBao = function() {
     
     let pad = (n) => String(n).padStart(2, '0');
     
+    // Tạo chuỗi đếm ngược Deadline chèn vào Nội dung Cột 3
     let deadlineStr = "";
     if (deadline) {
         let d = new Date(deadline);
         deadlineStr = `<br><p><strong>DEADLINE=${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}</strong></p>`;
     }
     
-    // Ghép Nội dung + Deadline đếm ngược + Thẻ nhận diện Tác giả (Để nguyên text gốc, không bọc thẻ html)
+    // Ghép Nội dung + Deadline đếm ngược + Thẻ nhận diện Tác giả (Để hệ thống tự dịch)
     let signedContent = content + deadlineStr + ` [POSTER:${currentUser.mssv}|${currentUser.name}]`;
 
-    let c1 = "PENDING"; // Chốt cờ PENDING chờ Admin duyệt
+    // --- SỬA Ở ĐÂY: Admin đăng bài sẽ gán cờ "NEW" (Công khai luôn), Sinh viên gán "PENDING" ---
+    let isSystemAdmin = currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+    let c1 = isSystemAdmin ? "NEW" : "PENDING"; 
+    
     let c2 = title;
     let c3 = signedContent; 
     
@@ -7130,10 +7146,11 @@ window.submitStudentThongBao = function() {
     let c4 = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
     let c5 = ""; 
     let c6 = link;
-    let c7 = category; // Trả cột 7 về đúng bản chất là chế độ Học thuật / Rèn luyện
+    let c7 = category; 
 
     let btn = $('#btnSubmitStuTb');
-    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
+    let originalBtnHtml = btn.html(); // Lưu lại thiết kế nút (chữ khác nhau tùy Admin/SV)
+    btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
     
     postToGAS({
         action: "insertSheetRowAfter",
@@ -7141,13 +7158,19 @@ window.submitStudentThongBao = function() {
         rowIndex: 1, 
         col1: c1, col2: c2, col3: c3, col4: c4, col5: c5, col6: c6, col7: c7
     }, function(res) {
-        alert("Đã gửi thông báo thành công! Vui lòng chờ Admin phê duyệt để hiển thị công khai.");
+        // --- SỬA Ở ĐÂY: Câu thông báo hoàn tất tùy thuộc vào quyền tài khoản ---
+        if (isSystemAdmin) {
+            alert("Đã đăng thông báo thành công và được công khai trên hệ thống!");
+        } else {
+            alert("Đã gửi thông báo thành công! Vui lòng chờ Admin phê duyệt để hiển thị công khai.");
+        }
+        
         $('#studentAddThongBaoModal').modal('hide');
-        btn.html('<i class="fa-solid fa-paper-plane me-1"></i> Gửi phê duyệt').prop('disabled', false);
+        btn.html(originalBtnHtml).prop('disabled', false);
         loadDataByHocPhan("Thông báo");
     }, function() {
         alert("Lỗi kết nối máy chủ! Vui lòng thử lại.");
-        btn.html('<i class="fa-solid fa-paper-plane me-1"></i> Gửi phê duyệt').prop('disabled', false);
+        btn.html(originalBtnHtml).prop('disabled', false);
     });
 };
 
