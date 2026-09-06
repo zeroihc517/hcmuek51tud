@@ -7151,7 +7151,7 @@ window.submitStudentThongBao = function() {
     // Ghép Nội dung + Deadline đếm ngược + Thẻ nhận diện Tác giả (Để hệ thống tự dịch)
     let signedContent = content + deadlineStr + ` [POSTER:${currentUser.mssv}|${currentUser.name}]`;
 
-    // --- SỬA Ở ĐÂY: Admin đăng bài sẽ gán cờ "NEW" (Công khai luôn), Sinh viên gán "PENDING" ---
+    // Admin đăng bài sẽ gán cờ "NEW" (Công khai luôn), Sinh viên gán "PENDING"
     let isSystemAdmin = currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
     let c1 = isSystemAdmin ? "NEW" : "PENDING"; 
     
@@ -7166,7 +7166,7 @@ window.submitStudentThongBao = function() {
     let c7 = category; 
 
     let btn = $('#btnSubmitStuTb');
-    let originalBtnHtml = btn.html(); // Lưu lại thiết kế nút (chữ khác nhau tùy Admin/SV)
+    let originalBtnHtml = btn.html(); 
     btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang xử lý...').prop('disabled', true);
     
     postToGAS({
@@ -7175,7 +7175,6 @@ window.submitStudentThongBao = function() {
         rowIndex: 1, 
         col1: c1, col2: c2, col3: c3, col4: c4, col5: c5, col6: c6, col7: c7
     }, function(res) {
-        // --- SỬA Ở ĐÂY: Câu thông báo hoàn tất tùy thuộc vào quyền tài khoản ---
         if (isSystemAdmin) {
             alert("Đã đăng thông báo thành công và được công khai trên hệ thống!");
         } else {
@@ -7184,7 +7183,17 @@ window.submitStudentThongBao = function() {
         
         $('#studentAddThongBaoModal').modal('hide');
         btn.html(originalBtnHtml).prop('disabled', false);
-        loadDataByHocPhan("Thông báo");
+        
+        // --- SỬA Ở ĐÂY: XÓA CACHE VÀ LOAD LẠI ĐÚNG GIAO DIỆN ---
+        // 1. Xóa cache của trang Thông báo để ép tải dữ liệu mới từ Server
+        if (window.boNhoDemHocPhan && window.boNhoDemHocPhan["Thông báo"]) {
+            delete window.boNhoDemHocPhan["Thông báo"];
+            sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan));
+        }
+        
+        // 2. Chuyển giao diện về trang Thông báo (Kèm ID của nút bấm để Sidebar sáng màu)
+        loadDataByHocPhan("Thông báo", document.getElementById('btnNavThongBao'));
+        
     }, function() {
         alert("Lỗi kết nối máy chủ! Vui lòng thử lại.");
         btn.html(originalBtnHtml).prop('disabled', false);
