@@ -57,7 +57,7 @@
         </svg>
     </div>
     
-    <h5 class="fw-bold mb-2 mt-2" style="color: #0f4c81; letter-spacing: 0.5px;">BẠN ĐANG TRUY CẬP WEB DỰ PHÒNG (Vì web chính đang bảo trì)</h5>
+    <h5 class="fw-bold mb-2 mt-2" style="color: #0f4c81; letter-spacing: 0.5px;">Bạn đang truy cập WEB Dự phòng (WEB Chính đang bảo trì)</h5>
     <small class="text-muted fw-bold mb-4" style="font-size: 14px;">Vui lòng chờ trong giây lát</small>
 
     <div class="loader-progress-bar">
@@ -88,7 +88,7 @@
         <aside class="sidebar" id="sidebarMenu">
             <div class="sidebar-brand">
                 <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-                <div><h6>Web dự phòng</h6><small>Applied mathematics</small></div>
+                <div><h6>WEB Dự phòng</h6></div>
 
             </div>
 <!-- KHUNG THÔNG TIN CÁ NHÂN & MENU NỔI (POPOVER) -->
@@ -2511,6 +2511,10 @@
     </div>
 <div id="groupLinkWrapper" class="widget-wrapper" style="width: 320px; max-width: 100%; transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">
         <div class="data-card border-0 shadow-sm m-0" style="border: 2px solid #10b981; border-radius: 12px; overflow: hidden; width: 100%; cursor: pointer;" onclick="openGroupLinksSection()">
+            <div class="d-flex justify-content-between align-items-center p-3" style="background: #d1fae5; transition: background 0.2s;" onmouseover="this.style.background='#a7f3d0'" onmouseout="this.style.background='#d1fae5'">
+                <h6 class="m-0 fw-bold" style="color: #059669;"><i class="fa-solid fa-users-rectangle me-2"></i> NHÓM HỌC TẬP</h6>
+                <i class="fa-solid fa-arrow-right text-success ms-3"></i>
+            </div>
         </div>
     </div>
 </div>
@@ -3103,7 +3107,53 @@
         </div>
     </div>
     
-<!-- BẢNG TỔNG HỢP LỊCH HỌC -->
+<!-- MODAL SINH VIÊN ĐĂNG THÔNG BÁO -->
+<div class="modal fade" id="studentAddThongBaoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header bg-success text-white" style="border-radius: 16px 16px 0 0;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-nib me-2"></i>Đăng Thông Báo Mới (Chờ duyệt)</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-success border-0 p-2 small m-0 mb-3" style="background-color: #dcfce7; border-radius: 8px;">
+                    <i class="fa-solid fa-circle-info me-1"></i> Bài viết của bạn sẽ được hiển thị cho tất cả sinh viên sau khi Ban quản trị phê duyệt.
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold text-muted small">Tiêu đề thông báo <span class="text-danger">*</span></label>
+                        <input type="text" id="stuTbTitle" class="form-control fw-bold" placeholder="Nhập tiêu đề...">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-muted small">Chế độ phân loại <span class="text-danger">*</span></label>
+                        <select id="stuTbCategory" class="form-select fw-bold border-success-subtle text-success">
+                            <option value="Học thuật">Học thuật & NCKH</option>
+                            <option value="Rèn luyện">Hoạt động Rèn luyện</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-bold text-muted small">Nội dung chi tiết <span class="text-danger">*</span></label>
+                        <textarea id="studentTbContent" class="form-control" rows="4" placeholder="Nhập nội dung..."></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small">Link đính kèm (nếu có)</label>
+                        <input type="text" id="stuTbLink" class="form-control" placeholder="https://...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small">Hết hạn lúc (Deadline)</label>
+                        <input type="datetime-local" id="stuTbDeadline" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 16px 16px;">
+                <button type="button" class="btn btn-light fw-bold shadow-sm" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #10b981;" onclick="submitStudentThongBao()" id="btnSubmitStuTb">
+                    <i class="fa-solid fa-paper-plane me-1"></i> Gửi phê duyệt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- BẢNG TỔNG HỢP LỊCH HỌC -->
 <div class="modal fade" id="manageTkbListModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -4693,6 +4743,69 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+<script>
+    (function() {
+        // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
+        const startMaintenance = new Date(2026, 8, 05, 17, 40);  
+        const endMaintenance   = new Date(2026, 8, 05, 17, 55); 
+        // Hàm tạo chuỗi định dạng
+        const pad = (n) => n.toString().padStart(2, '0');
+        const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
+
+        const maintenancePage = "Baotri.html"; 
+        const now = new Date();
+
+        if (now >= startMaintenance && now <= endMaintenance) {
+            localStorage.setItem("maintenanceConfig", JSON.stringify({
+                endTime: endMaintenance.getTime(), 
+                textShow: endTimeStr
+            }));
+            
+            // Thêm ID để tránh tạo trùng iframe
+            if (!document.getElementById('maintenanceIframe')) {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'maintenanceIframe';
+                iframe.src = maintenancePage;
+                iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; border: none; background-color: #f8fafc;';
+                document.body.appendChild(iframe);
+                document.body.style.overflow = 'hidden'; 
+            }
+        }
+        // Đã xóa phần else để không xung đột dữ liệu
+    })();
+</script>
+<script>
+    (function() {
+        const now = new Date();
+        
+        // Thiết lập thời gian bảo trì HÀNG NGÀY: Từ 11:40 đến 12:30
+        const startMaintenance = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0);  
+        const endMaintenance   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30, 0); 
+        
+        const pad = (n) => n.toString().padStart(2, '0');
+        const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
+
+        const maintenancePage = "Baotri.html"; 
+
+        if (now >= startMaintenance && now <= endMaintenance) {
+            localStorage.setItem("maintenanceConfig", JSON.stringify({
+                endTime: endMaintenance.getTime(), 
+                textShow: endTimeStr
+            }));
+            
+            // Thêm ID để tránh tạo trùng iframe
+            if (!document.getElementById('maintenanceIframe')) {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'maintenanceIframe';
+                iframe.src = maintenancePage;
+                iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; border: none; background-color: #f8fafc;';
+                document.body.appendChild(iframe);
+                document.body.style.overflow = 'hidden'; 
+            }
+        }
+        // Đã xóa phần else để không xung đột dữ liệu
+    })();
+</script>
 
 <script>
 // Hàm đổi URL linh hoạt
