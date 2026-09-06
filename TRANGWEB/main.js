@@ -58,9 +58,9 @@ function maskMSSV(mssv) {
         }
     }
 
-    if (str.length <= 6) return str; 
-    // Che khuất theo định dạng 51***xxx
-    return str.substring(0, 2) + '***' + str.substring(str.length - 3); 
+    // Nếu người xem là sinh viên thường -> Tiến hành che MSSV
+        if (str.length <= 6) return str; 
+        return str.substring(0, 2) + '***' + str.substring(str.length - 3);
 }
 // 3. Hàm kích hoạt chuyển chế độ (CHẠY SIÊU TỐC - KHÔNG GỌI LẠI AJAX)
 function toggleAdminNameDisplay() {

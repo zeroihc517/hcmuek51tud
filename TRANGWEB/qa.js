@@ -532,9 +532,16 @@ function cleanExternalHTML(html) {
                     let userObj = window.allUsersMap ? window.allUsersMap[cleanRawMssv] : null;
                     let authorName = userObj ? getNaturalShortName(userObj.name) : "Sinh viên";
 
-                    let displayMssv = `${rawMssv} - ${authorName}`;
-                    if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv) {
-                        displayMssv += ` (Bạn)`;
+                    let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
+                    let isMyPost = activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv;
+
+                    let displayMssv = "";
+                    if (isSystemAdmin) {
+                        displayMssv = `${rawMssv} - ${authorName}`;
+                    } else if (isMyPost) {
+                        displayMssv = `${rawMssv} - ${authorName} (Bạn)`;
+                    } else {
+                        displayMssv = maskMSSV(rawMssv);
                     }
 
                     // Ghép Avatar vào trang Q&A tổng
@@ -3441,12 +3448,20 @@ window.loadCourseQAList = function() {
                             let cleanRawMssv = rawMssv.replace(/\./g, ""); 
                             
                             // Lấy Tên và Avatar từ Map dữ liệu
+                           // Lấy Tên và Avatar từ Map dữ liệu
                             let userObj = window.allUsersMap ? window.allUsersMap[cleanRawMssv] : null;
                             let authorName = userObj ? getNaturalShortName(userObj.name) : "Sinh viên";
 
-                            let displayMssv = `${rawMssv} - ${authorName}`;
-                            if (activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv) {
-                                displayMssv += ` <span class="badge bg-success ms-1" style="font-size: 10px;">Bạn</span>`;
+                            let isSystemAdmin = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
+                            let isMyPost = activeUser && activeUser.mssv && activeUser.mssv.replace(/\./g, "") === cleanRawMssv;
+
+                            let displayMssv = "";
+                            if (isSystemAdmin) {
+                                displayMssv = `${rawMssv} - ${authorName}`;
+                            } else if (isMyPost) {
+                                displayMssv = `${rawMssv} - ${authorName} <span class="badge bg-success ms-1" style="font-size: 10px;">Bạn</span>`;
+                            } else {
+                                displayMssv = maskMSSV(rawMssv);
                             }
 
                             let answer = row[3] || '';
