@@ -7079,27 +7079,44 @@ window.closeSplitPane = function(type, skipPing = false) {
         pingOnlineStatus();
     }
 };
+// HÀM MỞ BẢNG ĐĂNG THÔNG BÁO CHO SINH VIÊN & ADMIN
 window.openStudentAddTbModal = function() {
     if (!currentUser || currentUser.isGuest) {
         alert("Vui lòng đăng nhập để có thể đăng thông báo!");
         return;
     }
     
-    // --- SỬA Ở ĐÂY: Đổi giao diện hiển thị tùy theo quyền của tài khoản ---
     let isSystemAdmin = currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+    let categorySelect = $('#stuTbCategory');
+    
+    // Đổi giao diện hiển thị tùy theo quyền của tài khoản
     if (isSystemAdmin) {
         $('#studentAddThongBaoModal .modal-title').html('<i class="fa-solid fa-pen-nib me-2"></i>Đăng Thông Báo Mới');
         $('#studentAddThongBaoModal .alert-success').html('<i class="fa-solid fa-circle-check me-1"></i> Bài viết của Admin sẽ được hiển thị công khai ngay lập tức trên hệ thống.');
         $('#btnSubmitStuTb').html('<i class="fa-solid fa-paper-plane me-1"></i> Đăng công khai');
+        
+        // --- THÊM PHÂN LOẠI "HỆ THỐNG" ĐỘC QUYỀN CHO ADMIN ---
+        categorySelect.html(`
+            <option value="Hệ thống">Thông báo Hệ thống</option>
+            <option value="Học thuật">Học thuật & NCKH</option>
+            <option value="Rèn luyện">Hoạt động Rèn luyện</option>
+        `);
+        categorySelect.val('Hệ thống'); // Mặc định chọn Hệ thống cho Admin
     } else {
         $('#studentAddThongBaoModal .modal-title').html('<i class="fa-solid fa-pen-nib me-2"></i>Đăng Thông Báo Mới (Chờ duyệt)');
         $('#studentAddThongBaoModal .alert-success').html('<i class="fa-solid fa-circle-info me-1"></i> Bài viết của bạn sẽ được hiển thị cho tất cả sinh viên sau khi Ban quản trị phê duyệt.');
         $('#btnSubmitStuTb').html('<i class="fa-solid fa-paper-plane me-1"></i> Gửi phê duyệt');
+        
+        // --- ẨN "HỆ THỐNG" ĐỐI VỚI SINH VIÊN THƯỜNG ---
+        categorySelect.html(`
+            <option value="Học thuật">Học thuật & NCKH</option>
+            <option value="Rèn luyện">Hoạt động Rèn luyện</option>
+        `);
+        categorySelect.val('Học thuật'); // Mặc định chọn Học thuật cho Sinh viên
     }
     
     // Reset Form
     $('#stuTbTitle, #stuTbLink, #stuTbDeadline').val('');
-    $('#stuTbCategory').val('Học thuật'); // Mặc định chế độ
     
     if (tinymce.get('studentTbContent')) {
         tinymce.get('studentTbContent').setContent('');
