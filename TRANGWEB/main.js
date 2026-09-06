@@ -7089,31 +7089,35 @@ window.submitStudentThongBao = function() {
         return;
     }
     
-    // Định dạng lại nội dung, tự động đánh dấu tác giả ở góc phải
-    let signedContent = content + `<br><p style="text-align: right; color: #64748b; font-size: 14px; margin-top: 10px;"><i>Người đăng: <b>${currentUser.name}</b> (${currentUser.mssv})</i></p>`;
+    let pad = (n) => String(n).padStart(2, '0');
+    
+    // --- SỬA Ở ĐÂY: Tạo chuỗi đếm ngược Deadline chèn vào Nội dung ---
+    let deadlineStr = "";
+    if (deadline) {
+        let d = new Date(deadline);
+        deadlineStr = `<br><p><strong>DEADLINE=${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}</strong></p>`;
+    }
+    
+    // Định dạng lại nội dung: Ghép Nội dung + Deadline đếm ngược + Chữ ký người đăng
+    let signedContent = content + deadlineStr + `<br><p style="text-align: right; color: #64748b; font-size: 14px; margin-top: 10px;"><i>Người đăng: <b>${currentUser.name}</b> (${currentUser.mssv})</i></p>`;
 
     let c1 = "PENDING"; // Chốt cờ PENDING chờ Admin duyệt
     let c2 = title;
-    let c3 = signedContent;
+    let c3 = signedContent; // Lưu toàn bộ nội dung gồm cả deadline vào Cột C
     
     // Ngày giờ đăng
     let now = new Date();
-    let pad = (n) => String(n).padStart(2, '0');
     let c4 = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
     let c5 = ""; 
     let c6 = link;
     
-    // Định tuyến Cột 7: Phân khu + Hạn chót
+    // Cột 7 bây giờ chỉ chứa duy nhất chuyên mục Học thuật / Rèn luyện
     let c7 = category;
-    if (deadline) {
-        let d = new Date(deadline);
-        c7 += ` | DEADLINE=${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}`;
-    }
 
     let btn = $('#btnSubmitStuTb');
     btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
     
-    // Gọi hàm chèn chung của hệ thống (Gắn lên trên cùng)
+    // Gọi hàm chèn chung của hệ thống
     postToGAS({
         action: "insertSheetRowAfter",
         sheetName: "Thông báo",
