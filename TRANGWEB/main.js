@@ -777,12 +777,31 @@ const regexNgayDang = /ĐĂNG=((?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4})/i;
     const regexNbsp = /&nbsp;/gi;
     const regexBr = /(<br\s*\/?>|\n)+/gi;
 data.forEach((row, rowIndex) => {
-    if (rowIndex === 0) return; 
-    
-    let c1 = String(row[0] || '').trim();
-    let c2 = String(row[1] || '').trim();
-    let c3 = String(row[2] || '').trim();
-    let c3_raw = c3;
+        if (rowIndex === 0) return; 
+        
+        let c1 = String(row[0] || '').trim();
+        let c2 = String(row[1] || '').trim();
+        let c3 = String(row[2] || '').trim();
+        
+        // --- CODE MỚI: BÓC TÁCH NGƯỜI ĐĂNG VÀ ĐẨY LÊN GÓC PHẢI ---
+        let posterHtml = "";
+        c3 = c3.replace(/\[POSTER:(.*?)\|(.*?)\]/g, function(match, pMssv, pName) {
+            let shortName = getNaturalShortName(pName); 
+            let displayMssv = pMssv;
+            
+            let isSystemAdminAcc = currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+            
+            if (!isSystemAdminAcc && (!currentUser || currentUser.mssv !== pMssv)) {
+                if (pMssv.length > 6) {
+                    displayMssv = pMssv.substring(0, 2) + '***' + pMssv.substring(pMssv.length - 3);
+                }
+            }
+            // Tạo huy hiệu Người đăng, class 'ms-auto' sẽ tự động đẩy khối này sang góc bên phải màn hình
+            posterHtml = `<span class="tb-date-text ms-auto" style="background: #f8fafc; border: 1px solid #cbd5e1; color: #475569;"><i class="fa-solid fa-user-pen me-1"></i>Người đăng: <b class="text-dark">${shortName}</b> (${displayMssv})</span>`;
+            return ``; // Xóa thẻ này khỏi nội dung văn bản c3
+        });
+        
+        let c3_raw = c3;
     let c4_raw = String(row[3] || '').trim(); 
     let c5 = String(row[4] || '').trim();
     let c6 = String(row[5] || '').trim();
@@ -852,8 +871,8 @@ let now = new Date();
 
     let assignedTbCode = tbCodesMap[rowIndex] || "";
     
-    // Ghi nhớ dữ liệu vào detailData KỂ CẢ KHI BÀI ĐÃ BỊ ẨN để dán link mở được
-   detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew, isHidden, tbCode: assignedTbCode, deadlineTime: deadlineTime };
+   // Đính kèm posterHtml vào data để truyền sang trang chi tiết
+    detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew, isHidden, tbCode: assignedTbCode, deadlineTime: deadlineTime, posterHtml: posterHtml };
 
     // Bỏ qua không vẽ ra danh sách bên ngoài nếu bài bị ẩn và không phải Admin
 if (isHidden && !isAdmin) {
@@ -1045,9 +1064,11 @@ let html = `
         [${currentCode}] ${data.c2} ${hiddenNoticeBadge}
     </div>
 </div>
-<div class="tb-detail-dates mb-2 d-flex align-items-center flex-wrap gap-3" style="font-size: 15px; padding-bottom: 8px; border-bottom: none;">
+<!-- Thêm class w-100 để thanh ngang kéo dài hết màn hình -->
+<div class="tb-detail-dates mb-2 d-flex align-items-center flex-wrap gap-3 w-100" style="font-size: 15px; padding-bottom: 8px; border-bottom: none;">
     ${dateDisplay}
     ${detailCountdownHtml}
+    ${data.posterHtml || ''} <!-- Nhúng thẻ người đăng vào đây -->
 </div>
 <div class="tb-detail-main-content" style="font-size: 16px; font-weight: normal; line-height: 1.6; border-top: 2px solid #f3f4f6; padding-top: 16px;">
     ${processedContent}
@@ -7091,33 +7112,29 @@ window.submitStudentThongBao = function() {
     
     let pad = (n) => String(n).padStart(2, '0');
     
-    // --- SỬA Ở ĐÂY: Tạo chuỗi đếm ngược Deadline chèn vào Nội dung ---
     let deadlineStr = "";
     if (deadline) {
         let d = new Date(deadline);
         deadlineStr = `<br><p><strong>DEADLINE=${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()}</strong></p>`;
     }
     
-    // Định dạng lại nội dung: Ghép Nội dung + Deadline đếm ngược + Chữ ký người đăng
-    let signedContent = content + deadlineStr + `<br><p style="text-align: right; color: #64748b; font-size: 14px; margin-top: 10px;"><i>Người đăng: <b>${currentUser.name}</b> (${currentUser.mssv})</i></p>`;
+    // Ghép Nội dung + Deadline đếm ngược + Thẻ nhận diện Tác giả (Để nguyên text gốc, không bọc thẻ html)
+    let signedContent = content + deadlineStr + ` [POSTER:${currentUser.mssv}|${currentUser.name}]`;
 
     let c1 = "PENDING"; // Chốt cờ PENDING chờ Admin duyệt
     let c2 = title;
-    let c3 = signedContent; // Lưu toàn bộ nội dung gồm cả deadline vào Cột C
+    let c3 = signedContent; 
     
     // Ngày giờ đăng
     let now = new Date();
     let c4 = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
     let c5 = ""; 
     let c6 = link;
-    
-    // Cột 7 bây giờ chỉ chứa duy nhất chuyên mục Học thuật / Rèn luyện
-    let c7 = category;
+    let c7 = category; // Trả cột 7 về đúng bản chất là chế độ Học thuật / Rèn luyện
 
     let btn = $('#btnSubmitStuTb');
     btn.html('<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi...').prop('disabled', true);
     
-    // Gọi hàm chèn chung của hệ thống
     postToGAS({
         action: "insertSheetRowAfter",
         sheetName: "Thông báo",
@@ -7133,6 +7150,7 @@ window.submitStudentThongBao = function() {
         btn.html('<i class="fa-solid fa-paper-plane me-1"></i> Gửi phê duyệt').prop('disabled', false);
     });
 };
+
 // ==========================================
 // HÀM DUYỆT BÀI NHANH DÀNH CHO ADMIN
 // ==========================================
