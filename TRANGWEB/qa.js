@@ -1531,13 +1531,28 @@ window.loadGroupLinks = function() {
                     // Cấp quyền sửa xóa cho Admin hoặc Chính chủ
                     let isOwnerOrAdmin = isAdmin || (currentUser && (currentUser.mssv === mssv || currentUser.mssv === "51.01.108.008"));
                     
-                    let iconHtml = ''; let badgeBg = 'bg-light text-dark';
-                    if (platform === 'Zalo') { iconHtml = '<i class="fa-solid fa-comment-dots text-primary"></i>'; }
-                    else if (platform === 'Messenger') { iconHtml = '<i class="fa-brands fa-facebook-messenger text-primary"></i>'; }
-                    else if (platform === 'Discord') { iconHtml = '<i class="fa-brands fa-discord" style="color: #5865F2;"></i>'; }
-                    else if (platform === 'MS TEAMS') { iconHtml = '<i class="fa-brands fa-telegram text-info"></i>'; }
-					else if (platform === 'Facebook') { iconHtml = '<i class="fa-brands fa-facebook text-primary"></i>'; }
-                    else { iconHtml = '<i class="fa-solid fa-users text-success"></i>'; }
+                    let iconHtml = '';
+
+if (platform === 'Zalo') {
+    // FontAwesome không có logo Zalo, dùng icon chat kết hợp màu xanh chuẩn của Zalo
+    iconHtml = '<i class="fa-solid fa-comment-dots" style="color: #0068FF;"></i>';
+}
+else if (platform === 'Facebook') {
+    // Sử dụng màu xanh chuẩn của Facebook
+    iconHtml = '<i class="fa-brands fa-facebook" style="color: #1877F2;"></i>';
+}
+else if (platform === 'Discord') {
+    // Màu của Discord bạn làm đã rất chuẩn, mình giữ nguyên
+    iconHtml = '<i class="fa-brands fa-discord" style="color: #5865F2;"></i>';
+}
+else if (platform === 'MS TEAMS') {
+    // Icon "people-group" nhìn giống logo Teams hơn "users", kết hợp màu tím chuẩn của Teams
+    iconHtml = '<i class="fa-solid fa-people-group" style="color: #6264A7;"></i>';
+}
+else {
+    // Default: dùng icon quả địa cầu hoặc mạng lưới (network) với màu trung tính sẽ hợp lý hơn
+    iconHtml = '<i class="fa-solid fa-globe text-secondary"></i>';
+}
                     
                     let actionBtns = '';
                     if (isOwnerOrAdmin) {
