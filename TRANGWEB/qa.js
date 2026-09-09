@@ -1534,19 +1534,22 @@ window.loadGroupLinks = function() {
                     let iconHtml = '';
 
 if (platform === 'Zalo') {
-    iconHtml = '<i class="fa-solid fa-comment-dots text-primary"></i>';
+    iconHtml = '<i class="fa-solid fa-comment-dots text-primary"></i>';
+}
+else if (platform === 'Messenger') {
+    iconHtml = '<i class="fa-brands fa-facebook-messenger text-primary"></i>';
 }
 else if (platform === 'Facebook') {
-    iconHtml = '<i class="fa-brands fa-facebook text-primary"></i>';
+    iconHtml = '<i class="fa-brands fa-facebook text-primary"></i>';
 }
 else if (platform === 'Discord') {
-    iconHtml = '<i class="fa-brands fa-discord" style="color: #5865F2;"></i>';
+    iconHtml = '<i class="fa-brands fa-discord" style="color: #5865F2;"></i>';
 }
 else if (platform === 'MS TEAMS') {
-    iconHtml = '<i class="fa-solid fa-users text-info"></i>';
+    iconHtml = '<i class="fa-brands fa-telegram text-info"></i>';
 }
 else {
-    iconHtml = '<i class="fa-solid fa-users text-success"></i>';
+    iconHtml = '<i class="fa-solid fa-users text-success"></i>';
 }
                     
                     let actionBtns = '';
