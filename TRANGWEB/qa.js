@@ -1534,24 +1534,19 @@ window.loadGroupLinks = function() {
                     let iconHtml = '';
 
 if (platform === 'Zalo') {
-    // FontAwesome không có logo Zalo, dùng icon chat kết hợp màu xanh chuẩn của Zalo
-    iconHtml = '<i class="fa-solid fa-comment-dots" style="color: #0068FF;"></i>';
+    iconHtml = '<i class="fa-solid fa-comment-dots text-primary"></i>';
 }
 else if (platform === 'Facebook') {
-    // Sử dụng màu xanh chuẩn của Facebook
-    iconHtml = '<i class="fa-brands fa-facebook" style="color: #1877F2;"></i>';
+    iconHtml = '<i class="fa-brands fa-facebook text-primary"></i>';
 }
 else if (platform === 'Discord') {
-    // Màu của Discord bạn làm đã rất chuẩn, mình giữ nguyên
-    iconHtml = '<i class="fa-brands fa-discord" style="color: #5865F2;"></i>';
+    iconHtml = '<i class="fa-brands fa-discord" style="color: #5865F2;"></i>';
 }
 else if (platform === 'MS TEAMS') {
-    // Icon "people-group" nhìn giống logo Teams hơn "users", kết hợp màu tím chuẩn của Teams
-    iconHtml = '<i class="fa-solid fa-people-group" style="color: #6264A7;"></i>';
+    iconHtml = '<i class="fa-solid fa-users text-info"></i>';
 }
 else {
-    // Default: dùng icon quả địa cầu hoặc mạng lưới (network) với màu trung tính sẽ hợp lý hơn
-    iconHtml = '<i class="fa-solid fa-globe text-secondary"></i>';
+    iconHtml = '<i class="fa-solid fa-users text-success"></i>';
 }
                     
                     let actionBtns = '';
