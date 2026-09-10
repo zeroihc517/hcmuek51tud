@@ -4927,7 +4927,20 @@
     (function() {
         const now = new Date();
         
-        // Thiết lập thời gian bảo trì HÀNG NGÀY: Từ 11:40 đến 12:30
+        // 1. KIỂM TRA THỨ TRONG TUẦN
+        // now.getDay() trả về: 0 (Chủ nhật), 1 (Thứ 2), 2 (Thứ 3), 3 (Thứ 4), 4 (Thứ 5), 5 (Thứ 6), 6 (Thứ 7)
+        const currentDay = now.getDay();
+        
+        // 2. KHAI BÁO CÁC THỨ BẠN MUỐN BẬT BẢO TRÌ ĐỊNH KỲ
+        // Ví dụ dưới đây là chỉ bật vào Thứ 3 (2) và Thứ 5 (4)
+        const daysToMaintain = [2, 3, 6, 7]; 
+        
+        // Nếu hôm nay không thuộc các thứ đã cấu hình thì bỏ qua, không làm gì cả
+        if (!daysToMaintain.includes(currentDay)) {
+            return;
+        }
+
+        // Thiết lập thời gian bảo trì trong ngày đó: Từ 11:40 đến 12:30
         const startMaintenance = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0);  
         const endMaintenance   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30, 0); 
         
@@ -4952,7 +4965,6 @@
                 document.body.style.overflow = 'hidden'; 
             }
         }
-        // Đã xóa phần else để không xung đột dữ liệu
     })();
 </script>
 
