@@ -866,7 +866,7 @@ function loadPersonalLinks() {
     if (loc.includes("LÊ VĂN SỸ") || loc.includes("LVS")) return "https://maps.app.goo.gl/7zCgiMmscdPFfCFv5";
     if (loc.includes("LẠC LONG QUÂN") || loc.includes("LLQ")) return "https://maps.app.goo.gl/oV1mXHYDuW44cGbN6";
     if (loc.includes("LÊ THỊ RIÊNG") || loc.includes("CVLTR")) return "https://maps.app.goo.gl/K7GzwaEcJwSb9dwGA";
- if (loc.includes("NTD.PHU THO")) return "https://maps.app.goo.gl/GUJQhfFCiGL9ss4f9";
+ if (loc.includes("NTD.PHU THO")) return "https://maps.app.goo.gl/2X5Xb5J5jW6Ytugp6";
     if (loc.includes("PHÂN HIỆU LONG AN") || loc.includes("PHLA")) return "https://maps.app.goo.gl/KNwjk6CUQZM44CZ16";
     return "#";
 }
@@ -1132,7 +1132,17 @@ function fetchUserAccessHistory() {
         }
     });
 }
-
+function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        // Kiểm tra kích thước màn hình
+        if (window.innerWidth > 768) {
+            // Nếu là PC: Thu gọn / Mở rộng thanh bên (Dùng class .hidden)
+            sidebar.classList.toggle('hidden');
+        } else {
+            // Nếu là Điện thoại: Trượt menu ra/vào (Dùng class .show của hệ thống cũ)
+            sidebar.classList.toggle('show');
+        }
+    }
 // Tự động tải dữ liệu khi bấm vào tab Lịch sử
 $(document).ready(function() {
     $('a[onclick*="lichsu"]').on('click', function() {

@@ -11,6 +11,27 @@ body{
   font-family:Inter,system-ui;
   background:var(--bg);
 }
+/* Ép hiển thị nút menu trên giao diện PC */
+    .menu-btn {
+        display: inline-block !important;
+    }
+
+    /* Hiệu ứng đóng mở cho sidebar trên PC */
+    .sidebar {
+        transition: all 0.3s ease-in-out;
+        overflow: hidden;
+        white-space: nowrap; 
+    }
+
+    /* Class khi sidebar bị ẩn trên PC */
+    .sidebar.hidden {
+        width: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin: 0 !important;
+        opacity: 0;
+        border-right: none !important;
+    }
 
 /* TOP BAR */
 .topbar{
