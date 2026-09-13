@@ -6,17 +6,22 @@ function loadTKBView() {
     
     updateSystemUrl('view', 'tkb'); 
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
-	setTimeout(() => { if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView(); }, 500);
-    if (typeof globalTkbData !== 'undefined' && globalTkbData.length > 0) {
+    setTimeout(() => { if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView(); }, 500);
+
+    // Tận dụng cờ isGpaDataLoaded để biết dữ liệu đã tải xong lúc login chưa
+    let isDataLoaded = window.isGpaDataLoaded === true;
+
+    if (isDataLoaded || (typeof globalTkbData !== 'undefined' && globalTkbData.length > 0)) {
         filterAndRenderTKB();
         renderTkbToolBar();
     } else {
         loadThoiGianBieu(); 
     }
 
-    if (typeof globalDeadlineData !== 'undefined' && globalDeadlineData.length > 0) {
-        renderDeadlines();
+    // Xóa bỏ phụ thuộc vào length > 0 để tránh tải lại vô ích khi sinh viên không có deadline nào
+    if (isDataLoaded || (typeof globalDeadlineData !== 'undefined' && globalDeadlineData.length > 0)) {
         $('#deadlineBox').removeClass('d-none');
+        renderDeadlines();
     } else {
         loadDeadlines();
     }
@@ -1022,7 +1027,8 @@ function processTKBData(data) {
     }).filter(c => (c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1) || (c.hinhThuc || '').toUpperCase().includes('VLE'));
     
     filterAndRenderTKB();
-autoSyncTkbToGpa();
+    autoSyncTkbToGpa();
+    renderDeadlines(); // <--- ĐẢM BẢO DEADLINE ĐƯỢC RENDER ĐỒNG THỜI CÙNG TKB
 }
 
 
