@@ -4933,7 +4933,7 @@
         
         // 2. KHAI BÁO CÁC THỨ BẠN MUỐN BẬT BẢO TRÌ ĐỊNH KỲ
         // Ví dụ dưới đây là chỉ bật vào Thứ 3 (2) và Thứ 5 (4)
-        const daysToMaintain = [2, 3, 6, 7]; 
+        const daysToMaintain = [3, 6, 7]; 
         
         // Nếu hôm nay không thuộc các thứ đã cấu hình thì bỏ qua, không làm gì cả
         if (!daysToMaintain.includes(currentDay)) {
@@ -4941,8 +4941,8 @@
         }
 
         // Thiết lập thời gian bảo trì trong ngày đó: Từ 11:40 đến 12:30
-        const startMaintenance = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0);  
-        const endMaintenance   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30, 0); 
+        const startMaintenance = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 30, 0);  
+        const endMaintenance   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 00, 0); 
         
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
