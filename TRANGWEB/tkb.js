@@ -1421,7 +1421,7 @@ function executeSavePersonalTkb() {
     let isWeekMode = $('#modeWeek').is(':checked');
     let ngayBdRaw = "", ngayKtRaw = "", finalNgoaiLe = "";
     
-  if (isWeekMode) {
+    if (isWeekMode) {
         let selectedDates = [];
         $('.utkb-week-cb:checked').each(function() {
             let weekStartMs = parseInt($(this).val()); 
@@ -1490,12 +1490,20 @@ function executeSavePersonalTkb() {
         }
     });
 
-  if (isOverlap) {
+    // --- ĐÃ THAY ĐỔI: HỎI XÁC NHẬN KHI TRÙNG LỊCH THAY VÌ CHẶN LƯU ---
+    if (isOverlap) {
         let thuText = thuVal === 8 ? "Chủ nhật" : "Thứ " + thuVal;
-        $('#uTkbOverlapMessage').html(`<b>Lỗi:</b> Lịch bị trùng tiết với môn <b>"${overlapCourseName}"</b> (${thuText}). Vui lòng chọn thời gian khác.`);
-        $('#uTkbOverlapAlert').removeClass('d-none');
-        // Đã xóa hàm alert() ở đây! Bảng chỉ từ chối lưu và hiện dòng chữ đỏ lên thôi.
-        return; 
+        let forceAdd = confirm(`Hiện đang trùng lịch với môn "${overlapCourseName}" (${thuText}). Bạn có chắc chắn muốn chèn không?`);
+        
+        if (!forceAdd) {
+            // Nếu người dùng chọn Cancel (Không chèn)
+            $('#uTkbOverlapMessage').html(`<b>Lỗi:</b> Lịch bị trùng tiết với môn <b>"${overlapCourseName}"</b> (${thuText}). Vui lòng chọn thời gian khác.`);
+            $('#uTkbOverlapAlert').removeClass('d-none');
+            return; 
+        } else {
+            // Nếu người dùng chọn OK, ẩn dòng cảnh báo đỏ đi để lưu tiếp
+            $('#uTkbOverlapAlert').addClass('d-none');
+        }
     }
 
     let finalHinhThuc = $('#uTkbHinhThuc').val().trim(); 
@@ -1509,11 +1517,11 @@ function executeSavePersonalTkb() {
         finalHinhThuc = cleanHinhThuc;
     }
 
-   let pData = {
+    let pData = {
         action: isEditMode ? "editTKBUser" : "addTKBUser", 
         rowIndex: targetRowIndex, mssv: currentUser.mssv, thu: thuVal, tietBd: tietBdVal, soTiet: soTietVal, thoiGian: $('#uTkbThoiGian').val(), 
         hinhThuc: finalHinhThuc, mon: monVal, phong: $('#uTkbPhong').val(), gv: $('#uTkbGV').val(), color: $('#uTkbColor').val(),
-        ngayBatDau: ngayBdRaw, ngayKetThuc: ngayKtRaw, ngayNgoaiLe: finalNgoaiLe, // <--- Sửa ngayNgoaiLe thành finalNgoaiLe
+        ngayBatDau: ngayBdRaw, ngayKetThuc: ngayKtRaw, ngayNgoaiLe: finalNgoaiLe,
         editScope: pendingEventAction.scope || "all", 
         targetDate: pendingEventAction.targetDate || ""
     };
