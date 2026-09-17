@@ -1574,15 +1574,12 @@ function renderTKBTable(courses) {
 
     // 2. Xác định trọng số (độ rộng) và trạng thái ẩn của từng cột
     let hideDay = Array(9).fill(false);
-    let weights = Array(9).fill(1); // Mặc định mỗi cột trọng số là 1 phần
+    let weights = Array(9).fill(1); 
 
     if (courses.length === 0) {
-        // Mặc định lúc load (chưa có sự kiện nào) -> Hiện đều từ T2 đến Chủ Nhật (tất cả trọng số = 1)
     } else if (!hasCourse[8]) {
-        // Trường hợp 1: Có sự kiện nhưng Chủ nhật trống -> Ẩn Chủ nhật, Thứ 2 - Thứ 7 chia đều
         hideDay[8] = true;
     } else {
-        // Chủ nhật có sự kiện
         let hasEventMonToSat = false;
         for (let i = 2; i <= 7; i++) {
             if (hasCourse[i]) {
@@ -1592,16 +1589,14 @@ function renderTKBTable(courses) {
         }
 
         if (!hasEventMonToSat) {
-            // Trường hợp 3: Chủ nhật có sự kiện, Thứ 2 - Thứ 7 ĐỀU TRỐNG
-            for (let i = 2; i <= 7; i++) weights[i] = 1; // Thu hẹp T2-T7
-            weights[8] = 3; // Để Chủ nhật rộng ra (Gấp 3 lần ngày trống)
+            for (let i = 2; i <= 7; i++) weights[i] = 1; 
+            weights[8] = 3; 
         } else {
-            // Trường hợp 2: Chủ nhật có sự kiện, Thứ 2 - Thứ 7 có ngày trống
             for (let i = 2; i <= 8; i++) {
                 if (hasCourse[i]) {
-                    weights[i] = 2.5; // Ngày có sự kiện chiếm không gian rộng hơn
+                    weights[i] = 2.5; 
                 } else {
-                    weights[i] = 1; // Ngày trống thu hẹp lại
+                    weights[i] = 1; 
                 }
             }
         }
@@ -1613,7 +1608,6 @@ function renderTKBTable(courses) {
         if (!hideDay[thu]) totalWeight += weights[thu];
     }
 
-    // Gán CSS Inline Width vào thẻ tiêu đề ngày, bảng table-layout: fixed sẽ tự ép các ô <td> ăn theo
     for (let thu = 2; thu <= 8; thu++) {
         if (hideDay[thu]) {
             $(`#th-day-${thu}`).hide();
@@ -1623,57 +1617,144 @@ function renderTKBTable(courses) {
         }
     }
 
+    // --- NHÓM CÁC MÔN CÓ KHẢ NĂNG TRÙNG LỊCH LẠI VỚI NHAU ---
+    let dailyGroups = {};
+    for (let thu = 2; thu <= 8; thu++) {
+        dailyGroups[thu] = [];
+        let dayCourses = courses.filter(c => c.thu === thu).sort((a,b) => a.tietBd - b.tietBd);
+        
+        let currentGroup = null;
+        for (let c of dayCourses) {
+            let tietKt = parseInt(c.tietBd) + parseInt(c.soTiet || 1) - 1;
+            if (!currentGroup) {
+                currentGroup = { minTiet: parseInt(c.tietBd), maxTiet: tietKt, courses: [c] };
+                dailyGroups[thu].push(currentGroup);
+            } else {
+                if (parseInt(c.tietBd) <= currentGroup.maxTiet) { 
+                    currentGroup.maxTiet = Math.max(currentGroup.maxTiet, tietKt);
+                    currentGroup.courses.push(c); 
+                } else { 
+                    currentGroup = { minTiet: parseInt(c.tietBd), maxTiet: tietKt, courses: [c] };
+                    dailyGroups[thu].push(currentGroup);
+                }
+            }
+        }
+    }
+
     // 4. Render các dòng dữ liệu <tr> <td>
     let tableHtml = "";
     for (let i = 1; i <= totalRows; i++) {
         tableHtml += `<tr>`;
         tableHtml += `<td class="col-tiet">${i}</td>`;
         for (let thu = 2; thu <= 8; thu++) {
-            // Nếu ngày bị ẩn thì bỏ qua không tạo thẻ <td>
             if (hideDay[thu]) continue; 
-
             if (occupied[i][thu]) continue; 
-            const course = courses.find(c => c.thu === thu && c.tietBd === i);
             
-            if (course) {
-                const len = course.soTiet;
+            let group = dailyGroups[thu].find(g => g.minTiet === i);
+            
+            if (group) {
+                const len = group.maxTiet - group.minTiet + 1;
                 for (let r = 0; r < len; r++) { if (i + r <= totalRows) occupied[i + r][thu] = true; }
                 
-                let rawHinhThuc = course.hinhThuc || ""; let customLink = checkAndExtractUrl(rawHinhThuc); let displayHinhThuc = rawHinhThuc;
-                if(customLink) displayHinhThuc = rawHinhThuc.replace(customLink, '').trim();
+                if (group.courses.length === 1) {
+                    // ==========================================
+                    // TRƯỜNG HỢP 1 MÔN: RENDER Y HỆT BẢN GỐC TKB CŨ
+                    // ==========================================
+                    let course = group.courses[0];
+                    let rawHinhThuc = course.hinhThuc || ""; let customLink = checkAndExtractUrl(rawHinhThuc); let displayHinhThuc = rawHinhThuc;
+                    if(customLink) displayHinhThuc = rawHinhThuc.replace(customLink, '').trim();
 
-                let autoColor = course.color; const locU = displayHinhThuc.toUpperCase();
-                if (locU.includes("AN DƯƠNG VƯƠNG") || locU.includes("ADV")) autoColor = "#e0f2fe";
-                else if (locU.includes("LÊ VĂN SỸ") || locU.includes("LVS")) autoColor = "#e6f9ef";
-                else if (locU.includes("LẠC LONG QUÂN") || locU.includes("LLQ")) autoColor = "#fff3e0";
-                else if (locU.includes("LÊ THỊ RIÊNG") || locU.includes("CVLTR") || locU.includes("NTD.PHU THO")) autoColor = "#fef9c3";
-                else if (locU.includes("ONLINE") || locU.includes("HỌP")) autoColor = "#f3e8ff";
-                else if (locU.includes("PHÂN HIỆU LONG AN") || locU.includes("PHLA")) autoColor = "#fff5fb";
+                    let autoColor = course.color; const locUF = displayHinhThuc.toUpperCase();
+                    if (locUF.includes("AN DƯƠNG VƯƠNG") || locUF.includes("ADV")) autoColor = "#e0f2fe";
+                    else if (locUF.includes("LÊ VĂN SỸ") || locUF.includes("LVS")) autoColor = "#e6f9ef";
+                    else if (locUF.includes("LẠC LONG QUÂN") || locUF.includes("LLQ")) autoColor = "#fff3e0";
+                    else if (locUF.includes("LÊ THỊ RIÊNG") || locUF.includes("CVLTR") || locUF.includes("NTD.PHU THO")) autoColor = "#fef9c3";
+                    else if (locUF.includes("ONLINE") || locUF.includes("HỌP")) autoColor = "#f3e8ff";
+                    else if (locUF.includes("PHÂN HIỆU LONG AN") || locUF.includes("PHLA")) autoColor = "#fff5fb";
 
-                const finalLink = getAutoLink(displayHinhThuc, customLink);
-                let monDisplay = course.mon;
-                let examTypes = ["Kiểm tra Quá trình", "Kiểm tra Giữa học phần", "Kiểm tra Kết thúc học phần"];
-                for (let type of examTypes) {
-                    let regex = new RegExp(`^(${type})\\s*[-:]?\\s*`, "i");
-                    if (regex.test(monDisplay)) {
-                        let subjectName = monDisplay.replace(regex, "").trim();
-                        monDisplay = `<b>${type}</b><br>${subjectName}`; break; 
+                    const finalLink = getAutoLink(displayHinhThuc, customLink);
+                    let monDisplay = course.mon;
+                    let examTypes = ["Kiểm tra Quá trình", "Kiểm tra Giữa học phần", "Kiểm tra Kết thúc học phần"];
+                    for (let type of examTypes) {
+                        let regex = new RegExp(`^(${type})\\s*[-:]?\\s*`, "i");
+                        if (regex.test(monDisplay)) {
+                            let subjectName = monDisplay.replace(regex, "").trim();
+                            monDisplay = `<b>${type}</b><br>${subjectName}`; break; 
+                        }
                     }
-                }                        
-                tableHtml += `
-               <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'};">
-                    <div class="tkb-actions">
-                        <button class="btn-tkb-act text-warning" onclick="openEditTkbModal('${course.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
-                        <button class="btn-tkb-act text-danger" onclick="promptDeletePersonalTkb('${course.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                    <div class="subject">
-                        ${course.thoiGian ? `<div class="time">${course.thoiGian}</div>` : ''}
-                        <div style="font-weight:600;"><a href="${finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">${displayHinhThuc || "Truy cập"}</a></div>
-                        <div>${monDisplay}</div>
-                        ${course.phong ? `<span class="room">Phòng: ${course.phong}</span><br>` : ''}
-                        ${course.gv ? `<span class="teacher">GV: ${course.gv}</span>` : ''}
-                    </div>
-                </td>`;
+
+                    tableHtml += `
+                    <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'};">
+                        <div class="tkb-actions">
+                            <button class="btn-tkb-act text-warning" onclick="openEditTkbModal('${course.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                            <button class="btn-tkb-act text-danger" onclick="promptDeletePersonalTkb('${course.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <div class="subject">
+                            ${course.thoiGian ? `<div class="time">${course.thoiGian}</div>` : `<div class="time text-muted">Tiết ${course.tietBd}-${parseInt(course.tietBd) + parseInt(course.soTiet || 1) - 1}</div>`}
+                            <div style="font-weight:600;"><a href="${finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">${displayHinhThuc || "Truy cập"}</a></div>
+                            <div>${monDisplay}</div>
+                            ${course.phong ? `<span class="room">Phòng: ${course.phong}</span><br>` : ''}
+                            ${course.gv ? `<span class="teacher">GV: ${course.gv}</span>` : ''}
+                        </div>
+                    </td>`;
+
+                } else {
+                    // ==========================================
+                    // TRƯỜNG HỢP NHIỀU MÔN TRÙNG LỊCH
+                    // ==========================================
+                    tableHtml += `<td rowspan="${len}" class="td-subject" style="background: #fff; border: 1.5px solid #fee2e2; vertical-align: top; padding: 5px;">`;
+                    
+                    group.courses.forEach((course, cIndex) => {
+                        let rawHinhThuc = course.hinhThuc || ""; let customLink = checkAndExtractUrl(rawHinhThuc); let displayHinhThuc = rawHinhThuc;
+                        if(customLink) displayHinhThuc = rawHinhThuc.replace(customLink, '').trim();
+
+                        // => TÍNH MÀU NỀN ĐỘC LẬP CHO TỪNG KHỐI NHỎ
+                        let autoColor = course.color; const locUF = displayHinhThuc.toUpperCase();
+                        if (locUF.includes("AN DƯƠNG VƯƠNG") || locUF.includes("ADV")) autoColor = "#e0f2fe";
+                        else if (locUF.includes("LÊ VĂN SỸ") || locUF.includes("LVS")) autoColor = "#e6f9ef";
+                        else if (locUF.includes("LẠC LONG QUÂN") || locUF.includes("LLQ")) autoColor = "#fff3e0";
+                        else if (locUF.includes("LÊ THỊ RIÊNG") || locUF.includes("CVLTR") || locUF.includes("NTD.PHU THO")) autoColor = "#fef9c3";
+                        else if (locUF.includes("ONLINE") || locUF.includes("HỌP")) autoColor = "#f3e8ff";
+                        else if (locUF.includes("PHÂN HIỆU LONG AN") || locUF.includes("PHLA")) autoColor = "#fff5fb";
+
+                        let innerBg = autoColor || '#f8fafc';
+                        
+                        const finalLink = getAutoLink(displayHinhThuc, customLink);
+                        let monDisplay = course.mon;
+                        let examTypes = ["Kiểm tra Quá trình", "Kiểm tra Giữa học phần", "Kiểm tra Kết thúc học phần"];
+                        for (let type of examTypes) {
+                            let regex = new RegExp(`^(${type})\\s*[-:]?\\s*`, "i");
+                            if (regex.test(monDisplay)) {
+                                let subjectName = monDisplay.replace(regex, "").trim();
+                                monDisplay = `<b>${type}</b><br>${subjectName}`; break; 
+                            }
+                        }
+
+                        tableHtml += `
+                        <div style="position: relative; background: ${innerBg}; border-radius: 6px; padding: 6px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                            <div class="tkb-actions" style="position: absolute; top: 2px; right: 2px; z-index: 10;">
+                                <button class="btn-tkb-act text-warning bg-white shadow-sm" onclick="openEditTkbModal('${course.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
+                                <button class="btn-tkb-act text-danger bg-white shadow-sm" onclick="promptDeletePersonalTkb('${course.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                            <div class="subject" style="position: relative; z-index: 5;">
+                                ${course.thoiGian ? `<div class="time">${course.thoiGian}</div>` : `<div class="time text-muted">Tiết ${course.tietBd}-${parseInt(course.tietBd) + parseInt(course.soTiet || 1) - 1}</div>`}
+                                <div style="font-weight:600;"><a href="${finalLink}" target="_blank" style="color:#2563eb; text-decoration:none;">${displayHinhThuc || "Truy cập"}</a></div>
+                                <div>${monDisplay}</div>
+                                ${course.phong ? `<span class="room">Phòng: ${course.phong}</span><br>` : ''}
+                                ${course.gv ? `<span class="teacher">GV: ${course.gv}</span>` : ''}
+                            </div>
+                        </div>`;
+
+                        if (cIndex < group.courses.length - 1) {
+                            tableHtml += `
+                            <div class="text-danger fw-bold text-center w-100" style="font-size: 11px; margin: 4px 0; text-transform: uppercase;">
+                                <i class="fa-solid fa-triangle-exclamation fa-fade me-1"></i> ----- Trùng lịch -----
+                            </div>`;
+                        }
+                    });
+
+                    tableHtml += `</td>`;
+                }
             } else { 
                 tableHtml += `<td class="day"></td>`; 
             }
@@ -1682,6 +1763,7 @@ function renderTKBTable(courses) {
     }
     tbody.innerHTML = tableHtml;
 }
+
 function fetchSemesterConfig() {
     $.ajax({
         url: SCRIPT_URL + "?action=getConfigHocKy",
