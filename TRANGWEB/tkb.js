@@ -1034,17 +1034,18 @@ function processTKBData(data) {
 
 // Ví dụ trong hàm xử lý nút "Chỉ sự kiện này" hoặc khi chuẩn bị gửi data:
 function getCorrectLocalDateString(dateInput) {
-    // Nếu dateInput là đối tượng Date, chuyển về dạng YYYY-MM-DD theo giờ địa phương
     if (dateInput instanceof Date) {
-        let tzoffset = dateInput.getTimezoneOffset() * 60000; // độ lệch múi giờ tính bằng ms
-        let localISOTime = (new Date(dateInput.getTime() - tzoffset)).toISOString().slice(0, 10);
-        return localISOTime;
+        let d = String(dateInput.getDate()).padStart(2, '0');
+        let m = String(dateInput.getMonth() + 1).padStart(2, '0');
+        let y = dateInput.getFullYear();
+        return `${d}/${m}/${y}`;
     }
-    return dateInput; // Nếu đã là chuỗi "YYYY-MM-DD" thì giữ nguyên
+    return dateInput; 
 }
 
 // Khi người dùng chọn "Chỉ sự kiện này", hãy gán lại ngày chuẩn:
 pendingEventAction.date = getCorrectLocalDateString(pendingEventAction.date);
+
 function promptDeletePersonalTkb(sheetRowIndex) {
     let course = globalTkbData.find(c => String(c.sheetRowIndex) === String(sheetRowIndex));
     if (course && course.isSystem) { alert("Khóa bảo mật: Bạn không thể xóa học phần đã được đồng bộ từ hệ thống Đào tạo."); return; }
@@ -1054,22 +1055,31 @@ function promptDeletePersonalTkb(sheetRowIndex) {
     $('#eventScopeModal').modal('show');
 }
 
+// Xóa bỏ hoàn toàn hàm getCorrectLocalDateString bị sai định dạng
+
 function submitEventScope(scope) {
     $('#eventScopeModal').modal('hide');
     pendingEventAction.scope = scope;
-    let selectedDateStr = formatDateDDMMYYYY(currentSelectedMonday); 
-    pendingEventAction.targetDate = selectedDateStr;
+    
+    let eventDate = new Date(currentSelectedMonday);
 
-if (scope === 'single' || scope === 'future') {
+    // Xây dựng hàm ép định dạng tĩnh: Ngày/Tháng/Năm (DD/MM/YYYY)
+    const formatExactDDMMYYYY = (dateObj) => {
+        let d = String(dateObj.getDate()).padStart(2, '0');
+        let m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        let y = dateObj.getFullYear();
+        return `${d}/${m}/${y}`;
+    };
+
+    if (scope === 'single' || scope === 'future') {
         // Tính toán ngày chính xác của sự kiện dựa vào "thu" của sự kiện đó
-        let eventDate = new Date(currentSelectedMonday); 
-        // course.thu có giá trị từ 2 (Thứ 2) đến 8 (Chủ nhật)
         let dayDiff = pendingEventAction.thu - 2; 
         eventDate.setDate(eventDate.getDate() + dayDiff);
         
-        pendingEventAction.targetDate = formatDateDDMMYYYY(eventDate); 
+        // Gán ngày đã được ép chuẩn định dạng
+        pendingEventAction.targetDate = formatExactDDMMYYYY(eventDate); 
     } else {
-        pendingEventAction.targetDate = formatDateDDMMYYYY(currentSelectedMonday); 
+        pendingEventAction.targetDate = formatExactDDMMYYYY(currentSelectedMonday); 
     }
 
     if (pendingEventAction.type === 'edit') {
@@ -1078,7 +1088,6 @@ if (scope === 'single' || scope === 'future') {
         executeDeletePersonalTkb();
     }
 }
-
 // ========================================================
 // HỆ THỐNG JAVASCRIPT CHO MODAL GỘP (UNIFIED MODAL)
 // ========================================================
