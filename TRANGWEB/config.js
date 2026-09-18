@@ -400,7 +400,6 @@ $(document).ready(function() {
     });
 });
 
-// --- KẾT THÚC ĐOẠN CODE ---
 // HÀM MỞ TÀI LIỆU TRỰC TIẾP TRÊN WEB
 window.openDocumentViewer = function(url, title) {
     // THÊM MỚI: Tự động nhảy tab mới và dừng lệnh ngay nếu là link Upcoder
@@ -408,6 +407,20 @@ window.openDocumentViewer = function(url, title) {
         window.open(url, '_blank');
         return; 
     }
+
+    // ======================================================
+    // THÊM MỚI: MỞ TAB MỚI CHO GOOGLE DOC, WORD TRÊN GIAO DIỆN ĐIỆN THOẠI
+    // ======================================================
+    let isMobile = window.innerWidth < 992 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+    
+    // Nhận diện link Google Docs hoặc file Word (.doc, .docx)
+    let isDocOrWord = url.includes('docs.google.com/document') || /\.docx?(?:[?#]|$)/i.test(url);
+    
+    if (isMobile && isDocOrWord) {
+        window.open(url, '_blank'); // Mở tab mới
+        return; // Dừng việc mở Iframe
+    }
+    // ======================================================
 
     let embedUrl = url;
     
@@ -440,10 +453,9 @@ window.openDocumentViewer = function(url, title) {
     }
     
     // Dọn dẹp HTML dư thừa nếu có trong tiêu đề
-    let cleanTitle = $('<div>').html(title).text();
-    $('#docViewerTitle').html(`<i class="fa-solid fa-file-lines me-2"></i> ${cleanTitle || 'Xem tài liệu'}`);
+    let cleanTitle = $('<div>').html(title).text();$('#docViewerTitle').html(`<i class="fa-solid fa-file-lines me-2"></i> ${cleanTitle || 'Xem tài liệu'}`);
     
-if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
+    if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
         $('#btnOpenInNewTab')
             .removeClass('d-none')
             .off('click') // Xóa rác sự kiện cũ
@@ -454,12 +466,12 @@ if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv ===
         // Sinh viên thường sẽ bị ẩn đi
         $('#btnOpenInNewTab').addClass('d-none');
     }
+    
     // Bật trạng thái Loading
     $('#docLoading').show(); 
     $('#docViewerIframe').attr('src', embedUrl);
     $('#documentViewerModal').modal('show');
 }
-
 // Dọn dẹp iframe khi đóng để tránh rò rỉ bộ nhớ
 $(document).ready(function() {
     $('#documentViewerModal').on('hidden.bs.modal', function () {
