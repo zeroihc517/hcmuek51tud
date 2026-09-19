@@ -23,6 +23,7 @@ function resetNavActive() {
     $('#gpaSection').addClass('d-none');
     $('#profileSection').addClass('d-none'); // <--- Ẩn trang hồ sơ
 	$('#datLichSection').addClass('d-none');
+$('#customHtmlSection').addClass('d-none');
 }
 
 // Thay đổi hàm loadTongHopView để không gọi lại dữ liệu nếu đã có
@@ -623,6 +624,8 @@ function loadDataByHocPhan(sheetName, element) {
         if (element) {
             resetUrlToDefault();
         }
+$('#tbMainView').removeClass('d-none').attr('style', '');
+    $('#tbDetailContainer').addClass('d-none');
     }
 
     // Hiển thị form thêm dữ liệu nếu là Admin và Đổi nhãn thông minh
@@ -791,7 +794,7 @@ data.forEach((row, rowIndex) => {
         let c1 = String(row[0] || '').trim();
         let c2 = String(row[1] || '').trim();
         let c3 = String(row[2] || '').trim();
-        
+        if (c1 === '' && c2 === '' && c3 === '') return;
         // --- CODE MỚI: BÓC TÁCH NGƯỜI ĐĂNG VÀ ĐẨY LÊN GÓC PHẢI ---
         let posterHtml = "";
         c3 = c3.replace(/\[POSTER:(.*?)\|(.*?)\]/g, function(match, pMssv, pName) {
@@ -852,8 +855,14 @@ let now = new Date();
     let deadlineTime = extractDeadline(c3);
 
     if (isNew) {
-        if (noiDung.startsWith('Kỳ thi')) hasNewKyThi = true;
-                    else hasNewTemp = true;
+        if (deadlineTime) {
+            if (now.getTime() > deadlineTime) isNew = false;
+        } else {
+            if (publishDate) {
+                let diffDays = (now.getTime() - publishDate.getTime()) / (1000 * 60 * 60 * 24);
+                if (diffDays > 15) isNew = false;
+            }
+        }
     }
 
     // Kiểm tra trạng thái ẩn bài
@@ -1393,10 +1402,13 @@ window.loadThongBaoComments = function(tbCode) {
                 </div>
                 `;
 
-                if ($('#customViewWrapper').length === 0) $('#tableWrapper').before('<div id="customViewWrapper" class="w-100"></div>');
-                $('#customViewWrapper').html(customViewHtml).removeClass('d-none');
+                if ($('#customViewWrapper').length === 0) {
+    $('#tableWrapper').before('<div id="customViewWrapper" class="w-100"></div>');
+}
+$('#customViewWrapper').html(customViewHtml).removeClass('d-none'); // Nhớ xóa class d-none ở đây
 
-                if (heThongItemsHtml === '') {
+// Bật các khu vực lên
+if (heThongItemsHtml === '') {
     $('#tbItemsHeThong').addClass('d-none');
 } else {
     $('#tbItemsHeThong').removeClass('d-none');
@@ -3993,26 +4005,7 @@ function loadAdminMasterTkbView() {
     
     fetchAdminMasterTkb();
 }
-function resetNavActive() {
-    // Tự động khôi phục URL về mặc định khi chuyển sang danh mục khác
 
-
-    $('.btn-course').removeClass('active'); 
-    $('#btnNavQA').removeClass('active'); 
-    $('#btnNavTKB').removeClass('active');
-    $('#btnNavShareCode').removeClass('active');
-    $('#btnNavGPA').removeClass('active');
-    $('#btnNavDatLich').removeClass('active');
-    $('#tongHopSection').addClass('d-none'); 
-    $('#courseSection').addClass('d-none');
-    $('#qaSection').addClass('d-none'); 
-    $('#tkbSection').addClass('d-none');
-    $('#shareCodeSection').addClass('d-none'); 
-    $('#gpaSection').addClass('d-none');
-    $('#profileSection').addClass('d-none');
-	$('#datLichSection').addClass('d-none');
-$('#customHtmlSection').addClass('d-none');
-}
 
 // Chèn lệnh ẩn vào hàm reset mặc định
 const originalResetNavMaster = resetNavActive;
@@ -4472,8 +4465,7 @@ function fetchAndRenderDeadlinesForNotice() {
     });
 }
 function renderDeadlinesOnNoticePage() {
-    if (typeof globalDeadlineData === 'undefined' || globalDeadlineData.length === 0) return;
-
+    // Xóa bỏ lệnh return sớm để hàm có thể tiếp tục chạy xuống quét TKB kể cả khi không có Deadline
     let completedList = [];
     if (currentUser && currentUser.mssv) {
         completedList = JSON.parse(localStorage.getItem('completed_deadlines_' + currentUser.mssv)) || [];
@@ -4489,50 +4481,97 @@ function renderDeadlinesOnNoticePage() {
 
     let deadlineHtml = '';
 
-    globalDeadlineData.forEach(d => {
-        // 1. Nếu đã hoàn thành -> Bỏ qua
-        let isDone = completedList.includes(String(d.sheetRowIndex));
-        if (isDone) return; 
+    // 1. RENDER DEADLINE BÌNH THƯỜNG
+    if (typeof globalDeadlineData !== 'undefined' && globalDeadlineData.length > 0) {
+        globalDeadlineData.forEach(d => {
+            let isDone = completedList.includes(String(d.sheetRowIndex));
+            if (isDone) return; 
 
-        // 2. Kiểm tra sự kiện đang diễn ra hôm nay
-        let startT = getTimeFast(d.dateStart) || 0;
-        let endT = getTimeFast(d.dateEnd) || startT;
-        let isHappeningNow = (nowTime >= startT && nowTime <= endT);
+            let startT = getTimeFast(d.dateStart) || 0;
+            let endT = getTimeFast(d.dateEnd) || startT;
+            let isHappeningNow = (nowTime >= startT && nowTime <= endT);
 
-        if (isHappeningNow) {
-            let urlRegex = /(https?:\/\/[^\s]+)/g;
-            let cleanTitle = d.title ? d.title.replace(urlRegex, '').trim() : 'Nhiệm vụ';
-            let emoji = d.emoji || '📌';
+            if (isHappeningNow) {
+                let urlRegex = /(https?:\/\/[^\s]+)/g;
+                let cleanTitle = d.title ? d.title.replace(urlRegex, '').trim() : 'Nhiệm vụ';
+                let emoji = d.emoji || '📌';
 
-            // Khung Deadline nhỏ xinh
-            deadlineHtml += `
-            <div class="mini-dl-capsule mb-2" onclick="jumpToTKBFromNotice('${d.dateStart}')" title="Nhấn để xem Lịch học tuần này">
-                <div class="d-flex align-items-center justify-content-between gap-2 px-3 py-2">
-                   <div class="d-flex align-items-center gap-2 overflow-hidden">
-    <span class="mini-dl-emoji align-self-start mt-1">${emoji}</span> <!-- Căn emoji lên trên cùng nếu chữ nhiều dòng -->
-    <div class="text-wrap" style="word-break: break-word;"> <!-- Thay text-truncate bằng text-wrap -->
-        <span class="fw-bold mini-dl-title">${cleanTitle}</span>
-        <small class="mini-dl-time ms-2 d-inline-block mt-1 mb-1"><i class="fa-regular fa-clock me-1"></i>${d.duration || d.dateStart}</small>
-    </div>
-</div>
-                    
-                    <button class="btn btn-sm btn-mini-done flex-shrink-0" onclick="quickMarkDone('${d.sheetRowIndex}', event)" title="Đánh dấu đã hoàn thành">
-                        <i class="fa-solid fa-check me-1"></i>Xong
-                    </button>
-                </div>
-            </div>`;
-        }
-    });
+                deadlineHtml += `
+                <div class="mini-dl-capsule mb-2" onclick="jumpToTKBFromNotice('${d.dateStart}')" title="Nhấn để xem Lịch học tuần này">
+                    <div class="d-flex align-items-center justify-content-between gap-2 px-3 py-2">
+                       <div class="d-flex align-items-center gap-2 overflow-hidden">
+                            <span class="mini-dl-emoji align-self-start mt-1">${emoji}</span>
+                            <div class="text-wrap" style="word-break: break-word;">
+                                <span class="fw-bold mini-dl-title">${cleanTitle}</span>
+                                <small class="mini-dl-time ms-2 d-inline-block mt-1 mb-1"><i class="fa-regular fa-clock me-1"></i>${d.duration || d.dateStart}</small>
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-mini-done flex-shrink-0" onclick="quickMarkDone('${d.sheetRowIndex}', event)" title="Đánh dấu đã hoàn thành">
+                            <i class="fa-solid fa-check me-1"></i>Xong
+                        </button>
+                    </div>
+                </div>`;
+            }
+        });
+    }
 
+    // 2. TÍCH HỢP QUÉT CÁC KỲ THI TRONG THỜI KHÓA BIỂU
+    if (typeof globalTkbData !== 'undefined' && globalTkbData.length > 0) {
+        globalTkbData.forEach(c => {
+            // Nhận diện bài kiểm tra không phân biệt hoa thường
+            let isExam = /(Kiểm tra Giữa học phần|Kiểm tra Quá trình|Kiểm tra Kết thúc học phần)/i.test(c.mon);
+            
+            if (isExam && c.ngayBatDau) {
+                let startRange = getTimeFast(c.ngayBatDau);
+                let endRange = getTimeFast(c.ngayKetThuc) || startRange;
+                let skipDates = (c.ngayNgoaiLe || "").split(',').map(x => x.trim());
+                let targetDayOfWeek = c.thu === 8 ? 0 : c.thu - 1;
+                
+                // Xác định vùng tìm kiếm: Bắt đầu từ ngày hiện tại cho đến tối đa 5 ngày sau
+                let curDate = new Date(Math.max(nowTime, startRange));
+                let maxFutureDate = new Date(nowTime + 5 * 24 * 60 * 60 * 1000);
+                let lastDate = new Date(Math.min(maxFutureDate.getTime(), endRange));
+                
+                // Quét từng ngày trong dải 5 ngày để tìm xem có đúng thứ lịch học đó không
+                while (curDate <= lastDate) {
+                    if (curDate.getDay() === targetDayOfWeek) {
+                        let pad = (n) => String(n).padStart(2, '0');
+                        let dateStr = pad(curDate.getDate()) + '/' + pad(curDate.getMonth() + 1) + '/' + curDate.getFullYear();
+                        
+                        // Kiểm tra nếu không rơi vào ngày nghỉ lễ ngoại lệ
+                        if (!skipDates.includes(dateStr)) {
+                            let diffDays = Math.round((curDate.getTime() - nowTime) / (1000 * 60 * 60 * 24));
+                            let timeText = diffDays === 0 ? "Hôm nay" : `Còn ${diffDays} ngày`;
+                            
+                            deadlineHtml += `
+                            <div class="mini-dl-capsule mb-2" onclick="jumpToTKBFromNotice('${dateStr}')" title="Nhấn để xem chi tiết trên Lịch">
+                                <div class="d-flex align-items-center justify-content-between gap-2 px-3 py-2" style="border-left: 4px solid #ef4444; background-color: #fef2f2;">
+                                   <div class="d-flex align-items-center gap-2 overflow-hidden">
+                                        <span class="mini-dl-emoji align-self-start mt-1">✍️</span>
+                                        <div class="text-wrap" style="word-break: break-word;">
+                                            <span class="fw-bold mini-dl-title text-danger">${c.mon}</span>
+                                            <small class="mini-dl-time ms-2 d-inline-block mt-1 mb-1 text-danger">
+                                                <i class="fa-solid fa-clock fa-shake me-1"></i>Sắp diễn ra: ${dateStr} (${timeText})
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`;
+                        }
+                    }
+                    // Tăng thêm 1 ngày để duyệt tiếp
+                    curDate.setDate(curDate.getDate() + 1);
+                }
+            }
+        });
+    }
+
+    // Xóa các capsule cũ để tránh rác và cập nhật nội dung mới
     if (deadlineHtml !== '') {
-        // Xóa các capsule cũ (nếu có) để tránh bị lặp lại khi render lại
         $('#tbItemsHeThong .mini-dl-capsule').remove();
-        
-        // Dùng .prepend() để chèn Deadline LÊN ĐẦU, giữ nguyên Thông báo hệ thống bên dưới!
         $('#tbItemsHeThong').removeClass('d-none').prepend(deadlineHtml);
     }
 }
-
 // HÀM CHUYỂN SANG TAB LỊCH HỌC VÀ TỰ DẪN TỚI TUẦN ĐÓ
 function jumpToTKBFromNotice(dateStartStr) {
     // 1. Chuyển giao diện sang tab Lịch học
