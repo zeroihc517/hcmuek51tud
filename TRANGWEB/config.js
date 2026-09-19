@@ -473,33 +473,40 @@ window.openDocumentViewer = function(url, title) {
     // Dọn dẹp HTML dư thừa nếu có trong tiêu đề
     let cleanTitle = $('<div>').html(title).text();$('#docViewerTitle').html(`<i class="fa-solid fa-file-lines me-2"></i> ${cleanTitle || 'Xem tài liệu'}`);
     
-    // 1. Quét diện rộng để chắc chắn bắt được mọi thiết bị
-    let isMobileDevice = window.innerWidth < 992 || screen.width < 992 || window.matchMedia("(max-width: 991px)").matches || /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    // 1. Nhận diện chuẩn xác 100% Điện thoại & Tablet (Bao gồm iPad giả lập Mac và chế độ Desktop)
+let isMobileDevice = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                     (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) || 
+                     /Tablet|Pad/i.test(navigator.userAgent);
+                     
+// 2. Lấy MSSV thực sự (Vượt rào ảo hóa khi Admin dùng tính năng Góc nhìn sinh viên)
+let actualMssv = "";
+if (typeof window.isImpersonating !== 'undefined' && window.isImpersonating && window.realAdminMssv) {
+    actualMssv = String(window.realAdminMssv).replace(/\./g, "");
+} else if (typeof currentUser !== 'undefined' && currentUser && currentUser.mssv) {
+    actualMssv = String(currentUser.mssv).replace(/\./g, "");
+}
+
+let isSpecificAdmin = (actualMssv === "5101108008");
+
+// 3. Quét bật/tắt TẤT CẢ các nút đang bị lặp lại trong HTML
+let btnNewTab = $('[id="btnOpenInNewTab"]');
+
+// ĐIỀU KIỆN CHUẨN: 
+// - isMobileDevice: Tất cả mọi người dùng điện thoại/tablet đều thấy
+// - isSpecificAdmin: Trên máy tính, chỉ Admin (5101108008) mới được thấy
+if (isMobileDevice || isSpecificAdmin) {
+    btnNewTab.removeClass('d-none')
+             .attr('style', 'display: inline-flex !important; border-radius: 6px; border-color: rgba(255,255,255,0.4);')
+             .off('click.openTab')
+             .on('click.openTab', function() { 
+                 window.open(url, '_blank'); 
+             });
+} else {
+    btnNewTab.addClass('d-none')
+             .attr('style', 'display: none !important;')
+             .off('click.openTab');
+}
     
-    // 2. Lấy MSSV thực sự (Vượt rào ảo hóa khi Admin dùng tính năng Góc nhìn sinh viên)
-    let actualMssv = "";
-    if (typeof window.isImpersonating !== 'undefined' && window.isImpersonating && window.realAdminMssv) {
-        actualMssv = String(window.realAdminMssv).replace(/\./g, "");
-    } else if (typeof currentUser !== 'undefined' && currentUser && currentUser.mssv) {
-        actualMssv = String(currentUser.mssv).replace(/\./g, "");
-    }
-    
-    let isSpecificAdmin = (actualMssv === "5101108008");
-    
-    let btnNewTab = $('[id="btnOpenInNewTab"]');
-    
-    if (isSpecificAdmin) {
-        btnNewTab.removeClass('d-none')
-                 .attr('style', 'display: inline-flex !important; border-radius: 6px; border-color: rgba(255,255,255,0.4);')
-                 .off('click.openTab')
-                 .on('click.openTab', function() { 
-                     window.open(url, '_blank'); 
-                 });
-    } else {
-        btnNewTab.addClass('d-none')
-                 .attr('style', 'display: none !important;')
-                 .off('click.openTab');
-    }
     
     // Bật trạng thái Loading
     $('#docLoading').show();
