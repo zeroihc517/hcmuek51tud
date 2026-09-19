@@ -408,19 +408,28 @@ window.openDocumentViewer = function(url, title) {
         return; 
     }
 
-    // ======================================================
-    // THÊM MỚI: MỞ TAB MỚI CHO GOOGLE DOC, WORD TRÊN GIAO DIỆN ĐIỆN THOẠI
+   // ======================================================
+    // 2. MỞ TAB MỚI CHO GOOGLE DOC, WORD TRÊN GIAO DIỆN ĐIỆN THOẠI
     // ======================================================
     let isMobile = window.innerWidth < 992 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
     
-    // Nhận diện link Google Docs hoặc file Word (.doc, .docx)
-    let isDocOrWord = url.includes('docs.google.com/document') || /\.docx?(?:[?#]|$)/i.test(url);
+    // Đưa link và tiêu đề về chữ thường để quét không bị sót
+    let urlLower = (url || "").toLowerCase();
+    let titleLower = (title || "").toLowerCase();
+    
+    // Quét diện rộng để tìm tài liệu Doc/Word:
+    // - Chứa gốc link chuẩn của Google Docs
+    // - Chứa đuôi .doc hoặc .docx trong đường link
+    // - Chứa đuôi .doc hoặc .docx ngay trong Tên bài học (Tiêu đề)
+    let isDocOrWord = urlLower.includes('docs.google.com/document') || 
+                      urlLower.includes('docs.google.com/word') ||
+                      /\.docx?(?:[?#]|$)/.test(urlLower) || 
+                      /\.docx?/.test(titleLower);
     
     if (isMobile && isDocOrWord) {
-        window.open(url, '_blank'); // Mở tab mới
-        return; // Dừng việc mở Iframe
+        window.open(url, '_blank');
+        return; // Lệnh return này sẽ CHẶN ĐỨNG hoàn toàn việc bật Iframe ở bên dưới
     }
-    // ======================================================
 
     let embedUrl = url;
     
