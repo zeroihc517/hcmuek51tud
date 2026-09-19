@@ -12,6 +12,7 @@ function resetNavActive() {
     $('#btnNavShareCode').removeClass('active');
     $('#btnNavGPA').removeClass('active');
     $('#btnNavDatLich').removeClass('active');
+	$('#btnNavKyThi').removeClass('active');
     $('#tongHopSection').addClass('d-none'); 
 	$('#courseSection').addClass('d-none');
     $('#courseSection').addClass('d-none');
@@ -851,14 +852,8 @@ let now = new Date();
     let deadlineTime = extractDeadline(c3);
 
     if (isNew) {
-        if (deadlineTime) {
-            if (now.getTime() > deadlineTime) isNew = false;
-        } else {
-            if (publishDate) {
-                let diffDays = (now.getTime() - publishDate.getTime()) / (1000 * 60 * 60 * 24);
-                if (diffDays > 15) isNew = false;
-            }
-        }
+        if (noiDung.startsWith('Kỳ thi')) hasNewKyThi = true;
+                    else hasNewTemp = true;
     }
 
     // Kiểm tra trạng thái ẩn bài
@@ -5782,17 +5777,29 @@ $(document).ready(function() {
 });
 window.datLichCache = [];
 
-// 1. Hàm chuyển sang màn hình Giao diện Đặt lịch hẹn
-window.loadDatLichHenView = function() {
-    document.title = "Đặt lịch hẹn | Học nhóm APMA Khoa Toán";
+window.currentDatLichMode = 'all'; // Biến theo dõi đang mở chế độ nào
+
+window.loadDatLichHenView = function(mode = 'temp') {
+    window.currentDatLichMode = mode;
     resetNavActive(); 
-    $('#btnNavShareCode').addClass('active'); // Đổi từ btnNavDatLich sang btnNavShareCode
     $('#datLichSection').removeClass('d-none');
     
-    // THÊM DÒNG NÀY ĐỂ GHI NHẬN ĐÚNG LỊCH SỬ TRUY CẬP:
-    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - Đặt lịch hẹn");
-    
-    updateSystemUrl('view', 'datlich'); // Đổi URL thành ?view=datlich
+    if (mode === 'kythi') {
+        document.title = "Kỳ thi | Học nhóm APMA Khoa Toán";
+        $('#btnNavKyThi').addClass('active');
+        $('#datLichPageTitle').html('<i class="fa-solid fa-file-pen"></i> Kỳ thi & Kiểm tra');
+        if (typeof window.setDetailedView === 'function') window.setDetailedView("Kỳ thi");
+        updateSystemUrl('view', 'kythi'); 
+        $('#filterDatLichNoiDung').addClass('d-none').val('Kỳ thi'); // Ẩn và Ép bộ lọc thành Kỳ thi
+    } else {
+        document.title = "TEMP | Học nhóm APMA Khoa Toán";
+        $('#btnNavShareCode').addClass('active');
+        $('#datLichPageTitle').html('<i class="fa-solid fa-calendar-check"></i> TEMP');
+        if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - TEMP");
+        updateSystemUrl('view', 'temp'); 
+        $('#filterDatLichNoiDung').removeClass('d-none').val(''); // Hiện bộ lọc cho TEMP
+    }
+
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
     
     closeFormDatLich();
@@ -5819,9 +5826,9 @@ function loadDatLichData() {
 
 // Thêm hàm bật/tắt ô nhập tay nội dung "Khác"
 window.toggleDatLichKhac = function() {
-    if ($('#selDatLichNoiDung').val() === 'Khác') {
+    if (window.currentDatLichMode !== 'kythi' && $('#selDatLichNoiDung').val() === 'Khác') {
         $('#txtDatLichNoiDungKhac').removeClass('d-none').focus();
-    } else {
+    } else if (window.currentDatLichMode !== 'kythi') {
         $('#txtDatLichNoiDungKhac').addClass('d-none').val('');
     }
 };
@@ -5873,17 +5880,29 @@ function renderDatLichTable() {
         </tr>`;
     });
     tbody.html(html);
+	searchDatLich();
 }
 
-// Cập nhật reset giá trị cho hàm Open/Close Form
 function openFormDatLich() {
     if (!currentUser || currentUser.isGuest) {
-        alert("Vui lòng đăng nhập để tạo bài đăng lịch hẹn!");
+        alert("Vui lòng đăng nhập để tạo bài đăng!");
         return;
     }
     $('#datLichRowIndex, #txtDatLichTen, #txtDatLichUrl, #txtDatLichNoiDungKhac').val('');
-    $('#selDatLichNoiDung').val('Đặt lịch hẹn');
-    $('#txtDatLichNoiDungKhac').addClass('d-none');
+
+    if (window.currentDatLichMode === 'kythi') {
+        // Màn hình Kỳ thi: Ẩn Select, Hiện Input text
+        $('#selDatLichNoiDung').addClass('d-none');
+        $('#txtDatLichNoiDungKhac').removeClass('d-none').attr('placeholder', 'Nhập tên học phần (VD: Đại số tuyến tính)...');
+        $('#selDatLichNoiDung').prev('label').html('Tên học phần <span class="text-danger">*</span>');
+    } else {
+        // Màn hình TEMP: Ẩn Kỳ thi khỏi Select
+        $('#selDatLichNoiDung').removeClass('d-none').val('Đặt lịch hẹn');
+        $('#selDatLichNoiDung option[value="Kỳ thi"]').hide(); 
+        $('#txtDatLichNoiDungKhac').addClass('d-none').attr('placeholder', 'Ghi rõ nội dung...');
+        $('#selDatLichNoiDung').prev('label').html('Nội dung <span class="text-danger">*</span>');
+    }
+
     $('#formDatLichTitle').html('<i class="fa-solid fa-plus me-2"></i>Tạo bài đăng mới');
     $('#formDatLichArea').removeClass('d-none');
     $('html, body').animate({ scrollTop: $('#formDatLichArea').offset().top - 80 }, 300);
@@ -5902,49 +5921,56 @@ function editDatLichPost(index) {
     $('#datLichRowIndex').val(item.rowIndex);
     $('#txtDatLichTen').val(item.title);
     $('#txtDatLichUrl').val(item.url);
-    
-    // Kiểm tra xem nội dung lưu trước đó có nằm trong option mặc định hay không
+
     let nd = item.noiDung || "Đặt lịch hẹn";
-    let defaultOptions = ["Đặt lịch hẹn", "Chia sẻ Minh Chứng Rèn luyện", "Chia sẻ Hoạt động Rèn luyện"];
-    
-    if (defaultOptions.includes(nd)) {
-        $('#selDatLichNoiDung').val(nd);
-        $('#txtDatLichNoiDungKhac').addClass('d-none').val('');
+
+    if (window.currentDatLichMode === 'kythi') {
+        $('#selDatLichNoiDung').addClass('d-none');
+        $('#txtDatLichNoiDungKhac').removeClass('d-none').attr('placeholder', 'Nhập tên học phần...');
+        $('#selDatLichNoiDung').prev('label').html('Tên học phần <span class="text-danger">*</span>');
+        
+        // Cắt bỏ chữ "Kỳ thi - " để sinh viên dễ sửa tên môn
+        let tenHP = nd.startsWith('Kỳ thi - ') ? nd.substring(9) : (nd === 'Kỳ thi' ? '' : nd);
+        $('#txtDatLichNoiDungKhac').val(tenHP);
     } else {
-        $('#selDatLichNoiDung').val('Khác');
-        $('#txtDatLichNoiDungKhac').removeClass('d-none').val(nd);
+        $('#selDatLichNoiDung').removeClass('d-none');
+        $('#selDatLichNoiDung option[value="Kỳ thi"]').hide();
+        $('#selDatLichNoiDung').prev('label').html('Nội dung <span class="text-danger">*</span>');
+
+        let defaultOptions = ["Đặt lịch hẹn", "Chia sẻ Minh Chứng Rèn luyện", "Chia sẻ Hoạt động Rèn luyện"];
+        if (defaultOptions.includes(nd)) {
+            $('#selDatLichNoiDung').val(nd);
+            $('#txtDatLichNoiDungKhac').addClass('d-none').val('');
+        } else {
+            $('#selDatLichNoiDung').val('Khác');
+            $('#txtDatLichNoiDungKhac').removeClass('d-none').val(nd);
+        }
     }
 
     $('#formDatLichTitle').html('<i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa bài đăng');
     $('#formDatLichArea').removeClass('d-none');
     $('html, body').animate({ scrollTop: $('#formDatLichArea').offset().top - 80 }, 300);
 }
-
-// Cập nhật hàm Gửi dữ liệu về Server (đính kèm biến noiDung)
 function saveDatLichPost() {
     let rowIndex = $('#datLichRowIndex').val().trim();
     let title = $('#txtDatLichTen').val().trim();
     let url = $('#txtDatLichUrl').val().trim();
     
-    // Lấy biến nội dung
-    let noiDung = $('#selDatLichNoiDung').val();
-    if (noiDung === 'Khác') {
-        noiDung = $('#txtDatLichNoiDungKhac').val().trim();
-        if (!noiDung) {
-            alert("Vui lòng ghi rõ nội dung khác!");
-            $('#txtDatLichNoiDungKhac').focus();
-            return;
+    let noiDung = "";
+    if (window.currentDatLichMode === 'kythi') {
+        let tenHP = $('#txtDatLichNoiDungKhac').val().trim();
+        if (!tenHP) { alert("Vui lòng nhập Tên học phần!"); $('#txtDatLichNoiDungKhac').focus(); return; }
+        noiDung = "Kỳ thi - " + tenHP; // Tự động gắn tag định danh
+    } else {
+        noiDung = $('#selDatLichNoiDung').val();
+        if (noiDung === 'Khác') {
+            noiDung = $('#txtDatLichNoiDungKhac').val().trim();
+            if (!noiDung) { alert("Vui lòng ghi rõ nội dung khác!"); $('#txtDatLichNoiDungKhac').focus(); return; }
         }
     }
 
-    if (!title || !url) {
-        alert("Vui lòng nhập đầy đủ Tên bài đăng và Đường link URL!");
-        return;
-    }
-
-    if (!url.match(/^https?:\/\//i)) {
-        url = 'https://' + url;
-    }
+    if (!title || !url) { alert("Vui lòng nhập đầy đủ Tên bài đăng và URL!"); return; }
+    if (!url.match(/^https?:\/\//i)) url = 'https://' + url;
 
     let btn = $('#btnSaveDatLich');
     let originalText = btn.html();
@@ -5953,12 +5979,8 @@ function saveDatLichPost() {
     let isEdit = rowIndex !== "";
     let payload = {
         action: isEdit ? "editDatLichHen" : "addDatLichHen",
-        rowIndex: rowIndex,
-        mssv: currentUser.mssv,
-        authorName: currentUser.name,
-        title: title,
-        url: url,
-        noiDung: noiDung // << Đóng gói nội dung vào Payload gửi đi
+        rowIndex: rowIndex, mssv: currentUser.mssv, authorName: currentUser.name,
+        title: title, url: url, noiDung: noiDung
     };
 
     postToGAS(payload, function(res) {
@@ -6032,39 +6054,55 @@ window.toggleAdminActions = function() {
 window.searchDatLich = function() {
     let keyword = $('#txtSearchDatLich').val().toLowerCase().trim();
     let selectedFilter = $('#filterDatLichNoiDung').val();
+    let mode = window.currentDatLichMode;
+
+    let visibleCount = 0;
+    $('#emptyDatLichRow').remove(); // Xóa dòng thông báo trống cũ
 
     $('#datLichTableBody tr').each(function() {
-        // Bỏ qua dòng thông báo hệ thống (như dòng "Đang tải danh sách..." có colspan)
-        if ($(this).find('td').length === 1 && $(this).find('td').attr('colspan')) return;
+        if ($(this).find('td').length === 1 && $(this).find('td').attr('colspan')) {$(this).addClass('d-none'); // Ẩn dòng thông báo hệ thống cũ
+            return; 
+        }
 
-        // Tìm thông tin text trong toàn bộ hàng (bao gồm tiêu đề và tác giả)
         let rowText = $(this).text().toLowerCase();
-        
-        // Lấy Nội dung từ Cột 2 (Text bên trong thẻ hiển thị nhãn)
         let rowNoiDung = $(this).find('td:nth-child(2)').text().trim(); 
 
-        // 1. Kiểm tra từ khóa tìm kiếm
+        // LỌC THEO MÀN HÌNH HIỆN TẠI
+        if (mode === 'kythi') {
+            if (!rowNoiDung.startsWith('Kỳ thi')) { $(this).addClass('d-none'); return; }
+        } else if (mode === 'temp') {
+            if (rowNoiDung.startsWith('Kỳ thi')) { $(this).addClass('d-none'); return; }
+        }
+
+        // LỌC THEO TỪ KHÓA & DROPDOWN (Chỉ TEMP mới có)
         let matchKeyword = keyword === "" || rowText.includes(keyword);
-        
-        // 2. Kiểm tra bộ lọc
         let matchFilter = false;
+        
         if (selectedFilter === "") {
             matchFilter = true;
         } else if (selectedFilter === "Khác") {
             let defaultOptions = ["Đặt lịch hẹn", "Chia sẻ Minh Chứng Rèn luyện", "Chia sẻ Hoạt động Rèn luyện"];
-            // Nếu Nội dung của thẻ không nằm trong 3 mục mặc định, thì nó thuộc loại "Khác"
             matchFilter = !defaultOptions.some(opt => rowNoiDung.includes(opt));
         } else {
             matchFilter = rowNoiDung.includes(selectedFilter);
         }
 
-        // Hiển thị nếu thỏa mãn CẢ 2 điều kiện
         if (matchKeyword && matchFilter) {
             $(this).removeClass('d-none');
+            visibleCount++;
         } else {
             $(this).addClass('d-none');
         }
     });
+
+    // BÁO TÌNH TRẠNG KHI RỖNG THEO TỪNG TRANG
+    if (visibleCount === 0) {
+        let emptyMsg = mode === 'kythi' 
+            ? 'Hiện tại chưa có kỳ thi hoặc bài kiểm tra nào.' 
+            : 'Hiện tại chưa có sự kiện hoặc bài đăng nào trong TEMP.';
+            
+        $('#datLichTableBody').append(`<tr id="emptyDatLichRow"><td colspan="4" class="text-center py-5 text-muted"><i class="fa-regular fa-calendar-xmark fs-2 mb-2"></i><br>${emptyMsg}</td></tr>`);
+    }
 };
 
 // --- BỘ XỬ LÝ XEM VÀ CHỈNH SỬA TIÊU ĐỀ + NỘI DUNG LATEX TRỰC TIẾP FULLSCREEN ---

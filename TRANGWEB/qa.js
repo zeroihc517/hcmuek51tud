@@ -70,31 +70,28 @@ window.copyShareCodeDirect = function(index, btnElement) {
 window.isQAUnanswered = false;
 window.isShareCodeNew = false;
 window.isDatLichNew = false; // THÊM MỚI
+window.isKyThiNew = false;
 
-// Cập nhật hàm updateSidebarThaoLuanBadge
 function updateSidebarThaoLuanBadge() {
-    // Bật/tắt ngoài Sidebar (Thêm isDatLichNew)
+    // 1. Huy hiệu cho thẻ Thảo Luận tổng
     if (window.isQAUnanswered || window.isShareCodeNew || window.isDatLichNew) {
         $('#shareCodeSidebarBadge').removeClass('d-none');
     } else {
         $('#shareCodeSidebarBadge').addClass('d-none');
     }
 
-    // Bật/tắt riêng cho thẻ "Giải đáp thắc mắc" bên trong trang Thảo luận
-    if (window.isQAUnanswered) {
-        $('#qaInsideBadge').removeClass('d-none');
-    } else {
-        $('#qaInsideBadge').addClass('d-none');
-    }
+    if (window.isQAUnanswered) { $('#qaInsideBadge').removeClass('d-none'); } 
+    else { $('#qaInsideBadge').addClass('d-none'); }
     
-    // THÊM MỚI: Bật/tắt riêng cho thẻ "Đặt lịch hẹn"
-    if (window.isDatLichNew) {
-        $('#datLichInsideBadge').removeClass('d-none');
-    } else {
-        $('#datLichInsideBadge').addClass('d-none');
-    }
+    // 2. Huy hiệu thẻ TEMP bên trong Thảo Luận
+    if (window.isDatLichNew) { $('#datLichInsideBadge').removeClass('d-none'); } 
+    else { $('#datLichInsideBadge').addClass('d-none'); }
+    
+    // 3. Huy hiệu thẻ Kỳ thi ngoài Sidebar
+    if (window.isKyThiNew) { $('#kyThiSidebarBadge').removeClass('d-none'); } 
+    else { $('#kyThiSidebarBadge').addClass('d-none'); }
 }
-// Hàm kiểm tra Đặt Lịch Hẹn có bài mới hay không
+
 function checkNewDatLichGlobal() {
     $.ajax({
         url: SCRIPT_URL + "?action=getDatLichHenData",
@@ -102,17 +99,21 @@ function checkNewDatLichGlobal() {
         dataType: "json",
         success: function(data) {
             if (!data || data.length === 0) {
+                window.isKyThiNew = false;
                 window.isDatLichNew = false;
                 updateSidebarThaoLuanBadge();
                 return;
             }
 
             let nowTime = new Date().getTime();
-            let oneDayMs = 24 * 60 * 60 * 1000; // 24 giờ
-            let hasNew = false;
+            let oneDayMs = 24 * 60 * 60 * 1000; 
+            let hasNewTemp = false;
+            let hasNewKyThi = false;
 
             data.forEach(item => {
                 let time = item.updateTime || '';
+                let noiDung = item.noiDung || '';
+                let title = (item.title || "").toLowerCase();
                 let postDate = null;
                 
                 let match2 = time.match(/(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/); 
@@ -126,18 +127,25 @@ function checkNewDatLichGlobal() {
                     postDate = new Date(parseInt(match1[3]), parseInt(match1[2]) - 1, parseInt(match1[1]), h, m, 0);
                 }
 
-                // Nếu bài đăng xuất hiện trong vòng 1 ngày -> Có bài mới
+                let isNew = false;
                 if (postDate && (nowTime - postDate.getTime() <= oneDayMs)) {
-                    hasNew = true;
+                    isNew = true;
+                } else if (title.includes("đang diễn ra") || title.includes("hôm nay") || title.includes("chưa kết thúc")) {
+                    isNew = true;
+                }
+
+                if (isNew) {
+                    if (noiDung === 'Kỳ thi') hasNewKyThi = true;
+                    else hasNewTemp = true;
                 }
             });
 
-            window.isDatLichNew = hasNew;
+            window.isKyThiNew = hasNewKyThi;
+            window.isDatLichNew = hasNewTemp;
             updateSidebarThaoLuanBadge();
         }
     });
 }
-
 // 1. Kiểm tra Q&A có câu hỏi mới chưa trả lời
 function checkNewQA() { 
     $.ajax({ 
