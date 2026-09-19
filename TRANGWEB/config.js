@@ -402,36 +402,42 @@ $(document).ready(function() {
 
 // HÀM MỞ TÀI LIỆU TRỰC TIẾP TRÊN WEB
 window.openDocumentViewer = function(url, title) {
-    // THÊM MỚI: Tự động nhảy tab mới và dừng lệnh ngay nếu là link Upcoder
+    // Tự động nhảy tab mới và dừng lệnh ngay nếu là link Upcoder
     if (url.includes('test.upcoder.xyz') || url.includes('upcoder.xyz')) {
         window.open(url, '_blank');
         return; 
     }
 
-   // ======================================================
-    // 2. MỞ TAB MỚI CHO GOOGLE DOC, WORD TRÊN GIAO DIỆN ĐIỆN THOẠI
-    // ======================================================
-    let isMobile = window.innerWidth < 992 || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
     let urlLower = (url || "").toLowerCase();
     let titleLower = (title || "").toLowerCase();
     
+    // ======================================================
+    // 2. ÉP MỞ TAB MỚI CHO GOOGLE DOC, WORD TRÊN CẢ ĐIỆN THOẠI & MÁY TÍNH
+    // ======================================================
+    // Nâng cấp nhận diện link Word, Google Docs (kể cả link Office live)
     let isDocOrWord = urlLower.includes('docs.google.com/document') || 
                       urlLower.includes('docs.google.com/word') ||
+                      urlLower.includes('word-edit.officeapps.live.com') ||
                       /\.docx?(?:[?#]|$)/.test(urlLower) || 
-                      /\.docx?/.test(titleLower);
+                      /\.docx?/.test(titleLower) ||
+                      titleLower.includes('word') || 
+                      titleLower.includes('doc');
     
-    if (isMobile && isDocOrWord) {
-        // Cố gắng mở trong tab mới
-        let newTab = window.open(url, '_blank');
-        
-        // CỨU CÁNH: Nếu trình duyệt điện thoại chặn mở tab mới, ép chuyển trang trực tiếp
-        if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
-            window.location.href = url;
-        }
-        return; // Chốt chặn cuối cùng, tuyệt đối không cho code chạy tiếp xuống Iframe
+    // Nếu là file Word hoặc Google Docs thì mở tab mới luôn, không dùng iframe trên cả mobile lẫn máy tính
+    if (isDocOrWord) {
+        // Cách tối ưu để mở tab mới trên mọi thiết bị, tránh bị chặn Popup
+        let a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return; // Chốt chặn cuối cùng, tuyệt đối không cho code chạy tiếp xuống Iframe bên dưới
     }
-    // ======================================================
 
+    // ======================================================
+    // CODE RENDER IFRAME (DÀNH CHO PDF, VIDEO, GOOGLE DRIVE PREVIEW)
+    // ======================================================
     let embedUrl = url;
     
     // Tự động chuyển link Google Drive sang chế độ preview để xem trực tiếp
@@ -463,25 +469,44 @@ window.openDocumentViewer = function(url, title) {
     }
     
     // Dọn dẹp HTML dư thừa nếu có trong tiêu đề
+// Dọn dẹp HTML dư thừa nếu có trong tiêu đề
+    // Dọn dẹp HTML dư thừa nếu có trong tiêu đề
     let cleanTitle = $('<div>').html(title).text();$('#docViewerTitle').html(`<i class="fa-solid fa-file-lines me-2"></i> ${cleanTitle || 'Xem tài liệu'}`);
     
-    if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
-        $('#btnOpenInNewTab')
-            .removeClass('d-none')
-            .off('click') // Xóa rác sự kiện cũ
-            .on('click', function() { 
-                window.open(url, '_blank'); 
-            });
+    // 1. Quét diện rộng để chắc chắn bắt được mọi thiết bị
+    let isMobileDevice = window.innerWidth < 992 || screen.width < 992 || window.matchMedia("(max-width: 991px)").matches || /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // 2. Lấy MSSV thực sự (Vượt rào ảo hóa khi Admin dùng tính năng Góc nhìn sinh viên)
+    let actualMssv = "";
+    if (typeof window.isImpersonating !== 'undefined' && window.isImpersonating && window.realAdminMssv) {
+        actualMssv = String(window.realAdminMssv).replace(/\./g, "");
+    } else if (typeof currentUser !== 'undefined' && currentUser && currentUser.mssv) {
+        actualMssv = String(currentUser.mssv).replace(/\./g, "");
+    }
+    
+    let isSpecificAdmin = (actualMssv === "5101108008");
+    
+    let btnNewTab = $('[id="btnOpenInNewTab"]');
+    
+    if (isSpecificAdmin) {
+        btnNewTab.removeClass('d-none')
+                 .attr('style', 'display: inline-flex !important; border-radius: 6px; border-color: rgba(255,255,255,0.4);')
+                 .off('click.openTab')
+                 .on('click.openTab', function() { 
+                     window.open(url, '_blank'); 
+                 });
     } else {
-        // Sinh viên thường sẽ bị ẩn đi
-        $('#btnOpenInNewTab').addClass('d-none');
+        btnNewTab.addClass('d-none')
+                 .attr('style', 'display: none !important;')
+                 .off('click.openTab');
     }
     
     // Bật trạng thái Loading
-    $('#docLoading').show(); 
+    $('#docLoading').show();
     $('#docViewerIframe').attr('src', embedUrl);
     $('#documentViewerModal').modal('show');
 }
+
 // Dọn dẹp iframe khi đóng để tránh rò rỉ bộ nhớ
 $(document).ready(function() {
     $('#documentViewerModal').on('hidden.bs.modal', function () {
