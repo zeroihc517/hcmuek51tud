@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Thi Trực Tuyến | Học nhóm APMA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../../TRANGWEB/styleweb.css" rel="stylesheet">
+    <link href="baitap.css" rel="stylesheet">
+    
+    <!-- CSS TẠO FAKE FULLSCREEN CHO UPCODER ĐỂ KHÔNG ĐỤNG CHẠM HỆ THỐNG THI -->
+    <style>
+        .pseudo-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 999995 !important;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        .pseudo-fullscreen #upcoderIframeWrapper {
+            flex-grow: 1 !important;
+            height: auto !important;
+            border: none !important;
+            border-radius: 0 !important;
+        }
+    </style>
+</head>
+<body style="background-color: #f8fafc; font-family: 'Inter', sans-serif;">
+
+<!-- MÀN HÌNH BẮT ĐẦU LÀM BÀI -->
+<div id="examStartOverlay" class="d-flex flex-column justify-content-center align-items-center" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(248, 250, 252, 0.95); z-index: 9999998; backdrop-filter: blur(8px);">
+    <div class="card border-0 shadow-lg" style="border-radius: 20px; max-width: 600px; width: 90%;">
+        <div class="card-header text-white text-center py-4" style="border-radius: 20px 20px 0 0; background-color: #0f4c81;">
+            <h4 class="fw-bold m-0"><i class="fa-solid fa-laptop-code me-2"></i>HỆ THỐNG THI TRỰC TUYẾN</h4>
+        </div>
+        <div class="card-body p-5">
+            <h5 class="fw-bold text-dark mb-4 text-center" style="line-height: 1.5;">BÀI KIỂM TRA MÔN HỌC:<br><span class="text-primary">THUẬT TOÁN SẮP XẾP VÀ TÌM KIẾM</span></h5>
+            
+            <ul class="list-unstyled mb-4 text-secondary" style="line-height: 2.2; font-size: 15px;">
+                <li><i class="fa-solid fa-clock text-warning me-2 fs-5 w-20px"></i> <strong>Thời gian làm bài:</strong> 90 phút</li>
+                <li><i class="fa-solid fa-file-circle-question text-info me-2 fs-5 w-20px"></i> <strong>Cấu trúc đề:</strong> 4 câu hỏi lập trình</li>
+                <li><i class="fa-solid fa-expand text-danger me-2 fs-5 w-20px"></i> <strong>Giám sát (Khi thi):</strong> Yêu cầu làm bài Toàn màn hình. Tự ý thoát sẽ bị hệ thống cảnh báo.</li>
+            </ul>
+            
+            <div class="alert alert-warning border-0 shadow-sm rounded mb-4" style="font-size: 14px;">
+                <i class="fa-solid fa-triangle-exclamation me-1"></i> <strong>Lưu ý:</strong> Vui lòng chọn chế độ phù hợp. Bạn có thể tự do chuyển đổi giữa các câu hỏi trong lúc làm bài.
+            </div>
+            
+            <div class="d-flex gap-3 mt-2">
+                <button class="btn btn-outline-success w-50 fw-bold py-3 shadow-sm" style="border-radius: 12px; font-size: 16px; transition: 0.2s;" onclick="startOnlineExam('practice')" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fa-solid fa-dumbbell me-2"></i> Chế độ Luyện tập
+                </button>
+                <button class="btn text-white w-50 fw-bold py-3 shadow" style="border-radius: 12px; background-color: #0f4c81; font-size: 16px; transition: 0.2s;" onclick="startOnlineExam('exam')" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <i class="fa-solid fa-play me-2"></i> Chế độ Thi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MÀN HÌNH CẢNH BÁO GIAN LẬN THOÁT FULLSCREEN -->
+<div id="antiCheatOverlay" class="d-none d-flex flex-column justify-content-center align-items-center" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.98); z-index: 9999999;">
+    <i class="fa-solid fa-triangle-exclamation text-warning mb-3" style="font-size: 80px;"></i>
+    <h2 class="fw-bold text-white text-center mb-3">CẢNH BÁO VI PHẠM QUY CHẾ</h2>
+    <p class="text-light text-center fs-5 mb-4" style="max-width: 600px;">
+        Bạn đang trong chế độ Thi và đã thoát khỏi Toàn màn hình.<br>
+        Hành vi này đã được ghi nhận. Vui lòng quay lại chế độ Toàn màn hình ngay lập tức để tiếp tục làm bài!
+    </p>
+    <button class="btn btn-warning btn-lg fw-bold px-5 py-3 shadow" onclick="resumeFullscreenExam()">
+        <i class="fa-solid fa-expand me-2"></i> QUAY LẠI LÀM BÀI
+    </button>
+</div>
+
+<!-- THẺ CHIM MỒI (DECOY) CHẶN JS CŨ GHI ĐÈ -->
+<div id="homeQuestionList" style="display: none;"></div>
+<span id="labelTotalQuestions" style="display: none;"></span>
+<span id="badgeCourseHome" style="display: none;"></span>
+
+  <div class="container-fluid px-2 py-4">
+    
+    <!-- VIEW 1: TRANG CHỦ (DANH SÁCH BÀI TẬP) -->
+    <div id="homeView">
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; border-left: 6px solid #0f4c81 !important; background: #ffffff;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <span class="badge bg-primary mb-2 px-3 py-1.5" style="font-size: 13px; background-color: #0f4c81 !important;" id="myBadgeCourseHome">Thuật toán Cấu trúc Dữ liệu</span>
+                        <h3 class="fw-bold text-dark m-0">Danh sách bài tập (Minigame 20/09) <span id="modeDisplay" class="ms-2 fs-6 badge bg-secondary"></span></h3>
+                    </div>
+                    
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-danger text-white px-4 py-2 shadow-sm rounded-pill fw-bold d-flex align-items-center gap-2" style="font-size: 18px; border: 2px solid #fff;">
+                            <i class="fa-solid fa-clock"></i>
+                            <span id="examTimerDisplayList">90:00</span>
+                        </div>
+                        <span class="badge bg-light text-dark border fw-normal" id="myTotalQuestions">0 câu</span>
+                    </div>
+                </div>
+                
+<div id="questionContentAreaError"></div>
+
+<!-- Lưới danh sách các câu hỏi -->
+<div class="home-question-grid" id="myQuestionList">
+    
+    <!-- CÂU 1 -->
+    <div class="card border border-secondary-subtle shadow-sm mb-3" style="border-radius: 12px; transition: 0.2s;">
+        <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-primary-emphasis m-0"><i class="fa-solid fa-file-code me-2"></i>Câu 1: Xử lý dãy số theo tứ phân vị</h6>
+                <span class="badge bg-secondary" style="font-size: 11px;">Mở bài</span>
+            </div>
+            <div class="text-muted" style="font-size: 13px;">Mã: MINIGAME-20-09-Cau01</div>
+            
+            <div class="question-content-data d-none">
+                <p>Cho một dãy gồm <strong>n</strong> số nguyên. Hãy xây dựng chương trình thực hiện các yêu cầu sau:</p>
+                <ol>
+                    <li>Từ phần tử đầu tiên đến tứ phân vị thứ nhất (Q1): sắp xếp các phần tử theo thứ tự tăng dần.</li>
+                    <li>Từ phần tử sau Q1 đến tứ phân vị thứ hai (Q2): sắp xếp các phần tử theo thứ tự giảm dần.</li>
+                    <li>Từ phần tử sau Q2 đến tứ phân vị thứ ba (Q3): thay mỗi phần tử bằng số đối của nó (đổi dấu).</li>
+                    <li>Từ phần tử sau Q3 đến phần tử cuối cùng: sắp xếp các phần tử theo số lượng ước dương tăng dần. Nếu hai số có cùng số lượng ước, giữ nguyên thứ tự (khi nhập từ bàn phím) của chúng.</li>
+                </ol>
+                <p class="mb-1 text-dark fw-bold">Yêu cầu:</p>
+                <ul class="mb-0">
+                    <li>Sử dụng các thuật toán sắp xếp để thực hiện các thao tác trên.</li>
+                    <li>Các đoạn dữ liệu phải được xử lý độc lập, không làm thay đổi vị trí của các phần tử thuộc đoạn khác.</li>
+                    <li>Xuất dãy sau khi hoàn thành tất cả các yêu cầu.</li>
+                    <li>Các vị trí được tính theo chỉ số mảng bắt đầu từ 0.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- CÂU 2 -->
+    <div class="card border border-secondary-subtle shadow-sm mb-3" style="border-radius: 12px; transition: 0.2s;">
+        <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-primary-emphasis m-0"><i class="fa-solid fa-file-code me-2"></i>Câu 2: Sắp xếp và tìm kiếm Sinh viên</h6>
+                <span class="badge bg-secondary" style="font-size: 11px;">Mở bài</span>
+            </div>
+            <div class="text-muted" style="font-size: 13px;">Mã: MINIGAME-20-09-Cau02</div>
+            
+            <div class="question-content-data d-none">
+                <h6 class="fw-bold text-dark">Bài toán: Sắp xếp và tìm kiếm đối tượng Sinh Viên</h6>
+                <p>Cho một danh sách gồm <strong>n</strong> sinh viên. Mỗi sinh viên có các thông tin: <em>Mã sinh viên (chuỗi), Họ và tên (chuỗi), Điểm trung bình (số thực)</em>. Hãy viết chương trình thực hiện:</p>
+                <ol>
+                    <li>Sử dụng thuật toán <strong>Quick Sort</strong> để sắp xếp danh sách sinh viên theo thứ tự Điểm trung bình giảm dần.</li>
+                    <li>Trong trường hợp nhiều sinh viên có cùng Điểm trung bình, hãy tiếp tục sắp xếp những sinh viên đó theo thứ tự tăng dần của Mã sinh viên (Sắp xếp chuỗi).</li>
+                    <li>Xuất danh sách sinh viên sau khi đã sắp xếp.</li>
+                    <li>Sử dụng thuật toán <strong>Tìm kiếm nhị phân (Binary Search)</strong> trên mảng <em>đã được sắp xếp</em> để tìm và in ra thông tin của sinh viên có Mã sinh viên bằng `X` (được nhập từ bàn phím). Nếu không tìm thấy, xuất "Không tìm thấy sinh viên".</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- CÂU 3 -->
+    <div class="card border border-secondary-subtle shadow-sm mb-3" style="border-radius: 12px; transition: 0.2s;">
+        <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-primary-emphasis m-0"><i class="fa-solid fa-file-code me-2"></i>Câu 3: Phân tích hiệu suất Bubble Sort</h6>
+                <span class="badge bg-secondary" style="font-size: 11px;">Mở bài</span>
+            </div>
+            <div class="text-muted" style="font-size: 13px;">Mã: MINIGAME-20-09-Cau03</div>
+            
+            <div class="question-content-data d-none">
+                <h6 class="fw-bold text-dark">Bài toán: Phân tích hiệu suất thuật toán Bubble Sort</h6>
+                <p>Cho một mảng <strong>A</strong> gồm <strong>n</strong> số nguyên. Hãy viết chương trình:</p>
+                <ol>
+                    <li>Cài đặt thuật toán <strong>Bubble Sort (Sắp xếp nổi bọt)</strong> để sắp xếp mảng tăng dần. <em>Yêu cầu phải có biến cờ hiệu (flag) để tối ưu hóa, dừng thuật toán sớm nếu mảng đã có thứ tự.</em></li>
+                    <li>Trong quá trình chạy thuật toán, hãy đếm và lưu lại tổng số lần thực hiện phép <strong>so sánh</strong> và tổng số lần thực hiện phép <strong>hoán vị (swap)</strong>.</li>
+                    <li>Xuất mảng A sau khi đã sắp xếp.</li>
+                    <li>In ra màn hình thông báo: "Tổng số phép so sánh: [X] - Tổng số phép hoán vị: [Y]".</li>
+                </ol>
+                <p class="mb-1 text-dark fw-bold">Lưu ý:</p>
+                <ul class="mb-0">
+                    <li>Sinh viên cần phân biệt rõ khi nào lệnh so sánh `if(A[i] > A[i+1])` được gọi và khi nào lệnh `swap` thực sự xảy ra để đếm cho chính xác.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- CÂU 4 -->
+    <div class="card border border-secondary-subtle shadow-sm mb-3" style="border-radius: 12px; transition: 0.2s;">
+        <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="fw-bold text-primary-emphasis m-0"><i class="fa-solid fa-file-code me-2"></i>Câu 4: Merge Sort & Đếm nghịch thế</h6>
+                <span class="badge bg-secondary" style="font-size: 11px;">Mở bài</span>
+            </div>
+            <div class="text-muted" style="font-size: 13px;">Mã: MINIGAME-20-09-Cau04</div>
+            
+            <div class="question-content-data d-none">
+                <h6 class="fw-bold text-dark">Bài toán: Ứng dụng Merge Sort đếm số nghịch thế (Inversion Count)</h6>
+                <p>Cho một mảng số nguyên <strong>A</strong> có kích thước <strong>n</strong>. Một cặp nghịch thế (inversion) được định nghĩa là một cặp chỉ số `(i, j)` sao cho `i < j` và `A[i] > A[j]`.</p>
+                <ol>
+                    <li>Hãy viết chương trình tính tổng số lượng cặp nghịch thế có trong mảng A.</li>
+                    <li><strong>Bắt buộc:</strong> Phải ứng dụng tư tưởng chia để trị của thuật toán <strong>Merge Sort</strong> để đếm số lượng nghịch thế trong lúc gộp (merge) hai nửa mảng lại với nhau.</li>
+                    <li>Không chấp nhận việc sử dụng 2 vòng lặp lồng nhau (thuật toán Brute Force độ phức tạp O(n²)). Thuật toán của bạn phải đạt độ phức tạp thời gian là <strong>O(n log n)</strong>.</li>
+                    <li>Xuất ra kết quả tổng số nghịch thế đếm được.</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: GIAO DIỆN BÀI LÀM -->
+    <div id="workingView" class="d-none">
+        <!-- Đặt giá trị mặc định tránh bị lệch sang mã cũ CTDL-CD1-Cau1 -->
+        <input type="hidden" id="txtMaBai" value="MINIGAME-20-09-Cau01">
+        <input type="hidden" id="txtTenBai" value="Câu 1: Xử lý dãy số theo tứ phân vị">
+        
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <button class="btn btn-outline-secondary fw-bold shadow-sm" onclick="goBackToHome()" style="border-radius: 8px; background: white;">
+                <i class="fa-solid fa-arrow-left me-1"></i> Trở về danh sách câu hỏi
+            </button>
+            
+            <div class="bg-danger text-white px-4 py-2 shadow-sm rounded-pill fw-bold d-flex align-items-center gap-2" style="font-size: 18px; border: 2px solid #fff;">
+                <i class="fa-solid fa-clock"></i>
+                <span id="examTimerDisplayWork">90:00</span>
+            </div>
+        </div>
+	
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; border-left: 6px solid #0f4c81 !important; background: #ffffff;">
+           <div class="card-body p-4">
+                <span class="badge bg-primary mb-2 px-3 py-1.5" style="font-size: 13px; background-color: #0f4c81 !important;" id="badgeCourse">Đang tải học phần...</span>
+                
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h3 class="fw-bold text-dark m-0" id="titleMaBai">Bài tập: ---</h3>
+                    
+                    <div class="btn-group shadow-sm" role="group" aria-label="Trạng thái tiến độ">
+                        <input type="radio" class="btn-check" name="statusRadio" id="radioChuaLam" autocomplete="off" onclick="changeExerciseStatus('chualam')">
+                        <label class="btn btn-outline-secondary fw-bold px-3" for="radioChuaLam">Chưa làm</label>
+
+                        <input type="radio" class="btn-check" name="statusRadio" id="radioConHoc" autocomplete="off" onclick="changeExerciseStatus('conhoc')">
+                        <label class="btn btn-outline-warning text-dark fw-bold px-3" for="radioConHoc">Còn học</label>
+
+                        <input type="radio" class="btn-check" name="statusRadio" id="radioDaLam" autocomplete="off" onclick="changeExerciseStatus('dalam')">
+                        <label class="btn btn-outline-success fw-bold px-3" for="radioDaLam">Đã làm</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-4">
+            <!-- CỘT TRÁI ĐỀ BÀI -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; background-color: #ffffff;">
+                    <div class="card-header bg-light border-0 pt-3 px-4 d-flex align-items-center justify-content-between">
+                        <h6 class="fw-bold text-primary m-0"><i class="fa-solid fa-circle-question me-2"></i>Đề bài chi tiết</h6>
+                        <span class="badge bg-danger px-3 py-1" id="labelCurrentMaBai" style="font-size: 12px;">Mã bài: MINIGAME-20-09-Cau01</span>
+                    </div>
+                    <div class="card-body p-4 fs-6 text-secondary" id="questionContentArea" style="line-height: 1.6;">
+                        Đang tải đề bài...
+                    </div>
+                </div>
+            </div>
+
+            <!-- CỘT PHẢI BÀI LÀM -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm h-100" style="border-radius: 16px; overflow: hidden;" id="mainSubmissionCard">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center py-3 px-4" style="background-color: #0f4c81;">
+                        <h6 class="m-0 fw-bold" id="formSubmissionTitle"><i class="fa-solid fa-pen-to-square me-2"></i>Bài làm của sinh viên</h6>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="small opacity-75">MSSV:</span>
+                            <input type="text" id="txtExerciseMSSV" class="form-control form-control-sm fw-bold border-0 text-center" style="width: 120px; background: rgba(255,255,255,0.2); color: #fff;" readonly>
+                            <button type="button" class="btn btn-sm btn-light fw-bold text-primary shadow-sm" onclick="requireLogin()" title="Đăng nhập tài khoản">
+                                <i class="fa-solid fa-right-to-bracket"></i>
+                            </button>
+                        </div>
+                    </div>
+<div class="mb-2 d-flex gap-2" style="padding: 0 1.5rem;"> 
+    <button type="button" class="btn btn-sm btn-outline-info fw-bold" onclick="openCustomTreeModal()">
+        <i class="fa-solid fa-sitemap me-1"></i> Vẽ Cây
+    </button>
+    <!-- Nút chạy thử code để bật/tắt (nếu họ lỡ tay tắt thì có thể mở lại) -->
+    <button type="button" class="btn btn-sm btn-outline-warning fw-bold text-dark" onclick="toggleUpcoderIframe()">
+        <i class="fa-solid fa-code-compare me-1"></i> Ẩn / Hiện WEB Code
+    </button>
+
+</div>
+<div id="drawingContainer" class="card p-3 mb-3 d-none border bg-light">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold small text-dark"><i class="fa-solid fa-paintbrush me-1"></i> Bảng vẽ phác thảo tự do:</span>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline-dark" onclick="setDrawMode('pen')"><i class="fa-solid fa-pen"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDrawMode('eraser')"><i class="fa-solid fa-eraser"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="undoCanvas()"><i class="fa-solid fa-rotate-left"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="redoCanvas()"><i class="fa-solid fa-rotate-right"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="clearCanvas()">Xóa sạch</button>
+            <button type="button" class="btn btn-sm btn-primary" onclick="insertDrawingToEditor()">Chèn vào bài làm</button>
+        </div>
+    </div>
+<div id="canvasWrapper" class="shadow-sm rounded" style="resize: vertical; overflow: hidden; min-height: 250px; border: 1px solid #cbd5e1; background: #ffffff; position: relative;">
+    <canvas id="sketchCanvas" style="cursor: crosshair; display: block; width: 100%; height: 100%;"></canvas>
+</div>
+</div>
+<!-- KHUNG VẼ CÂY NHỊ PHÂN -->
+<div id="customTreeContainer" class="card p-3 mb-3 d-none border shadow-sm" style="background-color: #f8fafc;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="fw-bold text-primary" style="font-size: 15px;">
+            <i class="fa-solid fa-diagram-project me-2"></i> Bảng chèn Cây Nhị Phân:
+        </span>
+        <button type="button" class="btn-close" onclick="$('#customTreeContainer').addClass('d-none')" title="Đóng"></button>
+    </div>
+    
+    <div class="row g-3">
+        <div class="col-lg-5 d-flex flex-column">
+            <h6 class="fw-bold text-dark mb-2" style="font-size: 13.5px;"><i class="fa-solid fa-keyboard me-1 text-secondary"></i>Nhập dữ liệu từng nút:</h6>
+            <div class="table-responsive flex-grow-1" style="max-height: 450px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff;">
+                <table class="table table-bordered align-middle text-center mb-0" id="customTreeTable">
+                    <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
+                        <tr><th>Cha</th><th>Trái</th><th>Phải</th><th>Xóa</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div class="mt-2 text-center">
+                <button class="btn btn-sm btn-outline-secondary fw-bold w-100 py-2" onclick="$('#customTreeTable tbody').append('<tr><td><input type=\'text\' class=\'form-control form-control-sm node-parent\'></td><td><input type=\'text\' class=\'form-control form-control-sm node-left\'></td><td><input type=\'text\' class=\'form-control form-control-sm node-right\'></td><td><button class=\'btn btn-sm btn-danger\' onclick=\'removeCustomTreeRow(this)\'><i class=\'fa-solid fa-trash\'></i></button></td></tr>');">
+                    <i class="fa-solid fa-plus me-1"></i>Thêm dòng
+                </button>
+            </div>
+        </div>
+
+        <div class="col-lg-7 d-flex flex-column">
+            <h6 class="fw-bold text-success mb-2" style="font-size: 13.5px;"><i class="fa-solid fa-eye me-1"></i>Bản xem trước trực tiếp:</h6>
+            <div class="flex-grow-1 bg-white d-flex justify-content-center align-items-center p-2" style="overflow: auto; border: 1px dashed #cbd5e1; border-radius: 8px; min-height: 450px;">
+                <canvas id="treePreviewCanvas" width="1200" height="800" style="background:#ffffff; width: 100%; min-height: 450px; object-fit: contain;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-end mt-3 gap-2 border-top pt-3">
+        <button type="button" class="btn btn-light border fw-bold" onclick="$('#customTreeContainer').addClass('d-none')">Hủy bỏ</button>
+        <button type="button" class="btn btn-success fw-bold px-3" onclick="exportTreeTo4KImage()">
+            <i class="fa-solid fa-download me-1"></i> Xuất ảnh 4K
+        </button>
+        <button type="button" class="btn text-white fw-bold px-4" style="background-color: #0f4c81;" onclick="insertTreeDirectlyToEditor()">
+            <i class="fa-solid fa-check me-1"></i> Chèn hình vào bài làm
+        </button>
+    </div>
+</div>
+
+                    <div class="card-body p-4 d-flex flex-column justify-content-between">
+<div id="genericIframeContainer" class="d-none px-4 mb-2 py-2" style="transition: all 0.2s ease-in-out; background: #f8fafc;">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold text-primary"><i class="fa-solid fa-globe me-1"></i> Đăng nhập lại nếu cần</span>
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-sm btn-danger fw-bold shadow-sm" onclick="closeGenericIframe()"><i class="fa-solid fa-arrow-left me-1"></i> Trở lại</button>
+        </div>
+    </div>
+    <div id="genericIframeWrapper" style="border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; height: 650px; background: #fff;">
+        <iframe id="genericIframe" name="genericIframeTarget" src="" style="width: 100%; height: 100%; border: none;"></iframe>
+    </div>
+</div>
+
+<!-- KHUNG UPCODER MỞ SẴN BẰNG CÁCH BỎ CLAS "d-none" -->
+<div id="upcoderContainer" class="px-4 mb-2 py-2" style="transition: all 0.2s ease-in-out; background: #f8fafc;">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold text-warning-emphasis"><i class="fa-solid fa-globe me-1"></i> Chạy thử Code (Nhớ copy code và dán ở khung nộp bài ở bên dưới):</span>
+        <div class="d-flex align-items-center gap-2">
+            
+            <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" title="Mở rộng khung code toàn màn hình" onclick="makeUpcoderFullscreen(this)" style="width: 28px; height: 28px; padding: 0;">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+
+            <div class="vr mx-1" style="height: 20px; align-self: center;"></div>
+            <button type="button" class="btn-close" onclick="document.getElementById('upcoderContainer').classList.add('d-none')" title="Đóng"></button>
+        </div>
+    </div>
+   <div id="upcoderIframeWrapper" style="border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; height: 650px; background: #fff;">
+        <iframe id="upcoderIframe" src="https://onecompiler.com/cpp" style="width: 100%; height: 100%; border: none;"></iframe>
+    </div>
+</div>
+
+<div class="card-body p-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark" style="font-size: 15px;">
+                                    <i class="fa-solid fa-align-left text-primary me-2"></i>1. TRẢ LỜI / LỜI GIẢI LÝ THUYẾT:
+                                </label>
+                                <textarea id="theoryEditor" class="form-control" rows="6" placeholder="Trình bày lời giải..."></textarea>
+                            </div>
+
+                            <div class="mb-4" id="codeSectionWrapper">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label fw-bold text-dark m-0" style="font-size: 15px;">
+                                        <i class="fa-solid fa-code text-success me-2"></i>2. NỘP CODE:
+                                    </label>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="small text-muted">Ngôn ngữ:</span>
+                                        <select id="selectLang" class="form-select form-select-sm fw-bold" style="width: 120px;" onchange="changeEditorLang()">
+                                            <option value="cpp">C / C++</option>
+                                            <option value="python">Python</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="exerciseCodeEditor" style="height: 450px; border: 1px solid #cbd5e1; border-radius: 8px;"></div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted small"><i class="fa-solid fa-circle-info me-1"></i>Bài làm sẽ được lưu vào hệ thống.</span>
+                            </div>
+                            <button type="button" class="btn text-white fw-bold px-5 py-2.5 shadow-sm" style="background-color: #0f4c81; border-radius: 12px; font-size: 15px;" onclick="submitExerciseSolution()" id="btnSubmitExercise">
+                                <i class="fa-solid fa-paper-plane me-2"></i> Nộp bài
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm" style="border-radius: 16px; background-color: #ffffff;">
+            <div class="card-header bg-light border-0 pt-3 px-4 d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold text-success m-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>Lịch sử bài nộp của tôi</h6>
+                <button class="btn btn-sm btn-outline-success fw-bold" onclick="loadSubmissionHistory(true)" style="border-radius: 8px;">
+                    <i class="fa-solid fa-rotate-right me-1"></i> Làm mới lịch sử
+                </button>
+            </div>
+            <div class="card-body p-4" id="submissionHistoryContainer">
+                <div class="text-center text-muted py-3">
+                    <i class="fa-solid fa-spinner fa-spin me-2"></i> Đang tải lịch sử bài nộp...
+                </div>
+            </div>
+        </div>
+</div>
+    </div>
+
+<!-- MODAL ĐĂNG NHẬP -->
+<div class="modal fade" id="userAuthModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header text-white text-center p-4 d-block" style="background-color: #0f4c81;">
+                <i class="fa-solid fa-graduation-cap fs-1 mb-2"></i>
+                <h5 class="fw-bold m-0">ĐĂNG NHẬP HỆ THỐNG</h5>
+            </div>
+            <div class="modal-body p-4 p-md-5">
+                <div class="input-group mb-4 shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                    <span class="input-group-text bg-light border-0"><i class="fa-solid fa-id-card text-muted"></i></span>
+                    <input type="text" id="txtUserMSSV" class="form-control border-0 bg-light py-2" placeholder="Mã số sinh viên">
+                </div>
+                <div class="input-group mb-3 shadow-sm" style="border-radius: 8px; overflow: hidden;">
+                    <span class="input-group-text bg-light border-0"><i class="fa-solid fa-lock text-muted"></i></span>
+                    <input type="password" id="txtUserPass" class="form-control border-0 bg-light py-2" placeholder="Mật khẩu" onkeypress="if(event.key === 'Enter') loginStudentExercise()">
+                </div>
+                <small class="text-danger text-center d-block d-none mb-3 fw-bold" id="userAuthError"></small>
+                <button type="button" class="btn text-white w-100 fw-bold py-2.5 mb-2 shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" id="btnLoginStudent" onclick="loginStudentExercise()">
+                    Đăng nhập ngay
+                </button>
+                <button type="button" class="btn btn-light w-100 fw-bold py-2 border shadow-sm" style="border-radius: 8px;" data-bs-dismiss="modal">
+                    Hủy bỏ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Thư viện JS -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
+    <script src="../../TRANGWEB/config.js"></script>
+    <script src="baitap.js"></script>
+
+<script>
+    const instantLoader = document.getElementById('fullScreenProgressLoader');
+    if (instantLoader) {
+        instantLoader.remove(); 
+    }
+
+    let examTimerInterval = null;
+    let timeRemaining = 90 * 60; // 90 phút
+    let isExamActive = false;
+    let activeMode = 'practice'; // 'practice' hoặc 'exam'
+
+    const questionCards = document.querySelectorAll('#myQuestionList > .card');
+    document.getElementById('myTotalQuestions').innerText = questionCards.length + ' câu';
+    
+    questionCards.forEach((card, index) => {
+        card.style.cursor = 'pointer'; 
+        const titleElem = card.querySelector('h6');
+        const titleText = titleElem ? titleElem.innerText.trim() : ('Câu ' + (index + 1));
+        const maBaiElem = card.querySelector('.text-muted');
+        const maBai = maBaiElem ? maBaiElem.innerText.replace('Mã: ', '').trim() : ('MINIGAME-20-09-Cau0' + (index + 1)); 
+
+        card.onmouseenter = function() { this.classList.replace('border-secondary-subtle', 'border-primary'); };
+        card.onmouseleave = function() { this.classList.replace('border-primary', 'border-secondary-subtle'); };
+
+        card.onclick = function() {
+            openHardcodedQuestion(titleText, maBai, this);
+        };
+    });
+        
+    document.addEventListener("fullscreenchange", checkFullscreenStatus);
+    document.addEventListener("webkitfullscreenchange", checkFullscreenStatus);
+    document.addEventListener("mozfullscreenchange", checkFullscreenStatus);
+    document.addEventListener("MSFullscreenChange", checkFullscreenStatus);
+
+    function checkFullscreenStatus() {
+        if (isExamActive && activeMode === 'exam' && !document.fullscreenElement && !document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
+            document.getElementById('antiCheatOverlay').classList.remove('d-none');
+        }
+    }
+
+    function requestFullscreenExam() {
+        let elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
+    }
+
+    function resumeFullscreenExam() {
+        requestFullscreenExam();
+        document.getElementById('antiCheatOverlay').classList.add('d-none');
+    }
+
+    function updateExamTimerDisplay() {
+        let minutes = Math.floor(timeRemaining / 60);
+        let seconds = timeRemaining % 60;
+        let displayStr = (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+        
+        document.getElementById('examTimerDisplayList').innerText = displayStr;
+        document.getElementById('examTimerDisplayWork').innerText = displayStr;
+            
+        if (timeRemaining <= 300) { 
+            document.getElementById('examTimerDisplayList').parentElement.classList.add('pulse-text');
+            document.getElementById('examTimerDisplayWork').parentElement.classList.add('pulse-text');
+        }
+    }
+
+    window.startOnlineExam = function(mode) {
+        activeMode = mode;
+        
+        const modeBadge = document.getElementById('modeDisplay');
+        if (modeBadge) {
+            if (mode === 'exam') {
+                modeBadge.className = 'ms-2 fs-6 badge bg-danger';
+                modeBadge.innerText = 'Chế độ Thi';
+            } else {
+                modeBadge.className = 'ms-2 fs-6 badge bg-success';
+                modeBadge.innerText = 'Chế độ Luyện tập';
+            }
+        }
+        
+        if (activeMode === 'exam') {
+            requestFullscreenExam();
+        }
+        
+        if (!examTimerInterval) {
+            isExamActive = true;
+            examTimerInterval = setInterval(() => {
+                timeRemaining--;
+                updateExamTimerDisplay();
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(examTimerInterval);
+                    alert("HẾT GIỜ LÀM BÀI! Hệ thống đã ghi nhận.");
+                    if(typeof submitExerciseSolution === 'function') submitExerciseSolution();
+                    if (document.exitFullscreen) document.exitFullscreen();
+                    goBackToHome();
+                    isExamActive = false;
+                }
+            }, 1000);
+        }
+        
+        document.getElementById('examStartOverlay').classList.add('d-none');
+    };
+
+    window.openHardcodedQuestion = function(title, maBai, element) {
+        const questionContent = element.querySelector('.question-content-data').innerHTML;
+        document.getElementById('titleMaBai').innerText = title;
+        document.getElementById('labelCurrentMaBai').innerText = 'Mã bài: ' + maBai;
+        document.getElementById('questionContentArea').innerHTML = questionContent;
+
+        // Cập nhật chuẩn xác giá trị cho thẻ input ẩn để file baitap.js lấy đúng mã bài
+        if (document.getElementById('txtMaBai')) {
+            document.getElementById('txtMaBai').value = maBai;
+        }
+        if (document.getElementById('txtTenBai')) {
+            document.getElementById('txtTenBai').value = title;
+        }
+
+        document.getElementById('homeView').classList.add('d-none');
+        document.getElementById('workingView').classList.remove('d-none');
+
+        if (window.MathJax) {
+            MathJax.typesetPromise();
+        }
+        
+        // Tải lại lịch sử đúng theo mã câu hỏi hiện tại
+        if (typeof loadSubmissionHistory === 'function') {
+            loadSubmissionHistory(true);
+        }
+    };
+
+    window.goBackToHome = function() {
+        document.getElementById('workingView').classList.add('d-none');
+        document.getElementById('homeView').classList.remove('d-none');
+    };
+
+    window.makeUpcoderFullscreen = function(btn) {
+        const container = document.getElementById('upcoderContainer');
+        const icon = btn.querySelector('i');
+        
+        if (!container.classList.contains('pseudo-fullscreen')) {
+            container.classList.add('pseudo-fullscreen');
+            if (icon) {
+                icon.classList.remove('fa-expand');
+                icon.classList.add('fa-compress');
+            }
+        } else {
+            container.classList.remove('pseudo-fullscreen');
+            if (icon) {
+                icon.classList.remove('fa-compress');
+                icon.classList.add('fa-expand');
+            }
+        }
+    };
+</script>
+
+<script>
+    window.MathJax = {
+        tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] }
+    };
+</script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="../../TRANGWEB/qa.js"></script>
+</body>
+</html>
