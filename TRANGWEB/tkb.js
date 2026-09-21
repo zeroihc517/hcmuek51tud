@@ -2874,10 +2874,14 @@ function toggleDeadlineComplete(sheetRowIndex, event) {
     if ($('#manageTkbListModal').is(':visible')) {
         openManageTkbListModal();
     }
+    
+    // --- BỔ SUNG ĐOẠN NÀY ĐỂ ĐỒNG BỘ NGƯỢC LẠI RA TRANG THÔNG BÁO ---
+    if (typeof renderDeadlinesOnNoticePage === 'function') {
+        renderDeadlinesOnNoticePage();
+    }
 
     // 3. ĐỒNG BỘ LÊN GOOGLE SHEETS BẰNG API MỚI
     if (currentUser && currentUser.mssv) {
-        // Có thể chèn thêm nút loading tùy ý ở đây nếu cần UI/UX mượt hơn
         postToGAS({
             action: "saveCompletedDeadlines",
             mssv: currentUser.mssv,

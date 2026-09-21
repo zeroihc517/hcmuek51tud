@@ -4484,7 +4484,9 @@ function renderDeadlinesOnNoticePage() {
     // 1. RENDER DEADLINE BÌNH THƯỜNG
     if (typeof globalDeadlineData !== 'undefined' && globalDeadlineData.length > 0) {
         globalDeadlineData.forEach(d => {
-            let isDone = completedList.includes(String(d.sheetRowIndex));
+            // --- SỬA Ở ĐÂY: Dùng getDlKey(d) thay vì String(d.sheetRowIndex) ---
+            let dlKey = getDlKey(d);
+            let isDone = completedList.includes(dlKey);
             if (isDone) return; 
 
             let startT = getTimeFast(d.dateStart) || 0;
@@ -4506,7 +4508,8 @@ function renderDeadlinesOnNoticePage() {
                                 <small class="mini-dl-time ms-2 d-inline-block mt-1 mb-1"><i class="fa-regular fa-clock me-1"></i>${d.duration || d.dateStart}</small>
                             </div>
                         </div>
-                        <button class="btn btn-sm btn-mini-done flex-shrink-0" onclick="quickMarkDone('${d.sheetRowIndex}', event)" title="Đánh dấu đã hoàn thành">
+                        <!-- SỬA Ở ĐÂY: Truyền dlKey vào hàm quickMarkDone -->
+                        <button class="btn btn-sm btn-mini-done flex-shrink-0" onclick="quickMarkDone('${dlKey}', event)" title="Đánh dấu đã hoàn thành">
                             <i class="fa-solid fa-check me-1"></i>Xong
                         </button>
                     </div>
