@@ -6807,16 +6807,25 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
     let courseName = $(sidebarId).attr('data-sheet') || currentSheetName;
     if (!courseName) return;
 
-    $(searchInputId).val('');
+    let searchInput = $(searchInputId);
+    let searchBtn = searchInput.next('button');
     let container = $(listId);
 
-    // 1. HIỂN THỊ NGAY LẬP TỨC CÂU LỆNH TÌM KIẾM, BỎ QUA HOÀN TOÀN BƯỚC LOADING UI
-    container.html(`<div class="text-muted small text-center py-4"><i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>Hệ thống đã sẵn sàng.<br>Nhập mã bài (VD: B01) để tìm kiếm...</div>`);
+    // 1. TRẠNG THÁI ĐANG TẢI: Khóa ô nhập liệu, khóa nút tìm kiếm và hiển thị vòng xoay
+    searchInput.val('').prop('disabled', true).attr('placeholder', 'Đang tải dữ liệu code...');
+    searchBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+    
+    container.html(`
+        <div class="text-muted small text-center py-4">
+            <i class="fa-solid fa-spinner fa-spin fs-3 mb-2 d-block text-secondary"></i>
+            Hệ thống đang đồng bộ Code tham khảo...<br>Vui lòng chờ trong giây lát.
+        </div>
+    `);
 
-    // Khởi tạo mảng trống để bảo vệ ứng dụng (tránh lỗi nếu user gõ tìm kiếm quá nhanh khi dữ liệu chưa kịp tải về)
+    // Khởi tạo mảng trống để bảo vệ ứng dụng
     window.allSidebarSnippets = window.allSidebarSnippets || [];
 
-    // 2. HÀM XỬ LÝ DỮ LIỆU NGẦM (Không động chạm đến giao diện)
+    // 2. HÀM XỬ LÝ DỮ LIỆU & MỞ KHÓA GIAO DIỆN
     const processSnippetsData = (data) => {
         let activeUserObj = JSON.parse(localStorage.getItem('currentUser')) || null;
         let myCleanMssv = activeUserObj ? activeUserObj.mssv.replace(/\./g, "") : "";
@@ -6830,10 +6839,10 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
                 let targetTag = `[SHARECODE|${courseName}`;
                 
                 if (contentRaw.startsWith(targetTag)) {
-                    let maBaiMatch = contentRaw.match(/^\[SHARECODE\|.*?\|(.*?)\]/);
+                    let maBaiMatch = contentRaw.match(/^\[SHARECODE\Vert{}.*?\Vert{}(.*?)\]/);
                     let maBai = maBaiMatch && maBaiMatch[1] ? maBaiMatch[1].trim() : "";
                     
-                    let cleanContent = contentRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '').trim();
+                    let cleanContent = contentRaw.replace(/^\[SHARECODE\Vert{}.*?\]\s*/, '').trim();
                     let theoryPart = "", codePart = "", langMatch = "cpp";
 
                     let codeMatch = cleanContent.match(/```(cpp|python|c\+\+|c)?([\s\S]*?)```/i);
@@ -6866,14 +6875,25 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
             });
         }
         window.allSidebarSnippets = myCodes.concat(otherCodes);
+        
+        // --- HOÀN TẤT: Mở khóa ô nhập liệu và cho phép gõ ---
+        searchInput.prop('disabled', false).attr('placeholder', 'Nhập mã bài (VD: B01)...');
+        searchBtn.prop('disabled', false).html('<i class="fa-solid fa-magnifying-glass"></i>');
+        container.html(`
+            <div class="text-muted small text-center py-4">
+                <i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>
+                Hệ thống đã sẵn sàng.<br>Nhập mã bài (VD: B01) để tìm kiếm...
+            </div>
+        `);
     };
 
-    // 3. CHẠY LÉN VIỆC LẤY DỮ LIỆU TỪ MÁY CHỦ (Background Fetch)
+    // 3. CHẠY FETCH DỮ LIỆU TỪ MÁY CHỦ (HOẶC RAM)
     if (window.cachedShareCodeData) {
         // Đã có bộ nhớ đệm RAM thì dịch dữ liệu luôn
-        processSnippetsData(window.cachedShareCodeData);
+        // Dùng setTimeout để tạo độ trễ giả mượt mà khoảng 300ms cho UX tốt hơn
+        setTimeout(() => processSnippetsData(window.cachedShareCodeData), 300);
     } else {
-        // Chưa có bộ nhớ đệm thì tải lén từ máy chủ
+        // Chưa có bộ nhớ đệm thì tải từ máy chủ
         $.ajax({
             url: SCRIPT_URL + "?action=getShareCodeData",
             method: "GET",
@@ -6881,12 +6901,17 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
             success: function(data) {
                 window.cachedShareCodeData = data; 
                 processSnippetsData(data);
+            },
+            error: function() {
+                // Xử lý khi bị lỗi mạng
+                searchInput.prop('disabled', true).attr('placeholder', 'Lỗi tải dữ liệu!');
+                searchBtn.prop('disabled', true).html('<i class="fa-solid fa-triangle-exclamation"></i>');
+                container.html('<div class="text-danger small text-center py-4"><i class="fa-solid fa-triangle-exclamation fs-3 mb-2 d-block"></i> Lỗi kết nối máy chủ! Không thể tải code.</div>');
             }
-            // Loại bỏ luôn hàm error: function() {...} để nó chạy hoàn toàn im lặng, 
-            // không quấy rầy user bằng các dòng thông báo lỗi trên UI nếu rớt mạng.
         });
     }
 };
+
 window.searchSidebarCode = function(isLatex = false) {
     let searchInputId = isLatex ? '#txtLatexSearchCode' : '#txtSidebarSearchCode';
     let listId = isLatex ? '#latexCodeList' : '#sidebarCodeList';
