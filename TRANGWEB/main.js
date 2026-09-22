@@ -4426,19 +4426,18 @@ $('#latexViewerModal').on('hide.bs.modal', function (e) {
     // ========================================================
     // 3. ĐÁNH CHẶN CLICK CHUYỂN MENU NHƯNG TRỪ NÚT CÔNG CỤ (Sửa lại danh sách)
     // ========================================================
-    $(document).off('click', 'a, button, .btn-course'); // Xóa sự kiện cũ để tránh trùng lặp
+    $(document).off('click', 'a, button, .btn-course');
     $(document).on('click', 'a, button, .btn-course', function(e) {
         if (isEnforcedFullscreen && isTimerActive()) {
-            // 1. Thêm #splitLessonSelectModal vào danh sách vùng an toàn
+            // Bổ sung các Modal an toàn để không bị cảnh báo (Bao gồm Latex và các thẻ phụ khác)
             if ($(this).closest('#documentViewerModal, #latexViewerModal, #linkWarningModal, #closeWarningModal, #returnStudyModal, #sidebarCodeViewerModal, #courseQAModal, #splitLessonSelectModal').length > 0) return; 
 
-            // 2. Cho phép các nút có ID bắt đầu bằng btnQA_ (Nút mở hỏi đáp) được hoạt động tự do
+            // Cho phép các nút có ID bắt đầu bằng btnQA_ được hoạt động
             if ($(this).attr('id') && $(this).attr('id').startsWith('btnQA_')) return;
 
-            // Nếu không thuộc vùng an toàn -> Hiện bảng ĐỎ cảnh báo
             e.preventDefault();
             e.stopImmediatePropagation();
-            $('#returnStudyModal').modal('show'); 
+            $('#returnStudyModal').modal('show'); // Hiện bảng bắt quay lại
             return false;
         }
     });
