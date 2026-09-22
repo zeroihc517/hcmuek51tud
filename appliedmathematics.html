@@ -3842,10 +3842,10 @@
                 
                 <!-- Nhóm nút bên phải -->
                <div class="d-flex gap-2 align-items-center">
-    <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('latex')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
+    <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('iframe')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
         <i class="fa-solid fa-table-columns"></i> Mở thêm bài
     </button>
-    <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleLatexSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
+    <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleIframeSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
         <i class="fa-solid fa-layer-group"></i> Công cụ
     </button>
 <button type="button" id="btnOpenInNewTab" class="btn btn-sm btn-outline-light d-none" style="border-radius: 6px; border-color: rgba(255,255,255,0.4);">
@@ -4117,16 +4117,14 @@
                     <span class="fw-bold fs-6" id="lblLatexCountdownClock" style="color: #facc15; letter-spacing: 0.5px;">00:00:00</span>
                     <button class="btn btn-sm btn-link text-white p-0 ms-2 btn-countdown-pause" onclick="togglePauseUserCountdown()" title="Tạm ngưng / Tiếp tục"><i class="fa-solid fa-pause"></i></button>
                 </div>
-                <div class="d-flex gap-2 align-items-center">
+               <div class="d-flex gap-2 align-items-center">
     <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('latex')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
         <i class="fa-solid fa-table-columns"></i> Mở thêm bài
     </button>
     <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleLatexSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
         <i class="fa-solid fa-layer-group"></i> Công cụ
     </button>
-
-    <!-- Nút Sửa (Chỉ Admin mới thấy) -->
-    <button type="button" id="btnEditLatexModal" class="btn btn-sm btn-warning fw-bold d-none shadow-sm" onclick="toggleLatexEditMode()">
+<button type="button" id="btnEditLatexModal" class="btn btn-sm btn-warning fw-bold d-none shadow-sm" onclick="toggleLatexEditMode()">
         <i class="fa-solid fa-pen me-1"></i> Sửa Nội Dung
     </button>
     <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
