@@ -193,7 +193,8 @@ window.setDetailedView = function(viewString) {
     pingOnlineStatus(); // Gọi hàm ping để cập nhật lên bảng Admin ngay lập tức
 };
 // 5. Hàm gửi request lấy dữ liệu mới từ Server (chạy ngầm định kỳ)
-// 5. Hàm gửi request lấy dữ liệu mới từ Server (chạy ngầm định kỳ)
+let activePingRequest = null; // BỔ SUNG: Biến chặn xung đột mạng (Race Condition)
+
 function pingOnlineStatus() {
     let mssvParam = "Khách"; 
     
@@ -202,7 +203,6 @@ function pingOnlineStatus() {
         mssvParam = window.realAdminMssv + "|" + window.realAdminName + "|1";
         $('#gpaNavContainer').removeClass('d-none');
     } else {
-        // NẾU LÀ NGƯỜI DÙNG BÌNH THƯỜNG -> DÙNG ORIGINAL GET ITEM ĐỂ VƯỢT RÀO ẢO HÓA
         let savedUser = (window.hookedLocalStorage && window.originalGetItem) 
             ? window.originalGetItem.call(localStorage, 'currentUser') 
             : localStorage.getItem('currentUser');
@@ -233,7 +233,6 @@ function pingOnlineStatus() {
     if (window.userDetailedView !== "") {
         currentView = window.userDetailedView;
     } else if (activeMenuText === "Lịch học" || !$('#tkbSection').hasClass('d-none')) {
-        // Tự động quét dữ liệu TKB nếu đang đứng ở trang này
         let nh = $('#namHocSelect').val();
         let hk = $('#hocKySelect').val();
         let weekText = $('#weekSelect option:selected').text();
@@ -250,20 +249,24 @@ function pingOnlineStatus() {
     } else {
         currentView = document.title.split('|')[0].trim(); 
     }
-	
-let splitTitle = "";
+    
+    let splitTitle = "";
     if ($('#splitIframeWrapper').length && !$('#splitIframeWrapper').hasClass('d-none')) {
         splitTitle = $('#splitIframeTitle').text().trim();
     } else if ($('#splitLatexWrapper').length && !$('#splitLatexWrapper').hasClass('d-none')) {
         splitTitle = $('#splitLatexTitle').text().trim();
     }
 
-    // Bỏ qua nếu tiêu đề là chữ mặc định chưa load xong của hệ thống
     if (splitTitle && splitTitle !== "Bài học mở thêm") {
         currentView += " ++ " + splitTitle;
     }
 
-    $.ajax({ 
+    // BỔ SUNG: Hủy request cũ đang treo để bảo vệ dữ liệu chân trang
+    if (activePingRequest) {
+        activePingRequest.abort();
+    }
+
+    activePingRequest = $.ajax({ 
         url: SCRIPT_URL + "?action=pingPresence&uuid=" + sessionUUID + "&mssv=" + encodeURIComponent(mssvParam) + "&lastView=" + encodeURIComponent(currentView), 
         method: "GET", 
         dataType: "json", 
@@ -271,68 +274,65 @@ let splitTitle = "";
         success: function(res) { 
             if (res && res.list) { 
                 
-                // PHÁT ÂM THANH VÀ THÔNG BÁO BẰNG WINDOW.ALERT ĐỂ NỔI LÊN TRÊN LOAD_WEB
-if (currentUser && currentUser.mssv === "51.01.108.008") {
-    if (typeof cachedOnlineList !== 'undefined' && cachedOnlineList.length > 0) {
-        let oldUsersMap = {};
-        let newUsersMap = {};
-        
-        cachedOnlineList.forEach(u => {
-            if (u !== "Khách" && u.includes("|")) {
-                let parts = u.split("|");
-                oldUsersMap[parts[0]] = parts[1];
-            }
-        });
-        
-        res.list.forEach(u => {
-            if (u !== "Khách" && u.includes("|")) {
-                let parts = u.split("|");
-                newUsersMap[parts[0]] = parts[1];
-            }
-        });
-        
-        let hasJoin = false;
-        let hasLeave = false;
-        let joinMessages = []; // Dùng mảng thay vì chuỗi đơn
-        let leaveMessages = [];
+                // PHÁT ÂM THANH VÀ THÔNG BÁO BẰNG WINDOW.ALERT
+                if (currentUser && currentUser.mssv === "51.01.108.008") {
+                    if (typeof cachedOnlineList !== 'undefined' && cachedOnlineList.length > 0) {
+                        let oldUsersMap = {};
+                        let newUsersMap = {};
+                        
+                        cachedOnlineList.forEach(u => {
+                            if (u !== "Khách" && u.includes("|")) {
+                                let parts = u.split("|");
+                                oldUsersMap[parts[0].trim()] = parts[1]; // Trim bảo vệ khoảng trắng
+                            }
+                        });
+                        
+                        res.list.forEach(u => {
+                            if (u !== "Khách" && u.includes("|")) {
+                                let parts = u.split("|");
+                                newUsersMap[parts[0].trim()] = parts[1]; // Trim bảo vệ khoảng trắng
+                            }
+                        });
+                        
+                        let hasJoin = false;
+                        let hasLeave = false;
+                        let joinMessages = []; 
+                        let leaveMessages = [];
 
-        // 1. Kiểm tra người mới vào
-        for (let mssv in newUsersMap) {
-            if (!oldUsersMap[mssv]) {
-                if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
-                let fullName = newUsersMap[mssv];
-                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
-                joinMessages.push(`${shortName} đã tham gia`);
-                hasJoin = true;
-            }
-        }
+                        // 1. Kiểm tra người mới vào
+                        for (let mssv in newUsersMap) {
+                            if (!oldUsersMap[mssv]) {
+                                if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
+                                let fullName = newUsersMap[mssv];
+                                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
+                                joinMessages.push(`${shortName} đã tham gia`);
+                                hasJoin = true;
+                            }
+                        }
 
-        // 2. Kiểm tra người vừa rời đi
-        for (let mssv in oldUsersMap) {
-            if (!newUsersMap[mssv]) {
-                if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
-                let fullName = oldUsersMap[mssv];
-                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
-                leaveMessages.push(`${shortName} đã rời`);
-                hasLeave = true;
-            }
-        }
+                        // 2. Kiểm tra người vừa rời đi
+                        for (let mssv in oldUsersMap) {
+                            if (!newUsersMap[mssv]) {
+                                if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
+                                let fullName = oldUsersMap[mssv];
+                                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
+                                leaveMessages.push(`${shortName} đã rời`);
+                                hasLeave = true;
+                            }
+                        }
 
-        if (hasJoin) {
-            let joinSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3');
-            joinSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
-            // Gọi toast cho từng người mới vào
-            joinMessages.forEach(msg => window.alert(msg)); 
-        } 
-        if (hasLeave) {
-            let leaveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2868/2868-preview.mp3');
-            leaveSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
-            // Gọi toast cho từng người rời đi
-            leaveMessages.forEach(msg => window.alert(msg));
-        }
-    }
-}
-                // KẾT THÚC THÊM MỚI
+                        if (hasJoin) {
+                            let joinSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3');
+                            joinSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
+                            joinMessages.forEach(msg => window.alert(msg)); 
+                        } 
+                        if (hasLeave) {
+                            let leaveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2868/2868-preview.mp3');
+                            leaveSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
+                            leaveMessages.forEach(msg => window.alert(msg));
+                        }
+                    }
+                }
 
                 // Cập nhật dữ liệu mới vào RAM
                 cachedOnlineList = res.list;
@@ -341,10 +341,12 @@ if (currentUser && currentUser.mssv === "51.01.108.008") {
                 // Vẽ lại UI
                 renderOnlineFooterUI();
             } 
-        } 
+        },
+        complete: function() {
+            activePingRequest = null; // Giải phóng request sau khi vẽ xong
+        }
     });
 }
-
 function loadWebLinks() { 
     $('#webLinksContainer').html(`
         <div class="col-12 w-100">
@@ -6807,16 +6809,25 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
     let courseName = $(sidebarId).attr('data-sheet') || currentSheetName;
     if (!courseName) return;
 
-    $(searchInputId).val('');
+    let searchInput = $(searchInputId);
+    let searchBtn = searchInput.next('button');
     let container = $(listId);
 
-    // 1. HIỂN THỊ NGAY LẬP TỨC CÂU LỆNH TÌM KIẾM, BỎ QUA HOÀN TOÀN BƯỚC LOADING UI
-    container.html(`<div class="text-muted small text-center py-4"><i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>Hệ thống đã sẵn sàng.<br>Nhập mã bài (VD: B01) để tìm kiếm...</div>`);
+    // 1. TRẠNG THÁI ĐANG TẢI: Khóa ô nhập liệu, khóa nút tìm kiếm và hiển thị vòng xoay
+    searchInput.val('').prop('disabled', true).attr('placeholder', 'Đang tải dữ liệu code...');
+    searchBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+    
+    container.html(`
+        <div class="text-muted small text-center py-4">
+            <i class="fa-solid fa-spinner fa-spin fs-3 mb-2 d-block text-secondary"></i>
+            Hệ thống đang đồng bộ Code tham khảo...<br>Vui lòng chờ trong giây lát.
+        </div>
+    `);
 
-    // Khởi tạo mảng trống để bảo vệ ứng dụng (tránh lỗi nếu user gõ tìm kiếm quá nhanh khi dữ liệu chưa kịp tải về)
+    // Khởi tạo mảng trống để bảo vệ ứng dụng
     window.allSidebarSnippets = window.allSidebarSnippets || [];
 
-    // 2. HÀM XỬ LÝ DỮ LIỆU NGẦM (Không động chạm đến giao diện)
+    // 2. HÀM XỬ LÝ DỮ LIỆU & MỞ KHÓA GIAO DIỆN
     const processSnippetsData = (data) => {
         let activeUserObj = JSON.parse(localStorage.getItem('currentUser')) || null;
         let myCleanMssv = activeUserObj ? activeUserObj.mssv.replace(/\./g, "") : "";
@@ -6830,10 +6841,10 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
                 let targetTag = `[SHARECODE|${courseName}`;
                 
                 if (contentRaw.startsWith(targetTag)) {
-                    let maBaiMatch = contentRaw.match(/^\[SHARECODE\|.*?\|(.*?)\]/);
+                    let maBaiMatch = contentRaw.match(/^\[SHARECODE\Vert{}.*?\Vert{}(.*?)\]/);
                     let maBai = maBaiMatch && maBaiMatch[1] ? maBaiMatch[1].trim() : "";
                     
-                    let cleanContent = contentRaw.replace(/^\[SHARECODE\|.*?\]\s*/, '').trim();
+                    let cleanContent = contentRaw.replace(/^\[SHARECODE\Vert{}.*?\]\s*/, '').trim();
                     let theoryPart = "", codePart = "", langMatch = "cpp";
 
                     let codeMatch = cleanContent.match(/```(cpp|python|c\+\+|c)?([\s\S]*?)```/i);
@@ -6866,14 +6877,25 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
             });
         }
         window.allSidebarSnippets = myCodes.concat(otherCodes);
+        
+        // --- HOÀN TẤT: Mở khóa ô nhập liệu và cho phép gõ ---
+        searchInput.prop('disabled', false).attr('placeholder', 'Nhập mã bài (VD: B01)...');
+        searchBtn.prop('disabled', false).html('<i class="fa-solid fa-magnifying-glass"></i>');
+        container.html(`
+            <div class="text-muted small text-center py-4">
+                <i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>
+                Hệ thống đã sẵn sàng.<br>Nhập mã bài (VD: B01) để tìm kiếm...
+            </div>
+        `);
     };
 
-    // 3. CHẠY LÉN VIỆC LẤY DỮ LIỆU TỪ MÁY CHỦ (Background Fetch)
+    // 3. CHẠY FETCH DỮ LIỆU TỪ MÁY CHỦ (HOẶC RAM)
     if (window.cachedShareCodeData) {
         // Đã có bộ nhớ đệm RAM thì dịch dữ liệu luôn
-        processSnippetsData(window.cachedShareCodeData);
+        // Dùng setTimeout để tạo độ trễ giả mượt mà khoảng 300ms cho UX tốt hơn
+        setTimeout(() => processSnippetsData(window.cachedShareCodeData), 300);
     } else {
-        // Chưa có bộ nhớ đệm thì tải lén từ máy chủ
+        // Chưa có bộ nhớ đệm thì tải từ máy chủ
         $.ajax({
             url: SCRIPT_URL + "?action=getShareCodeData",
             method: "GET",
@@ -6881,12 +6903,17 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
             success: function(data) {
                 window.cachedShareCodeData = data; 
                 processSnippetsData(data);
+            },
+            error: function() {
+                // Xử lý khi bị lỗi mạng
+                searchInput.prop('disabled', true).attr('placeholder', 'Lỗi tải dữ liệu!');
+                searchBtn.prop('disabled', true).html('<i class="fa-solid fa-triangle-exclamation"></i>');
+                container.html('<div class="text-danger small text-center py-4"><i class="fa-solid fa-triangle-exclamation fs-3 mb-2 d-block"></i> Lỗi kết nối máy chủ! Không thể tải code.</div>');
             }
-            // Loại bỏ luôn hàm error: function() {...} để nó chạy hoàn toàn im lặng, 
-            // không quấy rầy user bằng các dòng thông báo lỗi trên UI nếu rớt mạng.
         });
     }
 };
+
 window.searchSidebarCode = function(isLatex = false) {
     let searchInputId = isLatex ? '#txtLatexSearchCode' : '#txtSidebarSearchCode';
     let listId = isLatex ? '#latexCodeList' : '#sidebarCodeList';
