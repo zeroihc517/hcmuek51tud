@@ -2133,7 +2133,7 @@ function initGlobalApp() {
         if (now - window.lastUserActionTime < 10 * 60 * 1000) {
             pingOnlineStatus();
         }
-    }, 25000);
+    }, 15000);
     // --- KẾT THÚC FIX ---
     
     // 1. Gọi ngầm kiểm tra dữ liệu Q&A và ShareCode mỗi 5 giây
