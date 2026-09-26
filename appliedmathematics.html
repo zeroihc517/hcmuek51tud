@@ -58,7 +58,7 @@
     </div>
     
     <h5 class="fw-bold mb-2 mt-2" style="color: #0f4c81; letter-spacing: 0.5px;">Chào mừng bạn đến vùng trời "Analysis và Phản ví dụ"</h5>
-    <small class="text-muted fw-bold mb-4" style="font-size: 14px;">Vui lòng chờ trong giây lát</small>
+    <small class="text-muted fw-bold mb-4" style="font-size: 15px;">Bạn vui lòng chờ trong <span id="countdownNumber" style="color: #e61d4a; font-size: 18px;">5</span> giây nữa...</small>
 
     <div class="loader-progress-bar">
         <div class="loader-progress-value"></div>
@@ -5129,6 +5129,44 @@ window.addEventListener('popstate', function() {
 $(document).ready(function() {
     initSystemUrlRouter();
 });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let timeLeft = 5;
+        const countdownEl = document.getElementById('countdownNumber');
+        const loaderEl = document.getElementById('globalScreenLoader');
+
+        // BƯỚC 1: Khóa cứng màn hình Loading bằng !important ngay từ lúc bắt đầu
+        if (loaderEl) {
+            loaderEl.style.setProperty('display', 'flex', 'important');
+            loaderEl.style.setProperty('opacity', '1', 'important');
+        }
+
+        const timer = setInterval(() => {
+            timeLeft--;
+            
+            // Cập nhật số giây
+            if (countdownEl) {
+                countdownEl.innerText = timeLeft;
+            }
+            
+            // BƯỚC 2: Liên tục "bảo kê" khung Loading, ép phải hiển thị trong lúc đang đếm
+            if (loaderEl && timeLeft > 0) {
+                loaderEl.style.setProperty('display', 'flex', 'important');
+            }
+            
+            // BƯỚC 3: Hết 7 giây mới nhả khóa và cho phép làm mờ rồi ẩn đi
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                if (loaderEl) {
+                    loaderEl.style.setProperty('opacity', '0', 'important');
+                    setTimeout(() => {
+                        loaderEl.style.setProperty('display', 'none', 'important');
+                    }, 300);
+                }
+            }
+        }, 1000);
+    });
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
