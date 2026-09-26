@@ -134,8 +134,10 @@ function checkNewDatLichGlobal() {
                     isNew = true;
                 }
 
+                // TÌM VÀ THAY THẾ ĐOẠN NÀY:
                 if (isNew) {
-                    if (noiDung === 'Kỳ thi') hasNewKyThi = true;
+                    // Đổi từ (noiDung === 'Kỳ thi') thành (noiDung.startsWith('Kỳ thi'))
+                    if (noiDung.startsWith('Kỳ thi')) hasNewKyThi = true;
                     else hasNewTemp = true;
                 }
             });

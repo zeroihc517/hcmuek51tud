@@ -5904,12 +5904,27 @@ function renderDatLichTable() {
         let timeHtml = item.updateTime ? `<div class="text-muted small mt-1"><i class="fa-solid fa-clock-rotate-left me-1"></i>Cập nhật: ${item.updateTime}</div>` : '';
         let noiDung = item.noiDung || "Đặt lịch hẹn";
 
+        // Xử lý an toàn tiêu đề
+        let safeTitle = (item.title || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        
+        // --- PHÂN LOẠI CÁCH MỞ LINK DỰA VÀO CHẾ ĐỘ HIỆN TẠI ---
+        let linkHtml = '';
+        if (window.currentDatLichMode === 'kythi') {
+            // Đang trong mục Kỳ Thi -> Mở Iframe và đổi icon thành màn hình
+            linkHtml = `<a href="javascript:void(0)" onclick="openDocumentViewer('${item.url}', '${safeTitle}');" class="fw-bold text-decoration-none fs-6" style="color: #0f4c81;" title="Bấm để làm bài">
+                <i class="fa-solid fa-desktop me-2" style="font-size: 13px;"></i>${item.title}
+            </a>`;
+        } else {
+            // Đang trong mục TEMP -> Mở Tab Mới và đổi icon thành mở link
+            linkHtml = `<a href="${item.url}" target="_blank" class="fw-bold text-decoration-none fs-6" style="color: #0f4c81;" title="Bấm để mở liên kết">
+                <i class="fa-solid fa-arrow-up-right-from-square me-2" style="font-size: 13px;"></i>${item.title}
+            </a>`;
+        }
+
         html += `
         <tr>
             <td style="padding-left: 20px;">
-                <a href="${item.url}" target="_blank" class="fw-bold text-decoration-none fs-6" style="color: #0f4c81;" title="Bấm để mở đường link đặt lịch">
-                    <i class="fa-solid fa-arrow-up-right-from-square me-2" style="font-size: 13px;"></i>${item.title}
-                </a>
+                ${linkHtml}
                 ${timeHtml}
             </td>
             <td>
@@ -5925,7 +5940,6 @@ function renderDatLichTable() {
     tbody.html(html);
 	searchDatLich();
 }
-
 function openFormDatLich() {
     if (!currentUser || currentUser.isGuest) {
         alert("Vui lòng đăng nhập để tạo bài đăng!");
