@@ -6877,28 +6877,24 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
     let searchInputId = isLatex ? '#txtLatexSearchCode' : '#txtSidebarSearchCode';
     let listId = isLatex ? '#latexCodeList' : '#sidebarCodeList';
 
-    let courseName = $(sidebarId).attr('data-sheet') || currentSheetName;
-    if (!courseName) return;
-
     let searchInput = $(searchInputId);
     let searchBtn = searchInput.next('button');
     let container = $(listId);
 
-    // 1. TRẠNG THÁI ĐANG TẢI: Khóa ô nhập liệu, khóa nút tìm kiếm và hiển thị vòng xoay
-    searchInput.val('').prop('disabled', true).attr('placeholder', 'Đang tải dữ liệu code...');
+    // 1. TRẠNG THÁI ĐANG TẢI
+    searchInput.val('').prop('disabled', true).attr('placeholder', 'Đang tải toàn bộ dữ liệu code...');
     searchBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
     
     container.html(`
         <div class="text-muted small text-center py-4">
             <i class="fa-solid fa-spinner fa-spin fs-3 mb-2 d-block text-secondary"></i>
-            Hệ thống đang đồng bộ Code tham khảo...<br>Vui lòng chờ trong giây lát.
+            Hệ thống đang đồng bộ kho Code tham khảo...<br>Vui lòng chờ trong giây lát.
         </div>
     `);
 
-    // Khởi tạo mảng trống để bảo vệ ứng dụng
     window.allSidebarSnippets = window.allSidebarSnippets || [];
 
-    // 2. HÀM XỬ LÝ DỮ LIỆU & MỞ KHÓA GIAO DIỆN
+    // 2. HÀM XỬ LÝ DỮ LIỆU TẤT CẢ CÁC MÔN
     const processSnippetsData = (data) => {
         let activeUserObj = JSON.parse(localStorage.getItem('currentUser')) || null;
         let myCleanMssv = activeUserObj ? activeUserObj.mssv.replace(/\./g, "") : "";
@@ -6909,11 +6905,20 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
         if (data && data.length > 0) {
             data.forEach(row => {
                 let contentRaw = row[2] || '';
-                let targetTag = `[SHARECODE|${courseName}`;
                 
-                if (contentRaw.startsWith(targetTag)) {
-                    let maBaiMatch = contentRaw.match(/^\[SHARECODE\Vert{}.*?\Vert{}(.*?)\]/);
-                    let maBai = maBaiMatch && maBaiMatch[1] ? maBaiMatch[1].trim() : "";
+                // MỞ KHÓA: Lấy toàn bộ các bài bắt đầu bằng [SHARECODE| không phân biệt môn học
+                if (contentRaw.startsWith('[SHARECODE|')) {
+                    // CÁCH MỚI: Tách chuỗi an toàn tuyệt đối không dùng Regex phức tạp
+                    let firstLineEnd = contentRaw.indexOf(']');
+                    let courseTag = "Khác";
+                    let maBai = "Mã code";
+                    
+                    if (firstLineEnd !== -1) {
+                        let tagStr = contentRaw.substring(1, firstLineEnd); // Cắt lấy: SHARECODE|Tên môn|Mã bài
+                        let parts = tagStr.split('|');
+                        if (parts[1]) courseTag = parts[1].trim();
+                        if (parts[2]) maBai = parts[2].trim();
+                    }
                     
                     let cleanContent = contentRaw.replace(/^\[SHARECODE\Vert{}.*?\]\s*/, '').trim();
                     let theoryPart = "", codePart = "", langMatch = "cpp";
@@ -6939,7 +6944,7 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
                     if (codePart || theoryPart) {
                         let codeObj = {
                             maBai: maBai, theory: theoryPart, code: codePart, lang: langMatch,
-                            author: authorName, isMine: isMyCode, answer: row[3] || '', rowIndex: row[6] 
+                            author: authorName, course: courseTag, isMine: isMyCode, answer: row[3] || '', rowIndex: row[6] 
                         };
                         if (isMyCode) myCodes.push(codeObj);
                         else otherCodes.push(codeObj);
@@ -6949,24 +6954,21 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
         }
         window.allSidebarSnippets = myCodes.concat(otherCodes);
         
-        // --- HOÀN TẤT: Mở khóa ô nhập liệu và cho phép gõ ---
-        searchInput.prop('disabled', false).attr('placeholder', 'Nhập mã bài (VD: B01)...');
+        // --- HOÀN TẤT: Mở khóa ô nhập liệu ---
+        searchInput.prop('disabled', false).attr('placeholder', 'Tra cứu mã bài tất cả môn...');
         searchBtn.prop('disabled', false).html('<i class="fa-solid fa-magnifying-glass"></i>');
         container.html(`
             <div class="text-muted small text-center py-4">
                 <i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>
-                Hệ thống đã sẵn sàng.<br>Nhập mã bài (VD: B01) để tìm kiếm...
+                Kho dữ liệu chung đã sẵn sàng.<br>Nhập mã bài để tra cứu toàn hệ thống...
             </div>
         `);
     };
 
-    // 3. CHẠY FETCH DỮ LIỆU TỪ MÁY CHỦ (HOẶC RAM)
+    // 3. CHẠY FETCH DỮ LIỆU
     if (window.cachedShareCodeData) {
-        // Đã có bộ nhớ đệm RAM thì dịch dữ liệu luôn
-        // Dùng setTimeout để tạo độ trễ giả mượt mà khoảng 300ms cho UX tốt hơn
         setTimeout(() => processSnippetsData(window.cachedShareCodeData), 300);
     } else {
-        // Chưa có bộ nhớ đệm thì tải từ máy chủ
         $.ajax({
             url: SCRIPT_URL + "?action=getShareCodeData",
             method: "GET",
@@ -6976,7 +6978,6 @@ window.loadSidebarCodeSnippets = function(isLatex = false) {
                 processSnippetsData(data);
             },
             error: function() {
-                // Xử lý khi bị lỗi mạng
                 searchInput.prop('disabled', true).attr('placeholder', 'Lỗi tải dữ liệu!');
                 searchBtn.prop('disabled', true).html('<i class="fa-solid fa-triangle-exclamation"></i>');
                 container.html('<div class="text-danger small text-center py-4"><i class="fa-solid fa-triangle-exclamation fs-3 mb-2 d-block"></i> Lỗi kết nối máy chủ! Không thể tải code.</div>');
@@ -6993,20 +6994,19 @@ window.searchSidebarCode = function(isLatex = false) {
     let container = $(listId);
 
     if (!maBaiSearch) {
-        container.html(`<div class="text-muted small text-center py-4"><i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>Nhập từ khóa mã bài để tìm kiếm...</div>`);
+        container.html(`<div class="text-muted small text-center py-4"><i class="fa-solid fa-magnifying-glass fs-3 mb-2 d-block text-secondary" style="opacity: 0.5;"></i>Nhập từ khóa để tra cứu mã bài...</div>`);
         return;
     }
 
-    // Chuẩn hóa từ khóa: Đưa về chữ thường và loại bỏ toàn bộ dấu tiếng Việt
     let cleanSearch = maBaiSearch.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
+    // Tìm kiếm trong toàn bộ dữ liệu ở RAM (Quét Tên bài, Tên Sinh viên, và Tên môn học)
     window.sidebarCodeCache = window.allSidebarSnippets.filter(item => {
-        // Chuẩn hóa dữ liệu của từng bài để so sánh chuẩn xác, thêm phòng hờ lỗi undefined
         let safeMaBai = (item.maBai || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         let safeAuthor = (item.author || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        let safeCourse = (item.course || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         
-        // Mở rộng bộ lọc: Tìm theo cả Mã bài HOẶC Tên sinh viên chia sẻ
-        return safeMaBai.includes(cleanSearch) || safeAuthor.includes(cleanSearch);
+        return safeMaBai.includes(cleanSearch) || safeAuthor.includes(cleanSearch) || safeCourse.includes(cleanSearch);
     });
 
     let html = '';
@@ -7019,7 +7019,7 @@ window.searchSidebarCode = function(isLatex = false) {
             <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-white shadow-sm" style="border: 1px solid #cbd5e1; border-left: 3px solid ${borderLeftColor}; border-radius: 6px; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='#f1f5f9';" onmouseout="this.style.background='#ffffff';" onclick="openSidebarCodeViewer(${idx})">
                 <div class="text-truncate" style="max-width: 80%;">
                     <strong style="font-size: 13px; color: #1e293b;">${item.maBai || "Mã code"} ${badgeHtml}</strong><br>
-                    <small class="text-muted" style="font-size: 11px;"><i class="fa-solid fa-user me-1"></i>${item.author}</small>
+                    <small class="text-muted" style="font-size: 11px;"><i class="fa-solid fa-book me-1"></i>${item.course} <span class="mx-1 text-black-50">|</span> <i class="fa-solid fa-user me-1"></i>${item.author}</small>
                 </div>
                 <i class="fa-solid fa-up-right-from-square text-primary" style="font-size: 12px;"></i>
             </div>`;
