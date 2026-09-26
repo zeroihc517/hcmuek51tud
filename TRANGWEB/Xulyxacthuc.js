@@ -376,33 +376,20 @@ function initInactivityTracker() {
 }
 
 $(document).ready(function() {
-    // Nếu có màn hình loading toàn trang thì bắt đầu kiểm tra
     if ($('#globalScreenLoader').length) {
-        
-        // TĂNG TỐC QUÉT KIỂM TRA: Giảm từ 300ms xuống 100ms để bắt sự kiện tải xong tức thì
         let checkInitialLoad = setInterval(function() {
             let isTableLoaded = $('#loadingStatus').hasClass('d-none');
             let isCategoriesLoaded = $('#dynamicCourseList').text().indexOf('Đang tải') === -1;
             
-            // Nếu các điều kiện tải trang hoàn tất
             if (isTableLoaded && isCategoriesLoaded) {
                 clearInterval(checkInitialLoad); 
-                
-                // TĂNG TỐC HIỆU ỨNG TẮT: Giảm từ fadeOut(600) xuống fadeOut(250) để vào web nhanh hơn
-                $('#globalScreenLoader').fadeOut(250, function() {
-                    $(this).remove();
-                });
+                // ĐÃ XÓA LỆNH FADEOUT Ở ĐÂY ĐỂ NHƯỜNG QUYỀN ĐIỀU KHIỂN ĐẾM NGƯỢC CHO FILE HTML
             }
         }, 100); 
 
-        // Đề phòng trường hợp lỗi mạng bị kẹt loading mãi mãi, tự động đóng sau 8 giây (Gốc là 10 giây)
         setTimeout(function() {
             clearInterval(checkInitialLoad);
-            if ($('#globalScreenLoader').length) {
-                $('#globalScreenLoader').fadeOut(250, function() {
-                    $(this).remove();
-                });
-            }
+            // ĐÃ XÓA LỆNH FADEOUT DỰ PHÒNG 8 GIÂY
         }, 8000); 
     }
 });

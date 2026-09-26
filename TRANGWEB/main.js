@@ -4444,25 +4444,82 @@ $('#latexViewerModal').on('hide.bs.modal', function (e) {
         }
     });
 });
-// HÀM TẢI VÀ RENDER DEADLINE TẠI TRANG THÔNG BÁO
+// HÀM TẢI VÀ RENDER DEADLINE TẠI TRANG THÔNG BÁO (ĐÃ NÂNG CẤP ĐỒNG BỘ TKB)
 function fetchAndRenderDeadlinesForNotice() {
     if (!currentUser || !currentUser.mssv) return;
 
-    $.ajax({
+    // Tải song song cả Deadline và TKB để trang Thông báo có đủ dữ liệu quét Kỳ thi
+    let reqDeadline = $.ajax({
         url: SCRIPT_URL + "?action=getDeadlinesUser&mssv=" + currentUser.mssv + "&_=" + new Date().getTime(),
         method: "GET",
         dataType: "json",
-        cache: false,
-        success: function(data) {
-            globalDeadlineData = data.map(r => ({
-                title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5],
-                dateStart: r[6] || "", dateEnd: r[7] || "", 
-                sheetRowIndex: r[8]
-            }));
+        cache: false
+    });
 
-            // >>> CHÈN THÊM DÒNG NÀY: Cập nhật ngay thẻ xinh xinh vào giao diện khi tải xong
-            renderDeadlinesOnNoticePage();
-        }
+    let reqTKB = $.ajax({
+        url: SCRIPT_URL + "?action=getTKBUser&mssv=" + currentUser.mssv + "&_=" + new Date().getTime(),
+        method: "GET",
+        dataType: "json",
+        cache: false
+    });
+
+    // Xử lý khi cả 2 dữ liệu đã được tải về
+    $.when(reqDeadline, reqTKB).done(function(resDeadline, resTKB) {
+        let dataDL = resDeadline[0] || [];
+        let dataTKB = resTKB[0] || [];
+
+        // 1. Phân giải dữ liệu Deadline
+        globalDeadlineData = dataDL.map(r => ({
+            title: r[1], duration: r[2], tag: r[3], icon: r[4], emoji: r[5],
+            dateStart: r[6] || "", dateEnd: r[7] || "", 
+            sheetRowIndex: r[8]
+        }));
+
+        // 2. Phân giải dữ liệu TKB để nạp vào globalTkbData (không gây nhiễu giao diện Lịch học)
+        globalTkbData = dataTKB.map((row) => {
+            let lastElement = row.pop(); 
+            let actualRowIndex = -1;
+            let isSystemFlag = false;
+
+            if (typeof lastElement === 'string' && lastElement.startsWith('SYS_')) {
+                isSystemFlag = true;
+                actualRowIndex = lastElement; 
+            } else {
+                actualRowIndex = parseInt(lastElement) || -1;
+            }
+
+            let extractedClassId = row[12] || ""; 
+            let hinhThucRaw = row[4] || "";
+            
+            if (!extractedClassId && hinhThucRaw.includes("#")) {
+                let match = hinhThucRaw.match(/#([a-zA-Z0-9_]+)/);
+                if (match) {
+                    extractedClassId = match[1];
+                    hinhThucRaw = hinhThucRaw.replace(match[0], '').trim();
+                    row[4] = hinhThucRaw; 
+                }
+            }
+
+            if (isSystemFlag && !extractedClassId) {
+                let parts = actualRowIndex.split('_'); 
+                if (parts.length >= 2) {
+                    extractedClassId = parts[1]; 
+                }
+            }
+
+            return {
+                thu: parseInt(row[0]) || 0, tietBd: parseInt(row[1]) || 0, soTiet: parseInt(row[2]) || 1,
+                thoiGian: row[3] || "", hinhThuc: row[4] || "", mon: row[5] || "", phong: row[6] || "",
+                gv: row[7] || "", color: row[8] || "#e0f2fe", ngayBatDau: row[9] || "", ngayKetThuc: row[10] || "",
+                ngayNgoaiLe: row[11] || "", classId: extractedClassId, sheetRowIndex: actualRowIndex, isSystem: isSystemFlag
+            };
+        }).filter(c => (c.thu >= 2 && c.thu <= 8 && c.tietBd >= 1) || (c.hinhThuc || '').toUpperCase().includes('VLE'));
+
+        // 3. Render ngay thẻ Deadline và Kỳ thi lên giao diện Thông báo
+        renderDeadlinesOnNoticePage();
+        
+    }).fail(function() {
+        console.error("Lỗi khi kết nối tải dữ liệu TKB hoặc Deadline.");
     });
 }
 function renderDeadlinesOnNoticePage() {

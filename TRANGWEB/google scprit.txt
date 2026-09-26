@@ -1,0 +1,2935 @@
+// Khai báo biến toàn cục để tái sử dụng, tăng tốc độ xử lý
+var ss = SpreadsheetApp.getActiveSpreadsheet();
+
+// ==========================================
+// 1. BỘ ĐỊNH TUYẾN GET (Xử lý lấy dữ liệu)
+// ==========================================
+function doGet(e) {
+  if (!e || !e.parameter || !e.parameter.action) {
+    return ContentService.createTextOutput(JSON.stringify({error: "Thiếu action."})).setMimeType(ContentService.MimeType.JSON);
+  }
+  var action = e.parameter.action;
+  var result;
+  try {
+    switch(action) {
+      case "getHocPhanList": result = getHocPhanList(); break; 
+      case "getAllUsersAccessHistory": result = getAllUsersAccessHistory(); break;
+      case "getHocPhanData": result = getHocPhanData(e.parameter.sheetName); break;
+      case "getWebLinks": result = getWebLinks(e.parameter.mssv); break;
+      case "getQAData": result = getQAData(); break;
+      case "getTKB": result = getTKBData(); break;
+      case "getDatLichHenData": result = getDatLichHenData(); break;
+      case "getTKBUser": result = getTKBUser(e.parameter.mssv); break; 
+      case "getExerciseQuestions": result = getExerciseQuestions(e.parameter.course); break;
+      case "getDeadlinesUser": result = getDeadlinesUser(e.parameter.mssv); break; 
+      case "getGroupStudy": result = getGroupStudy(); break;
+      case "pingPresence": result = pingPresence(e.parameter.uuid, e.parameter.mssv, e.parameter.lastView); break;
+      case "getConfigHocKy": result = getConfigHocKy(); break;
+      case "getAppDatabase": result = getAppDatabase(); break;
+      case "getChatMessages": result = getChatMessages(); break;
+      case "getExerciseStatus": result = getExerciseStatus(e.parameter.mssv, e.parameter.course); break;
+      case "getGPAUser": result = getGPAUser(e.parameter.mssv); break;
+      case "getGPAConfig": result = getGPAConfig(e.parameter.mssv); break;
+      case "getSystemTKBList": result = getSystemTKBList(e.parameter.mssv); break;
+      case "getGPAConfig": result = getGPAConfig(e.parameter.mssv); break;
+      case "getLearningData": result = getLearningData(e.parameter.mssv); break;
+      case "getShareCodeData": result = getShareCodeData(); break;
+      case "getRenLuyen": result = getRenLuyen(e.parameter.mssv, e.parameter.namHoc, e.parameter.hocKy); break;
+      case "getGroupLinks": result = getGroupLinks(); break;
+      case "adminGetUserData": result = adminGetUserData(e.parameter.targetMssv, e.parameter.adminMssv); break;
+      case "getAllUsers": result = getAllUsers(); break;
+      // Thêm dòng này vào bên trong khối switch(action) của hàm doGet(e):
+case "getUserProfile": result = getUserProfile(e.parameter.mssv); break;
+    case "getAdminMasterTkb": result = getAdminMasterTkb(); break;
+    case "getCourseAssignees": result = getCourseAssignees(e.parameter.courseId); break;
+    case "getGlobalNotifications": result = getGlobalNotifications(); break;
+    case "getDashboardData": result = getDashboardData(e.parameter.mssv); break;
+    // Thêm dòng này vào trong khối switch(action) của doGet
+case "getCompletedDeadlines": result = getCompletedDeadlines(e.parameter.mssv); break;
+      default: return ContentService.createTextOutput(JSON.stringify({error: "Action không hợp lệ."})).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({error: err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+  if (action === "getGPAConfig") {
+    var mssv = e.parameter.mssv;
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("gpa_data");
+    var data = sheet.getDataRange().getValues();
+    var configResult = "";
+    
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(mssv)) {
+        configResult = data[i][2]; // Lấy dữ liệu ở Cột C
+        break;
+      }
+    }
+    
+    return ContentService.createTextOutput(configResult).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+// ==========================================
+// 2. BỘ ĐỊNH TUYẾN POST
+// ==========================================
+function doPost(e) {
+  if (!e || !e.postData || !e.postData.contents) return ContentService.createTextOutput("Lỗi: Không có dữ liệu.").setMimeType(ContentService.MimeType.TEXT);
+  try {
+    var payload = JSON.parse(e.postData.contents);
+    var action = payload.action;
+    var result;
+    
+    switch(action) {
+      case "login": result = loginUser(payload.mssv, payload.password); break;
+      case "register": result = registerUser(payload.mssv, payload.password, payload.name); break;
+      case "deleteChatMessage": result = deleteChatMessage(payload.rowIndex, payload.mssv); break;
+      case "copySystemTkbToPersonal": 
+        result = copySystemTkbToPersonal(payload.mssv, payload.courses); 
+        break;
+      case "deleteMultipleTKBRows": 
+        result = deleteMultipleTKBRows(payload.mssv, payload.rowIndices); 
+        break;
+        case "bulkAddTKBUser": 
+  result = bulkAddTKBUser(payload.mssv, payload.schedules); 
+  break;
+  case "saveExerciseStatus": result = saveExerciseStatus(payload.mssv, payload.course, payload.statusData); break;
+  case "saveRenLuyen": result = saveRenLuyen(payload.mssv, payload.namHoc, payload.hocKy, payload.rlData, payload.totalScore, payload.rank); break;
+  case "markAsRead": 
+  result = markAsRead(payload.sheetName, payload.rowIndex, payload.mssv); 
+  break;
+  case "editExerciseQuestion": result = editExerciseQuestion(payload); break;
+  case "editGroupStudy": result = editGroupStudy(payload); break;
+  case "getGroupStudy": result = getGroupStudy(); break;
+  case "addGroupStudy": result = addGroupStudy(payload); break;
+case "toggleGroupStudyReg": result = toggleGroupStudyReg(payload); break;
+case "deleteGroupStudy": result = deleteGroupStudy(payload); break;
+       case "addDatLichHen": result = addDatLichHen(payload.mssv, payload.authorName, payload.title, payload.url, payload.noiDung); break;
+case "editDatLichHen": result = editDatLichHen(payload.rowIndex, payload.mssv, payload.title, payload.url, payload.noiDung); break;
+case "deleteDatLichHen": result = deleteDatLichHen(payload.rowIndex, payload.mssv); break;
+      // ===== SỬA API TKB (THÊM HỖ TRỢ SCOPE: SINGLE/FUTURE/ALL) =====
+      case "updateShareCodeSubmission": 
+  result = updateShareCodeSubmission(payload.rowIndex, payload.mssv, payload.codeData); 
+  break;
+  case "syncToGoogleCalendar": 
+  result = syncToGoogleCalendar(payload.events); 
+  break;
+  case "addExerciseQuestion": result = addExerciseQuestion(payload); break;
+      case "addTKBUser": 
+        result = addTKBUser(payload.mssv, payload.thu, payload.tietBd, payload.soTiet, payload.thoiGian, payload.hinhThuc, payload.mon, payload.phong, payload.gv, payload.color, payload.ngayBatDau, payload.ngayKetThuc, payload.ngayNgoaiLe); 
+        break;
+      case "editTKBUser": 
+        result = editTKBUser(payload.rowIndex, payload.mssv, payload.thu, payload.tietBd, payload.soTiet, payload.thoiGian, payload.hinhThuc, payload.mon, payload.phong, payload.gv, payload.color, payload.ngayBatDau, payload.ngayKetThuc, payload.ngayNgoaiLe, payload.editScope, payload.targetDate); 
+        break;
+      case "deleteTKBUser": 
+        result = deleteTKBUser(payload.rowIndex, payload.mssv, payload.deleteScope, payload.targetDate); 
+        break;
+        case "addGroupLink": result = addGroupLink(payload.mssv, payload.author, payload.title, payload.platform, payload.desc, payload.url, payload.assigned); break;
+case "editGroupLink": result = editGroupLink(payload.rowIndex, payload.mssv, payload.title, payload.platform, payload.desc, payload.url, payload.assigned); break;
+case "deleteGroupLink": result = deleteGroupLink(payload.rowIndex, payload.mssv); break;
+      case "saveGPAUser": result = saveGPAUser(payload.mssv, payload.gpaData); break;  
+      case "sendChat": result = sendChat(payload.mssv, payload.name, payload.message); break;
+      case "addDeadlineUser": result = addDeadlineUser(payload.mssv, payload.title, payload.duration, payload.tag, payload.icon, payload.emoji, payload.startDate, payload.endDate); break;
+      case "editDeadlineUser": result = editDeadlineUser(payload.rowIndex, payload.mssv, payload.title, payload.duration, payload.tag, payload.icon, payload.emoji, payload.startDate, payload.endDate); break;
+      case "updateUserProfile": 
+  result = updateUserProfile(payload.mssv, payload.chuyenNganh, payload.khoa, payload.khoaHoc, payload.nhom, payload.avatar); 
+  break;
+  // Thêm case này vào switch(action) của doPost:
+case "uploadAvatarFile": 
+  result = uploadAvatarFile(payload.mssv, payload.base64Data, payload.mimeType, payload.fileName); 
+  break;
+  case "saveLearningData": result = saveLearningData(payload.mssv, payload.dataStr); break;
+      case "deleteDeadlineUser": result = deleteDeadlineUser(payload.rowIndex, payload.mssv); break;
+      case "editChatMessage": result = editChatMessage(payload.rowIndex, payload.mssv, payload.newMessage); break;
+      case "changePassword": result = changePassword(payload.mssv, payload.oldPassword, payload.newPassword); break;
+      case "submitQuestion": result = submitQuestion(payload.mssv, payload.question); break;
+      case "replyToAdmin": result = replyToAdmin(payload.rowIndex, payload.replyText); break;
+      case "adminReplyQuestion": result = adminReplyQuestion(payload.rowIndex, payload.replyText); break;
+      case "submitVote": result = submitVote(payload.rowIndex, payload.type); break;
+      case "undoVote": result = undoVote(payload.rowIndex, payload.type); break;
+      case "updateQAThread": result = updateQAThread(payload.rowIndex, payload.fullText); break;
+      case "saveGPAConfig": result = saveUserGPAConfig(payload.mssv, payload.config); break;
+      case "deleteQA": result = deleteQA(payload.rowIndex); break;
+      case "addSheetRow": 
+        result = addSheetRow(payload.sheetName, payload.col1, payload.col2, payload.col3, payload.col4, payload.col5, payload.col6, payload.col7); 
+        break;
+      case "editSheetRow": 
+        result = editSheetRow(payload.sheetName, payload.rowIndex, payload.col1, payload.col2, payload.col3, payload.col4, payload.col5, payload.col6, payload.col7);
+        break;
+      case "deleteSheetRow": 
+        result = deleteSheetRow(payload.sheetName, payload.rowIndex); 
+        break;
+      case "insertSheetRowAfter": 
+        result = insertSheetRowAfter(payload.sheetName, payload.rowIndex, payload.col1, payload.col2, payload.col3, payload.col4, payload.col5, payload.col6, payload.col7);
+        break;
+      case "addPersonalWebLink": 
+  result = addPersonalWebLink(payload.mssv, payload.title, payload.desc, payload.url, payload.icon); 
+  break;
+  case "editPersonalWebLink": 
+  result = editPersonalWebLink(payload.rowIndex, payload.mssv, payload.title, payload.desc, payload.url, payload.icon); 
+  break;
+  
+case "deletePersonalWebLink": 
+  result = deletePersonalWebLink(payload.rowIndex, payload.mssv); 
+  break;
+      case "addPersonalWebLink": result = addPersonalWebLink(payload.mssv, payload.title, payload.desc, payload.url, payload.icon); break;
+    case "deletePersonalWebLink": result = deletePersonalWebLink(payload.rowIndex, payload.mssv); break;
+     case "moveSheetRow": result = moveSheetRow(payload.sheetName, payload.rowIndex, payload.direction); break;
+      case "addHocPhan": result = addHocPhan(payload.name); break;
+      case "deleteHocPhan": result = deleteHocPhan(payload.name); break;
+      case "editHocPhan": result = editHocPhan(payload.oldName, payload.newName); break;
+      case "moveHocPhan": result = moveHocPhan(payload.name, payload.direction); break;
+      case "getAppDatabase": result = getAppDatabase(); break;
+      case "saveSystemTkbSelection": result = saveSystemTkbSelection(payload.mssv, payload.courseIds); break;
+      case "submitSurvey": 
+        result = submitSurvey(payload.mssv, payload.name, payload.q1_time, payload.q2_duration, payload.q3_method, payload.q3_method_detail, payload.q4_feedback, payload.q5_rewind); 
+        break;
+      case "submitShareCode": result = submitShareCode(payload.mssv, payload.codeData); break;
+      case "replyToShareCode": result = replyToShareCode(payload.rowIndex, payload.replyText); break;
+      case "updateShareCode": result = updateShareCode(payload.rowIndex, payload.codeData); break;
+      case "adminEditTkb": 
+        result = adminEditTkb(payload.rowIndex, payload.mssv, payload.thu, payload.tietBd, payload.soTiet, payload.thoiGian, payload.hinhThuc, payload.mon, payload.phong, payload.gv, payload.color, payload.ngayBatDau, payload.ngayKetThuc, payload.ngayNgoaiLe); 
+        break;
+      case "adminDeleteTkb": result = adminDeleteTkb(payload.rowIndex, payload.mssv); break;
+case "adminDeleteDeadline": result = adminDeleteDeadline(payload.rowIndex, payload.mssv); break;
+      case "adminEditDeadline": 
+        result = adminEditDeadline(payload.rowIndex, payload.mssv, payload.title, payload.duration, payload.tag, payload.icon, payload.emoji, payload.startDate, payload.endDate); 
+        break;
+     case "addMasterTkb": result = addMasterTkb(payload); break;
+case "editMasterTkb": result = editMasterTkb(payload); break;
+case "deleteMasterTkb": result = deleteMasterTkb(payload.rowIndex); break;
+    case "assignStudentsToCourse": result = assignStudentsToCourse(payload.courseId, payload.assignedMssvList); break;
+    case "dragDropSheetRow": 
+        result = dragDropSheetRow(payload.sheetName, payload.fromIndex, payload.toIndex); 
+        break;
+      // Thêm dòng này vào trong khối switch(action) của doPost
+case "saveCompletedDeadlines": result = saveCompletedDeadlines(payload.mssv, payload.completedData); break;
+      default: return ContentService.createTextOutput("Lỗi: Action không hợp lệ.").setMimeType(ContentService.MimeType.TEXT);
+    }
+    
+    return typeof result === 'object' ? 
+      ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON) : 
+      ContentService.createTextOutput(result).setMimeType(ContentService.MimeType.TEXT);
+      
+  } catch(err) {
+    return ContentService.createTextOutput("Lỗi máy chủ: " + err.toString()).setMimeType(ContentService.MimeType.TEXT);
+  }
+    
+if (action === "getAllUsersAccessHistory") {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName("Users");
+    var data = sheet.getDataRange().getValues();
+    var usersList = [];
+
+    // Duyệt qua các hàng (Bỏ qua hàng tiêu đề index 0)
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][0]) { // Kiểm tra nếu có MSSV
+        var rawDate = data[i][5]; // Cột F: Lần cuối truy cập
+        var formattedDate = "Chưa từng truy cập";
+        
+        if (rawDate) {
+          formattedDate = Utilities.formatDate(new Date(rawDate), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+        }
+
+        usersList.push({
+          mssv: data[i][0],
+          name: data[i][1],
+          lastActive: formattedDate
+        });
+      }
+    }
+
+    return ContentService.createTextOutput(JSON.stringify(usersList))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  if (action === "saveGPAConfig") {
+    var mssv = payload.mssv;
+    var configData = payload.config;
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("gpa_data");
+    var data = sheet.getDataRange().getValues();
+    var found = false;
+    
+    // Tìm dòng của sinh viên
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(mssv)) {
+        // Ghi đè cấu hình vào Cột C (Cột số 3)
+        sheet.getRange(i + 1, 3).setValue(configData);
+        found = true;
+        break;
+      }
+    }
+    
+    // Nếu sinh viên chưa từng lưu GPA bao giờ, tạo dòng mới
+    if (!found) {
+      sheet.appendRow([mssv, "[]", configData]);
+    }
+    
+    return ContentService.createTextOutput("Đã lưu cấu hình").setMimeType(ContentService.MimeType.TEXT);
+    // Thêm đoạn này vào bên trong hàm doPost(e) của bạn
+
+  }
+}
+// Hàm hỗ trợ cập nhật lần cuối truy cập vào Sheet Users
+function updateLastActive(mssv) {
+  try {
+    var sheet = ss.getSheetByName("Users");
+    if (!sheet) return;
+    
+    var data = sheet.getDataRange().getValues();
+    var nowStr = Utilities.formatDate(new Date(), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+    
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === String(mssv).trim()) {
+        sheet.getRange(i + 1, 9).setValue(nowStr); // Ghi vào Cột I (Cột 9) để giữ nguyên Email ở Cột F
+        break;
+      }
+    }
+  } catch (e) {
+    Logger.log("Lỗi updateLastActive: " + e.toString());
+  }
+}
+// ==========================================
+// HÀM TIỆN ÍCH XỬ LÝ NGÀY THÁNG (Cho tính năng SCOPE)
+// ==========================================
+function parseDateStr(dateStr) {
+  if (!dateStr || dateStr.trim() === "") return null;
+  
+  // Hỗ trợ định dạng YYYY-MM-DD nếu lỡ có lưu sai trước đó
+  if (dateStr.indexOf('-') !== -1) {
+    var parts = dateStr.split('-');
+    if (parts.length === 3) return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+  
+  // Định dạng chuẩn DD/MM/YYYY
+  var parts = dateStr.split('/');
+  if (parts.length === 3) return new Date(parts[2], parts[1] - 1, parts[0]);
+  
+  return null;
+}
+
+function formatDateStr(dateObj) {
+  if (!dateObj) return "";
+  var dd = String(dateObj.getDate()).padStart(2, '0');
+  var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+  var yyyy = dateObj.getFullYear();
+  return dd + '/' + mm + '/' + yyyy;
+}
+
+// ==========================================
+// API LẤY & LƯU TRỮ DEADLINE
+// ==========================================
+function getDeadlinesUser(mssv) {
+  var sheetName = getDeadlineSheetName(mssv);
+  var sheet = ss.getSheetByName(sheetName);
+  var result = [];
+  
+  // Lấy Deadline cá nhân hiện tại
+  if (sheet) {
+    var data = sheet.getDataRange().getDisplayValues();
+    if (data.length > 1) {
+      for (var i = 1; i < data.length; i++) {
+        if (String(data[i][0]).trim() === String(mssv).trim()) {
+          var row = [];
+          for (var col = 0; col < 8; col++) row.push(col < data[i].length ? data[i][col] : "");
+          row.push(i + 1); 
+          result.push(row);
+        }
+      }
+    }
+  }
+
+  // TRỘN THÊM CÁC HỌC PHẦN HỆ THỐNG CÓ GHI 'VLE'
+  var regSheet = ss.getSheetByName("UserRegisteredCourses");
+  var masterSheet = ss.getSheetByName("MasterTKB");
+
+  if (regSheet && masterSheet) {
+    var regData = regSheet.getDataRange().getDisplayValues();
+    var registeredIds = [];
+    
+    for (var j = 1; j < regData.length; j++) {
+      if (String(regData[j][0]).trim() === String(mssv).trim()) {
+        registeredIds = String(regData[j][1]).split(',').map(function(id) { return id.trim(); }).filter(Boolean);
+        break;
+      }
+    }
+
+    if (registeredIds.length > 0) {
+      var masterData = masterSheet.getDataRange().getDisplayValues();
+      for (var k = 1; k < masterData.length; k++) {
+        var courseId = String(masterData[k][0]).trim(); 
+        if (registeredIds.indexOf(courseId) !== -1) {
+          
+          var hinhThuc = String(masterData[k][5]).toUpperCase();
+          var phong = String(masterData[k][7]).toUpperCase();
+          var tenMon = String(masterData[k][6]).toUpperCase();
+          
+          // Chỉ lấy nếu thuộc VLE
+          if (hinhThuc.indexOf("VLE") !== -1 || phong.indexOf("VLE") !== -1 || tenMon.indexOf("VLE") !== -1) {
+            var mon = masterData[k][6] || "";
+            var ngayBD = masterData[k][10] || "";
+            var ngayKT = masterData[k][11] || "";
+            var thoiGianDesc = (ngayBD && ngayKT) ? "Từ " + ngayBD + " đến " + ngayKT : "Học phần trực tuyến";
+            
+            result.push([
+              mssv,                  // [0]
+              mon,                   // [1] Tiêu đề
+              thoiGianDesc,          // [2] Thời lượng
+              "VLE",        // [3] Nhãn Tag
+              "primary",             // [4] Icon nền (Màu xanh dương)
+              "🌐",                   // [5] Emoji
+              ngayBD,                // [6] Ngày BĐ
+              ngayKT,                // [7] Ngày KT
+              "SYS_VLE_" + courseId  // [8] Gắn mã ID hệ thống
+            ]);
+          }
+        }
+      }
+    }
+  }
+  
+  return result;
+}
+function addDeadlineUser(mssv, title, duration, tag, icon, emoji, startDate, endDate) {
+  var sheetName = getDeadlineSheetName(mssv);
+  var sheet = ss.getSheetByName(sheetName);
+  if(!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    sheet.appendRow(["MSSV", "Title", "Duration", "Tag", "Icon", "Emoji", "StartDate", "EndDate"]);
+  }
+  sheet.appendRow([mssv, title, duration, tag, icon, emoji, startDate, endDate]);
+  return "Đã thêm Deadline thành công!";
+}
+
+function editDeadlineUser(rowIndex, mssv, title, duration, tag, icon, emoji, startDate, endDate) {
+  var sheetName = getDeadlineSheetName(mssv);
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return "Lỗi: Không tìm thấy cơ sở dữ liệu Deadline.";
+  sheet.getRange(rowIndex, 1, 1, 8).setValues([[mssv, title, duration, tag, icon, emoji, startDate, endDate]]);
+  return "Cập nhật Deadline thành công!";
+}
+
+function deleteDeadlineUser(rowIndex, mssv) {
+  var sheetName = getDeadlineSheetName(mssv);
+  var sheet = ss.getSheetByName(sheetName);
+  if(sheet) sheet.deleteRow(rowIndex);
+  return "Đã xóa Deadline!";
+}
+
+
+function registerUser(mssv, password, name) {
+  var sheet = ss.getSheetByName("Users");
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      return { success: false, message: "Tài khoản mã số sinh viên này đã đăng ký trước đó!" };
+    }
+  }
+  sheet.appendRow([mssv, password, name]);
+  return { success: true, message: "Đăng ký thành công!" };
+}
+
+function changePassword(mssv, oldPassword, newPassword) {
+  var sheet = ss.getSheetByName("Users");
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      if (String(data[i][1]).trim() === String(oldPassword).trim()) {
+        sheet.getRange(i + 1, 2).setValue(newPassword);
+        return "Thay đổi mật khẩu cá nhân thành công!";
+      } else {
+        return "Lỗi: Mật khẩu cũ hiện tại nhập không chính xác.";
+      }
+    }
+  }
+  return "Lỗi: Không tìm thấy thông tin tài khoản người dùng.";
+}
+
+// ==========================================
+// API LẤY LỊCH HỌC TKB NGƯỜI DÙNG
+// ==========================================
+function getTKBUser(mssv) {
+  var result = [];
+
+  // --- 1. LẤY LỊCH HỌC CÁ NHÂN TỰ TẠO ---
+  var sheetName = getTkbSheetName(mssv);
+  var sheet = ss.getSheetByName(sheetName);
+  if (sheet && sheet.getLastRow() > 1) {
+    var data = sheet.getDataRange().getDisplayValues();
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === String(mssv).trim()) {
+        var rowData = [];
+        for (var col = 1; col <= 12; col++) {
+          rowData.push(col < data[i].length ? data[i][col] : "");
+        }
+        rowData.push(i + 1); 
+        result.push(rowData);
+      }
+    }
+  }
+
+  // --- 2. TRỘN THÊM LỊCH HỌC HỆ THỐNG ĐÃ ĐĂNG KÝ ---
+  var regSheet = ss.getSheetByName("UserRegisteredCourses");
+  var masterSheet = ss.getSheetByName("MasterTKB");
+
+if (regSheet && masterSheet) {
+    var regData = regSheet.getDataRange().getDisplayValues();
+    var registeredIds = [];
+    
+    for (var j = 1; j < regData.length; j++) {
+      if (String(regData[j][0]).trim() === String(mssv).trim()) {
+        registeredIds = String(regData[j][1]).split(',').map(function(id) { return id.trim(); });
+        break;
+      }
+    }
+
+    if (registeredIds.length > 0) {
+      var masterData = masterSheet.getDataRange().getDisplayValues();
+      for (var k = 1; k < masterData.length; k++) {
+        var courseId = String(masterData[k][0]).trim(); 
+        if (registeredIds.indexOf(courseId) !== -1) {
+          
+          var hinhThuc = String(masterData[k][5]).toUpperCase();
+          var phong = String(masterData[k][7]).toUpperCase();
+          var mon = String(masterData[k][6]).toUpperCase();
+          
+          // BỘ LỌC: Bỏ qua nếu Hình thức, Môn hoặc Phòng có chứa từ khóa "VLE"
+          if (hinhThuc.indexOf("VLE") === -1 && phong.indexOf("VLE") === -1 && mon.indexOf("VLE") === -1) {
+            var sysRow = [
+              masterData[k][1], masterData[k][2], masterData[k][3],
+              masterData[k][4], masterData[k][5], masterData[k][6],
+              masterData[k][7], masterData[k][8], masterData[k][9],
+              masterData[k][10], masterData[k][11], masterData[k][14] || "" 
+            ];
+            sysRow.push("SYS_" + courseId); 
+            result.push(sysRow);
+          }
+        }
+      }
+    }
+  }
+// --- 3. TRỘN THÊM LỊCH HỌC NHÓM ĐÃ ĐĂNG KÝ VÀO TKB ---
+ var gsSheet = ss.getSheetByName("GroupStudyBooking");
+  if (gsSheet) {
+    var gsData = gsSheet.getDataRange().getDisplayValues();
+    for (var g = 1; g < gsData.length; g++) {
+      var regList = (gsData[g][15] || "").split(',');
+      var isJoined = false;
+      
+      // Xử lý tách chuỗi để nhận diện MSSV
+      for (var r = 0; r < regList.length; r++) {
+          if (regList[r].split(':::')[0].trim() === String(mssv).trim()) {
+              isJoined = true;
+              break;
+          }
+      }
+      
+      if (isJoined) {
+        var linkVal = gsData[g][16] ? (" " + gsData[g][16]) : "";
+        var hinhThucDisplay = gsData[g][8] ? (gsData[g][8] + " (Học nhóm)") : "(Học nhóm)";
+        var sysRow = [
+          gsData[g][4],  // Thu
+          gsData[g][5],  // TietBd
+          gsData[g][6],  // SoTiet
+          gsData[g][7],  // ThoiGian
+          gsData[g][8] + linkVal,  // HinhThuc
+          gsData[g][3],  // Mon
+          gsData[g][9],  // Phong
+          gsData[g][17] || "", // GV
+          gsData[g][10], // Color
+          gsData[g][11], // NgayBD
+          gsData[g][12], // NgayKT
+          gsData[g][18] || ""  // ĐÃ SỬA: Đưa NgayNgoaiLe vào TKB
+        ];
+        
+        sysRow.push("SYS_GS_" + gsData[g][0]); 
+        result.push(sysRow);
+      }
+    }
+  }
+  return result;
+}
+
+// ==========================================
+// API THÊM/SỬA/XÓA TKB (TÍCH HỢP DATE SPLIT LOGIC)
+// ==========================================
+function addTKBUser(mssv, thu, tietBd, soTiet, thoiGian, hinhThuc, mon, phong, gv, color, ngayBatDau, ngayKetThuc, ngayNgoaiLe) {
+  var sheetName = getTkbSheetName(mssv);
+  var sheet = ss.getSheetByName(sheetName);
+  if(!sheet){
+      sheet = ss.insertSheet(sheetName);
+      sheet.appendRow(["MSSV", "Thứ", "Tiết", "Số Tiết", "Thời Gian", "Hình Thức", "Môn", "Phòng", "Giảng Viên", "Màu Sắc", "Ngày BĐ", "Ngày KT", "Ngoại Lệ"]);
+  }
+  var days = String(thu).split(',');
+  var addedCount = 0;
+  for (var i = 0; i < days.length; i++) {
+    var t = parseInt(days[i].trim());
+    if (!isNaN(t) && t >= 2 && t <= 8) {
+      sheet.appendRow([mssv, t, tietBd, soTiet, thoiGian, hinhThuc, mon, phong, gv, color, ngayBatDau, ngayKetThuc, ngayNgoaiLe]);
+      addedCount++;
+    }
+  }
+  return addedCount > 0 ? "Đã tạo thành công " + addedCount + " lịch học cá nhân!" : "Lỗi: Vui lòng nhập đúng định dạng Thứ.";
+}
+
+function editTKBUser(rowIndex, mssv, thu, tietBd, soTiet, thoiGian, hinhThuc, mon, phong, gv, color, ngayBatDau, ngayKetThuc, ngayNgoaiLe, editScope, targetDate) {
+  var sheetName = getTkbSheetName(mssv);
+  var sheet = ss.getSheetByName(sheetName);
+  if(!sheet) return "Lỗi: Không tìm thấy bảng TKB.";
+  
+  if (editScope === "single" && targetDate) {
+      var originalData = sheet.getRange(rowIndex, 1, 1, 13).getValues()[0];
+      var currentNgoaiLe = originalData[12] ? String(originalData[12]) : "";
+      
+      // Giữ nguyên định dạng DD/MM/YYYY
+      var newNgoaiLe = currentNgoaiLe ? currentNgoaiLe + ", " + targetDate : targetDate;
+      sheet.getRange(rowIndex, 13).setValue(newNgoaiLe);
+      
+      var correctThu = thu;
+      var tDateObj = parseDateStr(targetDate);
+      if (tDateObj && !isNaN(tDateObj.getTime())) {
+        var dayOfWeek = tDateObj.getDay();
+        correctThu = (dayOfWeek === 0) ? 8 : (dayOfWeek + 1);
+      }
+      
+      sheet.appendRow([mssv, correctThu, tietBd, soTiet, thoiGian, hinhThuc, mon, phong, gv, color, targetDate, targetDate, ""]);
+      return "Đã cập nhật riêng sự kiện ngày " + targetDate + "!";
+  }
+else if (editScope === "future" && targetDate) {
+      var originalData = sheet.getRange(rowIndex, 1, 1, 13).getDisplayValues()[0];
+    var oldEndDate = originalData[11] ? String(originalData[11]) : ngayKetThuc;
+
+    var tDate = parseDateStr(targetDate);
+      
+      if (tDate && !isNaN(tDate.getTime())) {
+         // Tính ngày kết thúc của sự kiện cũ là ngày trước đó
+         var tempDate = new Date(tDate.getTime());
+         tempDate.setDate(tempDate.getDate() - 1);
+         var newEndDateForOld = formatDateStr(tempDate); // SỬ DỤNG HÀM FORMAT CHUẨN
+         sheet.getRange(rowIndex, 12).setValue(newEndDateForOld); // Lưu định dạng DD/MM/YYYY
+      }
+      
+      // Thêm dòng mới bắt đầu từ ngày được chọn
+      sheet.appendRow([mssv, thu, tietBd, soTiet, thoiGian, hinhThuc, mon, phong, gv, color, targetDate, oldEndDate, ngayNgoaiLe]);
+      return "Đã cập nhật sự kiện từ ngày " + targetDate + " trở về sau!";
+  }
+  else {
+      var days = String(thu).split(',');
+      var firstDay = parseInt(days[0].trim());
+      if (!isNaN(firstDay) && firstDay >= 2 && firstDay <= 8) {
+        sheet.getRange(rowIndex, 2, 1, 12).setValues([[firstDay, tietBd, soTiet, thoiGian, hinhThuc, mon, phong, gv, color, ngayBatDau, ngayKetThuc, ngayNgoaiLe]]);
+      }
+      var extraCount = 0;
+      for (var i = 1; i < days.length; i++) {
+        var t = parseInt(days[i].trim());
+        if (!isNaN(t) && t >= 2 && t <= 8) {
+          sheet.appendRow([mssv, t, tietBd, soTiet, thoiGian, hinhThuc, mon, phong, gv, color, ngayBatDau, ngayKetThuc, ngayNgoaiLe]);
+          extraCount++;
+        }
+      }
+      return extraCount > 0 ? "Cập nhật thành công! (Tạo thêm " + extraCount + " buổi học mới)" : "Cập nhật toàn bộ chuỗi sự kiện thành công!";
+  }
+}
+
+function deleteTKBUser(rowIndex, mssv, deleteScope, targetDate) {
+  var sheetName = getTkbSheetName(mssv);
+  var sheet = ss.getSheetByName(sheetName);
+  if(!sheet) return "Lỗi: Không tìm thấy bảng TKB.";
+
+  if (deleteScope === "single" && targetDate) {
+      var originalData = sheet.getRange(rowIndex, 1, 1, 13).getDisplayValues()[0];
+    var currentNgoaiLe = originalData[12] ? String(originalData[12]) : "";
+      var newNgoaiLe = currentNgoaiLe ? currentNgoaiLe + ", " + targetDate : targetDate;
+      sheet.getRange(rowIndex, 13).setValue(newNgoaiLe);
+      return "Đã xóa (bỏ qua) sự kiện trong ngày " + targetDate + "!";
+  }
+  else if (deleteScope === "future" && targetDate) {
+      var tDate = parseDateStr(targetDate);
+      if (tDate && !isNaN(tDate.getTime())) {
+         tDate.setDate(tDate.getDate() - 1);
+         var newEndDateForOld = formatDateStr(tDate);
+         sheet.getRange(rowIndex, 12).setValue(newEndDateForOld);
+         return "Đã xóa tất cả các sự kiện từ ngày " + targetDate + " trở về sau!";
+      }
+  }
+
+  sheet.deleteRow(rowIndex);
+  return "Đã xóa lịch học cá nhân thành công!";
+}
+
+// ==========================================
+// CÁC HÀM TIỆN ÍCH TRẠNG THÁI & CHAT
+// ==========================================
+function pingPresence(uuid, mssv, lastView) {
+  var lock = LockService.getScriptLock();
+  var onlineList = [];
+  
+  if (lock.tryLock(2000)) {
+    try {
+      var props = PropertiesService.getScriptProperties();
+      var now = Date.now();
+      
+      var userInfo = { time: now, mssv: mssv || "Khách" };
+      props.setProperty('user_' + uuid, JSON.stringify(userInfo));
+      
+      if (mssv && mssv !== "Khách" && mssv.indexOf("|") !== -1) {
+        var cleanMssv = mssv.split("|")[0].trim();
+        updateLastActive(cleanMssv, lastView);
+      }
+      
+      var allProps = props.getProperties();
+      var keysToDelete = [];
+      
+      for (var key in allProps) {
+        if (key.indexOf('user_') === 0) {
+          try {
+            var data = JSON.parse(allProps[key]);
+
+            if (now - data.time > 90000) { 
+              keysToDelete.push(key); 
+            } else { 
+              if (onlineList.indexOf(data.mssv) === -1) {
+                  onlineList.push(data.mssv);
+              }
+            }
+          } catch(e) { 
+            keysToDelete.push(key); 
+          }
+        }
+      }
+      keysToDelete.forEach(function(k) { props.deleteProperty(k); });
+    } finally {
+      lock.releaseLock();
+    }
+  }
+  return { count: onlineList.length, list: onlineList };
+}
+
+function updateLastActive(mssv, lastView) {
+  try {
+    var sheet = ss.getSheetByName("Users");
+    if (!sheet) return;
+    
+    var data = sheet.getDataRange().getValues();
+    var now = new Date();
+    var nowStr = Utilities.formatDate(now, "GMT+7", "yyyy-MM-dd HH:mm:ss");
+    
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === String(mssv).trim()) {
+        var oldLastActiveStr = data[i][8];   // Cột I (Index 8) - Lần cuối
+        var oldCurrentView = data[i][9];     // Cột J (Index 9) - Đang xem
+        var oldPrevView1 = data[i][10];      // Cột K (Index 10) - Trước 1
+        var oldPrevView2 = data[i][11];      // Cột L (Index 11) - Trước 2
+        var oldFirstAccessStr = data[i][13]; // Cột N (Index 13) - Lần đầu đợt
+        
+        // BỘ LỌC KHỬ RÁC (Chỉ xóa nếu là Object hoặc đúng định dạng YYYY-MM-DD)
+        var dateRegex = /^\d{4}-\d{2}-\d{2}/; 
+        if (typeof oldCurrentView === 'object' || dateRegex.test(String(oldCurrentView))) oldCurrentView = "";
+        if (typeof oldPrevView1 === 'object' || dateRegex.test(String(oldPrevView1))) oldPrevView1 = "";
+        if (typeof oldPrevView2 === 'object' || dateRegex.test(String(oldPrevView2))) oldPrevView2 = "";
+
+        // TÍNH TOÁN LOGIC 30 PHÚT ĐỢT MỚI ĐÃ ĐƯỢC SỬA LỖI TIMEZONE
+        var isNewSession = true;
+        if (oldLastActiveStr) {
+          var timeNowFixed = new Date(nowStr.replace(' ', 'T') + "Z").getTime();
+          var oldStrFixed = String(oldLastActiveStr).trim();
+          if (typeof oldLastActiveStr === 'object' && oldLastActiveStr instanceof Date) {
+             oldStrFixed = Utilities.formatDate(oldLastActiveStr, "GMT+7", "yyyy-MM-dd HH:mm:ss");
+          }
+          var timeOldFixed = new Date(oldStrFixed.replace(' ', 'T') + "Z").getTime();
+          if (!isNaN(timeOldFixed) && !isNaN(timeNowFixed)) {
+            var diff = timeNowFixed - timeOldFixed;
+            if (diff >= 0 && diff < 30 * 60 * 1000) isNewSession = false;
+          }
+        }
+        
+        // 1. Cập nhật "Lần cuối truy cập" (Cột I)
+        sheet.getRange(i + 1, 9).setValue(nowStr);
+        
+       
+        // 2. Đẩy lịch sử: Đang xem -> Trước 1 -> Trước 2 -> Trước 3
+        if (lastView && String(lastView) !== String(oldCurrentView)) {
+          var newStr = String(lastView).trim();
+          var oldStr = String(oldCurrentView).trim();
+          
+          sheet.getRange(i + 1, 10).setValue(newStr); // J: Đang xem luôn được cập nhật
+          
+          if (oldCurrentView) {
+            if (newStr !== oldStr) {
+                var parentView = newStr.indexOf(" - ") !== -1 ? newStr.split(" - ")[0].trim() : newStr;
+                var oldParentView = oldStr.indexOf(" - ") !== -1 ? oldStr.split(" - ")[0].trim() : oldStr;
+                
+                // TRƯỜNG HỢP 1: Dọn rác trạng thái chờ (LOẠI BỎ CHỮ THỜI GIAN BIỂU BỊ DƯ)
+                // Nếu bước cũ CHỈ LÀ danh mục gốc của bước mới (VD: "Thời gian biểu" -> "Thời gian biểu - Tuần 15")
+                if (oldStr === parentView && newStr !== oldStr) {
+                    // => Không làm gì cả. Chữ "Thời gian biểu" trơ trọi sẽ bị ĐÈ MẤT bởi newStr ở cột J phía trên, 
+                    // mà không bị đẩy xuống cột K (Phía trước 1).
+                }
+                // TRƯỜNG HỢP 2: Nội suy bước trung gian
+                // Chuyển từ một danh mục KHÁC hoàn toàn thẳng vào chi tiết (VD: "Trang chủ" -> "Thời gian biểu - Tuần 8")
+                else if (parentView !== newStr && oldStr !== parentView && parentView !== oldParentView) {
+                    sheet.getRange(i + 1, 11).setValue(parentView); // K: Chèn danh mục gốc vào Trước 1
+                    sheet.getRange(i + 1, 12).setValue(oldStr);     // L: Đẩy trang cũ xuống Trước 2
+                    if (oldPrevView1 && oldPrevView1 !== oldStr) {
+                        sheet.getRange(i + 1, 13).setValue(oldPrevView1); // M: Trước 3
+                    }
+                } 
+                // TRƯỜNG HỢP 3: Đẩy tuần tự bình thường 
+                // Ghi nhận chuyển qua lại giữa các tuần (VD: "Thời gian biểu - Tuần 6" -> "Thời gian biểu - Tuần 8")
+                else {
+                    sheet.getRange(i + 1, 11).setValue(oldStr); // K: Trước 1
+                    if (oldPrevView1 && oldPrevView1 !== oldStr) {
+                        sheet.getRange(i + 1, 12).setValue(oldPrevView1); // L: Trước 2
+                        if (oldPrevView2) {
+                            sheet.getRange(i + 1, 13).setValue(oldPrevView2); // M: Trước 3
+                        }
+                    }
+                }
+            }
+          }
+        } else if (lastView && !oldCurrentView) {
+          sheet.getRange(i + 1, 10).setValue(lastView);
+        }
+        
+        // 3. Cập nhật "Lần đầu truy cập cho đợt" (Cột N)
+        // Lần này logic đợt mới isNewSession đã hoạt động đúng
+        if (isNewSession || !oldFirstAccessStr || String(oldFirstAccessStr).trim() === "") {
+          sheet.getRange(i + 1, 14).setValue(nowStr);
+        }
+        
+        break;
+      }
+    }
+  } catch (e) {
+    Logger.log("Lỗi updateLastActive: " + e.toString());
+  }
+}
+
+// API Trả về danh sách cho Admin
+function getAllUsersAccessHistory() {
+  var sheet = ss.getSheetByName("Users");
+  if (!sheet) return [];
+  
+  var data = sheet.getDataRange().getValues();
+  var usersList = [];
+
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0]) { 
+      var rawDate = data[i][8]; 
+      var formattedDate = "Chưa từng truy cập";
+      if (rawDate) {
+        formattedDate = Utilities.formatDate(new Date(rawDate), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+      }
+
+      var lastViewData = data[i][9] || "Không rõ"; // J: Đang xem
+      var prevView1Data = data[i][10] || "Chưa có"; // K: Trước 1
+      var prevView2Data = data[i][11] || "Chưa có"; // L: Trước 2
+      var prevView3Data = data[i][12] || "Chưa có"; // M: Trước 3
+      
+      var rawFirstAccess = data[i][13]; // N: Lần đầu đợt
+      var formattedFirstAccess = "Chưa có";
+      if (rawFirstAccess) {
+        formattedFirstAccess = Utilities.formatDate(new Date(rawFirstAccess), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+      }
+
+      usersList.push({
+        mssv: data[i][0],      
+        name: data[i][2] || "", 
+        lastActive: formattedDate,
+        lastView: lastViewData,
+        prevView1: prevView1Data,
+        prevView2: prevView2Data,
+        prevView3: prevView3Data,
+        firstAccess: formattedFirstAccess
+      });
+    }
+  }
+
+  return usersList;
+}
+
+function sendChat(mssv, name, message) {
+  var sheet = ss.getSheetByName("ChatHistory");
+  if (!sheet) {
+    sheet = ss.insertSheet("ChatHistory");
+    sheet.appendRow(["Thời gian", "MSSV", "Tên", "Nội dung"]);
+    sheet.getRange("A1:D1").setFontWeight("bold").setBackground("#154c79").setFontColor("white");
+  }
+  
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+  sheet.appendRow([timestamp, mssv, name, message]);
+  
+  var maxRows = 500;
+  if (sheet.getLastRow() > maxRows + 1) {
+    sheet.deleteRows(2, sheet.getLastRow() - maxRows - 1);
+  }
+  return "Đã gửi tin nhắn!";
+}
+
+function getChatMessages() {
+  var sheet = ss.getSheetByName("ChatHistory");
+  if (!sheet || sheet.getLastRow() <= 1) return [];
+  
+  var lastRow = sheet.getLastRow();
+  var startRow = Math.max(2, lastRow - 50); 
+  var numRows = lastRow - startRow + 1;
+  
+  var data = sheet.getRange(startRow, 1, numRows, 4).getDisplayValues();
+  var result = [];
+  
+  for (var i = 0; i < data.length; i++) {
+    result.push({
+      rowIndex: startRow + i, 
+      time: data[i][0],
+      mssv: data[i][1],
+      name: data[i][2],
+      message: data[i][3]
+    });
+  }
+  return result;
+}
+
+function editChatMessage(rowIndex, mssv, newMessage) {
+  var sheet = ss.getSheetByName("ChatHistory");
+  if (!sheet) return "Lỗi: Không tìm thấy dữ liệu.";
+  var row = Number(rowIndex); 
+  var savedMssv = sheet.getRange(row, 2).getValue();
+  if (String(savedMssv).trim() !== String(mssv).trim()) return "Lỗi: Bạn không có quyền sửa tin nhắn này.";
+  sheet.getRange(row, 4).setValue(newMessage);
+  return "Đã cập nhật tin nhắn.";
+}
+
+function deleteChatMessage(rowIndex, mssv) {
+  var sheet = ss.getSheetByName("ChatHistory");
+  if (!sheet) return "Lỗi: Không tìm thấy dữ liệu.";
+  var row = Number(rowIndex); 
+  var savedMssv = sheet.getRange(row, 2).getValue();
+  if (String(savedMssv).trim() !== String(mssv).trim()) return "Lỗi: Bạn không có quyền xóa tin nhắn này.";
+  sheet.deleteRow(row);
+  return "Đã xóa tin nhắn.";
+}
+
+// ==========================================
+// CÁC HÀM GET DỮ LIỆU & QUẢN LÝ (WEB/HỌC PHẦN/QA)
+// ==========================================
+function getHocPhanList() {
+  var sheets = ss.getSheets();
+  var list = [];
+  for(var i = 0; i < sheets.length; i++) {
+    var name = sheets[i].getName();
+    if (name !== "Q&A" && name !== "WEB" && name !== "TKB" && name !== "Deadlines_Personal" && name !== "CauHinhHocKy" && name !== "Users") list.push(name);
+  }
+  return list;
+}
+
+function getConfigHocKy() {
+  var sheet = ss.getSheetByName("CauHinhHocKy");
+  if (!sheet || sheet.getLastRow() <= 1) return [];
+  return sheet.getRange(2, 1, sheet.getLastRow() - 1, 5).getDisplayValues();
+}
+
+function getWebLinks() {
+  var sheet = ss.getSheetByName("WEB");
+  if (!sheet || sheet.getLastRow() <= 1) return []; 
+  return sheet.getRange(2, 1, sheet.getLastRow() - 1, 4).getValues();
+}
+
+function getHocPhanData(sheetName) {
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet || sheet.getLastRow() === 0) return [];
+  
+  var data = sheet.getDataRange().getDisplayValues();
+  var now = new Date().getTime();
+  
+  var col1Updates = []; // Khai báo mảng gom dữ liệu để ghi 1 lần
+  var hasChanges = false; // Cờ theo dõi xem có cần cập nhật Sheet không
+  
+  for (var i = 1; i < data.length; i++) { // Bỏ qua dòng tiêu đề
+    var c1 = String(data[i][0]).trim();
+    var c2 = String(data[i][1] || ''); // Cột 2: Tiêu đề
+    var c3 = String(data[i][2] || ''); // Cột 3: Nội dung
+    var c4 = String(data[i][3] || '').trim(); // Cột 4: Ngày đăng
+    var c7 = String(data[i][6] || ''); // Cột 7: Ghi chú
+    
+    var isCurrentlyNew = /\bnew\b/i.test(c1);
+    var shouldBeNew = false;
+    var hasCondition = false;
+    
+    // 1. Quét tìm Deadline ở các cột 2, 3, 7
+    var deadlineTime = extractDeadlineGAS(c2) || extractDeadlineGAS(c3) || extractDeadlineGAS(c7);
+    
+    if (deadlineTime) {
+      hasCondition = true;
+      if (now <= deadlineTime) {
+        shouldBeNew = true;
+      }
+    } else {
+      // 2. Không có Deadline -> Dựa vào Ngày đăng bài
+      var postDateMatch = c4.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (postDateMatch) {
+        hasCondition = true;
+        var postDate = new Date(postDateMatch[3], postDateMatch[2] - 1, postDateMatch[1]).getTime();
+        var daysPassed = (now - postDate) / (1000 * 60 * 60 * 24);
+        
+        if (daysPassed <= 15) {
+          shouldBeNew = true; 
+        }
+      }
+    }
+    
+    var finalC1 = c1;
+    
+    // XỬ LÝ LOGIC CHỮ "NEW"
+    if (sheetName.toLowerCase() === 'thông báo') {
+      if (hasCondition) {
+        if (shouldBeNew && !isCurrentlyNew) {
+          finalC1 = c1 === "" ? "New" : "New - " + c1;
+          hasChanges = true;
+        } 
+        else if (!shouldBeNew && isCurrentlyNew) {
+          finalC1 = c1.replace(/\bnew\b/ig, '').trim(); 
+          finalC1 = finalC1.replace(/^[\s\-]+|[\s\-]+$/g, ''); 
+          hasChanges = true;
+        }
+      }
+    } else {
+      if (isCurrentlyNew) {
+         finalC1 = c1.replace(/\bnew\b/ig, '').trim(); 
+         finalC1 = finalC1.replace(/^[\s\-]+|[\s\-]+$/g, '');
+         hasChanges = true;
+      }
+    }
+    
+    // Cập nhật vào mảng kết quả trả về cho Web
+    data[i][0] = finalC1;
+    // Cập nhật vào mảng chờ để ghi xuống Sheet
+    col1Updates.push([finalC1]);
+  }
+  
+  // NẾU PHÁT HIỆN SỰ THAY ĐỔI -> GHI XUỐNG SHEET 1 LẦN DUY NHẤT (SIÊU TỐC)
+  if (hasChanges) {
+    sheet.getRange(2, 1, col1Updates.length, 1).setValues(col1Updates);
+  }
+  
+  return data;
+}
+
+function extractDeadlineGAS(text) {
+  if (!text) return null;
+  
+  // Biểu thức quét siêu linh hoạt:
+  // - Bắt được chữ "Ngày", "Ng&agrave;y", "Ngày." hoặc "Ng&agrave;y."
+  // - Hoặc không cần chữ Ngày nào luôn cũng bắt được
+  var match = text.match(/DEADLINE[\s=:]*(?:lúc\s*)?(?:(\d{1,2}:\d{2}))?[\s]*(?:Ng(?:à|&agrave;)y\.?\s*)?(\d{1,2}\/\d{1,2}\/\d{4})/i);
+  
+  if (match) {
+    var timeStr = match[1] || "23:59"; // Mặc định 23:59 nếu không nhập giờ
+    var dateStr = match[2];            // Lấy chuỗi ngày tháng
+    
+    var dateParts = dateStr.split('/');
+    var timeParts = timeStr.split(':');
+    
+    // Quy đổi ra mili-giây để tính toán
+    return new Date(dateParts[2], dateParts[1] - 1, dateParts[0], timeParts[0], timeParts[1], 0).getTime();
+  }
+  return null;
+}
+
+function getTKBData() {
+  var sheet = ss.getSheetByName("TKB");
+  if (!sheet) return [];
+  var data = sheet.getDataRange().getDisplayValues();
+  return data.length > 1 ? data.slice(1) : [];
+}
+
+function addSheetRow(sheetName, col1, col2, col3, col4, col5, col6, col7) {
+  var sheet = ss.getSheetByName(sheetName);
+  sheet.insertRowAfter(1);
+  // Ghi dữ liệu vào 7 cột
+  sheet.getRange(2, 1, 1, 7).setValues([[col1 || "", col2 || "", col3 || "", col4 || "", col5 || "", col6 || "", col7 || ""]]);
+  return "Đã thêm nội dung mới lên đầu bảng thành công!";
+}
+
+function deleteSheetRow(sheetName, rowIndex) {
+  var sheet = ss.getSheetByName(sheetName);
+  sheet.deleteRow(rowIndex);
+  return "Đã xóa nội dung thành công!";
+}
+
+function editSheetRow(sheetName, rowIndex, col1, col2, col3, col4, col5, col6, col7) {
+  var sheet = ss.getSheetByName(sheetName);
+  sheet.getRange(rowIndex, 1, 1, 7).setValues([[col1 || "", col2 || "", col3 || "", col4 || "", col5 || "", col6 || "", col7 || ""]]);
+  return "Đã lưu nội dung cập nhật!";
+}
+
+function insertSheetRowAfter(sheetName, rowIndex, col1, col2, col3, col4, col5, col6, col7) {
+  var sheet = ss.getSheetByName(sheetName);
+  sheet.insertRowAfter(rowIndex);
+  sheet.getRange(rowIndex + 1, 1, 1, 7).setValues([[col1 || "", col2 || "", col3 || "", col4 || "", col5 || "", col6 || "", col7 || ""]]);
+  return "Đã chèn nội dung thành công!";
+}
+
+function moveSheetRow(sheetName, rowIndex, direction) {
+  var sheet = ss.getSheetByName(sheetName);
+  var lastRow = sheet.getLastRow();
+  if (direction === 'up' && rowIndex <= 2) return "Đã ở vị trí trên cùng.";
+  if (direction === 'down' && rowIndex >= lastRow) return "Đã ở vị trí dưới cùng.";
+  var targetIndex = (direction === 'up') ? rowIndex - 1 : rowIndex + 2;
+  sheet.insertRowBefore(targetIndex);
+  var sourceRange = sheet.getRange((direction === 'up') ? rowIndex + 1 : rowIndex, 1, 1, sheet.getMaxColumns());
+  var targetRange = sheet.getRange(targetIndex, 1);
+  sourceRange.moveTo(targetRange);
+  sheet.deleteRow((direction === 'up') ? rowIndex + 1 : rowIndex);
+  return "Đã di chuyển hàng thành công.";
+}
+
+function addHocPhan(name) {
+  if (ss.getSheetByName(name)) return "Lỗi: Danh mục đã tồn tại.";
+  var newSheet = ss.insertSheet(name, ss.getNumSheets());
+  newSheet.appendRow(["STT", "Nội dung", "Hình thức", "Tài liệu học tập"]);
+  newSheet.getRange("A1:D1").setFontWeight("bold").setBackground("#154c79").setFontColor("white");
+  return "Đã thêm danh mục mới vào cuối danh sách!";
+}
+
+function deleteHocPhan(name) {
+  var sheet = ss.getSheetByName(name);
+  ss.deleteSheet(sheet);
+  return "Đã xóa danh mục thành công!";
+}
+
+function editHocPhan(oldName, newName) {
+  var sheet = ss.getSheetByName(oldName);
+  sheet.setName(newName);
+  return "Đã đổi tên danh mục thành công!";
+}
+
+function moveHocPhan(name, direction) {
+  var sheet = ss.getSheetByName(name);
+  var currentIndex = sheet.getIndex(); 
+  var sheetsCount = ss.getSheets().length;
+  if (direction === "up" && currentIndex > 1) { ss.setActiveSheet(sheet); ss.moveActiveSheet(currentIndex - 1); } 
+  else if (direction === "down" && currentIndex < sheetsCount) { ss.setActiveSheet(sheet); ss.moveActiveSheet(currentIndex + 1); }
+  return "Đã di chuyển danh mục!";
+}
+
+function submitQuestion(mssv, questionText) {
+  var qaSheet = ss.getSheetByName("Q&A");
+  if (!qaSheet) {
+    qaSheet = ss.insertSheet("Q&A");
+    qaSheet.appendRow(["Thời gian", "Mã số sinh viên", "Câu hỏi", "Trả lời của Admin", "👍 Hữu ích", "👎 Chưa rõ"]);
+    qaSheet.getRange("A1:F1").setFontWeight("bold").setBackground("#154c79").setFontColor("white");
+    qaSheet.setColumnWidths(1, 4, [150, 150, 350, 350]);
+  }
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+  qaSheet.appendRow([timestamp, mssv, questionText, "", 0, 0, ""]);
+
+  try {
+    var recipientEmail = "truongbaochi.toan.hcmue@outlook.com.vn"; 
+    var cleanQuestion = questionText.replace(/<[^>]*>/g, '').trim(); 
+
+    var subject = "🔔 [Q&A Mới] Có câu hỏi mới từ SV: " + mssv;
+    
+    // Thiết kế giao diện Email HTML chuyên nghiệp, có khung màu mè
+    var htmlBody = `
+      <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+        <div style="background: linear-gradient(135deg, #0f4c81, #1664a8); color: #ffffff; padding: 18px 24px; border-radius: 8px 8px 0 0; text-align: center;">
+          <h2 style="margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 0.5px;">🔔 Thông báo Q&A Mới</h2>
+        </div>
+        <div style="background-color: #ffffff; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none;">
+          <p style="color: #334155; font-size: 15px; margin-top: 0;">Chào bạn,</p>
+          <p style="color: #334155; font-size: 15px;">Hệ thống Học nhóm vừa nhận được một câu hỏi mới trong mục <strong>Giải đáp thắc mắc</strong>:</p>
+          
+          <div style="background-color: #f1f5f9; padding: 12px 18px; border-radius: 8px; margin: 16px 0; font-size: 14.5px; color: #475569;">
+            <p style="margin: 6px 0;"><strong>👤 Người gửi:</strong> <span style="color: #0f4c81; font-weight: bold;">${mssv}</span></p>
+            <p style="margin: 6px 0;"><strong>⏰ Thời gian:</strong> ${timestamp}</p>
+          </div>
+
+          <p style="color: #1e293b; font-size: 14.5px; font-weight: bold; margin-bottom: 6px;">📝 Nội dung câu hỏi:</p>
+          <div style="background-color: #fff5f5; border-left: 4px solid #e61d4a; padding: 16px; border-radius: 0 8px 8px 0; color: #1e293b; font-size: 15px; line-height: 1.6; word-break: break-word; margin-bottom: 24px;">
+            ${questionText}
+          </div>
+
+          <div style="text-align: center;">
+            <a href="https://zeroihc517.github.io/hcmuek51tud/login.html" target="_blank" style="background-color: #0f4c81; color: #ffffff; padding: 12px 28px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(15, 76, 129, 0.2);">Trở lại trang web để phản hồi</a>
+          </div>
+        </div>
+        <div style="text-align: center; color: #94a3b8; font-size: 12px; margin-top: 16px;">
+          Hệ thống tự động thông báo - Khoa Toán-Tin học
+        </div>
+      </div>
+    `;
+
+    MailApp.sendEmail({
+      to: recipientEmail,
+      subject: subject,
+      htmlBody: htmlBody
+    });
+  } catch (emailError) {
+    Logger.log("Lỗi khi gửi mail thông báo: " + emailError.toString());
+  }
+
+  return "Đã gửi câu hỏi thành công!";
+}
+
+function replyToAdmin(rowIndex, replyText) {
+  var qaSheet = ss.getSheetByName("Q&A");
+  var answerCell = qaSheet.getRange(rowIndex, 4); 
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+  answerCell.setValue(answerCell.getValue() + "\n\n[SV]\n(" + timestamp + ")\n" + replyText + "\n[/SV]\n\n");
+  qaSheet.getRange(rowIndex, 7).setValue("UNREAD");
+  try {
+    var recipientEmail = "truongbaochi.toan.hcmue@outlook.com.vn";
+    var svMssv = qaSheet.getRange(rowIndex, 2).getValue();
+    var originalQuestion = qaSheet.getRange(rowIndex, 3).getValue().replace(/<[^>]*>/g, '').trim();
+
+    var subject = "💬 [Thảo luận - Phản hồi mới] SV: " + svMssv;
+    var htmlBody = `
+      <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+        <div style="background: linear-gradient(135deg, #166534, #22c55e); color: #ffffff; padding: 18px 24px; border-radius: 8px 8px 0 0; text-align: center;">
+          <h2 style="margin: 0; font-size: 20px; text-transform: uppercase;">💬 Bình luận phản hồi mới</h2>
+        </div>
+        <div style="background-color: #ffffff; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none;">
+          <p style="color: #334155; font-size: 15px;">Sinh viên (<strong style="color: #166534;">${svMssv}</strong>) vừa gửi một bình luận mới trong chuỗi thảo luận:</p>
+          
+          <div style="background-color: #f1f5f9; padding: 12px 18px; border-radius: 8px; margin: 16px 0; font-size: 14px; color: #475569;">
+            <p style="margin: 4px 0;"><strong>📌 Câu hỏi gốc:</strong> ${originalQuestion}</p>
+          </div>
+
+          <div style="background-color: #f0fdf4; border-left: 4px solid #166534; padding: 16px; border-radius: 0 8px 8px 0; color: #166534; font-size: 15px; line-height: 1.6; margin-bottom: 24px;">
+            <strong>Nội dung phản hồi:</strong><br>${replyText}
+          </div>
+        </div>
+      </div>
+    `;
+
+    MailApp.sendEmail({
+      to: recipientEmail,
+      subject: subject,
+      htmlBody: htmlBody
+    });
+  } catch (e) {
+    Logger.log("Lỗi gửi mail phản hồi: " + e.toString());
+  }
+
+  return "Đã gửi phản hồi thành công!";
+}
+
+// THAY THẾ TOÀN BỘ HÀM NÀY:
+function submitVote(rowIndex, voteType, user) {
+    var qaSheet = ss.getSheetByName("Q&A");
+    var colIndex = (voteType === 'up') ? 5 : 6; 
+    
+    var cell = qaSheet.getRange(rowIndex, colIndex);
+    var currentVotes = parseInt(cell.getValue()) || 0;
+    
+    // Cộng thêm 1 điểm
+    cell.setValue(currentVotes + 1);
+    
+    // Tùy chọn: Bạn có thể lưu user vào cột 7 (G) để chống spam tuyệt đối (nếu muốn)
+    // var userCell = qaSheet.getRange(rowIndex, 7);
+    // var votedUsers = userCell.getValue();
+    // userCell.setValue(votedUsers + (votedUsers ? "," : "") + user);
+    
+    // Trả về số lượt Vote mới nhất của cả 2 cột để giao diện cập nhật
+    var totalUp = parseInt(qaSheet.getRange(rowIndex, 5).getValue()) || 0;
+    var totalDown = parseInt(qaSheet.getRange(rowIndex, 6).getValue()) || 0;
+    
+    return { up: totalUp, down: totalDown };
+}
+function getQAData() {
+  var qaSheet = ss.getSheetByName("Q&A");
+  if (!qaSheet || qaSheet.getLastRow() <= 1) return [];
+  // Quét 7 cột thay vì 6
+  var data = qaSheet.getRange(2, 1, qaSheet.getLastRow() - 1, 7).getDisplayValues(); 
+  var result = [];
+  for (var i = 0; i < data.length; i++) {
+     var row = data[i].slice(0, 6); // Giữ nguyên 6 cột gốc để không làm hỏng Frontend cũ
+     row.push(i + 2);               // Index 6: Trở thành rowIndex
+     row.push(data[i][6]);          // Index 7: Trạng thái Đọc (READ/UNREAD)
+     result.push(row);
+  }
+  return result.reverse(); 
+}
+function getStudentEmailByMssv(mssv) {
+  try {
+    var sheet = ss.getSheetByName("Users");
+    if (!sheet) return null;
+    var data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return null;
+    
+    // Tìm vị trí cột "Email liên hệ" từ dòng tiêu đề (dòng đầu tiên)
+    var headers = data[0];
+    var emailColIndex = -1;
+    for (var h = 0; h < headers.length; h++) {
+      var headerText = String(headers[h]).trim().toLowerCase();
+      if (headerText === "email liên hệ" || headerText === "email") {
+        emailColIndex = h;
+        break;
+      }
+    }
+    
+    // Nếu không tìm thấy cột email, mặc định lấy cột F (index 5) theo hình của bạn
+    if (emailColIndex === -1) emailColIndex = 5; 
+
+    // Duyệt tìm email của sinh viên theo MSSV (cột A tương ứng index 0)
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === String(mssv).trim()) {
+        var email = String(data[i][emailColIndex] || "").trim();
+        if (email.indexOf("@") !== -1) {
+          return email;
+        }
+      }
+    }
+  } catch (e) {
+    Logger.log("Lỗi tra cứu email sinh viên: " + e.toString());
+  }
+  return null;
+}
+function adminReplyQuestion(rowIndex, adminReplyText) {
+  var sheet = ss.getSheetByName("Q&A"); 
+  var currentAnswer = sheet.getRange(rowIndex, 4).getValue(); 
+  sheet.getRange(rowIndex, 4).setValue(currentAnswer ? currentAnswer + "\n\n" + adminReplyText : adminReplyText);
+  sheet.getRange(rowIndex, 7).setValue("UNREAD"); // ĐÚNG
+  try {
+    var svMssv = sheet.getRange(rowIndex, 2).getValue();
+    var originalQuestion = sheet.getRange(rowIndex, 3).getValue().replace(/<[^>]*>/g, '').trim();
+    
+    // Tra cứu email của sinh viên từ hồ sơ
+    var studentEmail = getStudentEmailByMssv(svMssv);
+    
+    if (studentEmail) {
+      var subject = "🎓 [Học nhóm Khoa Toán] Admin đã giải đáp câu hỏi của bạn!";
+      var htmlBody = `
+        <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <div style="background: linear-gradient(135deg, #0f4c81, #1664a8); color: #ffffff; padding: 18px 24px; border-radius: 8px 8px 0 0; text-align: center;">
+            <h2 style="margin: 0; font-size: 20px; text-transform: uppercase;">✨ Câu hỏi của bạn đã có phản hồi</h2>
+          </div>
+          <div style="background-color: #ffffff; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none;">
+            <p style="color: #334155; font-size: 15px;">Xin chào bạn,</p>
+            <p style="color: #334155; font-size: 15px;">Admin vừa đăng câu trả lời cho thắc mắc của bạn trên hệ thống:</p>
+            
+            <div style="background-color: #f1f5f9; padding: 12px 18px; border-radius: 8px; margin: 16px 0; font-size: 14px; color: #475569;">
+              <p style="margin: 4px 0;"><strong>📌 Câu hỏi gốc của bạn:</strong> ${originalQuestion}</p>
+            </div>
+
+            <p style="color: #1e293b; font-size: 14.5px; font-weight: bold; margin-bottom: 6px;">💡 Câu trả lời từ Admin:</p>
+            <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 16px; border-radius: 0 8px 8px 0; color: #166534; font-size: 15px; line-height: 1.6; word-break: break-word; margin-bottom: 24px;">
+              ${adminReplyText}
+            </div>
+
+            <div style="text-align: center;">
+              <a href="https://bit.ly/applied-mathematics-ihc517" target="_blank" style="background-color: #0f4c81; color: #ffffff; padding: 12px 28px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block;">Truy cập website xem chi tiết</a>
+            </div>
+          </div>
+        </div>
+      `;
+
+      MailApp.sendEmail({
+        to: studentEmail,
+        subject: subject,
+        htmlBody: htmlBody
+      });
+    }
+  } catch (e) {
+    Logger.log("Lỗi gửi email thông báo cho sinh viên: " + e.toString());
+  }
+
+  return "Đã đăng câu trả lời và gửi email thông báo thành công!";
+}
+
+function deleteQA(rowIndex) {
+  var sheet = ss.getSheetByName("Q&A");
+  try { sheet.deleteRow(rowIndex); return "Đã xóa toàn bộ Q&A này!"; } catch (e) { return "Lỗi khi xóa: " + e.toString(); }
+}
+
+function updateQAThread(rowIndex, fullText) {
+  var sheet = ss.getSheetByName("Q&A");
+  sheet.getRange(rowIndex, 4).setValue(fullText);
+  return "Cập nhật thành công!";
+}
+
+function getTkbSheetName(mssv) {
+  return (String(mssv).trim() === "51.01.108.008") ? "TKB_Admin" : "TKB";
+}
+
+function getDeadlineSheetName(mssv) {
+  return (String(mssv).trim() === "51.01.108.008") ? "Deadlines_Admin" : "Deadlines_Personal";
+}
+
+
+// ==========================================
+// API ĐỒNG BỘ TKB HỆ THỐNG
+// ==========================================
+function getSystemTKBList(mssv) {
+  var masterSheet = ss.getSheetByName("MasterTKB");
+  if (!masterSheet) return { allCourses: [], registeredIds: [] };
+
+  // 1. Lấy danh sách toàn bộ môn học từ hệ thống
+  var data = masterSheet.getDataRange().getDisplayValues();
+  var allCourses = [];
+  
+  // Vòng lặp đọc đến cột N (index 13: Học Kỳ) để lấy dữ liệu lọc
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0]) {
+      allCourses.push({
+        id: data[i][0],
+        thu: data[i][1],
+        tietBd: parseInt(data[i][2]),
+        soTiet: parseInt(data[i][3]),
+        thoiGian: data[i][4],
+        hinhThuc: data[i][5],
+        mon: data[i][6],
+        phong: data[i][7],
+        gv: data[i][8],
+        ngayBatDau: data[i][10] || "", // Cột K
+        ngayKetThuc: data[i][11] || "", // Cột L
+        namHoc: data[i][12] || "",      // Cột M (Dùng cho dropdown Lọc Năm Học)
+        hocKy: data[i][13] || "",        // Cột N (Dùng cho dropdown Lọc Học Kỳ)
+        ngayNgoaiLe: data[i][14] || "",
+        ghiChu: data[i][15] || ""
+      });
+    }
+  }
+
+  // 2. Lấy danh sách ID mà sinh viên đã đăng ký
+  var regSheet = ss.getSheetByName("UserRegisteredCourses");
+  var registeredIds = [];
+  if (regSheet) {
+    var regData = regSheet.getDataRange().getDisplayValues();
+    for (var j = 1; j < regData.length; j++) {
+      if (String(regData[j][0]).trim() === String(mssv).trim()) {
+        registeredIds = String(regData[j][1]).split(',').map(function(id) { return id.trim(); }).filter(function(id) { return id; });
+        break;
+      }
+    }
+  }
+  
+  return { allCourses: allCourses, registeredIds: registeredIds };
+}
+function logRegistrationHistory(mssv, actionType, details) {
+  try {
+    var sheet = ss.getSheetByName("RegistrationHistory");
+    if (!sheet) {
+      sheet = ss.insertSheet("RegistrationHistory");
+      sheet.appendRow(["Thời gian", "MSSV", "Thao tác", "Chi tiết Mã HP / Lớp"]);
+      sheet.getRange("A1:D1").setFontWeight("bold").setBackground("#0f4c81").setFontColor("white");
+    }
+    var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+    sheet.appendRow([timestamp, mssv, actionType, details]);
+  } catch(e) {
+    Logger.log("Lỗi ghi log lịch sử: " + e.toString());
+  }
+}
+function saveSystemTkbSelection(mssv, courseIds) {
+  var regSheet = ss.getSheetByName("UserRegisteredCourses");
+  if (!regSheet) {
+    regSheet = ss.insertSheet("UserRegisteredCourses");
+    regSheet.appendRow(["MSSV", "CourseIDs"]);
+    regSheet.getRange("A1:B1").setFontWeight("bold").setBackground("#154c79").setFontColor("white");
+  }
+
+  var data = regSheet.getDataRange().getValues();
+  var found = false;
+  
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      regSheet.getRange(i + 1, 2).setValue(courseIds);
+      found = true;
+      break;
+    }
+  }
+  
+  if (!found) {
+    regSheet.appendRow([mssv, courseIds]);
+  }
+  
+  // GHI LOG LỊCH SỬ
+  logRegistrationHistory(mssv, "Đồng bộ Hệ thống", courseIds || "Đã hủy hết");
+  
+  return "Lưu đăng ký hệ thống thành công!";
+}
+
+// ==========================================
+// API QUẢN LÝ ĐIỂM GPA CỦA SINH VIÊN
+// ==========================================
+function getGPAUser(mssv) {
+  var sheet = ss.getSheetByName("GPA_Data");
+  if (!sheet) return "[]"; // Chưa có sheet thì trả về mảng rỗng
+  
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      return data[i][1]; // Trả về chuỗi JSON dữ liệu GPA của sinh viên
+    }
+  }
+  return "[]";
+}
+
+function saveGPAUser(mssv, gpaDataStr) {
+  var sheet = ss.getSheetByName("GPA_Data");
+  // Tự động tạo Sheet nếu chưa có
+  if (!sheet) {
+    sheet = ss.insertSheet("GPA_Data");
+    sheet.appendRow(["MSSV", "GPADataset"]);
+    sheet.getRange("A1:B1").setFontWeight("bold").setBackground("#154c79").setFontColor("white");
+  }
+  
+  var data = sheet.getDataRange().getValues();
+  var found = false;
+  
+  // Tìm sinh viên để ghi đè điểm
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      sheet.getRange(i + 1, 2).setValue(gpaDataStr);
+      found = true;
+      break;
+    }
+  }
+  
+  // Chưa có thì thêm mới
+  if (!found) {
+    sheet.appendRow([mssv, gpaDataStr]);
+  }
+  
+  return "Đã đồng bộ điểm GPA lên hệ thống thành công!";
+}
+// Hàm lấy cấu hình GPA
+function getGPAConfig(mssv) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("gpa_data");
+  if (!sheet) return "";
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(mssv)) {
+      return data[i][2]; // Lấy dữ liệu ở Cột C (Cột 3)
+    }
+  }
+  return "";
+}
+
+// Hàm lưu cấu hình GPA
+function saveUserGPAConfig(mssv, configData) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("gpa_data");
+  if (!sheet) {
+    sheet = ss.insertSheet("GPA_Data");
+    sheet.appendRow(["MSSV", "GPADataset", "Config"]);
+  }
+  var data = sheet.getDataRange().getValues();
+  var found = false;
+  
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      sheet.getRange(i + 1, 3).setValue(configData);
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    sheet.appendRow([mssv, "[]", configData]);
+  }
+  return "Đã lưu cấu hình song ngành!";
+}
+function submitSurvey(mssv, name, q1, q2, q3, q3_text, q4, q5) {
+  var sheet = ss.getSheetByName("KhaoSat");
+  
+  // Nếu chưa có sheet "KhaoSat" (hoặc bạn xóa sheet cũ đi), tạo mới và thêm 9 cột tiêu đề
+  if (!sheet) {
+    sheet = ss.insertSheet("KhaoSat");
+    sheet.appendRow(["Thời gian", "MSSV", "Họ Tên", "Câu 1: Giờ kết thúc", "Câu 2: Tự học", "Câu 3: Học nhóm", "Chi tiết C3", "Câu 4: Góp ý", "Câu 5: Hối hận"]);
+    sheet.getRange("A1:I1").setFontWeight("bold").setBackground("#154c79").setFontColor("white");
+  }
+  
+  var timestamp = Utilities.formatDate(new Date(), "GMT+7", "dd/MM/yyyy HH:mm:ss");
+  
+  // Lưu dữ liệu vào dòng mới với đầy đủ 9 cột
+  sheet.appendRow([timestamp, mssv, name, q1, q2, q3, q3_text, q4, q5]);
+  
+  return "Ghi nhận thành công";
+}
+
+function submitShareCode(mssv, codeData) {
+  var sheet = ss.getSheetByName("ShareCode");
+  if (!sheet) {
+    sheet = ss.insertSheet("ShareCode");
+    sheet.appendRow(["Thời gian", "Mã số sinh viên", "Nội dung Code", "Bình luận", "👍 Hữu ích", "👎 Chưa rõ"]);
+    sheet.getRange("A1:F1").setFontWeight("bold").setBackground("#10b981").setFontColor("white");
+    sheet.setColumnWidths(1, 4, [150, 150, 350, 350]);
+  }
+  
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+  
+  // 1. TÌM THẺ TAG 
+  var targetTag = null;
+  var startIndex = codeData.indexOf("[SHARECODE|");
+  var endIndex = codeData.indexOf("]", startIndex);
+  
+  if (startIndex !== -1 && endIndex !== -1) {
+    targetTag = codeData.substring(startIndex, endIndex + 1).trim();
+  }
+
+  // ĐÃ XÓA HOÀN TOÀN KHỐI LỆNH SỐ 2 (XÓA BÀI CŨ CHỐNG TRÙNG LẶP) Ở ĐÂY!
+  // Bây giờ việc nộp bài mới sẽ KHÔNG đụng chạm gì đến các bài cũ nữa.
+
+  // 3. THÊM BÀI NỘP MỚI XUỐNG CUỐI BẢNG
+  sheet.appendRow([timestamp, mssv, codeData, "", 0, 0, ""]);
+
+  // 4. KHỐI GỬI EMAIL THÔNG BÁO CHO ADMIN (Chỉ gửi khi có "1. TRẢ LỜI / LỜI GIẢI LÝ THUYẾT:")
+  if (codeData.indexOf("1. TRẢ LỜI / LỜI GIẢI LÝ THUYẾT:") !== -1) {
+    try {
+      var recipientEmail = "truongbaochi.toan.hcmue@outlook.com.vn"; 
+      var cleanCode = codeData.replace(/```[a-z]*/g, '').trim(); 
+      var subject = "💻 [Thảo luận Code] Bài cập nhật từ SV: " + mssv;
+      var htmlBody = `
+        <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <div style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; padding: 18px 24px; border-radius: 8px 8px 0 0; text-align: center;">
+            <h2 style="margin: 0; font-size: 20px; text-transform: uppercase;">💻 Cập nhật Bài chia sẻ Code</h2>
+          </div>
+          <div style="background-color: #ffffff; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none;">
+            <p style="color: #334155; font-size: 15px;">Sinh viên <strong style="color: #0284c7;">${mssv}</strong> vừa nộp một mã nguồn mới (có phần trả lời lý thuyết):</p>
+            <div style="background-color: #0f172a; color: #e2e8f0; padding: 16px; border-radius: 8px; font-family: monospace; font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; margin-bottom: 24px; overflow-x: auto;">
+              ${cleanCode}
+            </div>
+          </div>
+        </div>
+      `;
+      MailApp.sendEmail({ to: recipientEmail, subject: subject, htmlBody: htmlBody });
+    } catch (e) {
+      Logger.log("Lỗi gửi mail Share Code: " + e.toString());
+    }
+  }
+
+  return "Đã nộp bài mới thành công! (Không xóa bài cũ)";
+}
+
+function getShareCodeData() {
+  var sheet = ss.getSheetByName("ShareCode");
+  if (!sheet || sheet.getLastRow() <= 1) return [];
+  var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 7).getDisplayValues();
+  var result = [];
+  for (var i = 0; i < data.length; i++) {
+     var row = data[i].slice(0, 6);
+     row.push(i + 2);               // Index 6: rowIndex
+     row.push(data[i][6]);          // Index 7: Trạng thái Đọc
+     result.push(row);
+  }
+  return result.reverse(); 
+}
+function replyToShareCode(rowIndex, replyText) {
+  var sheet = ss.getSheetByName("ShareCode");
+  var answerCell = sheet.getRange(rowIndex, 4); 
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+  
+  // Ghi dữ liệu vào Google Sheets
+  answerCell.setValue(answerCell.getValue() + "\n\n[SV]\n(" + timestamp + ")\n" + replyText + "\n[/SV]\n\n");
+  sheet.getRange(rowIndex, 7).setValue("UNREAD");
+  
+  try {
+    var svMssv = String(sheet.getRange(rowIndex, 2).getValue()).trim(); // MSSV tác giả bài viết
+    
+    // Bóc tách dữ liệu gửi từ Frontend (Dạng: MSSV:::Thời gian:::Nội dung)
+    var parts = replyText.split(":::");
+    var commenterMssv = parts.length > 0 ? parts[0].trim() : "";
+    var content = parts.length >= 3 ? parts.slice(2).join(":::").trim() : replyText; 
+
+    // FIX: Nếu người bình luận CHÍNH LÀ tác giả bài viết -> Không cần gửi mail nhắc nhở
+    if (commenterMssv === svMssv) {
+        return "Đã gửi bình luận thành công!";
+    }
+    
+    // Lấy email tác giả bài viết
+    var studentEmail = getStudentEmailByMssv(svMssv);
+
+    if (studentEmail) {
+        var subject = "💬 [Bình luận mới] Bài chia sẻ Code của bạn có phản hồi";
+        var commenterDisplay = commenterMssv.length > 6 ? commenterMssv.substring(0, 2) + '***' + commenterMssv.substring(commenterMssv.length - 3) : commenterMssv;
+        
+        var htmlBody = `
+          <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
+            <div style="background: linear-gradient(135deg, #059669, #10b981); color: #ffffff; padding: 18px 24px; border-radius: 8px 8px 0 0; text-align: center;">
+              <h2 style="margin: 0; font-size: 20px; text-transform: uppercase; letter-spacing: 0.5px;">💬 BẠN CÓ BÌNH LUẬN MỚI</h2>
+            </div>
+            <div style="background-color: #ffffff; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none;">
+              <p style="color: #334155; font-size: 15px; margin-top: 0;">Chào bạn,</p>
+              <p style="color: #334155; font-size: 15px;">Bài <strong>Thảo luận Code</strong> của bạn trên hệ thống Học nhóm vừa nhận được một phản hồi mới từ tài khoản <strong>${commenterDisplay}</strong>.</p>
+              
+              <p style="color: #1e293b; font-size: 14.5px; font-weight: bold; margin-bottom: 6px; margin-top: 20px;">📝 Nội dung bình luận:</p>
+              <div style="background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 16px; border-radius: 0 8px 8px 0; color: #166534; font-size: 15px; line-height: 1.6; word-break: break-word; margin-bottom: 24px;">
+                ${content}
+              </div>
+
+              <div style="text-align: center;">
+                <a href="https://zeroihc517.github.io/hcmuek51tud/login.html" target="_blank" style="background-color: #10b981; color: #ffffff; padding: 12px 28px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 14px; display: inline-block; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">Trở lại trang web để thảo luận</a>
+              </div>
+            </div>
+            <div style="text-align: center; color: #94a3b8; font-size: 12px; margin-top: 16px;">
+              Hệ thống tự động thông báo - Khoa Toán-Tin học
+            </div>
+          </div>
+        `;
+
+        MailApp.sendEmail({
+            to: studentEmail, 
+            subject: subject, 
+            htmlBody: htmlBody
+        });
+    }
+  } catch (e) {
+    Logger.log("Lỗi gửi mail bình luận Share Code: " + e.toString());
+  }
+
+  return "Đã gửi bình luận thành công!";
+}
+
+function updateShareCode(rowIndex, codeData) {
+  var sheet = ss.getSheetByName("ShareCode");
+  if(sheet) {
+    sheet.getRange(rowIndex, 3).setValue(codeData);
+    return "Đã chỉnh sửa code thành công!";
+  }
+  return "Lỗi: Không tìm thấy trang tính ShareCode.";
+}
+
+// THÊM HÀM NÀY VÀO DƯỚI CÙNG FILE HOẶC NGAY DƯỚI HÀM submitVote
+function undoVote(rowIndex, voteType, user) {
+    var qaSheet = ss.getSheetByName("Q&A");
+    var colIndex = (voteType === 'up') ? 5 : 6; 
+    
+    var cell = qaSheet.getRange(rowIndex, colIndex);
+    var currentVotes = parseInt(cell.getValue()) || 0;
+    
+    // Trừ đi 1 điểm, không để số điểm nhỏ hơn 0
+    cell.setValue(Math.max(0, currentVotes - 1));
+    
+    // Trả về số lượt Vote mới nhất của cả 2 cột để giao diện cập nhật
+    var totalUp = parseInt(qaSheet.getRange(rowIndex, 5).getValue()) || 0;
+    var totalDown = parseInt(qaSheet.getRange(rowIndex, 6).getValue()) || 0;
+    
+    return { up: totalUp, down: totalDown };
+}
+
+function updateUserProfile(mssv, chuyenNganh, khoa, khoaHoc, nhom, avatar) {
+  var sheet = ss.getSheetByName("Users");
+  var data = sheet.getDataRange().getValues();
+  
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      sheet.getRange(i + 1, 4).setValue(chuyenNganh); // Cột D
+      sheet.getRange(i + 1, 5).setValue(khoa);        // Cột E
+      sheet.getRange(i + 1, 6).setValue(khoaHoc);     // Cột F
+      sheet.getRange(i + 1, 7).setValue(nhom);        // Cột G
+      if (avatar !== undefined) {
+        sheet.getRange(i + 1, 8).setValue(avatar);      // Cột H (Ghi đè URL Avatar)
+      }
+      return "Đã cập nhật thông tin học tập thành công!";
+    }
+  }
+  return "Lỗi: Không tìm thấy thông tin tài khoản người dùng.";
+}
+
+// ==========================================
+// API QUẢN LÝ DỮ LIỆU DÀNH CHO ADMIN
+// ==========================================
+function getAllUsers() {
+  var sheet = ss.getSheetByName("Users");
+  if (!sheet) return [];
+  var data = sheet.getDataRange().getValues();
+  var users = [];
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0]) {
+      users.push({ mssv: data[i][0], name: data[i][2], avatar: data[i][7] || "" });
+    }
+  }
+  return users;
+}
+function getUserProfile(mssv) {
+  var sheet = ss.getSheetByName("Users");
+  if (!sheet) return { success: false };
+  var data = sheet.getDataRange().getValues();
+  
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      
+      // --- BẮT ĐẦU: QUÉT SHEET KHAOSAT ĐỂ KIỂM TRA TRẠNG THÁI ---
+      var isSurveyDone = false;
+      try {
+        var ksSheet = ss.getSheetByName("KhaoSat");
+        if (ksSheet) {
+          var ksData = ksSheet.getDataRange().getDisplayValues();
+          for (var j = 1; j < ksData.length; j++) {
+            if (String(ksData[j][1]).trim() === String(mssv).trim()) {
+              isSurveyDone = true;
+              break;
+            }
+          }
+        }
+      } catch(e) {}
+      // --- KẾT THÚC ---
+
+      return { 
+        success: true, 
+        mssv: data[i][0], 
+        name: data[i][2],
+        chuyenNganh: data[i][3] || "",
+        khoa: data[i][4] || "",
+        khoaHoc: data[i][5] || "",
+        nhom: data[i][6] || "",
+        avatar: data[i][7] || "",
+        isSurveyDone: isSurveyDone // Trả thêm biến này về cho Web
+      };
+    }
+  }
+  return { success: false, message: "Không tìm thấy thông tin" };
+}
+function adminGetUserData(targetMssv, adminMssv) {
+  if (String(adminMssv).trim() !== "51.01.108.008") return { error: "Từ chối truy cập!" };
+  if (!targetMssv) return { error: "Thiếu mã số sinh viên." };
+
+  var tkbData = getTKBUser(targetMssv);
+  var deadlineData = getDeadlinesUser(targetMssv);
+  var gpaRaw = getGPAUser(targetMssv);
+  var gpaParsed = [];
+  try { if (gpaRaw && gpaRaw !== "[]") gpaParsed = JSON.parse(gpaRaw); } catch(e) {}
+
+  // Lấy Profile sinh viên
+  var usersSheet = ss.getSheetByName("Users");
+  var usersData = usersSheet.getDataRange().getValues();
+  var profile = {};
+  for (var i = 1; i < usersData.length; i++) {
+    if (String(usersData[i][0]).trim() === String(targetMssv).trim()) {
+      profile = {
+        name: usersData[i][2] || "Trống",
+        chuyenNganh: usersData[i][3] || "Chưa cập nhật",
+        khoa: usersData[i][4] || "Chưa cập nhật",
+        email: usersData[i][5] || "Chưa cập nhật",
+        songNganh: usersData[i][6] || "Không có"
+      };
+      break;
+    }
+  }
+
+  // Lấy danh sách Web Link cá nhân của sinh viên
+  var webLinksData = getWebLinks(targetMssv);
+  var personalLinksData = webLinksData ? webLinksData.personal : [];
+
+  // Lấy Tiến độ (Progress) và Ghi chú cá nhân (Notes) của sinh viên
+  var learningData = getLearningData(targetMssv) || {};
+  var progressData = learningData.progress || {};
+  var notesData = learningData.notes || {};
+
+  // Trả về toàn bộ dữ liệu gộp chung
+  return { 
+    success: true, 
+    tkb: tkbData, 
+    deadlines: deadlineData, 
+    gpa: gpaParsed,             // Key gốc
+    gpaData: gpaParsed,         // Thêm key gpaData để tương thích với code hiển thị mới của Frontend
+    profile: profile,
+    personalLinks: personalLinksData,
+    progress: progressData,
+    notes: notesData
+  };
+}
+
+function assignStudentsToCourse(courseId, assignedMssvList) {
+  var regSheet = ss.getSheetByName("UserRegisteredCourses");
+  var data = regSheet.getDataRange().getValues();
+  var mssvArray = assignedMssvList.split(',').map(function(item) { return item.trim(); }).filter(Boolean);
+  
+  // Xóa courseId khỏi tất cả sinh viên trước, sau đó chỉ thêm lại cho những người được check
+  for (var i = 1; i < data.length; i++) {
+    var mssv = String(data[i][0]).trim();
+    var courses = String(data[i][1]).split(',').map(function(c) { return c.trim(); }).filter(Boolean);
+    
+    var index = courses.indexOf(String(courseId).trim());
+    var isAssigned = mssvArray.indexOf(mssv) !== -1;
+    
+    if (isAssigned && index === -1) {
+      courses.push(courseId); // Thêm môn
+      regSheet.getRange(i + 1, 2).setValue(courses.join(','));
+    } else if (!isAssigned && index !== -1) {
+      courses.splice(index, 1); // Rút môn
+      regSheet.getRange(i + 1, 2).setValue(courses.join(','));
+    }
+  }
+  return "Đã cập nhật danh sách sinh viên tham gia học phần!";
+}
+// ==========================================
+// API BỔ SUNG CHO ADMIN CAN THIỆP DỮ LIỆU
+// ==========================================
+
+function adminEditTkb(rowIndex, mssv, thu, tietBd, soTiet, thoiGian, hinhThuc, mon, phong, gv, color, ngayBatDau, ngayKetThuc, ngayNgoaiLe) {
+  // Hàm này gọi trực tiếp hàm editTKBUser đã có sẵn, nhưng cho phép Admin thực hiện trên MSSV bất kỳ
+  return editTKBUser(rowIndex, mssv, thu, tietBd, soTiet, thoiGian, hinhThuc, mon, phong, gv, color, ngayBatDau, ngayKetThuc, ngayNgoaiLe, "all", "");
+}
+
+function adminDeleteTkb(rowIndex, mssv) {
+  return deleteTKBUser(rowIndex, mssv, "all", "");
+}
+
+function adminDeleteDeadline(rowIndex, mssv) {
+  return deleteDeadlineUser(rowIndex, mssv);
+}
+function adminEditDeadline(rowIndex, mssv, title, duration, tag, icon, emoji, startDate, endDate) {
+  // Gọi hàm editDeadlineUser đã có sẵn
+  return editDeadlineUser(rowIndex, mssv, title, duration, tag, icon, emoji, startDate, endDate);
+}
+function getAdminMasterTkb() {
+  var sheet = ss.getSheetByName("MasterTKB");
+  if (!sheet) return [];
+  var data = sheet.getDataRange().getDisplayValues();
+  var courses = [];
+  
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0]) {
+      courses.push({
+        rowIndex: i + 1,      // <--- Bổ sung rowIndex để định vị chính xác từng hàng
+        id: data[i][0],      
+        thu: data[i][1],      
+        tietBd: data[i][2],   
+        soTiet: data[i][3],   
+        thoiGian: data[i][4], 
+        hinhThuc: data[i][5], 
+        mon: data[i][6],      
+        phong: data[i][7],    
+        gv: data[i][8],       
+        color: data[i][9],    
+        ngayBatDau: data[i][10],
+        ngayKetThuc: data[i][11],
+        namHoc: data[i][12],
+        hocKy: data[i][13],
+        ngayNgoaiLe: data[i][14]
+      });
+    }
+  }
+  return courses;
+}
+function addMasterTkb(p) {
+  var sheet = ss.getSheetByName("MasterTKB");
+  sheet.appendRow([p.id, p.thu, p.tietBd, p.soTiet, p.thoiGian, p.hinhThuc, p.mon, p.phong, p.gv, p.color, p.ngayBatDau, p.ngayKetThuc, p.namHoc, p.hocKy, p.ngayNgoaiLe]);
+  return "Thêm học phần vào MasterTKB thành công!";
+}
+function getCourseAssignees(courseId) {
+  var users = getAllUsers();
+  var regSheet = ss.getSheetByName("UserRegisteredCourses");
+  var assigned = [];
+  
+  if (regSheet) {
+    var data = regSheet.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+       var courses = String(data[i][1]).split(',').map(function(c) { return c.trim(); });
+       if (courses.indexOf(String(courseId).trim()) !== -1) {
+          assigned.push(String(data[i][0]).trim());
+       }
+    }
+  }
+  return { users: users, assigned: assigned };
+}
+function editMasterTkb(p) {
+  var sheet = ss.getSheetByName("MasterTKB");
+  // Ghi đè dữ liệu trực tiếp vào đúng số hàng (rowIndex) đó, cực kỳ nhanh và chính xác
+  sheet.getRange(p.rowIndex, 1, 1, 15).setValues([[p.id, p.thu, p.tietBd, p.soTiet, p.thoiGian, p.hinhThuc, p.mon, p.phong, p.gv, p.color, p.ngayBatDau, p.ngayKetThuc, p.namHoc, p.hocKy, p.ngayNgoaiLe]]);
+  return "Cập nhật lịch học MasterTKB thành công!";
+}
+function deleteMasterTkb(rowIndex) {
+  var sheet = ss.getSheetByName("MasterTKB");
+  sheet.deleteRow(rowIndex); // Xóa đúng dòng lịch được chỉ định
+  return "Đã xóa lịch trình khỏi MasterTKB!";
+}
+function assignStudentsToCourse(courseId, assignedMssvList) {
+  var regSheet = ss.getSheetByName("UserRegisteredCourses");
+  if (!regSheet) {
+    regSheet = ss.insertSheet("UserRegisteredCourses");
+    regSheet.appendRow(["MSSV", "CourseIDs"]);
+  }
+  var data = regSheet.getDataRange().getValues();
+  var mssvArray = assignedMssvList.split(',').map(function(item) { return item.trim(); }).filter(Boolean);
+  
+  var existingMssvs = [];
+  for (var i = 1; i < data.length; i++) {
+    var mssv = String(data[i][0]).trim();
+    existingMssvs.push(mssv);
+    var courses = String(data[i][1]).split(',').map(function(c) { return c.trim(); }).filter(Boolean);
+    
+    var index = courses.indexOf(String(courseId).trim());
+    var isAssigned = mssvArray.indexOf(mssv) !== -1;
+    
+    if (isAssigned && index === -1) {
+      courses.push(courseId); // Gán thêm môn
+      regSheet.getRange(i + 1, 2).setValue(courses.join(','));
+    } else if (!isAssigned && index !== -1) {
+      courses.splice(index, 1); // Rút bớt môn
+      regSheet.getRange(i + 1, 2).setValue(courses.join(','));
+    }
+  }
+  
+  // Xử lý thêm sinh viên hoàn toàn mới (chưa từng có hàng dữ liệu nào trước đây)
+  for (var j = 0; j < mssvArray.length; j++) {
+    if (existingMssvs.indexOf(mssvArray[j]) === -1) {
+      regSheet.appendRow([mssvArray[j], String(courseId).trim()]);
+    }
+  }
+  return "Đã cập nhật danh sách sinh viên tham gia học phần!";
+}
+function dragDropSheetRow(sheetName, fromIndex, toIndex) {
+  var sheet = ss.getSheetByName(sheetName);
+  if (fromIndex === toIndex) return "Không có sự thay đổi vị trí.";
+  
+  // Xác định dòng đích để chèn khoảng trống
+  var targetIndex = toIndex > fromIndex ? toIndex + 1 : toIndex;
+  sheet.insertRowBefore(targetIndex);
+  
+  // Do vừa chèn thêm 1 dòng, vị trí dòng gốc có thể bị đẩy xuống
+  var actualFromIndex = toIndex < fromIndex ? fromIndex + 1 : fromIndex;
+  var sourceRange = sheet.getRange(actualFromIndex, 1, 1, sheet.getMaxColumns());
+  var targetRange = sheet.getRange(targetIndex, 1);
+  
+  // Di chuyển dữ liệu và xóa dòng cũ
+  sourceRange.moveTo(targetRange);
+  sheet.deleteRow(actualFromIndex);
+  
+  return "Đã kéo thả và sắp xếp thành công!";
+}
+function saveCompletedDeadlines(mssv, completedData) {
+  var sheet = ss.getSheetByName("Deadlines_Status");
+  if (!sheet) {
+    sheet = ss.insertSheet("Deadlines_Status");
+    sheet.appendRow(["MSSV", "CompletedList"]);
+    sheet.getRange("A1:B1").setFontWeight("bold").setBackground("#154c79").setFontColor("white");
+  }
+  
+  var data = sheet.getDataRange().getValues();
+  var found = false;
+  
+  // Tìm MSSV để cập nhật danh sách
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      sheet.getRange(i + 1, 2).setValue(completedData);
+      found = true;
+      break;
+    }
+  }
+  
+  // Nếu chưa có thì tạo dòng mới
+  if (!found) {
+    sheet.appendRow([mssv, completedData]);
+  }
+  return "Đã đồng bộ trạng thái Deadline!";
+}
+
+function getCompletedDeadlines(mssv) {
+  var sheet = ss.getSheetByName("Deadlines_Status");
+  if (!sheet) return "[]"; 
+  
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      return data[i][1] || "[]";
+    }
+  }
+  return "[]";
+}
+// HÀM SAO CHÉP HÀNG LOẠT VÀO TKB CÁ NHÂN (ĐÃ FIX CHO MÔN VLE)
+// HÀM SAO CHÉP HÀNG LOẠT VÀO TKB CÁ NHÂN (ĐÃ FIX BỔ SUNG NGÀY NGOẠI LỆ)
+function copySystemTkbToPersonal(mssv, courses) {
+  var sheetName = getTkbSheetName(mssv);
+  var sheet = ss.getSheetByName(sheetName);
+  if(!sheet){
+      sheet = ss.insertSheet(sheetName);
+      sheet.appendRow(["MSSV", "Thứ", "Tiết", "Số Tiết", "Thời Gian", "Hình Thức", "Môn", "Phòng", "Giảng Viên", "Màu Sắc", "Ngày BĐ", "Ngày KT", "Ngoại Lệ"]);
+  }
+  
+  var dataToInsert = [];
+  var copiedClassIds = [];
+  
+  for(var i = 0; i < courses.length; i++) {
+      var c = courses[i];
+      if (c.classId && copiedClassIds.indexOf(c.classId) === -1) {
+        copiedClassIds.push(c.classId);
+      }
+      var hinhThucUpper = String(c.hinhThuc || "").toUpperCase();
+      var isVle = hinhThucUpper.indexOf("VLE") !== -1;
+      
+      if (isVle) {
+          dataToInsert.push([
+              mssv, c.thu || 99, c.tietBd || 99, c.soTiet || 1, 
+              c.thoiGian || "VLE", c.hinhThuc || "VLE", c.mon, 
+              c.phong || "VLE", c.gv || "", "#e0f2fe", 
+              c.ngayBatDau || "", c.ngayKetThuc || "", c.ngayNgoaiLe || "" // <-- Đã sửa: Lưu Ngày Ngoại Lệ cho VLE
+          ]);
+      } else {
+          var days = String(c.thu).split(',');
+          for (var j = 0; j < days.length; j++) {
+              var t = parseInt(days[j].trim());
+              if (!isNaN(t) && t >= 2 && t <= 8) {
+                  dataToInsert.push([
+                      mssv, t, c.tietBd, c.soTiet, 
+                      c.thoiGian || "", c.hinhThuc || "", c.mon, 
+                      c.phong || "", c.gv || "", "#e0f2fe", 
+                      c.ngayBatDau || "", c.ngayKetThuc || "", c.ngayNgoaiLe || "" // <-- Đã sửa: Lưu Ngày Ngoại Lệ cho lịch chính khóa
+                  ]);
+              }
+          }
+      }
+  }
+  
+  if(dataToInsert.length > 0) {
+      sheet.getRange(sheet.getLastRow() + 1, 1, dataToInsert.length, dataToInsert[0].length).setValues(dataToInsert);
+      
+      // GHI LOG LỊCH SỬ
+      logRegistrationHistory(mssv, "Sao chép Cá nhân", copiedClassIds.join(', '));
+      
+      return "Đã sao chép thành công " + dataToInsert.length + " lịch học sang TKB cá nhân!";
+  }
+  
+  return "Không có môn học nào hợp lệ để sao chép.";
+}
+
+function deleteMultipleTKBRows(mssv, rowIndicesStr) {
+  var sheetName = getTkbSheetName(mssv);
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return "Lỗi: Không tìm thấy bảng TKB.";
+  
+  var indices = rowIndicesStr.split(',').map(function(i) { return parseInt(i.trim()); }).filter(function(i) { return !isNaN(i); });
+  
+  // Sắp xếp các chỉ số dòng theo thứ tự từ lớn đến bé 
+  // (Bắt buộc phải xóa từ dưới lên trên để không làm lệch số thứ tự các dòng phía trên)
+  indices.sort(function(a, b) { return b - a; });
+  
+  for (var i = 0; i < indices.length; i++) {
+    sheet.deleteRow(indices[i]);
+  }
+  
+  return "Đã xóa sạch toàn bộ các buổi học thành công!";
+}
+
+// Ghi đè hàm getWebLinks cũ
+function getWebLinks(mssv) {
+  var globalLinks = [];
+  var personalLinks = [];
+  
+  // 1. Lấy Link Hệ Thống (Trang WEB gốc)
+  var gSheet = ss.getSheetByName("WEB");
+  if (gSheet && gSheet.getLastRow() > 1) {
+    var gData = gSheet.getRange(2, 1, gSheet.getLastRow() - 1, 4).getValues();
+    for (var i = 0; i < gData.length; i++) {
+      globalLinks.push({
+        title: gData[i][0], 
+        desc: gData[i][1], 
+        url: gData[i][2], 
+        icon: gData[i][3]
+      });
+    }
+  }
+
+  // 2. Lấy Link Cá Nhân (Nếu sinh viên đã đăng nhập)
+  if (mssv && mssv !== "undefined" && mssv !== "") {
+    var pSheet = ss.getSheetByName("WebLinks_Personal");
+    if (pSheet && pSheet.getLastRow() > 1) {
+      var pData = pSheet.getDataRange().getDisplayValues();
+      for (var j = 1; j < pData.length; j++) {
+        if (String(pData[j][0]).trim() === String(mssv).trim()) {
+          personalLinks.push({
+            title: pData[j][1], 
+            desc: pData[j][2], 
+            url: pData[j][3], 
+            icon: pData[j][4], 
+            rowIndex: j + 1
+          });
+        }
+      }
+    }
+  }
+  
+  return { global: globalLinks, personal: personalLinks };
+}
+
+function addPersonalWebLink(mssv, title, desc, url, icon) {
+  var sheet = ss.getSheetByName("WebLinks_Personal");
+  if (!sheet) {
+    sheet = ss.insertSheet("WebLinks_Personal");
+    sheet.appendRow(["MSSV", "Title", "Desc", "URL", "Icon"]);
+    sheet.getRange("A1:E1").setFontWeight("bold").setBackground("#16a34a").setFontColor("white");
+  }
+  sheet.appendRow([mssv, title, desc, url, icon]);
+  return "Đã thêm liên kết cá nhân thành công!";
+}
+
+// ==========================================
+// 5. HÀM XÓA LINK CÁ NHÂN
+// ==========================================
+function deletePersonalWebLink(rowIndex, mssv) {
+  var sheet = ss.getSheetByName("WebLinks_Personal");
+  if (!sheet) return "Lỗi: Không tìm thấy cơ sở dữ liệu.";
+  
+  // Xác thực bảo mật MSSV trước khi xóa
+  var savedMssv = sheet.getRange(rowIndex, 1).getValue();
+  if (String(savedMssv).trim() !== String(mssv).trim()) {
+    return "Lỗi: Bạn không có quyền xóa liên kết này.";
+  }
+  
+  sheet.deleteRow(rowIndex);
+  return "Đã xóa liên kết cá nhân!";
+}
+// Hàm chỉnh sửa link cá nhân
+function editPersonalWebLink(rowIndex, mssv, title, desc, url, icon) {
+  var sheet = ss.getSheetByName("WebLinks_Personal");
+  if (!sheet) return "Lỗi: Không tìm thấy cơ sở dữ liệu.";
+  
+  // Kiểm tra quyền sở hữu
+  var savedMssv = sheet.getRange(rowIndex, 1).getValue();
+  if (String(savedMssv).trim() !== String(mssv).trim()) {
+    return "Lỗi: Bạn không có quyền chỉnh sửa liên kết này.";
+  }
+  
+  // Cập nhật lại 4 cột: Title, Desc, URL, Icon (Cột B đến E)
+  sheet.getRange(rowIndex, 2, 1, 4).setValues([[title, desc, url, icon]]);
+  return "Đã cập nhật liên kết thành công!";
+}
+
+function testSendEmail() {
+  MailApp.sendEmail("truongbaochi.toan.hcmue@outlook.com.vn", "Test Email", "Kiểm tra hệ thống gửi mail từ Apps Script.");
+  Logger.log("Đã gửi email test thành công!");
+}
+function uploadAvatarFile(mssv, base64Data, mimeType, fileName) {
+  try {
+    if (!base64Data) return { success: false, message: "Dữ liệu ảnh trống!" };
+    
+    // Tách bỏ tiền tố Data URL nếu có
+    var cleanBase64 = base64Data;
+    if (base64Data.indexOf(',') !== -1) {
+      cleanBase64 = base64Data.split(',')[1];
+    }
+    
+    var bytes = Utilities.base64Decode(cleanBase64);
+    var blob = Utilities.newBlob(bytes, mimeType || "image/jpeg", fileName || ("avatar_" + mssv + ".jpg"));
+    
+    var folder = DriveApp.getFolderById("1JXscOS2cNQLVr1JbpDdVqpcL1ravwB9d");
+    var file = folder.createFile(blob); // Tạo file ảnh (Lệnh này đã chạy thành công)
+    
+    // ĐÃ XÓA DÒNG file.setSharing BỊ LỖI Ở ĐÂY
+    
+    var fileId = file.getId();
+    var avatarUrl = "https://drive.google.com/thumbnail?id=" + fileId + "&sz=w400";
+    
+    var sheet = ss.getSheetByName("Users");
+    if (sheet) {
+      var data = sheet.getDataRange().getValues();
+      for (var i = 1; i < data.length; i++) {
+        if (String(data[i][0]).trim() === String(mssv).trim()) {
+          sheet.getRange(i + 1, 8).setValue(avatarUrl); // Ghi URL vào Cột H
+          break;
+        }
+      }
+    }
+    
+    return { success: true, avatarUrl: avatarUrl, message: "Tải ảnh lên thành công!" };
+  } catch (err) {
+    return { success: false, message: "Lỗi chi tiết: " + err.toString() };
+  }
+}
+function forceGrantDrivePermission() {
+  var folder = DriveApp.getFolderById("1JXscOS2cNQLVr1JbpDdVqpcL1ravwB9d");
+  var testBlob = Utilities.newBlob("test", "text/plain", "test.txt");
+  var file = folder.createFile(testBlob); // Tạo file test thành công
+  file.setTrashed(true); // Xóa file test
+  Logger.log("ĐÃ CẤP QUYỀN VÀ TẠO FILE THÀNH CÔNG NHA!");
+}
+// API Trả về danh sách cho Admin
+function getAllUsersAccessHistory() {
+  var sheet = ss.getSheetByName("Users");
+  if (!sheet) return [];
+  
+  var data = sheet.getDataRange().getValues();
+  var usersList = [];
+
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0]) { 
+      var rawDate = data[i][8]; 
+      var formattedDate = "Chưa từng truy cập";
+      if (rawDate) {
+        formattedDate = Utilities.formatDate(new Date(rawDate), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+      }
+
+      var lastViewData = data[i][9] || "Không rõ"; // J: Đang xem
+      var prevView1Data = data[i][10] || "Chưa có"; // K: Trước 1
+      var prevView2Data = data[i][11] || "Chưa có"; // L: Trước 2
+      var prevView3Data = data[i][12] || "Chưa có"; // M: Trước 3
+      
+      var rawFirstAccess = data[i][13]; // N: Lần đầu đợt
+      var formattedFirstAccess = "Chưa có";
+      if (rawFirstAccess) {
+        formattedFirstAccess = Utilities.formatDate(new Date(rawFirstAccess), "GMT+7", "yyyy-MM-dd HH:mm:ss");
+      }
+
+      usersList.push({
+        mssv: data[i][0],      
+        name: data[i][2] || "", 
+        lastActive: formattedDate,
+        lastView: lastViewData,
+        prevView1: prevView1Data,
+        prevView2: prevView2Data,
+        prevView3: prevView3Data,
+        firstAccess: formattedFirstAccess
+      });
+    }
+  }
+
+  return usersList;
+}
+
+function updateShareCodeSubmission(rowIndex, mssv, codeData) {
+  var sheet = ss.getSheetByName("ShareCode");
+  if (!sheet) return "Lỗi: Không tìm thấy trang tính ShareCode.";
+  
+  var row = Number(rowIndex);
+  if (row <= 1 || isNaN(row)) return "Lỗi: Vị trí bài nộp không hợp lệ.";
+
+  // Xác thực MSSV của bài nộp ở Cột 2 (B)
+  var savedMssv = sheet.getRange(row, 2).getValue();
+  if (String(savedMssv).trim().toLowerCase() !== String(mssv).trim().toLowerCase()) {
+    return "Lỗi: Bạn không có quyền chỉnh sửa bài nộp này!";
+  }
+
+  // Cập nhật lại mốc thời gian
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+  
+  // GHI ĐÈ LÀM MỚI TOÀN BỘ DÒNG ĐÓ TẠI VỊ TRÍ CŨ
+  // Cột 1: Thời gian, Cột 2: MSSV, Cột 3: Nội dung Code, Cột 4: Bình luận (trống), Cột 5: Upvote (0), Cột 6: Downvote (0)
+  sheet.getRange(row, 1, 1, 6).setValues([[timestamp, mssv, codeData, "", 0, 0]]);
+
+  return "Đã cập nhật và thay thế bài làm mới thành công!";
+}
+// Hàm lấy danh sách câu hỏi theo môn
+function getExerciseQuestions(course) {
+  var sheet = ss.getSheetByName("ExerciseQuestions");
+  if (!sheet) return [];
+  var data = sheet.getDataRange().getValues();
+  var result = [];
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(course).trim() || !course) {
+      result.push({
+        course: data[i][0],
+        maBai: data[i][1],
+        title: data[i][2],
+        content: data[i][3]
+      });
+    }
+  }
+  return result;
+}
+
+// Hàm Thêm câu hỏi mới từ trang Admin
+function addExerciseQuestion(p) {
+  var sheet = ss.getSheetByName("ExerciseQuestions");
+  if (!sheet) {
+    sheet = ss.insertSheet("ExerciseQuestions");
+    sheet.appendRow(["Course", "MaBai", "Title", "Content"]);
+    sheet.getRange("A1:D1").setFontWeight("bold").setBackground("#0f4c81").setFontColor("white");
+  }
+  sheet.appendRow([p.course, p.maBai, p.title, p.content]);
+  return "Đã thêm câu hỏi thành công!";
+}
+// ==========================================
+// API QUẢN LÝ ĐẶT LỊCH HẸN (Dữ liệu lưu vào Sheet "DatLichHen")
+// ==========================================
+function getDatLichHenData() {
+  var sheet = ss.getSheetByName("DatLichHen");
+  if (!sheet || sheet.getLastRow() <= 1) return [];
+  
+  // Nới rộng vùng lấy dữ liệu lên 6 cột để lấy được Nội dung ở cột F
+  var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 6).getDisplayValues();
+  var result = [];
+  
+  for (var i = 0; i < data.length; i++) {
+    result.push({
+      rowIndex: i + 2,
+      mssv: data[i][0],
+      authorName: data[i][1],
+      title: data[i][2],
+      url: data[i][3],
+      updateTime: data[i][4] || "",
+      noiDung: data[i][5] || "Đặt lịch hẹn" // Hứng dữ liệu ở cột F
+    });
+  }
+  return result.reverse(); 
+}
+
+function addDatLichHen(mssv, authorName, title, url, noiDung) {
+  var sheet = ss.getSheetByName("DatLichHen");
+  if (!sheet) {
+    sheet = ss.insertSheet("DatLichHen");
+    // Thêm cột Nội dung
+    sheet.appendRow(["MSSV", "Tác giả", "Tên bài đăng", "URL Link", "Ngày cập nhật", "Nội dung"]);
+    sheet.getRange("A1:F1").setFontWeight("bold").setBackground("#0f4c81").setFontColor("white");
+  }
+  
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+  
+  // Nạp 6 biến xuống dưới sheet (Cột F)
+  sheet.appendRow([mssv, authorName, title, url, timestamp, noiDung]);
+  return "Đã tạo bài đăng lịch hẹn thành công!";
+}
+
+function editDatLichHen(rowIndex, mssv, title, url, noiDung) {
+  var sheet = ss.getSheetByName("DatLichHen");
+  if (!sheet) return "Lỗi: Không tìm thấy dữ liệu.";
+  
+  var row = Number(rowIndex);
+  var savedMssv = sheet.getRange(row, 1).getValue();
+  
+  if (String(savedMssv).trim() !== String(mssv).trim() && String(mssv).trim() !== "51.01.108.008") {
+    return "Lỗi: Bạn không có quyền chỉnh sửa bài đăng này.";
+  }
+  
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+  
+  // Ghi đè bắt đầu từ cột C(3) đi 4 cột: Tên bài, URL, Ngày cập nhật, Nội dung (Cột C, D, E, F)
+  sheet.getRange(row, 3, 1, 4).setValues([[title, url, timestamp, noiDung]]);
+  return "Đã cập nhật bài đăng lịch hẹn thành công!";
+}
+
+function deleteDatLichHen(rowIndex, mssv) {
+  var sheet = ss.getSheetByName("DatLichHen");
+  if (!sheet) return "Lỗi: Không tìm thấy dữ liệu.";
+  
+  var row = Number(rowIndex);
+  var savedMssv = sheet.getRange(row, 1).getValue();
+  
+  if (String(savedMssv).trim() !== String(mssv).trim() && String(mssv).trim() !== "51.01.108.008") {
+    return "Lỗi: Bạn không có quyền xóa bài đăng này.";
+  }
+  
+  sheet.deleteRow(row);
+  return "Đã xóa bài đăng lịch hẹn thành công!";
+}
+
+// ==========================================
+// API QUẢN LÝ NHÓM HỌC TẬP (ZALO/MESSENGER...)
+// ==========================================
+// ==========================================
+// API QUẢN LÝ NHÓM HỌC TẬP (ZALO/MESSENGER...)
+// ==========================================
+function getGroupLinks() {
+  var sheet = ss.getSheetByName("GroupLinks");
+  if (!sheet || sheet.getLastRow() <= 1) return [];
+  // Tăng lên 8 cột để lấy thêm cột Chỉ định (Cột H)
+  var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 8).getDisplayValues();
+  for (var i = 0; i < data.length; i++) data[i].push(i + 2); // Đính kèm số hàng (Bây giờ nó sẽ ở index 8)
+  return data.reverse();
+}
+
+function addGroupLink(mssv, author, title, platform, desc, url, assigned) {
+  var sheet = ss.getSheetByName("GroupLinks");
+  if (!sheet) {
+    sheet = ss.insertSheet("GroupLinks");
+    sheet.appendRow(["Thời gian", "MSSV", "Tác giả", "Chủ đề", "Nền tảng", "Mô tả", "Link tham gia", "Chỉ định SV"]);
+    sheet.getRange("A1:H1").setFontWeight("bold").setBackground("#10b981").setFontColor("white");
+  }
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+  sheet.appendRow([timestamp, mssv, author, title, platform, desc, url, assigned || ""]);
+  return "Đã chia sẻ nhóm học tập thành công!";
+}
+
+function editGroupLink(rowIndex, mssv, title, platform, desc, url, assigned) {
+  var sheet = ss.getSheetByName("GroupLinks");
+  if (!sheet) return "Lỗi: Không tìm thấy cơ sở dữ liệu.";
+  
+  var savedMssv = sheet.getRange(rowIndex, 2).getValue();
+  if (String(savedMssv).trim() !== String(mssv).trim() && String(mssv).trim() !== "51.01.108.008") {
+    return "Lỗi: Bạn không có quyền chỉnh sửa nhóm này.";
+  }
+  
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+  sheet.getRange(rowIndex, 1).setValue(timestamp); 
+  // Ghi đè 5 cột (Từ D đến H)
+  sheet.getRange(rowIndex, 4, 1, 5).setValues([[title, platform, desc, url, assigned || ""]]); 
+  return "Đã cập nhật thông tin nhóm thành công!";
+}
+
+function deleteGroupLink(rowIndex, mssv) {
+  var sheet = ss.getSheetByName("GroupLinks");
+  if (!sheet) return "Lỗi: Không tìm thấy cơ sở dữ liệu.";
+  
+  var savedMssv = sheet.getRange(rowIndex, 2).getValue();
+  if (String(savedMssv).trim() !== String(mssv).trim() && String(mssv).trim() !== "51.01.108.008") {
+    return "Lỗi: Bạn không có quyền xóa nhóm này.";
+  }
+  
+  sheet.deleteRow(rowIndex);
+  return "Đã xóa nhóm học tập thành công!";
+}
+function syncToGoogleCalendar(events) {
+  try {
+    var cal = CalendarApp.getDefaultCalendar();
+    var addedCount = 0;
+    
+    for (var i = 0; i < events.length; i++) {
+      var ev = events[i];
+      var calEvent = null;
+      
+      var success = false;
+      var retries = 0;
+      var maxRetries = 4; // Tối đa thử lại 4 lần cho 1 sự kiện
+      
+      // Vòng lặp thử lại nếu bị Google chặn do Rate Limit
+      while (!success && retries < maxRetries) {
+        try {
+          // Xử lý sự kiện cả ngày (Deadline)
+          if (ev.type === 'ALLDAY') {
+            var startDate = new Date(ev.startDate);
+            var endDate = new Date(ev.endDate);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(0, 0, 0, 0);
+            
+            if (startDate.getTime() === endDate.getTime()) {
+              calEvent = cal.createAllDayEvent(ev.title, startDate, {
+                location: ev.location || "",
+                description: ev.description || ""
+              });
+            } else {
+              var adjustedEndDate = new Date(endDate);
+              adjustedEndDate.setDate(adjustedEndDate.getDate() + 1);
+              calEvent = cal.createAllDayEvent(ev.title, startDate, adjustedEndDate, {
+                location: ev.location || "",
+                description: ev.description || ""
+              });
+            }
+          } 
+          // Xử lý sự kiện theo giờ (Có Vòng lặp hoặc Sự kiện đơn)
+          else {
+            if (ev.type === 'RECURRING') {
+              var recurrence = CalendarApp.newRecurrence().addWeeklyRule().times(ev.count);
+              calEvent = cal.createEventSeries(ev.title, new Date(ev.start), new Date(ev.end), recurrence, {
+                location: ev.location || "",
+                description: ev.description || ""
+              });
+            } else {
+              calEvent = cal.createEvent(ev.title, new Date(ev.start), new Date(ev.end), {
+                location: ev.location || "",
+                description: ev.description || ""
+              });
+            }
+          }
+          
+// ĐẶT CHUÔNG BÁO THEO ĐÚNG QUY LUẬT TÍNH TOÁN TỪ FRONTEND
+// Đã mở khóa cho cả sự kiện lặp (RECURRING)
+if (calEvent && ev.reminders && ev.reminders.length > 0) {
+    try {
+        calEvent.removeAllReminders(); // Xóa các thông báo mặc định của tài khoản
+        for (var r = 0; r < ev.reminders.length; r++) {
+            calEvent.addPopupReminder(ev.reminders[r]); // Chèn giờ thông báo chính xác
+        }
+    } catch(e) {
+        // Ignored: Bỏ qua nếu Google quá tải hoặc lỗi thêm nhắc nhở
+    }
+}
+          success = true; // Đánh dấu thành công để thoát vòng lặp while
+          addedCount++;
+          
+          // Tạm nghỉ 1.5 giây giữa mỗi sự kiện để không bị Google đánh dấu spam
+          Utilities.sleep(1500); 
+
+        } catch(e) {
+          var errorMsg = e.toString().toLowerCase();
+          // Nếu gặp lỗi do tạo quá nhanh
+          if (errorMsg.indexOf("quá nhiều") !== -1 || errorMsg.indexOf("too many") !== -1 || errorMsg.indexOf("limit") !== -1) {
+            retries++;
+            if (retries >= maxRetries) {
+              throw e; // Ném lỗi ra ngoài nếu thử quá số lần nhưng vẫn bị chặn
+            }
+            // Ngủ lâu hơn 1 chút trước khi thử lại (3s, 6s, 9s...)
+            Utilities.sleep(retries * 3000);
+          } else {
+            throw e; // Các lỗi khác không phải do spam thì ném ra ngay
+          }
+        }
+      }
+    }
+    
+    return "Tuyệt vời! Đã đồng bộ trực tiếp " + addedCount + " sự kiện vào Google Calendar của bạn.";
+  } catch(err) {
+    return "Lỗi đồng bộ: " + err.toString() + ". (Lưu ý: Bạn hãy đợi khoảng 15-30 phút để Google mở khóa chống Spam rồi hẵng thử lại nhé).";
+  }
+}
+
+function forceCalendarAuth() {
+  CalendarApp.getDefaultCalendar();
+  Logger.log("Đã cấp quyền Calendar thành công!");
+
+}
+// ==========================================
+// API QUẢN LÝ TIẾN ĐỘ & GHI CHÚ BÀI HỌC
+// ==========================================
+function getLearningData(mssv) {
+  var sheet = ss.getSheetByName("LearningData");
+  if (!sheet) return {}; // Nếu chưa có Sheet thì trả về Object rỗng
+  
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      try {
+        return JSON.parse(data[i][1]); // Trả về dạng JSON Object
+      } catch(e) {
+        return {};
+      }
+    }
+  }
+  return {};
+}
+
+function saveLearningData(mssv, dataStr) {
+  var sheet = ss.getSheetByName("LearningData");
+  // Tự động tạo Sheet nếu chưa có
+  if (!sheet) {
+    sheet = ss.insertSheet("LearningData");
+    sheet.appendRow(["MSSV", "DataJSON"]);
+    sheet.getRange("A1:B1").setFontWeight("bold").setBackground("#0f4c81").setFontColor("white");
+  }
+  
+  var data = sheet.getDataRange().getValues();
+  var found = false;
+  
+  // Tìm sinh viên để ghi đè dữ liệu mới nhất
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      sheet.getRange(i + 1, 2).setValue(dataStr);
+      found = true;
+      break;
+    }
+  }
+  
+  // Chưa có thì tạo dòng mới
+  if (!found) {
+    sheet.appendRow([mssv, dataStr]);
+  }
+  
+  return "Đã đồng bộ tiến độ và ghi chú lên hệ thống!";
+}
+
+function bulkAddTKBUser(mssv, schedules) {
+  var sheetName = getTkbSheetName(mssv);
+  var sheet = ss.getSheetByName(sheetName);
+  if(!sheet){
+      sheet = ss.insertSheet(sheetName);
+      sheet.appendRow(["MSSV", "Thứ", "Tiết", "Số Tiết", "Thời Gian", "Hình Thức", "Môn", "Phòng", "Giảng Viên", "Màu Sắc", "Ngày BĐ", "Ngày KT", "Ngoại Lệ"]);
+  }
+  
+  var dataToInsert = [];
+  for (var i = 0; i < schedules.length; i++) {
+    var s = schedules[i];
+    dataToInsert.push([
+      mssv, s.thu, s.tietBd, s.soTiet, s.thoiGian, s.hinhThuc, s.mon, s.phong, s.gv, s.color, s.ngayBatDau, s.ngayKetThuc, s.ngayNgoaiLe
+    ]);
+  }
+  
+  if (dataToInsert.length > 0) {
+    sheet.getRange(sheet.getLastRow() + 1, 1, dataToInsert.length, dataToInsert[0].length).setValues(dataToInsert);
+    return "Đã thêm thành công " + dataToInsert.length + " lịch tự học vào TKB!";
+  }
+  return "Không có môn tự học nào được ghi nhận.";
+}
+
+function toggleGroupStudyReg(p) {
+  var sheet = ss.getSheetByName("GroupStudyBooking");
+  if (!sheet) return "Lỗi: Không tìm thấy cơ sở dữ liệu.";
+  
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === p.id) {
+      var maxSlot = parseInt(data[i][13]);
+      var registeredStr = data[i][15] ? String(data[i][15]) : "";
+      var regList = registeredStr.split(',').filter(function(x) { return x; });
+      
+      // Tìm vị trí MSSV trong mảng đã nối chuỗi
+      var index = -1;
+      for (var r = 0; r < regList.length; r++) {
+          if (regList[r].split(':::')[0].trim() === p.mssv) {
+              index = r;
+              break;
+          }
+      }
+      
+      if (p.type === 'register') {
+        if (regList.length >= maxSlot) return "Lỗi: Lịch học nhóm đã đầy slot!";
+        if (index === -1) {
+            // Nối MSSV và Ghi chú bằng chuỗi phân cách ':::'
+            var userNote = p.note ? ":::" + p.note : ":::";
+            regList.push(p.mssv + userNote);
+        }
+      } else if (p.type === 'cancel') {
+        if (index !== -1) regList.splice(index, 1);
+      }
+      
+      sheet.getRange(i + 1, 16).setValue(regList.join(','));
+      return p.type === 'register' ? "Đã đăng ký và đồng bộ vào TKB!" : "Đã hủy đăng ký khỏi TKB!";
+    }
+  }
+  return "Lỗi: Không tìm thấy lịch nhóm này.";
+}
+
+function addGroupStudy(p) {
+  var sheet = ss.getSheetByName("GroupStudyBooking");
+  if (!sheet) {
+    sheet = ss.insertSheet("GroupStudyBooking");
+    // Bổ sung thêm cột NgayNgoaiLe ở cuối cùng (Cột S - Index 18)
+    sheet.appendRow(["ID", "CreatorMSSV", "CreatorName", "Mon", "Thu", "TietBd", "SoTiet", "ThoiGian", "HinhThuc", "Phong", "Color", "NgayBatDau", "NgayKetThuc", "MaxSlot", "Note", "RegisteredMSSVs", "Link", "GV", "NgayNgoaiLe"]);
+    sheet.getRange("A1:S1").setFontWeight("bold").setBackground("#10b981").setFontColor("white");
+  }
+  
+  var id = "GS_" + new Date().getTime();
+  // Chèn thêm p.ngayNgoaiLe vào phần tử thứ 19 của mảng
+  sheet.appendRow([id, p.mssv, p.name, p.mon, p.thu, p.tietBd, p.soTiet, p.thoiGian, p.hinhThuc, p.phong, p.color, p.ngayBatDau, p.ngayKetThuc, p.slot, p.note, "", p.link || "", p.gv || "", p.ngayNgoaiLe || ""]); 
+  
+  return "Đã tạo lịch học nhóm thành công! (Lưu ý: Nhấn 'Đăng ký' nếu bạn cũng muốn tham gia học)";
+}
+function getGroupStudy() {
+  var sheet = ss.getSheetByName("GroupStudyBooking");
+  if (!sheet) return [];
+  var data = sheet.getDataRange().getDisplayValues();
+  var result = [];
+  for (var i = 1; i < data.length; i++) {
+    result.push({
+      id: data[i][0],
+      creatorMssv: data[i][1],
+      creatorName: data[i][2],
+      mon: data[i][3],
+      thu: data[i][4],
+      tietBd: data[i][5],
+      soTiet: data[i][6],
+      thoiGian: data[i][7],
+      hinhThuc: data[i][8],
+      phong: data[i][9],
+      color: data[i][10],
+      ngayBatDau: data[i][11],
+      ngayKetThuc: data[i][12],
+      maxSlot: data[i][13],
+      note: data[i][14],
+      registered: data[i][15] || "",
+      link: data[i][16] || "",
+      gv: data[i][17] || "",
+      ngayNgoaiLe: data[i][18] || "" // Lấy dữ liệu ngoại lệ
+    });
+  }
+  return result.reverse(); 
+}
+// 3. Mở rộng dải ô cập nhật thêm 1 cột (Thành 16 cột thay vì 15)
+function editGroupStudy(p) {
+  var sheet = ss.getSheetByName("GroupStudyBooking");
+  if (!sheet) return "Lỗi: Không tìm thấy cơ sở dữ liệu.";
+
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === p.id) {
+      if (data[i][1] === p.mssv || p.mssv === "51.01.108.008") {
+        
+        // Cập nhật 16 cột (thêm p.ngayNgoaiLe vào cuối)
+        sheet.getRange(i + 1, 4, 1, 16).setValues([[
+          p.mon, p.thu, p.tietBd, p.soTiet, 
+          p.thoiGian, p.hinhThuc, p.phong, p.color, 
+          p.ngayBatDau, p.ngayKetThuc, p.slot, p.note, 
+          data[i][15] || "", 
+          p.link || "", 
+          p.gv || "",
+          p.ngayNgoaiLe || ""
+        ]]);
+        
+        return "Đã cập nhật lịch học nhóm thành công!";
+      } else {
+        return "Lỗi: Bạn không có quyền chỉnh sửa lịch nhóm này.";
+      }
+    }
+  }
+  return "Lỗi: Không tìm thấy lịch học nhóm.";
+}
+
+function deleteGroupStudy(p) {
+  var sheet = ss.getSheetByName("GroupStudyBooking");
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (data[i][0] === p.id) {
+      if (data[i][1] === p.mssv || p.mssv === "51.01.108.008") {
+        sheet.deleteRow(i + 1);
+        return "Đã xóa lịch học nhóm!";
+      } else {
+        return "Bạn không có quyền xóa lịch này.";
+      }
+    }
+  }
+  return "Lỗi tìm kiếm dữ liệu.";
+}
+function editExerciseQuestion(p) {
+  var sheet = ss.getSheetByName("ExerciseQuestions");
+  if (!sheet) return "Lỗi: Không tìm thấy trang tính ExerciseQuestions.";
+  
+  var data = sheet.getDataRange().getValues();
+  // Quét tìm dòng chứa khóa học và mã bài cũ để ghi đè
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(p.course).trim() && String(data[i][1]).trim() === String(p.oldMaBai).trim()) {
+      // Ghi đè 4 cột: Course, MaBai, Title, Content
+      sheet.getRange(i + 1, 1, 1, 4).setValues([[p.course, p.newMaBai, p.title, p.content]]);
+      return "✅ Đã cập nhật đề bài thành công!";
+    }
+  }
+  return "❌ Lỗi: Không tìm thấy đề bài trên hệ thống để sửa.";
+}
+function markAsRead(sheetName, rowIndex, mssv) {
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return "Error";
+  
+  // Xác thực bảo mật: Chỉ cho phép tác giả bài viết tự đánh dấu "Đã đọc"
+  var savedMssv = String(sheet.getRange(rowIndex, 2).getValue()).trim();
+  if (savedMssv === String(mssv).trim()) {
+    sheet.getRange(rowIndex, 7).setValue("READ");
+    return "Đã đánh dấu xem";
+  }
+  return "Không đủ quyền";
+}
+
+// ==========================================
+// API ĐIỂM RÈN LUYỆN
+// ==========================================
+function getRenLuyen(mssv, namHoc, hocKy) {
+  var sheet = ss.getSheetByName("RenLuyen_Data");
+  if (!sheet) return "{}"; 
+  
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    // So sánh MSSV, Năm học và Học kỳ
+    if (String(data[i][0]).trim() === String(mssv).trim() && 
+        String(data[i][1]).trim() === String(namHoc).trim() && 
+        String(data[i][2]).trim() === String(hocKy).trim()) {
+      return data[i][3]; // Trả về chuỗi JSON dữ liệu rèn luyện nằm ở cột thứ 4 (Index 3)
+    }
+  }
+  return "{}";
+}
+
+function saveRenLuyen(mssv, namHoc, hocKy, rlDataStr, totalScore, rank) {
+  var sheet = ss.getSheetByName("RenLuyen_Data");
+  if (!sheet) {
+    sheet = ss.insertSheet("RenLuyen_Data");
+    // Thêm cột Năm học và Học kỳ vào cấu trúc bảng
+    sheet.appendRow(["MSSV", "Năm học", "Học kỳ", "Dữ liệu JSON", "Tổng điểm", "Xếp loại", "Cập nhật lần cuối"]);
+    sheet.getRange("A1:G1").setFontWeight("bold").setBackground("#0f4c81").setFontColor("white");
+  }
+  
+  var data = sheet.getDataRange().getValues();
+  var found = false;
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
+  
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim() && 
+        String(data[i][1]).trim() === String(namHoc).trim() && 
+        String(data[i][2]).trim() === String(hocKy).trim()) {
+      // Ghi đè vào 4 cột: JSON, Tổng điểm, Xếp loại, Cập nhật
+      sheet.getRange(i + 1, 4, 1, 4).setValues([[rlDataStr, totalScore, rank, timestamp]]);
+      found = true;
+      break;
+    }
+  }
+  
+  if (!found) {
+    // Tạo mới hàng dữ liệu theo đúng Năm học - Học kỳ
+    sheet.appendRow([mssv, namHoc, hocKy, rlDataStr, totalScore, rank, timestamp]);
+  }
+  
+  return "Đã lưu phiếu đánh giá điểm rèn luyện thành công!";
+}
+// ==========================================
+// API QUẢN LÝ TRẠNG THÁI BÀI TẬP (CHƯA LÀM / CÒN HỌC / ĐÃ LÀM)
+// ==========================================
+function saveExerciseStatus(mssv, course, statusData) {
+  var sheet = ss.getSheetByName("Exercise_Status");
+  if (!sheet) {
+    sheet = ss.insertSheet("Exercise_Status");
+    sheet.appendRow(["MSSV", "Môn Học", "StatusJSON"]);
+    sheet.getRange("A1:C1").setFontWeight("bold").setBackground("#154c79").setFontColor("white");
+  }
+  
+  var data = sheet.getDataRange().getValues();
+  var found = false;
+  
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim() && String(data[i][1]).trim() === String(course).trim()) {
+      sheet.getRange(i + 1, 3).setValue(statusData);
+      found = true;
+      break;
+    }
+  }
+  
+  if (!found) {
+    sheet.appendRow([mssv, course, statusData]);
+  }
+  return "Đã đồng bộ trạng thái bài tập lên máy chủ!";
+}
+
+function getExerciseStatus(mssv, course) {
+  var sheet = ss.getSheetByName("Exercise_Status");
+  if (!sheet) return {}; // Đổi từ "{}" thành object {}
+  
+  var data = sheet.getDataRange().getValues();
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim() && String(data[i][1]).trim() === String(course).trim()) {
+      try {
+        return JSON.parse(data[i][2]); // Giải mã chuỗi lưu trên Sheet thành Object
+      } catch(e) {
+        return {};
+      }
+    }
+  }
+  return {}; // Đổi từ "{}" thành object {}
+}
+// ==========================================
+// API GỘP: TẢI TOÀN BỘ DỮ LIỆU CÁ NHÂN TRONG 1 LẦN (CHỐNG LAG)
+// ==========================================
+function getDashboardData(mssv) {
+  if (!mssv) return { error: "Thiếu MSSV" };
+  
+  return {
+    tkb: getTKBUser(mssv),
+    deadlines: getDeadlinesUser(mssv),
+    completedDeadlines: getCompletedDeadlines(mssv),
+    gpaConfig: getGPAConfig(mssv),
+    gpaUser: getGPAUser(mssv)
+  };
+}
+
+function loginUser(mssv, password) {
+  var sheet = ss.getSheetByName("Users");
+  if (!sheet) return { success: false, message: "Lỗi: Không tìm thấy bảng dữ liệu Users." };
+  
+  var data = sheet.getDataRange().getValues();
+  
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(mssv).trim()) {
+      if (String(data[i][1]).trim() === String(password).trim()) {
+        
+        // Kiểm tra xem sinh viên đã làm khảo sát chưa
+        var isSurveyDone = false;
+        var ksSheet = ss.getSheetByName("KhaoSat");
+        if (ksSheet) {
+          var ksData = ksSheet.getDataRange().getValues();
+          for (var j = 1; j < ksData.length; j++) {
+            if (String(ksData[j][1]).trim() === String(mssv).trim()) {
+              isSurveyDone = true;
+              break;
+            }
+          }
+        }
+        
+        return {
+          success: true,
+          mssv: data[i][0],
+          name: data[i][2],
+          chuyenNganh: data[i][3] || "",
+          khoa: data[i][4] || "",
+          khoaHoc: data[i][5] || "",
+          nhom: data[i][6] || "",
+          avatar: data[i][7] || "",
+          isSurveyDone: isSurveyDone
+        };
+      } else {
+        return { success: false, message: "Mật khẩu không chính xác!" };
+      }
+    }
+  }
+  return { success: false, message: "Tài khoản không tồn tại trên hệ thống!" };
+}
