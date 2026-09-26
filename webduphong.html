@@ -57,8 +57,8 @@
         </svg>
     </div>
     
-    <h5 class="fw-bold mb-2 mt-2" style="color: #0f4c81; letter-spacing: 0.5px;">Bạn đang truy cập WEB Dự phòng (WEB Chính đang bảo trì)</h5>
-    <small class="text-muted fw-bold mb-4" style="font-size: 14px;">Vui lòng chờ trong giây lát</small>
+    <h5 class="fw-bold mb-2 mt-2" style="color: #0f4c81; letter-spacing: 0.5px;">Chào mừng bạn đến web Dự phòng</h5>
+    <small class="text-muted fw-bold mb-4" style="font-size: 15px;">Bạn vui lòng chờ trong <span id="countdownNumber" style="color: #e61d4a; font-size: 18px;">5</span> giây nữa...</small>
 
     <div class="loader-progress-bar">
         <div class="loader-progress-value"></div>
@@ -156,7 +156,10 @@
             <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
                 <i class="fa-solid fa-calendar"></i> Lịch học
             </button>
-
+<button class="btn-course" id="btnNavKyThi" onclick="loadDatLichHenView('kythi')">
+    <i class="fa-solid fa-file-pen"></i> Kỳ thi
+    <span id="kyThiSidebarBadge" class="badge-new-qa d-none">Mới</span>
+</button>
             <div id="gpaNavContainer" class="d-none">
                 <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
                     <i class="fa-solid fa-clipboard-check"></i> Kết quả học tập
@@ -164,15 +167,14 @@
 <button class="btn-course" id="btnNavRenLuyen" onclick="loadRenLuyenView()">
     <i class="fa-solid fa-medal"></i> Rèn luyện
 </button>
+            </div>
+            
+
 <button class="btn-course" id="btnNavShareCode" onclick="openShareCodeSection()">
     <i class="fa-solid fa-laptop-code"></i> Thảo luận
     <!-- THÊM DÒNG NÀY: Badge thông báo ở thanh menu -->
     <span id="shareCodeSidebarBadge" class="badge-new-qa d-none">Mới</span>
 </button>
-            </div>
-            
-
-
         </div>
     </div>
 
@@ -1724,12 +1726,9 @@
     </div>
 </div>
 <div id="datLichSection" class="d-none">
-    <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+   <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
     <div class="d-flex align-items-center">
-        <button class="btn btn-light fw-bold shadow-sm me-3" onclick="$('#datLichSection').addClass('d-none'); openShareCodeSection();">
-            <i class="fa-solid fa-arrow-left"></i> Trở lại
-        </button>
-        <div class="page-title m-0"><i class="fa-solid fa-calendar-check"></i> Đặt lịch hẹn & Chia sẻ thông tin</div>
+       <div class="page-title m-0" id="datLichPageTitle"><i class="fa-solid fa-calendar-check"></i> TEMP</div>
     </div>
     <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
@@ -1737,8 +1736,8 @@
                 onclick="loadDatLichData()">
             <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
         </button>
-        <button class="btn text-white fw-bold shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" onclick="openFormDatLich()">
-            <i class="fa-solid fa-plus me-1"></i> Tạo bài đăng mới
+        <button class="btn text-white fw-bold shadow-sm" style="background-color: #e61d4a; border-radius: 8px;" onclick="openFormDatLich()">
+            <i class="fa-solid fa-plus me-1"></i> Tạo kỳ thi mới
         </button>
     </div>
 </header>
@@ -1756,6 +1755,7 @@
             <div class="col-md-4">
                 <label class="form-label fw-bold small">Nội dung <span class="text-danger">*</span></label>
                 <select id="selDatLichNoiDung" class="form-select fw-bold border-primary-subtle" onchange="toggleDatLichKhac()">
+		    <option value="Kỳ thi">Kỳ thi</option>
                     <option value="Đặt lịch hẹn">Đặt lịch hẹn</option>
                     <option value="Chia sẻ Minh Chứng Rèn luyện">Chia sẻ Minh Chứng Rèn luyện</option>
                     <option value="Chia sẻ Hoạt động Rèn luyện">Chia sẻ Hoạt động Rèn luyện</option>
@@ -1779,12 +1779,13 @@
     <!-- Bảng danh sách bài đăng lịch hẹn -->
     <div class="data-card p-0 shadow-sm">
         <div class="tb-header-blue d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <span><i class="fa-solid fa-list-check me-2"></i> Danh sách bài đăng lịch hẹn</span>
+            <span><i class="fa-solid fa-list-check me-2"></i> Danh sách bài đăng</span>
             
             <!-- BỘ LỌC VÀ TÌM KIẾM ĐƯỢC THÊM VÀO ĐÂY -->
             <div class="d-flex gap-2">
                 <select id="filterDatLichNoiDung" class="form-select form-select-sm border-0 shadow-sm" style="width: auto; border-radius: 6px; font-weight: 600; color: #0f4c81;" onchange="searchDatLich()">
                     <option value="">-- Tất cả nội dung --</option>
+			<option value="Kỳ thi">Kỳ thi</option>
                     <option value="Đặt lịch hẹn">Đặt lịch hẹn</option>
                     <option value="Chia sẻ Minh Chứng Rèn luyện">Chia sẻ Minh Chứng Rèn luyện</option>
                     <option value="Chia sẻ Hoạt động Rèn luyện">Chia sẻ Hoạt động Rèn luyện</option>
@@ -2834,15 +2835,14 @@
 
 <!-- Thẻ 5: Đặt lịch hẹn -->
 <div class="col">
-    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #8b5cf6;" onclick="loadDatLichHenView()">
+    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #8b5cf6;" onclick="loadDatLichHenView('temp')">
         <div class="icon-box position-relative">
             <i class="fa-solid fa-calendar-check" style="color: #8b5cf6;"></i>
-            <!-- THÊM DÒNG NÀY: Huy hiệu "Mới" cho Đặt lịch hẹn -->
             <span id="datLichInsideBadge" class="badge-new-qa d-none" style="position: absolute; top: -5px; right: -25px; padding: 2px 6px;">Mới</span>
         </div>
         <div class="card-text-wrapper">
-            <h5>Đặt lịch hẹn/Chia sẻ thông tin</h5>
-            <p class="card-desc">Cùng nhau chia sẻ thông tin, đặt lịch hẹn học tập...</p>
+            <h5>TEMP</h5>
+            <p class="card-desc">Hoạt động, Đặt lịch...</p>
         </div>
     </div>
 </div>
@@ -3006,8 +3006,8 @@
                     <option value="Zalo">Zalo</option>
                     <option value="Messenger">Messenger</option>
                     <option value="Discord">Discord</option>
-					<option value="MS TEAMS">MS TEAMS</option>
-                    <option value="Facebook">Facebook</option>
+                    <option value="MS TEAMS">MS TEAMS</option>
+					<option value="Facebook">Facebook</option>
                     <option value="Khác">Khác</option>
                 </select>
             </div>
@@ -3186,44 +3186,80 @@
     
 <!-- MODAL SINH VIÊN ĐĂNG THÔNG BÁO -->
 <div class="modal fade" id="studentAddThongBaoModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
+    <!-- Thêm style="max-width: 95vw;" để bảng rộng ra 95% màn hình -->
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 95vw;">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
             <div class="modal-header bg-success text-white" style="border-radius: 16px 16px 0 0;">
                 <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-nib me-2"></i>Đăng Thông Báo Mới (Chờ duyệt)</h6>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body p-4">
+            <div class="modal-body p-4" style="background-color: #f8fafc;">
                 <div class="alert alert-success border-0 p-2 small m-0 mb-3" style="background-color: #dcfce7; border-radius: 8px;">
                     <i class="fa-solid fa-circle-info me-1"></i> Bài viết của bạn sẽ được hiển thị cho tất cả sinh viên sau khi Ban quản trị phê duyệt.
                 </div>
-                <div class="row g-3">
-                    <div class="col-md-8">
-                        <label class="form-label fw-bold text-muted small">Tiêu đề thông báo <span class="text-danger">*</span></label>
-                        <input type="text" id="stuTbTitle" class="form-control fw-bold" placeholder="Nhập tiêu đề...">
+                
+                <!-- Bố cục 2 cột (Trái: Form nhập | Phải: Xem trước) -->
+                <div class="row g-4">
+                    
+                    <!-- CỘT TRÁI: FORM NHẬP LIỆU -->
+                    <div class="col-lg-6">
+                        <div class="bg-white p-3 rounded shadow-sm border border-success-subtle h-100">
+                            <h6 class="fw-bold text-success mb-3 border-bottom pb-2">
+                                <i class="fa-solid fa-keyboard me-2"></i>Nhập nội dung
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label class="form-label fw-bold text-muted small">Tiêu đề thông báo <span class="text-danger">*</span></label>
+                                    <input type="text" id="stuTbTitle" class="form-control fw-bold" placeholder="Nhập tiêu đề...">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold text-muted small">Phân loại <span class="text-danger">*</span></label>
+                                    <select id="stuTbCategory" class="form-select fw-bold border-success-subtle text-success">
+                                        <option value="Học thuật">Học thuật & NCKH</option>
+                                        <option value="Rèn luyện">Hoạt động Rèn luyện</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-bold text-muted small">Nội dung chi tiết <span class="text-danger">*</span></label>
+                                    <textarea id="studentTbContent" class="form-control" rows="4" placeholder="Nhập nội dung..."></textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-muted small">Link đính kèm (nếu có)</label>
+                                    <input type="text" id="stuTbLink" class="form-control" placeholder="https://...">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold text-muted small">Hết hạn lúc (Deadline)</label>
+                                    <input type="datetime-local" id="stuTbDeadline" class="form-control">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-bold text-muted small">Chế độ phân loại <span class="text-danger">*</span></label>
-                        <select id="stuTbCategory" class="form-select fw-bold border-success-subtle text-success">
-                            <option value="Học thuật">Học thuật & NCKH</option>
-                            <option value="Rèn luyện">Hoạt động Rèn luyện</option>
-                        </select>
+                    
+                    <!-- CỘT PHẢI: BẢNG XEM TRƯỚC -->
+                    <div class="col-lg-6">
+                        <div class="p-4 rounded shadow-sm border border-primary-subtle bg-white h-100 overflow-auto" id="livePreviewContainer" style="max-height: 75vh;">
+                            <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">
+                                <i class="fa-solid fa-eye me-2"></i>Xem trước bài đăng
+                            </h6>
+                            
+                            <!-- Mô phỏng giao diện chi tiết thông báo -->
+                            <div class="tb-detail-title-small text-danger fw-bold mb-2" id="previewTitle" style="font-size: 20px; word-break: break-word;">
+                                [Tiêu đề sẽ hiển thị ở đây]
+                            </div>
+                            <div class="tb-detail-dates mb-3 text-muted border-bottom pb-2" style="font-size: 14px;">
+                                <i class="fa-regular fa-calendar"></i> Ngày đăng: <span id="previewDate">Vừa xong</span>
+                            </div>
+                            <div class="tb-detail-main-content" id="previewContent" style="font-size: 16px; line-height: 1.6; color: #1e293b; overflow-wrap: break-word;">
+                                <span class="text-muted fst-italic">[Nội dung bài đăng sẽ hiển thị ở đây]</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-12">
-                        <label class="form-label fw-bold text-muted small">Nội dung chi tiết <span class="text-danger">*</span></label>
-                        <textarea id="studentTbContent" class="form-control" rows="4" placeholder="Nhập nội dung..."></textarea>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">Link đính kèm (nếu có)</label>
-                        <input type="text" id="stuTbLink" class="form-control" placeholder="https://...">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold text-muted small">Hết hạn lúc (Deadline)</label>
-                        <input type="datetime-local" id="stuTbDeadline" class="form-control">
-                    </div>
+                    
                 </div>
             </div>
+            
             <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 16px 16px;">
-                <button type="button" class="btn btn-light fw-bold shadow-sm" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-light fw-bold shadow-sm border" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #10b981;" onclick="submitStudentThongBao()" id="btnSubmitStuTb">
                     <i class="fa-solid fa-paper-plane me-1"></i> Gửi phê duyệt
                 </button>
@@ -3805,18 +3841,18 @@
 </div>
                 
                 <!-- Nhóm nút bên phải -->
-                <div class="d-flex align-items-center gap-2">
-			<button type="button" class="btn btn-sm fw-bold d-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('iframe')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
-                        <i class="fa-solid fa-table-columns"></i> Mở thêm bài
-                    </button>
-                    <button type="button" class="btn btn-sm fw-bold d-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleIframeSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
-                        <i class="fa-solid fa-layer-group"></i> Công cụ
-                    </button>
-                    <button type="button" id="btnOpenInNewTab" class="btn btn-sm btn-outline-light d-none" style="border-radius: 6px; border-color: rgba(255,255,255,0.4);">
-                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                    </button>
-                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
-                </div>
+               <div class="d-flex gap-2 align-items-center">
+    <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('iframe')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
+        <i class="fa-solid fa-table-columns"></i> Mở thêm bài
+    </button>
+    <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleIframeSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
+        <i class="fa-solid fa-layer-group"></i> Công cụ
+    </button>
+<button type="button" id="btnOpenInNewTab" class="btn btn-sm btn-outline-light d-none" style="border-radius: 6px; border-color: rgba(255,255,255,0.4);">
+    <i class="fa-solid fa-arrow-up-right-from-square"></i> Mở tab mới
+</button>
+    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
+</div>
             </div>
             
             <!-- Thân Modal (Chứa Iframe & Sidebar) -->
@@ -4081,19 +4117,18 @@
                     <span class="fw-bold fs-6" id="lblLatexCountdownClock" style="color: #facc15; letter-spacing: 0.5px;">00:00:00</span>
                     <button class="btn btn-sm btn-link text-white p-0 ms-2 btn-countdown-pause" onclick="togglePauseUserCountdown()" title="Tạm ngưng / Tiếp tục"><i class="fa-solid fa-pause"></i></button>
                 </div>
-                <div class="d-flex gap-2 align-items-center">
-                    <button type="button" class="btn btn-sm fw-bold d-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('latex')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
-                        <i class="fa-solid fa-table-columns"></i> Mở thêm bài
-                    </button>
-                    <button type="button" class="btn btn-sm fw-bold d-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleLatexSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
-                        <i class="fa-solid fa-layer-group"></i> Công cụ
-                    </button>
-                    <!-- Nút Sửa (Chỉ Admin mới thấy) -->
-                    <button type="button" id="btnEditLatexModal" class="btn btn-sm btn-warning fw-bold d-none shadow-sm" onclick="toggleLatexEditMode()">
-                        <i class="fa-solid fa-pen me-1"></i> Sửa Nội Dung
-                    </button>
-                    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
-                </div>
+               <div class="d-flex gap-2 align-items-center">
+    <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('latex')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
+        <i class="fa-solid fa-table-columns"></i> Mở thêm bài
+    </button>
+    <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleLatexSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
+        <i class="fa-solid fa-layer-group"></i> Công cụ
+    </button>
+<button type="button" id="btnEditLatexModal" class="btn btn-sm btn-warning fw-bold d-none shadow-sm" onclick="toggleLatexEditMode()">
+        <i class="fa-solid fa-pen me-1"></i> Sửa Nội Dung
+    </button>
+    <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
+</div>
             </div>
             
             <!-- Thân Modal -->
@@ -4804,6 +4839,43 @@
             </div>
         </div>
     </div>
+<!-- MODAL SINH VIÊN ĐĂNG BÀI VÀO DANH MỤC HỌC PHẦN -->
+<div class="modal fade" id="studentCoursePostModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header bg-success text-white" style="border-radius: 16px 16px 0 0;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-nib me-2"></i>Đăng bài thảo luận (Chờ duyệt)</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-success border-0 p-2 small mb-3">
+                    <i class="fa-solid fa-circle-info me-1"></i> Bài viết của bạn sẽ được Ban quản trị duyệt trước khi hiển thị công khai cho mọi người.
+                </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-bold small text-muted">Tiêu đề bài đăng <span class="text-danger">*</span></label>
+                        <input type="text" id="stuCourseTitle" class="form-control fw-bold" placeholder="Nhập tiêu đề hoặc chủ đề thảo luận...">
+                    </div>
+                                      <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted">Link đính kèm (Nếu có)</label>
+                        <input type="text" id="stuCourseLink" class="form-control" placeholder="https://...">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small text-muted">Ghi chú thêm</label>
+                        <input type="text" id="stuCourseNote" class="form-control" placeholder="Ghi chú ngắn...">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 16px 16px;">
+                <button type="button" class="btn btn-light fw-bold shadow-sm border" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #10b981;" onclick="submitStudentCoursePost()" id="btnSubmitStuCoursePost">
+                    <i class="fa-solid fa-paper-plane me-1"></i> Gửi phê duyệt
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js"></script>
@@ -4982,6 +5054,44 @@ window.addEventListener('popstate', function() {
 $(document).ready(function() {
     initSystemUrlRouter();
 });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let timeLeft = 5;
+        const countdownEl = document.getElementById('countdownNumber');
+        const loaderEl = document.getElementById('globalScreenLoader');
+
+        // BƯỚC 1: Khóa cứng màn hình Loading bằng !important ngay từ lúc bắt đầu
+        if (loaderEl) {
+            loaderEl.style.setProperty('display', 'flex', 'important');
+            loaderEl.style.setProperty('opacity', '1', 'important');
+        }
+
+        const timer = setInterval(() => {
+            timeLeft--;
+            
+            // Cập nhật số giây
+            if (countdownEl) {
+                countdownEl.innerText = timeLeft;
+            }
+            
+            // BƯỚC 2: Liên tục "bảo kê" khung Loading, ép phải hiển thị trong lúc đang đếm
+            if (loaderEl && timeLeft > 0) {
+                loaderEl.style.setProperty('display', 'flex', 'important');
+            }
+            
+            // BƯỚC 3: Hết 7 giây mới nhả khóa và cho phép làm mờ rồi ẩn đi
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                if (loaderEl) {
+                    loaderEl.style.setProperty('opacity', '0', 'important');
+                    setTimeout(() => {
+                        loaderEl.style.setProperty('display', 'none', 'important');
+                    }, 300);
+                }
+            }
+        }, 1000);
+    });
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
