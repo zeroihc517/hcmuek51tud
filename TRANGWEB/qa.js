@@ -3301,7 +3301,7 @@ window.sendThongBaoAdminReply = function(rowIndex) {
 $(document).ready(function() {
     const courseQAModalHtml = `
     <div class="modal fade" id="courseQAModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
-        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
                 <div class="modal-header text-white" style="background-color: #0f4c81;">
                     <h6 class="modal-title fw-bold" id="courseQAModalTitle"><i class="fa-solid fa-comments me-2"></i> Trao đổi bài học</h6>
@@ -3577,4 +3577,520 @@ window.sendCourseQAAdminReply = function(rowIndex) {
         alert("Lỗi khi gửi trả lời.");
         btn.html(originalBtnHtml).prop('disabled', false);
     });
+};
+// =======================================================
+// BỘ XỬ LÝ THÔNG BÁO CÁ NHÂN (PRIVATE MESSAGES V3)
+// =======================================================
+window.privateMessages = [];
+window.unreadPrivateMessages = [];
+window.selectedSpmUsers = [];
+window.pmThreadParts = {}; 
+
+// TỰ ĐỘNG CHÈN CSS ÉP LỚP HIỂN THỊ ĐỂ CHỐNG LỖI ĐEN MÀN HÌNH CỦA BOOTSTRAP
+$('<style>').text(`
+    #sendPrivateMsgModal, #privateMsgThreadModal { z-index: 1080 !important; }
+    #editPrivateMsgModal { z-index: 1090 !important; }
+`).appendTo('head');
+
+// ĐẢM BẢO CHUÔNG QUÉT NGẦM MỖI 5 GIÂY CHÍNH XÁC
+$(document).ready(function() {
+    setInterval(function() {
+        if (typeof checkPrivateMessages === 'function') checkPrivateMessages();
+    }, 5000);
+    setTimeout(function() { if (typeof checkPrivateMessages === 'function') checkPrivateMessages(); }, 2000);
+});
+
+// 1. Ô TÌM KIẾM GỢI Ý SINH VIÊN (GÕ TỪ KHÓA ĐỂ CHỌN)
+$(document).on('input', '#spmAssignedSearch', function() {
+    let keyword = $(this).val().toLowerCase().trim();
+    let dropdown = $('#spmAssignedDropdown');
+    
+    if (keyword.length === 0) { dropdown.hide(); return; }
+
+    if (!window.allUsersDataForSearch || window.allUsersDataForSearch.length === 0) {
+        $.ajax({url: SCRIPT_URL + "?action=getAllUsers", method: "GET", dataType: "json", success: function(users) { window.allUsersDataForSearch = users; }});
+    }
+
+    let matches = (window.allUsersDataForSearch || []).filter(u => 
+        (u.mssv.toLowerCase().includes(keyword) || u.name.toLowerCase().includes(keyword)) &&
+        !window.selectedSpmUsers.includes(u.mssv)
+    );
+
+    if (matches.length > 0) {
+        let html = '';
+        matches.slice(0, 10).forEach(u => {
+            html += `<li><a class="dropdown-item py-2" href="javascript:void(0)" onclick="addSpmUser('${u.mssv}', '${u.name}')"><strong class="text-danger">${u.mssv}</strong> - ${u.name}</a></li>`;
+        });
+        dropdown.html(html).show();
+    } else {
+        dropdown.html('<li><span class="dropdown-item text-muted py-2">Không tìm thấy sinh viên...</span></li>').show();
+    }
+});
+
+$(document).on('click', function(e) {
+    if (!$(e.target).closest('#adminSpmAssignArea').length) $('#spmAssignedDropdown').hide();
+});
+
+window.addSpmUser = function(mssv, name) {
+    if (!window.selectedSpmUsers.includes(mssv)) {
+        window.selectedSpmUsers.push(mssv);
+        renderSpmUserTags();
+    }
+    $('#spmAssignedSearch').val('').focus();
+    $('#spmAssignedDropdown').hide();
+};
+
+window.removeSpmUser = function(mssv) {
+    window.selectedSpmUsers = window.selectedSpmUsers.filter(id => id !== mssv);
+    renderSpmUserTags();
+};
+
+window.renderSpmUserTags = function() {
+    let html = '';
+    window.selectedSpmUsers.forEach(mssv => {
+        let user = (window.allUsersDataForSearch || []).find(u => u.mssv === mssv);
+        let displayName = user ? `${mssv} - ${getNaturalShortName(user.name)}` : mssv;
+        html += `
+        <span class="badge bg-danger d-flex align-items-center gap-2 shadow-sm" style="font-size: 13px; padding: 6px 10px; border-radius: 6px;">
+            ${displayName}
+            <i class="fa-solid fa-xmark" style="cursor: pointer; opacity: 0.8;" onclick="removeSpmUser('${mssv}')"></i>
+        </span>`;
+    });
+    $('#spmAssignedTags').html(html);
+    $('#spmTargetMssv').val(window.selectedSpmUsers.join(',')); 
+};
+
+// 2. MODAL ADMIN GỬI THÔNG BÁO
+window.openSendPrivateMsgModal = function() {
+    window.selectedSpmUsers = [];
+    renderSpmUserTags();
+    $('#spmAssignedSearch, #spmTargetMssv, #spmTitle, #spmContent').val('');
+    $('#sendPrivateMsgModal').modal('show');
+    
+    $('#spmAssignedSearch').attr('placeholder', 'Đang tải dữ liệu sinh viên...').prop('disabled', true);
+    
+    $.ajax({
+        url: SCRIPT_URL + "?action=getAllUsers", method: "GET", dataType: "json", 
+        success: function(users) { 
+            window.allUsersDataForSearch = users; 
+            $('#spmAssignedSearch').attr('placeholder', 'Nhập MSSV hoặc Tên để tìm kiếm...').prop('disabled', false).focus();
+        }
+    });
+};
+
+window.submitSendPrivateMsg = function() {
+    let targets = $('#spmTargetMssv').val().trim();
+    let title = $('#spmTitle').val().trim();
+    let content = $('#spmContent').val().trim();
+    
+    if(!targets || !title || !content) { alert("Vui lòng chọn Sinh viên và điền nội dung!"); return; }
+    
+    let btn = $('#btnSubmitSendPrivateMsg');
+    let originText = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang gửi...').prop('disabled', true);
+    
+    postToGAS({ action: "sendPrivateMessage", adminMssv: currentUser.mssv, targetMssvs: targets, title: title, content: content }, function(res) {
+        alert(res);
+        btn.html(originText).prop('disabled', false);
+        $('#sendPrivateMsgModal').modal('hide');
+        checkPrivateMessages(); 
+        
+        let traCuuMssv = $('#adminSearchMSSV').val();
+        if (traCuuMssv && targets.includes(traCuuMssv) && typeof adminFetchUserData === 'function') {
+            adminFetchUserData();
+        }
+    }, function() { alert("Lỗi máy chủ!"); btn.html(originText).prop('disabled', false); });
+};
+
+// 3. QUÉT THÔNG BÁO ĐỊNH KỲ VÀ TỔNG HỢP BADGE
+window.checkPrivateMessages = function() {
+    if (!currentUser || currentUser.isGuest) return;
+    $.ajax({
+        url: SCRIPT_URL + "?action=getPrivateMessages&mssv=" + currentUser.mssv,
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            window.privateMessages = data;
+            let isSysAdmin = (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+            window.unreadPrivateMessages = data.filter(msg => isSysAdmin ? msg.status === 'UNREAD_ADMIN' : msg.status === 'UNREAD_USER');
+            updatePersonalNotificationBell();
+        }
+    });
+};
+
+window.updatePersonalNotificationBell = function() {
+    let unreadPrivateCount = window.unreadPrivateMessages ? window.unreadPrivateMessages.length : 0;
+    let total = window.personalUnreadQA.length + window.personalUnreadShareCode.length + unreadPrivateCount;
+    let badge = $('#personalNotificationBadge');
+    let bell = $('#bellIconUI');
+    
+    if (total > 0) {
+        badge.text(total).removeClass('d-none');
+        bell.removeClass('text-secondary').addClass('text-danger fa-shake'); 
+    } else {
+        badge.addClass('d-none');
+        bell.removeClass('text-danger fa-shake').addClass('text-secondary');
+    }
+};
+
+// 4. MỞ DANH SÁCH THÔNG BÁO CÁ NHÂN
+window.openPersonalNotifications = function() {
+    if (!currentUser || currentUser.isGuest) { alert("Vui lòng đăng nhập để xem thông báo cá nhân!"); return; }
+    
+    let html = '';
+    let isSysAdmin = (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+
+    if (window.privateMessages && window.privateMessages.length > 0) {
+       window.privateMessages.forEach(msg => {
+            let isUnread = isSysAdmin ? (msg.status === 'UNREAD_ADMIN') : (msg.status === 'UNREAD_USER');
+            let titleStr = isSysAdmin ? `Giao tiếp: SV ${msg.mssv}` : `Từ: Ban Quản Trị`;
+            let bgColor = isUnread ? (isSysAdmin ? "#fffbeb" : "#fff1f2") : "#ffffff";
+            let iconColor = isUnread ? (isSysAdmin ? "bg-warning text-dark" : "bg-danger text-white") : "bg-secondary text-white";
+            let textColor = isUnread ? (isSysAdmin ? "text-warning-emphasis" : "text-danger") : "text-dark";
+            let dotHtml = isUnread ? `<div class="rounded-circle bg-danger" style="width: 8px; height: 8px; position: absolute; top: 15px; right: 15px;"></div>` : '';
+
+            // Định dạng lại thời gian
+            let displayTime = msg.time;
+            if (displayTime && displayTime.includes('T')) {
+                let d = new Date(displayTime);
+                if (!isNaN(d.getTime())) {
+                    let pad = (n) => String(n).padStart(2, '0');
+                    displayTime = `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+                }
+            }
+
+            html += `
+            <div class="p-3 border-bottom position-relative" style="cursor: pointer; background: ${bgColor}; transition: 0.2s;" onmouseover="this.style.filter='brightness(0.95)'" onmouseout="this.style.filter='brightness(1)'" onclick="openPrivateMsgThread(${msg.rowIndex})">
+                ${dotHtml}
+                <div class="d-flex align-items-start gap-3">
+                    <div class="${iconColor} rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><i class="fa-solid fa-envelope"></i></div>
+                    <div>
+                        <div class="fw-bold ${textColor} mb-1" style="font-size: 14.5px;"><span class="me-1">${titleStr}</span> | <span class="ms-1 text-secondary">${msg.title}</span></div>
+                        <div class="text-muted small"><i class="fa-regular fa-clock me-1"></i>${displayTime}</div>
+                    </div>
+                </div>
+            </div>`;
+        });
+    }
+
+    if (window.personalUnreadQA && window.personalUnreadQA.length > 0) {
+        window.personalUnreadQA.forEach(row => {
+            let qPreview = String(row[2]).replace(/<[^>]*>?/gm, '').substring(0, 60) + '...';
+            html += `
+            <div class="p-3 border-bottom" style="cursor: pointer; background: #f8fafc;" onclick="handleNotificationClick('Q&A', ${row[6]})">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><i class="fa-solid fa-comments"></i></div>
+                    <div>
+                        <div class="fw-bold text-primary mb-1" style="font-size: 14.5px;">Phản hồi mới trong Giải đáp thắc mắc</div>
+                        <div class="text-muted small fst-italic">"${qPreview}"</div>
+                    </div>
+                </div>
+            </div>`;
+        });
+    }
+    
+    if (html === '') html = '<div class="text-center text-muted p-5"><i class="fa-regular fa-bell-slash fs-1 mb-3"></i><br>Bạn không có thông báo cá nhân nào.</div>';
+    
+    $('#personalNotificationList').html(html);
+    $('#personalNotificationModal').modal('show');
+};
+
+// 5. MỞ HỘI THOẠI CHI TIẾT
+window.openPrivateMsgThread = function(rowIndex, isFromAdminTable = false) {
+    if(!isFromAdminTable) {
+        $('#personalNotificationModal').modal('hide');
+        // Sử dụng setTimeout để đợi hiệu ứng tắt của Bootstrap, chống đen màn hình
+        setTimeout(() => { executeOpenThread(rowIndex, isFromAdminTable); }, 400); 
+    } else {
+        executeOpenThread(rowIndex, isFromAdminTable);
+    }
+};
+
+function executeOpenThread(rowIndex, isFromAdminTable, isUpdateOnly = false) {
+    let msgList = isFromAdminTable ? window.adminCurrentTargetPMs : window.privateMessages;
+    let msg = (msgList || []).find(m => m.rowIndex === rowIndex);
+    if(!msg) return;
+    
+    $('#privateMsgRowIndex').val(rowIndex);
+    let isSysAdmin = (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+    let roleForApi = isSysAdmin ? 'ADMIN' : 'USER';
+    
+    let isUnread = isSysAdmin ? (msg.status === 'UNREAD_ADMIN') : (msg.status === 'UNREAD_USER');
+    if (isUnread) {
+        postToGAS({ action: "markPrivateMessageRead", rowIndex: rowIndex, role: roleForApi }, function() { checkPrivateMessages(); });
+    }
+    
+    $('#privateMsgThreadTitle').html(`<i class="fa-solid fa-envelope-open-text me-2"></i> ${msg.title}`);
+    
+    let threadHtml = '';
+    
+    // 1. Dọn dẹp HTML Entity đề phòng dữ liệu từ Google Sheets bị mã hóa
+    let safeThread = msg.thread.replace(/&#91;/g, "[").replace(/&#93;/g, "]");
+    
+    // 2. Tách chính xác từng khối tin nhắn. Đã sửa lỗi \vert{} thành |
+    let parts = safeThread.split(/(\[(?:ADMIN|SV)\][\s\S]*?\[\/(?:ADMIN|SV)\])/gi).filter(p => p.trim() !== "");
+    window.pmThreadParts[rowIndex] = parts;
+    
+    parts.forEach((part, index) => {
+        let content = part.trim();
+        if (!content) return;
+        
+        // Bỏ qua nếu là các chuỗi rác lọt vào giữa các tin nhắn
+        if (!content.toUpperCase().startsWith("[ADMIN]") && !content.toUpperCase().startsWith("[SV]")) return;
+
+        let role = content.toUpperCase().startsWith("[ADMIN]") ? "Admin" : "Sinh viên";
+        
+        // 3. Xóa các thẻ Tag hệ thống để lấy nội dung thuần
+        let textRaw = content.replace(/\[\/?(ADMIN|SV)\]/gi, "").trim();
+        
+        // Bóc tách thời gian
+        let timeMatch = textRaw.match(/^\((.*?)\)\n?/);
+        let timeStr = timeMatch ? timeMatch[1] : "";
+        if (timeMatch) textRaw = textRaw.replace(timeMatch[0], '').trim();
+        
+        // 4. Phân luồng lề Trái/Phải (Của mình thì bên phải, người khác bên trái)
+       // 4. Phân luồng lề Trái/Phải (Của mình thì bên phải, người khác bên trái)
+        let isMe = false;
+        if (isSysAdmin && role === "Admin") isMe = true;
+        if (!isSysAdmin && role === "Sinh viên") isMe = true;
+
+        let alignClass = isMe ? "justify-content-end" : "justify-content-start";
+        let bubbleColor = isMe ? "#0f4c81" : "#ffffff";
+        let textColor = isMe ? "#ffffff" : "#1e293b";
+        let borderColor = isMe ? "none" : "1px solid #cbd5e1";
+        let borderRadius = isMe ? "18px 18px 4px 18px" : "18px 18px 18px 4px";
+        let avatarIcon = role === "Admin" ? '<i class="fa-solid fa-user-shield"></i>' : '<i class="fa-solid fa-user-graduate"></i>';
+        let avatarBg = role === "Admin" ? "bg-danger" : "bg-primary";
+        
+       let senderName = "Sinh viên";
+            if (role === "Admin") {
+                senderName = "Ban Quản Trị";
+            } else {
+                let cleanMssv = msg.mssv ? String(msg.mssv).replace(/\./g, "").trim() : "";
+                let fullName = "";
+                
+                if (typeof currentUser !== 'undefined' && currentUser && currentUser.mssv) {
+                    let myCleanMssv = String(currentUser.mssv).replace(/\./g, "").trim();
+                    if (myCleanMssv === cleanMssv) fullName = currentUser.name;
+                }
+                
+                if (!fullName && window.allUsersMap && window.allUsersMap[cleanMssv]) {
+                    fullName = window.allUsersMap[cleanMssv].name;
+                } 
+                else if (!fullName && window.allUsersDataForSearch && window.allUsersDataForSearch.length > 0) {
+                    let found = window.allUsersDataForSearch.find(u => String(u.mssv).replace(/\./g, "").trim() === cleanMssv);
+                    if (found) fullName = found.name;
+                }
+
+                let displayMssv = cleanMssv;
+                if (cleanMssv && !isSysAdmin) {
+                    displayMssv = cleanMssv.substring(0, 3) + "***" + cleanMssv.slice(-3);
+                }
+
+                if (fullName) {
+                    let nameParts = fullName.trim().split(/\s+/);
+                    let shortName = (nameParts.length >= 2) ? nameParts.slice(-2).join(' ') : fullName;
+                    senderName = displayMssv + " - " + shortName;
+                } else {
+                    senderName = "SV " + displayMssv; 
+                }
+            }
+
+        if (isMe) senderName = "Bạn";
+        // ---------------------------------------------------
+
+        let statusHtml = '';
+        if (isMe && index === parts.length - 1) { 
+            let isOtherUnread = isSysAdmin ? (msg.status === 'UNREAD_USER') : (msg.status === 'UNREAD_ADMIN');
+            if (isOtherUnread) {
+                statusHtml = `<small class="text-muted mt-1 px-1 fw-bold" style="font-size: 11px;"><i class="fa-regular fa-circle-check me-1"></i>Đã nhận</small>`;
+            } else {
+                statusHtml = `<small class="text-primary mt-1 px-1 fw-bold" style="font-size: 11px;"><i class="fa-solid fa-check-double me-1"></i>Đã xem</small>`;
+            }
+        }
+        threadHtml += `
+        <div class="d-flex ${alignClass} mb-3 w-100">
+            ${!isMe ? `<div class="${avatarBg} text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm me-2 mt-auto" style="width: 35px; height: 35px; font-size: 14px;">${avatarIcon}</div>` : ''}
+
+            <div class="d-flex flex-column ${isMe ? 'align-items-end' : 'align-items-start'}" style="max-width: 80%;">
+                <small class="text-muted mb-1 px-1" style="font-size: 12px;">${senderName}</small>
+                <!-- Trả lại textRaw, không dùng random icon nữa -->
+                <div class="p-3 shadow-sm position-relative" style="background: ${bubbleColor}; color: ${textColor}; border-radius: ${borderRadius}; border: ${borderColor}; font-size: 14.5px; white-space: pre-wrap; word-break: break-word;">${textRaw}</div>
+                <div class="d-flex align-items-center mt-1 px-1 gap-2">
+                    ${timeStr ? `<small class="text-muted" style="font-size: 11px;"><i class="fa-regular fa-clock me-1"></i>${timeStr}</small>` : ''}
+                    ${isSysAdmin && role === "Admin" ? `<button class="btn btn-sm btn-link text-warning p-0 text-decoration-none" onclick="openEditPrivateMsgPart(${rowIndex},${index})" style="font-size: 11px;"><i class="fa-solid fa-pen"></i> Sửa</button>` : ''}
+                </div>
+                ${statusHtml}
+            </div>
+
+            ${isMe ? `<div class="${avatarBg} text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm ms-2 mt-auto" style="width: 35px; height: 35px; font-size: 14px;">${avatarIcon}</div>` : ''}
+        </div>`;
+    });
+    
+    if (isSysAdmin) threadHtml += `<div class="text-center mt-4 border-top pt-3"><button class="btn btn-sm btn-outline-danger fw-bold shadow-sm" onclick="deleteFullPrivateMsg(${rowIndex}, ${isFromAdminTable})"><i class="fa-solid fa-trash me-1"></i> Xóa toàn bộ hội thoại này</button></div>`;
+
+    $('#privateMsgThreadContent').html(threadHtml);
+    $('#txtPrivateMsgReply').val('');
+    $('#btnSendPrivateReply').attr('data-from-admin', isFromAdminTable ? '1' : '0');
+
+    if (!isUpdateOnly) $('#privateMsgThreadModal').modal('show');
+    setTimeout(() => { let bodyArea = $('#privateMsgThreadModal .modal-body'); bodyArea.scrollTop(bodyArea[0].scrollHeight); }, 300);
+}
+// 6. GỬI PHẢN HỒI LÊN HỆ THỐNG
+window.sendPrivateMsgReply = function() {
+    let rowIndex = $('#privateMsgRowIndex').val();
+    let text = $('#txtPrivateMsgReply').val().trim();
+    let isFromAdminTable = $('#btnSendPrivateReply').attr('data-from-admin') === '1';
+
+    if(!text) { alert("Vui lòng nhập nội dung!"); return; }
+    
+    let btn = $('#btnSendPrivateReply'); let originText = btn.html();
+    btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
+    
+    postToGAS({ action: "replyPrivateMessage", rowIndex: rowIndex, senderMssv: currentUser.mssv, replyText: text }, function(res) {
+        btn.html(originText).prop('disabled', false);
+        checkPrivateMessages(); 
+        $('#privateMsgThreadModal').modal('hide');
+        
+        if (isFromAdminTable && typeof adminFetchUserData === 'function') {
+            adminFetchUserData();
+        } else {
+            $.ajax({
+                url: SCRIPT_URL + "?action=getPrivateMessages&mssv=" + currentUser.mssv,
+                method: "GET", dataType: "json",
+                success: function(data) {
+                    window.privateMessages = data;
+                    executeOpenThread(parseInt(rowIndex), false, true); 
+                }
+            });
+        }
+    }, function() { alert("Lỗi máy chủ!"); btn.html(originText).prop('disabled', false); });
+};
+
+// 7. ADMIN CHỈNH SỬA & XÓA TIN NHẮN
+let editPmRowIndex = -1; let editPmPartIndex = -1;
+window.openEditPrivateMsgPart = function(rowIndex, partIndex) {
+    editPmRowIndex = rowIndex; editPmPartIndex = partIndex;
+    let fullPart = window.pmThreadParts[rowIndex][partIndex];
+    let contentRaw = fullPart.replace(/\[ADMIN\]|\[\/ADMIN\]/g, "").trim();
+    let timeMatch = contentRaw.match(/^\((.*?)\)\n/);
+    if (timeMatch) contentRaw = contentRaw.replace(timeMatch[0], '').trim();
+    $('#editPrivateMsgText').val(contentRaw);
+    $('#editPrivateMsgModal').modal('show');
+};
+
+window.saveEditPrivateMsg = function() {
+    let newText = $('#editPrivateMsgText').val().trim();
+    if (!newText) { alert("Nội dung không được rỗng!"); return; }
+    let btn = $('#btnSaveEditPrivateMsg'); btn.html('<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...').prop('disabled', true);
+    
+    let fullPart = window.pmThreadParts[editPmRowIndex][editPmPartIndex];
+    let timeMatch = fullPart.replace(/\[ADMIN\]|\[\/ADMIN\]/g, "").trim().match(/^\((.*?)\)\n/);
+    let timeStr = timeMatch ? timeMatch[0] : "";
+    let reconstructed = "[ADMIN]\n" + timeStr + newText + "\n[/ADMIN]";
+    window.pmThreadParts[editPmRowIndex][editPmPartIndex] = reconstructed;
+    let fullThreadToSave = window.pmThreadParts[editPmRowIndex].join("\n\n");
+    
+    postToGAS({ action: "updatePrivateMsgThread", rowIndex: editPmRowIndex, fullText: fullThreadToSave }, function(res) {
+        btn.html('Lưu thay đổi').prop('disabled', false);
+        $('#editPrivateMsgModal').modal('hide');
+        checkPrivateMessages(); 
+        
+        let isFromAdminTable = $('#btnSendPrivateReply').attr('data-from-admin') === '1';
+        if (isFromAdminTable && typeof adminFetchUserData === 'function') adminFetchUserData();
+        
+        executeOpenThread(editPmRowIndex, isFromAdminTable, true); 
+    }, function() { alert("Lỗi!"); btn.html('Lưu thay đổi').prop('disabled', false); });
+};
+
+window.deleteFullPrivateMsg = function(rowIndex, isFromAdminTable) {
+    if(!confirm("Bạn có chắc chắn muốn xóa vĩnh viễn TOÀN BỘ hội thoại này?")) return;
+    postToGAS({action: "deletePrivateMsg", rowIndex: rowIndex}, function(res) {
+        alert(res);
+        $('#privateMsgThreadModal').modal('hide');
+        checkPrivateMessages();
+        if (isFromAdminTable && typeof adminFetchUserData === 'function') {
+            adminFetchUserData(); 
+        } else {
+            setTimeout(openPersonalNotifications, 500); 
+        }
+    }, function() { alert("Lỗi kết nối!"); });
+};
+
+// 8. TÍCH HỢP BẢNG LỊCH SỬ TIN NHẮN VÀO TRANG HỒ SƠ ADMIN
+if (typeof window.renderAdminUserDetail !== 'undefined') {
+    const originalRenderAdminUserDetail = window.renderAdminUserDetail;
+    window.renderAdminUserDetail = function(mssv, data) {
+        originalRenderAdminUserDetail(mssv, data);
+        window.adminCurrentTargetPMs = data.privateMessages || [];
+        
+        let pmHtml = `
+        <!-- BẢNG 3: LỊCH SỬ TIN NHẮN CÁ NHÂN -->
+        <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+            <h6 class="fw-bold text-danger m-0"><i class="fa-solid fa-envelope-open-text me-2"></i>Lịch sử Giao tiếp (Private Messages)</h6>
+            <button class="btn btn-sm btn-outline-danger fw-bold" onclick="$('#spmTargetMssv').val('${mssv}'); $('#spmTitle, #spmContent, #spmAssignedSearch').val(''); $('#spmAssignedTags').html('<span class=\\'badge bg-danger shadow-sm\\'>${mssv}</span>'); $('#sendPrivateMsgModal').modal('show');"><i class="fa-solid fa-plus"></i> Gửi tin mới</button>
+        </div>
+        <div class="table-responsive bg-white rounded border shadow-sm mb-4">
+            <table class="table table-bordered table-hover m-0 align-middle text-center">
+                <thead class="bg-danger text-white">
+                    <tr><th>Thời gian</th><th>Tiêu đề</th><th>Trạng thái</th><th>Thao tác</th></tr>
+                </thead>
+                <tbody>`;
+
+        if (data.privateMessages && data.privateMessages.length > 0) {
+            data.privateMessages.forEach(function(msg) {
+                let isUnread = (msg.status === 'UNREAD_ADMIN');
+                let statusBadge = isUnread 
+                    ? '<span class="badge bg-warning text-dark"><i class="fa-solid fa-bell fa-shake"></i> Có phản hồi mới</span>' 
+                    : '<span class="badge bg-light text-secondary border">Đã xem</span>';
+
+                pmHtml += `
+                <tr style="${isUnread ? 'background-color: #fffbeb;' : ''}">
+                    <td class="text-muted small">${msg.time}</td>
+                    <td class="text-start fw-bold text-danger">${msg.title}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger fw-bold py-1 px-3" onclick="openPrivateMsgThread(${msg.rowIndex}, true)">
+                            <i class="fa-solid fa-eye me-1"></i> Xem hội thoại
+                        </button>
+                    </td>
+                </tr>`;
+            });
+        } else {
+            pmHtml += '<tr><td colspan="4" class="text-muted py-4"><i class="fa-regular fa-comments fs-3 mb-2"></i><br>Chưa có lịch sử giao tiếp với sinh viên này.</td></tr>';
+        }
+        pmHtml += '</tbody></table></div>';
+        $('#adminUserDetailArea').append(pmHtml);
+    };
+}
+
+window.handleNotificationClick = function(type, rowIndex, catName) {
+    $('#personalNotificationModal').modal('hide');
+    postToGAS({ action: "markAsRead", sheetName: type, rowIndex: rowIndex, mssv: currentUser.mssv }, function() {
+        if (type === 'Q&A') window.personalUnreadQA = window.personalUnreadQA.filter(r => r[6] !== rowIndex);
+        else window.personalUnreadShareCode = window.personalUnreadShareCode.filter(r => r[6] !== rowIndex);
+        updatePersonalNotificationBell();
+    }, function() {});
+
+    if (type === 'Q&A') {
+        openQASection();
+        let retryCount = 0;
+        let checkQaInterval = setInterval(() => {
+            let targetBlock = $('#replyBox-' + rowIndex).closest('.qa-item');
+            if (targetBlock.length > 0) {
+                clearInterval(checkQaInterval);
+                $('html, body').animate({ scrollTop: targetBlock.offset().top - 100 }, 600);
+            }
+            retryCount++;
+            if (retryCount > 30) clearInterval(checkQaInterval); 
+        }, 200);
+    }
+};
+
+// Hàm gắn Emoji vào ô Chat PM
+window.insertEmojiPM = function(emoji) {
+    let txtArea = $('#txtPrivateMsgReply');
+    let currentVal = txtArea.val();
+    txtArea.val(currentVal + emoji);
+    txtArea.focus();
 };

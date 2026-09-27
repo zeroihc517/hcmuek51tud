@@ -2093,6 +2093,7 @@
         <option value="">Đang tải danh sách sinh viên...</option>
     </select>
     <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="adminFetchUserData()">Tra cứu</button>
+<button class="btn btn-danger fw-bold mt-2 shadow-sm" onclick="openSendPrivateMsgModal()"><i class="fa-solid fa-envelope-open-text me-1"></i> Gửi thông báo riêng (Personal Message)</button>
 </div>
 <!-- Bổ sung Nút & Bảng Lịch sử Truy cập vào adminUserManageSection -->
 <!-- Bổ sung Nút & Bảng Lịch sử Truy cập vào adminUserManageSection -->
@@ -4267,7 +4268,116 @@
         </div>
     </div>
 </div>
+<!-- MODAL ADMIN TẠO THÔNG BÁO CÁ NHÂN (CẬP NHẬT TÌM KIẾM SINH VIÊN) -->
+<div class="modal fade" id="sendPrivateMsgModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header text-white" style="background-color: #e61d4a;">
+        <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-paper-plane me-2"></i>Gửi thông báo riêng</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+         
+         <div class="mb-3" id="adminSpmAssignArea">
+            <label class="form-label fw-bold small text-muted"><i class="fa-solid fa-users me-1"></i>Chọn sinh viên nhận thông báo <span class="text-danger">*</span></label>
+            <!-- Khung chứa giao diện Tags -->
+            <div class="form-control d-flex flex-wrap gap-1 align-items-center" style="min-height: 42px; position: relative; padding: 6px 10px;">
+                <div id="spmAssignedTags" class="d-flex flex-wrap gap-1"></div>
+                <input type="text" id="spmAssignedSearch" class="border-0 shadow-none flex-grow-1 fw-bold" placeholder="Nhập MSSV hoặc Tên để tìm kiếm..." style="outline: none; min-width: 200px; background: transparent; font-size: 14px;">
+                <!-- Dropdown gợi ý -->
+                <ul id="spmAssignedDropdown" class="dropdown-menu w-100 shadow-lg border-0" style="position: absolute; top: 100%; left: 0; max-height: 250px; overflow-y: auto; display: none; z-index: 1050; border-radius: 8px;"></ul>
+            </div>
+            <!-- Giá trị thực ẩn đi để gửi lên server -->
+            <input type="hidden" id="spmTargetMssv" value="">
+         </div>
 
+         <div class="mb-3">
+           <label class="fw-bold small text-muted mb-1">Tiêu đề thông báo <span class="text-danger">*</span></label>
+           <input type="text" id="spmTitle" class="form-control fw-bold" placeholder="Nhập tiêu đề...">
+         </div>
+         <div class="mb-3">
+           <label class="fw-bold small text-muted mb-1">Nội dung <span class="text-danger">*</span></label>
+           <textarea id="spmContent" class="form-control" rows="4" placeholder="Nhập nội dung..."></textarea>
+         </div>
+      </div>
+      <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 16px 16px;">
+         <button class="btn btn-light fw-bold border shadow-sm" data-bs-dismiss="modal">Hủy</button>
+         <button class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #e61d4a;" onclick="submitSendPrivateMsg()" id="btnSubmitSendPrivateMsg">Gửi đi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SỬA TIN NHẮN (DÀNH CHO ADMIN) -->
+<div class="modal fade" id="editPrivateMsgModal" tabindex="-1" aria-hidden="true" style="z-index: 1070;">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-warning text-dark">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa thông báo Admin</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <textarea id="editPrivateMsgText" class="form-control" rows="6"></textarea>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light fw-bold shadow-sm border" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-warning px-4 fw-bold shadow-sm" onclick="saveEditPrivateMsg()" id="btnSaveEditPrivateMsg">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL XEM CHI TIẾT HỘI THOẠI (PRIVATE MESSAGE) -->
+<div class="modal fade" id="privateMsgThreadModal" tabindex="-1" aria-hidden="true">
+    <!-- Sửa dòng bên dưới -->
+    <div class="modal-dialog modal-fullscreen modal-dialog-scrollable">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 0;">
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold" id="privateMsgThreadTitle"><i class="fa-solid fa-envelope-open-text me-2"></i> Chi tiết tin nhắn</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4" style="background-color: #f8fafc; min-height: 300px;">
+                <input type="hidden" id="privateMsgRowIndex" value="">
+                <div id="privateMsgThreadContent">
+                    <!-- Nội dung hội thoại sẽ được JS đổ vào đây -->
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light d-flex flex-column align-items-stretch" style="border-radius: 0 0 16px 16px;">
+                <!-- KHU VỰC NHẬP TEXT VÀ NÚT EMOJI -->
+                <div class="position-relative mb-2 w-100">
+                    <textarea id="txtPrivateMsgReply" class="form-control" rows="2" placeholder="Nhập nội dung phản hồi..." style="padding-right: 40px; border-radius: 8px;"></textarea>
+                    
+                    <!-- Nút mở Emoji Dropdown -->
+                    <div class="dropdown" style="position: absolute; bottom: 8px; right: 10px;">
+                        <i class="fa-regular fa-face-smile text-muted" data-bs-toggle="dropdown" style="cursor: pointer; font-size: 20px; transition: 0.2s;" onmouseover="this.style.color='#0f4c81'" onmouseout="this.style.color='#6c757d'"></i>
+                        <div class="dropdown-menu dropdown-menu-end p-2 shadow-lg border-0" style="width: 260px; border-radius: 12px;">
+                            <div class="d-flex flex-wrap gap-2 justify-content-center" id="pmEmojiPicker">
+                                <span style="cursor: pointer; font-size: 22px;" onclick="insertEmojiPM('😀')">😀</span>
+                                <span style="cursor: pointer; font-size: 22px;" onclick="insertEmojiPM('😂')">😂</span>
+                                <span style="cursor: pointer; font-size: 22px;" onclick="insertEmojiPM('🥰')">🥰</span>
+                                <span style="cursor: pointer; font-size: 22px;" onclick="insertEmojiPM('😎')">😎</span>
+                                <span style="cursor: pointer; font-size: 22px;" onclick="insertEmojiPM('🙏')">🙏</span>
+                                <span style="cursor: pointer; font-size: 22px;" onclick="insertEmojiPM('👍')">👍</span>
+                                <span style="cursor: pointer; font-size: 22px;" onclick="insertEmojiPM('🔥')">🔥</span>
+                                <span style="cursor: pointer; font-size: 22px;" onclick="insertEmojiPM('🎉')">🎉</span>
+                                <span style="cursor: pointer; font-size: 22px;" onclick="insertEmojiPM('✨')">✨</span>
+                                <span style="cursor: pointer; font-size: 22px;" onclick="insertEmojiPM('❤️')">❤️</span>
+                                <span style="cursor: pointer; font-size: 22px;" onclick="insertEmojiPM('🚀')">🚀</span>
+                                <span style="cursor: pointer; font-size: 22px;" onclick="insertEmojiPM('💪')">💪</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light fw-bold border shadow-sm" data-bs-dismiss="modal">Đóng</button>
+                    <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #0f4c81;" onclick="sendPrivateMsgReply()" id="btnSendPrivateReply" data-from-admin="0">
+                        <i class="fa-solid fa-paper-plane me-2"></i>Gửi phản hồi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- MODAL XUẤT THỜI KHÓA BIỂU & DEADLINE SANG GOOGLE LỊCH -->
 <div class="modal fade" id="exportCalendarModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
