@@ -2433,7 +2433,6 @@ document.addEventListener("visibilitychange", function() {
         }
     }
 });
-
 // 9. GỠ BỎ MỌI RÀNG BUỘC KHI TẮT HẸN GIỜ BẰNG TAY HOẶC HẾT GIỜ
 if (typeof window.cancelUserCountdown !== 'undefined') {
     const originalCancelUserCountdown = window.cancelUserCountdown;
