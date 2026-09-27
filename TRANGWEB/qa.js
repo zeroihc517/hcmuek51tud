@@ -3738,7 +3738,15 @@ window.openPersonalNotifications = function() {
     if (!currentUser || currentUser.isGuest) { alert("Vui lòng đăng nhập để xem thông báo cá nhân!"); return; }
     
     let html = '';
-    let isSysAdmin = (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+    // Kiểm tra quyền Admin
+    let isSysAdmin = (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008" || (typeof isAdmin !== 'undefined' && isAdmin));
+
+    // Bật nút nếu là Admin, ẩn nếu là sinh viên
+    if (isSysAdmin) {
+        $('#btnAdminSendPrivateMsgModal').removeClass('d-none');
+    } else {
+        $('#btnAdminSendPrivateMsgModal').addClass('d-none');
+    }
 
     if (window.privateMessages && window.privateMessages.length > 0) {
        window.privateMessages.forEach(msg => {
@@ -4092,5 +4100,21 @@ window.insertEmojiPM = function(emoji) {
     let txtArea = $('#txtPrivateMsgReply');
     let currentVal = txtArea.val();
     txtArea.val(currentVal + emoji);
+    txtArea.focus();
+};
+
+// Hàm chèn Icon / Emoji vào ô Nội dung thông báo riêng của Admin
+window.insertEmojiToSpm = function(emoji) {
+    let txtArea = document.getElementById('spmContent');
+    if (!txtArea) return;
+
+    let startPos = txtArea.selectionStart;
+    let endPos = txtArea.selectionEnd;
+    let textBefore = txtArea.value.substring(0, startPos);
+    let textAfter = txtArea.value.substring(endPos, txtArea.value.length);
+
+    // Chèn emoji vào đúng vị trí con trỏ chuột
+    txtArea.value = textBefore + emoji + textAfter;
+    txtArea.selectionStart = txtArea.selectionEnd = startPos + emoji.length;
     txtArea.focus();
 };

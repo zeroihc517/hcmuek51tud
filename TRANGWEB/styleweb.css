@@ -3717,3 +3717,15 @@ tr.rl-row-white td {
     color: #ffffff !important;
     border-color: rgba(255, 255, 255, 0.15) !important;
 }
+.spm-emoji-btn {
+    cursor: pointer;
+    font-size: 20px;
+    padding: 3px 6px;
+    border-radius: 6px;
+    transition: background 0.15s ease, transform 0.15s ease;
+    user-select: none;
+}
+.spm-emoji-btn:hover {
+    background-color: #f1f5f9;
+    transform: scale(1.2);
+}

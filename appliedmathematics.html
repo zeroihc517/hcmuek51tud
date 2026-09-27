@@ -2093,7 +2093,7 @@
         <option value="">Đang tải danh sách sinh viên...</option>
     </select>
     <button class="btn text-white fw-bold px-4" style="background: var(--accent-red);" onclick="adminFetchUserData()">Tra cứu</button>
-<button class="btn btn-danger fw-bold mt-2 shadow-sm" onclick="openSendPrivateMsgModal()"><i class="fa-solid fa-envelope-open-text me-1"></i> Gửi thông báo riêng (Personal Message)</button>
+
 </div>
 <!-- Bổ sung Nút & Bảng Lịch sử Truy cập vào adminUserManageSection -->
 <!-- Bổ sung Nút & Bảng Lịch sử Truy cập vào adminUserManageSection -->
@@ -4273,7 +4273,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
       <div class="modal-header text-white" style="background-color: #e61d4a;">
-        <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-paper-plane me-2"></i>Gửi thông báo riêng</h6>
+        <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-paper-plane me-2"></i>Gửi tin</h6>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-4">
@@ -4296,8 +4296,59 @@
            <input type="text" id="spmTitle" class="form-control fw-bold" placeholder="Nhập tiêu đề...">
          </div>
          <div class="mb-3">
-           <label class="fw-bold small text-muted mb-1">Nội dung <span class="text-danger">*</span></label>
-           <textarea id="spmContent" class="form-control" rows="4" placeholder="Nhập nội dung..."></textarea>
+           <div class="d-flex justify-content-between align-items-center mb-1">
+             <label class="fw-bold small text-muted m-0">Nội dung <span class="text-danger">*</span></label>
+             <!-- Nút chọn mở rộng bảng Emoji đầy đủ -->
+             <div class="dropdown">
+               <button class="btn btn-sm btn-light border py-0 px-2 text-muted dropdown-toggle shadow-sm" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 12px; border-radius: 6px;">
+                 <i class="fa-regular fa-face-smile text-warning me-1"></i>Thêm icon
+               </button>
+               <div class="dropdown-menu dropdown-menu-end p-2 shadow-lg border-0" style="width: 270px; border-radius: 12px; max-height: 200px; overflow-y: auto;">
+                 <div class="d-flex flex-wrap gap-2 justify-content-center" id="spmExtraEmojiPicker">
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('😀')">😀</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('😁')">😁</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('😂')">😂</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('🥰')">🥰</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('😎')">😎</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('🤔')">🤔</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('👍')">👍</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('👎')">👎</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('🙏')">🙏</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('👏')">👏</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('🎉')">🎉</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('✨')">✨</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('🔥')">🔥</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('📢')">📢</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('📌')">📌</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('⚠️')">⚠️</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('✅')">✅</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('❌')">❌</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('⏰')">⏰</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('📅')">📅</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('📚')">📚</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('📝')">📝</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('🎓')">🎓</span>
+                   <span class="spm-emoji-btn" onclick="insertEmojiToSpm('🚀')">🚀</span>
+                 </div>
+               </div>
+             </div>
+           </div>
+
+           <!-- Thanh công cụ Icon nhanh hay dùng -->
+           <div class="d-flex align-items-center gap-1 p-1 bg-light border border-bottom-0 rounded-top flex-wrap" style="border-color: #dee2e6 !important;">
+             <button type="button" class="btn btn-sm btn-white border-0 py-0 px-1 text-muted" title="Nhắc nhở" onclick="insertEmojiToSpm('📢 ')">📢</button>
+             <button type="button" class="btn btn-sm btn-white border-0 py-0 px-1 text-muted" title="Ghim / Chú ý" onclick="insertEmojiToSpm('📌 ')">📌</button>
+             <button type="button" class="btn btn-sm btn-white border-0 py-0 px-1 text-muted" title="Cảnh báo" onclick="insertEmojiToSpm('⚠️ ')">⚠️</button>
+             <button type="button" class="btn btn-sm btn-white border-0 py-0 px-1 text-muted" title="Đã duyệt / Thành công" onclick="insertEmojiToSpm('✅ ')">✅</button>
+             <button type="button" class="btn btn-sm btn-white border-0 py-0 px-1 text-muted" title="Hạn chót" onclick="insertEmojiToSpm('⏰ ')">⏰</button>
+             <button type="button" class="btn btn-sm btn-white border-0 py-0 px-1 text-muted" title="Lịch" onclick="insertEmojiToSpm('📅 ')">📅</button>
+             <button type="button" class="btn btn-sm btn-white border-0 py-0 px-1 text-muted" title="Học tập" onclick="insertEmojiToSpm('📚 ')">📚</button>
+             <button type="button" class="btn btn-sm btn-white border-0 py-0 px-1 text-muted" title="Chúc mừng" onclick="insertEmojiToSpm('🎉 ')">🎉</button>
+             <button type="button" class="btn btn-sm btn-white border-0 py-0 px-1 text-muted" title="Thích" onclick="insertEmojiToSpm('👍 ')">👍</button>
+             <button type="button" class="btn btn-sm btn-white border-0 py-0 px-1 text-muted" title="Cảm ơn" onclick="insertEmojiToSpm('🙏 ')">🙏</button>
+           </div>
+
+           <textarea id="spmContent" class="form-control rounded-bottom rounded-0" rows="4" placeholder="Nhập nội dung..."></textarea>
          </div>
       </div>
       <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 16px 16px;">
@@ -4863,10 +4914,15 @@
 <div class="modal fade" id="personalNotificationModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
-            <!-- Đã đổi màu nền sang xanh chủ đạo -->
-            <div class="modal-header text-white" style="background-color: #0f4c81;">
+            <div class="modal-header text-white d-flex justify-content-between align-items-center" style="background-color: #0f4c81;">
                 <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-bell fa-shake me-2"></i>Thông báo cá nhân</h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <div class="d-flex align-items-center gap-2">
+                    <!-- Nút gửi thông báo riêng chỉ dành cho Admin -->
+                    <button type="button" id="btnAdminSendPrivateMsgModal" class="btn btn-sm btn-danger fw-bold d-none shadow-sm" onclick="$('#personalNotificationModal').modal('hide'); setTimeout(openSendPrivateMsgModal, 350);" style="border-radius: 8px;">
+                        <i class="fa-solid fa-paper-plane me-1"></i> Gửi tin
+                    </button>
+                    <button type="button" class="btn-close btn-close-white ms-1" data-bs-dismiss="modal"></button>
+                </div>
             </div>
             <div class="modal-body p-0" style="background: #f8fafc; min-height: 250px;">
                 <div id="personalNotificationList">
@@ -4875,8 +4931,7 @@
             </div>
         </div>
     </div>
-</div>
-<!-- MODAL THÊM MINH CHỨNG RÈN LUYỆN -->
+</div><!-- MODAL THÊM MINH CHỨNG RÈN LUYỆN -->
 <div class="modal fade" id="addProofModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
