@@ -164,10 +164,18 @@ window.isQAUnanswered = data.some(row => { return (row[3] ? String(row[3]).trim(
 
 if (currentUser && !currentUser.isGuest) {
     let myCleanMssv = currentUser.mssv.replace(/\./g, "").toLowerCase();
-    window.personalUnreadQA = data.filter(row => {
-        let authorCleanMssv = String(row[1] || '').trim().replace(/[-|.]/g, '').toLowerCase();
-        return authorCleanMssv === myCleanMssv && row[7] === 'UNREAD';
-    });
+    window.localReadQA = window.localReadQA || new Set(); // Bộ đệm nhớ tin đã bấm
+    
+   window.personalUnreadQA = data.filter(row => {
+    let authorCleanMssv = String(row[1] || '').trim().replace(/[-|.]/g, '').toLowerCase();
+    let answer = row[3] || '';
+    
+    // NẾU BỘ NHỚ TẠM CỦA MÁY NHẬN DIỆN LÀ ĐÃ CLICK -> ÉP NGAY SANG 'READ'
+    if (window.localReadQA.has(row[6])) row[7] = 'READ';
+    
+    // Đảm bảo bài đã có trả lời mới hiển thị lên chuông thông báo cá nhân
+    return authorCleanMssv === myCleanMssv && answer.trim() !== "" && (row[7] === 'UNREAD' || row[7] === 'READ');
+});
     updatePersonalNotificationBell();
 }
             }
@@ -236,9 +244,12 @@ let cleanCat = category.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace
 if (currentUser && !currentUser.isGuest) {
     let myCleanMssv = currentUser.mssv.replace(/\./g, "").toLowerCase();
     window.personalUnreadShareCode = data.filter(row => {
-        let authorCleanMssv = String(row[1] || '').trim().replace(/[-|.]/g, '').toLowerCase();
-        return authorCleanMssv === myCleanMssv && row[7] === 'UNREAD';
-    });
+    let authorCleanMssv = String(row[1] || '').trim().replace(/[-|.]/g, '').toLowerCase();
+    let answer = row[3] || ''; // Lấy dữ liệu cột bình luận
+    
+    // Chỉ lấy thông báo của những bài ĐÃ CÓ BÌNH LUẬN (answer không rỗng)
+    return authorCleanMssv === myCleanMssv && answer.trim() !== "" && (row[7] === 'UNREAD' || row[7] === 'READ');
+});
     updatePersonalNotificationBell();
 }
             window.isShareCodeNew = hasGlobalNew;
@@ -765,12 +776,20 @@ $(document).ready(function() {
 });
 
 // 1. Mở màn hình Thảo luận chung
+// 1. Mở màn hình Thảo luận chung
 function openShareCodeSection() { 
     document.title = "Thảo luận | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
     $('#btnNavShareCode').addClass('active'); 
     $('#shareCodeSection').removeClass('d-none'); 
+    
+    // Đảm bảo bật lại màn hình chọn môn và tắt các khung chi tiết
+    $('#shareCategoryView').removeClass('d-none');
+    $('#shareContentView').addClass('d-none');
+    $('#groupLinksView').addClass('d-none');
+    
     if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận");
+    
     // Nếu không có tham số category trên URL thì mới trở về danh mục Thảo luận tổng
     let urlParams = new URLSearchParams(window.location.search);
     if (!urlParams.get('category')) {
@@ -3044,127 +3063,6 @@ window.backToCourseTable = function() {
     $('#sidebarMenu').removeClass('d-none');
     $('#courseSection').removeClass('d-none');
 };
-window.personalUnreadQA = [];
-window.personalUnreadShareCode = [];
-
-function updatePersonalNotificationBell() {
-    let total = window.personalUnreadQA.length + window.personalUnreadShareCode.length;
-    let badge = $('#personalNotificationBadge');
-    let bell = $('#bellIconUI');
-    
-    if (total > 0) {
-        badge.text(total).removeClass('d-none');
-        bell.removeClass('text-secondary').addClass('text-danger fa-shake'); // Rung lác cảnh báo
-    } else {
-        badge.addClass('d-none');
-        bell.removeClass('text-danger fa-shake').addClass('text-secondary');
-    }
-}
-window.openPersonalNotifications = function() {
-    if (!currentUser || currentUser.isGuest) {
-        alert("Vui lòng đăng nhập để xem thông báo cá nhân!");
-        return;
-    }
-    
-    let html = '';
-    if (window.personalUnreadQA.length === 0 && window.personalUnreadShareCode.length === 0) {
-        html = '<div class="text-center text-muted p-5"><i class="fa-regular fa-bell-slash fs-1 mb-3"></i><br>Bạn không có thông báo mới nào.</div>';
-    } else {
-        window.personalUnreadQA.forEach(row => {
-            let qPreview = String(row[2]).replace(/<[^>]*>?/gm, '').substring(0, 60) + '...';
-            html += `
-            <div class="p-3 border-bottom" style="cursor: pointer; background: #f8fafc; transition: 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'" onclick="handleNotificationClick('Q&A', ${row[6]})">
-                <div class="d-flex align-items-start gap-3">
-                    <!-- Chuyển sang xanh chủ đạo -->
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><i class="fa-solid fa-comments"></i></div>
-                    <div>
-                        <div class="fw-bold text-primary mb-1" style="font-size: 14.5px;">Phản hồi mới trong Giải đáp thắc mắc</div>
-                        <div class="text-muted small fst-italic">"${qPreview}"</div>
-                    </div>
-                </div>
-            </div>`;
-        });
-
-       window.personalUnreadShareCode.forEach(row => {
-            let codePreview = String(row[2]).replace(/<[^>]*>?/gm, '');
-            let maBaiMatch = codePreview.match(/^\[SHARECODE\|.*?\|(.*?)\]/);
-            let maBai = maBaiMatch && maBaiMatch[1] ? maBaiMatch[1].trim() : "Mã code";
-            let catMatch = codePreview.match(/^\[SHARECODE\|(.*?)(?:\||\])/);
-            let catName = catMatch && catMatch[1] ? catMatch[1].trim() : "";
-
-            html += `
-            <div class="p-3 border-bottom" style="cursor: pointer; background: #f0fdf4; transition: 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#f0fdf4'" onclick="handleNotificationClick('ShareCode', ${row[6]}, '${catName}')">
-                <div class="d-flex align-items-start gap-3">
-                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><i class="fa-solid fa-code"></i></div>
-                    <div>
-                        <div class="fw-bold text-success mb-1" style="font-size: 14.5px;">Bình luận mới trong ShareCode</div>
-                        <div class="text-muted small">Mã bài: <strong class="text-dark">${maBai}</strong></div>
-                    </div>
-                </div>
-            </div>`;
-        });
-    }
-    $('#personalNotificationList').html(html);
-    $('#personalNotificationModal').modal('show');
-};
-
-
- window.handleNotificationClick = function(type, rowIndex, catName) {
-    $('#personalNotificationModal').modal('hide');
-
-    postToGAS({
-        action: "markAsRead",
-        sheetName: type,
-        rowIndex: rowIndex,
-        mssv: currentUser.mssv
-    }, function() {
-        if (type === 'Q&A') window.personalUnreadQA = window.personalUnreadQA.filter(r => r[6] !== rowIndex);
-        else window.personalUnreadShareCode = window.personalUnreadShareCode.filter(r => r[6] !== rowIndex);
-        updatePersonalNotificationBell();
-    }, function() {});
-
-    if (type === 'Q&A') {
-        openQASection();
-        let retryCount = 0;
-        let checkQaInterval = setInterval(() => {
-            let targetBlock = $('#replyBox-' + rowIndex).closest('.qa-item');
-            if (targetBlock.length > 0) {
-                clearInterval(checkQaInterval);
-                $('html, body').animate({ scrollTop: targetBlock.offset().top - 100 }, 600);
-                // Đồng bộ hiệu ứng viền sang màu xanh thay vì đỏ
-                targetBlock.css({'border-color': '#0f4c81', 'box-shadow': '0 0 20px rgba(15, 76, 129, 0.4)', 'transition': 'all 0.5s ease'});
-                setTimeout(() => { targetBlock.css({'border-color': '', 'box-shadow': ''}); }, 4000);
-            }
-            retryCount++;
-            if (retryCount > 30) clearInterval(checkQaInterval); 
-        }, 200);
-    }
-    else if (type === 'ShareCode') {
-        openShareCodeSection();
-        if (catName) {
-            let lang = catName.toLowerCase().includes('python') ? 'python' : 'cpp';
-            
-            setTimeout(() => {
-                // FIX: Xóa sạch dữ liệu cũ để ép Interval chờ dữ liệu danh mục mới tải xong
-                window.shareCodeList = null; 
-                openShareCategory(catName, lang);
-                
-                let retryCount = 0;
-                let checkDataInterval = setInterval(() => {
-                    if (window.shareCodeList && window.shareCodeList.length > 0) {
-                        clearInterval(checkDataInterval);
-                        let itemIndex = window.shareCodeList.findIndex(i => i.rowIndex === rowIndex);
-                        if (itemIndex !== -1) {
-                            openShareCodeDetail(itemIndex);
-                        }
-                    }
-                    retryCount++;
-                    if (retryCount > 25) clearInterval(checkDataInterval);
-                }, 200);
-            }, 300);
-        }
-    }
-};
 
 window.toggleOneCompiler = function(btn, isShow) {
     let sidebar = $(btn).closest('#iframeSidebar, #latexSidebar'); 
@@ -3716,10 +3614,14 @@ window.checkPrivateMessages = function() {
         }
     });
 };
-
 window.updatePersonalNotificationBell = function() {
-    let unreadPrivateCount = window.unreadPrivateMessages ? window.unreadPrivateMessages.length : 0;
-    let total = window.personalUnreadQA.length + window.personalUnreadShareCode.length + unreadPrivateCount;
+    let unreadPrivateCount = window.unreadPrivateMessages ? window.unreadPrivateMessages.filter(msg => msg.status.includes('UNREAD')).length : 0;
+    
+    // CHỈ ĐẾM SỐ LƯỢNG TIN 'UNREAD' CHO CHUÔNG
+    let unreadQACount = window.personalUnreadQA ? window.personalUnreadQA.filter(r => r[7] === 'UNREAD').length : 0;
+    let unreadSCCount = window.personalUnreadShareCode ? window.personalUnreadShareCode.filter(r => r[7] === 'UNREAD').length : 0;
+    
+    let total = unreadQACount + unreadSCCount + unreadPrivateCount;
     let badge = $('#personalNotificationBadge');
     let bell = $('#bellIconUI');
     
@@ -3732,15 +3634,12 @@ window.updatePersonalNotificationBell = function() {
     }
 };
 
-// 4. MỞ DANH SÁCH THÔNG BÁO CÁ NHÂN
 window.openPersonalNotifications = function() {
     if (!currentUser || currentUser.isGuest) { alert("Vui lòng đăng nhập để xem thông báo cá nhân!"); return; }
     
     let html = '';
-    // Kiểm tra quyền Admin
     let isSysAdmin = (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008" || (typeof isAdmin !== 'undefined' && isAdmin));
 
-    // Bật nút nếu là Admin, ẩn nếu là sinh viên
     if (isSysAdmin) {
         $('#btnAdminSendPrivateMsgModal').removeClass('d-none');
     } else {
@@ -3756,7 +3655,6 @@ window.openPersonalNotifications = function() {
             let textColor = isUnread ? (isSysAdmin ? "text-warning-emphasis" : "text-danger") : "text-dark";
             let dotHtml = isUnread ? `<div class="rounded-circle bg-danger" style="width: 8px; height: 8px; position: absolute; top: 15px; right: 15px;"></div>` : '';
 
-            // Định dạng lại thời gian
             let displayTime = msg.time;
             if (displayTime && displayTime.includes('T')) {
                 let d = new Date(displayTime);
@@ -3782,14 +3680,53 @@ window.openPersonalNotifications = function() {
 
     if (window.personalUnreadQA && window.personalUnreadQA.length > 0) {
         window.personalUnreadQA.forEach(row => {
+            let isUnread = row[7] === 'UNREAD';
+            let bgColor = isUnread ? '#f8fafc' : '#ffffff';
+            let iconColor = isUnread ? 'bg-primary' : 'bg-secondary';
+            let titleColor = isUnread ? 'text-primary' : 'text-dark';
+            let titleText = isUnread ? 'Phản hồi mới trong Giải đáp thắc mắc' : 'Phản hồi trong Giải đáp thắc mắc';
+
             let qPreview = String(row[2]).replace(/<[^>]*>?/gm, '').substring(0, 60) + '...';
             html += `
-            <div class="p-3 border-bottom" style="cursor: pointer; background: #f8fafc;" onclick="handleNotificationClick('Q&A', ${row[6]})">
+            <div class="p-3 border-bottom" style="cursor: pointer; background: ${bgColor}; transition: 0.2s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='${bgColor}'" onclick="handleNotificationClick('Q&A', ${row[6]})">
                 <div class="d-flex align-items-start gap-3">
-                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><i class="fa-solid fa-comments"></i></div>
+                    <div class="${iconColor} text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><i class="fa-solid fa-comments"></i></div>
                     <div>
-                        <div class="fw-bold text-primary mb-1" style="font-size: 14.5px;">Phản hồi mới trong Giải đáp thắc mắc</div>
+                        <div class="fw-bold ${titleColor} mb-1" style="font-size: 14.5px;">${titleText}</div>
                         <div class="text-muted small fst-italic">"${qPreview}"</div>
+                    </div>
+                </div>
+            </div>`;
+        });
+    }
+
+    if (window.personalUnreadShareCode && window.personalUnreadShareCode.length > 0) {
+        window.personalUnreadShareCode.forEach(row => {
+            let isUnread = row[7] === 'UNREAD';
+            let bgColor = isUnread ? '#f0fdf4' : '#ffffff';
+            let iconColor = isUnread ? 'bg-success' : 'bg-secondary';
+            let titleColor = isUnread ? 'text-success' : 'text-dark';
+            let titleText = isUnread ? 'Bình luận mới trong ShareCode' : 'Bình luận trong ShareCode';
+
+           let codePreview = String(row[2]).replace(/<[^>]*>?/gm, '');
+let categoryMatch = codePreview.match(/^\[SHARECODE\|(.*?)(?:\|(.*))?\]/);
+let maBai = "Mã code";
+let catName = "";
+
+if (categoryMatch) {
+    catName = categoryMatch[1] ? categoryMatch[1].trim() : "";
+    if (categoryMatch[2] && categoryMatch[2].trim() !== "undefined") {
+        maBai = categoryMatch[2].trim();
+    }
+}
+
+            html += `
+            <div class="p-3 border-bottom" style="cursor: pointer; background: ${bgColor}; transition: 0.2s;" onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='${bgColor}'" onclick="handleNotificationClick('ShareCode', ${row[6]}, '${catName}')">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="${iconColor} text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;"><i class="fa-solid fa-code"></i></div>
+                    <div>
+                        <div class="fw-bold ${titleColor} mb-1" style="font-size: 14.5px;">${titleText}</div>
+                        <div class="text-muted small">Mã bài: <strong class="text-dark">${maBai}</strong></div>
                     </div>
                 </div>
             </div>`;
@@ -4073,12 +4010,33 @@ if (typeof window.renderAdminUserDetail !== 'undefined') {
 
 window.handleNotificationClick = function(type, rowIndex, catName) {
     $('#personalNotificationModal').modal('hide');
-    postToGAS({ action: "markAsRead", sheetName: type, rowIndex: rowIndex, mssv: currentUser.mssv }, function() {
-        if (type === 'Q&A') window.personalUnreadQA = window.personalUnreadQA.filter(r => r[6] !== rowIndex);
-        else window.personalUnreadShareCode = window.personalUnreadShareCode.filter(r => r[6] !== rowIndex);
-        updatePersonalNotificationBell();
-    }, function() {});
 
+    window.localReadQA = window.localReadQA || new Set();
+    window.localReadSC = window.localReadSC || new Set();
+
+    // 1. GHI NHẬN VÀO BỘ NHỚ TẠM MÁY TÍNH ĐỂ NGĂN SERVER ĐÈ NGƯỢC LẠI
+    if (type === 'Q&A') {
+        window.localReadQA.add(rowIndex);
+        let item = window.personalUnreadQA.find(r => r[6] === rowIndex);
+        if (item) item[7] = 'READ';
+    } else {
+        window.localReadSC.add(rowIndex);
+        let item = window.personalUnreadShareCode.find(r => r[6] === rowIndex);
+        if (item) item[7] = 'READ';
+    }
+
+    // Tắt chấm đỏ trên chuông ngay lập tức
+    updatePersonalNotificationBell();
+
+    // 2. BÁO LÊN SERVER NGẦM (Không truyền hàm success để tránh xung đột)
+    postToGAS({
+        action: "markAsRead",
+        sheetName: type,
+        rowIndex: rowIndex,
+        mssv: currentUser.mssv
+    }, function() {}, function() {});
+
+    // 3. DI CHUYỂN MÀN HÌNH TỚI VỊ TRÍ TIN NHẮN
     if (type === 'Q&A') {
         openQASection();
         let retryCount = 0;
@@ -4087,13 +4045,56 @@ window.handleNotificationClick = function(type, rowIndex, catName) {
             if (targetBlock.length > 0) {
                 clearInterval(checkQaInterval);
                 $('html, body').animate({ scrollTop: targetBlock.offset().top - 100 }, 600);
+                // Tạo viền flash màu xanh nhạt
+                targetBlock.css({'border-color': '#0f4c81', 'box-shadow': '0 0 20px rgba(15, 76, 129, 0.4)', 'transition': 'all 0.5s ease'});
+                setTimeout(() => { targetBlock.css({'border-color': '', 'box-shadow': ''}); }, 4000);
             }
             retryCount++;
             if (retryCount > 30) clearInterval(checkQaInterval); 
         }, 200);
     }
+    else if (type === 'ShareCode') {
+        // Đảm bảo mở đúng mục ShareCode tổng trước
+        openShareCodeSection();
+        
+        if (catName) {
+            let lang = catName.toLowerCase().includes('python') ? 'python' : 'cpp';
+            
+            // Ép xóa danh sách ShareCode cũ trước khi kích hoạt chọn môn
+            window.shareCodeList = []; 
+            
+            // Kích hoạt ngay lập tức hàm vào môn học, hàm này đã tích hợp sẵn lệnh gọi AJAX loadShareCodeData
+            openShareCategory(catName, lang);
+            
+            // Tạo vòng lặp chờ dữ liệu từ AJAX loadShareCodeData trả về
+            let retryCount = 0;
+            let checkDataInterval = setInterval(() => {
+                if (window.shareCodeList && window.shareCodeList.length > 0) {
+                    clearInterval(checkDataInterval); // Hủy vòng lặp ngay khi có data
+                    
+                    // Quét tìm xem bài code chứa bình luận đó nằm ở index số mấy
+                    let itemIndex = window.shareCodeList.findIndex(i => i.rowIndex === rowIndex);
+                    if (itemIndex !== -1) {
+                        // Kích hoạt mở hộp thoại chứa đoạn Code và Bình luận
+                        openShareCodeDetail(itemIndex);
+                        
+                        // Cuộn mượt màn hình tới chỗ nhập bình luận
+                        setTimeout(() => {
+                            let targetReplyBox = $('#shareReplyBox-' + rowIndex);
+                            if (targetReplyBox.length > 0) {
+                                $('html, body').animate({ scrollTop: targetReplyBox.offset().top - 200 }, 600);
+                                targetReplyBox.removeClass('d-none'); // Mở sẵn khung bình luận cho tiện
+                                $('#txtShareReply-' + rowIndex).focus();
+                            }
+                        }, 400);
+                    }
+                }
+                retryCount++;
+                if (retryCount > 40) clearInterval(checkDataInterval); // Tối đa chờ 8 giây rồi từ bỏ
+            }, 200);
+        }
+    }
 };
-
 // Hàm gắn Emoji vào ô Chat PM
 window.insertEmojiPM = function(emoji) {
     let txtArea = $('#txtPrivateMsgReply');

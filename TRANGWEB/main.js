@@ -189,6 +189,13 @@ window.userDetailedView = "";
 
 // Hàm gán view chi tiết và đẩy lên server ngay lập tức
 window.setDetailedView = function(viewString) {
+    // --- BẮT ĐẦU FIX TRIỆT ĐỂ LỖI ẢO GIÁC LỊCH SỬ KHI F5 ---
+    // Ngăn chặn tiến trình ngầm của TKB tự động "chiếm quyền" lịch sử khi sinh viên đang ở trang khác
+    if (viewString && viewString.includes("Thời gian biểu") && $('#tkbSection').length && $('#tkbSection').hasClass('d-none')) {
+        return; // Từ chối báo cáo nếu giao diện TKB đang bị ẩn
+    }
+    // --- KẾT THÚC FIX ---
+    
     window.userDetailedView = viewString;
     pingOnlineStatus(); // Gọi hàm ping để cập nhật lên bảng Admin ngay lập tức
 };
