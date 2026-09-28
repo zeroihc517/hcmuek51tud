@@ -1,4 +1,4 @@
- const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwH187OIGNgjyKmrzG5sDWKoKkcE6JWK45sebOGcVdITnMgKewbEx-6xYZpVDJX__vz/exec'; 
+ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyhOWnYzRqW9ar27wX2rEy60jGNxQS-zB6ZuEao-hTP_eXLy0hMjZPRPcQD8lcyvtR5/exec'; 
 
      let isAdmin = false;
         let currentSheetName = "";
@@ -577,11 +577,12 @@ function fetchUserAccessHistory() {
                 }
 
                 // Hàm định dạng UI cho các Mục xem
-                const formatSection = (sectionName) => {
+               const formatSection = (sectionName) => {
                     let formatted = sectionName;
                     if (sectionName !== "Không rõ" && sectionName !== "Chưa có" && sectionName !== "") {
-                        formatted = sectionName.replace(/\s-\s/g, '<br><i class="fa-solid fa-arrow-turn-up fa-rotate-90 text-secondary ms-2 me-1" style="font-size: 12px;"></i>');
-                        return `<div class="fw-bold text-start d-inline-block" style="color: #0284c7; font-size: 15px; line-height: 1.5;">${formatted}</div>`;
+                        // Đã xóa thẻ <br> và đổi ms-2 thành mx-1 để icon cách đều 2 bên
+                        formatted = sectionName.replace(/\s-\s/g, ' <i class="fa-solid fa-arrow-turn-up fa-rotate-90 text-secondary mx-1" style="font-size: 12px;"></i> ');
+                        return `<div class="fw-bold text-start d-inline-block" style="color: #0284c7; font-size: 14.5px; line-height: 1.5; word-wrap: break-word;">${formatted}</div>`;
                     }
                     return `<span class="fw-bold text-muted" style="font-size: 14.5px;">${sectionName}</span>`;
                 };

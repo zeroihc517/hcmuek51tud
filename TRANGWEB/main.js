@@ -231,18 +231,18 @@ function pingOnlineStatus() {
     let activeMenuText = $('#sidebarMenu .active').text().trim();
     
     if (window.userDetailedView !== "") {
-        currentView = window.userDetailedView;
-    } else if (activeMenuText === "Lịch học" || !$('#tkbSection').hasClass('d-none')) {
-        let nh = $('#namHocSelect').val();
-        let hk = $('#hocKySelect').val();
-        let weekText = $('#weekSelect option:selected').text();
-        
-        currentView = "Thời gian biểu";
-        if (nh && hk && weekText && weekText.indexOf('--') === -1) {
-            let w = weekText.split('(')[0].trim();
-            currentView += ` - ${nh} - ${hk} - ${w}`;
-        }
-    } else if (activeMenuText) {
+            currentView = window.userDetailedView;
+        } else if ($('#btnNavTKB').hasClass('active')) {
+            let nh = $('#namHocSelect').val();
+            let hk = $('#hocKySelect').val();
+            let weekText = $('#weekSelect option:selected').text();
+            
+            currentView = "Thời gian biểu";
+            if (nh && hk && weekText && weekText.indexOf('--') === -1) {
+                let w = weekText.split('(')[0].trim();
+                currentView += ` - ${nh} - ${hk} - ${w}`;
+            }
+        } else if (activeMenuText) {
         currentView = activeMenuText; 
     } else if (typeof currentSheetName !== 'undefined' && currentSheetName !== "") {
         currentView = currentSheetName; 
