@@ -226,30 +226,28 @@ function pingOnlineStatus() {
         }
     }
 
-    // --- LOGIC LẤY TÊN MỤC ĐANG XEM (CHUẨN XÁC THEO MENU) ---
-    let currentView = "Trang chủ"; 
-    let activeMenuText = $('#sidebarMenu .active').text().trim();
-    
-    if (window.userDetailedView !== "") {
-            currentView = window.userDetailedView;
-        } else if ($('#btnNavTKB').hasClass('active')) {
-            let nh = $('#namHocSelect').val();
-            let hk = $('#hocKySelect').val();
-            let weekText = $('#weekSelect option:selected').text();
-            
-            currentView = "Thời gian biểu";
-            if (nh && hk && weekText && weekText.indexOf('--') === -1) {
-                let w = weekText.split('(')[0].trim();
-                currentView += ` - ${nh} - ${hk} - ${w}`;
-            }
-        } else if (activeMenuText) {
-        currentView = activeMenuText; 
-    } else if (typeof currentSheetName !== 'undefined' && currentSheetName !== "") {
+    // --- BẮT ĐẦU: LOGIC LẤY TÊN MỤC ĐANG XEM (FIX TRIỆT ĐỂ LỖI ẢO GIÁC LỊCH HỌC) ---
+    let baseView = document.title.split('|')[0].trim();
+    let currentView = baseView || "Trang chủ"; 
+
+    if (window.userDetailedView && window.userDetailedView !== "") {
+        currentView = window.userDetailedView;
+    } 
+    // CHỐT CHẶN: Chỉ lấy thông tin Năm/Kỳ/Tuần khi TIÊU ĐỀ TRANG web thực sự là Thời gian biểu
+    else if (baseView === "Thời gian biểu") {
+        let nh = $('#namHocSelect').val();
+        let hk = $('#hocKySelect').val();
+        let weekText = $('#weekSelect option:selected').text();
+        
+        if (nh && hk && weekText && weekText.indexOf('--') === -1) {
+            let w = weekText.split('(')[0].trim();
+            currentView += ` - ${nh} - ${hk} - ${w}`;
+        }
+    } 
+    else if (typeof currentSheetName !== 'undefined' && currentSheetName !== "") {
         currentView = currentSheetName; 
-    } else {
-        currentView = document.title.split('|')[0].trim(); 
     }
-    
+
     let splitTitle = "";
     if ($('#splitIframeWrapper').length && !$('#splitIframeWrapper').hasClass('d-none')) {
         splitTitle = $('#splitIframeTitle').text().trim();
@@ -260,6 +258,7 @@ function pingOnlineStatus() {
     if (splitTitle && splitTitle !== "Bài học mở thêm") {
         currentView += " ++ " + splitTitle;
     }
+    // --- KẾT THÚC LOGIC LẤY TÊN MỤC ĐANG XEM ---
 
     // BỔ SUNG: Hủy request cũ đang treo để bảo vệ dữ liệu chân trang
     if (activePingRequest) {
@@ -521,7 +520,22 @@ function loadDataByHocPhan(sheetName, element) {
     document.title = sheetName + " | Học nhóm APMA Khoa Toán";
     currentSheetName = sheetName; 
     resetNavActive(); 
-    if(element) $(element).addClass('active');
+    
+    // --- BẮT ĐẦU SỬA FIX LỖI MẤT ACTIVE KHI F5 ---
+    if(element) {
+        $(element).addClass('active');
+    } else {
+        // Tự động tìm element tương ứng trong sidebar để active nếu F5
+        if (sheetName.toLowerCase() === 'thông báo') {
+            $('#btnNavThongBao').addClass('active');
+        } else {
+            $('.nav-hocphan').filter(function() {
+                return $(this).text().trim() === sheetName;
+            }).addClass('active');
+        }
+    }
+    // --- KẾT THÚC SỬA ---
+
     $('#courseHeaderTitle').html(`<i class="fa-solid fa-book-open me-2"></i> ${sheetName}`);
     if (currentSheetName.toLowerCase() !== 'thông báo') {
         $('#groupLinkWrapper').removeClass('d-none');
@@ -542,6 +556,8 @@ function loadDataByHocPhan(sheetName, element) {
     $('#swipeHint').addClass('d-none');
     $('#instructorWrapper').addClass('d-none'); 
     $('#instructorListContainer').html('');
+    
+    // ... (Giữ nguyên toàn bộ code phía dưới của bạn)
     
     // ==========================================
     // LOGIC CHỌN LOADING: BẬC THANG HAY BÀN CỜ 
