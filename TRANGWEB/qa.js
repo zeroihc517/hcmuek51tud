@@ -3881,6 +3881,7 @@ function executeOpenThread(rowIndex, isFromAdminTable, isUpdateOnly = false) {
     setTimeout(() => { let bodyArea = $('#privateMsgThreadModal .modal-body'); bodyArea.scrollTop(bodyArea[0].scrollHeight); }, 300);
 }
 // 6. GỬI PHẢN HỒI LÊN HỆ THỐNG
+// 6. GỬI PHẢN HỒI LÊN HỆ THỐNG
 window.sendPrivateMsgReply = function() {
     let rowIndex = $('#privateMsgRowIndex').val();
     let text = $('#txtPrivateMsgReply').val().trim();
@@ -3888,16 +3889,50 @@ window.sendPrivateMsgReply = function() {
 
     if(!text) { alert("Vui lòng nhập nội dung!"); return; }
     
-    let btn = $('#btnSendPrivateReply'); let originText = btn.html();
+    let btn = $('#btnSendPrivateReply'); 
+    let originText = btn.html();
     btn.html('<i class="fa-solid fa-spinner fa-spin"></i>').prop('disabled', true);
     
+    // --- HIỆU ỨNG ĐANG GỬI / TẢI TIN NHẮN MỚI ---
+    let loadingHtml = `
+    <div class="d-flex justify-content-end mb-3 w-100" id="tempLoadingMsg">
+        <div class="d-flex flex-column align-items-end" style="max-width: 80%;">
+            <div class="p-3 shadow-sm position-relative d-flex align-items-center justify-content-center" style="background: #0f4c81; color: #ffffff; border-radius: 18px 18px 4px 18px; height: 42px; opacity: 0.8;">
+                <i class="fa-solid fa-ellipsis fa-fade fs-4"></i>
+            </div>
+            <small class="text-muted mt-1 px-1 fw-bold" style="font-size: 11px;">Đang gửi và đồng bộ...</small>
+        </div>
+    </div>`;
+    
+    // Chèn bong bóng loading vào cuối danh sách tin nhắn
+    $('#privateMsgThreadContent').append(loadingHtml);
+    
+    // Tự động cuộn xuống cuối cùng để thấy hiệu ứng
+    let bodyArea = $('#privateMsgThreadModal .modal-body');
+    bodyArea.scrollTop(bodyArea[0].scrollHeight);
+    
+    // Xóa trống ô nhập liệu ngay lập tức cho mượt
+    $('#txtPrivateMsgReply').val('');
+    // ---------------------------------------------
+
     postToGAS({ action: "replyPrivateMessage", rowIndex: rowIndex, senderMssv: currentUser.mssv, replyText: text }, function(res) {
         btn.html(originText).prop('disabled', false);
         checkPrivateMessages(); 
-        $('#privateMsgThreadModal').modal('hide');
         
         if (isFromAdminTable && typeof adminFetchUserData === 'function') {
             adminFetchUserData();
+            let targetMSSV = window.impersonatedMSSV || $('#adminSearchMSSV').val();
+            let adminMSSV = window.realAdminMssv || currentUser.mssv;
+            
+            $.ajax({
+                url: SCRIPT_URL + "?action=adminGetUserData&targetMssv=" + targetMSSV + "&adminMssv=" + adminMSSV,
+                method: "GET", dataType: "json",
+                success: function(data) {
+                    window.adminCurrentTargetPMs = data.privateMessages || [];
+                    // Hàm này sẽ tự động ghi đè lại toàn bộ nội dung (bao gồm cả việc xóa cái bong bóng loading)
+                    executeOpenThread(parseInt(rowIndex), true, true); 
+                }
+            });
         } else {
             $.ajax({
                 url: SCRIPT_URL + "?action=getPrivateMessages&mssv=" + currentUser.mssv,
@@ -3908,9 +3943,15 @@ window.sendPrivateMsgReply = function() {
                 }
             });
         }
-    }, function() { alert("Lỗi máy chủ!"); btn.html(originText).prop('disabled', false); });
+    }, function() { 
+        alert("Lỗi máy chủ! Vui lòng thử lại."); 
+        btn.html(originText).prop('disabled', false); 
+        
+        // Nếu lỗi, xóa bong bóng loading và trả lại nội dung text đã gõ
+        $('#tempLoadingMsg').remove(); 
+        $('#txtPrivateMsgReply').val(text); 
+    });
 };
-
 // 7. ADMIN CHỈNH SỬA & XÓA TIN NHẮN
 let editPmRowIndex = -1; let editPmPartIndex = -1;
 window.openEditPrivateMsgPart = function(rowIndex, partIndex) {
