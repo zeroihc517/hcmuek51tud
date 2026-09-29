@@ -3599,7 +3599,7 @@ window.submitSendPrivateMsg = function() {
     }, function() { alert("Lỗi máy chủ!"); btn.html(originText).prop('disabled', false); });
 };
 
-// 3. QUÉT THÔNG BÁO ĐỊNH KỲ VÀ TỔNG HỢP BADGE
+// 3. QUÉT THÔNG BÁO ĐỊNH KỲ VÀ TỔNG HỢP BADGE (TỰ ĐỘNG BƠM TIN NHẮN REAL-TIME)
 window.checkPrivateMessages = function() {
     if (!currentUser || currentUser.isGuest) return;
     $.ajax({
@@ -3607,33 +3607,31 @@ window.checkPrivateMessages = function() {
         method: "GET",
         dataType: "json",
         success: function(data) {
-            window.privateMessages = data;
             let isSysAdmin = (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+            
+            // --- TÍNH NĂNG MỚI: TỰ ĐỘNG BƠM TIN NHẮN VÀO KHUNG CHAT ĐANG MỞ ---
+            if ($('#privateMsgThreadModal').is(':visible')) {
+                let currentRowIndex = parseInt($('#privateMsgRowIndex').val());
+                let oldMsg = (window.privateMessages || []).find(m => m.rowIndex === currentRowIndex);
+                let newMsg = data.find(m => m.rowIndex === currentRowIndex);
+                
+                // So sánh nếu hội thoại trên server có thay đổi (người B vừa nhắn)
+                if (newMsg && oldMsg && newMsg.thread !== oldMsg.thread) {
+                    window.privateMessages = data; // Ép RAM nhận dữ liệu mới ngay
+                    let isFromAdminTable = $('#btnSendPrivateReply').attr('data-from-admin') === '1';
+                    
+                    // Render lại khung chat ngay lập tức với cờ isUpdateOnly = true để không bị giật màn hình
+                    executeOpenThread(currentRowIndex, isFromAdminTable, true); 
+                }
+            }
+            // -------------------------------------------------------------------
+
+            window.privateMessages = data;
             window.unreadPrivateMessages = data.filter(msg => isSysAdmin ? msg.status === 'UNREAD_ADMIN' : msg.status === 'UNREAD_USER');
             updatePersonalNotificationBell();
         }
     });
 };
-window.updatePersonalNotificationBell = function() {
-    let unreadPrivateCount = window.unreadPrivateMessages ? window.unreadPrivateMessages.filter(msg => msg.status.includes('UNREAD')).length : 0;
-    
-    // CHỈ ĐẾM SỐ LƯỢNG TIN 'UNREAD' CHO CHUÔNG
-    let unreadQACount = window.personalUnreadQA ? window.personalUnreadQA.filter(r => r[7] === 'UNREAD').length : 0;
-    let unreadSCCount = window.personalUnreadShareCode ? window.personalUnreadShareCode.filter(r => r[7] === 'UNREAD').length : 0;
-    
-    let total = unreadQACount + unreadSCCount + unreadPrivateCount;
-    let badge = $('#personalNotificationBadge');
-    let bell = $('#bellIconUI');
-    
-    if (total > 0) {
-        badge.text(total).removeClass('d-none');
-        bell.removeClass('text-secondary').addClass('text-danger fa-shake'); 
-    } else {
-        badge.addClass('d-none');
-        bell.removeClass('text-danger fa-shake').addClass('text-secondary');
-    }
-};
-
 window.openPersonalNotifications = function() {
     if (!currentUser || currentUser.isGuest) { alert("Vui lòng đăng nhập để xem thông báo cá nhân!"); return; }
     
