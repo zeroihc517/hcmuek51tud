@@ -2160,24 +2160,16 @@ function initGlobalApp() {
     // --- KẾT THÚC FIX ---
     
     setInterval(function() {
-        // Lệnh 1: Kiểm tra Q&A chạy trước
         if (!$('#qaSection').hasClass('d-none')) {
             silentCheckNewQA();
         } else {
             checkNewQA(); 
         }
         
-        // Lệnh 2: Đợi 3 giây sau mới kiểm tra ShareCode
-        setTimeout(function() {
-            checkNewShareCodeGlobal(); 
-        }, 4000);
-
-        // Lệnh 3: Đợi thêm 6 giây sau mới kiểm tra Lịch hẹn
-        setTimeout(function() {
-            checkNewDatLichGlobal();
-        }, 6000);
-
-    }, 60000);
+        // Cập nhật huy hiệu cho ShareCode cực mượt
+        checkNewShareCodeGlobal(); 
+        checkNewDatLichGlobal();
+    }, 2000);
 
     // 2. ĐỒNG BỘ TRẠNG THÁI DEADLINE TỪ SERVER VỀ MÁY KHI KHỞI ĐỘNG
     if (currentUser && currentUser.mssv) {
