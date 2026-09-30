@@ -1,213 +1,394 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Bảo trì hệ thống</title>
-  <style>
-    :root{
-      --bg: #0f172a;        /* slate-900 */
-      --card: #111827;      /* gray-900 */
-      --text: #e5e7eb;      /* gray-200 */
-      --muted:#9ca3af;      /* gray-400 */
-      --accent:#38bdf8;     /* sky-400 */
-      --ring:#1f2937;       /* gray-800 */
-    }
-    @media (prefers-color-scheme: light){
-      :root{
-        --bg:#f1f5f9;       /* slate-100 */
-        --card:#ffffff;
-        --text:#0f172a;
-        --muted:#475569;
-        --accent:#0284c7;   /* sky-600 */
-        --ring:#e5e7eb;
-      }
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body{
-      margin:0;
-      background: radial-gradient(1200px 800px at 50% -10%, rgba(56,189,248,.18), transparent 60%) , var(--bg);
-      color: var(--text);
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      display:flex; align-items:center; justify-content:center;
-      padding: 24px;
-    }
-    .card{
-      width: 100%;
-      max-width: 620px;
-      background: var(--card);
-      border: 1px solid var(--ring);
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      padding: 32px 28px;
-      text-align: center;
-    }
-    .icon{
-      width: 84px; height: 84px; margin: 0 auto 16px;
-      display:block;
-      filter: drop-shadow(0 6px 16px rgba(2,132,199,.25));
-    }
-    .gear{ transform-origin: 50% 50%; animation: slowspin 8s linear infinite; }
-    @keyframes slowspin{ to{ transform: rotate(360deg);} }
-    h1{
-      font-size: clamp(22px, 3.4vw, 28px);
-      margin: 0 0 10px;
-      letter-spacing: .2px;
-    }
-    p{
-      color: var(--muted);
-      margin: 0;
-      font-size: clamp(14px, 2.4vw, 16px);
-      line-height: 1.6;
-    }
-    .time-badge{
-      display: inline-block;
-      margin: 16px 0 10px;
-      padding: 8px 18px;
-      background: rgba(56, 189, 248, 0.1);
-      border: 1px dashed var(--accent);
-      border-radius: 50px;
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 15px;
-    }
-    .countdown-text{
-      display: block;
-      color: var(--muted);
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-    .btn{
-      margin-top: 14px;
-      display:inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 22px;
-      border-radius: 12px;
-      border: 1px solid var(--accent);
-      background: linear-gradient(180deg, rgba(56,189,248,.18), rgba(56,189,248,.08));
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn:hover{
-      background: rgba(56,189,248,.25);
-      transform: translateY(-1px);
-    }
-    .tips{
-      margin-top: 20px;
-      font-size: 13px;
-      color: var(--muted);
-      opacity: .85;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Đang Nâng Cấp & Bảo Trì</title>
+    <!-- Nhúng Tailwind CSS để hỗ trợ layout nhanh -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Nhúng Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #154c79; 
+            --primary-hover: #0f395c;
+            --primary-light: #e8f1f8;
+            --accent-red: #e61d4a; 
+            --text-main: #1f2937;
+            --text-muted: #4b5563;
+            --bg-global: #eff0f2; 
+            --card-bg: #ffffff;
+            --card-border-radius: 16px; 
+            --border-color: #d1d5db;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        body.dark-mode {
+            --bg-global: #0b0f19 !important;       
+            --card-bg: #131c30 !important;         
+            --text-main: #f8fafc !important;       
+            --text-muted: #94a3b8 !important;      
+            --border-color: #1e293b !important;    
+            --primary-light: #172554 !important;
+            --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        body { 
+            background-color: var(--bg-global); 
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            font-size: 16px; 
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .maintenance-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--card-border-radius);
+            box-shadow: var(--shadow-md);
+            max-width: 580px;
+            width: 100%;
+            padding: 48px 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Vạch kẻ màu xanh ở trên cùng */
+        .maintenance-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary-color);
+        }
+
+        .maintenance-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-top: 24px;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        body.dark-mode .maintenance-title {
+            color: #ffffff;
+        }
+
+        .maintenance-desc {
+            font-size: 15px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .gear-icon-wrapper {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            color: var(--primary-color);
+        }
+
+        body.dark-mode .gear-icon-wrapper {
+            color: #3b82f6; 
+        }
+
+        .gear-main {
+            transform-origin: center;
+            animation: spinGear 12s linear infinite;
+        }
+
+        .gear-small {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 36px;
+            height: 36px;
+            background-color: var(--card-bg);
+            border-radius: 50%;
+            transform-origin: center;
+            animation: spinGearReverse 8s linear infinite;
+        }
+
+        @keyframes spinGear { 100% { transform: rotate(360deg); } }
+        @keyframes spinGearReverse { 100% { transform: rotate(-360deg); } }
+
+        /* Badge hiển thị mốc thời gian */
+        .time-badge {
+            display: inline-block;
+            margin: 8px 0 10px;
+            padding: 8px 18px;
+            background: var(--primary-light);
+            border: 1px dashed var(--primary-color);
+            border-radius: 50px;
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 15px;
+        }
+        
+        body.dark-mode .time-badge {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+            color: #60a5fa;
+        }
+
+        .countdown-text {
+            display: block;
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .btn-support {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--primary-color);
+            color: #ffffff;
+            height: 48px;
+            padding: 0 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            cursor: pointer;
+        }
+
+        .btn-support:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(15, 76, 129, 0.2);
+            color: #ffffff;
+        }
+
+        .tips {
+            margin-top: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+            opacity: .85;
+        }
+
+        .brand-footer {
+            margin-top: 40px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+        }
+
+        /* Nút switch Dark Mode */
+        .dark-mode-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: #cbd5e1;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            padding: 0 4px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .dark-mode-switch .switch-handle {
+            width: 18px;
+            height: 18px;
+            background: #ffffff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #f59e0b; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        body.dark-mode .dark-mode-switch {
+            background: #2563eb;
+        }
+        body.dark-mode .dark-mode-switch .switch-handle {
+            transform: translateX(22px);
+            color: #f8fafc;
+            background: #0f172a;
+        }
+
+        @media (max-width: 600px) {
+            .maintenance-card {
+                padding: 32px 24px;
+            }
+            .maintenance-title {
+                font-size: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <main class="card" role="main" aria-labelledby="maintitle">
-    <svg class="icon" viewBox="0 0 128 128" aria-hidden="true">
-      <circle cx="64" cy="64" r="48" fill="rgba(56,189,248,.10)" stroke="var(--accent)" stroke-width="2"/>
-      <g class="gear" fill="none" stroke="var(--accent)" stroke-width="4">
-        <circle cx="64" cy="64" r="16"/>
-        <g>
-          <path d="M64 34 v-10"/>
-          <path d="M64 104 v10"/>
-          <path d="M34 64 h-10"/>
-          <path d="M104 64 h10"/>
-          <path d="M44 44 l-7 -7"/>
-          <path d="M91 91 l7 7"/>
-          <path d="M44 84 l-7 7"/>
-          <path d="M91 37 l7 -7"/>
-        </g>
-      </g>
-      <path d="M28 90c-2 2-2 5 0 7l3 3c2 2 5 2 7 0l30-30c4 2 9 1 12-2 4-4 4-10 0-14-3-3-8-4-12-2l-30 30z"
-            fill="currentColor" style="color: var(--text); opacity:.9"/>
-    </svg>
 
-    <h1 id="maintitle">Hệ thống đang bảo trì</h1>
-    <p>Hệ thống đang được nâng cấp để phục vụ bạn tốt hơn.</p>
+    <main class="maintenance-card">
+        
+        <!-- Icon Bánh răng quay -->
+        <div class="gear-icon-wrapper">
+            <svg class="w-full h-full gear-main" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            
+            <div class="gear-small flex items-center justify-center">
+                <svg class="w-7 h-7 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+            </div>
+        </div>
 
-    <!-- Hiển thị thời gian lấy từ LocalStorage -->
-    <div>
-      <span class="time-badge" id="lblMaintenanceTime">Quay lại lúc: Đang cập nhật...</span>
+        <h1 class="maintenance-title">Hệ Thống Đang Nâng Cấp & Bảo Trì</h1>
+        
+        <p class="maintenance-desc">
+            Nhằm đáp ứng khả năng phục vụ và mang lại trải nghiệm học tập trọn vẹn hơn, cổng thông tin hiện đang trong giai đoạn nâng cấp dữ liệu và cấu trúc toàn diện.
+        </p>
+        
+        <!-- Hiển thị thời gian lấy từ LocalStorage -->
+        <div>
+            <span class="time-badge" id="lblMaintenanceTime">Quay lại lúc: Đang cập nhật...</span>
+        </div>
+        <span class="countdown-text" id="lblCountdownRemaining"></span>
+        
+        <!-- Nút Thử vào lại -->
+        <div>
+            <button class="btn-support" onclick="checkAndRedirect(true)" aria-label="Kiểm tra và vào lại">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                Thử vào lại ngay
+            </button>
+        </div>
+
+        <div class="tips" role="note">
+            Hệ thống sẽ tự động chuyển hướng khi hoàn tất bảo trì.
+        </div>
+    </main>
+
+    <div class="brand-footer">
+        <div class="dark-mode-switch" onclick="toggleDarkMode()" title="Chuyển đổi giao diện">
+            <div class="switch-handle">
+                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg id="moon-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </div>
+        </div>
+        <div class="brand-text">
+            © APPLIED MATHEMATICS PORTAL
+        </div>
     </div>
-    <span class="countdown-text" id="lblCountdownRemaining"></span>
 
-    <!-- Nút kiểm tra & Vào lại ngay -->
-    <div>
-      <button class="btn" onclick="checkAndRedirect(true)" aria-label="Kiểm tra và vào lại">
-        ↻ Thử vào lại
-      </button>
-    </div>
-
-    <div class="tips" role="note">
-      Hệ thống sẽ tự động chuyển hướng khi hoàn tất bảo trì.
-    </div>
-  </main>
-
-  <script>
-    const savedConfig = JSON.parse(localStorage.getItem("maintenanceConfig") || "{}");
-    const targetUrl = savedConfig.targetUrl || "appliedmathematics.html";
-    const endTime = savedConfig.endTime || 0;
-    const textShow = savedConfig.textShow;
-
-    const lblTime = document.getElementById("lblMaintenanceTime");
-    const lblRemaining = document.getElementById("lblCountdownRemaining");
-
-    // 1. Hiển thị thông báo mốc thời gian
-    if (textShow) {
-      lblTime.textContent = `Quay lại lúc: ${textShow}`;
-    } else {
-      lblTime.textContent = "Quay lại lúc: Vui lòng thử lại sau";
-    }
-
-    // 2. Hàm kiểm tra trạng thái và chuyển trang
-    function checkAndRedirect(isManualClick = false) {
-      const now = Date.now();
-      
-      if (!endTime || now >= endTime) {
-        // Đã hết giờ bảo trì -> Xóa config và vào lại trang chủ
-        localStorage.removeItem("maintenanceConfig");
-        window.top.location.replace(targetUrl); // THÊM .top VÀO ĐÂY
-      } else {
-        // Chưa hết giờ mà người dùng bấm thử vào lại
-        if (isManualClick) {
-          const diff = Math.ceil((endTime - now) / 1000);
-          const mins = Math.floor(diff / 60);
-          const secs = diff % 60;
-          alert(`Hệ thống vẫn đang bảo trì!\nCòn lại khoảng: ${mins} phút ${secs} giây nữa.`);
+    <!-- Script Logic Tính Năng Của Baotri.html -->
+    <script>
+        // Tính năng Đổi Dark Mode
+        function toggleDarkMode() {
+            const body = document.body;
+            body.classList.toggle('dark-mode');
+            
+            const sunIcon = document.getElementById('sun-icon');
+            const moonIcon = document.getElementById('moon-icon');
+            
+            if (body.classList.contains('dark-mode')) {
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            } else {
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            }
         }
-      }
-    }
 
-    // 3. Đếm ngược tự động mỗi giây
-    function updateCountdown() {
-      const now = Date.now();
-      if (!endTime) return;
+        // Tính năng lấy thời gian từ Local Storage
+        const savedConfig = JSON.parse(localStorage.getItem("maintenanceConfig") || "{}");
+        const targetUrl = savedConfig.targetUrl || "appliedmathematics.html";
+        const endTime = savedConfig.endTime || 0;
+        const textShow = savedConfig.textShow;
 
-      const diff = Math.floor((endTime - now) / 1000);
+        const lblTime = document.getElementById("lblMaintenanceTime");
+        const lblRemaining = document.getElementById("lblCountdownRemaining");
 
-      if (diff <= 0) {
-        lblRemaining.textContent = "Đang mở lại hệ thống...";
-        checkAndRedirect(false);
-      } else {
-        const hours = Math.floor(diff / 3600);
-        const mins = Math.floor((diff % 3600) / 60);
-        const secs = diff % 60;
-        
-        let timeStr = "";
-        if (hours > 0) timeStr += `${hours} giờ `;
-        timeStr += `${mins} phút ${secs} giây`;
-        
-        lblRemaining.textContent = `(Tự động mở lại sau: ${timeStr})`;
-      }
-    }
+        // 1. Hiển thị thông báo mốc thời gian
+        if (textShow) {
+            lblTime.textContent = `Quay lại lúc: ${textShow}`;
+        } else {
+            lblTime.textContent = "Quay lại lúc: Vui lòng thử lại sau";
+        }
 
-    // Khởi chạy vòng lặp kiểm tra
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-  </script>
+        // 2. Hàm kiểm tra trạng thái và chuyển trang
+        function checkAndRedirect(isManualClick = false) {
+            const now = Date.now();
+            
+            if (!endTime || now >= endTime) {
+                // Đã hết giờ bảo trì -> Xóa config và vào lại trang chủ
+                localStorage.removeItem("maintenanceConfig");
+                window.top.location.replace(targetUrl); 
+            } else {
+                // Chưa hết giờ mà người dùng bấm thử vào lại
+                if (isManualClick) {
+                    const diff = Math.ceil((endTime - now) / 1000);
+                    const mins = Math.floor(diff / 60);
+                    const secs = diff % 60;
+                    alert(`Hệ thống vẫn đang bảo trì!\nCòn lại khoảng: ${mins} phút ${secs} giây nữa.`);
+                }
+            }
+        }
+
+        // 3. Đếm ngược tự động mỗi giây
+        function updateCountdown() {
+            const now = Date.now();
+            if (!endTime) return;
+
+            const diff = Math.floor((endTime - now) / 1000);
+
+            if (diff <= 0) {
+                lblRemaining.textContent = "Đang mở lại hệ thống...";
+                checkAndRedirect(false);
+            } else {
+                const hours = Math.floor(diff / 3600);
+                const mins = Math.floor((diff % 3600) / 60);
+                const secs = diff % 60;
+                
+                let timeStr = "";
+                if (hours > 0) timeStr += `${hours} giờ `;
+                timeStr += `${mins} phút ${secs} giây`;
+                
+                lblRemaining.textContent = `(Tự động mở lại sau: ${timeStr})`;
+            }
+        }
+
+        // Khởi chạy vòng lặp kiểm tra
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    </script>
 </body>
 </html>
