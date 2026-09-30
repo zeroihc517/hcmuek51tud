@@ -5060,14 +5060,29 @@
 <script>
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
-        const startMaintenance = new Date(2026, 8, 30, 17, 30);  
-        const endMaintenance   = new Date(2026, 9, 1, 6, 30); 
+        const startMaintenance = new Date(2026, 8, 05, 17, 40);  
+        const endMaintenance   = new Date(2026, 9, 01, 06, 00); 
         // Hàm tạo chuỗi định dạng
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
 
-        const maintenancePage = "Baotri.html"; 
+        // Mặc định là trang bảo trì
+        let maintenancePage = "Baotri.html"; 
         const now = new Date();
+
+        // Kiểm tra tài khoản từ localStorage
+        let currentUserData = localStorage.getItem('currentUser');
+        if (currentUserData) {
+            try {
+                let userObj = JSON.parse(currentUserData);
+                // Tài khoản quản trị sẽ được điều hướng sang webduphong.html
+                if (userObj.mssv === "51.01.108.008" || userObj.mssv === "5101108008") {
+                    maintenancePage = "webduphong.html";
+                }
+            } catch(e) {
+                console.error("Lỗi khi đọc dữ liệu tài khoản:", e);
+            }
+        }
 
         if (now >= startMaintenance && now <= endMaintenance) {
             localStorage.setItem("maintenanceConfig", JSON.stringify({
@@ -5093,26 +5108,34 @@
         const now = new Date();
         
         // 1. KIỂM TRA THỨ TRONG TUẦN
-        // now.getDay() trả về: 0 (Chủ nhật), 1 (Thứ 2), 2 (Thứ 3), 3 (Thứ 4), 4 (Thứ 5), 5 (Thứ 6), 6 (Thứ 7)
         const currentDay = now.getDay();
+        const daysToMaintain = [5, 6]; 
         
-        // 2. KHAI BÁO CÁC THỨ BẠN MUỐN BẬT BẢO TRÌ ĐỊNH KỲ
-        // Ví dụ dưới đây là chỉ bật vào Thứ 3 (2) và Thứ 5 (4)
-        const daysToMaintain = [2, 5, 6]; 
-        
-        // Nếu hôm nay không thuộc các thứ đã cấu hình thì bỏ qua, không làm gì cả
         if (!daysToMaintain.includes(currentDay)) {
             return;
         }
 
-        // Thiết lập thời gian bảo trì trong ngày đó: Từ 11:40 đến 12:30
         const startMaintenance = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 30, 0);  
-        const endMaintenance   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 13, 00, 0); 
+        const endMaintenance   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30, 0); 
         
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
 
-        const maintenancePage = "Baotri.html"; 
+        // Mặc định là trang bảo trì chung
+        let maintenancePage = "Baotri.html"; 
+
+        // Kiểm tra tài khoản admin từ localStorage
+        let currentUserData = localStorage.getItem('currentUser');
+        if (currentUserData) {
+            try {
+                let userObj = JSON.parse(currentUserData);
+                if (userObj.mssv === "51.01.108.008" || userObj.mssv === "5101108008") {
+                    maintenancePage = "webduphong.html";
+                }
+            } catch(e) {
+                console.error("Lỗi khi đọc dữ liệu tài khoản:", e);
+            }
+        }
 
         if (now >= startMaintenance && now <= endMaintenance) {
             localStorage.setItem("maintenanceConfig", JSON.stringify({
@@ -5120,7 +5143,6 @@
                 textShow: endTimeStr
             }));
             
-            // Thêm ID để tránh tạo trùng iframe
             if (!document.getElementById('maintenanceIframe')) {
                 const iframe = document.createElement('iframe');
                 iframe.id = 'maintenanceIframe';
@@ -5132,7 +5154,6 @@
         }
     })();
 </script>
-
 <script>
 // Hàm đổi URL linh hoạt
 function updateSystemUrl(paramKey, paramValue) {
