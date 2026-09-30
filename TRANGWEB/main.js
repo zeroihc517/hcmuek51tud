@@ -2159,18 +2159,25 @@ function initGlobalApp() {
     }, 30000);
     // --- KẾT THÚC FIX ---
     
-    // 1. Gọi ngầm kiểm tra dữ liệu Q&A và ShareCode mỗi 5 giây
     setInterval(function() {
+        // Lệnh 1: Kiểm tra Q&A chạy trước
         if (!$('#qaSection').hasClass('d-none')) {
             silentCheckNewQA();
         } else {
             checkNewQA(); 
         }
         
-        // Cập nhật huy hiệu cho ShareCode cực mượt
-        checkNewShareCodeGlobal(); 
-        checkNewDatLichGlobal();
-    }, 20000);
+        // Lệnh 2: Đợi 3 giây sau mới kiểm tra ShareCode
+        setTimeout(function() {
+            checkNewShareCodeGlobal(); 
+        }, 4000);
+
+        // Lệnh 3: Đợi thêm 6 giây sau mới kiểm tra Lịch hẹn
+        setTimeout(function() {
+            checkNewDatLichGlobal();
+        }, 6000);
+
+    }, 60000);
 
     // 2. ĐỒNG BỘ TRẠNG THÁI DEADLINE TỪ SERVER VỀ MÁY KHI KHỞI ĐỘNG
     if (currentUser && currentUser.mssv) {
@@ -5098,7 +5105,7 @@ $(document).ready(function() {
                             }
                         });
                     }
-                }, index * 800); 
+                }, index * 2000); 
             });
         } else {
             // Nếu danh sách môn chưa tải xong, đợi 2 giây rồi thử lại
