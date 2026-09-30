@@ -3493,7 +3493,7 @@ $('<style>').text(`
 $(document).ready(function() {
     setInterval(function() {
         if (typeof checkPrivateMessages === 'function') checkPrivateMessages();
-    }, 5000);
+    }, 15000);
     setTimeout(function() { if (typeof checkPrivateMessages === 'function') checkPrivateMessages(); }, 2000);
 });
 
@@ -4156,4 +4156,37 @@ window.insertEmojiToSpm = function(emoji) {
     txtArea.value = textBefore + emoji + textAfter;
     txtArea.selectionStart = txtArea.selectionEnd = startPos + emoji.length;
     txtArea.focus();
+};
+window.updatePersonalNotificationBell = function() {
+    // 1. Chỉ đếm những thông báo Q&A thực sự chưa đọc (cột 7 === 'UNREAD')
+    let unreadQACount = 0;
+    if (window.personalUnreadQA && window.personalUnreadQA.length > 0) {
+        unreadQACount = window.personalUnreadQA.filter(row => row[7] === 'UNREAD').length;
+    }
+    
+    // 2. Chỉ đếm những thông báo ShareCode thực sự chưa đọc (cột 7 === 'UNREAD')
+    let unreadSCCount = 0;
+    if (window.personalUnreadShareCode && window.personalUnreadShareCode.length > 0) {
+        unreadSCCount = window.personalUnreadShareCode.filter(row => row[7] === 'UNREAD').length;
+    }
+
+    // 3. Tin nhắn riêng (PM) đã được filter UNREAD sẵn ở hàm checkPrivateMessages
+    let unreadPMCount = (window.unreadPrivateMessages && window.unreadPrivateMessages.length > 0) ? window.unreadPrivateMessages.length : 0;
+    
+    // 4. Tổng số tin nhắn thực sự chưa đọc
+    let totalUnread = unreadQACount + unreadSCCount + unreadPMCount;
+    
+    // 5. Cập nhật giao diện chuông và huy hiệu số
+    let badge = $('#personalNotificationBadge');
+    let bellIcon = $('#bellIconUI'); 
+    
+    if (totalUnread > 0) {
+        badge.text(totalUnread).removeClass('d-none');
+        // Tô đỏ chuông và thêm hiệu ứng rung
+        bellIcon.removeClass('text-secondary').addClass('text-danger fa-shake');
+    } else {
+        badge.text(0).addClass('d-none');
+        // Trả chuông về màu xám, tắt hiệu ứng rung
+        bellIcon.removeClass('text-danger fa-shake').addClass('text-secondary');
+    }
 };

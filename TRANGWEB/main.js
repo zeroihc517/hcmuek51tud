@@ -2156,7 +2156,7 @@ function initGlobalApp() {
         if (now - window.lastUserActionTime < 10 * 60 * 1000) {
             pingOnlineStatus();
         }
-    }, 15000);
+    }, 30000);
     // --- KẾT THÚC FIX ---
     
     // 1. Gọi ngầm kiểm tra dữ liệu Q&A và ShareCode mỗi 5 giây
@@ -2170,7 +2170,7 @@ function initGlobalApp() {
         // Cập nhật huy hiệu cho ShareCode cực mượt
         checkNewShareCodeGlobal(); 
         checkNewDatLichGlobal();
-    }, 5000);
+    }, 20000);
 
     // 2. ĐỒNG BỘ TRẠNG THÁI DEADLINE TỪ SERVER VỀ MÁY KHI KHỞI ĐỘNG
     if (currentUser && currentUser.mssv) {
