@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>404 - Not Found</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #fafafa;
+            color: #111111;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .error-card {
+            text-align: center;
+            padding: 24px;
+            max-width: 540px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .error-card h1 {
+            font-size: clamp(80px, 15vw, 130px);
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -3px;
+            color: #111111;
+            margin-bottom: 8px;
+        }
+
+        .error-card h2 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #333333;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .error-card p {
+            font-size: 16px;
+            color: #555555;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        /* Khung giữ chỗ để khi nút tách ra né, chữ bên trên không bị nhảy giật */
+        .btn-slot {
+            min-height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #reloadBtn {
+            padding: 12px 26px;
+            background: #111111;
+            color: #ffffff;
+            border: 1px solid #111111;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            white-space: nowrap;
+            transition: left 0.18s cubic-bezier(0.2, 0.8, 0.4, 1), 
+                        top 0.18s cubic-bezier(0.2, 0.8, 0.4, 1),
+                        background 0.15s ease;
+            z-index: 99;
+            will-change: left, top;
+        }
+
+        #reloadBtn:hover {
+            background: #2b2b2b;
+        }
+
+        #reloadBtn:active {
+            background: #000000;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="error-card" id="card">
+        <h1>404</h1>
+        <h2>Not Found</h2>
+        <p>
+            Xin lỗi, trang bạn đang tìm hiện tại đã tạm ẩn vì admin đang phải tìm cách để có những Epsilon Việt Nam... 😴
+        </p>
+
+        <!-- Nút ban đầu nằm chuẩn trong thẻ này, đảm bảo không bao giờ đè lên chữ -->
+        <div class="btn-slot">
+            <button id="reloadBtn" type="button">
+                🔄 Vào web dự phòng
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const button = document.getElementById("reloadBtn");
+        const card = document.getElementById("card");
+        let isDetached = false;
+        let lastMoveTime = 0;
+
+        function moveButton(pointerX, pointerY) {
+            const now = Date.now();
+            if (now - lastMoveTime < 100) return;
+            lastMoveTime = now;
+
+            // Lần đầu tương tác: đổi chữ và chuyển sang fixed position
+            if (!isDetached) {
+                const rect = button.getBoundingClientRect();
+                button.style.position = "fixed";
+                button.style.left = rect.left + "px";
+                button.style.top = rect.top + "px";
+                document.body.appendChild(button);
+                isDetached = true;
+            }
+
+            button.textContent = "Đố bạn bắt đc t";
+
+            const padding = 20;
+            const btnW = button.offsetWidth;
+            const btnH = button.offsetHeight;
+            const maxX = window.innerWidth - btnW - padding;
+            const maxY = window.innerHeight - btnH - padding;
+
+            // Vùng cấm: tránh nhảy đè vào giữa khối chữ
+            const cardRect = card.getBoundingClientRect();
+
+            let newX, newY;
+            let attempts = 0;
+
+            do {
+                newX = Math.floor(Math.random() * (maxX - padding)) + padding;
+                newY = Math.floor(Math.random() * (maxY - padding)) + padding;
+                attempts++;
+
+                const overlapsCard = (
+                    newX + btnW > cardRect.left - 20 &&
+                    newX < cardRect.right + 20 &&
+                    newY + btnH > cardRect.top - 20 &&
+                    newY < cardRect.bottom + 20
+                );
+
+                const tooCloseToPointer = (
+                    pointerX !== undefined &&
+                    Math.hypot(newX - pointerX, newY - pointerY) < 140
+                );
+
+                if (!overlapsCard && !tooCloseToPointer) break;
+
+            } while (attempts < 20);
+
+            button.style.left = newX + "px";
+            button.style.top = newY + "px";
+        }
+
+        // Né khi chuột chạm vào
+        button.addEventListener("mouseenter", function (e) {
+            moveButton(e.clientX, e.clientY);
+        });
+
+        // Né trước khi chuột đến sát gần
+        window.addEventListener("mousemove", function (e) {
+            const rect = button.getBoundingClientRect();
+            const btnCenterX = rect.left + rect.width / 2;
+            const btnCenterY = rect.top + rect.height / 2;
+            const distance = Math.hypot(e.clientX - btnCenterX, e.clientY - btnCenterY);
+
+            if (distance < 70) {
+                moveButton(e.clientX, e.clientY);
+            }
+        });
+
+        // Né trên màn hình cảm ứng điện thoại
+        button.addEventListener("touchstart", function (e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            moveButton(touch.clientX, touch.clientY);
+        }, { passive: false });
+
+        // Click trúng thì reload
+        button.addEventListener("click", function () {
+            location.reload();
+        });
+    </script>
+
+</body>
+</html>
