@@ -4545,10 +4545,16 @@ function fetchAndRenderDeadlinesForNotice() {
     });
 }
 function renderDeadlinesOnNoticePage() {
-    // Xóa bỏ lệnh return sớm để hàm có thể tiếp tục chạy xuống quét TKB kể cả khi không có Deadline
     let completedList = [];
     if (currentUser && currentUser.mssv) {
-        completedList = JSON.parse(localStorage.getItem('completed_deadlines_' + currentUser.mssv)) || [];
+        // [FIX CHỐNG SẬP TRẮNG MÀN HÌNH] Bảo vệ JSON.parse
+        try {
+            let savedStr = localStorage.getItem('completed_deadlines_' + currentUser.mssv);
+            completedList = savedStr ? JSON.parse(savedStr) : [];
+            if (!Array.isArray(completedList)) completedList = [];
+        } catch(e) {
+            completedList = [];
+        }
     }
 
     let nowTime = new Date().setHours(0, 0, 0, 0);
@@ -4564,7 +4570,6 @@ function renderDeadlinesOnNoticePage() {
     // 1. RENDER DEADLINE BÌNH THƯỜNG
     if (typeof globalDeadlineData !== 'undefined' && globalDeadlineData.length > 0) {
         globalDeadlineData.forEach(d => {
-            // --- SỬA Ở ĐÂY: Dùng getDlKey(d) thay vì String(d.sheetRowIndex) ---
             let dlKey = getDlKey(d);
             let isDone = completedList.includes(dlKey);
             if (isDone) return; 
@@ -4579,7 +4584,7 @@ function renderDeadlinesOnNoticePage() {
                 let emoji = d.emoji || '📌';
 
                 deadlineHtml += `
-                <div class="mini-dl-capsule mb-2" onclick="jumpToTKBFromNotice('${d.dateStart}')" title="Nhấn để xem Lịch học tuần này">
+                <div class="mini-dl-capsule mb-2" onclick="jumpToTKBFromNotice('${d.dateStart}', 'dl-card-${dlKey}')" title="Nhấn để xem Lịch học tuần này">
                     <div class="d-flex align-items-center justify-content-between gap-2 px-3 py-2">
                        <div class="d-flex align-items-center gap-2 overflow-hidden">
                             <span class="mini-dl-emoji align-self-start mt-1">${emoji}</span>
@@ -4588,7 +4593,6 @@ function renderDeadlinesOnNoticePage() {
                                 <small class="mini-dl-time ms-2 d-inline-block mt-1 mb-1"><i class="fa-regular fa-clock me-1"></i>${d.duration || d.dateStart}</small>
                             </div>
                         </div>
-                        <!-- SỬA Ở ĐÂY: Truyền dlKey vào hàm quickMarkDone -->
                         <button class="btn btn-sm btn-mini-done flex-shrink-0" onclick="quickMarkDone('${dlKey}', event)" title="Đánh dấu đã hoàn thành">
                             <i class="fa-solid fa-check me-1"></i>Xong
                         </button>
@@ -4601,7 +4605,6 @@ function renderDeadlinesOnNoticePage() {
     // 2. TÍCH HỢP QUÉT CÁC KỲ THI TRONG THỜI KHÓA BIỂU
     if (typeof globalTkbData !== 'undefined' && globalTkbData.length > 0) {
         globalTkbData.forEach(c => {
-            // Nhận diện bài kiểm tra không phân biệt hoa thường
             let isExam = /(Kiểm tra Giữa học phần|Kiểm tra Quá trình|Kiểm tra Kết thúc học phần)/i.test(c.mon);
             
             if (isExam && c.ngayBatDau) {
@@ -4610,24 +4613,21 @@ function renderDeadlinesOnNoticePage() {
                 let skipDates = (c.ngayNgoaiLe || "").split(',').map(x => x.trim());
                 let targetDayOfWeek = c.thu === 8 ? 0 : c.thu - 1;
                 
-                // Xác định vùng tìm kiếm: Bắt đầu từ ngày hiện tại cho đến tối đa 5 ngày sau
                 let curDate = new Date(Math.max(nowTime, startRange));
                 let maxFutureDate = new Date(nowTime + 5 * 24 * 60 * 60 * 1000);
                 let lastDate = new Date(Math.min(maxFutureDate.getTime(), endRange));
                 
-                // Quét từng ngày trong dải 5 ngày để tìm xem có đúng thứ lịch học đó không
                 while (curDate <= lastDate) {
                     if (curDate.getDay() === targetDayOfWeek) {
                         let pad = (n) => String(n).padStart(2, '0');
                         let dateStr = pad(curDate.getDate()) + '/' + pad(curDate.getMonth() + 1) + '/' + curDate.getFullYear();
                         
-                        // Kiểm tra nếu không rơi vào ngày nghỉ lễ ngoại lệ
                         if (!skipDates.includes(dateStr)) {
                             let diffDays = Math.round((curDate.getTime() - nowTime) / (1000 * 60 * 60 * 24));
                             let timeText = diffDays === 0 ? "Hôm nay" : `Còn ${diffDays} ngày`;
                             
                             deadlineHtml += `
-                            <div class="mini-dl-capsule mb-2" onclick="jumpToTKBFromNotice('${dateStr}')" title="Nhấn để xem chi tiết trên Lịch">
+                           <div class="mini-dl-capsule mb-2" onclick="jumpToTKBFromNotice('${dateStr}', 'tkb-card-${c.sheetRowIndex}')" title="Nhấn để xem chi tiết trên Lịch">
                                 <div class="d-flex align-items-center justify-content-between gap-2 px-3 py-2" style="border-left: 4px solid #ef4444; background-color: #fef2f2;">
                                    <div class="d-flex align-items-center gap-2 overflow-hidden">
                                         <span class="mini-dl-emoji align-self-start mt-1">✍️</span>
@@ -4642,32 +4642,29 @@ function renderDeadlinesOnNoticePage() {
                             </div>`;
                         }
                     }
-                    // Tăng thêm 1 ngày để duyệt tiếp
                     curDate.setDate(curDate.getDate() + 1);
                 }
             }
         });
     }
 
-    // Xóa các capsule cũ để tránh rác và cập nhật nội dung mới
     if (deadlineHtml !== '') {
         $('#tbItemsHeThong .mini-dl-capsule').remove();
         $('#tbItemsHeThong').removeClass('d-none').prepend(deadlineHtml);
     }
 }
-// HÀM CHUYỂN SANG TAB LỊCH HỌC VÀ TỰ DẪN TỚI TUẦN ĐÓ
-function jumpToTKBFromNotice(dateStartStr) {
+
+window.jumpToTKBFromNotice = function(dateStartStr, targetId) {
     // 1. Chuyển giao diện sang tab Lịch học
     loadTKBView();
 
-    // 2. Tính toán để nhảy tới tuần chứa Deadline đó
+    // 2. Tính toán để nhảy tới tuần chứa Deadline/Sự kiện
     if (dateStartStr) {
         let targetDate = parseDateString(dateStartStr);
         if (targetDate && typeof globalConfigHK !== 'undefined') {
             let targetTime = targetDate.getTime();
             let foundWeekTime = null;
 
-            // Tìm tuần phù hợp trong cấu hình Học kỳ
             for (let conf of globalConfigHK) {
                 let sDate = parseDateString(conf[2]); 
                 let numWeeks = parseInt(conf[3]); 
@@ -4681,14 +4678,10 @@ function jumpToTKBFromNotice(dateStartStr) {
                         let nextM = new Date(m); nextM.setDate(nextM.getDate() + 7);
                         
                         if (targetTime >= m.getTime() && targetTime < nextM.getTime()) {
-                            $('#namHocSelect').val(conf[0]); 
-                            onNamHocChange(); 
-                            $('#hocKySelect').val(conf[1]); 
-                            onHocKyChange(); 
-                            $('#weekSelect').val(m.getTime().toString()); 
-                            onWeekChange();
-                            foundWeekTime = true;
-                            break;
+                            $('#namHocSelect').val(conf[0]); onNamHocChange(); 
+                            $('#hocKySelect').val(conf[1]); onHocKyChange(); 
+                            $('#weekSelect').val(m.getTime().toString()); onWeekChange();
+                            foundWeekTime = true; break;
                         }
                         if (!breakWeeks.includes(calWk)) acadWk++;
                         calWk++;
@@ -4698,7 +4691,57 @@ function jumpToTKBFromNotice(dateStartStr) {
             }
         }
     }
-}
+    
+   // 3. TỎA SÁNG VÀ CUỘN MƯỢT (Dùng jQuery hỗ trợ đa chiều)
+    if (targetId) {
+        let retryCount = 0;
+        let checkExistInterval = setInterval(() => {
+            let targetElement = $('#' + targetId);
+            
+            if (targetElement.length > 0) {
+                clearInterval(checkExistInterval); // Tìm thấy thì hủy vòng lặp
+                
+                // 3.1 Cuộn dọc toàn trang (Trừ hao 120px thanh Header)
+                $('html, body').animate({
+                    scrollTop: targetElement.offset().top - 120
+                }, 600);
+
+                // 3.2 Cuộn ngang bảng TKB (Dành riêng cho màn hình điện thoại)
+                let tableBox = $('.table-box');
+                if (tableBox.length > 0 && targetId.includes('tkb-card')) {
+                    let scrollLeftPos = targetElement.offset().left - tableBox.offset().left + tableBox.scrollLeft() - 30;
+                    tableBox.animate({ scrollLeft: scrollLeftPos }, 600);
+                }
+
+                // 3.3 Hiệu ứng tỏa sáng Đỏ Hồng rực rỡ
+                let originalBg = targetElement.css('background-color');
+                let originalBoxShadow = targetElement.css('box-shadow');
+                let originalBorder = targetElement.css('border');
+
+                targetElement.css({
+                    'transition': 'all 0.5s ease',
+                    'background-color': '#ffe4e6', 
+                    'border': '3px solid #e61d4a',
+                    'box-shadow': '0 0 20px rgba(230, 29, 74, 0.8), inset 0 0 15px rgba(230, 29, 74, 0.3)',
+                    'z-index': '99'
+                });
+
+                // 3.4 Trả về bình thường sau 3.5 giây
+                setTimeout(() => {
+                    targetElement.css({
+                        'background-color': originalBg,
+                        'border': originalBorder,
+                        'box-shadow': originalBoxShadow,
+                        'z-index': '1'
+                    });
+                }, 3500);
+            }
+            retryCount++;
+            // Dừng vòng lặp sau khoảng 4 giây (200ms * 20) nếu mạng quá chậm hoặc không có dữ liệu
+            if (retryCount > 20) clearInterval(checkExistInterval); 
+        }, 200);
+    }
+};
 // HÀM TẠO KHÓA CỐ ĐỊNH ĐỂ CHỐNG LỖI NHẢY DỮ LIỆU KHI XÓA DÒNG
 function getDlKey(item) {
     // Nếu là dữ liệu hệ thống (có chữ SYS_) thì bản thân nó đã cố định

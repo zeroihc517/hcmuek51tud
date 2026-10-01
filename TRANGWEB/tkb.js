@@ -218,7 +218,7 @@ function renderDeadlines() {
         let doneBtnHtml = `<button class="btn-dl-done ${isDone ? 'is-done' : ''}" onclick="toggleDeadlineComplete('${getDlKey(item)}', event)" title="Đánh dấu trạng thái"><i class="fa-solid ${isDone ? 'fa-circle-check' : 'fa-circle'} me-1"></i> ${isDone ? 'Đã xong' : 'Chưa xong'}</button>`;
 
         return `
-            <div class="online-card ${isDone ? 'completed-dl' : ''}" ${cardOnClick} style="${cardStyle}" title="${extLink ? 'Bấm để mở liên kết' : ''}">
+            <div id="dl-card-${getDlKey(item)}" class="online-card ${isDone ? 'completed-dl' : ''}" ${cardOnClick} style="${cardStyle}" title="${extLink ? 'Bấm để mở liên kết' : ''}">
                 ${doneBtnHtml} ${actionButtons}
                 <div class="icon-circle ${item.icon}" style="margin-top: 15px;">${item.emoji || '📌'}</div>
                 <h3 class="text-danger mb-2" style="font-size: 15px; font-weight: 800;">${item.duration}</h3>
@@ -1692,7 +1692,7 @@ function renderTKBTable(courses) {
                     }
 
                     tableHtml += `
-                    <td rowspan="${len}" class="td-subject" style="background:${autoColor || '#fff'};">
+                    <td rowspan="${len}" class="td-subject" id="tkb-card-${course.sheetRowIndex}" style="background:${autoColor || '#fff'};">
                         <div class="tkb-actions">
                             <button class="btn-tkb-act text-warning" onclick="openEditTkbModal('${course.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
                             <button class="btn-tkb-act text-danger" onclick="promptDeletePersonalTkb('${course.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
@@ -1739,7 +1739,7 @@ function renderTKBTable(courses) {
                         }
 
                         tableHtml += `
-                        <div style="position: relative; background: ${innerBg}; border-radius: 6px; padding: 6px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+                        <div id="tkb-card-${course.sheetRowIndex}" style="position: relative; background: ${innerBg}; border-radius: 6px; padding: 6px; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                             <div class="tkb-actions" style="position: absolute; top: 2px; right: 2px; z-index: 10;">
                                 <button class="btn-tkb-act text-warning bg-white shadow-sm" onclick="openEditTkbModal('${course.sheetRowIndex}')" title="Sửa"><i class="fa-solid fa-pen"></i></button>
                                 <button class="btn-tkb-act text-danger bg-white shadow-sm" onclick="promptDeletePersonalTkb('${course.sheetRowIndex}')" title="Xóa"><i class="fa-solid fa-trash"></i></button>
