@@ -6030,15 +6030,17 @@ function renderDatLichTable() {
         let safeTitle = (item.title || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
         
         // --- PHÂN LOẠI CÁCH MỞ LINK DỰA VÀO CHẾ ĐỘ HIỆN TẠI ---
+        let safeNoiDung = (noiDung || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
         let linkHtml = '';
+        
         if (window.currentDatLichMode === 'kythi') {
-            // Đang trong mục Kỳ Thi -> Mở Iframe và đổi icon thành màn hình
-            linkHtml = `<a href="javascript:void(0)" onclick="openDocumentViewer('${item.url}', '${safeTitle}');" class="fw-bold text-decoration-none fs-6" style="color: #0f4c81;" title="Bấm để làm bài">
+            // Đang trong mục Kỳ Thi -> Ghi nhận Lịch sử "Kỳ thi - [Tên HP] - [Tiêu đề]", Mở Iframe và đổi icon thành màn hình
+            linkHtml = `<a href="javascript:void(0)" onclick="if(typeof setDetailedView === 'function') setDetailedView('${safeNoiDung} - ${safeTitle}'); openDocumentViewer('${item.url}', '${safeTitle}');" class="fw-bold text-decoration-none fs-6" style="color: #0f4c81;" title="Bấm để làm bài">
                 <i class="fa-solid fa-desktop me-2" style="font-size: 13px;"></i>${item.title}
             </a>`;
         } else {
-            // Đang trong mục TEMP -> Mở Tab Mới và đổi icon thành mở link
-            linkHtml = `<a href="${item.url}" target="_blank" class="fw-bold text-decoration-none fs-6" style="color: #0f4c81;" title="Bấm để mở liên kết">
+            // Đang trong mục TEMP -> Ghi nhận Lịch sử "TEMP - ...", Mở Tab Mới và đổi icon thành mở link
+            linkHtml = `<a href="${item.url}" target="_blank" onclick="if(typeof setDetailedView === 'function') setDetailedView('TEMP - ${safeNoiDung} - ${safeTitle}');" class="fw-bold text-decoration-none fs-6" style="color: #0f4c81;" title="Bấm để mở liên kết">
                 <i class="fa-solid fa-arrow-up-right-from-square me-2" style="font-size: 13px;"></i>${item.title}
             </a>`;
         }
@@ -6823,22 +6825,25 @@ $(document).ready(function() {
             closeSplitPane('latex', true);
         }
 
-        if (typeof window.setDetailedView === 'function' && typeof currentSheetName !== 'undefined') {
-            window.setDetailedView(currentSheetName);
-        }
-    });
-
-    // Đánh chặn Click Link trên Sidebar của cả 2 Modal
-    $('#documentViewerModal, #latexViewerModal').on('click', 'a[target="_blank"], button#btnOpenInNewTab', function(e) {
-        if (isEnforcedFullscreen && isTimerActive()) {
-            e.preventDefault(); 
-            let url = $(this).attr('href');
-            if ($(this).attr('id') === 'btnOpenInNewTab') {
-                url = $('#docViewerIframe').attr('src');
-            }
-            if (url && url !== '#') {
-                pendingUrlToOpen = url;
-                $('#linkWarningModal').modal('show'); 
+        // KHÔI PHỤC ĐÚNG TRẠNG THÁI LỊCH SỬ KHI ĐÓNG BẢNG TÀI LIỆU / ĐỀ THI
+        if (typeof window.setDetailedView === 'function') {
+            if (!$('#datLichSection').hasClass('d-none')) {
+                // Nếu đóng khi đang ở trang Kỳ thi / TEMP
+                if (window.currentDatLichMode === 'kythi') {
+                    window.setDetailedView("Kỳ thi");
+                } else {
+                    window.setDetailedView("Thảo luận - TEMP");
+                }
+            } else if (!$('#shareCodeSection').hasClass('d-none')) {
+                // Nếu đóng khi đang ở trang Thảo luận ShareCode
+                if (!$('#shareContentView').hasClass('d-none')) {
+                    window.setDetailedView("Thảo luận - Không gian Code - " + currentShareCategory);
+                } else {
+                    window.setDetailedView("Thảo luận");
+                }
+            } else if (typeof currentSheetName !== 'undefined') {
+                // Mặc định trả về tên môn học
+                window.setDetailedView(currentSheetName);
             }
         }
     });
