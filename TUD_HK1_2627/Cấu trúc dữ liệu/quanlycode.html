@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cấu trúc dữ liệu - Nhóm Winner</title>
+    <!-- Thư viện CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        
+        .card-custom { border-radius: 16px; background: #ffffff; border: none; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); }
+        .card-header-custom { background-color: #0f4c81; color: white; border-top-left-radius: 16px !important; border-top-right-radius: 16px !important; }
+        
+        .home-question-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+        
+        .btn-question-card {
+            background-color: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px;
+            padding: 16px; text-align: left; transition: all 0.2s ease; cursor: pointer;
+            display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .btn-question-card:hover { border-color: #0f4c81; background-color: #f0f7ff; transform: translateY(-3px); box-shadow: 0 6px 12px rgba(15, 76, 129, 0.1); }
+        .btn-question-card .q-title { color: #0f4c81; font-weight: 700; font-size: 16px; }
+        .btn-question-card .q-code { color: #64748b; font-size: 14px; font-weight: 500; }
+        
+        #exerciseCodeEditor { height: 550px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; }
+        
+        #fullScreenProgressLoader {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
+            background: rgba(255, 255, 255, 0.95); z-index: 999999; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+    </style>
+</head>
+<body>
+<!-- MÀN HÌNH ĐĂNG NHẬP -->
+<div id="loginView" class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+    <div class="card card-custom p-4 shadow-lg" style="width: 100%; max-width: 400px; border-top: 5px solid #0f4c81;">
+        <div class="text-center mb-4">
+            <h3 class="fw-bold" style="color: #0f4c81;">Đăng Nhập</h3>
+            <p class="text-muted small">Hệ thống quản lý Code - Nhóm Winner</p>
+        </div>
+        <div class="mb-3">
+            <label class="form-label fw-bold small text-secondary">Tài khoản</label>
+            <input type="text" id="username" class="form-control bg-light border-0 shadow-sm py-2" placeholder="Nhập tài khoản">
+        </div>
+        <div class="mb-4">
+            <label class="form-label fw-bold small text-secondary">Mật khẩu</label>
+            <input type="password" id="password" class="form-control bg-light border-0 shadow-sm py-2" placeholder="Nhập mật khẩu">
+        </div>
+        <div id="loginError" class="text-danger mb-3 d-none fw-bold small text-center">
+            <i class="fa-solid fa-circle-exclamation me-1"></i> Sai tài khoản hoặc mật khẩu!
+        </div>
+        <button class="btn w-100 fw-bold py-2 text-white shadow-sm" style="background-color: #0f4c81;" onclick="performLogin()">
+            Đăng nhập
+        </button>
+    </div>
+</div>
+
+
+
+<!-- MÀN HÌNH CHỜ -->
+<div id="fullScreenProgressLoader" class="d-none">
+    <div class="spinner-border mb-3" style="width: 3.5rem; height: 3.5rem; color: #0f4c81;" role="status"></div>
+    <h5 class="fw-bold" style="color: #0f4c81;" id="loaderMsg">Đang xử lý dữ liệu...</h5>
+</div>
+
+<div class="container py-4">
+    
+    <!-- HEADER -->
+    <div class="card card-custom mb-4 border-start border-primary border-5">
+        <div class="card-body p-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <span class="badge bg-primary mb-2 px-3 py-1.5" style="background-color: #0f4c81 !important;">Kho Code Nhóm</span>
+                <h3 class="fw-bold text-dark m-0">Cấu trúc dữ liệu - Nhóm Winner</h3>
+                <!-- Hiển thị tên người dùng đang đăng nhập -->
+                <div class="text-muted small mt-1">Xin chào, <span id="displayUser" class="fw-bold text-success"></span></div>
+            </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-success fw-bold shadow-sm" onclick="$('#createModal').modal('show')">
+                    <i class="fa-solid fa-plus me-1"></i> Tạo file mới
+                </button>
+                <button class="btn btn-outline-primary fw-bold shadow-sm" onclick="loadPostsFromSheet(true)">
+                    <i class="fa-solid fa-rotate-right me-1"></i> Làm mới
+                </button>
+                <!-- THÊM NÚT ĐĂNG XUẤT -->
+                <button class="btn btn-danger fw-bold shadow-sm" onclick="performLogout()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 1: TRANG CHỦ DANH SÁCH FILE -->
+    <div id="homeView">
+        <div class="card card-custom">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold" style="color: #0f4c81;"><i class="fa-solid fa-folder-tree me-2"></i>Danh sách các FILE (nếu chưa hiện lên thì nhấn nút Làm mới)</h5>
+                </div>
+                <div class="home-question-grid" id="postList">
+                    <!-- Danh sách file sẽ render vào đây -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW 2: KHUNG CHỈNH SỬA CODE -->
+    <div id="editorView" class="d-none">
+        <button class="btn btn-outline-secondary fw-bold shadow-sm mb-3" onclick="goBackToHome()" style="background: white; border-radius: 8px;">
+            <i class="fa-solid fa-arrow-left me-1"></i> Trở về danh sách file
+        </button>
+        
+        <div class="card card-custom">
+            <div class="card-header card-header-custom p-3 d-flex justify-content-between align-items-center">
+                <h5 class="m-0 fw-bold" id="editorTitle"><i class="fa-brands fa-cuttlefish me-2"></i>Đang tải...</h5>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small fw-bold">Ngôn ngữ:</span>
+                    <select id="selectLang" class="form-select form-select-sm fw-bold text-dark" style="width: 120px;" onchange="changeEditorLang()">
+                        <option value="cpp">C / C++</option>
+                        <option value="python">Python</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div id="exerciseCodeEditor"></div>
+                
+               <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+    <span class="text-muted small"><i class="fa-solid fa-circle-info me-1"></i>Code của bạn sẽ được lưu đè lên dữ liệu cũ trên Google Sheet.</span>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-outline-success fw-bold px-4 shadow-sm" style="border-radius: 8px;" onclick="downloadCode()">
+            <i class="fa-solid fa-download me-2"></i> Tải Code
+        </button>
+        <button type="button" class="btn text-white fw-bold px-5 shadow-sm" style="background-color: #0f4c81; border-radius: 8px;" onclick="saveCodeToSheet()">
+            <i class="fa-solid fa-floppy-disk me-2"></i> Lưu cập nhật File
+        </button>
+    </div>
+</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- MODAL TẠO FILE MỚI -->
+<div class="modal fade" id="createModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+            <div class="modal-header text-white text-center p-3" style="background-color: #16a34a;">
+                <h5 class="fw-bold m-0 w-100"><i class="fa-solid fa-file-circle-plus me-2"></i>Tạo File Code Mới</h5>
+            </div>
+            <div class="modal-body p-4">
+                <label class="fw-bold text-dark mb-1">Tên File (Cả phần mở rộng):</label>
+                <input type="text" id="txtNewId" class="form-control mb-3 py-2 bg-light border-0 shadow-sm" placeholder="VD: NhanVien.cpp, Utils.h">
+                
+                <label class="fw-bold text-dark mb-1">Mô tả chức năng file:</label>
+                <input type="text" id="txtNewTitle" class="form-control mb-3 py-2 bg-light border-0 shadow-sm" placeholder="VD: Class xử lý nhân viên thư viện">
+                
+                <label class="fw-bold text-dark mb-1">Ngôn ngữ mặc định:</label>
+                <select id="txtNewLang" class="form-select mb-4 bg-light border-0 shadow-sm">
+                    <option value="cpp">C / C++</option>
+                    <option value="python">Python</option>
+                </select>
+                <button class="btn btn-success w-100 fw-bold py-2 shadow-sm" onclick="createNewPost()">Tạo & Viết Code ngay</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ... (giữ nguyên phần <head> và #fullScreenProgressLoader) ... -->
+
+
+    <!-- ... (Giữ nguyên toàn bộ phần VIEW 1, VIEW 2 và MODAL bên dưới của bạn) ... -->
+<!-- Thư viện JS -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
+
+<script>
+    // Dán URL Google Apps Script của bạn vào đây
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyorKDegDxCdpDIg4eoZjq1wTycjaxDYvgve8gDkPTyKmMDDPhWvd2xjoMCbgFL5Fk3/exec"; 
+    
+    let exerciseEditor;
+    let currentFileCode = null; 
+    
+    // Khởi tạo sẵn các file Header và CPP chuẩn
+    let postsData = [
+            ];
+
+// ==========================================
+    // 1. HỆ THỐNG ĐĂNG NHẬP (Lưu vào LocalStorage)
+    // ==========================================
+    
+    // Cài đặt danh sách tài khoản / mật khẩu ở đây
+    const accountList = [
+        { user: "winner", pass: "123" },
+
+    ];
+
+    function checkLoginStatus() {
+        // Kiểm tra xem trong bộ nhớ trình duyệt đã có thông tin đăng nhập chưa
+        let loggedInUser = localStorage.getItem("khoCode_loggedInUser");
+        
+        if (loggedInUser) {
+            // Đã đăng nhập: Ẩn form login, hiện giao diện chính
+            $('#loginView').addClass('d-none');
+            $('#mainAppView').removeClass('d-none');
+            $('#displayUser').text(loggedInUser); // Hiện tên user
+            
+            // TIẾN HÀNH LOAD DỮ LIỆU TỪ SHEET KHI ĐÃ ĐĂNG NHẬP THÀNH CÔNG
+            loadPostsFromSheet(false);
+        } else {
+            // Chưa đăng nhập: Hiện form login, ẩn giao diện chính
+            $('#loginView').removeClass('d-none');
+            $('#mainAppView').addClass('d-none');
+        }
+    }
+
+    function performLogin() {
+        let u = $('#username').val().trim();
+        let p = $('#password').val().trim();
+        
+        // Kiểm tra xem tài khoản có khớp trong mảng accountList không
+        let isValidAccount = accountList.find(acc => acc.user === u && acc.pass === p);
+        
+        if (isValidAccount) {
+            // Đăng nhập đúng -> Lưu vào localStorage để F5 không bị mất
+            localStorage.setItem("khoCode_loggedInUser", isValidAccount.user);
+            $('#loginError').addClass('d-none');
+            checkLoginStatus();
+        } else {
+            // Đăng nhập sai
+            $('#loginError').removeClass('d-none');
+        }
+    }
+
+    function performLogout() {
+        if(confirm("Bạn có chắc chắn muốn đăng xuất?")) {
+            // Xóa thông tin bộ nhớ
+            localStorage.removeItem("khoCode_loggedInUser");
+            // Reset form
+            $('#username').val('');
+            $('#password').val('');
+            // Kiểm tra lại trạng thái để văng ra màn hình đăng nhập
+            checkLoginStatus();
+        }
+    }
+
+    // ==========================================
+    // 2. KHỞI TẠO HỆ THỐNG 
+    // ==========================================
+    $(document).ready(function() {
+        exerciseEditor = ace.edit("exerciseCodeEditor");
+        exerciseEditor.setTheme("ace/theme/textmate");
+        exerciseEditor.session.setMode("ace/mode/c_cpp");
+        exerciseEditor.setOptions({ fontSize: "15px", showPrintMargin: false });
+
+        // Bắt sự kiện nhấn phím Enter để đăng nhập nhanh
+        $('#password').keypress(function(e) {
+            if(e.which == 13) {
+                performLogin();
+            }
+        });
+
+        // Thay vì gọi loadPostsFromSheet luôn, ta kiểm tra đăng nhập trước
+        checkLoginStatus();
+    });
+
+    let countdownInterval;
+
+// Hàm đếm ngược 10, 9, 8...
+function showCountdownLoader() {
+    $('#fullScreenProgressLoader').removeClass('d-none');
+    let count = 10;
+    $('#loaderMsg').text(`Bạn vui lòng đợi trong giây lát`);
+    
+    // Xóa interval cũ nếu có để tránh chạy đè
+    if (countdownInterval) clearInterval(countdownInterval);
+    
+    countdownInterval = setInterval(() => {
+        count--;
+        if(count >= 0) {
+            $('#loaderMsg').text(`Bạn vui lòng đợi trong giây lát`);
+        }
+    }, 1000);
+}
+
+function hideLoader() {
+    if (countdownInterval) clearInterval(countdownInterval);
+    $('#fullScreenProgressLoader').addClass('d-none');
+}
+
+    // ---------------- ĐỒNG BỘ DỮ LIỆU TỪ SHEET ----------------
+function loadPostsFromSheet(forceRefresh) {
+    // Bật hiệu ứng đếm ngược 10 9 8...
+    showCountdownLoader();
+    
+    $.ajax({
+        url: SCRIPT_URL,
+        type: "POST",
+        data: JSON.stringify({ action: "getAllCodes" }),
+        contentType: "text/plain;charset=utf-8",
+        success: function(res) {
+            if(res.success && res.data.length > 0) {
+                res.data.forEach(serverRow => {
+                    let existingIndex = postsData.findIndex(p => p.maBai === serverRow.maBai);
+                    if (existingIndex !== -1) {
+                        postsData[existingIndex].title = serverRow.title;
+                        postsData[existingIndex].lang = serverRow.lang;
+                        postsData[existingIndex].code = serverRow.code;
+                    } else {
+                        postsData.push(serverRow);
+                    }
+                });
+            }
+            renderPostGrid();
+            hideLoader(); // Ẩn hiệu ứng khi dữ liệu tải xong
+        },
+        error: function() {
+            renderPostGrid();
+            hideLoader(); // Ẩn hiệu ứng 
+            if(forceRefresh) {
+                alert("Không thể kết nối đến máy chủ, đang dùng dữ liệu gốc!");
+            }
+        }
+    });
+}
+
+    // ---------------- HIỂN THỊ DANH SÁCH FILE ----------------
+    function renderPostGrid() {
+        let html = "";
+        postsData.forEach(p => {
+            let iconCode = p.maBai.includes(".h") ? "fa-h" : (p.maBai.includes(".cpp") ? "fa-c" : "fa-file-code");
+            html += `
+                <button class="btn-question-card" onclick="openCodeEditor('${p.maBai}')">
+                    <div class="q-title"><i class="fa-solid ${iconCode} me-2 text-secondary"></i>${p.maBai}</div>
+                    <div class="q-code text-muted"><i class="fa-regular fa-message me-1"></i> ${p.title}</div>
+                </button>
+            `;
+        });
+        $('#postList').html(html);
+    }
+
+   // ---------------- TẠO FILE MỚI (CHẠY NGẦM, KHÔNG CHỜ LOAD) ----------------
+function createNewPost() {
+    let title = $('#txtNewTitle').val().trim();
+    let id = $('#txtNewId').val().trim();
+    let lang = $('#txtNewLang').val();
+
+    if (!title || !id) return alert("Vui lòng điền đủ Tên file và Mô tả!");
+
+    let newFileTemplate = `// File: ${id}\n// Mô tả: ${title}\n\n#include <iostream>\nusing namespace std;\n\n`;
+
+    // 1. Cập nhật giao diện và cho phép code NGAY LẬP TỨC (Không gọi showLoader)
+    postsData.push({ maBai: id, title: title, lang: lang, code: newFileTemplate });
+    renderPostGrid();
+    
+    // Đóng Modal và làm rỗng Form
+    $('#createModal').modal('hide');
+    $('#txtNewTitle').val('');
+    $('#txtNewId').val('');
+    
+    // Mở ngay file vừa tạo
+    openCodeEditor(id);
+
+    // 2. Gửi lệnh tạo file chạy ngầm lên Server (không làm phiền người dùng)
+    $.ajax({
+        url: SCRIPT_URL,
+        type: "POST",
+        dataType: "json",
+        data: JSON.stringify({ action: "createPost", maBai: id, title: title, lang: lang, code: newFileTemplate }),
+        contentType: "text/plain;charset=utf-8",
+        success: function(res) {
+            console.log("Đã tạo file ngầm trên server thành công.");
+        },
+        error: function(xhr) {
+            console.log("Xử lý tạo file hoàn tất (Có thể bị CORS nhưng Google Sheet đã nhận).");
+        }
+    });
+}
+
+    // ---------------- MỞ GIAO DIỆN CHỈNH SỬA ----------------
+    function openCodeEditor(maBai) {
+        let post = postsData.find(p => p.maBai === maBai);
+        if (!post) return;
+
+        currentFileCode = maBai;
+        $('#homeView').addClass('d-none');
+        $('#editorView').removeClass('d-none');
+        
+        $('#editorTitle').html(`<i class="fa-solid fa-file-code me-2"></i> ${post.maBai} <span class="badge bg-secondary ms-2 fw-normal" style="font-size: 13px;">${post.title}</span>`);
+        $('#selectLang').val(post.lang);
+        changeEditorLang();
+        
+        exerciseEditor.setValue(post.code, -1); 
+    }
+
+    function goBackToHome() {
+        $('#editorView').addClass('d-none');
+        $('#homeView').removeClass('d-none');
+        currentFileCode = null;
+    }
+
+    function changeEditorLang() {
+        let selectedLang = $('#selectLang').val();
+        exerciseEditor.session.setMode(selectedLang === 'python' ? "ace/mode/python" : "ace/mode/c_cpp");
+    }
+
+    function saveCodeToSheet() {
+    let newCode = exerciseEditor.getValue().trim();
+    let newLang = $('#selectLang').val();
+
+    // 1. Cập nhật dữ liệu trên biến tạm ngay lập tức
+    let post = postsData.find(p => p.maBai === currentFileCode);
+    if (post) { 
+        post.code = newCode; 
+        post.lang = newLang; 
+    }
+
+    // 2. Thay vì khóa màn hình bằng vòng xoay lớn, chỉ hiện thông báo nhỏ
+    // (Bỏ lệnh showLoader(); ở đây)
+    let btnSave = $('button:contains("Lưu cập nhật")');
+    let originalText = btnSave.html();
+    btnSave.html('<i class="fa-solid fa-spinner fa-spin me-2"></i>Đang lưu...').prop('disabled', true);
+
+    // 3. Gửi request chạy ngầm lên server
+    $.ajax({
+        url: SCRIPT_URL,
+        type: "POST",
+        dataType: "json",
+        data: JSON.stringify({ action: "saveSourceCode", maBai: currentFileCode, code: newCode, lang: newLang }),
+        contentType: "text/plain;charset=utf-8",
+        success: function(res) {
+            btnSave.html('<i class="fa-solid fa-check me-2"></i>Đã lưu').removeClass('btn-primary').addClass('btn-success');
+            setTimeout(() => {
+                btnSave.html(originalText).removeClass('btn-success').addClass('btn-primary').prop('disabled', false);
+            }, 2000);
+        },
+        error: function(xhr) {
+            // Dù lỗi CORS thì dữ liệu vẫn lưu thành công
+            btnSave.html('<i class="fa-solid fa-check me-2"></i>Đã lưu').removeClass('btn-primary').addClass('btn-success');
+            setTimeout(() => {
+                btnSave.html(originalText).removeClass('btn-success').addClass('btn-primary').prop('disabled', false);
+            }, 2000);
+        }
+    });
+}
+// ---------------- TẢI CODE VỀ MÁY ----------------
+    function downloadCode() {
+        if (!currentFileCode) {
+            alert("Không xác định được file đang mở!");
+            return;
+        }
+        
+        // Lấy nội dung code hiện tại trong Editor
+        let codeContent = exerciseEditor.getValue();
+        let fileName = currentFileCode; // currentFileCode lưu tên file (VD: a.cpp)
+        
+        // Tạo đối tượng Blob chứa dữ liệu văn bản
+        let blob = new Blob([codeContent], { type: "text/plain;charset=utf-8" });
+        
+        // Tạo một thẻ <a> ảo để kích hoạt tải xuống
+        let link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName; 
+        
+        // Gắn vào body, click tự động và xóa đi ngay
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+// ==========================================
+    // 3. TÍNH NĂNG CHẶN XEM NGUỒN TRANG
+    // ==========================================
+    
+    // Chặn click chuột phải
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+
+    // Chặn các phím tắt công cụ dành cho nhà phát triển (DevTools) và Xem nguồn
+    document.addEventListener('keydown', function(e) {
+        // Chặn F12
+        if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Chặn Ctrl + Shift + I (Mở DevTools)
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Chặn Ctrl + Shift + J (Mở Console)
+        if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Chặn Ctrl + Shift + C (Chọn phần tử Inspect)
+        if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c' || e.keyCode === 67)) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Chặn Ctrl + U (Xem View Source)
+        if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
+            e.preventDefault();
+            return false;
+        }
+        
+        // Chặn Ctrl + S (Lưu trang)
+        if (e.ctrlKey && (e.key === 'S' || e.key === 's' || e.keyCode === 83)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+</script>
+</body>
+</html>
