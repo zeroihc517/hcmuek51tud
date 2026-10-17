@@ -1,247 +1,211 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TRANG TRUNG CHUYỂN | TUD K51</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>404 - Not Found</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-<style>
-  :root {
-    --primary: #0f4c81;
-    --accent: #2563eb;
-    --bg-main: #f8fafc;
-    --card-bg: #ffffff;
-    --border: #e2e8f0;
-  }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #fafafa;
+            color: #111111;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
 
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  }
+        .error-card {
+            text-align: center;
+            padding: 24px;
+            max-width: 540px;
+            width: 90%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+        }
 
-  body {
-    background-color: var(--bg-main);
-    color: #0f172a;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    user-select: none; /* Khóa bôi đen văn bản */
-  }
+        .error-card h1 {
+            font-size: clamp(80px, 15vw, 130px);
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -3px;
+            color: #111111;
+            margin-bottom: 8px;
+        }
 
-  /* KHU VỰC THÔNG ĐIỆP LÊU LÊU */
-  .taunt-container {
-    text-align: center;
-    margin-bottom: 30px;
-    max-width: 500px;
-  }
+        .error-card h2 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #333333;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
 
-  .taunt-emoji {
-    font-size: 64px;
-    margin-bottom: 10px;
-    animation: wobble 1s infinite alternate ease-in-out;
-  }
+        .error-card p {
+            font-size: 16px;
+            color: #555555;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
 
-  @keyframes wobble {
-    0% { transform: rotate(-12deg) scale(0.95); }
-    100% { transform: rotate(12deg) scale(1.05); }
-  }
+        /* Khung giữ chỗ để khi nút tách ra né, chữ bên trên không bị nhảy giật */
+        .btn-slot {
+            min-height: 48px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-  .taunt-title {
-    font-size: 24px;
-    font-weight: 800;
-    color: #dc2626;
-    margin-bottom: 8px;
-  }
+        #reloadBtn {
+            padding: 12px 26px;
+            background: #111111;
+            color: #ffffff;
+            border: 1px solid #111111;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            white-space: nowrap;
+            transition: left 0.18s cubic-bezier(0.2, 0.8, 0.4, 1), 
+                        top 0.18s cubic-bezier(0.2, 0.8, 0.4, 1),
+                        background 0.15s ease;
+            z-index: 99;
+            will-change: left, top;
+        }
 
-  .taunt-subtitle {
-    font-size: 15px;
-    color: #475569;
-    font-weight: 500;
-    line-height: 1.5;
-  }
+        #reloadBtn:hover {
+            background: #2b2b2b;
+        }
 
-  /* THẺ CARD TRUY CẬP HỌC NHÓM NĂM 2 */
-  .hub-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 28px;
-    width: 100%;
-    max-width: 440px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
-    text-decoration: none;
-    color: inherit;
-    display: block;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .hub-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; height: 4px;
-    background: var(--accent);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  .hub-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.12);
-    border-color: #bfdbfe;
-  }
-
-  .hub-card:hover::before {
-    opacity: 1;
-  }
-
-  .hub-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    background: #eff6ff;
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    margin-bottom: 18px;
-  }
-
-  .hub-card h3 {
-    font-size: 20px;
-    font-weight: 800;
-    margin-bottom: 8px;
-    color: #0f172a;
-  }
-
-  .hub-card p {
-    font-size: 14px;
-    color: #475569;
-    line-height: 1.5;
-  }
-
-  .hub-btn {
-    margin-top: 20px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 700;
-    font-size: 14.5px;
-    color: var(--accent);
-  }
-
-  /* POPUP BÁO LỖI KHI CỐ TÌNH F12 / CLICK CHUỘT PHẢI */
-  .alert-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background: rgba(15, 23, 42, 0.85);
-    backdrop-filter: blur(8px);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s ease;
-  }
-
-  .alert-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .alert-box {
-    background: white;
-    border-radius: 24px;
-    padding: 30px;
-    text-align: center;
-    max-width: 380px;
-    width: 90%;
-    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
-  }
-
-  .alert-btn {
-    background: var(--primary);
-    color: white;
-    border: none;
-    padding: 10px 24px;
-    border-radius: 99px;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    margin-top: 15px;
-  }
-</style>
+        #reloadBtn:active {
+            background: #000000;
+        }
+    </style>
 </head>
 
 <body>
 
-  <!-- CÂU CHỌC TẠO ĐIỂM NHẤN -->
-  <div class="taunt-container">
-    <div class="taunt-emoji">😜🤪</div>
-    <div class="taunt-title">Lêu lêu vì dám xóa link nhé!</div>
-    <div class="taunt-subtitle">Vào đây bằng niềm tin à? Nhấn bên dưới để quay lại trang chính nè! 👇</div>
-  </div>
+    <div class="error-card" id="card">
+        <h1>404</h1>
+        <h2>Not Found</h2>
+        <p>
+            Xin lỗi, trang bạn đang tìm hiện tại đã tạm ẩn vì admin đang phải tìm cách để có những Epsilon Việt Nam... 😴
+        </p>
 
-  <!-- THẺ CARD DUY NHẤT -->
-  <a href="appliedmathematics.html" class="hub-card">
-    <div class="hub-icon">
-      <i class="fa-solid fa-graduation-cap"></i>
+        <!-- Nút ban đầu nằm chuẩn trong thẻ này, đảm bảo không bao giờ đè lên chữ -->
+        <div class="btn-slot">
+            <button id="reloadBtn" type="button">
+                🔄 Vào web dự phòng
+            </button>
+        </div>
     </div>
-    <h3>Học Nhóm Năm 2</h3>
-    <p>Truy cập bảng thời gian biểu, lịch học phần và tài liệu học tập chính thức.</p>
-    <div class="hub-btn">
-      Truy cập ngay <i class="fa-solid fa-arrow-right"></i>
-    </div>
-  </a>
 
-  <!-- POPUP CẢNH BÁO KHI SOI CODE -->
-  <div class="alert-overlay" id="alertModal">
-    <div class="alert-box">
-      <div style="font-size: 48px; margin-bottom: 10px;">🛑😜</div>
-      <h3 style="color: #dc2626; font-size: 20px; font-weight: 800;">LÊU LÊU!</h3>
-      <p style="color: #4b5563; font-size: 14px; margin-top: 8px;">Định F12 / Click chuột phải để xem mã nguồn nữa sao? Không xem được đâu!</p>
-      <button class="alert-btn" onclick="closeAlert()">Đã hiểu</button>
-    </div>
-  </div>
+    <script>
+        const button = document.getElementById("reloadBtn");
+        const card = document.getElementById("card");
+        let isDetached = false;
+        let lastMoveTime = 0;
 
-<script>
-    function showAlert() {
-        document.getElementById('alertModal').classList.add('active');
-    }
+        function moveButton(pointerX, pointerY) {
+            const now = Date.now();
+            if (now - lastMoveTime < 100) return;
+            lastMoveTime = now;
 
-    function closeAlert() {
-        document.getElementById('alertModal').classList.remove('active');
-    }
+            // Lần đầu tương tác: đổi chữ và chuyển sang fixed position
+            if (!isDetached) {
+                const rect = button.getBoundingClientRect();
+                button.style.position = "fixed";
+                button.style.left = rect.left + "px";
+                button.style.top = rect.top + "px";
+                document.body.appendChild(button);
+                isDetached = true;
+            }
 
-    // Chặn chuột phải
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        showAlert();
-    });
+            button.textContent = "Đố bạn bắt đc t";
 
-    // Chặn phím tắt xem nguồn trang / Inspect / DevTools
-    document.addEventListener('keydown', function(e) {
-        if (
-            e.key === 'F12' || 
-            ((e.ctrlKey || e.metaKey) && ['u', 's', 'p'].includes(e.key.toLowerCase())) || 
-            ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase()))
-        ) {
-            e.preventDefault();
-            showAlert();
+            const padding = 20;
+            const btnW = button.offsetWidth;
+            const btnH = button.offsetHeight;
+            const maxX = window.innerWidth - btnW - padding;
+            const maxY = window.innerHeight - btnH - padding;
+
+            // Vùng cấm: tránh nhảy đè vào giữa khối chữ
+            const cardRect = card.getBoundingClientRect();
+
+            let newX, newY;
+            let attempts = 0;
+
+            do {
+                newX = Math.floor(Math.random() * (maxX - padding)) + padding;
+                newY = Math.floor(Math.random() * (maxY - padding)) + padding;
+                attempts++;
+
+                const overlapsCard = (
+                    newX + btnW > cardRect.left - 20 &&
+                    newX < cardRect.right + 20 &&
+                    newY + btnH > cardRect.top - 20 &&
+                    newY < cardRect.bottom + 20
+                );
+
+                const tooCloseToPointer = (
+                    pointerX !== undefined &&
+                    Math.hypot(newX - pointerX, newY - pointerY) < 140
+                );
+
+                if (!overlapsCard && !tooCloseToPointer) break;
+
+            } while (attempts < 20);
+
+            button.style.left = newX + "px";
+            button.style.top = newY + "px";
         }
-    });
-</script>
+
+        // Né khi chuột chạm vào
+        button.addEventListener("mouseenter", function (e) {
+            moveButton(e.clientX, e.clientY);
+        });
+
+        // Né trước khi chuột đến sát gần
+        window.addEventListener("mousemove", function (e) {
+            const rect = button.getBoundingClientRect();
+            const btnCenterX = rect.left + rect.width / 2;
+            const btnCenterY = rect.top + rect.height / 2;
+            const distance = Math.hypot(e.clientX - btnCenterX, e.clientY - btnCenterY);
+
+            if (distance < 70) {
+                moveButton(e.clientX, e.clientY);
+            }
+        });
+
+        // Né trên màn hình cảm ứng điện thoại
+        button.addEventListener("touchstart", function (e) {
+            e.preventDefault();
+            const touch = e.touches[0];
+            moveButton(touch.clientX, touch.clientY);
+        }, { passive: false });
+
+        // Click trúng thì reload
+        button.addEventListener("click", function () {
+            location.reload();
+        });
+    </script>
 
 </body>
 </html>
