@@ -971,7 +971,7 @@ if (isHidden && !isAdmin) {
                     <i class="fa-solid fa-triangle-exclamation fs-4 fa-fade"></i>
                 </div>
                 <div class="flex-grow-1 mt-1">
-                    <div class="fw-bold text-danger mb-1" style="font-size: 18px; text-transform: uppercase;">[QUAN TRỌNG] ${c2} ${badgeHtml}</div>
+                    <div class="fw-bold text-danger mb-1" style="font-size: 18px; text-transform: uppercase;">[NHIỆM VỤ HỆ THỐNG] ${c2} ${badgeHtml}</div>
                     <div class="tb-item-dates" style="font-size: 13.5px; color: #64748b;">
                         ${dateDisplay} ${countdownHtml}
                     </div>
