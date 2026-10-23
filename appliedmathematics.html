@@ -5109,13 +5109,13 @@
         
         // 1. KIỂM TRA THỨ TRONG TUẦN
         const currentDay = now.getDay();
-        const daysToMaintain = [5, 6]; 
+        const daysToMaintain = []; 
         
         if (!daysToMaintain.includes(currentDay)) {
             return;
         }
 
-        const startMaintenance = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 30, 0);  
+        const startMaintenance = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0);  
         const endMaintenance   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30, 0); 
         
         const pad = (n) => n.toString().padStart(2, '0');
