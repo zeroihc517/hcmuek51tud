@@ -3548,9 +3548,11 @@ body.dark-mode .chess-square:nth-child(even) { background-color: #1e293b; }
         word-break: break-word !important;
     }
     
-    /* 4. Đảm bảo khung chứa bảng hiển thị thanh cuộn ngang mượt mà */
-    #tableWrapper {
+   /* 4. Đảm bảo khung chứa bảng hiển thị thanh cuộn ngang mượt mà */
+    #tableWrapper:not(.d-none) {
         display: block !important;
+    }
+    #tableWrapper {
         width: 100% !important;
         overflow-x: auto !important;
         -webkit-overflow-scrolling: touch !important;
@@ -3567,12 +3569,12 @@ body.dark-mode .chess-square:nth-child(even) { background-color: #1e293b; }
         border-radius: 8px !important;
     }
     #tableWrapper::-webkit-scrollbar-thumb {
-        background: #cbd5e1 !important;
+        background: #0f4c81 !important;
         border-radius: 8px !important;
     }
 
-    /* Bật lại dòng thông báo "Vuốt ngang để xem..." (Nãy bị ẩn) */
-    #swipeHint {
+    /* Bật lại dòng thông báo "Vuốt ngang để xem..." (Tôn trọng lệnh ẩn d-none) */
+    #swipeHint:not(.d-none) {
         display: block !important; 
     }
 }
@@ -3729,3 +3731,4 @@ tr.rl-row-white td {
     background-color: #f1f5f9;
     transform: scale(1.2);
 }
+
