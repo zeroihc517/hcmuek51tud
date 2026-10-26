@@ -2627,52 +2627,14 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
         }
     }
     
-    let cleanTitle = $('<div>').html(title).text();
-        $('#docViewerTitle').html(`<i class="fa-solid fa-file-lines me-2"></i> ${cleanTitle || 'Xem tài liệu'}`);
-        
-        // --- BẮT ĐẦU XỬ LÝ PHÂN QUYỀN NÚT TRÊN PC VÀ MOBILE ---
-        let isMobileView = window.innerWidth < 992;
-        let actualMssv = "";
-        
-        if (typeof window.isImpersonating !== 'undefined' && window.isImpersonating && window.realAdminMssv) {
-            actualMssv = String(window.realAdminMssv).replace(/\./g, "");
-        } else if (typeof currentUser !== 'undefined' && currentUser && currentUser.mssv) {
-            actualMssv = String(currentUser.mssv).replace(/\./g, "");
-        }
-
-        let isSpecificAdmin = (actualMssv === "5101108008");
-        
-        let btnNewTab = $('#btnOpenInNewTab');
-        let btnSplit = $('#documentViewerModal button[onclick*="openSplitLessonModal"]');
-
-        if (isMobileView) {
-            // 1. TRÊN ĐIỆN THOẠI: Ẩn "Mở thêm bài", Hiện "Mở tab mới" cho TẤT CẢ mọi người
-            btnSplit.removeClass('d-md-flex').addClass('d-none').attr('style', 'display: none !important;');
-            
-            btnNewTab.removeClass('d-none')
-                     .attr('style', 'display: inline-flex !important; border-radius: 6px; border-color: rgba(255,255,255,0.4); margin-left: 6px;')
-                     .html('<i class="fa-solid fa-arrow-up-right-from-square"></i> Mở tab mới')
-                     .off('click.openTab')
-                     .on('click.openTab', function() { window.open(url, '_blank'); });
-        } else {
-            // 2. TRÊN MÁY TÍNH: Hiện "Mở thêm bài"
-            btnSplit.removeClass('d-none').addClass('d-md-flex').attr('style', 'display: inline-flex !important; background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;');
-            
-            if (isSpecificAdmin) {
-                // CHỈ ADMIN 51.01.108.008 MỚI THẤY NÚT "MỞ TAB MỚI" TRÊN MÁY TÍNH
-                btnNewTab.removeClass('d-none')
-                         .attr('style', 'display: inline-flex !important; border-radius: 6px; border-color: rgba(255,255,255,0.4); margin-left: 6px;')
-                         .html('<i class="fa-solid fa-arrow-up-right-from-square"></i> Mở tab mới')
-                         .off('click.openTab')
-                         .on('click.openTab', function() { window.open(url, '_blank'); });
-            } else {
-                // Sinh viên bình thường bị ẩn nút
-                btnNewTab.addClass('d-none')
-                         .attr('style', 'display: none !important;')
-                         .off('click.openTab');
-            }
-        }
-        // --- KẾT THÚC ---
+   let cleanTitle = $('<div>').html(title).text();
+    $('#docViewerTitle').html(`<i class="fa-solid fa-file-lines me-2"></i> ${cleanTitle || 'Xem tài liệu'}`);
+    
+    if (currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008")) {
+        $('#btnOpenInNewTab').removeClass('d-none').off('click').on('click', function() { window.open(url, '_blank'); });
+    } else {
+        $('#btnOpenInNewTab').addClass('d-none');
+    }
         
         // --- GẮN DỮ LIỆU ĐỊNH DANH VÀO SIDEBAR ---
     
@@ -4233,7 +4195,6 @@ window.updatePersonalNotificationBell = function() {
 
 // ĐẶT ĐOẠN CODE NÀY Ở DƯỚI CÙNG CỦA FILE main.js
 window.openDocumentViewer = function(url, title, sheetName, stableKey) {
-    // 1. Nhảy tab mới nếu là Upcoder
     if (url.includes('test.upcoder.xyz') || url.includes('upcoder.xyz')) {
         window.open(url, '_blank');
         return; 
@@ -4241,8 +4202,9 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
 
     let urlLower = (url || "").toLowerCase();
     let titleLower = (title || "").toLowerCase();
+    let isMobileView = window.innerWidth < 992;
     
-    // 2. Ép mở tab mới cho Word/Docs
+    // NHẬN DIỆN FILE WORD / DOCS
     let isDocOrWord = urlLower.includes('docs.google.com/document') || 
                       urlLower.includes('docs.google.com/word') ||
                       urlLower.includes('word-edit.officeapps.live.com') ||
@@ -4251,14 +4213,17 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
                       titleLower.includes('word') || 
                       titleLower.includes('doc');
     
-    if (isDocOrWord) {
+    // 1. NẾU LÀ ĐIỆN THOẠI VÀ LÀ FILE WORD -> TỰ ĐỘNG MỞ TAB MỚI
+    if (isDocOrWord && isMobileView) {
         let a = document.createElement('a');
         a.href = url; a.target = '_blank';
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
         return; 
     }
 
-    // 3. Iframe cho PDF/Video
+    // =====================================
+    // 2. XỬ LÝ IFRAME CHO MÁY TÍNH VÀ CÁC FILE KHÁC TRÊN ĐIỆN THOẠI
+    // =====================================
     let embedUrl = url;
     if (url.includes('drive.google.com/file/d/')) {
         embedUrl = url.replace(/\/view.*$/, '/preview');
@@ -4279,49 +4244,40 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
     let cleanTitle = $('<div>').html(title).text();
     $('#docViewerTitle').html(`<i class="fa-solid fa-file-lines me-2"></i> ${cleanTitle || 'Xem tài liệu'}`);
     
-    // 4. QUẢN LÝ NÚT (MOBILE vs PC)
-    let isMobileView = window.innerWidth < 992;
+    // LẤY MSSV KIỂM TRA ADMIN
     let actualMssv = "";
-    
     if (typeof window.isImpersonating !== 'undefined' && window.isImpersonating && window.realAdminMssv) {
         actualMssv = String(window.realAdminMssv).replace(/\./g, "");
     } else if (typeof currentUser !== 'undefined' && currentUser && currentUser.mssv) {
         actualMssv = String(currentUser.mssv).replace(/\./g, "");
     }
-
     let isSpecificAdmin = (actualMssv === "5101108008");
+    
     let btnNewTab = $('#btnOpenInNewTab');
     let btnSplit = $('#documentViewerModal button[onclick*="openSplitLessonModal"]');
 
+    // QUẢN LÝ NÚT MỞ THÊM BÀI (MÀU CAM)
     if (isMobileView) {
-        // ĐIỆN THOẠI: Ẩn "Mở thêm bài", HIỆN "Mở tab mới" cho TẤT CẢ mọi người
         btnSplit.removeClass('d-md-flex').addClass('d-none').attr('style', 'display: none !important;');
-        
+    } else {
+        btnSplit.removeClass('d-none').addClass('d-md-flex').attr('style', 'display: inline-flex !important; background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;');
+    }
+
+    // QUẢN LÝ NÚT MỞ TAB MỚI: CHỈ HIỆN CHO ADMIN (TRÊN CẢ PC VÀ ĐIỆN THOẠI)
+    if (isSpecificAdmin) {
+        let btnText = isMobileView ? '<i class="fa-solid fa-arrow-up-right-from-square"></i>' : '<i class="fa-solid fa-arrow-up-right-from-square"></i> Mở tab mới';
         btnNewTab.removeClass('d-none')
                  .attr('style', 'display: inline-flex !important; border-radius: 6px; border-color: rgba(255,255,255,0.4); margin-left: 6px;')
-                 .html('<i class="fa-solid fa-arrow-up-right-from-square"></i> Mở tab mới')
+                 .html(btnText)
                  .off('click.openTab')
                  .on('click.openTab', function() { window.open(url, '_blank'); });
     } else {
-        // MÁY TÍNH: Hiện "Mở thêm bài"
-        btnSplit.removeClass('d-none').addClass('d-md-flex').attr('style', 'display: inline-flex !important; background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;');
-        
-        if (isSpecificAdmin) {
-            // Chỉ Admin mới được thấy nút Mở tab mới trên PC
-            btnNewTab.removeClass('d-none')
-                     .attr('style', 'display: inline-flex !important; border-radius: 6px; border-color: rgba(255,255,255,0.4); margin-left: 6px;')
-                     .html('<i class="fa-solid fa-arrow-up-right-from-square"></i> Mở tab mới')
-                     .off('click.openTab')
-                     .on('click.openTab', function() { window.open(url, '_blank'); });
-        } else {
-            // Sinh viên bị ẩn nút trên PC
-            btnNewTab.addClass('d-none')
-                     .attr('style', 'display: none !important;')
-                     .off('click.openTab');
-        }
+        btnNewTab.addClass('d-none')
+                 .attr('style', 'display: none !important;')
+                 .off('click.openTab');
     }
     
-    // 5. GẮN DỮ LIỆU SIDEBAR
+    // GẮN DỮ LIỆU SIDEBAR
     if (sheetName && stableKey) {
         $('#iframeSidebar').attr('data-sheet', sheetName).attr('data-key', stableKey);
         let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
@@ -4340,7 +4296,6 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
     $('#docViewerIframe').attr('src', embedUrl);
     $('#documentViewerModal').modal('show');
     
-    // 6. Ràng buộc toàn màn hình nếu hẹn giờ
     if (typeof isTimerActive === 'function' && isTimerActive()) {
         setTimeout(() => {
             isEnforcedFullscreen = true;
