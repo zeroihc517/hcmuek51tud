@@ -3871,7 +3871,10 @@
             style="width: calc(100% + 60px); height: 100%; border: none; position: relative; z-index: 1;" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
             allowfullscreen
-            onload="document.getElementById('docLoading').style.display='none'">
+            onload="
+                document.getElementById('docLoading').style.display='none';
+                this.style.width = (this.src.includes('youtube.com') || this.src.includes('youtu.be')) ? '100%' : 'calc(100% + 60px)';
+            ">
     </iframe>
 </div>
                     <div id="splitIframeWrapper" class="d-none flex-column h-100 shadow-sm" style="width: 50%; border-left: 2px solid #cbd5e1; background: #fff; z-index: 2;">
