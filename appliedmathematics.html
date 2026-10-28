@@ -3861,7 +3861,7 @@
                 
                 <!-- Vùng Iframe Bài Học -->
                <div id="iframeContainer" class="flex-grow-1 position-relative d-flex" style="transition: width 0.3s; height: 100%;">
-                   <div id="mainIframeWrapper" class="h-100 position-relative" style="width: 100%; transition: width 0.3s; overflow: hidden;">
+                  <div id="mainIframeWrapper" class="h-100 position-relative" style="width: 100%; transition: width 0.3s; overflow: hidden;">
     <div class="w-100 h-100 d-flex align-items-center justify-content-center" id="docLoading" style="position: absolute; z-index: 0;">
         <div class="text-center text-white opacity-75">
             <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải tài liệu...
@@ -3874,8 +3874,9 @@
             onload="
                 document.getElementById('docLoading').style.display='none';
                 const isYouTube = this.src.includes('youtube.com') || this.src.includes('youtu.be');
+                const isHtml = this.src.includes('.html');
                 const isMobile = window.innerWidth < 992;
-                this.style.width = (isYouTube || isMobile) ? '100%' : 'calc(100% + 60px)';
+                this.style.width = (isYouTube || isHtml || isMobile) ? '100%' : 'calc(100% + 60px)';
             ">
     </iframe>
 </div>
