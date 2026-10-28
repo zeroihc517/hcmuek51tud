@@ -3861,19 +3861,21 @@
                 
                 <!-- Vùng Iframe Bài Học -->
                <div id="iframeContainer" class="flex-grow-1 position-relative d-flex" style="transition: width 0.3s; height: 100%;">
-                    <div id="mainIframeWrapper" class="h-100 position-relative" style="width: 100%; transition: width 0.3s; overflow: hidden;">
+                   <div id="mainIframeWrapper" class="h-100 position-relative" style="width: 100%; transition: width 0.3s; overflow: hidden;">
     <div class="w-100 h-100 d-flex align-items-center justify-content-center" id="docLoading" style="position: absolute; z-index: 0;">
         <div class="text-center text-white opacity-75">
             <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải tài liệu...
         </div>
     </div>
     <iframe id="docViewerIframe" src="" 
-            style="width: calc(100% + 60px); height: 100%; border: none; position: relative; z-index: 1;" 
+            style="width: 100%; height: 100%; border: none; position: relative; z-index: 1;" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
             allowfullscreen
             onload="
                 document.getElementById('docLoading').style.display='none';
-                this.style.width = (this.src.includes('youtube.com') || this.src.includes('youtu.be')) ? '100%' : 'calc(100% + 60px)';
+                const isYouTube = this.src.includes('youtube.com') || this.src.includes('youtu.be');
+                const isMobile = window.innerWidth < 992;
+                this.style.width = (isYouTube || isMobile) ? '100%' : 'calc(100% + 60px)';
             ">
     </iframe>
 </div>
