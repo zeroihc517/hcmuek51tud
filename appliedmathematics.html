@@ -3863,12 +3863,10 @@
         }
     }
 </style>
-            <!-- Thân Modal (Chứa Iframe & Sidebar) -->
-            <div class="modal-body p-0 d-flex" style="background-color: #202124; position: relative; height: 100%;">
-                
-                <!-- Vùng Iframe Bài Học -->
-               <div id="iframeContainer" class="flex-grow-1 position-relative d-flex" style="transition: width 0.3s; height: 100%;">
-                  <div class="modal-body p-0 d-flex flex-column" style="background-color: #202124; position: relative; height: calc(100vh - 56px);">
+                        <!-- Thân Modal (Chứa Iframe & Sidebar) - Đã sửa lỗi lồng thẻ -->
+<div class="modal-body p-0 d-flex" style="background-color: #202124; position: relative; height: calc(100vh - 56px);">
+    
+    <!-- Vùng Iframe Bài Học -->
     <div id="iframeContainer" class="flex-grow-1 position-relative d-flex" style="transition: width 0.3s; height: 100%;">
         <div id="mainIframeWrapper" class="h-100 position-relative" style="width: 100%; transition: width 0.3s; overflow: hidden;">
             <div class="w-100 h-100 d-flex align-items-center justify-content-center" id="docLoading" style="position: absolute; z-index: 0;">
@@ -3883,15 +3881,13 @@
                     allowfullscreen
                     onload="
                         document.getElementById('docLoading').style.display = 'none';
-                        
                         const src = this.src.toLowerCase();
                         const isDrivePdf = src.includes('drive.google.com') || src.includes('.pdf');
-                        const isMobile = window.innerWidth < 992; // Kiểm tra giao diện mobile
+                        const isMobile = window.innerWidth < 992;
                         
                         this.style.width = '100%';
                         
                         const mask = document.getElementById('drivePopoutMask');
-                        // Chỉ hiện mặt nạ che nếu là PDF từ Drive VÀ đang ở giao diện Desktop (không phải Mobile)
                         if (isDrivePdf && !isMobile) {
                             mask.classList.remove('d-none');
                         } else {
@@ -3900,17 +3896,22 @@
                     ">
             </iframe>
 
-            <!-- MẶT NẠ LÀM MỜ VÀ CHE NÚT POP-OUT MỞ TAB MỚI -->
+            <!-- MẶT NẠ LÀM MỜ -->
             <div id="drivePopoutMask" class="d-none" style="position: absolute; top: 12px; right: 16px; width: 45px; height: 45px; background-color: rgba(32, 33, 36, 0.98); backdrop-filter: blur(5px); z-index: 5; border-radius: 8px;"></div>
         </div>
-                    <div id="splitIframeWrapper" class="d-none flex-column h-100 shadow-sm" style="width: 50%; border-left: 2px solid #cbd5e1; background: #fff; z-index: 2;">
-                        <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
-                            <h6 class="m-0 fw-bold text-primary text-truncate px-2" id="splitIframeTitle"><i class="fa-solid fa-book-open me-2"></i> Bài học mở thêm</h6>
-                            <button type="button" class="btn-close" style="font-size: 12px;" onclick="closeSplitPane('iframe')"></button>
-                        </div>
-                        <div id="splitIframeContent" class="flex-grow-1 position-relative" style="overflow-y: auto;"></div>
-                    </div>
-                </div>
+        
+        <!-- Cột bài học mở thêm -->
+        <div id="splitIframeWrapper" class="d-none flex-column h-100 shadow-sm" style="width: 50%; border-left: 2px solid #cbd5e1; background: #fff; z-index: 2;">
+            <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
+                <h6 class="m-0 fw-bold text-primary text-truncate px-2" id="splitIframeTitle"><i class="fa-solid fa-book-open me-2"></i> Bài học mở thêm</h6>
+                <button type="button" class="btn-close" style="font-size: 12px;" onclick="closeSplitPane('iframe')"></button>
+            </div>
+            <div id="splitIframeContent" class="flex-grow-1 position-relative" style="overflow-y: auto;"></div>
+        </div>
+    </div>
+    
+    <!-- Vùng Sidebar Công Cụ -->
+    <!-- (Bạn giữ nguyên nội dung gốc của #iframeSidebar ở đây, không cần sửa đổi gì bên trong nó) -->
                 
                 <!-- Vùng Sidebar Công Cụ (Bên phải - Được thiết kế lại) -->
                 <div id="iframeSidebar" class="d-none flex-column" style="width: 32%; min-width: 350px; max-width: 450px; border-left: 1px solid #cbd5e1; background-color: #f8fafc; overflow-y: auto; height: 100%; z-index: 2; box-shadow: -4px 0 15px rgba(0,0,0,0.05);">
@@ -4162,7 +4163,7 @@
             </div>
             
             <!-- Thân Modal -->
-            <div class="modal-body p-0 d-flex" style="background-color: #f0f2f5; position: relative; height: 100%;">
+           <div class="modal-body p-0 d-flex" style="background-color: #f0f2f5; position: relative; height: calc(100vh - 56px);">
                 
 <div id="latexContentContainer" class="flex-grow-1 p-2 p-md-3 overflow-hidden d-flex gap-2" style="transition: width 0.3s; height: 100%;">
                     <div id="mainLatexWrapper" class="h-100 position-relative d-flex justify-content-center overflow-auto" style="width: 100%; transition: width 0.3s;">
