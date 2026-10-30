@@ -3861,12 +3861,9 @@
                 
                 <!-- Vùng Iframe Bài Học -->
                <div id="iframeContainer" class="flex-grow-1 position-relative d-flex" style="transition: width 0.3s; height: 100%;">
-                  <!-- Thân Modal (Đã giới hạn chiều cao để không bị tràn thanh Taskbar Windows) -->
-<div class="modal-body p-0 d-flex flex-column" style="background-color: #202124; position: relative; height: calc(100vh - 56px);">
-    
+                  <div class="modal-body p-0 d-flex flex-column" style="background-color: #202124; position: relative; height: calc(100vh - 56px);">
     <div id="iframeContainer" class="flex-grow-1 position-relative d-flex" style="transition: width 0.3s; height: 100%;">
         <div id="mainIframeWrapper" class="h-100 position-relative" style="width: 100%; transition: width 0.3s; overflow: hidden;">
-            
             <div class="w-100 h-100 d-flex align-items-center justify-content-center" id="docLoading" style="position: absolute; z-index: 0;">
                 <div class="text-center text-white opacity-75">
                     <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải tài liệu...
@@ -3882,13 +3879,13 @@
                         
                         const src = this.src.toLowerCase();
                         const isDrivePdf = src.includes('drive.google.com') || src.includes('.pdf');
+                        const isMobile = window.innerWidth < 992; // Kiểm tra giao diện mobile
                         
-                        // Giữ nguyên 100% để hiển thị thanh cuộn và nút Zoom (to/nhỏ) gốc của PDF
                         this.style.width = '100%';
                         
-                        // Kích hoạt mặt nạ che nút mở tab mới
                         const mask = document.getElementById('drivePopoutMask');
-                        if (isDrivePdf) {
+                        // Chỉ hiện mặt nạ che nếu là PDF từ Drive VÀ đang ở giao diện Desktop (không phải Mobile)
+                        if (isDrivePdf && !isMobile) {
                             mask.classList.remove('d-none');
                         } else {
                             mask.classList.add('d-none');
@@ -3897,9 +3894,7 @@
             </iframe>
 
             <!-- MẶT NẠ LÀM MỜ VÀ CHE NÚT POP-OUT MỞ TAB MỚI -->
-            <!-- Dùng màu xám đen khớp với toolbar Drive và thêm hiệu ứng blur làm mờ -->
             <div id="drivePopoutMask" class="d-none" style="position: absolute; top: 12px; right: 16px; width: 45px; height: 45px; background-color: rgba(32, 33, 36, 0.98); backdrop-filter: blur(5px); z-index: 5; border-radius: 8px;"></div>
-            
         </div>
                     <div id="splitIframeWrapper" class="d-none flex-column h-100 shadow-sm" style="width: 50%; border-left: 2px solid #cbd5e1; background: #fff; z-index: 2;">
                         <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
