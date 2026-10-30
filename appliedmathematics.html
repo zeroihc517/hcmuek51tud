@@ -3855,7 +3855,14 @@
     <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
 </div>
             </div>
-            
+            <style>
+    /* Ép ẩn mặt nạ che nút hoàn toàn trên giao diện điện thoại/màn hình nhỏ (dưới 992px) */
+    @media (max-width: 991px) {
+        #drivePopoutMask {
+            display: none !important;
+        }
+    }
+</style>
             <!-- Thân Modal (Chứa Iframe & Sidebar) -->
             <div class="modal-body p-0 d-flex" style="background-color: #202124; position: relative; height: 100%;">
                 
