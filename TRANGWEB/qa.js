@@ -73,23 +73,25 @@ window.isDatLichNew = false; // THÊM MỚI
 window.isKyThiNew = false;
 
 function updateSidebarThaoLuanBadge() {
-    // 1. Huy hiệu cho thẻ Thảo Luận tổng
-    if (window.isQAUnanswered || window.isShareCodeNew || window.isDatLichNew) {
+    // 1. Huy hiệu cho thẻ Thảo Luận tổng ở thanh Sidebar
+    // Bổ sung: Có bài TEMP mới hoặc Kỳ thi mới đều báo sáng
+    if (window.isQAUnanswered || window.isShareCodeNew || window.isDatLichNew || window.isKyThiNew) {
         $('#shareCodeSidebarBadge').removeClass('d-none');
     } else {
         $('#shareCodeSidebarBadge').addClass('d-none');
     }
 
+    // 2. Huy hiệu thẻ Q&A bên trong
     if (window.isQAUnanswered) { $('#qaInsideBadge').removeClass('d-none'); } 
     else { $('#qaInsideBadge').addClass('d-none'); }
     
-    // 2. Huy hiệu thẻ TEMP bên trong Thảo Luận
-    if (window.isDatLichNew) { $('#datLichInsideBadge').removeClass('d-none'); } 
-    else { $('#datLichInsideBadge').addClass('d-none'); }
-    
-    // 3. Huy hiệu thẻ Kỳ thi ngoài Sidebar
-    if (window.isKyThiNew) { $('#kyThiSidebarBadge').removeClass('d-none'); } 
-    else { $('#kyThiSidebarBadge').addClass('d-none'); }
+    // 3. Huy hiệu thẻ TEMP bên trong mục Thảo Luận
+    // Bổ sung: Báo sáng khi có bài TEMP hoặc bài Kỳ thi mới
+    if (window.isDatLichNew || window.isKyThiNew) { 
+        $('#datLichInsideBadge').removeClass('d-none'); 
+    } else { 
+        $('#datLichInsideBadge').addClass('d-none'); 
+    }
 }
 
 function checkNewDatLichGlobal() {
@@ -4254,15 +4256,7 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
     let isSpecificAdmin = (actualMssv === "5101108008");
     
     let btnNewTab = $('#btnOpenInNewTab');
-    let btnSplit = $('#documentViewerModal button[onclick*="openSplitLessonModal"]');
-
-    // QUẢN LÝ NÚT MỞ THÊM BÀI (MÀU CAM)
-    if (isMobileView) {
-        btnSplit.removeClass('d-md-flex').addClass('d-none').attr('style', 'display: none !important;');
-    } else {
-        btnSplit.removeClass('d-none').addClass('d-md-flex').attr('style', 'display: inline-flex !important; background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;');
-    }
-
+   
     // QUẢN LÝ NÚT MỞ TAB MỚI: CHỈ HIỆN CHO ADMIN (TRÊN CẢ PC VÀ ĐIỆN THOẠI)
     if (isSpecificAdmin) {
         let btnText = isMobileView ? '<i class="fa-solid fa-arrow-up-right-from-square"></i>' : '<i class="fa-solid fa-arrow-up-right-from-square"></i> Mở tab mới';

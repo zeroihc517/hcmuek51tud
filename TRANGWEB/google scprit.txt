@@ -27,6 +27,7 @@ function doGet(e) {
       case "getConfigHocKy": result = getConfigHocKy(); break;
       case "getAppDatabase": result = getAppDatabase(); break;
       case "getChatMessages": result = getChatMessages(); break;
+      case "getPrivateMessages": result = getPrivateMessages(e.parameter.mssv); break;
       case "getExerciseStatus": result = getExerciseStatus(e.parameter.mssv, e.parameter.course); break;
       case "getGPAUser": result = getGPAUser(e.parameter.mssv); break;
       case "getGPAConfig": result = getGPAConfig(e.parameter.mssv); break;
@@ -101,6 +102,11 @@ function doPost(e) {
   case "editExerciseQuestion": result = editExerciseQuestion(payload); break;
   case "editGroupStudy": result = editGroupStudy(payload); break;
   case "getGroupStudy": result = getGroupStudy(); break;
+  case "updatePrivateMsgThread": result = updatePrivateMsgThread(payload.rowIndex, payload.fullText); break;
+case "deletePrivateMsg": result = deletePrivateMsg(payload.rowIndex); break;
+  case "sendPrivateMessage": result = sendPrivateMessage(payload.adminMssv, payload.targetMssvs, payload.title, payload.content); break;
+case "replyPrivateMessage": result = replyPrivateMessage(payload.rowIndex, payload.senderMssv, payload.replyText); break;
+case "markPrivateMessageRead": result = markPrivateMessageRead(payload.rowIndex, payload.role); break;
   case "addGroupStudy": result = addGroupStudy(payload); break;
 case "toggleGroupStudyReg": result = toggleGroupStudyReg(payload); break;
 case "deleteGroupStudy": result = deleteGroupStudy(payload); break;
@@ -684,7 +690,7 @@ function pingPresence(uuid, mssv, lastView) {
           try {
             var data = JSON.parse(allProps[key]);
 
-            if (now - data.time > 90000) { 
+            if (now - data.time > 60000) { 
               keysToDelete.push(key); 
             } else { 
               if (onlineList.indexOf(data.mssv) === -1) {
@@ -758,23 +764,20 @@ function updateLastActive(mssv, lastView) {
                 var parentView = newStr.indexOf(" - ") !== -1 ? newStr.split(" - ")[0].trim() : newStr;
                 var oldParentView = oldStr.indexOf(" - ") !== -1 ? oldStr.split(" - ")[0].trim() : oldStr;
                 
-                // TRƯỜNG HỢP 1: Dọn rác trạng thái chờ (LOẠI BỎ CHỮ THỜI GIAN BIỂU BỊ DƯ)
-                // Nếu bước cũ CHỈ LÀ danh mục gốc của bước mới (VD: "Thời gian biểu" -> "Thời gian biểu - Tuần 15")
+                // TRƯỜNG HỢP 1: Dọn rác trạng thái chờ 
                 if (oldStr === parentView && newStr !== oldStr) {
-                    // => Không làm gì cả. Chữ "Thời gian biểu" trơ trọi sẽ bị ĐÈ MẤT bởi newStr ở cột J phía trên, 
-                    // mà không bị đẩy xuống cột K (Phía trước 1).
+                    // => Không làm gì cả
                 }
-                // TRƯỜNG HỢP 2: Nội suy bước trung gian
-                // Chuyển từ một danh mục KHÁC hoàn toàn thẳng vào chi tiết (VD: "Trang chủ" -> "Thời gian biểu - Tuần 8")
-                else if (parentView !== newStr && oldStr !== parentView && parentView !== oldParentView) {
-                    sheet.getRange(i + 1, 11).setValue(parentView); // K: Chèn danh mục gốc vào Trước 1
-                    sheet.getRange(i + 1, 12).setValue(oldStr);     // L: Đẩy trang cũ xuống Trước 2
+                /* ĐÃ ĐÓNG COMMENT TRƯỜNG HỢP 2 ĐỂ NGĂN NỘI SUY BƯỚC ĐỆM
+                else if (parentView !== newStr && oldStr !== parentView && parentView !== oldParentView && oldStr.toLowerCase().indexOf("thao tác") === -1) {
+                    sheet.getRange(i + 1, 11).setValue(parentView); 
+                    sheet.getRange(i + 1, 12).setValue(oldStr);     
                     if (oldPrevView1 && oldPrevView1 !== oldStr) {
-                        sheet.getRange(i + 1, 13).setValue(oldPrevView1); // M: Trước 3
+                        sheet.getRange(i + 1, 13).setValue(oldPrevView1); 
                     }
                 } 
-                // TRƯỜNG HỢP 3: Đẩy tuần tự bình thường 
-                // Ghi nhận chuyển qua lại giữa các tuần (VD: "Thời gian biểu - Tuần 6" -> "Thời gian biểu - Tuần 8")
+                */
+                // TRƯỜNG HỢP 3: Đẩy tuần tự bình thường (Bây giờ mọi thao tác sẽ rớt vào đây)
                 else {
                     sheet.getRange(i + 1, 11).setValue(oldStr); // K: Trước 1
                     if (oldPrevView1 && oldPrevView1 !== oldStr) {
@@ -789,7 +792,6 @@ function updateLastActive(mssv, lastView) {
         } else if (lastView && !oldCurrentView) {
           sheet.getRange(i + 1, 10).setValue(lastView);
         }
-        
         // 3. Cập nhật "Lần đầu truy cập cho đợt" (Cột N)
         // Lần này logic đợt mới isNewSession đã hoạt động đúng
         if (isNewSession || !oldFirstAccessStr || String(oldFirstAccessStr).trim() === "") {
@@ -1824,33 +1826,11 @@ function adminGetUserData(targetMssv, adminMssv) {
     profile: profile,
     personalLinks: personalLinksData,
     progress: progressData,
-    notes: notesData
+    notes: notesData,
+    privateMessages: getPrivateMessageOfUser(targetMssv)
   };
 }
 
-function assignStudentsToCourse(courseId, assignedMssvList) {
-  var regSheet = ss.getSheetByName("UserRegisteredCourses");
-  var data = regSheet.getDataRange().getValues();
-  var mssvArray = assignedMssvList.split(',').map(function(item) { return item.trim(); }).filter(Boolean);
-  
-  // Xóa courseId khỏi tất cả sinh viên trước, sau đó chỉ thêm lại cho những người được check
-  for (var i = 1; i < data.length; i++) {
-    var mssv = String(data[i][0]).trim();
-    var courses = String(data[i][1]).split(',').map(function(c) { return c.trim(); }).filter(Boolean);
-    
-    var index = courses.indexOf(String(courseId).trim());
-    var isAssigned = mssvArray.indexOf(mssv) !== -1;
-    
-    if (isAssigned && index === -1) {
-      courses.push(courseId); // Thêm môn
-      regSheet.getRange(i + 1, 2).setValue(courses.join(','));
-    } else if (!isAssigned && index !== -1) {
-      courses.splice(index, 1); // Rút môn
-      regSheet.getRange(i + 1, 2).setValue(courses.join(','));
-    }
-  }
-  return "Đã cập nhật danh sách sinh viên tham gia học phần!";
-}
 // ==========================================
 // API BỔ SUNG CHO ADMIN CAN THIỆP DỮ LIỆU
 // ==========================================
@@ -1908,15 +1888,16 @@ function addMasterTkb(p) {
 }
 function getCourseAssignees(courseId) {
   var users = getAllUsers();
-  var regSheet = ss.getSheetByName("UserRegisteredCourses");
+  // Đọc từ Sheet lưu trạng thái mới thay vì UserRegisteredCourses
+  var assignSheet = ss.getSheetByName("MasterTKBAssignees");
   var assigned = [];
   
-  if (regSheet) {
-    var data = regSheet.getDataRange().getValues();
+  if (assignSheet) {
+    var data = assignSheet.getDataRange().getValues();
     for (var i = 1; i < data.length; i++) {
-       var courses = String(data[i][1]).split(',').map(function(c) { return c.trim(); });
-       if (courses.indexOf(String(courseId).trim()) !== -1) {
-          assigned.push(String(data[i][0]).trim());
+       if (String(data[i][0]).trim() === String(courseId).trim()) {
+          assigned = String(data[i][1]).split(',').map(function(c) { return c.trim(); }).filter(Boolean);
+          break;
        }
     }
   }
@@ -1933,41 +1914,118 @@ function deleteMasterTkb(rowIndex) {
   sheet.deleteRow(rowIndex); // Xóa đúng dòng lịch được chỉ định
   return "Đã xóa lịch trình khỏi MasterTKB!";
 }
+// HÀM SAO CHÉP LỊCH HỌC CHO SINH VIÊN (HỖ TRỢ SAO CHÉP ĐA KHUNG GIỜ)
 function assignStudentsToCourse(courseId, assignedMssvList) {
-  var regSheet = ss.getSheetByName("UserRegisteredCourses");
-  if (!regSheet) {
-    regSheet = ss.insertSheet("UserRegisteredCourses");
-    regSheet.appendRow(["MSSV", "CourseIDs"]);
+  // 1. Lưu trạng thái tích chọn vào MasterTKBAssignees để hiển thị lại UI checkbox cho Admin
+  var assignSheet = ss.getSheetByName("MasterTKBAssignees");
+  if (!assignSheet) {
+    assignSheet = ss.insertSheet("MasterTKBAssignees");
+    assignSheet.appendRow(["CourseID", "AssignedMSSV"]);
   }
-  var data = regSheet.getDataRange().getValues();
-  var mssvArray = assignedMssvList.split(',').map(function(item) { return item.trim(); }).filter(Boolean);
-  
-  var existingMssvs = [];
+  var data = assignSheet.getDataRange().getValues();
+  var found = false;
   for (var i = 1; i < data.length; i++) {
-    var mssv = String(data[i][0]).trim();
-    existingMssvs.push(mssv);
-    var courses = String(data[i][1]).split(',').map(function(c) { return c.trim(); }).filter(Boolean);
-    
-    var index = courses.indexOf(String(courseId).trim());
-    var isAssigned = mssvArray.indexOf(mssv) !== -1;
-    
-    if (isAssigned && index === -1) {
-      courses.push(courseId); // Gán thêm môn
-      regSheet.getRange(i + 1, 2).setValue(courses.join(','));
-    } else if (!isAssigned && index !== -1) {
-      courses.splice(index, 1); // Rút bớt môn
-      regSheet.getRange(i + 1, 2).setValue(courses.join(','));
+    if (String(data[i][0]).trim() === String(courseId).trim()) {
+      assignSheet.getRange(i + 1, 2).setValue(assignedMssvList);
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    assignSheet.appendRow([courseId, assignedMssvList]);
+  }
+  
+  // 2. Thực hiện hành động SAO CHÉP thực tế vào TKB cá nhân của sinh viên
+  var masterSheet = ss.getSheetByName("MasterTKB");
+  if (!masterSheet) return "Lỗi: Không tìm thấy bảng MasterTKB.";
+  var masterData = masterSheet.getDataRange().getValues();
+  
+  // ---> QUÉT VÀ LẤY TOÀN BỘ CÁC DÒNG KHUNG GIỜ CÓ CHUNG MÃ HỌC PHẦN
+  var courseDataList = [];
+  for (var k = 1; k < masterData.length; k++) {
+    if (String(masterData[k][0]).trim() === String(courseId).trim()) {
+      courseDataList.push(masterData[k]);
     }
   }
   
-  // Xử lý thêm sinh viên hoàn toàn mới (chưa từng có hàng dữ liệu nào trước đây)
-  for (var j = 0; j < mssvArray.length; j++) {
-    if (existingMssvs.indexOf(mssvArray[j]) === -1) {
-      regSheet.appendRow([mssvArray[j], String(courseId).trim()]);
+  if (courseDataList.length === 0) return "Lỗi: Không tìm thấy học phần này trong dữ liệu MasterTKB.";
+
+  var mssvArray = assignedMssvList.split(',').map(function(item) { return item.trim(); }).filter(Boolean);
+  if (mssvArray.length === 0) return "Đã lưu cập nhật danh sách rỗng.";
+
+  var count = 0;
+
+  for (var m = 0; m < mssvArray.length; m++) {
+    var mssv = mssvArray[m];
+    var sheetName = getTkbSheetName(mssv);
+    var sheet = ss.getSheetByName(sheetName);
+    if (!sheet) {
+        sheet = ss.insertSheet(sheetName);
+        sheet.appendRow(["MSSV", "Thứ", "Tiết", "Số Tiết", "Thời Gian", "Hình Thức", "Môn", "Phòng", "Giảng Viên", "Màu Sắc", "Ngày BĐ", "Ngày KT", "Ngoại Lệ"]);
     }
+    
+    // Lấy dữ liệu TKB cá nhân hiện tại của sinh viên để kiểm tra trùng
+    var personalData = sheet.getDataRange().getValues();
+
+    // Duyệt qua từng khung giờ của Mã HP để chép vào
+    for (var c = 0; c < courseDataList.length; c++) {
+        var courseData = courseDataList[c];
+        var thuList = String(courseData[1]).split(',');
+        var tietBd = courseData[2];
+        var soTiet = courseData[3];
+        var thoiGian = courseData[4];
+        var hinhThuc = String(courseData[5] || "");
+        var mon = courseData[6];
+        var phong = courseData[7];
+        var gv = courseData[8];
+        var color = courseData[9] || "#e0f2fe";
+        var ngayBatDau = courseData[10];
+        var ngayKetThuc = courseData[11];
+        var ngayNgoaiLe = courseData[14];
+
+        var isVle = hinhThuc.toUpperCase().indexOf("VLE") !== -1 || (phong && phong.toUpperCase().indexOf("VLE") !== -1);
+        var cleanHinhThuc = hinhThuc.replace(/#[a-zA-Z0-9_]+/g, '').trim();
+        var finalHinhThuc = cleanHinhThuc + " #" + courseId; // Đóng dấu Mã HP để nhận diện nhóm
+        
+        var exists = false;
+        
+        for(var p = 1; p < personalData.length; p++) {
+           var pMon = String(personalData[p][6]).trim();
+           var pThu = String(personalData[p][1]).trim();
+           var pTietBd = String(personalData[p][2]).trim();
+           var pHinhThuc = String(personalData[p][5] || "").trim();
+           
+           // Trùng MSSV và Trùng tên Môn
+           if(String(personalData[p][0]).trim() === String(mssv).trim() && pMon === String(mon).trim()) {
+               // Phải cùng chung Mã HP đánh dấu
+               if (pHinhThuc.indexOf("#" + courseId) !== -1) {
+                   // Trùng khớp lịch VLE (Thứ 99) HOẶC trùng khớp Thứ + Tiết
+                   if (isVle && pThu === "99") { exists = true; break; }
+                   if (!isVle && thuList.includes(pThu) && pTietBd === String(tietBd).trim()) { exists = true; break; }
+               }
+           }
+        }
+
+        // Chỉ chép thêm những khung giờ mà sinh viên chưa có
+        if (!exists) {
+            if (isVle) {
+                sheet.appendRow([mssv, 99, 99, 1, thoiGian || "VLE", finalHinhThuc, mon, phong || "VLE", gv, color, ngayBatDau, ngayKetThuc, ngayNgoaiLe]);
+            } else {
+                for (var d = 0; d < thuList.length; d++) {
+                    var t = parseInt(thuList[d].trim());
+                    if (!isNaN(t) && t >= 2 && t <= 8) {
+                        sheet.appendRow([mssv, t, tietBd, soTiet, thoiGian, finalHinhThuc, mon, phong, gv, color, ngayBatDau, ngayKetThuc, ngayNgoaiLe]);
+                    }
+                }
+            }
+        }
+    }
+    count++;
   }
-  return "Đã cập nhật danh sách sinh viên tham gia học phần!";
+
+  return "Thành công! Đã sao chép " + courseDataList.length + " khung giờ của học phần vào TKB cho " + count + " sinh viên.";
 }
+
 function dragDropSheetRow(sheetName, fromIndex, toIndex) {
   var sheet = ss.getSheetByName(sheetName);
   if (fromIndex === toIndex) return "Không có sự thay đổi vị trí.";
@@ -2932,4 +2990,94 @@ function loginUser(mssv, password) {
     }
   }
   return { success: false, message: "Tài khoản không tồn tại trên hệ thống!" };
+}
+
+// ==========================================
+// API THÔNG BÁO CÁ NHÂN (PRIVATE MESSAGES) V3
+// ==========================================
+function sendPrivateMessage(adminMssv, targetMssvs, title, content) {
+  if (String(adminMssv).trim() !== "51.01.108.008" && String(adminMssv).trim() !== "5101108008") return "Lỗi: Không đủ quyền Admin!";
+  
+  var sheet = ss.getSheetByName("PrivateMessages");
+  if (!sheet) {
+    sheet = ss.insertSheet("PrivateMessages");
+    sheet.appendRow(["Thời gian", "MSSV Sinh viên", "Tiêu đề", "Nội dung Thread", "Trạng thái"]);
+    sheet.getRange("A1:E1").setFontWeight("bold").setBackground("#e61d4a").setFontColor("white");
+  }
+  
+  var mssvList = targetMssvs.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+  var initialThread = "[ADMIN]\n(" + timestamp + ")\n" + content + "\n[/ADMIN]";
+  
+  for (var i = 0; i < mssvList.length; i++) {
+    sheet.appendRow([timestamp, mssvList[i], title, initialThread, "UNREAD_USER"]);
+  }
+  return "Đã gửi thông báo riêng thành công cho " + mssvList.length + " sinh viên.";
+}
+
+function getPrivateMessages(mssv) {
+  var sheet = ss.getSheetByName("PrivateMessages");
+  if (!sheet || sheet.getLastRow() <= 1) return [];
+  var data = sheet.getDataRange().getValues();
+  var result = [];
+  var isAdminReq = (String(mssv).trim() === "51.01.108.008" || String(mssv).trim() === "5101108008");
+  
+  for (var i = 1; i < data.length; i++) {
+    var rowMssv = String(data[i][1]).trim();
+    // Admin lấy tất cả để đổ vào chuông tổng, SV lấy của riêng SV
+    if (isAdminReq || rowMssv === String(mssv).trim()) {
+       result.push({ rowIndex: i + 1, time: data[i][0], mssv: rowMssv, title: data[i][2], thread: data[i][3], status: String(data[i][4]).trim() });
+    }
+  }
+  return result.reverse(); 
+}
+
+function getPrivateMessageOfUser(mssv) {
+  var sheet = ss.getSheetByName("PrivateMessages");
+  if (!sheet || sheet.getLastRow() <= 1) return [];
+  var data = sheet.getDataRange().getValues();
+  var result = [];
+  
+  for (var i = 1; i < data.length; i++) {
+    // Chỉ lấy chính xác tin nhắn của sinh viên mục tiêu để Admin xem lịch sử
+    if (String(data[i][1]).trim() === String(mssv).trim()) {
+       result.push({ rowIndex: i + 1, time: data[i][0], mssv: String(data[i][1]).trim(), title: data[i][2], thread: data[i][3], status: String(data[i][4]).trim() });
+    }
+  }
+  return result.reverse(); 
+}
+
+function replyPrivateMessage(rowIndex, senderMssv, replyText) {
+  var sheet = ss.getSheetByName("PrivateMessages");
+  var currentThread = sheet.getRange(rowIndex, 4).getValue();
+  var timestamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm");
+  var isAdminReq = (String(senderMssv).trim() === "51.01.108.008" || String(senderMssv).trim() === "5101108008");
+  
+  var roleTag = isAdminReq ? "[ADMIN]" : "[SV]";
+  var newStatus = isAdminReq ? "UNREAD_USER" : "UNREAD_ADMIN";
+  var newThread = currentThread + "\n\n" + roleTag + "\n(" + timestamp + ")\n" + replyText + "\n[/" + roleTag.replace('[', '').replace(']', '') + "]";
+  
+  sheet.getRange(rowIndex, 4).setValue(newThread);
+  sheet.getRange(rowIndex, 5).setValue(newStatus); 
+  return "Đã gửi phản hồi.";
+}
+
+function markPrivateMessageRead(rowIndex, role) {
+  var sheet = ss.getSheetByName("PrivateMessages");
+  var currentStatus = sheet.getRange(rowIndex, 5).getValue();
+  if (role === 'ADMIN' && currentStatus === 'UNREAD_ADMIN') sheet.getRange(rowIndex, 5).setValue("READ");
+  else if (role === 'USER' && currentStatus === 'UNREAD_USER') sheet.getRange(rowIndex, 5).setValue("READ");
+  return "OK";
+}
+
+function updatePrivateMsgThread(rowIndex, fullText) {
+  var sheet = ss.getSheetByName("PrivateMessages");
+  sheet.getRange(rowIndex, 4).setValue(fullText);
+  return "Đã cập nhật nội dung tin nhắn!";
+}
+
+function deletePrivateMsg(rowIndex) {
+  var sheet = ss.getSheetByName("PrivateMessages");
+  sheet.deleteRow(rowIndex);
+  return "Đã xóa toàn bộ luồng hội thoại này!";
 }

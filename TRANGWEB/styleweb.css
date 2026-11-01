@@ -3578,7 +3578,59 @@ body.dark-mode .chess-square:nth-child(even) { background-color: #1e293b; }
         display: block !important; 
     }
 }
+/* Giao diện khung Đề thi thử / Đề Demo (Màu Tím) */
+.card-mockexam-box {
+    background-color: #ffffff;
+    border: 2px solid #8b5cf6; /* Viền Tím */
+    border-radius: 12px;
+    padding: 14px 10px;
+    text-align: center;
+    text-decoration: none !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    transition: all 0.25s ease;
+    height: 100%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
 
+.card-mockexam-box:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.15); /* Bóng đổ Tím */
+}
+
+.card-mockexam-box:hover .card-minigame-img img {
+    transform: scale(1.12); 
+}
+
+.card-mockexam-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #8b5cf6; /* Chữ Tím */
+    line-height: 1.4;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+/* Fix tương thích thẻ ảnh mặc định bên trong khung tím */
+.card-mockexam-box .card-minigame-img.default-icon {
+    background: linear-gradient(135deg, #e9d5ff, #c4b5fd);
+    color: #7c3aed;
+}
+
+/* Đồng bộ Dark Mode cho khối Đề thi thử */
+body.dark-mode .card-mockexam-box {
+    background-color: #131c30 !important;
+    border-color: #8b5cf6 !important;
+}
+body.dark-mode .card-mockexam-title {
+    color: #c4b5fd !important;
+}
 /* =======================================================
    CSS CHO BẢNG TRONG PHẦN LÝ THUYẾT (SIDEBAR VIEWER)
    ======================================================= */

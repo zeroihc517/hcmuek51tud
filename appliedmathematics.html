@@ -156,10 +156,7 @@
             <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
                 <i class="fa-solid fa-calendar"></i> Lịch học
             </button>
-<button class="btn-course" id="btnNavKyThi" onclick="loadDatLichHenView('kythi')">
-    <i class="fa-solid fa-file-pen"></i> Kỳ thi
-    <span id="kyThiSidebarBadge" class="badge-new-qa d-none">Mới</span>
-</button>
+
             <div id="gpaNavContainer" class="d-none">
                 <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
                     <i class="fa-solid fa-clipboard-check"></i> Kết quả học tập
@@ -1728,7 +1725,11 @@
 <div id="datLichSection" class="d-none">
    <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
     <div class="d-flex align-items-center">
-       <div class="page-title m-0" id="datLichPageTitle"><i class="fa-solid fa-calendar-check"></i> TEMP</div>
+        <!-- Bổ sung nút Trở lại -->
+        <button class="btn btn-light fw-bold shadow-sm me-3" onclick="openShareCodeSection()">
+            <i class="fa-solid fa-arrow-left"></i> Trở lại
+        </button>
+        <div class="page-title m-0" id="datLichPageTitle"><i class="fa-solid fa-calendar-check"></i> TEMP & Kỳ thi</div>
     </div>
     <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
@@ -2572,8 +2573,27 @@
             <!-- Nội dung Minigame -->
             <div class="collapse" id="collapseMinigames">
                 <div class="p-4" style="background: #ffffff; border-top: 1px dashed #fecaca;">
-                    <div id="examCardsContainer" class="grid-7-cols">
+                    <div id="minigameCardsContainer" class="grid-7-cols">
                         <!-- JS sẽ đổ các thẻ Minigame vào đây -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. KHỐI ĐỀ THI THỬ & DEMO -->
+    <div id="mockExamWrapper" class="d-none widget-wrapper" style="width: 320px; max-width: 100%; transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">
+        <div class="data-card border-0 shadow-sm m-0" style="border: 2px solid #8b5cf6; border-radius: 12px; overflow: hidden; width: 100%;">
+            <!-- Nút bấm gập/mở -->
+            <div class="d-flex justify-content-between align-items-center p-3" data-bs-toggle="collapse" data-bs-target="#collapseMockExams" aria-expanded="false" style="background: #f3e8ff; cursor: pointer; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#e9d5ff'" onmouseout="this.style.background='#f3e8ff'">
+                <h6 class="m-0 fw-bold" style="color: #8b5cf6;"><i class="fa-solid fa-file-pen fa-bounce me-2"></i> ĐỀ THI THỬ & DEMO</h6>
+                <i class="fa-solid fa-chevron-down text-purple minigame-chevron ms-3" style="transition: transform 0.3s;"></i>
+            </div>
+            <!-- Nội dung Đề thi -->
+            <div class="collapse" id="collapseMockExams">
+                <div class="p-4" style="background: #ffffff; border-top: 1px dashed #d8b4fe;">
+                    <div id="mockExamCardsContainer" class="grid-7-cols">
+                        <!-- JS sẽ đổ các thẻ Đề thi vào đây -->
                     </div>
                 </div>
             </div>
@@ -3843,9 +3863,7 @@
                 
                 <!-- Nhóm nút bên phải -->
                <div class="d-flex gap-2 align-items-center">
-    <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('iframe')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
-        <i class="fa-solid fa-table-columns"></i> Mở thêm bài
-    </button>
+    
     <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleIframeSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
         <i class="fa-solid fa-layer-group"></i> Công cụ
     </button>
@@ -3900,15 +3918,7 @@
             <div id="drivePopoutMask" class="d-none" style="position: absolute; top: 12px; right: 16px; width: 45px; height: 45px; background-color: rgba(32, 33, 36, 0.98); backdrop-filter: blur(5px); z-index: 5; border-radius: 8px;"></div>
         </div>
         
-        <!-- Cột bài học mở thêm -->
-        <div id="splitIframeWrapper" class="d-none flex-column h-100 shadow-sm" style="width: 50%; border-left: 2px solid #cbd5e1; background: #fff; z-index: 2;">
-            <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
-                <h6 class="m-0 fw-bold text-primary text-truncate px-2" id="splitIframeTitle"><i class="fa-solid fa-book-open me-2"></i> Bài học mở thêm</h6>
-                <button type="button" class="btn-close" style="font-size: 12px;" onclick="closeSplitPane('iframe')"></button>
             </div>
-            <div id="splitIframeContent" class="flex-grow-1 position-relative" style="overflow-y: auto;"></div>
-        </div>
-    </div>
     
     <!-- Vùng Sidebar Công Cụ -->
     <!-- (Bạn giữ nguyên nội dung gốc của #iframeSidebar ở đây, không cần sửa đổi gì bên trong nó) -->
@@ -4149,9 +4159,7 @@
                     <button class="btn btn-sm btn-link text-white p-0 ms-2 btn-countdown-pause" onclick="togglePauseUserCountdown()" title="Tạm ngưng / Tiếp tục"><i class="fa-solid fa-pause"></i></button>
                 </div>
                <div class="d-flex gap-2 align-items-center">
-    <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('latex')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
-        <i class="fa-solid fa-table-columns"></i> Mở thêm bài
-    </button>
+    
     <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleLatexSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
         <i class="fa-solid fa-layer-group"></i> Công cụ
     </button>
@@ -4208,14 +4216,7 @@
                         </div>
                     </div>
                     
-                    <div id="splitLatexWrapper" class="d-none flex-column h-100 shadow-sm border" style="width: 50%; border-radius: 8px; background: #fff;">
-                        <div class="d-flex justify-content-between align-items-center p-3 bg-light border-bottom" style="border-radius: 8px 8px 0 0;">
-                            <h6 class="m-0 fw-bold text-primary text-truncate" id="splitLatexTitle"><i class="fa-solid fa-book-open me-2"></i> Bài học mở thêm</h6>
-                            <button type="button" class="btn-close" style="font-size: 12px;" onclick="closeSplitPane('latex')"></button>
-                        </div>
-                        <div id="splitLatexContent" class="flex-grow-1 position-relative p-4 p-md-5" style="overflow-y: auto; font-size: 16px; line-height: 1.8; color: #1e293b; font-family: 'Inter', sans-serif;"></div>
-                    </div>
-                </div>
+  </div>
 
                 <!-- VÙNG SIDEBAR CÔNG CỤ CHO BẢNG LATEX (ẨN MẶC ĐỊNH) -->
                 <div id="latexSidebar" class="d-none flex-column" style="width: 32%; min-width: 350px; max-width: 450px; border-left: 1px solid #cbd5e1; background-color: #f8fafc; overflow-y: auto; height: 100%; z-index: 2; box-shadow: -4px 0 15px rgba(0,0,0,0.05);">
@@ -5020,20 +5021,6 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="splitLessonSelectModal" tabindex="-1" style="z-index: 10900;">
-        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-                <div class="modal-header text-white" style="background-color: #f59e0b;">
-                    <h6 class="modal-title fw-bold"><i class="fa-solid fa-list-check me-2"></i>Chọn bài học để mở song song</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body p-0 bg-light">
-                    <div class="list-group list-group-flush" id="splitLessonList">
-                        </div>
-                </div>
-            </div>
-        </div>
-    </div>
 <!-- MODAL SINH VIÊN ĐĂNG BÀI VÀO DANH MỤC HỌC PHẦN -->
 <div class="modal fade" id="studentCoursePostModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -5298,7 +5285,7 @@ async function initSystemUrlRouter() {
         else if (viewParam === 'gpa') loadGPAView();
         else if (viewParam === 'profile') loadProfileView();
         else if (viewParam === 'qa') openQASection();
-        else if (viewParam === 'datlich') loadDatLichHenView();
+        else if (viewParam === 'datlich' || viewParam === 'temp') loadDatLichHenView('temp');
         else if (viewParam === 'renluyen') loadRenLuyenView();
         else if (viewParam === 'sharecode' || viewParam === 'thaoluan') {
             openShareCodeSection();
@@ -5382,6 +5369,22 @@ $(document).ready(function() {
                 }
             }
         }, 1000);
+    });
+</script>
+<!-- JS Tự động dài ra (Dự phòng cho mọi trình duyệt) -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const setupAccordion = (collapseId, wrapperId) => {
+            let collapseEl = document.getElementById(collapseId);
+            let wrapperEl = document.getElementById(wrapperId);
+            if (collapseEl && wrapperEl) {
+                collapseEl.addEventListener('show.bs.collapse', () => wrapperEl.style.width = '100%');
+                collapseEl.addEventListener('hide.bs.collapse', () => wrapperEl.style.width = '320px');
+            }
+        };
+        setupAccordion('collapseMinigames', 'minigameWrapper');
+        setupAccordion('collapseMockExams', 'mockExamWrapper');
+        setupAccordion('collapseInstructor', 'instructorWrapper');
     });
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>

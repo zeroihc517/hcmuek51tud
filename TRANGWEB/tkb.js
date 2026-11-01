@@ -523,6 +523,9 @@ function renderTkbToolBar() {
                 </button>
 
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #16a34a;" onclick="openExportCalendarModal()"><i class="fa-solid fa-calendar-plus"></i> Xuất Google Lịch</button>
+<button class="btn btn-sm text-white fw-bold" style="background-color: #0ea5e9;" onclick="exportHocNhomTKBToExcel(event)">
+                    <i class="fa-solid fa-file-excel"></i> Xuất Excel
+                </button>
                 <button class="btn btn-sm text-white fw-bold" style="background-color: #10b981;" onclick="exportHocNhomTKBToImage(event)">
                     <i class="fa-solid fa-camera"></i> Xuất Ảnh
                 </button>
@@ -3833,14 +3836,23 @@ window.onGsListHocKyChange = function() {
 }
 
 window.loadGroupStudyList = function() {
-    $('#groupStudyListBody').html('<tr><td colspan="5" class="text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải danh sách...</td></tr>');
+    // Nếu đã có cache thì render ngay lập tức để không bị chờ
+    if (window.groupStudyCache && window.groupStudyCache.length > 0) {
+        renderGroupStudyTable();
+    } else {
+        $('#groupStudyListBody').html('<tr><td colspan="5" class="text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải danh sách...</td></tr>');
+    }
     
+    // Vẫn gọi lên server để kéo dữ liệu mới nhất (chạy ngầm)
     postToGAS({ action: "getGroupStudy" }, function(res) {
         let data = typeof res === 'string' ? JSON.parse(res) : res;
         window.groupStudyCache = data;
-        renderGroupStudyTable();
+        renderGroupStudyTable(); // Tự động làm mới bảng nếu có thay đổi
     }, function() {
-        $('#groupStudyListBody').html('<tr><td colspan="5" class="text-danger py-4">Lỗi kết nối máy chủ!</td></tr>');
+        // Chỉ báo lỗi nếu không có dữ liệu cache nào
+        if (!window.groupStudyCache || window.groupStudyCache.length === 0) {
+            $('#groupStudyListBody').html('<tr><td colspan="5" class="text-danger py-4">Lỗi kết nối máy chủ!</td></tr>');
+        }
     });
 };
 
@@ -4481,11 +4493,379 @@ window.updateTkbDetailedView = function(actionName = "") {
     if (typeof setDetailedView === 'function') setDetailedView(baseStr);
 };
 
-// BỔ SUNG: Phục hồi trạng thái xem "Tuần" khi sinh viên tắt các bảng chức năng (Modal)
 $(document).ready(function() {
-    $('#systemTkbModal, #manageTkbListModal, #manageDeadlineListModal, #unifiedTkbModal, #deadlinePersonalModal, #exportCalendarModal, #groupStudyListModal').on('hidden.bs.modal', function () {
-        if (!$('#tkbSection').hasClass('d-none')) {
-            updateTkbDetailedView(); 
-        }
-    });
+    // Tải trước dữ liệu Nhóm học tập / Đặt lịch hẹn ngầm ở background
+    setTimeout(function() {
+        postToGAS({ action: "getGroupStudy" }, function(res) {
+            let data = typeof res === 'string' ? JSON.parse(res) : res;
+            window.groupStudyCache = data;
+        }, function() {}); // Im lặng nếu lỗi để không làm phiền người dùng
+    }, 4000); // Chờ 4 giây sau khi web khởi động xong mới bắt đầu kéo
 });
+
+// =========================================================================
+// TÍNH NĂNG: XUẤT THỜI KHÓA BIỂU RA FILE EXCEL (XLSX) SIÊU ĐẸP VÀ CHUYÊN NGHIỆP
+// =========================================================================
+window.exportHocNhomTKBToExcel = async function(event) {
+    const btn = event.currentTarget || event.target;
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Đang xuất...';
+    btn.disabled = true;
+
+    try {
+        // 1. Tự động kéo thư viện ExcelJS và FileSaver nếu chưa có
+        if (typeof ExcelJS === 'undefined') {
+            await $.getScript("https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js");
+            await $.getScript("https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js");
+        }
+
+        const workbook = new ExcelJS.Workbook();
+        
+        // Lấy thông tin chung (Năm học, sinh viên, tuần học...)
+        let namHoc = $('#namHocSelect').val() || ".......";
+        let hocKy = $('#hocKySelect').val() || ".......";
+        let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : "..........";
+        let tenSV = (currentUser && currentUser.name) ? currentUser.name : "..........";
+        let nganh = (currentUser && currentUser.chuyenNganh) ? currentUser.chuyenNganh : "..............";
+
+        let weekTextRaw = $('#weekSelect option:selected').text() || "";
+        let dateRangeStr = "";
+        let match = weekTextRaw.match(/\((.*?)\)/);
+        if (match) {
+            dateRangeStr = match[1];
+        } else {
+            let start = new Date(currentSelectedMonday);
+            let end = new Date(start);
+            end.setDate(end.getDate() + 6);
+            let pad = n => String(n).padStart(2, '0');
+            dateRangeStr = `${pad(start.getDate())}/${pad(start.getMonth()+1)}/${start.getFullYear()} - ${pad(end.getDate())}/${pad(end.getMonth()+1)}/${end.getFullYear()}`;
+        }
+        let splitDates = dateRangeStr.split(' - ');
+
+        // =====================================================================
+        // SHEET 1: THỜI KHÓA BIỂU (XUẤT THEO TUẦN)
+        // =====================================================================
+        const worksheet = workbook.addWorksheet('ThoiKhoaBieu', {
+            views: [{ showGridLines: false }] 
+        });
+
+        worksheet.columns = [
+            { key: 'tiet', width: 10 },
+            { key: 't2', width: 28 },
+            { key: 't3', width: 28 },
+            { key: 't4', width: 28 },
+            { key: 't5', width: 28 },
+            { key: 't6', width: 28 },
+            { key: 't7', width: 28 },
+            { key: 'cn', width: 28 }
+        ];
+
+        // Tiêu đề TKB
+        worksheet.mergeCells('A1:H1');
+        let titleRow1 = worksheet.getCell('A1');
+        titleRow1.value = `THỜI GIAN BIỂU NĂM HỌC ${namHoc.toUpperCase()} - ${hocKy.toUpperCase()}\n(Từ ngày ${splitDates[0]} đến ngày ${splitDates[1] || dateRangeStr})`;
+        titleRow1.font = { size: 22, bold: true, name: 'Times New Roman', color: { argb: 'FF0F4C81' } }; 
+        titleRow1.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        worksheet.getRow(1).height = 65;
+
+        // Thông tin SV
+        worksheet.mergeCells('A2:H2');
+        let titleRow2 = worksheet.getCell('A2');
+        titleRow2.value = `Mã số sinh viên: ${mssv}    |    Sinh viên: ${tenSV}    |    Ngành: ${nganh}`;
+        titleRow2.font = { size: 14, italic: true, name: 'Times New Roman', color: { argb: 'FF334155' } };
+        titleRow2.alignment = { horizontal: 'center', vertical: 'middle' };
+        worksheet.getRow(2).height = 30;
+
+        // Header Ngày
+        let headerRow = worksheet.getRow(3);
+        headerRow.height = 40;
+        headerRow.getCell(1).value = "Tiết";
+        for (let i = 2; i <= 8; i++) {
+            headerRow.getCell(i).value = i === 8 ? "Chủ nhật" : `Thứ ${i}`;
+        }
+        headerRow.eachCell((cell) => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0F4C81' } };
+            cell.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 14, name: 'Arial' }; 
+            cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+            cell.border = { top: { style: 'thin', color: { argb: 'FFCBD5E1' } }, left: { style: 'thin', color: { argb: 'FFCBD5E1' } }, bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } }, right: { style: 'thin', color: { argb: 'FFCBD5E1' } } };
+        });
+
+        // 16 Tiết học
+        for (let i = 1; i <= 16; i++) {
+            let row = worksheet.getRow(i + 3);
+            row.height = 45; 
+            let cellTiet = row.getCell(1);
+            cellTiet.value = i;
+            cellTiet.alignment = { horizontal: 'center', vertical: 'middle' };
+            cellTiet.font = { bold: true, color: { argb: 'FF475569' }, size: 13, name: 'Arial' };
+            cellTiet.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+        }
+
+        // Lưới ô
+        for(let r = 4; r <= 19; r++) {
+            for(let c = 1; c <= 8; c++) {
+                worksheet.getCell(r, c).border = { top: { style: 'thin', color: { argb: 'FFCBD5E1' } }, left: { style: 'thin', color: { argb: 'FFCBD5E1' } }, bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } }, right: { style: 'thin', color: { argb: 'FFCBD5E1' } } };
+            }
+        }
+
+        // Lọc TKB ĐÚNG TUẦN ĐANG XEM
+        let isBreakWeek = $('#weekSelect').find(':selected').data('is-break') === true;
+        let filteredData = globalTkbData.filter(c => {
+            if ((c.hinhThuc || '').toUpperCase().includes('VLE')) return false;
+            if (c.thu < 2 || c.thu > 8 || c.tietBd < 1) return false;
+            let classDateInThisWeek = new Date(currentSelectedMonday); 
+            classDateInThisWeek.setDate(classDateInThisWeek.getDate() + (c.thu - 2));
+            let isRecurring = true; 
+            if (c.ngayBatDau && c.ngayKetThuc) {
+                let s = parseDateString(c.ngayBatDau); let e = parseDateString(c.ngayKetThuc);
+                if (s && e) { let diffDays = (e - s) / (1000 * 60 * 60 * 24); if (diffDays <= 7) isRecurring = false; }
+            }
+            if (isBreakWeek && isRecurring) return false;
+            if (c.ngayBatDau && c.ngayKetThuc) {
+                let startDate = parseDateString(c.ngayBatDau); let endDate = parseDateString(c.ngayKetThuc);
+                if (startDate && endDate) { if (classDateInThisWeek < startDate || classDateInThisWeek > endDate) return false; }
+            } 
+            if (c.ngayNgoaiLe && c.ngayNgoaiLe.trim() !== "") {
+                let skipDates = c.ngayNgoaiLe.split(',').map(d => d.trim()); 
+                let formattedClassDate = formatDateDDMMYYYY(classDateInThisWeek);
+                if (skipDates.includes(formattedClassDate)) return false; 
+            }
+            return true; 
+        });
+
+        // Điền TKB
+        let cellOccupancy = {}; 
+        let mergeRanges = [];
+
+        filteredData.sort((a,b) => a.tietBd - b.tietBd).forEach(c => {
+            let startRow = c.tietBd + 3;
+            let endRow = startRow + (parseInt(c.soTiet) || 1) - 1;
+            if (endRow > 19) endRow = 19; 
+            let col = c.thu;
+
+            let rawHinhThuc = c.hinhThuc || ""; 
+            let extLink = checkAndExtractUrl(rawHinhThuc); 
+            let displayHinhThuc = extLink ? rawHinhThuc.replace(extLink, '').trim() : rawHinhThuc.trim();
+
+            let richTextContent = [];
+            let timeStr = c.thoiGian ? c.thoiGian : `[Tiết ${c.tietBd}-${c.tietBd + parseInt(c.soTiet || 1) - 1}]`;
+            richTextContent.push({ text: timeStr + '\n', font: { color: { argb: 'FFDC2626' }, bold: true, name: 'Arial', size: 12 } });
+            
+            if (displayHinhThuc) {
+                richTextContent.push({ text: displayHinhThuc + '\n', font: { color: { argb: 'FF0284C7' }, bold: true, name: 'Arial', size: 12 } });
+            }
+            richTextContent.push({ text: c.mon + '\n', font: { color: { argb: 'FF1E293B' }, bold: true, name: 'Arial', size: 12 } });
+
+            if (c.phong && c.phong.trim() !== "" && c.phong.trim() !== "-") {
+                richTextContent.push({ text: `Phòng: ${c.phong}\n`, font: { color: { argb: 'FF334155' }, italic: true, name: 'Arial', size: 11 } });
+            }
+            if (c.gv && c.gv.trim() !== "" && c.gv.trim() !== "-") {
+                richTextContent.push({ text: `GV: ${c.gv}`, font: { color: { argb: 'FF334155' }, name: 'Arial', size: 11 } });
+            }
+
+            let targetCell = worksheet.getCell(startRow, col);
+            let isOccupied = false;
+            for(let r = startRow; r <= endRow; r++) { if(cellOccupancy[`${r}_${col}`]) isOccupied = true; }
+
+            if (isOccupied) {
+                let oldRichText = targetCell.value.richText ? [...targetCell.value.richText] : [];
+                oldRichText.push({ text: '\n\n--- TRÙNG LỊCH ---\n\n', font: { color: { argb: 'FFFF0000' }, bold: true, name: 'Arial', size: 13 } });
+                targetCell.value = { richText: oldRichText.concat(richTextContent) };
+                
+                let currentRow = worksheet.getRow(startRow);
+                currentRow.height = (currentRow.height || 45) + 85; 
+            } else {
+                for(let r = startRow; r <= endRow; r++) cellOccupancy[`${r}_${col}`] = true;
+
+                let argbColor = 'FFFFFFFF';
+                let autoColor = c.color;
+                const locUF = displayHinhThuc.toUpperCase();
+                if (locUF.includes("AN DƯƠNG VƯƠNG") || locUF.includes("ADV")) autoColor = "#e0f2fe";
+                else if (locUF.includes("LÊ VĂN SỸ") || locUF.includes("LVS")) autoColor = "#e6f9ef";
+                else if (locUF.includes("LẠC LONG QUÂN") || locUF.includes("LLQ")) autoColor = "#fff3e0";
+                else if (locUF.includes("LÊ THỊ RIÊNG") || locUF.includes("CVLTR") || locUF.includes("NTD.PHU THO")) autoColor = "#fef9c3";
+                else if (locUF.includes("ONLINE") || locUF.includes("HỌP")) autoColor = "#f3e8ff";
+                else if (locUF.includes("PHÂN HIỆU LONG AN") || locUF.includes("PHLA")) autoColor = "#fff5fb";
+                
+                if (autoColor && autoColor.startsWith('#')) {
+                    argbColor = 'FF' + autoColor.substring(1).toUpperCase(); 
+                }
+
+                if (startRow !== endRow) mergeRanges.push([startRow, col, endRow, col]);
+                
+                targetCell.value = { richText: richTextContent };
+                targetCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: argbColor } };
+            }
+
+            targetCell.alignment = { wrapText: true, vertical: 'middle', horizontal: 'center' };
+        });
+
+        mergeRanges.forEach(range => {
+            try { worksheet.mergeCells(range[0], range[1], range[2], range[3]); } catch(e) {}
+        });
+
+        // =====================================================================
+        // SHEET 2: DEADLINE (XUẤT FULL HỌC KỲ)
+        // =====================================================================
+        const wsDeadline = workbook.addWorksheet('DEADLINE', {
+            views: [{ showGridLines: false }]
+        });
+        
+        wsDeadline.columns = [
+            { key: 'stt', width: 8 },
+            { key: 'title', width: 50 },
+            { key: 'time', width: 35 },
+            { key: 'tag', width: 25 },
+            { key: 'status', width: 20 }
+        ];
+        
+        wsDeadline.mergeCells('A1:E1');
+        let dlTitle1 = wsDeadline.getCell('A1');
+        dlTitle1.value = `TỔNG HỢP DEADLINE & SỰ KIỆN\nNĂM HỌC ${namHoc.toUpperCase()} - ${hocKy.toUpperCase()}`;
+        dlTitle1.font = { size: 18, bold: true, name: 'Times New Roman', color: { argb: 'FFDC2626' } }; // Màu đỏ cảnh báo
+        dlTitle1.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
+        wsDeadline.getRow(1).height = 55;
+        
+        wsDeadline.mergeCells('A2:E2');
+        let dlTitle2 = wsDeadline.getCell('A2');
+        dlTitle2.value = `Mã số sinh viên: ${mssv}    |    Sinh viên: ${tenSV}    |    Ngành: ${nganh}`;
+        dlTitle2.font = { size: 13, italic: true, name: 'Times New Roman', color: { argb: 'FF334155' } };
+        dlTitle2.alignment = { horizontal: 'center', vertical: 'middle' };
+        wsDeadline.getRow(2).height = 30;
+        
+        // Header Bảng
+        let dlHeader = wsDeadline.getRow(3);
+        dlHeader.height = 35;
+        dlHeader.values = { stt: 'STT', title: 'Tên công việc / Bài tập', time: 'Thời gian diễn ra', tag: 'Hình thức / Phân loại', status: 'Trạng thái' };
+        dlHeader.eachCell((cell) => {
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE61D4A' } }; // Đỏ tươi
+            cell.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 13, name: 'Arial' };
+            cell.alignment = { horizontal: 'center', vertical: 'middle' };
+            cell.border = { top: { style: 'thin', color: { argb: 'FFCBD5E1' } }, left: { style: 'thin', color: { argb: 'FFCBD5E1' } }, bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } }, right: { style: 'thin', color: { argb: 'FFCBD5E1' } } };
+        });
+        
+        // Tính toán khoảng thời gian của cả Học kỳ
+        let semesterStartTime = null;
+        let semesterEndTime = null;
+        if (typeof globalConfigHK !== 'undefined') {
+            let config = globalConfigHK.find(item => item[0] === $('#namHocSelect').val() && item[1] === $('#hocKySelect').val());
+            if (config) {
+                let sDate = parseDateString(config[2]); 
+                let numAcademicWeeks = parseInt(config[3]); 
+                let breakWeeksCount = (config[4] || "").split(',').filter(w => w.trim() !== "").length;
+                if (sDate && numAcademicWeeks) {
+                    let startMon = getMondayOfDate(sDate);
+                    semesterStartTime = startMon.getTime();
+                    let endSun = new Date(startMon);
+                    endSun.setDate(endSun.getDate() + ((numAcademicWeeks + breakWeeksCount) * 7) - 1);
+                    endSun.setHours(23, 59, 59, 999);
+                    semesterEndTime = endSun.getTime();
+                }
+            }
+        }
+        
+        let virtualDeadlines = [];
+        if (typeof globalTkbData !== 'undefined') {
+            globalTkbData.forEach(c => {
+                if ((c.hinhThuc || '').toUpperCase().includes('VLE')) {
+                    let durationStr = (c.ngayBatDau && c.ngayKetThuc && c.ngayBatDau !== c.ngayKetThuc) ? `Từ ${c.ngayBatDau} đến ${c.ngayKetThuc}` : (c.ngayBatDau || "Chưa rõ");
+                    virtualDeadlines.push({ title: c.mon, duration: durationStr, tag: c.hinhThuc, emoji: "🌐", dateStart: c.ngayBatDau || "", dateEnd: c.ngayKetThuc || "", sheetRowIndex: c.sheetRowIndex, isSystem: c.isSystem, isVirtualVLE: true });
+                }
+            });
+        }
+        let combinedDeadlineData = [...(globalDeadlineData || []), ...virtualDeadlines];
+        
+        let filteredDeadlines = combinedDeadlineData.filter(d => {
+            if (d.isVirtualVLE && (!d.dateStart || !d.dateEnd)) return true;
+            let sDate = parseDateString(d.dateStart);
+            let eDate = parseDateString(d.dateEnd);
+            let sTime = sDate ? sDate.getTime() : null;
+            let eTime = eDate ? eDate.getTime() : null;
+            
+            if (!sTime && !eTime) return true; 
+            if (semesterStartTime && semesterEndTime) {
+                if (sTime && eTime) return sTime <= semesterEndTime && eTime >= semesterStartTime;
+                if (sTime) return sTime <= semesterEndTime;
+                if (eTime) return eTime >= semesterStartTime;
+            }
+            return true;
+        });
+        
+        let completedList = getCompletedDeadlines();
+        
+        if (filteredDeadlines.length === 0) {
+            let emptyRow = wsDeadline.addRow({ title: 'Không có deadline hoặc sự kiện nào trong học kỳ này.' });
+            wsDeadline.mergeCells(`B4:E4`);
+            emptyRow.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
+            emptyRow.getCell(2).font = { italic: true, color: { argb: 'FF94A3B8' } };
+            emptyRow.height = 40;
+        } else {
+            // Sắp xếp ưu tiên: Chưa xong lên trên, sau đó xếp theo thời gian
+            filteredDeadlines.sort((a, b) => {
+                let isDoneA = completedList.includes(getDlKey(a)) ? 1 : 0;
+                let isDoneB = completedList.includes(getDlKey(b)) ? 1 : 0;
+                if (isDoneA !== isDoneB) return isDoneA - isDoneB;
+                
+                let timeA = parseDateString(a.dateStart) ? parseDateString(a.dateStart).getTime() : 0;
+                let timeB = parseDateString(b.dateStart) ? parseDateString(b.dateStart).getTime() : 0;
+                return timeA - timeB;
+            }).forEach((d, idx) => {
+                let isDone = completedList.includes(getDlKey(d));
+                let statusText = isDone ? "Đã xong" : "Chưa làm";
+                let statusColor = isDone ? "FF16A34A" : "FFE61D4A"; // Xanh lá : Đỏ
+                
+                let cleanTitle = d.title || "";
+                let extLinkTitle = checkAndExtractUrl(cleanTitle);
+                if (extLinkTitle) cleanTitle = cleanTitle.replace(extLinkTitle, '').trim();
+                cleanTitle = cleanTitle.replace(/^([a-zA-Z0-9_\.]+)\s*-\s*/, '').trim();
+                let fullTitle = `${d.emoji || '📌'} ${cleanTitle}`;
+                
+                let row = wsDeadline.addRow({
+                    stt: idx + 1,
+                    title: fullTitle,
+                    time: d.duration || d.dateStart || '-',
+                    tag: d.tag || 'Khác',
+                    status: statusText
+                });
+                row.height = 35;
+                
+                row.eachCell((cell, colNum) => {
+                    cell.alignment = { vertical: 'middle', horizontal: colNum === 2 ? 'left' : 'center', wrapText: true };
+                    cell.border = { top: { style: 'thin', color: { argb: 'FFCBD5E1' } }, left: { style: 'thin', color: { argb: 'FFCBD5E1' } }, bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } }, right: { style: 'thin', color: { argb: 'FFCBD5E1' } } };
+                    
+                    if (colNum === 2) cell.font = { bold: true, size: 12, color: { argb: isDone ? 'FF94A3B8' : 'FF1E293B' }, strike: isDone }; 
+                    if (colNum === 3) cell.font = { bold: true, size: 12, color: { argb: 'FFDC2626' } };
+                    if (colNum === 4) cell.font = { size: 12, color: { argb: 'FF475569' } };
+                    if (colNum === 5) cell.font = { bold: true, size: 12, color: { argb: statusColor } };
+                    
+                    if (idx % 2 !== 0 && !isDone) {
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+                    } else if (isDone) {
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } }; 
+                    }
+                });
+            });
+        }
+
+        // =====================================================================
+        // LƯU FILE
+        // =====================================================================
+        let weekText = "Tuan_Hien_Tai";
+        if (dateRangeStr) {
+            weekText = dateRangeStr.replace(/\//g, '').replace(/\s-\s/g, '_');
+        }
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buffer]), `TKB_APMA_${weekText}.xlsx`);
+
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+
+    } catch (error) {
+        console.error("Lỗi xuất Excel: ", error);
+        alert("Có lỗi xảy ra khi xuất Excel. Vui lòng kiểm tra lại kết nối mạng!");
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};
