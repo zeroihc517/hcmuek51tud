@@ -4504,7 +4504,8 @@ $(document).ready(function() {
 });
 
 // =========================================================================
-// TÍNH NĂNG: XUẤT THỜI KHÓA BIỂU RA FILE EXCEL (XLSX) SIÊU ĐẸP VÀ CHUYÊN NGHIỆP
+// TÍNH NĂNG: XUẤT THỜI KHÓA BIỂU & DEADLINE RA FILE EXCEL (XLSX) SIÊU ĐẸP
+// CÓ CHỨC NĂNG TỰ ĐỘNG CẬP NHẬT ĐỊNH DẠNG KHI CHỌN "ĐÃ XONG"
 // =========================================================================
 window.exportHocNhomTKBToExcel = async function(event) {
     const btn = event.currentTarget || event.target;
@@ -4706,7 +4707,7 @@ window.exportHocNhomTKBToExcel = async function(event) {
         });
 
         // =====================================================================
-        // SHEET 2: DEADLINE (XUẤT FULL HỌC KỲ)
+        // SHEET 2: DEADLINE (XUẤT FULL HỌC KỲ VÀ CÓ AUTO-UPDATE BẰNG DROPDOWN)
         // =====================================================================
         const wsDeadline = workbook.addWorksheet('DEADLINE', {
             views: [{ showGridLines: false }]
@@ -4714,30 +4715,31 @@ window.exportHocNhomTKBToExcel = async function(event) {
         
         wsDeadline.columns = [
             { key: 'stt', width: 8 },
-            { key: 'title', width: 50 },
+            { key: 'title', width: 45 },
             { key: 'time', width: 35 },
             { key: 'tag', width: 25 },
-            { key: 'status', width: 20 }
+            { key: 'link', width: 30 },
+            { key: 'status', width: 20 } // Cột F: Trạng thái
         ];
         
-        wsDeadline.mergeCells('A1:E1');
+        wsDeadline.mergeCells('A1:F1');
         let dlTitle1 = wsDeadline.getCell('A1');
         dlTitle1.value = `TỔNG HỢP DEADLINE & SỰ KIỆN\nNĂM HỌC ${namHoc.toUpperCase()} - ${hocKy.toUpperCase()}`;
         dlTitle1.font = { size: 18, bold: true, name: 'Times New Roman', color: { argb: 'FFDC2626' } }; // Màu đỏ cảnh báo
         dlTitle1.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
         wsDeadline.getRow(1).height = 55;
         
-        wsDeadline.mergeCells('A2:E2');
+        wsDeadline.mergeCells('A2:F2');
         let dlTitle2 = wsDeadline.getCell('A2');
         dlTitle2.value = `Mã số sinh viên: ${mssv}    |    Sinh viên: ${tenSV}    |    Ngành: ${nganh}`;
         dlTitle2.font = { size: 13, italic: true, name: 'Times New Roman', color: { argb: 'FF334155' } };
         dlTitle2.alignment = { horizontal: 'center', vertical: 'middle' };
         wsDeadline.getRow(2).height = 30;
         
-        // Header Bảng
+        // Header Bảng Deadline
         let dlHeader = wsDeadline.getRow(3);
         dlHeader.height = 35;
-        dlHeader.values = { stt: 'STT', title: 'Tên công việc / Bài tập', time: 'Thời gian diễn ra', tag: 'Hình thức / Phân loại', status: 'Trạng thái' };
+        dlHeader.values = { stt: 'STT', title: 'Tên công việc / Bài tập', time: 'Thời gian diễn ra', tag: 'Hình thức / Phân loại', link: 'Liên kết đính kèm', status: 'Trạng thái' };
         dlHeader.eachCell((cell) => {
             cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE61D4A' } }; // Đỏ tươi
             cell.font = { color: { argb: 'FFFFFFFF' }, bold: true, size: 13, name: 'Arial' };
@@ -4793,10 +4795,11 @@ window.exportHocNhomTKBToExcel = async function(event) {
         });
         
         let completedList = getCompletedDeadlines();
-        
+        let currentMaxRow = 4;
+
         if (filteredDeadlines.length === 0) {
             let emptyRow = wsDeadline.addRow({ title: 'Không có deadline hoặc sự kiện nào trong học kỳ này.' });
-            wsDeadline.mergeCells(`B4:E4`);
+            wsDeadline.mergeCells(`B4:F4`);
             emptyRow.getCell(2).alignment = { horizontal: 'center', vertical: 'middle' };
             emptyRow.getCell(2).font = { italic: true, color: { argb: 'FF94A3B8' } };
             emptyRow.height = 40;
@@ -4813,7 +4816,6 @@ window.exportHocNhomTKBToExcel = async function(event) {
             }).forEach((d, idx) => {
                 let isDone = completedList.includes(getDlKey(d));
                 let statusText = isDone ? "Đã xong" : "Chưa làm";
-                let statusColor = isDone ? "FF16A34A" : "FFE61D4A"; // Xanh lá : Đỏ
                 
                 let cleanTitle = d.title || "";
                 let extLinkTitle = checkAndExtractUrl(cleanTitle);
@@ -4821,30 +4823,90 @@ window.exportHocNhomTKBToExcel = async function(event) {
                 cleanTitle = cleanTitle.replace(/^([a-zA-Z0-9_\.]+)\s*-\s*/, '').trim();
                 let fullTitle = `${d.emoji || '📌'} ${cleanTitle}`;
                 
+                let rawTag = d.tag || "";
+                let extLinkTag = checkAndExtractUrl(rawTag);
+                let cleanTag = rawTag;
+                if (extLinkTag) cleanTag = cleanTag.replace(extLinkTag, '').trim();
+                if (cleanTag === "") cleanTag = "Nhiệm vụ";
+                
+                let finalLink = extLinkTitle || extLinkTag || "";
+                let linkObj = finalLink ? { text: 'Mở liên kết', hyperlink: finalLink } : '-';
+                
                 let row = wsDeadline.addRow({
                     stt: idx + 1,
                     title: fullTitle,
                     time: d.duration || d.dateStart || '-',
-                    tag: d.tag || 'Khác',
+                    tag: cleanTag,
+                    link: linkObj,
                     status: statusText
                 });
                 row.height = 35;
+                currentMaxRow++;
                 
                 row.eachCell((cell, colNum) => {
                     cell.alignment = { vertical: 'middle', horizontal: colNum === 2 ? 'left' : 'center', wrapText: true };
                     cell.border = { top: { style: 'thin', color: { argb: 'FFCBD5E1' } }, left: { style: 'thin', color: { argb: 'FFCBD5E1' } }, bottom: { style: 'thin', color: { argb: 'FFCBD5E1' } }, right: { style: 'thin', color: { argb: 'FFCBD5E1' } } };
                     
-                    if (colNum === 2) cell.font = { bold: true, size: 12, color: { argb: isDone ? 'FF94A3B8' : 'FF1E293B' }, strike: isDone }; 
+                    // Thiết lập cơ bản (Sẽ bị ghi đè bởi Conditional Formatting bên dưới khi status thay đổi)
+                    if (colNum === 2) cell.font = { bold: true, size: 12, color: { argb: 'FF1E293B' } }; 
                     if (colNum === 3) cell.font = { bold: true, size: 12, color: { argb: 'FFDC2626' } };
                     if (colNum === 4) cell.font = { size: 12, color: { argb: 'FF475569' } };
-                    if (colNum === 5) cell.font = { bold: true, size: 12, color: { argb: statusColor } };
-                    
-                    if (idx % 2 !== 0 && !isDone) {
-                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
-                    } else if (isDone) {
-                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF1F5F9' } }; 
+                    if (colNum === 5) cell.font = { size: 12, color: { argb: finalLink ? 'FF0284C7' : 'FF94A3B8' }, underline: !!finalLink };
+                    if (colNum === 6) {
+                        cell.font = { bold: true, size: 12, color: { argb: 'FFE61D4A' } }; // Mặc định là đỏ
+                        
+                        // TẠO DROPDOWN CHỌN TRẠNG THÁI NGAY BÊN TRONG EXCEL
+                        cell.dataValidation = {
+                            type: 'list',
+                            allowBlank: false,
+                            formulae: ['"Đã xong,Chưa làm"']
+                        };
                     }
+                    
+                    if (idx % 2 !== 0) {
+                        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF8FAFC' } };
+                    } 
                 });
+            });
+
+            // =====================================================================
+            // ÁP DỤNG CONDITIONAL FORMATTING (ĐỊNH DẠNG TỰ ĐỘNG BẰNG HÀM EXCEL)
+            // =====================================================================
+            let rowLimit = currentMaxRow - 1;
+
+            // 1. Nếu Trạng thái (Cột F) là "Đã xong" -> Cả hàng đổi màu nền xám nhạt
+            wsDeadline.addConditionalFormatting({
+                ref: `A4:F${rowLimit}`,
+                rules: [{
+                    type: 'expression',
+                    formulae: ['$F4="Đã xong"'],
+                    style: { fill: { type: 'pattern', pattern: 'solid', bgColor: { argb: 'FFF1F5F9' } } }
+                }]
+            });
+
+            // 2. Nếu Trạng thái là "Đã xong" -> Tên công việc (Cột B) bị gạch ngang và đổi màu xám mờ
+            wsDeadline.addConditionalFormatting({
+                ref: `B4:B${rowLimit}`,
+                rules: [{
+                    type: 'expression',
+                    formulae: ['$F4="Đã xong"'],
+                    style: { font: { strike: true, color: { argb: 'FF94A3B8' } } }
+                }]
+            });
+
+            // 3. Tự động đổi màu chữ cho chính Cột Trạng thái (Cột F)
+            wsDeadline.addConditionalFormatting({
+                ref: `F4:F${rowLimit}`,
+                rules: [
+                    { 
+                        type: 'cellIs', operator: 'equal', formulae: ['"Đã xong"'], 
+                        style: { font: { color: { argb: 'FF16A34A' }, bold: true } } // Đã xong -> Màu xanh lá
+                    },
+                    { 
+                        type: 'cellIs', operator: 'equal', formulae: ['"Chưa làm"'], 
+                        style: { font: { color: { argb: 'FFE61D4A' }, bold: true } } // Chưa làm -> Màu đỏ
+                    }
+                ]
             });
         }
 
