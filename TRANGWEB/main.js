@@ -1529,12 +1529,34 @@ let isMinigame = /(minigame tuần|minigame hè|minigame số)/i.test(fullRowTex
 let isMockExam = /(đề thi thử|đề demo)/i.test(fullRowText);
 
 if (isMinigame || isMockExam) {
+    let rawColD = String(row[3] || '').trim(); 
+    
+    // --- BẮT ĐẦU THÊM MỚI: KIỂM TRA THỜI GIAN ĐĂNG BÀI ĐỐI VỚI ĐỀ THI/MINIGAME ---
+    let dangMatch = rawColD.match(/ĐĂNG=((?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4})/i);
+    if (dangMatch) {
+        let dateStr = dangMatch[1];
+        let dateParts = dateStr.match(/(?:(\d{1,2}):(\d{2}))?\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if (dateParts) {
+            let hour = dateParts[1] ? parseInt(dateParts[1]) : 0;
+            let minute = dateParts[2] ? parseInt(dateParts[2]) : 0;
+            let day = parseInt(dateParts[3]);
+            let month = parseInt(dateParts[4]) - 1;
+            let year = parseInt(dateParts[5]);
+            let publishDate = new Date(year, month, day, hour, minute, 0);
+            
+            // Nếu chưa tới thời điểm đăng bài và KHÔNG phải là Admin thì ẨN (không vẽ ra web)
+            if (publishDate > new Date() && !isAdmin) {
+                return; 
+            }
+        }
+    }
+    // --- KẾT THÚC THÊM MỚI ---
+
     if (isMinigame) hasMinigameCards = true;
     if (isMockExam) hasMockExamCards = true;
     
     let titleText = String(row[1] || row[0]).trim(); 
-    let rawColC = String(row[2] || '').trim(); 
-    let rawColD = String(row[3] || '').trim(); 
+    let rawColC = String(row[2] || '').trim();
     
     let cleanColC = rawColC.replace(/\[LOAD_WEB\]|\[LOAD_IFRAME\]|\[LOAD_MINIGAME\]|\[MINIGAME\]/gi, '').trim();
     let linkUrl = cleanColC !== '' ? cleanColC : '#';
