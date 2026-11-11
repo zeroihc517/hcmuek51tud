@@ -1,0 +1,21 @@
+{
+  "name": "Học nhóm APMA Khoa Toán",
+  "short_name": "APMA Hub",
+  "start_url": "/appliedmathematics.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f4c81",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "TRANGWEB/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "TRANGWEB/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
