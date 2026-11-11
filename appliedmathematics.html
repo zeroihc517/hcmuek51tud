@@ -2314,11 +2314,7 @@
                 <span class="input-group-text bg-white border-0 ps-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
                 <input type="text" id="txtSearchCourseHub" class="form-control border-0 fw-bold" placeholder="Tìm nhanh học phần..." onkeyup="filterCourseHubCards()">
             </div>
-            <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
-                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
-                    onclick="fetchAndRenderCategories()">
-                <i class="fa-solid fa-arrows-rotate" style="color: #10b981; font-size: 15px;"></i> Làm mới
-            </button>
+            
         </div>
     </header>
 
@@ -5118,8 +5114,8 @@
 <script>
     (function() {
         // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
-        const startMaintenance = new Date(2026, 10, 11, 16, 00);  
-        const endMaintenance   = new Date(2026, 10, 11, 17, 00); 
+        const startMaintenance = new Date(2026, 9, 14, 12, 00);  
+        const endMaintenance   = new Date(2026, 9, 14, 09, 30); 
         // Hàm tạo chuỗi định dạng
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
