@@ -5021,6 +5021,40 @@
         </div>
     </div>
 </div>
+<!-- MODAL BẢO MẬT KHÔNG GIAN CODE -->
+<div class="modal fade" id="codeSpaceAuthModal" tabindex="-1" aria-hidden="true" style="z-index: 1080;">
+    <!-- Đã xóa modal-sm và thêm max-width: 450px để bảng rộng ra vừa vặn, sang trọng hơn -->
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-user-secret me-2"></i>Xác thực Truy cập</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 75px; height: 75px; background-color: #f1f5f9; color: #0f4c81; font-size: 32px; border: 2px dashed #cbd5e1;">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <h5 class="fw-bold text-primary mb-2">Câu đố bảo mật</h5>
+                    <p class="text-muted mb-0" style="font-size: 15px;">Trong thế giới Toán học, nếu XA giúp ta xây dựng lý thuyết, thì XV giúp ta phá bỏ những kết luận ngộ nhận. X ở đây là gì?</p>
+                    <p class="text-muted fw-bold mt-2" style="font-size: 15px;">Nhập đáp án để mở khóa:</p>
+                </div>
+                <div class="form-floating mb-2 text-start">
+                    <!-- Bắt sự kiện ấn Enter để nộp đáp án -->
+                    <input type="password" id="txtCodeSpacePass" class="form-control fw-bold text-center" placeholder="Nhập mật khẩu..." onkeypress="if(event.key === 'Enter') verifyCodeSpacePassword()">
+                    <label for="txtCodeSpacePass">Đáp án của bạn</label>
+                </div>
+                <small class="text-danger fw-bold d-none" id="codeSpaceAuthError"><i class="fa-solid fa-triangle-exclamation me-1"></i>Đáp án chưa chính xác!</small>
+            </div>
+            <div class="modal-footer border-0 bg-light d-flex justify-content-center pb-4 gap-2">
+                <button type="button" class="btn btn-light fw-bold px-4 shadow-sm" data-bs-dismiss="modal" style="border-radius: 50px; border: 1.5px solid #cbd5e1;">Quay lại</button>
+                <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #0f4c81; border-radius: 50px;" onclick="verifyCodeSpacePassword()">
+                    <i class="fa-solid fa-key me-1"></i> Mở khóa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- MODAL SINH VIÊN ĐĂNG BÀI VÀO DANH MỤC HỌC PHẦN -->
 <div class="modal fade" id="studentCoursePostModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
