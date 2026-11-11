@@ -5919,27 +5919,23 @@ $(document).ready(function() {
             // BỘ LỌC 1: Chỉ nhả dữ liệu ra nếu nó thực sự là một Mảng (Array) hợp lệ
             if (sheet && window.boNhoDemHocPhan[sheet] && Array.isArray(window.boNhoDemHocPhan[sheet]) && typeof isAdmin !== 'undefined' && !isAdmin) {
                 setTimeout(() => { if (settings.success) settings.success(window.boNhoDemHocPhan[sheet]); }, 10);
-                // Trả về object giả lập để jQuery không bị sập
                 return { done: function(cb){ cb(window.boNhoDemHocPhan[sheet]); return this; }, fail: function(){ return this; }, always: function(cb){ cb(); return this; } }; 
             }
             
             let oldSuccess = settings.success;
             settings.success = function(data) {
-                // BỘ LỌC 2: Chỉ lưu vào bộ nhớ nếu Google trả về đúng danh sách (Không lưu rác/lỗi)
                 if (sheet && Array.isArray(data)) {
                     window.boNhoDemHocPhan[sheet] = data;
                     try {
                         sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan));
                     } catch(e) {}
                     
-                    // --- BỔ SUNG: CẬP NHẬT GIAO DIỆN TIẾN ĐỘ % NGAY LẬP TỨC ---
+                    // CẬP NHẬT GIAO DIỆN TIẾN ĐỘ % NGAY LẬP TỨC
                     if (!$('#courseHubSection').hasClass('d-none')) {
                         if (typeof renderCourseHubCards === 'function') {
-                            // Gây trễ 50ms để DOM không bị khựng khi vẽ liên tục
                             setTimeout(() => { renderCourseHubCards(); }, 50);
                         }
                     }
-                    // -----------------------------------------------------------
                 }
                 if (oldSuccess) oldSuccess(data);
             };
@@ -5949,11 +5945,14 @@ $(document).ready(function() {
 
     function batDauTaiNgam() {
         if (typeof globalCategories !== 'undefined' && globalCategories.length > 0 && typeof isAdmin !== 'undefined' && !isAdmin) {
-            globalCategories.forEach((sheetName, index) => {
+            
+            let loadIndex = 0; // THÊM BIẾN NÀY: Chỉ tăng khi môn học thực sự cần tải
+            
+            globalCategories.forEach((sheetName) => {
                 let lower = sheetName.toLowerCase();
                 if (['thông báo', 'users', 'cauhinhhocky', 'mastertkb'].includes(lower)) return;
 
-                // Chỉ tải nếu chưa có hoặc dữ liệu bị lỗi
+                // Chỉ tải nếu chưa có Cache
                 if (window.boNhoDemHocPhan[sheetName] && Array.isArray(window.boNhoDemHocPhan[sheetName])) return;
 
                 setTimeout(() => {
@@ -5968,7 +5967,9 @@ $(document).ready(function() {
                             }
                         }
                     });
-                }, index * 2500); 
+                }, loadIndex * 1500); // GIẢM XUỐNG 1.5s VÀ DÙNG loadIndex THAY VÌ index
+                
+                loadIndex++; // Đếm số lượng request thực tế
             });
         } else {
             setTimeout(batDauTaiNgam, 2000);
@@ -5976,6 +5977,7 @@ $(document).ready(function() {
     }
     setTimeout(batDauTaiNgam, 3000);
 });
+
 window.datLichCache = [];
 
 window.currentDatLichMode = 'all'; // Biến theo dõi đang mở chế độ nào
