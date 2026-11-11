@@ -399,7 +399,7 @@ function renderSidebarCategories() {
     const categoryGroups = {
 	'HK2 - Năm 2': ["Độ đo và tích phân", "Toán rời rạc", "Lập trình Python", "Phương trình vi phân và đạo hàm riêng", "Trí tuệ nhân tạo", "Lịch sử Đảng", "Quốc phòng An ninh"],
 	'HK1 - Năm 2': ['Hình học vi phân', 'Cấu trúc đại số', 'Cấu trúc dữ liệu', 'Lập trình hướng đối tượng', 'Tư tưởng Hồ Chí Minh'], 
-	'Năm 1': ["Năm 1"],
+	'Năm 1':  ['Năm 1', 'Giải tích hàm nhiều biến', 'Không gian tuyến tính', 'Hình học cao cấp hai chiều và ba chiều'],
     'Khác': [],
     };
 
@@ -470,6 +470,7 @@ for (const [groupName, html] of Object.entries(groupHtml)) {
         'Lập trình hướng đối tượng', 
         'Tư tưởng Hồ Chí Minh',
         'Năm 1',
+	'Giải tích hàm nhiều biến', 'Không gian tuyến tính', 'Hình học cao cấp hai chiều và ba chiều',
     ];
 
     // 2. Chỉ khi nào Admin bật "Dành cho bản quản trị" (isAdmin = true) mới load từ Sheet
@@ -7481,7 +7482,9 @@ function getCourseHubMeta(courseName) {
     else if (lower.includes('năm 1')) { icon = 'fa-folder-tree'; code = 'YEAR 1'; }
     else if (lower === 'users') { icon = 'fa-users-gear'; code = 'ADMIN'; }
     else if (lower === 'cauhinhhocky') { icon = 'fa-calendar-check'; code = 'CONFIG'; }
-
+     else if (lower.includes('giải tích hàm nhiều biến')) { icon = 'fa-cubes'; code = 'APMA1805'; }
+	else if (lower.includes('không gian tuyến tính')) { icon = 'fa-cubes'; code = 'APMA1802'; }
+else if (lower.includes('hình học cao cấp hai chiều ba chiều')) { icon = 'fa-cubes'; code = 'APMA1807'; }
     return { icon, code };
 }
 
@@ -7530,7 +7533,7 @@ window.renderCourseHubCards = function() {
     const categoryGroups = {
         'Học kỳ 2 - Năm 2': ["Độ đo và tích phân", "Toán rời rạc", "Lập trình Python", "Phương trình vi phân và đạo hàm riêng", "Trí tuệ nhân tạo", "Lịch sử Đảng", "Quốc phòng An ninh"],
         'Học kỳ 1 - Năm 2': ['Hình học vi phân', 'Cấu trúc đại số', 'Cấu trúc dữ liệu', 'Lập trình hướng đối tượng', 'Tư tưởng Hồ Chí Minh'],
-        'Tài liệu Năm 1': ["Năm 1"],
+        'Tài liệu Năm 1': ['Năm 1', 'Giải tích hàm nhiều biến', 'Không gian tuyến tính', 'Hình học cao cấp hai chiều và ba chiều'],
         'Học phần & Quản trị Khác': []
     };
 
