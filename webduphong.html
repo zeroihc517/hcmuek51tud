@@ -57,7 +57,7 @@
         </svg>
     </div>
     
-    <h5 class="fw-bold mb-2 mt-2" style="color: #0f4c81; letter-spacing: 0.5px;">Chào mừng bạn đến WEB Dự phòng</h5>
+    <h5 class="fw-bold mb-2 mt-2" style="color: #0f4c81; letter-spacing: 0.5px;">Chào mừng bạn đến vùng trời "Analysis và Phản ví dụ"</h5>
     <small class="text-muted fw-bold mb-4" style="font-size: 15px;">Bạn vui lòng chờ trong <span id="countdownNumber" style="color: #e61d4a; font-size: 18px;">5</span> giây nữa...</small>
 
     <div class="loader-progress-bar">
@@ -88,7 +88,7 @@
         <aside class="sidebar" id="sidebarMenu">
             <div class="sidebar-brand">
                 <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-                <div><h6>WEB Dự phòng</h6></div>
+                <div><h6>Cộng đồng</h6><small>Applied mathematics</small></div>
 
             </div>
 <!-- KHUNG THÔNG TIN CÁ NHÂN & MENU NỔI (POPOVER) -->
@@ -156,10 +156,7 @@
             <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
                 <i class="fa-solid fa-calendar"></i> Lịch học
             </button>
-<button class="btn-course" id="btnNavKyThi" onclick="loadDatLichHenView('kythi')">
-    <i class="fa-solid fa-file-pen"></i> Kỳ thi
-    <span id="kyThiSidebarBadge" class="badge-new-qa d-none">Mới</span>
-</button>
+
             <div id="gpaNavContainer" class="d-none">
                 <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
                     <i class="fa-solid fa-clipboard-check"></i> Kết quả học tập
@@ -1728,7 +1725,11 @@
 <div id="datLichSection" class="d-none">
    <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
     <div class="d-flex align-items-center">
-       <div class="page-title m-0" id="datLichPageTitle"><i class="fa-solid fa-calendar-check"></i> TEMP</div>
+        <!-- Bổ sung nút Trở lại -->
+        <button class="btn btn-light fw-bold shadow-sm me-3" onclick="openShareCodeSection()">
+            <i class="fa-solid fa-arrow-left"></i> Trở lại
+        </button>
+        <div class="page-title m-0" id="datLichPageTitle"><i class="fa-solid fa-calendar-check"></i> TEMP & Kỳ thi</div>
     </div>
     <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
@@ -2194,7 +2195,7 @@
             </div>
             <div class="modal-body p-4">
                 <input type="hidden" id="assignCourseId" value="">
-                <p class="text-muted small">Tích chọn các sinh viên tham gia học phần này. Các sinh viên được chọn sẽ tự động có lịch này trong TKB cá nhân mà không cần tự đồng bộ.</p>
+                <p class="text-muted small">Tích chọn các sinh viên tham gia học phần này. Hệ thống sẽ tự động SAO CHÉP lịch này vào TKB cá nhân của sinh viên (cho phép sinh viên tự do chỉnh sửa).</p>
                 <div class="row g-2 mt-2" id="assignStudentList" style="max-height: 400px; overflow-y: auto;">
                     <!-- Danh sách checkbox sinh viên -->
                 </div>
@@ -2572,8 +2573,27 @@
             <!-- Nội dung Minigame -->
             <div class="collapse" id="collapseMinigames">
                 <div class="p-4" style="background: #ffffff; border-top: 1px dashed #fecaca;">
-                    <div id="examCardsContainer" class="grid-7-cols">
+                    <div id="minigameCardsContainer" class="grid-7-cols">
                         <!-- JS sẽ đổ các thẻ Minigame vào đây -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. KHỐI ĐỀ THI THỬ & DEMO -->
+    <div id="mockExamWrapper" class="d-none widget-wrapper" style="width: 320px; max-width: 100%; transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">
+        <div class="data-card border-0 shadow-sm m-0" style="border: 2px solid #8b5cf6; border-radius: 12px; overflow: hidden; width: 100%;">
+            <!-- Nút bấm gập/mở -->
+            <div class="d-flex justify-content-between align-items-center p-3" data-bs-toggle="collapse" data-bs-target="#collapseMockExams" aria-expanded="false" style="background: #f3e8ff; cursor: pointer; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#e9d5ff'" onmouseout="this.style.background='#f3e8ff'">
+                <h6 class="m-0 fw-bold" style="color: #8b5cf6;"><i class="fa-solid fa-file-pen fa-bounce me-2"></i> ĐỀ THI THỬ & DEMO</h6>
+                <i class="fa-solid fa-chevron-down text-purple minigame-chevron ms-3" style="transition: transform 0.3s;"></i>
+            </div>
+            <!-- Nội dung Đề thi -->
+            <div class="collapse" id="collapseMockExams">
+                <div class="p-4" style="background: #ffffff; border-top: 1px dashed #d8b4fe;">
+                    <div id="mockExamCardsContainer" class="grid-7-cols">
+                        <!-- JS sẽ đổ các thẻ Đề thi vào đây -->
                     </div>
                 </div>
             </div>
@@ -3843,9 +3863,7 @@
                 
                 <!-- Nhóm nút bên phải -->
                <div class="d-flex gap-2 align-items-center">
-    <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('iframe')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
-        <i class="fa-solid fa-table-columns"></i> Mở thêm bài
-    </button>
+    
     <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleIframeSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
         <i class="fa-solid fa-layer-group"></i> Công cụ
     </button>
@@ -3855,33 +3873,55 @@
     <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal"></button>
 </div>
             </div>
-            
-            <!-- Thân Modal (Chứa Iframe & Sidebar) -->
-            <div class="modal-body p-0 d-flex" style="background-color: #202124; position: relative; height: 100%;">
-                
-                <!-- Vùng Iframe Bài Học -->
-               <div id="iframeContainer" class="flex-grow-1 position-relative d-flex" style="transition: width 0.3s; height: 100%;">
-                    <div id="mainIframeWrapper" class="h-100 position-relative" style="width: 100%; transition: width 0.3s;">
-                        <div class="w-100 h-100 d-flex align-items-center justify-content-center" id="docLoading" style="position: absolute; z-index: 0;">
-                            <div class="text-center text-white opacity-75">
-                                <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải tài liệu...
-                            </div>
-                        </div>
-                        <iframe id="docViewerIframe" src="" 
-                                style="width: 100%; height: 100%; border: none; position: relative; z-index: 1;" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                                allowfullscreen
-                                onload="document.getElementById('docLoading').style.display='none'">
-                        </iframe>
-                    </div>
-                    <div id="splitIframeWrapper" class="d-none flex-column h-100 shadow-sm" style="width: 50%; border-left: 2px solid #cbd5e1; background: #fff; z-index: 2;">
-                        <div class="d-flex justify-content-between align-items-center p-2 bg-light border-bottom">
-                            <h6 class="m-0 fw-bold text-primary text-truncate px-2" id="splitIframeTitle"><i class="fa-solid fa-book-open me-2"></i> Bài học mở thêm</h6>
-                            <button type="button" class="btn-close" style="font-size: 12px;" onclick="closeSplitPane('iframe')"></button>
-                        </div>
-                        <div id="splitIframeContent" class="flex-grow-1 position-relative" style="overflow-y: auto;"></div>
-                    </div>
+            <style>
+    /* Ép ẩn mặt nạ che nút hoàn toàn trên giao diện điện thoại/màn hình nhỏ (dưới 992px) */
+    @media (max-width: 991px) {
+        #drivePopoutMask {
+            display: none !important;
+        }
+    }
+</style>
+                        <!-- Thân Modal (Chứa Iframe & Sidebar) - Đã sửa lỗi lồng thẻ -->
+<div class="modal-body p-0 d-flex" style="background-color: #202124; position: relative; height: calc(100vh - 56px);">
+    
+    <!-- Vùng Iframe Bài Học -->
+    <div id="iframeContainer" class="flex-grow-1 position-relative d-flex" style="transition: width 0.3s; height: 100%;">
+        <div id="mainIframeWrapper" class="h-100 position-relative" style="width: 100%; transition: width 0.3s; overflow: hidden;">
+            <div class="w-100 h-100 d-flex align-items-center justify-content-center" id="docLoading" style="position: absolute; z-index: 0;">
+                <div class="text-center text-white opacity-75">
+                    <i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải tài liệu...
                 </div>
+            </div>
+            
+            <iframe id="docViewerIframe" src="" 
+                    style="width: 100%; height: 100%; border: none; position: relative; z-index: 1;" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                    allowfullscreen
+                    onload="
+                        document.getElementById('docLoading').style.display = 'none';
+                        const src = this.src.toLowerCase();
+                        const isDrivePdf = src.includes('drive.google.com') || src.includes('.pdf');
+                        const isMobile = window.innerWidth < 992;
+                        
+                        this.style.width = '100%';
+                        
+                        const mask = document.getElementById('drivePopoutMask');
+                        if (isDrivePdf && !isMobile) {
+                            mask.classList.remove('d-none');
+                        } else {
+                            mask.classList.add('d-none');
+                        }
+                    ">
+            </iframe>
+
+            <!-- MẶT NẠ LÀM MỜ -->
+            <div id="drivePopoutMask" class="d-none" style="position: absolute; top: 12px; right: 16px; width: 45px; height: 45px; background-color: rgba(32, 33, 36, 0.98); backdrop-filter: blur(5px); z-index: 5; border-radius: 8px;"></div>
+        </div>
+        
+            </div>
+    
+    <!-- Vùng Sidebar Công Cụ -->
+    <!-- (Bạn giữ nguyên nội dung gốc của #iframeSidebar ở đây, không cần sửa đổi gì bên trong nó) -->
                 
                 <!-- Vùng Sidebar Công Cụ (Bên phải - Được thiết kế lại) -->
                 <div id="iframeSidebar" class="d-none flex-column" style="width: 32%; min-width: 350px; max-width: 450px; border-left: 1px solid #cbd5e1; background-color: #f8fafc; overflow-y: auto; height: 100%; z-index: 2; box-shadow: -4px 0 15px rgba(0,0,0,0.05);">
@@ -4119,9 +4159,7 @@
                     <button class="btn btn-sm btn-link text-white p-0 ms-2 btn-countdown-pause" onclick="togglePauseUserCountdown()" title="Tạm ngưng / Tiếp tục"><i class="fa-solid fa-pause"></i></button>
                 </div>
                <div class="d-flex gap-2 align-items-center">
-    <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: #f59e0b; color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="openSplitLessonModal('latex')" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
-        <i class="fa-solid fa-table-columns"></i> Mở thêm bài
-    </button>
+    
     <button type="button" class="btn btn-sm fw-bold d-none d-md-flex align-items-center gap-2 px-3 shadow-sm" style="background-color: rgba(255,255,255,0.15); color: white; border-radius: 6px; border: 1px solid rgba(255,255,255,0.4); font-size: 13px; transition: 0.2s;" onclick="toggleLatexSidebar()" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.15)'">
         <i class="fa-solid fa-layer-group"></i> Công cụ
     </button>
@@ -4133,7 +4171,7 @@
             </div>
             
             <!-- Thân Modal -->
-            <div class="modal-body p-0 d-flex" style="background-color: #f0f2f5; position: relative; height: 100%;">
+           <div class="modal-body p-0 d-flex" style="background-color: #f0f2f5; position: relative; height: calc(100vh - 56px);">
                 
 <div id="latexContentContainer" class="flex-grow-1 p-2 p-md-3 overflow-hidden d-flex gap-2" style="transition: width 0.3s; height: 100%;">
                     <div id="mainLatexWrapper" class="h-100 position-relative d-flex justify-content-center overflow-auto" style="width: 100%; transition: width 0.3s;">
@@ -4178,14 +4216,7 @@
                         </div>
                     </div>
                     
-                    <div id="splitLatexWrapper" class="d-none flex-column h-100 shadow-sm border" style="width: 50%; border-radius: 8px; background: #fff;">
-                        <div class="d-flex justify-content-between align-items-center p-3 bg-light border-bottom" style="border-radius: 8px 8px 0 0;">
-                            <h6 class="m-0 fw-bold text-primary text-truncate" id="splitLatexTitle"><i class="fa-solid fa-book-open me-2"></i> Bài học mở thêm</h6>
-                            <button type="button" class="btn-close" style="font-size: 12px;" onclick="closeSplitPane('latex')"></button>
-                        </div>
-                        <div id="splitLatexContent" class="flex-grow-1 position-relative p-4 p-md-5" style="overflow-y: auto; font-size: 16px; line-height: 1.8; color: #1e293b; font-family: 'Inter', sans-serif;"></div>
-                    </div>
-                </div>
+  </div>
 
                 <!-- VÙNG SIDEBAR CÔNG CỤ CHO BẢNG LATEX (ẨN MẶC ĐỊNH) -->
                 <div id="latexSidebar" class="d-none flex-column" style="width: 32%; min-width: 350px; max-width: 450px; border-left: 1px solid #cbd5e1; background-color: #f8fafc; overflow-y: auto; height: 100%; z-index: 2; box-shadow: -4px 0 15px rgba(0,0,0,0.05);">
@@ -4919,7 +4950,7 @@
                 <div class="d-flex align-items-center gap-2">
                     <!-- Nút gửi thông báo riêng chỉ dành cho Admin -->
                     <button type="button" id="btnAdminSendPrivateMsgModal" class="btn btn-sm btn-danger fw-bold d-none shadow-sm" onclick="$('#personalNotificationModal').modal('hide'); setTimeout(openSendPrivateMsgModal, 350);" style="border-radius: 8px;">
-                        <i class="fa-solid fa-paper-plane me-1"></i> Gửi thông báo riêng
+                        <i class="fa-solid fa-paper-plane me-1"></i> Gửi tin
                     </button>
                     <button type="button" class="btn-close btn-close-white ms-1" data-bs-dismiss="modal"></button>
                 </div>
@@ -4990,20 +5021,40 @@
         </div>
     </div>
 </div>
-<div class="modal fade" id="splitLessonSelectModal" tabindex="-1" style="z-index: 10900;">
-        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-                <div class="modal-header text-white" style="background-color: #f59e0b;">
-                    <h6 class="modal-title fw-bold"><i class="fa-solid fa-list-check me-2"></i>Chọn bài học để mở song song</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<!-- MODAL BẢO MẬT KHÔNG GIAN CODE -->
+<div class="modal fade" id="codeSpaceAuthModal" tabindex="-1" aria-hidden="true" style="z-index: 1080;">
+    <!-- Đã xóa modal-sm và thêm max-width: 450px để bảng rộng ra vừa vặn, sang trọng hơn -->
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+            <div class="modal-header text-white" style="background-color: #0f4c81;">
+                <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-user-secret me-2"></i>Xác thực Truy cập</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 75px; height: 75px; background-color: #f1f5f9; color: #0f4c81; font-size: 32px; border: 2px dashed #cbd5e1;">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <h5 class="fw-bold text-primary mb-2">Câu đố bảo mật</h5>
+                    <p class="text-muted mb-0" style="font-size: 15px;">Trong thế giới Toán học, nếu XA giúp ta xây dựng lý thuyết, thì XV giúp ta phá bỏ những kết luận ngộ nhận. X ở đây là gì?</p>
+                    <p class="text-muted fw-bold mt-2" style="font-size: 15px;">Nhập đáp án để mở khóa:</p>
                 </div>
-                <div class="modal-body p-0 bg-light">
-                    <div class="list-group list-group-flush" id="splitLessonList">
-                        </div>
+                <div class="form-floating mb-2 text-start">
+                    <!-- Bắt sự kiện ấn Enter để nộp đáp án -->
+                    <input type="password" id="txtCodeSpacePass" class="form-control fw-bold text-center" placeholder="Nhập mật khẩu..." onkeypress="if(event.key === 'Enter') verifyCodeSpacePassword()">
+                    <label for="txtCodeSpacePass">Đáp án của bạn</label>
                 </div>
+                <small class="text-danger fw-bold d-none" id="codeSpaceAuthError"><i class="fa-solid fa-triangle-exclamation me-1"></i>Đáp án chưa chính xác!</small>
+            </div>
+            <div class="modal-footer border-0 bg-light d-flex justify-content-center pb-4 gap-2">
+                <button type="button" class="btn btn-light fw-bold px-4 shadow-sm" data-bs-dismiss="modal" style="border-radius: 50px; border: 1.5px solid #cbd5e1;">Quay lại</button>
+                <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #0f4c81; border-radius: 50px;" onclick="verifyCodeSpacePassword()">
+                    <i class="fa-solid fa-key me-1"></i> Mở khóa
+                </button>
             </div>
         </div>
     </div>
+</div>
 <!-- MODAL SINH VIÊN ĐĂNG BÀI VÀO DANH MỤC HỌC PHẦN -->
 <div class="modal fade" id="studentCoursePostModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -5057,8 +5108,103 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+<script>
+    (function() {
+        // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
+        const startMaintenance = new Date(2026, 9, 14, 12, 00);  
+        const endMaintenance   = new Date(2026, 9, 14, 09, 30); 
+        // Hàm tạo chuỗi định dạng
+        const pad = (n) => n.toString().padStart(2, '0');
+        const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
 
+        // Mặc định là trang bảo trì
+        let maintenancePage = "Baotri.html"; 
+        const now = new Date();
 
+        // Kiểm tra tài khoản từ localStorage
+        let currentUserData = localStorage.getItem('currentUser');
+        if (currentUserData) {
+            try {
+                let userObj = JSON.parse(currentUserData);
+                // Tài khoản quản trị sẽ được điều hướng sang webduphong.html
+                if (userObj.mssv === "51.01.108.008" || userObj.mssv === "5101108008") {
+                    maintenancePage = "webduphong.html";
+                }
+            } catch(e) {
+                console.error("Lỗi khi đọc dữ liệu tài khoản:", e);
+            }
+        }
+
+        if (now >= startMaintenance && now <= endMaintenance) {
+            localStorage.setItem("maintenanceConfig", JSON.stringify({
+                endTime: endMaintenance.getTime(), 
+                textShow: endTimeStr
+            }));
+            
+            // Thêm ID để tránh tạo trùng iframe
+            if (!document.getElementById('maintenanceIframe')) {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'maintenanceIframe';
+                iframe.src = maintenancePage;
+                iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; border: none; background-color: #f8fafc;';
+                document.body.appendChild(iframe);
+                document.body.style.overflow = 'hidden'; 
+            }
+        }
+        // Đã xóa phần else để không xung đột dữ liệu
+    })();
+</script>
+<script>
+    (function() {
+        const now = new Date();
+        
+        // 1. KIỂM TRA THỨ TRONG TUẦN
+        const currentDay = now.getDay();
+        const daysToMaintain = []; 
+        
+        if (!daysToMaintain.includes(currentDay)) {
+            return;
+        }
+
+        const startMaintenance = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0);  
+        const endMaintenance   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30, 0); 
+        
+        const pad = (n) => n.toString().padStart(2, '0');
+        const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
+
+        // Mặc định là trang bảo trì chung
+        let maintenancePage = "Baotri.html"; 
+
+        // Kiểm tra tài khoản admin từ localStorage
+        let currentUserData = localStorage.getItem('currentUser');
+        if (currentUserData) {
+            try {
+                let userObj = JSON.parse(currentUserData);
+                if (userObj.mssv === "51.01.108.008" || userObj.mssv === "5101108008") {
+                    maintenancePage = "webduphong.html";
+                }
+            } catch(e) {
+                console.error("Lỗi khi đọc dữ liệu tài khoản:", e);
+            }
+        }
+
+        if (now >= startMaintenance && now <= endMaintenance) {
+            localStorage.setItem("maintenanceConfig", JSON.stringify({
+                endTime: endMaintenance.getTime(), 
+                textShow: endTimeStr
+            }));
+            
+            if (!document.getElementById('maintenanceIframe')) {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'maintenanceIframe';
+                iframe.src = maintenancePage;
+                iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; border: none; background-color: #f8fafc;';
+                document.body.appendChild(iframe);
+                document.body.style.overflow = 'hidden'; 
+            }
+        }
+    })();
+</script>
 <script>
 // Hàm đổi URL linh hoạt
 function updateSystemUrl(paramKey, paramValue) {
@@ -5173,7 +5319,7 @@ async function initSystemUrlRouter() {
         else if (viewParam === 'gpa') loadGPAView();
         else if (viewParam === 'profile') loadProfileView();
         else if (viewParam === 'qa') openQASection();
-        else if (viewParam === 'datlich') loadDatLichHenView();
+        else if (viewParam === 'datlich' || viewParam === 'temp') loadDatLichHenView('temp');
         else if (viewParam === 'renluyen') loadRenLuyenView();
         else if (viewParam === 'sharecode' || viewParam === 'thaoluan') {
             openShareCodeSection();
@@ -5257,6 +5403,22 @@ $(document).ready(function() {
                 }
             }
         }, 1000);
+    });
+</script>
+<!-- JS Tự động dài ra (Dự phòng cho mọi trình duyệt) -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const setupAccordion = (collapseId, wrapperId) => {
+            let collapseEl = document.getElementById(collapseId);
+            let wrapperEl = document.getElementById(wrapperId);
+            if (collapseEl && wrapperEl) {
+                collapseEl.addEventListener('show.bs.collapse', () => wrapperEl.style.width = '100%');
+                collapseEl.addEventListener('hide.bs.collapse', () => wrapperEl.style.width = '320px');
+            }
+        };
+        setupAccordion('collapseMinigames', 'minigameWrapper');
+        setupAccordion('collapseMockExams', 'mockExamWrapper');
+        setupAccordion('collapseInstructor', 'instructorWrapper');
     });
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
