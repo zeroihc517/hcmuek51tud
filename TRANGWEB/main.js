@@ -218,11 +218,11 @@ function pingOnlineStatus() {
             try {
                 let userObj = JSON.parse(savedUser);
                 mssvParam = userObj.mssv + "|" + userObj.name + "|" + (isAdmin ? "1" : "0"); 
-                const allowedGpaAccounts = ["51.01.108.008", "ihcspt517"];
-                if (allowedGpaAccounts.includes(userObj.mssv)) {
-                    $('#gpaNavContainer').removeClass('d-none');
+               const allowedRenLuyen = ["51.01.108.008"]; // Thay MSSV của người kia vào đây
+                if (allowedRenLuyen.includes(userObj.mssv)) {
+                    $('#btnNavRenLuyen').removeClass('d-none');
                 } else {
-                    $('#gpaNavContainer').addClass('d-none');
+                    $('#btnNavRenLuyen').addClass('d-none');
                 }
             } catch(e) {
                 mssvParam = "Khách"; 
