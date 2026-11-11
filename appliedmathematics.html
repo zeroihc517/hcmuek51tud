@@ -85,111 +85,86 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <div class="app-container" style="display: none;">
-        <aside class="sidebar" id="sidebarMenu">
-            <div class="sidebar-brand">
-                <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
-                <div><h6>Cộng đồng</h6><small>Applied mathematics</small></div>
-
-            </div>
-<!-- KHUNG THÔNG TIN CÁ NHÂN & MENU NỔI (POPOVER) -->
-<div id="sidebarUserInfo" class="py-2 px-3 border-bottom d-none position-relative" style="background-color: #f8fafc;">
-    <div class="d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; user-select: none;">
-        <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0 overflow-hidden" style="width: 36px; height: 36px; background-color: #94a3b8; font-size: 16px;">
-            <i class="fa-solid fa-user" id="sidebarAvatarIcon"></i>
-            <img id="sidebarAvatarImg" src="" class="w-100 h-100 d-none" style="object-fit: cover;">
-        </div>
-<div class="flex-grow-1" style="line-height: 1.3;">
-    <div class="fw-bold" id="sidebarUserName" style="color: #0f4c81; font-size: 14px; word-wrap: break-word;">Tên Sinh Viên</div>
-    <div class="text-muted small" id="sidebarUserMSSV" style="font-size: 12px; word-wrap: break-word;">MSSV</div>
-</div>
+				<!-- THANH ĐIỀU HƯỚNG NGANG MỚI (TOP NAVBAR) -->
+<nav class="top-navbar" id="sidebarMenu">
+    <!-- Logo & Brand -->
+    <div class="navbar-brand-wrapper">
+        <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        <div class="brand-text"><h6>Cộng đồng</h6><small>Applied mathematics</small></div>
     </div>
-<div class="position-absolute" style="top: 18px; right: 15px; cursor: pointer; z-index: 10;" onclick="openPersonalNotifications()">
-        <i class="fa-solid fa-bell fs-5 text-secondary" id="bellIconUI"></i>
-        <span id="personalNotificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 9px; padding: 3px 5px;">0</span>
-    </div>
-
-    <!-- KHUNG BẢNG NỔI (Dropdown Menu) -->
-    <div class="dropdown-menu shadow-lg border-0 p-3" style="width: 260px; border-radius: 16px; margin-top: 10px; z-index: 1050;">
-        <!-- Tiêu đề Tên - MSSV -->
-        <div class="text-center mb-3 mt-1">
-            <span id="popoverUserTitle" class="fw-bold" style="color: #4b5563; font-size: 14px;">Tên - MSSV</span>
-        </div>
-        
-        <hr class="text-muted mb-2 mt-0" style="opacity: 0.15;">
-        <button id="btnAdminLoginToggle" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px;" onclick="openAdminModal()">
-        <i class="fa-solid fa-user-shield text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Dành cho bản quản trị
-    </button>
-        <!-- Các nút chức năng -->
-<!-- Nút Hồ sơ của tôi trên thanh Sidebar Dropdown -->
-<button class="dropdown-item py-2 mb-1 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadProfileView()">
-   <i class="fa-solid fa-address-card text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Hồ sơ của tôi
-</button>
-<button id="btnAdminManageUsers" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px;" onclick="loadAdminUserManageView()">
-    <i class="fa-solid fa-users-gear text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý Thành viên
-</button>
-<button id="btnAdminMasterTkb" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadAdminMasterTkbView()">
-    <i class="fa-solid fa-table-list text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý MasterTKB
-</button>
-        <button class="dropdown-item py-2 mb-4 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="openChangePasswordModal()">
-            <i class="fa-solid fa-ellipsis text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Đổi mật khẩu
-        </button>
-        
-        <!-- Nút Đăng xuất viền bo tròn -->
-        <button class="btn w-100 fw-bold" onclick="logoutStudent()" style="border: 1.5px solid #0f4c81; color: #0f4c81; border-radius: 25px; font-size: 14px; padding: 8px 0; background-color: transparent; transition: all 0.2s;">
-            Đăng xuất
-        </button>
-    </div>
-</div>           
-<div class="sidebar-content">
     
-    <!-- KHỐI 1: TRANG CÁ NHÂN -->
-    <div class="portal-filter-box">
-        <label class="portal-label">CÁ NHÂN</label>
-        <div class="course-list">
-            <button class="btn-course active" id="btnNavThongBao" onclick="loadDataByHocPhan('Thông báo', this)">
-                <i class="fa-solid fa-bell"></i> Thông báo
-            </button>
-            		<button class="btn-course" id="btnNavTongHop" onclick="loadTongHopView()">
-                <i class="fa-solid fa-link"></i> Tổng hợp Link
-            </button>
+    <!-- Các menu liên kết -->
+    <div class="navbar-links-wrapper" id="navbarLinks">
+        <!-- Nút đóng menu trên điện thoại -->
+        <button class="btn-close-menu d-lg-none" onclick="document.getElementById('sidebarMenu').classList.remove('show'); document.getElementById('sidebarOverlay').classList.remove('show');"><i class="fa-solid fa-xmark"></i></button>
 
-            <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()">
-                <i class="fa-solid fa-calendar"></i> Lịch học
-            </button>
-
-            <div id="gpaNavContainer" class="d-none">
-                <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()">
-                    <i class="fa-solid fa-clipboard-check"></i> Kết quả học tập
-                </button>
-<button class="btn-course" id="btnNavRenLuyen" onclick="loadRenLuyenView()">
-    <i class="fa-solid fa-medal"></i> Rèn luyện
-</button>
+        <div class="nav-group">
+            <button class="btn-course btn-nav-item active" id="btnNavThongBao" onclick="loadDataByHocPhan('Thông báo', this)"><i class="fa-solid fa-bell"></i> Thông báo</button>
+            <button class="btn-course btn-nav-item" id="btnNavTongHop" onclick="loadTongHopView()"><i class="fa-solid fa-link"></i> Link</button>
+            <button class="btn-course btn-nav-item" id="btnNavTKB" onclick="loadTKBView()"><i class="fa-solid fa-calendar"></i> Lịch học</button>
+            <div id="gpaNavContainer" class="d-none d-lg-inline-flex d-flex gap-2">
+                <button class="btn-course btn-nav-item" id="btnNavGPA" onclick="loadGPAView()"><i class="fa-solid fa-clipboard-check"></i> Kết quả</button>
+                <button class="btn-course btn-nav-item" id="btnNavRenLuyen" onclick="loadRenLuyenView()"><i class="fa-solid fa-medal"></i> Rèn luyện</button>
             </div>
-            
-
-<button class="btn-course" id="btnNavShareCode" onclick="openShareCodeSection()">
-    <i class="fa-solid fa-laptop-code"></i> Thảo luận
-    <!-- THÊM DÒNG NÀY: Badge thông báo ở thanh menu -->
-    <span id="shareCodeSidebarBadge" class="badge-new-qa d-none">Mới</span>
-</button>
+            <button class="btn-course btn-nav-item" id="btnNavShareCode" onclick="openShareCodeSection()"><i class="fa-solid fa-laptop-code"></i> Thảo luận <span id="shareCodeSidebarBadge" class="badge-new-nav d-none">Mới</span></button>
+            <button class="btn-course btn-nav-item" id="btnNavHocPhanHub" onclick="openCourseHubView(this)"><i class="fa-solid fa-layer-group"></i> Học phần <span class="badge rounded-pill ms-1" style="background: rgba(15, 76, 129, 0.12); color: #0f4c81; font-size: 11px;" id="totalCoursesBadge">All</span></button>
         </div>
+        
+        <!-- Nơi chứa ngầm danh sách học phần -->
+        <div id="dynamicCourseList" class="d-none"></div>
     </div>
 
-    <!-- KHỐI 2: TRA CỨU THÔNG TIN -->
-    <div class="portal-filter-box mt-4">
-        <label class="portal-label">HỌC PHẦN</label>
-        <div class="course-list">
-            
-            
-            <!-- Danh sách học phần (môn học) sẽ đổ tự động vào đây -->
-            <div id="dynamicCourseList" class="course-list mt-2">
-                <span class="text-muted small px-2">Đang tải danh sách học phần...</span>
+    <!-- Thông tin người dùng (Góc phải) -->
+    <div id="sidebarUserInfo" class="user-info-wrapper d-none position-relative">
+        <div class="d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; user-select: none;">
+            <div class="user-text text-end d-none d-md-block">
+                <div class="fw-bold" id="sidebarUserName" style="color: #0f4c81; font-size: 13.5px; line-height: 1.2;">Tên SV</div>
+                <div class="text-muted small" id="sidebarUserMSSV" style="font-size: 11px;">MSSV</div>
+            </div>
+            <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0 overflow-hidden" style="width: 38px; height: 38px; background-color: #94a3b8; font-size: 16px;">
+                <i class="fa-solid fa-user" id="sidebarAvatarIcon"></i>
+                <img id="sidebarAvatarImg" src="" class="w-100 h-100 d-none" style="object-fit: cover;">
             </div>
         </div>
+        
+        <!-- Chuông thông báo cá nhân -->
+        <div class="position-absolute" style="top: 50%; right: -12px; transform: translateY(-50%); cursor: pointer; z-index: 10;" onclick="openPersonalNotifications()">
+            <i class="fa-solid fa-bell fs-5 text-secondary" id="bellIconUI"></i>
+            <span id="personalNotificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 9px; padding: 3px 5px;">0</span>
+        </div>
+        
+        <!-- Dropdown Menu -->
+        <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-3" style="width: 260px; border-radius: 16px; margin-top: 15px; z-index: 1050;">
+            <div class="text-center mb-3 mt-1">
+                <span id="popoverUserTitle" class="fw-bold" style="color: #4b5563; font-size: 14px;">Tên - MSSV</span>
+            </div>
+            <hr class="text-muted mb-2 mt-0" style="opacity: 0.15;">
+            <button id="btnAdminLoginToggle" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px;" onclick="openAdminModal()">
+                <i class="fa-solid fa-user-shield text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Dành cho bản quản trị
+            </button>
+            <button class="dropdown-item py-2 mb-1 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadProfileView()">
+                <i class="fa-solid fa-address-card text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Hồ sơ của tôi
+            </button>
+            <button id="btnAdminManageUsers" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px;" onclick="loadAdminUserManageView()">
+                <i class="fa-solid fa-users-gear text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý Thành viên
+            </button>
+            <button id="btnAdminMasterTkb" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadAdminMasterTkbView()">
+                <i class="fa-solid fa-table-list text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý MasterTKB
+            </button>
+            <button class="dropdown-item py-2 mb-4 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="openChangePasswordModal()">
+                <i class="fa-solid fa-ellipsis text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Đổi mật khẩu
+            </button>
+            <button class="btn w-100 fw-bold" onclick="logoutStudent()" style="border: 1.5px solid #0f4c81; color: #0f4c81; border-radius: 25px; font-size: 14px; padding: 8px 0; background-color: transparent; transition: all 0.2s;">
+                Đăng xuất
+            </button>
+        </div>
     </div>
-</div>
-        </aside>
-
+    
+    <!-- Nút Toggle Mobile Hamburger -->
+    <button class="menu-toggle d-lg-none ms-3" id="btnToggleMenuMobile" onclick="document.getElementById('sidebarMenu').classList.toggle('show'); document.getElementById('sidebarOverlay').classList.toggle('show');">
+        <i class="fa-solid fa-bars" style="color: #0f4c81;"></i>
+    </button>
+</nav>
         <main class="main-content">
            <!-- KHU VỰC ĐÁNH GIÁ ĐIỂM RÈN LUYỆN -->
 <div id="renLuyenSection" class="d-none">
@@ -2328,18 +2303,50 @@
         </div>
     </div>
 </div>
-<div id="courseSection">
-    <header class="top-header d-flex justify-content-between align-items-center">
-        <!-- Đã thêm id="courseHeaderTitle" vào thẻ div bên dưới -->
-        <div class="page-title" id="courseHeaderTitle">
-            <i class="fa-solid fa-book-open"></i> Học nhóm APMA - Khoa Toán-Tin học
+<!-- KHU VỰC DANH MỤC KHUNG CÁC HỌC PHẦN (COURSE HUB) -->
+<div id="courseHubSection" class="d-none">
+    <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="page-title">
+            <i class="fa-solid fa-Graduation-cap" style="color: #0f4c81;"></i> Không Gian Các Học Phần
         </div>
-<button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div class="input-group input-group-sm shadow-sm" style="width: 260px; border-radius: 50px; overflow: hidden; border: 1.5px solid #cbd5e1;">
+                <span class="input-group-text bg-white border-0 ps-3"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                <input type="text" id="txtSearchCourseHub" class="form-control border-0 fw-bold" placeholder="Tìm nhanh học phần..." onkeyup="filterCourseHubCards()">
+            </div>
+            <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
+                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
+                    onclick="fetchAndRenderCategories()">
+                <i class="fa-solid fa-arrows-rotate" style="color: #10b981; font-size: 15px;"></i> Làm mới
+            </button>
+        </div>
+    </header>
+
+    <!-- Nơi đổ các khung thẻ Học phần được phân nhóm theo Học kỳ -->
+    <div id="courseHubCardsContainer" class="mb-5"></div>
+</div>
+
+<div id="courseSection">
+    <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-3">
+            <!-- Nút quay lại Khung Học Phần (Tự động ẩn khi xem Thông báo, hiện khi xem Môn học) -->
+            <button id="btnBackToCourseHub" class="btn btn-light fw-bold shadow-sm d-none align-items-center gap-2" 
+                    style="border-radius: 50px; padding: 6px 16px; border: 1.5px solid #cbd5e1; color: #0f4c81;" 
+                    onclick="openCourseHubView()">
+                <i class="fa-solid fa-arrow-left"></i> Các học phần
+            </button>
+            <div class="page-title m-0" id="courseHeaderTitle">
+                <i class="fa-solid fa-book-open"></i> Học nhóm APMA - Khoa Toán-Tin học
+            </div>
+        </div>
+        <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
                 style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
                 onclick="refreshCurrentCourseData()">
             <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
         </button>
     </header>
+
+
 <div id="adminAddRowArea" class="instructor-card d-none mb-3 p-0" style="border-left-color: var(--accent-red); overflow: hidden;">
     <!-- Thanh công cụ Admin chứa 2 nút Toggle -->
     <div class="d-flex justify-content-between align-items-center p-3 flex-wrap gap-2" style="background-color: #fff1f2;">
@@ -5321,6 +5328,9 @@ async function initSystemUrlRouter() {
         else if (viewParam === 'qa') openQASection();
         else if (viewParam === 'datlich' || viewParam === 'temp') loadDatLichHenView('temp');
         else if (viewParam === 'renluyen') loadRenLuyenView();
+	else if (viewParam === 'hocphan') {
+            if (typeof openCourseHubView === 'function') openCourseHubView();
+        }
         else if (viewParam === 'sharecode' || viewParam === 'thaoluan') {
             openShareCodeSection();
             if (categoryParam) {
