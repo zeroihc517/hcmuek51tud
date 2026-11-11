@@ -1914,7 +1914,7 @@ if (isUpdating && !isAdmin) {
     col2Html = `<span onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); $('#collapseMinigames').collapse('show'); event.stopPropagation();" style="cursor: pointer; color: #ef4444; font-weight: 700; text-decoration: none;" title="Nhấn để về đầu trang và mở khung Minigame"><i class="fa-solid fa-gamepad me-2" style="color: #ef4444; font-size: 16px;"></i>${col2Html}</span>`;
 } else if (isLoadWeb) {
     // LOAD_WEB: Chèn trực tiếp và phóng to full màn hình ẩn sidebar
-    col2Html = `<span onclick="openDirectWeb('${webFileUrl}', '${safeTitle}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Xem trực tiếp full màn hình">${lessonIcon}${col2Html || "Xem trực tiếp"}</span>`;
+    col2Html = `<span onclick="openDirectWeb('${webFileUrl}', '${safeTitle}', '${currentSheetName}', '${stableKey}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Xem trực tiếp full màn hình">${lessonIcon}${col2Html || "Xem trực tiếp"}</span>`;
 } else if (isLoadIframe) {
     // LOAD_IFRAME: Mở bảng Modal Iframe chuẩn y như ảnh mẫu của bạn
     col2Html = `<span onclick="setDetailedView('${safeTrackStr}'); openDocumentViewer('${iframeFileUrl}', '${safeTitle}', '${currentSheetName}', '${stableKey}'); event.stopPropagation();" style="cursor: pointer; color: #0f4c81; font-weight: 700; text-decoration: none;" title="Xem bằng Iframe">${lessonIcon}${col2Html || "Xem Iframe"}</span>`;
@@ -5121,10 +5121,24 @@ $(document).ready(function() {
                 return; // Cắt đứt kết nối mạng, không chờ Google nữa
             }
             
-            // Lần đầu tải (chưa có sẵn) -> Lưu lại vào kho sau khi tải xong
             let oldSuccess = settings.success;
             settings.success = function(data) {
-                if (sheet) window.boNhoDemHocPhan[sheet] = data;
+                // BỘ LỌC 2: Chỉ lưu vào bộ nhớ nếu Google trả về đúng danh sách (Không lưu rác/lỗi)
+                if (sheet && Array.isArray(data)) {
+                    window.boNhoDemHocPhan[sheet] = data;
+                    try {
+                        sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan));
+                    } catch(e) {}
+                    
+                    // --- BỔ SUNG: CẬP NHẬT GIAO DIỆN TIẾN ĐỘ % NGAY LẬP TỨC ---
+                    if (!$('#courseHubSection').hasClass('d-none')) {
+                        if (typeof renderCourseHubCards === 'function') {
+                            // Gây trễ 50ms để DOM không bị khựng khi vẽ liên tục
+                            setTimeout(() => { renderCourseHubCards(); }, 50);
+                        }
+                    }
+                    // -----------------------------------------------------------
+                }
                 if (oldSuccess) oldSuccess(data);
             };
         }
@@ -5916,6 +5930,15 @@ $(document).ready(function() {
                     try {
                         sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan));
                     } catch(e) {}
+                    
+                    // --- BỔ SUNG: CẬP NHẬT GIAO DIỆN TIẾN ĐỘ % NGAY LẬP TỨC ---
+                    if (!$('#courseHubSection').hasClass('d-none')) {
+                        if (typeof renderCourseHubCards === 'function') {
+                            // Gây trễ 50ms để DOM không bị khựng khi vẽ liên tục
+                            setTimeout(() => { renderCourseHubCards(); }, 50);
+                        }
+                    }
+                    // -----------------------------------------------------------
                 }
                 if (oldSuccess) oldSuccess(data);
             };
@@ -6300,8 +6323,22 @@ window.openLatexContentViewer = function(rowIndex) {
     $('#latexSidebar').attr('data-sheet', currentSheetName).attr('data-key', stableKey);
     let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
     
-    // Khôi phục Tiến độ
+    // Khôi phục Tiến độ và Tự động chuyển sang Đang học (yellow) nếu chưa học
     let progVal = localStorage.getItem(`prog_${mssv}_${currentSheetName}_${stableKey}`) || 'white';
+    if (progVal === 'white') {
+        progVal = 'yellow';
+        localStorage.setItem(`prog_${mssv}_${currentSheetName}_${stableKey}`, 'yellow');
+        
+        // Cập nhật thẻ Select ở bảng bên ngoài giao diện
+        let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
+        if(outerSelect.length) {
+            outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
+        }
+        
+        // Gửi ngầm dữ liệu lên Google Sheets
+        if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+    }
+    
     $('#latexProgressSelect').val(progVal).css('background-color', getProgressColor(progVal));
     
     // Khôi phục Ghi chú
@@ -7410,4 +7447,273 @@ window.approveCoursePost = function(rowIndex) {
     }, err => { 
         alert("Lỗi kết nối máy chủ!"); 
     });
+};
+
+// =========================================================================
+// HỆ THỐNG KHUNG DANH MỤC HỌC PHẦN (COURSE HUB VIEW)
+// =========================================================================
+
+// 1. Mở rộng resetNavActive để quản lý trạng thái ẩn/hiện của #courseHubSection
+const originalResetNavForHub = resetNavActive;
+resetNavActive = function() {
+    originalResetNavForHub();
+    $('#btnNavHocPhanHub').removeClass('active');
+    $('#courseHubSection').addClass('d-none');
+};
+
+// 2. Hàm lấy Icon và Mã học phần thông minh theo tên môn học
+function getCourseHubMeta(courseName) {
+    let lower = courseName.toLowerCase();
+    let icon = 'fa-book-open';
+    let code = 'APMA';
+
+    if (lower.includes('hình học vi phân')) { icon = 'fa-bezier-curve'; code = 'MATH1417'; }
+    else if (lower.includes('cấu trúc đại số')) { icon = 'fa-cubes'; code = 'APMA1803'; }
+    else if (lower.includes('cấu trúc dữ liệu')) { icon = 'fa-diagram-project'; code = 'COMP1016'; }
+    else if (lower.includes('hướng đối tượng')) { icon = 'fa-laptop-code'; code = 'COMP1017'; }
+    else if (lower.includes('python')) { icon = 'fa-brands fa-python'; code = 'COMP1804'; }
+    else if (lower.includes('độ đo và tích phân')) { icon = 'fa-square-root-variable'; code = 'MATH1413'; }
+    else if (lower.includes('toán rời rạc')) { icon = 'fa-network-wired'; code = 'APMA1817'; }
+    else if (lower.includes('phương trình vi phân')) { icon = 'fa-wave-square'; code = 'MATH1817'; }
+    else if (lower.includes('trí tuệ nhân tạo')) { icon = 'fa-brain'; code = 'COMP1314'; }
+    else if (lower.includes('hồ chí minh') ) { icon = 'fa-landmark'; code = 'POLI2005'; }
+    else if (lower.includes('quốc phòng')) { icon = 'fa-shield-halved'; code = 'MILI'; }
+    else if (lower.includes('năm 1')) { icon = 'fa-folder-tree'; code = 'YEAR 1'; }
+    else if (lower === 'users') { icon = 'fa-users-gear'; code = 'ADMIN'; }
+    else if (lower === 'cauhinhhocky') { icon = 'fa-calendar-check'; code = 'CONFIG'; }
+
+    return { icon, code };
+}
+
+// 3. Hàm mở giao diện Khung các Học phần khi nhấn vào mục "Học phần" trên Sidebar
+window.openCourseHubView = function(element) {
+    if (currentUser && currentUser.isGuest) {
+        alert("Nội dung học phần bị khóa! Vui lòng đăng nhập Sinh viên để truy cập tài liệu môn học.");
+        return;
+    }
+
+    document.title = "Danh mục Học phần | Học nhóm APMA Khoa Toán";
+    resetNavActive();
+    $('#btnNavHocPhanHub').addClass('active');
+    $('#courseHubSection').removeClass('d-none');
+
+    if (typeof window.setDetailedView === 'function') {
+        window.setDetailedView("Danh mục Học phần");
+    }
+    updateSystemUrl('view', 'hocphan');
+
+    if (window.innerWidth < 992) {
+        sidebar.classList.remove('show');
+        overlay.classList.remove('show');
+    }
+
+    renderCourseHubCards();
+};
+
+// 4. Hàm vẽ các Khung Học Phần (Chia theo từng nhóm Học kỳ) có Tính toán Tiến độ %
+window.renderCourseHubCards = function() {
+    let container = $('#courseHubCardsContainer');
+    if (!container.length) return;
+
+    if (currentUser && currentUser.isGuest) {
+        container.html(`
+            <div class="text-center p-5 bg-white rounded-4 shadow-sm border">
+                <i class="fa-solid fa-lock mb-3" style="font-size: 42px; color: #94a3b8;"></i>
+                <h5 class="fw-bold text-dark">Nội dung Học phần bị khóa</h5>
+                <p class="text-muted mb-3">Vui lòng đăng nhập tài khoản Sinh viên để xem toàn bộ học phần và tài liệu.</p>
+                <button class="btn text-white fw-bold px-4" style="background: #0f4c81; border-radius: 50px;" onclick="window.location.href='login.html'">Đăng nhập ngay</button>
+            </div>
+        `);
+        return;
+    }
+
+    const categoryGroups = {
+        'Học kỳ 2 - Năm 2': ["Độ đo và tích phân", "Toán rời rạc", "Lập trình Python", "Phương trình vi phân và đạo hàm riêng", "Trí tuệ nhân tạo", "Lịch sử Đảng", "Quốc phòng An ninh"],
+        'Học kỳ 1 - Năm 2': ['Hình học vi phân', 'Cấu trúc đại số', 'Cấu trúc dữ liệu', 'Lập trình hướng đối tượng', 'Tư tưởng Hồ Chí Minh'],
+        'Tài liệu Năm 1': ["Năm 1"],
+        'Học phần & Quản trị Khác': []
+    };
+
+    let groupItems = {};
+    for (const key in categoryGroups) { groupItems[key] = []; }
+
+    let totalValidCourses = 0;
+
+    (globalCategories || []).forEach((name) => {
+        let lowerName = name.trim().toLowerCase();
+        if (['thông báo', 'deadlines_admin', 'deadlines_status', 'tkb_admin', 'khaosat', 'weblinks_personal', 'registrationhistory', 'userregisteredcourses', 'mastertkb', 'datlichhen', 'learningdata', 'groupstudybooking', 'gpa_data', 'exercisequestions', 'sharecode', 'renluyen_data', 'grouplinks', 'exercise_status', 'privatemessages'].includes(lowerName)) {
+            return;
+        }
+        if ((lowerName === 'users' || lowerName === 'cauhinhhocky') && !isAdmin) return;
+
+        totalValidCourses++;
+        let matchedGroup = 'Học phần & Quản trị Khác';
+        for (const [groupName, subjects] of Object.entries(categoryGroups)) {
+            if (subjects.some(sub => sub.toLowerCase() === lowerName)) {
+                matchedGroup = groupName;
+                break;
+            }
+        }
+        groupItems[matchedGroup].push(name);
+    });
+
+    $('#totalCoursesBadge').text(totalValidCourses);
+
+    let fullHtml = '';
+    for (const [groupName, courses] of Object.entries(groupItems)) {
+        if (courses.length === 0) continue;
+
+        fullHtml += `
+        <div class="course-hub-group mb-4">
+            <div class="hub-semester-header">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>${groupName}</span>
+                <span class="sem-badge">${courses.length} học phần</span>
+            </div>
+            <div class="course-hub-grid">`;
+
+        courses.forEach(courseName => {
+            let meta = getCourseHubMeta(courseName);
+            let safeName = courseName.replace(/'/g, "\\'");
+            
+            // --- TÍNH TOÁN TIẾN ĐỘ ---
+            let progressHtml = '';
+            let courseData = (window.boNhoDemHocPhan && window.boNhoDemHocPhan[courseName]) ? window.boNhoDemHocPhan[courseName] : null;
+            
+            if (courseData && Array.isArray(courseData)) {
+                let totalLessons = 0;
+                let learnedLessons = 0;
+                let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+                
+                courseData.forEach((row, rowIndex) => {
+                    if (rowIndex === 0) return;
+                    if (!row || row.length === 0 || row.filter(cell => String(cell).trim() !== "").length === 0) return;
+                    
+                    let firstCellTextRaw = String(row[0]).trim(); 
+                    let firstCellText = firstCellTextRaw.toLowerCase().replace(/\s+/g, '');
+                    
+                    let isPart = /phần/.test(firstCellText);
+                    let isChapter = /chủđề|chương/.test(firstCellText);
+                    let isLesson = /bài/.test(firstCellText);
+                    let isMucTieu = firstCellText.includes('mụctiêu');
+                    
+                    // Chỉ tính các hàng chứa bài học thật sự
+                    if (!isPart && !isChapter && !isLesson && !isMucTieu) {
+                        totalLessons++;
+                        
+                        let rawLessonName = String(row[1] || row[0] || '').replace(/<[^>]*>?/gm, '').replace(/[^a-zA-Z0-9_]/g, '');
+                        let stableKey = rawLessonName ? rawLessonName : (rowIndex + 1);
+                        
+                        let progVal = localStorage.getItem(`prog_${mssv}_${courseName}_${stableKey}`) || 'white';
+                        // Tính gộp "Còn học" (yellow) và "Đã học" (green) đều là đã học
+                        if (progVal === 'yellow' || progVal === 'green') {
+                            learnedLessons++;
+                        }
+                    }
+                });
+                
+                let percent = totalLessons > 0 ? Math.round((learnedLessons / totalLessons) * 100) : 0;
+                progressHtml = `
+                    <div class="mb-3 mt-1">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size: 11px; color: #64748b; font-weight: 600;"><i class="fa-solid fa-bars-progress me-1"></i>Đã học ${learnedLessons}/${totalLessons}</span>
+                            <span style="font-size: 12px; color: #0f4c81; font-weight: 800;">${percent}%</span>
+                        </div>
+                        <div class="progress shadow-sm" style="height: 6px; border-radius: 10px; background-color: #e2e8f0; overflow: visible;">
+                            <div class="progress-bar position-relative" role="progressbar" style="width: ${percent}%; background: linear-gradient(90deg, #10b981, #0f4c81); border-radius: 10px; transition: width 0.5s ease;">
+                                <div style="position: absolute; right: -4px; top: -3px; width: 12px; height: 12px; background: #fff; border: 2px solid #0f4c81; border-radius: 50%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                progressHtml = `
+                    <div class="mb-3 mt-1">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="font-size: 11px; color: #94a3b8; font-weight: 600;"><i class="fa-solid fa-spinner fa-spin me-1"></i>Đang đồng bộ...</span>
+                        </div>
+                        <div class="progress shadow-sm" style="height: 6px; border-radius: 10px; background-color: #e2e8f0;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%; background-color: #cbd5e1; border-radius: 10px;"></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            fullHtml += `
+                <div class="course-hub-card" data-course-name="${courseName.toLowerCase()}" onclick="selectCourseFromHub('${safeName}')">
+                    <div class="d-flex flex-column h-100">
+                        <div class="hub-card-top">
+                            <div class="hub-icon-box">
+                                <i class="fa-solid ${meta.icon}"></i>
+                            </div>
+                            <span class="hub-course-code">${meta.code}</span>
+                        </div>
+                        <h5 class="hub-course-title flex-grow-1">${courseName}</h5>
+                        ${progressHtml}
+                        <div class="hub-card-footer">
+                            <span>Mở toàn bộ nội dung</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </div>`;
+        });
+
+        fullHtml += `
+            </div>
+        </div>`;
+    }
+
+    if (!fullHtml) {
+        fullHtml = `<div class="text-center text-muted py-5"><i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang đồng bộ danh sách học phần...</div>`;
+    }
+
+    container.html(fullHtml);
+    
+    let kw = ($('#txtSearchCourseHub').val() || '').trim();
+    if (kw !== '') filterCourseHubCards();
+};
+
+// 5. Hàm tìm kiếm nhanh học phần ngay tại màn hình Khung Học Phần
+window.filterCourseHubCards = function() {
+    let kw = ($('#txtSearchCourseHub').val() || '').toLowerCase().trim();
+    $('.course-hub-group').each(function() {
+        let hasVisible = false;
+        $(this).find('.course-hub-card').each(function() {
+            let name = $(this).attr('data-course-name') || '';
+            if (name.includes(kw)) {
+                $(this).removeClass('d-none');
+                hasVisible = true;
+            } else {
+                $(this).addClass('d-none');
+            }
+        });
+        if (hasVisible) $(this).removeClass('d-none');
+        else $(this).addClass('d-none');
+    });
+};
+
+// 6. Khi nhấn vào 1 Khung Học Phần -> Hiện toàn bộ nội dung học phần đó
+window.selectCourseFromHub = function(courseName) {
+    loadDataByHocPhan(courseName, null);
+    $('#btnNavHocPhanHub').addClass('active');
+    $('#btnBackToCourseHub').removeClass('d-none').addClass('d-inline-flex');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+// 7. Đồng bộ tự động khi loadDataByHocPhan hoặc renderSidebarCategories được gọi
+const originalRenderSidebarCategoriesHub = renderSidebarCategories;
+renderSidebarCategories = function() {
+    originalRenderSidebarCategoriesHub();
+    renderCourseHubCards();
+};
+
+const originalLoadDataByHocPhanHub = loadDataByHocPhan;
+loadDataByHocPhan = function(sheetName, element) {
+    originalLoadDataByHocPhanHub(sheetName, element);
+    if (sheetName && sheetName.toLowerCase() !== 'thông báo') {
+        $('#btnNavHocPhanHub').addClass('active');
+        $('#btnBackToCourseHub').removeClass('d-none').addClass('d-inline-flex');
+    } else {
+        $('#btnBackToCourseHub').addClass('d-none').removeClass('d-inline-flex');
+    }
 };

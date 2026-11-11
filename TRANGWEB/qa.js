@@ -2687,25 +2687,34 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
     
     // --- GẮN DỮ LIỆU ĐỊNH DANH VÀO SIDEBAR ---
     // (Bắt buộc phải có đoạn này thì khi bấm "Lưu", hệ thống mới biết đang lưu cho bài nào)
+    // GẮN DỮ LIỆU SIDEBAR
     if (sheetName && stableKey) {
         $('#iframeSidebar').attr('data-sheet', sheetName).attr('data-key', stableKey);
         let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
         
-        // 1. Nạp lại Tiến độ đã lưu từ máy
+        // Khôi phục Tiến độ và Tự động chuyển sang Đang học (yellow) nếu chưa học
         let progVal = localStorage.getItem(`prog_${mssv}_${sheetName}_${stableKey}`) || 'white';
+        if (progVal === 'white') {
+            progVal = 'yellow';
+            localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, 'yellow');
+            
+            // Cập nhật thẻ Select ở bảng bên ngoài giao diện
+            let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
+            if(outerSelect.length) {
+                outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
+            }
+            
+            // Gửi ngầm dữ liệu lên Google Sheets
+            if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+        }
+        
         $('#sidebarProgressSelect').val(progVal).css('background-color', getProgressColor(progVal));
         
-        // 2. Nạp lại Ghi chú đã lưu từ máy
         let noteData = JSON.parse(localStorage.getItem(`note_${mssv}_${sheetName}_${stableKey}`));
         let content = noteData && noteData.content ? noteData.content : '';
-        
-        if (tinymce.get('sidebarNoteEditor')) {
-            tinymce.get('sidebarNoteEditor').setContent(content);
-        } else {
-            $('#sidebarNoteEditor').val(content);
-        }
+        if (tinymce.get('sidebarNoteEditor')) tinymce.get('sidebarNoteEditor').setContent(content);
+        else $('#sidebarNoteEditor').val(content);
     } else {
-        // Rỗng nếu không truyền tham số
         $('#iframeSidebar').removeAttr('data-sheet').removeAttr('data-key');
     }
 
@@ -3014,7 +3023,7 @@ window.openCustomHtml = function(fileUrl, title) {
     };
 };
 
-window.openDirectWeb = function(safeFileUrl, title) {
+window.openDirectWeb = function(safeFileUrl, title, sheetName, stableKey) {
     // --- FIX LỖI: Bắt quả tang Đồng hồ đang chạy thì ép dùng Iframe ---
     if (typeof isTimerActive === 'function' && isTimerActive()) {
         if(window.innerWidth < 992) { 
@@ -3022,10 +3031,25 @@ window.openDirectWeb = function(safeFileUrl, title) {
             $('#sidebarOverlay').removeClass('show'); 
         }
         if (typeof openDocumentViewer === 'function') {
-            openDocumentViewer(safeFileUrl, title); 
+            openDocumentViewer(safeFileUrl, title, sheetName, stableKey); 
             return; 
         }
     }
+
+    // --- BỔ SUNG: Tự động lưu tiến độ Đang học ---
+    if (sheetName && stableKey) {
+        let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+        let progVal = localStorage.getItem(`prog_${mssv}_${sheetName}_${stableKey}`) || 'white';
+        if (progVal === 'white') {
+            localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, 'yellow');
+            let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
+            if(outerSelect.length) {
+                outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
+            }
+            if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+        }
+    }
+    // ----------------------------------------------
 
     // 1. Ẩn toàn bộ hệ thống gốc để dọn đường
     $('#sidebarMenu').addClass('d-none');
@@ -3099,7 +3123,6 @@ window.openDirectWeb = function(safeFileUrl, title) {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
-
 window.backToCourseTable = function() {
     let fullScreenContainer = $('#customHtmlSection');
     fullScreenContainer.addClass('d-none').attr('style', '');
@@ -4302,7 +4325,7 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
     
     let btnNewTab = $('#btnOpenInNewTab');
    
-    // QUẢN LÝ NÚT MỞ TAB MỚI: CHỈ HIỆN CHO ADMIN (TRÊN CẢ PC VÀ ĐIỆN THOẠI)
+    // QUẢN LÝ NÚT MỞ TAB MỚI: CHỈ HIỆN CHO ADMIN
     if (isSpecificAdmin) {
         let btnText = isMobileView ? '<i class="fa-solid fa-arrow-up-right-from-square"></i>' : '<i class="fa-solid fa-arrow-up-right-from-square"></i> Mở tab mới';
         btnNewTab.removeClass('d-none')
@@ -4316,11 +4339,23 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
                  .off('click.openTab');
     }
     
-    // GẮN DỮ LIỆU SIDEBAR
+    // GẮN DỮ LIỆU SIDEBAR VÀ TỰ ĐỘNG CHUYỂN SANG ĐANG HỌC
     if (sheetName && stableKey) {
         $('#iframeSidebar').attr('data-sheet', sheetName).attr('data-key', stableKey);
         let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+        
         let progVal = localStorage.getItem(`prog_${mssv}_${sheetName}_${stableKey}`) || 'white';
+        // Tự động chuyển màu tiến độ sang Vàng nếu là Chưa học
+        if (progVal === 'white') {
+            progVal = 'yellow';
+            localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, 'yellow');
+            let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
+            if(outerSelect.length) {
+                outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
+            }
+            if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+        }
+
         $('#sidebarProgressSelect').val(progVal).css('background-color', getProgressColor(progVal));
         
         let noteData = JSON.parse(localStorage.getItem(`note_${mssv}_${sheetName}_${stableKey}`));
