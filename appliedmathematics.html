@@ -11,6 +11,9 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+	<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f4c81">
+<link rel="apple-touch-icon" href="TRANGWEB/icon-192.png">
 </head>
 <body class="hide-hidden-posts">
 
@@ -5427,6 +5430,15 @@ $(document).ready(function() {
         setupAccordion('collapseMockExams', 'mockExamWrapper');
         setupAccordion('collapseInstructor', 'instructorWrapper');
     });
+</script>
+	<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(reg => console.log('Service Worker đã đăng ký thành công'))
+        .catch(err => console.log('Lỗi đăng ký Service Worker: ', err));
+    });
+  }
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
