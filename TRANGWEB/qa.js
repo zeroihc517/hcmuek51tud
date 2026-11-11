@@ -813,8 +813,54 @@ $('#groupLinksView').addClass('d-none');
     updateSystemUrl('view', 'thaoluan');
 }
 
-// 3. Mở môn Code cụ thể -> Đổi URL thành ?view=sharecode&category=...
-function openShareCategory(categoryName, lang) {
+// 1. Hai biến lưu tạm thông tin môn học sinh viên muốn mở
+window.pendingShareCategory = "";
+window.pendingShareLang = "";
+
+// 2. Hàm khi click vào môn học
+window.openShareCategory = function(categoryName, lang) {
+    let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    let isAdminAcc = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
+
+    if (!isAdminAcc) {
+        // Lưu tạm thông tin môn học lại
+        window.pendingShareCategory = categoryName;
+        window.pendingShareLang = lang;
+        
+        // Reset form và hiển thị Bảng Modal xịn xò
+        $('#txtCodeSpacePass').val('').removeClass('is-invalid');
+        $('#codeSpaceAuthError').addClass('d-none');
+        $('#codeSpaceAuthModal').modal('show');
+        
+        // Chờ modal mở lên xong mới tự động focus vào ô nhập chữ
+        setTimeout(() => $('#txtCodeSpacePass').focus(), 400);
+        return; // Dừng tại đây chờ người dùng nhập
+    }
+
+    // Nếu là Admin thì mở thẳng luôn, không cần hỏi
+    executeOpenShareCategory(categoryName, lang);
+};
+
+// 3. Hàm kiểm tra mật khẩu khi ấn nút "Mở khóa"
+window.verifyCodeSpacePassword = function() {
+    let pass = $('#txtCodeSpacePass').val();
+    
+    if (!pass || pass.trim().toUpperCase() !== "ANALYSIS VA PHAN VI DU") {
+        // Báo lỗi bằng chữ đỏ
+        $('#codeSpaceAuthError').removeClass('d-none');
+        // Kèm hiệu ứng nháy đỏ viền ô input
+        $('#txtCodeSpacePass').addClass('is-invalid');
+        setTimeout(() => $('#txtCodeSpacePass').removeClass('is-invalid'), 1000);
+        return;
+    }
+    
+    // Nếu nhập ĐÚNG -> Đóng modal và gọi hàm mở Không gian code
+    $('#codeSpaceAuthModal').modal('hide');
+    executeOpenShareCategory(window.pendingShareCategory, window.pendingShareLang);
+};
+
+// 4. Hàm thực thi việc bung giao diện Không gian code (Code cũ của bạn)
+window.executeOpenShareCategory = function(categoryName, lang) {
     currentShareCategory = categoryName;
     currentShareLang = lang;
     
@@ -822,9 +868,8 @@ function openShareCategory(categoryName, lang) {
     $('#shareCategoryView').addClass('d-none');
     $('#shareContentView').removeClass('d-none');
     if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - Không gian Code - " + categoryName);
-    // Tạo link dạng ?view=sharecode&category=LapTrinhPython
-   // Thay đoạn cũ bằng:
-let cleanCategory = categoryName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "");
+    
+    let cleanCategory = categoryName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "");
     let cleanPath = window.location.pathname;
     let newUrl = cleanPath + `?view=sharecode&category=${cleanCategory}`;
     window.history.pushState({ path: newUrl }, '', newUrl);
@@ -835,13 +880,13 @@ let cleanCategory = categoryName.normalize("NFD").replace(/[\u0300-\u036f]/g, ""
     shareCodeEditor.resize(); 
     cancelEditShareCode(); 
     loadShareCodeData();
-	// Thêm đoạn này vào cuối hàm openShareCodeSection() trong qa.js
-let urlParams = new URLSearchParams(window.location.search);
-let catParam = urlParams.get('category');
-if (catParam === 'CauTrucDuLieu' || catParam === 'Cấu trúc dữ liệu') {
-    openShareCategory('Cấu trúc dữ liệu', 'cpp');
-}
-}
+    
+    let urlParams = new URLSearchParams(window.location.search);
+    let catParam = urlParams.get('category');
+    if (catParam === 'CauTrucDuLieu' || catParam === 'Cấu trúc dữ liệu') {
+        executeOpenShareCategory('Cấu trúc dữ liệu', 'cpp');
+    }
+};
 function sendShareCode() {
     let mssvValue = currentUser ? currentUser.mssv : $('#txtMSSVShareCode').val().trim(); 
     let rawCode = shareCodeEditor.getValue().trim();
