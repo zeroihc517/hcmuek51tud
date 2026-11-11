@@ -7484,7 +7484,7 @@ function getCourseHubMeta(courseName) {
     else if (lower === 'cauhinhhocky') { icon = 'fa-calendar-check'; code = 'CONFIG'; }
      else if (lower.includes('giải tích hàm nhiều biến')) { icon = 'fa-cubes'; code = 'APMA1805'; }
 	else if (lower.includes('không gian tuyến tính')) { icon = 'fa-cubes'; code = 'APMA1802'; }
-else if (lower.includes('hình học cao cấp hai chiều ba chiều')) { icon = 'fa-cubes'; code = 'APMA1807'; }
+else if (lower.includes('hình học cao cấp hai chiều và ba chiều')) { icon = 'fa-cubes'; code = 'APMA1807'; }
     return { icon, code };
 }
 
