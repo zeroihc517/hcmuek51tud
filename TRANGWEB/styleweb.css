@@ -4212,3 +4212,47 @@ body.dark-mode .btn-nav-item.active {
         border-color: #1e293b !important;
     }
 }
+/* 1. Thêm mốc vị trí cho vùng chứa nội dung chính */
+.main-content {
+    position: relative;
+}
+
+/* 2. Cập nhật lại chân trang (Footer) */
+.fixed-bottom-footer { 
+    position: absolute; /* Sửa từ 'fixed' thành 'absolute' */
+    bottom: 0; 
+    left: 0; 
+    width: 100%; 
+    
+    /* Các thuộc tính thiết kế cũ giữ nguyên */
+    height: 46px; 
+    background-color: #0b2a4a; 
+    color: #e2e8f0; 
+    padding: 0 24px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    z-index: 10; 
+    font-size: 13.5px; 
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.2); 
+}
+
+/* Container Navbar Ngang */
+.top-navbar {
+    position: absolute; /* Sửa từ 'fixed' thành 'absolute' ở đây */
+    top: 0; 
+    left: 0; 
+    right: 0;
+    
+    /* Tất cả các thuộc tính bên dưới giữ nguyên */
+    height: var(--navbar-height);
+    background: #ffffff;
+    box-shadow: 0 4px 20px rgba(15, 76, 129, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    z-index: 1030;
+    border-bottom: 1px solid #e2e8f0;
+}
+
