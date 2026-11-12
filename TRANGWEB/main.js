@@ -6327,22 +6327,24 @@ window.openLatexContentViewer = function(rowIndex) {
     let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
     
     // Khôi phục Tiến độ và Tự động chuyển sang Đang học (yellow) nếu chưa học
-    let progVal = localStorage.getItem(`prog_${mssv}_${currentSheetName}_${stableKey}`) || 'white';
-    if (progVal === 'white') {
-        progVal = 'yellow';
-        localStorage.setItem(`prog_${mssv}_${currentSheetName}_${stableKey}`, 'yellow');
+        let progVal = localStorage.getItem(`prog_${mssv}_${currentSheetName}_${stableKey}`) || 'white';
         
-        // Cập nhật thẻ Select ở bảng bên ngoài giao diện
-        let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
-        if(outerSelect.length) {
-            outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
+        // BẢO VỆ: Chỉ tự động chuyển sang "Đang học" nếu trạng thái thực sự là "Chưa học"
+        if (progVal === 'white' || !progVal) {
+            progVal = 'yellow';
+            localStorage.setItem(`prog_${mssv}_${currentSheetName}_${stableKey}`, 'yellow');
+            
+            // Cập nhật thẻ Select ở bảng bên ngoài giao diện
+            let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
+            if(outerSelect.length) {
+                outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
+            }
+            
+            // Gửi ngầm dữ liệu lên Google Sheets
+            if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
         }
         
-        // Gửi ngầm dữ liệu lên Google Sheets
-        if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
-    }
-    
-    $('#latexProgressSelect').val(progVal).css('background-color', getProgressColor(progVal));
+        $('#latexProgressSelect').val(progVal).css('background-color', getProgressColor(progVal));
     
     // Khôi phục Ghi chú
     let noteData = JSON.parse(localStorage.getItem(`note_${mssv}_${currentSheetName}_${stableKey}`));
@@ -7722,3 +7724,4 @@ loadDataByHocPhan = function(sheetName, element) {
         $('#btnBackToCourseHub').addClass('d-none').removeClass('d-inline-flex');
     }
 };
+

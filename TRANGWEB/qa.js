@@ -2687,27 +2687,24 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
     
     // --- GẮN DỮ LIỆU ĐỊNH DANH VÀO SIDEBAR ---
     // (Bắt buộc phải có đoạn này thì khi bấm "Lưu", hệ thống mới biết đang lưu cho bài nào)
-    // GẮN DỮ LIỆU SIDEBAR
+    // GẮN DỮ LIỆU SIDEBAR VÀ TỰ ĐỘNG CHUYỂN SANG ĐANG HỌC
     if (sheetName && stableKey) {
         $('#iframeSidebar').attr('data-sheet', sheetName).attr('data-key', stableKey);
         let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
         
-        // Khôi phục Tiến độ và Tự động chuyển sang Đang học (yellow) nếu chưa học
         let progVal = localStorage.getItem(`prog_${mssv}_${sheetName}_${stableKey}`) || 'white';
-        if (progVal === 'white') {
+        
+        // BẢO VỆ: Tránh đè trạng thái "Đã học" (green) do sinh viên đã xác nhận
+        if (progVal === 'white' || !progVal) {
             progVal = 'yellow';
             localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, 'yellow');
-            
-            // Cập nhật thẻ Select ở bảng bên ngoài giao diện
             let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
             if(outerSelect.length) {
                 outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
             }
-            
-            // Gửi ngầm dữ liệu lên Google Sheets
             if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
         }
-        
+
         $('#sidebarProgressSelect').val(progVal).css('background-color', getProgressColor(progVal));
         
         let noteData = JSON.parse(localStorage.getItem(`note_${mssv}_${sheetName}_${stableKey}`));
@@ -4345,8 +4342,9 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
         let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
         
         let progVal = localStorage.getItem(`prog_${mssv}_${sheetName}_${stableKey}`) || 'white';
-        // Tự động chuyển màu tiến độ sang Vàng nếu là Chưa học
-        if (progVal === 'white') {
+        
+        // BẢO VỆ: Tránh đè trạng thái "Đã học" (green) do sinh viên đã xác nhận
+        if (progVal === 'white' || !progVal) {
             progVal = 'yellow';
             localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, 'yellow');
             let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
