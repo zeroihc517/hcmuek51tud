@@ -103,7 +103,7 @@
 
         <div class="nav-group">
             <button class="btn-course btn-nav-item active" id="btnNavThongBao" onclick="loadDataByHocPhan('Thông báo', this)"><i class="fa-solid fa-bell"></i> Thông báo</button>
-            <button class="btn-course btn-nav-item" id="btnNavTongHop" onclick="loadTongHopView()"><i class="fa-solid fa-link"></i> Link</button>
+          
             <button class="btn-course btn-nav-item" id="btnNavTKB" onclick="loadTKBView()"><i class="fa-solid fa-calendar"></i> Lịch học</button>
             <div id="gpaNavContainer" class="d-none d-lg-inline-flex d-flex gap-2">
                 <button class="btn-course btn-nav-item" id="btnNavGPA" onclick="loadGPAView()"><i class="fa-solid fa-clipboard-check"></i> Kết quả</button>
@@ -1615,7 +1615,15 @@
 </div><!-- KHU VỰC TỔNG HỢP LINK -->
 <div id="tongHopSection" class="d-none">
     <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
+<div class="d-flex align-items-center">
+            <!-- Thêm nút trở lại -->
+            <button class="btn btn-light fw-bold shadow-sm me-3" onclick="openShareCodeSection()">
+                <i class="fa-solid fa-arrow-left"></i> Trở lại
+            </button>
+<div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
+                  </div>
+        
+
 <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
                     style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
@@ -2336,11 +2344,71 @@
                 <i class="fa-solid fa-book-open"></i> Học nhóm APMA - Khoa Toán-Tin học
             </div>
         </div>
-        <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
-                style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
-                onclick="refreshCurrentCourseData()">
-            <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
-        </button>
+
+        <!-- KHU VỰC BÊN PHẢI: GỒM CỤM ĐỒNG HỒ VÀ NÚT LÀM MỚI -->
+        <div class="d-flex align-items-center gap-3 ms-auto flex-wrap">
+            
+            <!-- CỤM ĐỒNG HỒ (Đã ép kiểu !important để khử dứt điểm màu đen và vạch đỏ) -->
+            <div class="d-flex align-items-center gap-2 px-3 py-1 shadow-sm" style="background-color: #ffffff; border-radius: 50px; border: 1.5px solid #cbd5e1;">
+                
+                <!-- 🔴 CỤM ĐỒNG HỒ ĐẾM NGƯỢC CÁ NHÂN -->
+                <div class="user-countdown-footer-widget" id="userCountdownWidget" style="border: none !important; background: transparent !important; padding: 0 !important; box-shadow: none !important;">
+                    <!-- Màn hình 1: KHI CHƯA ĐẶT GIỜ -->
+                    <div id="countdownSetupArea" class="d-flex align-items-center gap-1">
+                        <span class="countdown-label d-none d-md-inline-block fw-bold" style="color: #0f4c81; font-size: 13.5px; border: none !important;">
+                            <i class="fa-solid fa-hourglass-start text-warning me-1"></i>Hẹn giờ:
+                        </span>
+                        <div class="d-flex align-items-center gap-1">
+                            <input type="number" id="txtCountHours" class="form-control form-control-sm countdown-input text-center fw-bold" style="width: 48px; border-color: #cbd5e1 !important; color: #0f4c81 !important; background-color: #f1f5f9 !important; box-shadow: none !important;" placeholder="Giờ" min="0" max="23">
+                            <span class="time-sep fw-bold" style="color: #475569;">:</span>
+                            <input type="number" id="txtCountMinutes" class="form-control form-control-sm countdown-input text-center fw-bold" style="width: 48px; border-color: #cbd5e1 !important; color: #0f4c81 !important; background-color: #f1f5f9 !important; box-shadow: none !important;" placeholder="Phút" min="0" max="59">
+                            <span class="time-sep fw-bold" style="color: #475569;">:</span>
+                            <input type="number" id="txtCountSeconds" class="form-control form-control-sm countdown-input text-center fw-bold" style="width: 48px; border-color: #cbd5e1 !important; color: #0f4c81 !important; background-color: #f1f5f9 !important; box-shadow: none !important;" placeholder="Giây" min="0" max="59">
+                        </div>
+                        <button class="btn btn-sm btn-danger btn-countdown-start ms-1 shadow-sm" style="border-radius: 50%; width: 28px; height: 28px; padding: 0;" onclick="startUserCountdown()" title="Chạy đếm ngược">
+                            <i class="fa-solid fa-play" style="font-size: 11px;"></i>
+                        </button>
+                    </div>
+
+                    <!-- Màn hình 2: KHI ĐANG ĐẾM NGƯỢC -->
+                    <div id="countdownDisplayArea" class="d-none d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-1 px-3 py-1 shadow-sm" style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 20px;">
+                            <i class="fa-solid fa-stopwatch fa-spin-slow" style="color: #d97706;"></i>
+                            <span class="fw-bold countdown-clock-text" id="lblCountdownClock" style="color: #d97706 !important; font-size: 14.5px;">00:00:00</span>
+                        </div>
+                        
+                        <!-- Đã bổ sung class btn-countdown-pause vào nút Tạm ngưng -->
+                        <button class="btn btn-sm btn-outline-warning shadow-sm btn-countdown-pause" style="border-radius: 50%; width: 28px; height: 28px; padding: 0;" onclick="togglePauseUserCountdown()" title="Tạm ngưng / Tiếp tục">
+                            <i class="fa-solid fa-pause text-dark" style="font-size: 11px;"></i>
+                        </button>
+                        
+                        <!-- Đã bổ sung class btn-countdown-cancel vào nút Hủy -->
+                        <button class="btn btn-sm btn-outline-danger shadow-sm btn-countdown-cancel" style="border-radius: 50%; width: 28px; height: 28px; padding: 0;" onclick="cancelUserCountdown()" title="Hủy đếm ngược">
+                            <i class="fa-solid fa-xmark" style="font-size: 12px;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 🔴 ĐỒNG HỒ HỆ THỐNG LED -->
+                <div class="d-flex align-items-center gap-2 px-3 clock-led-container ms-1" style="border-left: 1.5px solid #cbd5e1; height: 26px; font-family: 'Chakra Petch', sans-serif;">
+                    <span id="ledDate" class="led-date fw-bold" style="font-size: 14px; color: #475569;">--/--/----</span>
+                    <div style="width: 1.5px; height: 16px; background-color: #cbd5e1;"></div>
+                    <div class="d-flex align-items-center gap-1" style="font-size: 15px; font-weight: 700;">
+                        <span id="ledTimeMain" style="color: #0f4c81;">00:00</span>
+                        <span style="color: #0f4c81;">:</span>
+                        <span id="ledSeconds" style="color: #e61d4a;">00</span>
+                        <span id="ledAmpm" style="color: #64748b; font-size: 12px; margin-left: 3px; text-transform: uppercase;">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nút Làm Mới Nguyên Bản -->
+            <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
+                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
+                    onclick="refreshCurrentCourseData()">
+                <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
+            </button>
+        </div>
     </header>
 
 
@@ -2839,10 +2907,21 @@
 
   <!-- MÀN HÌNH 1: CHỌN HỌC PHẦN -->
 <div id="shareCategoryView">
+<h6 class="text-muted fw-bold mb-3"><i class="fa-solid fa-code me-2"></i>Tài nguyên & Hỗ trợ</h6>
 
     <!-- HÀNG 1: CÁC KÊNH HỖ TRỢ CHUNG -->
 <div class="row row-cols-2 row-cols-lg-5 g-4 mb-5">
-        
+        <div class="col">
+            <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #f59e0b;" onclick="loadTongHopView()">
+                <div class="icon-box position-relative">
+                    <i class="fa-solid fa-link" style="color: #f59e0b;"></i>
+                </div>
+                <div class="card-text-wrapper">
+                    <h5>Tổng hợp Link</h5>
+                    <p class="card-desc">Các liên kết quan trọng</p>
+                </div>
+            </div>
+        </div>
         <!-- Thẻ 1: Giải đáp thắc mắc -->
         <div class="col">
             <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid var(--primary-color);" onclick="openQASection()">
@@ -2858,19 +2937,6 @@
             </div>
         </div>
 
-<!-- Thẻ 5: Đặt lịch hẹn -->
-<div class="col">
-    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #8b5cf6;" onclick="loadDatLichHenView('temp')">
-        <div class="icon-box position-relative">
-            <i class="fa-solid fa-calendar-check" style="color: #8b5cf6;"></i>
-            <span id="datLichInsideBadge" class="badge-new-qa d-none" style="position: absolute; top: -5px; right: -25px; padding: 2px 6px;">Mới</span>
-        </div>
-        <div class="card-text-wrapper">
-            <h5>TEMP</h5>
-            <p class="card-desc">Hoạt động, Đặt lịch...</p>
-        </div>
-    </div>
-</div>
         
         <!-- Thẻ 4: Nhóm học tập -->
 <div class="col">
@@ -2885,10 +2951,25 @@
     </div>
 </div>
 
+
+<!-- Thẻ 5: Đặt lịch hẹn -->
+<div class="col">
+    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #8b5cf6;" onclick="loadDatLichHenView('temp')">
+        <div class="icon-box position-relative">
+            <i class="fa-solid fa-calendar-check" style="color: #8b5cf6;"></i>
+            <span id="datLichInsideBadge" class="badge-new-qa d-none" style="position: absolute; top: -5px; right: -25px; padding: 2px 6px;">Mới</span>
+        </div>
+        <div class="card-text-wrapper">
+            <h5>TEMP</h5>
+            <p class="card-desc">Đang thử nghiệm, không truy cập...</p>
+        </div>
+    </div>
+</div>
+
     </div>
 
     <!-- HÀNG 2: CÁC HỌC PHẦN CHIA SẺ CODE -->
-    <h6 class="text-muted fw-bold mb-3"><i class="fa-solid fa-code me-2"></i>Không gian Code</h6>
+    <h6 class="text-muted fw-bold mb-3"><i class="fa-solid fa-code me-2"></i>Không gian Code (Không được truy cập)</h6>
    <div class="row row-cols-2 row-cols-lg-5 g-4 mb-4">
                 <!-- Thẻ 4: Lập trình nâng cao -->
         <div class="col">
@@ -3093,59 +3174,6 @@
             <i class="fa-solid fa-spinner fa-spin"></i> Đang tải danh sách...
         </span>
     </div>
-
-    <!-- CỘT PHẢI: ĐỒNG HỒ ĐẾM NGƯỢC (BÊN TRÁI) + ĐỒNG HỒ HỆ THỐNG (BÊN PHẢI) -->
-    <div class="footer-info-right d-flex align-items-center gap-2">
-        
-        <!-- 🔴 CỤM ĐỒNG HỒ ĐẾM NGƯỢC CÁ NHÂN -->
-        <div class="user-countdown-footer-widget" id="userCountdownWidget">
-            <!-- Màn hình 1: KHI CHƯA ĐẶT GIỜ -->
-            <div id="countdownSetupArea" class="d-flex align-items-center gap-1">
-                <span class="countdown-label d-none d-md-inline-block">
-                    <i class="fa-solid fa-hourglass-start text-warning me-1"></i>Hẹn giờ:
-                </span>
-                <div class="d-flex align-items-center gap-1">
-                    <input type="number" id="txtCountHours" class="form-control form-control-sm countdown-input" placeholder="Giờ" min="0" max="23" title="Giờ">
-                    <span class="time-sep">:</span>
-                    <input type="number" id="txtCountMinutes" class="form-control form-control-sm countdown-input" placeholder="Phút" min="0" max="59" title="Phút">
-                    <span class="time-sep">:</span>
-                    <input type="number" id="txtCountSeconds" class="form-control form-control-sm countdown-input" placeholder="Giây" min="0" max="59" title="Giây">
-                </div>
-                <button class="btn btn-sm btn-danger btn-countdown-start ms-1" onclick="startUserCountdown()" title="Chạy đếm ngược">
-                    <i class="fa-solid fa-play"></i>
-                </button>
-            </div>
-
-            <!-- Màn hình 2: KHI ĐANG ĐẾM NGƯỢC -->
-            <!-- Màn hình 2: KHI ĐANG ĐẾM NGƯỢC -->
-<div id="countdownDisplayArea" class="d-none d-flex align-items-center gap-2">
-    <div class="d-flex align-items-center gap-1">
-        <i class="fa-solid fa-stopwatch fa-spin-slow" style="color: #facc15;"></i>
-        <span class="fw-bold countdown-clock-text" id="lblCountdownClock" style="color: #facc15 !important;">00:00:00</span>
-    </div>
-    
-    <!-- THÊM NÚT TẠM NGƯNG VÀO ĐÂY -->
-    <button class="btn btn-sm btn-outline-light btn-countdown-pause" onclick="togglePauseUserCountdown()" title="Tạm ngưng / Tiếp tục">
-        <i class="fa-solid fa-pause"></i>
-    </button>
-
-    <button class="btn btn-sm btn-outline-light btn-countdown-cancel" onclick="cancelUserCountdown()" title="Hủy đếm ngược">
-        <i class="fa-solid fa-xmark"></i>
-    </button>
-</div>
-        </div>
-
-        <!-- 🔴 ĐỒNG HỒ HỆ THỐNG LED (NẰM NGAY BÊN PHẢI ĐỒNG HỒ ĐẾM NGƯỢC) -->
-        <div class="d-flex align-items-center gap-2 px-3 clock-led-container" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); height: 32px; border-radius: 6px; font-family: 'Chakra Petch', sans-serif;">
-            <span id="ledDate" class="led-date" style="font-size: 14px; color: #f3e8ff; font-weight: 600;">--/--/----</span>
-            <div style="width: 1px; height: 14px; background-color: rgba(255, 255, 255, 0.3);"></div>
-            <div class="d-flex align-items-center gap-1" style="font-size: 15px; font-weight: 600;">
-                <span id="ledTimeMain" style="color: #60a5fa;">00:00</span>
-                <span style="color: #60a5fa;">:</span>
-                <span id="ledSeconds" style="color: #f87171;">00</span>
-                <span id="ledAmpm" style="color: #60a5fa; font-size: 13px; margin-left: 2px; text-transform: uppercase;">--</span>
-            </div>
-        </div>
 
     </div>
 </footer>
