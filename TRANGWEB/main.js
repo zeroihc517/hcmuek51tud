@@ -471,6 +471,8 @@ for (const [groupName, html] of Object.entries(groupHtml)) {
         'Tư tưởng Hồ Chí Minh',
         'Năm 1',
 	'Giải tích hàm nhiều biến', 'Không gian tuyến tính', 'Hình học cao cấp hai chiều và ba chiều',
+
+		
     ];
 
     // 2. Chỉ khi nào Admin bật "Dành cho bản quản trị" (isAdmin = true) mới load từ Sheet
@@ -1520,11 +1522,12 @@ headHtml += `<th style="width: 130px;" class="text-center">Tiến độ</th><th 
                 }
                 
                 // 2. Trích xuất thông tin giảng viên
-                if (/mãhọcphần|họcphần|giảngviênphụtrách|emailgiảngviên/.test(fullRowText.replace(/\s+/g, ''))) { 
-                    let info = row.filter(cell => String(cell).trim() !== "").join(" <span class='mx-2 text-black-50'>|</span> "); 
-                    if(info) instructorInfos.push(info); 
-                    return; 
-                }
+let textToCheck = fullRowText.replace(/\s+/g, '');
+if (/mãhọcphần|họcphần|giảngviênphụtrách|emailgiảngviên/.test(textToCheck) && !textToCheck.includes('mụctiêu')) { 
+    let info = row.filter(cell => String(cell).trim() !== "").join(" <span class='mx-2 text-black-50'>|</span> "); 
+    if(info) instructorInfos.push(info); 
+    return; 
+}
 // 3. Trích xuất thẻ bài kiểm tra/minigame/đề thi
 let isMinigame = /(minigame tuần|minigame hè|minigame số)/i.test(fullRowText);
 let isMockExam = /(đề thi thử|đề demo)/i.test(fullRowText);
@@ -7482,6 +7485,8 @@ function getCourseHubMeta(courseName) {
     else if (lower.includes('phương trình vi phân')) { icon = 'fa-wave-square'; code = 'MATH1817'; }
     else if (lower.includes('trí tuệ nhân tạo')) { icon = 'fa-brain'; code = 'COMP1314'; }
     else if (lower.includes('hồ chí minh') ) { icon = 'fa-landmark'; code = 'POLI2005'; }
+ else if (lower.includes('lịch sử đẳng') ) { icon = 'fa-landmark'; code = 'POLI2006'; }
+
     else if (lower.includes('quốc phòng')) { icon = 'fa-shield-halved'; code = 'MILI'; }
     else if (lower.includes('năm 1')) { icon = 'fa-folder-tree'; code = 'YEAR 1'; }
     else if (lower === 'users') { icon = 'fa-users-gear'; code = 'ADMIN'; }
@@ -7724,4 +7729,3 @@ loadDataByHocPhan = function(sheetName, element) {
         $('#btnBackToCourseHub').addClass('d-none').removeClass('d-inline-flex');
     }
 };
-
