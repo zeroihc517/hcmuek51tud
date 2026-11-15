@@ -211,11 +211,92 @@ function saveEditRow() {
        
 
         // =========================================================
-// XỬ LÝ MENU CHUỘT PHẢI TÙY CHỈNH
+// XỬ LÝ MENU CHUỘT PHẢI TÙY CHỈNH (MỞ ĐÚNG MỤC TRONG TAB MỚI)
 // =========================================================
 let lastRightClickedInput = null;
 let savedSelectionText = "";
-let rightClickedLinkUrl = "";
+let rightClickedTargetUrl = "";
+
+// Hàm hỗ trợ chuẩn hóa chuỗi tạo tham số URL (giống hàm updateSystemUrl)
+function makeCleanParam(str) {
+    return String(str || '').normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/gi, "d")
+        .replace(/[^a-zA-Z0-9]/g, "");
+}
+
+// Hàm thông minh phân tích phần tử được chuột phải để lấy đúng URL đích
+function resolveContextTargetUrl(target) {
+    const baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+
+    // 1. Nếu là thẻ <a> có href hợp lệ
+    const anchorEl = target.closest('a');
+    if (anchorEl && anchorEl.href && !anchorEl.href.startsWith('javascript:')) {
+        return anchorEl.href;
+    }
+
+    // 2. Nếu chuột phải vào Thẻ Học phần trong Course Hub (VD: Cấu trúc dữ liệu)
+    const hubCard = target.closest('.course-hub-card');
+    if (hubCard) {
+        const titleEl = hubCard.querySelector('.hub-course-title');
+        if (titleEl && titleEl.innerText.trim()) {
+            return `${baseUrl}?course=${makeCleanParam(titleEl.innerText.trim())}`;
+        }
+    }
+
+    // 3. Nếu chuột phải vào các nút Menu trên thanh điều hướng (Navbar)
+    const navBtn = target.closest('.btn-nav-item, .btn-course');
+    if (navBtn) {
+        const id = navBtn.id;
+        if (id === 'btnNavThongBao') return baseUrl;
+        if (id === 'btnNavTKB') return `${baseUrl}?view=tkb`;
+        if (id === 'btnNavGPA') return `${baseUrl}?view=gpa`;
+        if (id === 'btnNavRenLuyen') return `${baseUrl}?view=renluyen`;
+        if (id === 'btnNavShareCode') return `${baseUrl}?view=thaoluan`;
+        if (id === 'btnNavHocPhanHub') return `${baseUrl}?view=hocphan`;
+    }
+
+    // 4. Nếu chuột phải vào một mục Thông báo trong danh sách
+    const tbItem = target.closest('.tb-list-item, .border-animation');
+    if (tbItem && window.thongBaoData) {
+        const onclickAttr = tbItem.getAttribute('onclick') || tbItem.querySelector('[onclick]')?.getAttribute('onclick') || "";
+        const match = onclickAttr.match(/viewThongBaoDetail\((\d+)\)/);
+        if (match && window.thongBaoData[match[1]] && window.thongBaoData[match[1]].tbCode) {
+            return `${baseUrl}?tb=${window.thongBaoData[match[1]].tbCode}`;
+        }
+    }
+
+    // 5. Nếu chuột phải vào các thẻ trong mục Thảo luận (Tổng hợp link, Hỏi đáp, Nhóm, TEMP...)
+    const modernCard = target.closest('.link-card-modern');
+    if (modernCard) {
+        const onclickAttr = modernCard.getAttribute('onclick') || "";
+        if (onclickAttr.includes('loadTongHopView')) return `${baseUrl}?view=weblinks`;
+        if (onclickAttr.includes('openQASection')) return `${baseUrl}?view=qa`;
+        if (onclickAttr.includes('openGroupLinksSection')) return `${baseUrl}?view=grouplinks`;
+        if (onclickAttr.includes('loadDatLichHenView')) return `${baseUrl}?view=temp`;
+        const catMatch = onclickAttr.match(/openShareCategory\(['"]([^'"]+)['"]/);
+        if (catMatch) return `${baseUrl}?view=sharecode&category=${makeCleanParam(catMatch[1])}`;
+    }
+
+    // 6. Nếu chuột phải vào nút "Hồ sơ của tôi" trong menu tài khoản
+    const profileBtn = target.closest('[onclick*="loadProfileView"]');
+    if (profileBtn) {
+        return `${baseUrl}?view=profile`;
+    }
+
+    // 7. Nếu chuột phải vào bài học / tài liệu trong bảng học phần có link (Drive, Youtube, Web...)
+    const clickableEl = target.closest('[onclick]');
+    if (clickableEl) {
+        const onclickAttr = clickableEl.getAttribute('onclick') || "";
+        const urlMatch = onclickAttr.match(/(?:openDocumentViewer|openDirectWeb)\(['"](https?:\/\/[^'"]+|[^'"]+\.html[^'"]*)['"]/);
+        if (urlMatch && urlMatch[1]) {
+            return urlMatch[1];
+        }
+    }
+
+    // Mặc định nếu bấm ở vùng trống: trả về URL trang hiện tại
+    return window.location.href;
+}
 
 document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
@@ -223,11 +304,11 @@ document.addEventListener('contextmenu', function(e) {
     const menu = document.getElementById('customContextMenu');
     if (!menu) return;
 
-    // 1. Lưu lại vùng văn bản đang được bôi đen (nếu có)
+    // 1. Lưu vùng văn bản đang bôi đen
     const selection = window.getSelection();
     savedSelectionText = selection ? selection.toString() : "";
 
-    // 2. Kiểm tra xem người dùng có đang chuột phải vào ô nhập liệu (input/textarea) không
+    // 2. Kiểm tra ô nhập liệu
     const target = e.target;
     if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
         lastRightClickedInput = target;
@@ -238,13 +319,10 @@ document.addEventListener('contextmenu', function(e) {
         lastRightClickedInput = null;
     }
 
-    // 3. Kiểm tra xem có đang chuột phải trúng thẻ liên kết <a> hay không
-    const anchorEl = target.closest('a');
-    rightClickedLinkUrl = (anchorEl && anchorEl.href && !anchorEl.href.startsWith('javascript:')) 
-        ? anchorEl.href 
-        : window.location.href;
+    // 3. Phân tích và lấy đường dẫn đích chính xác của phần tử đang chuột phải
+    rightClickedTargetUrl = resolveContextTargetUrl(target);
 
-    // Bật/Tắt trạng thái mờ cho nút Sao chép và Dán
+    // Bật/tắt nút Sao chép và Dán
     const btnCopy = document.getElementById('ctxCopy');
     const btnPaste = document.getElementById('ctxPaste');
 
@@ -260,7 +338,7 @@ document.addEventListener('contextmenu', function(e) {
         btnPaste.classList.add('disabled');
     }
 
-    // 4. Tính toán tọa độ hiển thị để menu không bị tràn ra ngoài mép màn hình
+    // 4. Hiển thị menu đúng tọa độ chuột
     menu.classList.remove('d-none');
     const menuWidth = menu.offsetWidth;
     const menuHeight = menu.offsetHeight;
@@ -277,7 +355,7 @@ document.addEventListener('contextmenu', function(e) {
     menu.style.top = posY + 'px';
 });
 
-// Ẩn menu khi click chuột trái ra ngoài hoặc cuộn trang
+// Ẩn menu khi click ra ngoài hoặc cuộn trang
 document.addEventListener('click', function(e) {
     const menu = document.getElementById('customContextMenu');
     if (menu && !menu.contains(e.target)) {
@@ -289,9 +367,8 @@ window.addEventListener('scroll', function() {
     if (menu) menu.classList.add('d-none');
 }, true);
 
-// Gắn sự kiện cho 4 nút chức năng
+// Sự kiện click cho 4 nút
 $(document).ready(function() {
-    // 1. Sao chép
     $('#ctxCopy').on('click', function() {
         $('#customContextMenu').addClass('d-none');
         if (savedSelectionText) {
@@ -303,7 +380,6 @@ $(document).ready(function() {
         }
     });
 
-    // 2. Dán
     $('#ctxPaste').on('click', async function() {
         $('#customContextMenu').addClass('d-none');
         if (!lastRightClickedInput) return;
@@ -318,7 +394,7 @@ $(document).ready(function() {
                 const val = lastRightClickedInput.value;
                 lastRightClickedInput.value = val.slice(0, start) + text + val.slice(end);
                 lastRightClickedInput.selectionStart = lastRightClickedInput.selectionEnd = start + text.length;
-                $(lastRightClickedInput).trigger('input'); // Kích hoạt sự kiện cập nhật live preview nếu có
+                $(lastRightClickedInput).trigger('input');
             } else if (lastRightClickedInput.isContentEditable) {
                 document.execCommand('insertText', false, text);
             }
@@ -327,16 +403,14 @@ $(document).ready(function() {
         }
     });
 
-    // 3. Tải lại trang
     $('#ctxReload').on('click', function() {
         $('#customContextMenu').addClass('d-none');
         location.reload();
     });
 
-    // 4. Mở tab mới
     $('#ctxNewTab').on('click', function() {
         $('#customContextMenu').addClass('d-none');
-        window.open(rightClickedLinkUrl || window.location.href, '_blank');
+        window.open(rightClickedTargetUrl || window.location.href, '_blank');
     });
 });
         document.addEventListener('keydown', function(e) {
