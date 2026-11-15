@@ -730,7 +730,103 @@ body {
         }
     });
 </script>
+<script>
+    (function() {
+        // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
+        const startMaintenance = new Date(2026, 9, 14, 12, 00);  
+        const endMaintenance   = new Date(2026, 9, 14, 09, 30); 
+        // Hàm tạo chuỗi định dạng
+        const pad = (n) => n.toString().padStart(2, '0');
+        const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
 
+        // Mặc định là trang bảo trì
+        let maintenancePage = "Baotri.html"; 
+        const now = new Date();
+
+        // Kiểm tra tài khoản từ localStorage
+        let currentUserData = localStorage.getItem('currentUser');
+        if (currentUserData) {
+            try {
+                let userObj = JSON.parse(currentUserData);
+                // Tài khoản quản trị sẽ được điều hướng sang webduphong.html
+                if (userObj.mssv === "51.01.108.008" || userObj.mssv === "5101108008") {
+                    maintenancePage = "loginle29.html";
+                }
+            } catch(e) {
+                console.error("Lỗi khi đọc dữ liệu tài khoản:", e);
+            }
+        }
+
+        if (now >= startMaintenance && now <= endMaintenance) {
+            localStorage.setItem("maintenanceConfig", JSON.stringify({
+                endTime: endMaintenance.getTime(), 
+                textShow: endTimeStr
+            }));
+            
+            // Thêm ID để tránh tạo trùng iframe
+            if (!document.getElementById('maintenanceIframe')) {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'maintenanceIframe';
+                iframe.src = maintenancePage;
+                iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; border: none; background-color: #f8fafc;';
+                document.body.appendChild(iframe);
+                document.body.style.overflow = 'hidden'; 
+            }
+        }
+        // Đã xóa phần else để không xung đột dữ liệu
+    })();
+</script>
+<script>
+    (function() {
+        const now = new Date();
+        
+        // 1. KIỂM TRA THỨ TRONG TUẦN
+        const currentDay = now.getDay();
+        const daysToMaintain = []; 
+        
+        if (!daysToMaintain.includes(currentDay)) {
+            return;
+        }
+
+        const startMaintenance = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 40, 0);  
+        const endMaintenance   = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 30, 0); 
+        
+        const pad = (n) => n.toString().padStart(2, '0');
+        const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
+
+        // Mặc định là trang bảo trì chung
+        let maintenancePage = "Baotri.html"; 
+
+        // Kiểm tra tài khoản admin từ localStorage
+        let currentUserData = localStorage.getItem('currentUser');
+        if (currentUserData) {
+            try {
+                let userObj = JSON.parse(currentUserData);
+                if (userObj.mssv === "51.01.108.008" || userObj.mssv === "5101108008") {
+                    maintenancePage = "webduphong.html";
+                }
+            } catch(e) {
+                console.error("Lỗi khi đọc dữ liệu tài khoản:", e);
+            }
+        }
+
+        if (now >= startMaintenance && now <= endMaintenance) {
+            localStorage.setItem("maintenanceConfig", JSON.stringify({
+                endTime: endMaintenance.getTime(), 
+                textShow: endTimeStr
+            }));
+            
+            if (!document.getElementById('maintenanceIframe')) {
+                const iframe = document.createElement('iframe');
+                iframe.id = 'maintenanceIframe';
+                iframe.src = maintenancePage;
+                iframe.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 999999; border: none; background-color: #f8fafc;';
+                document.body.appendChild(iframe);
+                document.body.style.overflow = 'hidden'; 
+            }
+        }
+    })();
+</script>
 
 </body>
 </html>
