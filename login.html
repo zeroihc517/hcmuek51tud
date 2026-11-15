@@ -3,67 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập | Cổng APMA</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Đăng nhập | Cổng APMA - Mario & Dino Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="TRANGWEB/styleweb.css" rel="stylesheet">
 <style>
 /* =========================================================
-   NỀN HỆ THỐNG (NEON TỐI & LƯỚI TOÁN HỌC)
+   NỀN BẦU TRỜI MARIO DỄ THƯƠNG & TƯƠI SÁNG (GIỮ NGUYÊN)
 ========================================================= */
 :root {
-    --bg-dark: #030812;
-    --neon-blue: rgba(56, 189, 248, 0.18);
-    --neon-orange: rgba(245, 158, 11, 0.15);
-    --grid-line: rgba(255, 255, 255, 0.03);
-    --pyramid-glow: #b24bf3;
+    --sky-top: #5c94fc;
+    --sky-bottom: #a5d8ff;
+    --mario-red: #e52521;
+    --mario-blue: #049cd8;
+    --mario-yellow: #fbd000;
+    --mario-green: #43b047;
+    --brick-brown: #c84c0c;
+    --card-border: #38bdf8;
 }
 
 body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
     margin: 0;
     position: relative;
     overflow-x: hidden;
-    background-color: var(--bg-dark);
-    background-image: 
-        radial-gradient(circle at 50% 50%, transparent 20%, var(--bg-dark) 100%),
-        radial-gradient(circle at 15% 35%, var(--neon-blue) 0%, transparent 50%),
-        radial-gradient(circle at 85% 65%, var(--neon-orange) 0%, transparent 50%),
-        linear-gradient(var(--grid-line) 1px, transparent 1px),
-        linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 78%, #8ce99a 78%, #43b047 100%);
     background-attachment: fixed;
 }
 
+/* Mây bồng bềnh trôi ngang */
+.clouds-layer {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+.cloud {
+    position: absolute;
+    background: #ffffff;
+    border-radius: 50px;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.06);
+    opacity: 0.92;
+    animation: driftCloud linear infinite;
+}
+.cloud::before, .cloud::after {
+    content: "";
+    position: absolute;
+    background: #ffffff;
+    border-radius: 50%;
+}
+.cloud-1 { width: 120px; height: 38px; top: 10%; left: -150px; animation-duration: 38s; }
+.cloud-1::before { width: 54px; height: 54px; top: -26px; left: 18px; }
+.cloud-1::after { width: 40px; height: 40px; top: -16px; right: 18px; }
+
+.cloud-2 { width: 150px; height: 46px; top: 22%; left: -200px; animation-duration: 52s; animation-delay: -15s; }
+.cloud-2::before { width: 68px; height: 68px; top: -32px; left: 24px; }
+.cloud-2::after { width: 50px; height: 50px; top: -20px; right: 24px; }
+
+.cloud-3 { width: 100px; height: 32px; top: 36%; left: -120px; animation-duration: 44s; animation-delay: -28s; }
+.cloud-3::before { width: 45px; height: 45px; top: -22px; left: 15px; }
+.cloud-3::after { width: 34px; height: 34px; top: -14px; right: 15px; }
+
+@keyframes driftCloud {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(100vw + 350px)); }
+}
+
+/* Mặt đất gạch Mario & Đồi cỏ & Ống cống dưới đáy */
+.mario-ground {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 44px;
+    z-index: 1;
+    pointer-events: none;
+    background-color: #d97706;
+    background-image: 
+        linear-gradient(to bottom, #43b047 0%, #43b047 10px, #1e293b 10px, #1e293b 12px, transparent 12px),
+        repeating-linear-gradient(90deg, #e07a16 0px, #e07a16 30px, #7c2d12 30px, #7c2d12 32px),
+        repeating-linear-gradient(0deg, transparent 12px, transparent 26px, #7c2d12 26px, #7c2d12 28px);
+    border-top: 2px solid #1e293b;
+}
+
+.mario-pipe {
+    position: fixed;
+    bottom: 44px;
+    width: 58px;
+    height: 64px;
+    background: linear-gradient(90deg, #2b9348 0%, #55a630 30%, #80b918 45%, #2b9348 100%);
+    border: 3px solid #1e293b;
+    border-bottom: none;
+    z-index: 1;
+    pointer-events: none;
+}
+.mario-pipe::before {
+    content: "";
+    position: absolute;
+    top: -22px;
+    left: -7px;
+    width: 66px;
+    height: 22px;
+    background: linear-gradient(90deg, #2b9348 0%, #55a630 30%, #80b918 45%, #2b9348 100%);
+    border: 3px solid #1e293b;
+    border-radius: 4px;
+}
+.pipe-left { left: 4%; }
+.pipe-right { right: 4%; height: 48px; }
+
+/* Nhân vật Mario tự chạy & nhảy ở nền */
+.mario-runner-track {
+    position: fixed;
+    bottom: 44px;
+    left: 0;
+    width: 100%;
+    height: 110px;
+    pointer-events: none;
+    z-index: 2;
+}
+.ambient-mario {
+    position: absolute;
+    bottom: 0;
+    left: 12%;
+    font-size: 32px;
+    animation: marioPatrol 14s ease-in-out infinite;
+    filter: drop-shadow(0 3px 0 rgba(0,0,0,0.25));
+}
+@keyframes marioPatrol {
+    0% { left: 12%; transform: scaleX(1) translateY(0); }
+    22% { left: 32%; transform: scaleX(1) translateY(0); }
+    25% { left: 34%; transform: scaleX(1) translateY(-38px); }
+    28% { left: 36%; transform: scaleX(1) translateY(0); }
+    48% { left: 68%; transform: scaleX(1) translateY(0); }
+    50% { left: 68%; transform: scaleX(-1) translateY(0); }
+    72% { left: 36%; transform: scaleX(-1) translateY(0); }
+    75% { left: 34%; transform: scaleX(-1) translateY(-38px); }
+    78% { left: 32%; transform: scaleX(-1) translateY(0); }
+    98% { left: 12%; transform: scaleX(-1) translateY(0); }
+    100% { left: 12%; transform: scaleX(1) translateY(0); }
+}
+
 /* =========================================================
-   NÚT BẬT/TẮT NHẠC NỀN GÓC PHẢI TRÊN (TÔNG XANH ĐỒNG BỘ)
+   NÚT BẬT/TẮT NHẠC NỀN GÓC PHẢI TRÊN (PHONG CÁCH MARIO COIN)
 ========================================================= */
 .audio-control-btn {
     position: fixed;
-    top: 20px;
+    top: 18px;
     right: 20px;
     z-index: 10000;
-    background: rgba(21, 76, 121, 0.9);
-    color: #38bdf8;
-    border: 1.5px solid #38bdf8;
+    background: #fbd000;
+    color: #1e293b;
+    border: 3px solid #1e293b;
     border-radius: 50px;
-    padding: 8px 16px;
+    padding: 8px 18px;
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 800;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    backdrop-filter: blur(8px);
-    transition: all 0.3s ease;
+    box-shadow: 0 4px 0 #1e293b;
+    transition: all 0.15s ease;
 }
 .audio-control-btn:hover {
-    background: #154c79;
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
+    background: #ffe033;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 0 #1e293b;
+}
+.audio-control-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #1e293b;
 }
 .audio-control-btn.playing i {
     animation: rotateMusic 3s linear infinite;
@@ -74,155 +186,288 @@ body {
 }
 
 /* =========================================================
-   KHUNG ANIMATION BÊN TRÁI (KIM TỰ THÁP & CODE)
+   KHUNG TRÁI: TRÒ CHƠI KHỦNG LONG NHẢY XƯƠNG RỒNG (TỐC ĐỘ CHẬM)
 ========================================================= */
 .left-visual-container {
     position: absolute;
-    left: 8%;
-    top: 50%;
+    left: 4.5%;
+    top: 48%;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
-    z-index: 1;
-    width: 320px;
+    z-index: 5;
+    width: 345px;
+    gap: 16px;
 }
 
-.pyramid-wrapper {
+.dino-game-card {
+    width: 100%;
+    background: #fffbeb;
+    border: 3px solid #1e293b;
+    border-radius: 22px;
+    padding: 12px;
+    box-shadow: 0 8px 0 #1e293b, 0 15px 25px rgba(0,0,0,0.15);
+}
+
+.game-header {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
+    margin-bottom: 8px;
+    padding: 0 2px;
 }
-.pyramid-row {
-    display: flex;
-    justify-content: center;
+.game-title-badge {
+    background: var(--mario-red);
+    color: #fff;
+    font-size: 11.5px;
+    font-weight: 900;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 2px solid #1e293b;
+    letter-spacing: 0.3px;
 }
-.pyramid-box {
-    width: 45px;
-    height: 45px;
-    border: 2px solid var(--pyramid-glow);
-    background: transparent;
-    margin: -1px;
-    opacity: 0.1;
-    transition: all 0.3s ease;
-}
-.pyramid-box.glow {
-    opacity: 1;
-    background: #ffffff;
-    box-shadow: 0 0 15px var(--pyramid-glow), inset 0 0 10px var(--pyramid-glow);
-    border-color: #ffffff;
+.game-score-box {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: #b45309;
+    background: #fef3c7;
+    padding: 5px 8px;
+    border-radius: 10px;
+    border: 2px solid #f59e0b;
 }
 
+#dinoMiniCanvas {
+    width: 100%;
+    height: 195px;
+    background: linear-gradient(180deg, #e0f2fe 0%, #f8fafc 84%, #fde68a 84%, #f59e0b 100%);
+    border-radius: 14px;
+    border: 2.5px solid #1e293b;
+    display: block;
+    cursor: pointer;
+    user-select: none;
+}
+
+.game-controls-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    gap: 6px;
+}
+.btn-game-play {
+    background: var(--mario-green);
+    color: #fff;
+    border: 2px solid #1e293b;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 5px 12px;
+    box-shadow: 0 3px 0 #1e293b;
+    transition: all 0.1s;
+}
+.btn-game-play:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #1e293b;
+}
+.game-hint-text {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #475569;
+}
+
+/* Hộp thoại gõ chữ phong cách Mario */
 .typing-code-box {
     width: 100%;
-    background: rgba(10, 15, 30, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    backdrop-filter: blur(5px);
+    background: #ffffff;
+    border: 3px solid #1e293b;
+    border-radius: 20px;
+    padding: 14px 16px;
+    box-shadow: 0 6px 0 #1e293b;
 }
 .typing-code-box .window-controls {
     display: flex;
+    align-items: center;
     gap: 6px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 .typing-code-box .dot {
-    width: 10px; height: 10px; border-radius: 50%;
+    width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid #1e293b;
 }
 .dot-red { background: #ff5f56; }
 .dot-yellow { background: #ffbd2e; }
 .dot-green { background: #27c93f; }
+.dialog-tag {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 800;
+    color: #0284c7;
+    background: #e0f2fe;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
 
 #code-content {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 13px;
-    color: #38bdf8;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #1e293b;
     white-space: pre-wrap;
     margin: 0;
     line-height: 1.5;
+    min-height: 62px;
 }
 .cursor {
     display: inline-block;
     width: 8px;
-    height: 15px;
-    background-color: #38bdf8;
-    animation: blink 1s step-end infinite;
+    height: 14px;
+    background-color: var(--mario-red);
+    border-radius: 2px;
+    animation: blink 0.8s step-end infinite;
     vertical-align: middle;
 }
 @keyframes blink { 50% { opacity: 0; } }
 
-@media (max-width: 1100px) {
+@media (max-width: 1180px) {
     .left-visual-container { display: none; }
 }
 
 /* =========================================================
-   FORM ĐĂNG NHẬP
+   FORM ĐĂNG NHẬP DỄ THƯƠNG (MARIO & PASTEL - GIỮ NGUYÊN)
 ========================================================= */
 .login-card-wrapper {
     position: relative;
-    z-index: 2;
-    max-width: 480px;
+    z-index: 6;
+    max-width: 460px;
     width: 100%;
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(10px);
-    border-radius: 24px;
-    box-shadow: 0 20px 40px rgba(15, 76, 129, 0.15);
-    animation: fadeInCard 0.8s ease;
+    background: rgba(255, 255, 255, 0.97);
+    border: 3.5px solid #1e293b;
+    border-radius: 30px;
+    box-shadow: 0 10px 0 #1e293b, 0 25px 45px rgba(15, 76, 129, 0.22);
+    animation: fadeInCard 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 @keyframes fadeInCard {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; transform: translateY(25px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-.login-header-modern { padding: 35px 30px 15px; text-align: center; }
+.card-rivet {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #fbd000;
+    border: 2px solid #1e293b;
+    border-radius: 50%;
+}
+.rivet-tl { top: 14px; left: 14px; }
+.rivet-tr { top: 14px; right: 14px; }
+.rivet-bl { bottom: 14px; left: 14px; }
+.rivet-br { bottom: 14px; right: 14px; }
+
+.login-header-modern { padding: 30px 28px 12px; text-align: center; }
+
 .login-logo-circle {
-    width: 70px; height: 70px;
-    background: #154c79;
-    color: #ffffff; font-size: 30px;
-    border-radius: 20px;
+    width: 76px; height: 76px;
+    background: linear-gradient(135deg, #ff4d4d 0%, #e52521 100%);
+    color: #ffffff;
+    font-size: 32px;
+    border-radius: 24px;
+    border: 3px solid #1e293b;
     display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 18px;
-    box-shadow: 0 8px 20px rgba(21, 76, 121, 0.25);
-    animation: floatIcon 3.5s ease-in-out infinite;
+    margin: 0 auto 14px;
+    box-shadow: 0 5px 0 #1e293b;
+    animation: floatIcon 2.6s ease-in-out infinite;
+    position: relative;
+}
+.login-logo-circle::after {
+    content: "⭐";
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 20px;
+    animation: spinStar 4s linear infinite;
 }
 @keyframes floatIcon {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-6px); }
+    0%, 100% { transform: translateY(0px) rotate(-2deg); }
+    50% { transform: translateY(-7px) rotate(2deg); }
+}
+@keyframes spinStar {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.2) rotate(20deg); }
+}
+
+.cute-subtitle-pill {
+    display: inline-block;
+    background: #fef3c7;
+    color: #b45309;
+    border: 1.5px solid #f59e0b;
+    border-radius: 50px;
+    padding: 3px 14px;
+    font-size: 13px;
+    font-weight: 800;
+    margin-top: 4px;
 }
 
 .form-control-modern {
-    background: #ffffff !important;
-    border: 1.5px solid #cbd5e1 !important;
-    border-radius: 14px !important;
-    padding: 14px 16px 14px 48px !important;
+    background: #f8fafc !important;
+    border: 2.5px solid #cbd5e1 !important;
+    border-radius: 16px !important;
+    padding: 13px 16px 13px 46px !important;
     font-size: 15px !important;
-    font-weight: 500;
+    font-weight: 700;
+    color: #1e293b !important;
+    transition: all 0.2s ease;
 }
 .form-control-modern:focus {
-    border-color: #154c79 !important;
-    box-shadow: 0 0 0 4px rgba(21, 76, 121, 0.1) !important;
+    background: #ffffff !important;
+    border-color: #049cd8 !important;
+    box-shadow: 0 0 0 4px rgba(4, 156, 216, 0.18) !important;
 }
 
 .input-group-icon { position: relative; }
 .input-group-icon i {
-    position: absolute; top: 50%; left: 18px; transform: translateY(-50%);
-    color: #94a3b8; font-size: 18px; z-index: 10;
+    position: absolute; top: 50%; left: 17px; transform: translateY(-50%);
+    color: #049cd8; font-size: 18px; z-index: 10;
+}
+
+.interface-pill {
+    background: #f1f5f9;
+    border: 2px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.interface-pill:has(input:checked) {
+    background: #e0f2fe;
+    border-color: #049cd8;
+    box-shadow: 0 3px 0 #049cd8;
 }
 
 .btn-login-modern {
-    background: #154c79;
-    border: none; border-radius: 14px;
-    padding: 14px; font-size: 16px; font-weight: 700; color: #ffffff;
-    transition: all 0.3s ease;
+    background: linear-gradient(180deg, #ff4d4d 0%, #e52521 100%);
+    border: 3px solid #1e293b;
+    border-radius: 18px;
+    padding: 13px;
+    font-size: 16.5px;
+    font-weight: 900;
+    color: #ffffff;
+    box-shadow: 0 5px 0 #1e293b;
+    transition: all 0.15s ease;
+    letter-spacing: 0.3px;
 }
 .btn-login-modern:hover { 
     color: #ffffff !important;
-    background-color: #154c79 !important;
+    background: linear-gradient(180deg, #ff5e5e 0%, #f02d29 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 7px 0 #1e293b;
+}
+.btn-login-modern:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0 #1e293b;
 }
 .btn-login-modern:disabled {
-    background-color: #154c79 !important;
+    background: #94a3b8 !important;
     color: #ffffff !important;
     opacity: 0.9 !important;
     cursor: not-allowed;
@@ -232,15 +477,17 @@ body {
    TÀI KHOẢN ĐĂNG NHẬP GẦN ĐÂY
 ========================================================= */
 #savedAccountsContainer .saved-acc-item {
-    background: transparent !important;
-    border: none !important;
-    padding: 6px 4px;
-    border-radius: 12px;
+    background: #f8fafc !important;
+    border: 2px solid #e2e8f0 !important;
+    padding: 7px 10px;
+    border-radius: 14px;
     transition: all 0.2s ease;
     cursor: pointer;
 }
 #savedAccountsContainer .saved-acc-item:hover {
-    background: rgba(15, 76, 129, 0.05) !important;
+    background: #e0f2fe !important;
+    border-color: #38bdf8 !important;
+    transform: translateX(3px);
 }
 #savedAccountsContainer .btn-close-acc {
     background: none;
@@ -254,53 +501,55 @@ body {
     color: #ef4444;
 }
 
+/* =========================================================
+   BẢNG TIN HỆ THỐNG BÊN PHẢI (GIỮ NGUYÊN)
+========================================================= */
 .maintenance-banner-premium {
     position: fixed;
-    top: 50%; right: 25px;
+    top: 48%; right: 24px;
     transform: translateY(-50%);
-    width: 400px;
-    height: 680px;
-    max-height: 85vh;
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-radius: 20px;
+    width: 370px;
+    max-height: 78vh;
+    background: rgba(255, 255, 255, 0.96);
+    border: 3.5px solid #1e293b;
+    border-radius: 24px;
     color: #1e293b; 
-    padding: 28px;
-    font-size: 16px;
-    font-weight: 500;
-    z-index: 10999;
+    padding: 22px;
+    font-size: 15px;
+    font-weight: 600;
+    z-index: 10;
     overflow: hidden;
-    box-shadow: -10px 10px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 0 #1e293b, 0 15px 30px rgba(0, 0, 0, 0.15);
     display: none;
     flex-direction: column;
 }
 
 .maintenance-banner-premium::before {
-    content: "📣 BẢNG TIN HỆ THỐNG";
+    content: "🍄 BẢNG TIN HỆ THỐNG";
     display: block; text-align: center;
-    font-size: 20px;
-    font-weight: 800;
-    color: #154c79; 
-    margin-bottom: 15px; padding-bottom: 15px;
-    border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+    font-size: 18px;
+    font-weight: 900;
+    color: #e52521; 
+    margin-bottom: 14px; padding-bottom: 12px;
+    border-bottom: 2.5px dashed #cbd5e1;
 }
 
 .maintenance-text {
     display: flex; flex-direction: column;
-    background: #f1f5f9; 
-    border-radius: 12px;
-    padding: 18px;
-    margin-bottom: 18px;
-    border: 1px solid #e2e8f0;
-    line-height: 1.6;
-    font-size: 15px;
+    background: #fefce8; 
+    border-radius: 16px;
+    padding: 15px;
+    margin-bottom: 14px;
+    border: 2px solid #facc15;
+    line-height: 1.55;
+    font-size: 14px;
 }
 
 .maintenance-text strong {
-    color: #0f4c81; 
-    font-size: 16px;
-    margin-bottom: 8px;
+    color: #0369a1; 
+    font-size: 15px;
+    font-weight: 800;
+    margin-bottom: 6px;
     display: flex; align-items: center; gap: 8px;
 }
 .marquee-wrapper { display: flex; flex-direction: column; height: max-content; }
@@ -315,12 +564,45 @@ body {
     50% { transform: scale(1.2); opacity: 0.7; }
 }
 .maintenance-banner-premium:hover .scrolling-active { animation-play-state: paused; }
-@media (max-width: 1024px) { .maintenance-banner-premium { display: none !important; } }
+@media (max-width: 1180px) { .maintenance-banner-premium { display: none !important; } }
+
+/* Nút mở nhanh Minigame trên màn hình nhỏ */
+.mobile-game-toggle {
+    display: none;
+    position: fixed;
+    top: 18px;
+    left: 20px;
+    z-index: 10000;
+    background: #43b047;
+    color: #fff;
+    border: 3px solid #1e293b;
+    border-radius: 50px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 800;
+    box-shadow: 0 4px 0 #1e293b;
+}
+@media (max-width: 1180px) {
+    .mobile-game-toggle { display: inline-flex; align-items: center; gap: 6px; }
+}
 </style>
 </head>
 <body class="d-flex align-items-center justify-content-center vh-100 p-3">
 
-    <!-- THẺ AUDIO TỰ ĐỘNG PHÁT & LẶP LẠI -->
+    <!-- LỚP TRANG TRÍ BẦU TRỜI & MẶT ĐẤT MARIO (GIỮ NGUYÊN) -->
+    <div class="clouds-layer">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+        <div class="cloud cloud-3"></div>
+    </div>
+    <div class="mario-pipe pipe-left"></div>
+    <div class="mario-pipe pipe-right"></div>
+    <div class="mario-runner-track">
+        <div class="ambient-mario" title="It's-a me, Mario!">🍄🏃‍♂️</div>
+    </div>
+    <div class="mario-ground"></div>
+
+    <!-- THẺ AUDIO TỰ ĐỘNG PHÁT & LẶP LẠI[cite: 1] -->
     <audio id="bgMusic" autoplay loop preload="auto">
         <source src="TRANGWEB/nhacnen.mp3" type="audio/mpeg">
         <source src="audio/nhacnen.mp3" type="audio/mpeg">
@@ -328,49 +610,66 @@ body {
         Trình duyệt không hỗ trợ phát âm thanh.
     </audio>
 
-    <!-- NÚT ĐIỀU KHIỂN BẬT / TẮT NHẠC NỀN -->
+    <!-- NÚT MỞ GAME TRÊN MOBILE/TABLET -->
+    <button class="mobile-game-toggle" type="button" data-bs-toggle="modal" data-bs-target="#mobileGameModal">
+        🦖 Chơi Khủng Long
+    </button>
+
+    <!-- NÚT ĐIỀU KHIỂN BẬT / TẮT NHẠC NỀN[cite: 1] -->
     <button class="audio-control-btn" id="btnAudioControl" onclick="toggleAudio()" title="Bật/Tắt nhạc nền">
         <i class="fa-solid fa-music" id="audioIcon"></i>
         <span id="audioStatusText">Nhạc nền</span>
     </button>
 
-    <!-- HIỆU ỨNG BÊN TRÁI: KHỐI KIM TỰ THÁP VÀ CODE -->
+    <!-- KHUNG BÊN TRÁI: TRÒ CHƠI KHỦNG LONG (TỐC ĐỘ CHẬM) & HỘP THOẠI -->
     <div class="left-visual-container">
-        <!-- Kim Tự Tháp -->
-        <div class="pyramid-wrapper" id="pyramid-wrapper">
-            <div class="pyramid-row"><div class="pyramid-box"></div></div>
-            <div class="pyramid-row"><div class="pyramid-box"></div><div class="pyramid-box"></div></div>
-            <div class="pyramid-row"><div class="pyramid-box"></div><div class="pyramid-box"></div><div class="pyramid-box"></div></div>
-            <div class="pyramid-row"><div class="pyramid-box"></div><div class="pyramid-box"></div><div class="pyramid-box"></div><div class="pyramid-box"></div></div>
-            <div class="pyramid-row"><div class="pyramid-box"></div><div class="pyramid-box"></div><div class="pyramid-box"></div><div class="pyramid-box"></div><div class="pyramid-box"></div></div>
+        <!-- Mini Game Dino Runner -->
+        <div class="dino-game-card">
+            <div class="game-header">
+                <span class="game-title-badge">🦖 DINO VƯỢT XƯƠNG RỒNG</span>
+                <span class="game-score-box">HI:<span id="dinoHighScore">0000</span> | <span id="dinoScore">0000</span></span>
+            </div>
+            <canvas id="dinoMiniCanvas" width="320" height="195"></canvas>
+            <div class="game-controls-bar">
+                <button type="button" class="btn-game-play" id="btnStartDinoGame" onclick="startDinoGame()">
+                    ▶ Chơi ngay
+                </button>
+                <span class="game-hint-text">Bấm khung hoặc Space / ↑ để nhảy</span>
+            </div>
         </div>
 
-        <!-- Khung Code -->
+        <!-- Khung Lời Chào Dễ Thương -->
         <div class="typing-code-box">
             <div class="window-controls">
                 <div class="dot dot-red"></div>
                 <div class="dot dot-yellow"></div>
                 <div class="dot dot-green"></div>
+                <span class="dialog-tag">💬 Lời nhắn từ APMA</span>
             </div>
             <div id="code-content"></div><span class="cursor"></span>
         </div>
     </div>
 
-    <!-- KHUNG ĐĂNG NHẬP -->
+    <!-- KHUNG ĐĂNG NHẬP[cite: 1] -->
     <div class="login-card-wrapper">
+        <span class="card-rivet rivet-tl"></span>
+        <span class="card-rivet rivet-tr"></span>
+        <span class="card-rivet rivet-bl"></span>
+        <span class="card-rivet rivet-br"></span>
+
         <div class="login-header-modern">
             <div class="login-logo-circle">
                 <i class="fa-solid fa-graduation-cap"></i>
             </div>
-            <h3 class="fw-bold text-dark mb-1" style="letter-spacing: -0.5px;">Applied Mathematics</h3>
-            <p class="text-primary small m-0 fw-bold opacity-85" style="color: #0d6efd !important;">Thời gian không thể xóa đi...</p>
+            <h3 class="fw-black text-dark mb-1" style="font-weight: 900; letter-spacing: -0.5px;">Applied Mathematics</h3>
+            <div class="cute-subtitle-pill">✨ Thời gian không thể xóa đi... ✨</div>
         </div>
 
-        <div class="card-body px-4 pb-4 pt-0">
-            <!-- Nơi hiển thị tài khoản đã lưu -->
+        <div class="card-body px-4 pb-4 pt-2">
+            <!-- Nơi hiển thị tài khoản đã lưu[cite: 1] -->
             <div id="savedAccountsContainer" class="mb-2"></div>
 
-            <div class="input-group-icon mb-3 mt-3">
+            <div class="input-group-icon mb-3 mt-2">
                 <input type="text" id="txtUserMSSV" class="form-control form-control-modern" placeholder="Mã số sinh viên (VD: 51.01...)">
                 <i class="fa-regular fa-address-card"></i>
             </div>
@@ -378,66 +677,79 @@ body {
                 <input type="password" id="txtUserPass" class="form-control form-control-modern" placeholder="Mật khẩu (Mặc định: 123)">
                 <i class="fa-solid fa-lock"></i>
             </div>
-            <div class="d-flex justify-content-center gap-4 mb-3">
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="interfaceOption" id="interface1" value="appliedmathematics.html" checked>
-                <label class="form-check-label fw-bold" style="color: #154c79;" for="interface1">
-                    Giao diện 1
+            <div class="d-flex justify-content-center gap-3 mb-3">
+                <label class="form-check interface-pill mb-0 d-flex align-items-center gap-2" for="interface1">
+                    <input class="form-check-input m-0" type="radio" name="interfaceOption" id="interface1" value="appliedmathematics.html" checked>
+                    <span class="fw-bold" style="color: #0f4c81; font-size: 14px;">🍄 Giao diện 1</span>
+                </label>
+                <label class="form-check interface-pill mb-0 d-flex align-items-center gap-2" for="interface2">
+                    <input class="form-check-input m-0" type="radio" name="interfaceOption" id="interface2" value="appliedmathematics2.html">
+                    <span class="fw-bold" style="color: #0f4c81; font-size: 14px;">⭐ Giao diện 2</span>
                 </label>
             </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="interfaceOption" id="interface2" value="appliedmathematics2.html">
-                <label class="form-check-label fw-bold" style="color: #154c79;" for="interface2">
-                    Giao diện 2
-                </label>
-            </div>
-        </div>
-        <small class="text-danger text-center d-block d-none mb-3 fw-bold" id="userAuthError"></small>
-            <button type="button" class="btn w-100 btn-login-modern mt-2" onclick="loginStudentPage()" id="btnLoginStudent">
-                Đăng nhập hệ thống
+            <small class="text-danger text-center d-block d-none mb-3 fw-bold" id="userAuthError"></small>
+            <button type="button" class="btn w-100 btn-login-modern mt-1" onclick="loginStudentPage()" id="btnLoginStudent">
+                🚀 Đăng nhập hệ thống
             </button>
         </div>
     </div>
 
-    <!-- KHUNG THÔNG BÁO BÊN PHẢI -->
+    <!-- KHUNG THÔNG BÁO BÊN PHẢI[cite: 1] -->
     <div id="maintenanceBanner" class="maintenance-banner-premium" style="display: none;">
         <div class="marquee-wrapper" id="marqueeWrapper">
-                <div class="maintenance-text">
+            <div class="maintenance-text">
                 <strong><i class="fa-solid fa-bell pulse-icon" style="color:#0ea5e9;"></i> THÔNG BÁO 1 (27/08):</strong>
                 <span>Đôi lúc Google Scripts có thể xảy ra tình trạng lag hoặc phản hồi chậm. Bạn vui lòng quay lại sau ít phút. Admin không thể can thiệp xử lý vì vấn đề này xuất phát từ máy chủ của Google!</span>
             </div>
-        <div class="maintenance-text">
-                <strong><i class="fa-solid fa-flag pulse-icon"></i> THÔNG BÁO 2 (03/09)</strong>
+            <div class="maintenance-text">
+                <strong><i class="fa-solid fa-flag pulse-icon"></i> THÔNG BÁO 2 (03/09):</strong>
                 <span>Nếu phát hiện nội dung có sai sót, các bạn vui lòng bình luận tại mục Trao đổi (biểu tượng cùng hàng) hay Hỏi đáp QA để admin chỉnh sửa nhé!</span>
             </div>
-
- </div>
+        </div>
     </div>
 
-    <!-- PHẦN MODAL CẢNH BÁO SOI CODE -->
+    <!-- MODAL CHƠI GAME TRÊN MÀN HÌNH NHỎ -->
+    <div class="modal fade" id="mobileGameModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 24px; border: 3px solid #1e293b; background: #fffbeb;">
+                <div class="modal-header border-0 pb-1">
+                    <h6 class="modal-title fw-bold text-danger">🦖 DINO VƯỢT XƯƠNG RỒNG</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center pt-1">
+                    <p class="small text-muted mb-2">Chạm vào khung bên dưới để Khủng long nhảy qua xương rồng nhé!</p>
+                    <div class="fw-bold text-warning mb-2" style="font-family: 'Press Start 2P', monospace; font-size: 11px;">
+                        HI: <span id="mobileDinoHighScore">0000</span> | ĐIỂM: <span id="mobileDinoScore">0000</span>
+                    </div>
+                    <canvas id="mobileDinoCanvas" width="310" height="200" style="width:100%; border-radius:16px; border:2.5px solid #1e293b; background: linear-gradient(180deg, #e0f2fe 0%, #f8fafc 84%, #fde68a 84%, #f59e0b 100%);"></canvas>
+                    <button type="button" class="btn btn-success fw-bold rounded-pill px-4 mt-3" onclick="startMobileDinoGame()">▶ Bắt đầu / Nhảy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHẦN MODAL CẢNH BÁO SOI CODE[cite: 1] -->
     <div class="modal fade" id="tauntSourceModal" tabindex="-1" aria-hidden="true" style="z-index: 10900;">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
-                <div class="modal-header text-white justify-content-center" style="background-color: #dc2626;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden; border: 3px solid #1e293b !important;">
+                <div class="modal-header text-white justify-content-center" style="background-color: #e52521;">
                     <h6 class="modal-title m-0 fw-bold text-uppercase fs-5">
                         <i class="fa-solid fa-ghost me-2"></i>CẢNH BÁO SOI CODE!
                     </h6>
                 </div>
                 <div class="modal-body p-4 text-center">
-                    <div class="mb-3">
-                        <span style="font-size: 64px; display: inline-block; animation: wobble 1s infinite alternate ease-in-out;"></span>
-                    </div>
+                    <div class="mb-2" style="font-size: 54px;">👾</div>
                     <h4 class="fw-bold text-danger mb-2">Hãy cẩn thận với người im lặng vì họ thường không nói gì!</h4>
                     <p class="text-secondary mb-3" style="font-size: 15px; line-height: 1.6;">
                         Định mở chuột phải hoặc bấm F12 để soi code hả? <br>
                         Không dễ thế đâu, lo học bài đi nhé! 😉
                     </p>
-                    <div class="alert alert-danger border-0 p-2 small text-danger m-0" style="background-color: #fff5f5; border-radius: 12px; font-weight: 600;">
+                    <div class="alert alert-danger border-0 p-2 small text-danger m-0" style="background-color: #fff5f5; border-radius: 12px; font-weight: 700;">
                         <i class="fa-solid fa-shield-halved me-1"></i> Lêu lêu! 🤪😜
                     </div>
                 </div>
                 <div class="modal-footer border-0 justify-content-center pb-4 bg-light">
-                    <button type="button" class="btn text-white fw-bold px-4 py-2" style="background-color: #0f4c81; border-radius: 50px; min-width: 160px;" data-bs-dismiss="modal">
+                    <button type="button" class="btn text-white fw-bold px-4 py-2" style="background-color: #049cd8; border-radius: 50px; min-width: 160px;" data-bs-dismiss="modal">
                        Quay lại
                     </button>
                 </div>
@@ -445,15 +757,15 @@ body {
         </div>
     </div>
 
-    <!-- CHÂN TRANG -->
-    <div style="position: absolute; bottom: 15px; width: 100%; text-align: center; color: rgba(255, 255, 255, 0.6); font-size: 13px; font-weight: 500; z-index: 10; left: 0; pointer-events: none; letter-spacing: 0.5px;">
+    <!-- CHÂN TRANG[cite: 1] -->
+    <div style="position: fixed; bottom: 11px; width: 100%; text-align: center; color: #ffffff; text-shadow: 0 1.5px 0 #1e293b; font-size: 12.5px; font-weight: 800; z-index: 10; left: 0; pointer-events: none; letter-spacing: 0.3px;">
         &copy;2026 Applied Mathematics - Kế thừa và phát triển từ dự án của Nhóm 2 – 12T2 – CBT K32 (HHB, TBC, LTPV, TCN)
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- TỰ ĐỘNG PHÁT NHẠC (AUTO PLAY SCRIPT) -->
+    <!-- TỰ ĐỘNG PHÁT NHẠC (AUTO PLAY SCRIPT)[cite: 1] -->
     <script>
         const audio = document.getElementById('bgMusic');
         const audioBtn = document.getElementById('btnAudioControl');
@@ -471,7 +783,6 @@ body {
 
         function forcePlayMusic() {
             audio.volume = 0.5;
-            // Nếu bạn muốn tua đến đoạn hay (ví dụ giây 188 như login.html), hãy sửa số 0 bên dưới:
             if (audio.currentTime === 0) {
                 audio.currentTime = 204; 
             }
@@ -480,8 +791,7 @@ body {
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     updateAudioState(true);
-                }).catch((error) => {
-                    console.log("Trình duyệt chặn Autoplay. Đang chờ người dùng tương tác...");
+                }).catch(() => {
                     updateAudioState(false);
                 });
             }
@@ -507,9 +817,371 @@ body {
         });
     </script>
 
+    <!-- SCRIPT MINIGAME KHỦNG LONG CHROME DINO RUNNER (TỐC ĐỘ CHẬM RÃI) -->
     <script>
-        // XỬ LÝ GIAO DIỆN VÀ ANIMATION BÊN TRÁI & PHẢI
+        function createChromeDinoGame(canvasId, scoreId, highScoreId, btnId) {
+            const canvas = document.getElementById(canvasId);
+            if (!canvas) return null;
+            const ctx = canvas.getContext('2d');
+            const scoreEl = document.getElementById(scoreId);
+            const highScoreEl = document.getElementById(highScoreId);
+            const btnEl = btnId ? document.getElementById(btnId) : null;
+
+            const groundY = canvas.height - 32;
+            let state = 'idle'; // 'idle' | 'playing' | 'gameover'
+            let score = 0;
+            let highScore = parseInt(localStorage.getItem('apmaDinoHighScore') || '0', 10);
+            let gameSpeed = 2.5; // Tốc độ chậm rãi, dễ chơi
+            let frameCount = 0;
+
+            const dino = {
+                x: 34,
+                y: groundY - 34,
+                w: 30,
+                h: 34,
+                vy: 0,
+                gravity: 0.44,    // Rơi nhẹ nhàng để dễ nhảy qua chướng ngại vật
+                jumpPower: -9.5,  // Lực nhảy vừa tầm với trọng lực chậm
+                isGrounded: true
+            };
+
+            let obstacles = [];
+            let clouds = [
+                { x: 90, y: 34, speed: 0.35 },
+                { x: 240, y: 52, speed: 0.25 }
+            ];
+            let groundDots = [20, 75, 130, 195, 250, 305];
+            let nextSpawnIn = 105;
+
+            function formatScore(num) {
+                return Math.floor(num).toString().padStart(4, '0');
+            }
+
+            if (highScoreEl) highScoreEl.textContent = formatScore(highScore);
+
+            // Vẽ chú khủng long pixel dễ thương
+            function drawCuteDino(x, y, isDead, legPhase) {
+                ctx.save();
+                ctx.translate(x, y);
+
+                ctx.fillStyle = isDead ? '#ef4444' : '#22c55e';
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 2;
+
+                // Đuôi
+                ctx.beginPath();
+                ctx.roundRect(0, 14, 9, 10, 3);
+                ctx.fill();
+                ctx.stroke();
+
+                // Thân
+                ctx.beginPath();
+                ctx.roundRect(6, 10, 16, 17, 5);
+                ctx.fill();
+                ctx.stroke();
+
+                // Bụng sáng màu
+                ctx.fillStyle = '#bbf7d0';
+                ctx.fillRect(14, 14, 6, 10);
+
+                // Đầu khủng long
+                ctx.fillStyle = isDead ? '#ef4444' : '#22c55e';
+                ctx.beginPath();
+                ctx.roundRect(11, 0, 19, 14, 5);
+                ctx.fill();
+                ctx.stroke();
+
+                // Má hồng dễ thương
+                ctx.fillStyle = '#fb7185';
+                ctx.beginPath();
+                ctx.arc(21, 9, 2.2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Mắt
+                ctx.fillStyle = '#1e293b';
+                if (isDead) {
+                    ctx.font = 'bold 9px sans-serif';
+                    ctx.fillText('×', 22, 7);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(24, 5, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(24.5, 3.8, 1, 1);
+                }
+
+                // Tay nhỏ
+                ctx.strokeStyle = '#1e293b';
+                ctx.beginPath();
+                ctx.moveTo(22, 16);
+                ctx.lineTo(26, 16);
+                ctx.lineTo(26, 19);
+                ctx.stroke();
+
+                // Hai chân chạy luân phiên
+                ctx.fillStyle = '#16a34a';
+                if (!dino.isGrounded || isDead) {
+                    ctx.fillRect(9, 27, 4, 6);
+                    ctx.fillRect(16, 27, 4, 6);
+                } else if (legPhase === 0) {
+                    ctx.fillRect(9, 27, 4, 7);
+                    ctx.fillRect(16, 27, 4, 3);
+                } else {
+                    ctx.fillRect(9, 27, 4, 3);
+                    ctx.fillRect(16, 27, 4, 7);
+                }
+
+                ctx.restore();
+            }
+
+            // Vẽ cây xương rồng hoặc chim bay
+            function drawObstacle(ob) {
+                ctx.save();
+                if (ob.type === 'bird') {
+                    ctx.font = '22px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(Math.floor(frameCount / 14) % 2 === 0 ? '🦅' : '🕊️', ob.x + ob.w / 2, ob.y + 18);
+                } else {
+                    ctx.fillStyle = '#15803d';
+                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 2;
+
+                    // Thân chính
+                    ctx.beginPath();
+                    ctx.roundRect(ob.x + 6, ob.y, 10, ob.h, 4);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Nhánh trái
+                    ctx.beginPath();
+                    ctx.roundRect(ob.x, ob.y + 8, 6, 10, 3);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Nhánh phải
+                    ctx.beginPath();
+                    ctx.roundRect(ob.x + 16, ob.y + 5, 6, 11, 3);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Bông hoa hồng nhỏ trên đỉnh xương rồng
+                    ctx.fillStyle = '#f43f5e';
+                    ctx.beginPath();
+                    ctx.arc(ob.x + 11, ob.y - 2, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            function drawEnvironment() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Mây trắng trôi nhẹ
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                clouds.forEach(c => {
+                    ctx.beginPath();
+                    ctx.roundRect(c.x, c.y, 34, 10, 5);
+                    ctx.roundRect(c.x + 8, c.y - 5, 18, 10, 5);
+                    ctx.fill();
+                });
+
+                // Đường mặt đất
+                ctx.strokeStyle = '#1e293b';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(0, groundY);
+                ctx.lineTo(canvas.width, groundY);
+                ctx.stroke();
+
+                // Sỏi trên mặt đất
+                ctx.fillStyle = '#b45309';
+                groundDots.forEach(gx => {
+                    ctx.fillRect(gx, groundY + 6, 6, 2.5);
+                    ctx.fillRect(gx + 14, groundY + 13, 4, 2);
+                });
+            }
+
+            function jump() {
+                if (state === 'idle' || state === 'gameover') {
+                    resetAndStart();
+                    return;
+                }
+                if (dino.isGrounded) {
+                    dino.vy = dino.jumpPower;
+                    dino.isGrounded = false;
+                }
+            }
+
+            function spawnObstacle() {
+                const canSpawnBird = score > 200 && Math.random() > 0.72;
+                if (canSpawnBird) {
+                    const highBird = Math.random() > 0.5;
+                    obstacles.push({
+                        type: 'bird',
+                        x: canvas.width + 10,
+                        y: highBird ? groundY - 46 : groundY - 24,
+                        w: 24,
+                        h: 20
+                    });
+                } else {
+                    const isTall = Math.random() > 0.5;
+                    const h = isTall ? 30 : 23;
+                    obstacles.push({
+                        type: 'cactus',
+                        x: canvas.width + 10,
+                        y: groundY - h,
+                        w: 22,
+                        h: h
+                    });
+                }
+            }
+
+            function update() {
+                if (state !== 'playing') return;
+                frameCount++;
+
+                // Di chuyển mây & sỏi đất
+                clouds.forEach(c => {
+                    c.x -= c.speed;
+                    if (c.x < -40) c.x = canvas.width + 20;
+                });
+                for (let i = 0; i < groundDots.length; i++) {
+                    groundDots[i] -= gameSpeed;
+                    if (groundDots[i] < -20) groundDots[i] = canvas.width + 10;
+                }
+
+                // Vật lý nhảy khủng long
+                dino.vy += dino.gravity;
+                dino.y += dino.vy;
+                if (dino.y >= groundY - dino.h) {
+                    dino.y = groundY - dino.h;
+                    dino.vy = 0;
+                    dino.isGrounded = true;
+                }
+
+                // Sinh chướng ngại vật cách xa nhau hơn để dễ nhảy
+                nextSpawnIn--;
+                if (nextSpawnIn <= 0) {
+                    spawnObstacle();
+                    nextSpawnIn = Math.max(75, Math.floor(105 + Math.random() * 55 - gameSpeed * 3));
+                }
+
+                // Cập nhật chướng ngại vật & kiểm tra va chạm
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    const ob = obstacles[i];
+                    ob.x -= gameSpeed;
+
+                    const hit =
+                        dino.x + 6 < ob.x + ob.w - 5 &&
+                        dino.x + dino.w - 6 > ob.x + 5 &&
+                        dino.y + 5 < ob.y + ob.h - 4 &&
+                        dino.y + dino.h - 4 > ob.y + 4;
+
+                    if (hit) {
+                        state = 'gameover';
+                        if (score > highScore) {
+                            highScore = Math.floor(score);
+                            localStorage.setItem('apmaDinoHighScore', highScore.toString());
+                            if (highScoreEl) highScoreEl.textContent = formatScore(highScore);
+                        }
+                        if (btnEl) btnEl.textContent = '🔄 Chơi lại';
+                        renderFrame();
+                        return;
+                    }
+
+                    if (ob.x + ob.w < -10) {
+                        obstacles.splice(i, 1);
+                    }
+                }
+
+                // Tăng điểm & tăng tốc rất nhẹ
+                score += 0.12;
+                gameSpeed = Math.min(4.8, 2.5 + score * 0.0015);
+                if (scoreEl) scoreEl.textContent = formatScore(score);
+
+                renderFrame();
+                requestAnimationFrame(update);
+            }
+
+            function renderFrame() {
+                drawEnvironment();
+                obstacles.forEach(drawObstacle);
+                const legPhase = Math.floor(frameCount / 9) % 2;
+                drawCuteDino(dino.x, dino.y, state === 'gameover', legPhase);
+
+                if (state === 'idle') {
+                    ctx.fillStyle = '#1e293b';
+                    ctx.font = 'bold 13px Nunito, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Bấm vào đây hoặc nhấn Space để nhảy!', canvas.width / 2 + 12, 75);
+                } else if (state === 'gameover') {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                    ctx.beginPath();
+                    ctx.roundRect(canvas.width / 2 - 95, 48, 190, 56, 12);
+                    ctx.fill();
+                    ctx.strokeStyle = '#1e293b';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#e52521';
+                    ctx.font = '900 14px Nunito, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('ÚI! ĐỤNG XƯƠNG RỒNG RỒI', canvas.width / 2, 72);
+                    ctx.fillStyle = '#334155';
+                    ctx.font = 'bold 12px Nunito, sans-serif';
+                    ctx.fillText('Bấm để chơi lại ngay 🦖', canvas.width / 2, 92);
+                }
+            }
+
+            function resetAndStart() {
+                score = 0;
+                gameSpeed = 2.5;
+                obstacles = [];
+                dino.y = groundY - dino.h;
+                dino.vy = 0;
+                dino.isGrounded = true;
+                nextSpawnIn = 95;
+                if (scoreEl) scoreEl.textContent = '0000';
+                if (btnEl) btnEl.textContent = '⬆ Nhảy (Space)';
+                state = 'playing';
+                update();
+            }
+
+            canvas.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                jump();
+            });
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                jump();
+            }, { passive: false });
+
+            renderFrame();
+            return { jump, resetAndStart };
+        }
+
+        let desktopDinoGame, mobileDinoGame;
+        function startDinoGame() {
+            if (desktopDinoGame) desktopDinoGame.jump();
+        }
+        function startMobileDinoGame() {
+            if (mobileDinoGame) mobileDinoGame.jump();
+        }
+
+        window.addEventListener('keydown', function(e) {
+            const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+            if (activeTag === 'input' || activeTag === 'textarea') return;
+
+            if (e.code === 'Space' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (desktopDinoGame) desktopDinoGame.jump();
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
+            desktopDinoGame = createChromeDinoGame('dinoMiniCanvas', 'dinoScore', 'dinoHighScore', 'btnStartDinoGame');
+            mobileDinoGame = createChromeDinoGame('mobileDinoCanvas', 'mobileDinoScore', 'mobileDinoHighScore', null);
+
             let banner = document.getElementById('maintenanceBanner');
             if (banner) banner.style.display = 'flex';
 
@@ -521,27 +1193,11 @@ body {
                 }
             }
 
-            const boxes = document.querySelectorAll('.pyramid-box');
-            let currentBox = 0;
-            
-            function lightUpBoxes() {
-                if(currentBox >= boxes.length) {
-                    boxes.forEach(b => b.classList.remove('glow'));
-                    currentBox = 0;
-                    setTimeout(lightUpBoxes, 500);
-                    return;
-                }
-                boxes[currentBox].classList.add('glow');
-                currentBox++;
-                setTimeout(lightUpBoxes, 200);
-            }
-            setTimeout(lightUpBoxes, 1000);
-
-            // Animation Gõ code HTML
+            // Animation Gõ lời chào dễ thương[cite: 1]
             const codeLines = [
-                "Chào mừng bạn đến với vùng trời \"Analysis và Phản ví dụ\"",
-                "Chúc bạn học tập thật tốt, luôn vui vẻ và có thật nhiều kỷ niệm đẹp trong những năm tháng đại học!",
-                "Thân!",
+                "🍄 Chào mừng bạn đến với vùng trời \"Analysis và Phản ví dụ\"!",
+                "⭐ Chúc bạn học tập thật tốt, luôn vui vẻ và có thật nhiều kỷ niệm đẹp trong những năm tháng đại học!",
+                "💖 Thân!"
             ];
 
             const codeContainer = document.getElementById('code-content');
@@ -563,7 +1219,7 @@ body {
                         let char = codeLines[lineIndex].charAt(charIndex);
                         codeContainer.innerHTML += escapeHtml(char);
                         charIndex++;
-                        setTimeout(typeCode, 35);
+                        setTimeout(typeCode, 32);
                     } else {
                         codeContainer.innerHTML += "<br>";
                         lineIndex++;
@@ -612,14 +1268,12 @@ body {
             }
             renderSavedAccountsWithIcons();
 
-            // --- ĐOẠN CODE MỚI THÊM: Bắt sự kiện nhấn phím Enter ---
             $('#txtUserMSSV, #txtUserPass').on('keypress', function(e) {
-                if (e.which === 13) { // 13 là mã của phím Enter
-                    e.preventDefault(); // Ngăn hành vi mặc định của form
-                    loginStudentPage(); // Gọi hàm xử lý đăng nhập
+                if (e.which === 13) {
+                    e.preventDefault();
+                    loginStudentPage();
                 }
             });
-            // --------------------------------------------------------
         });
 
         function renderSavedAccountsWithIcons() {
@@ -628,18 +1282,18 @@ body {
             if (savedAccounts.length === 0) { container.hide(); return; }
             container.show();
             
-            let html = '<div class="text-dark mb-2" style="font-size: 13.5px;"><i class="fa-solid fa-clock-rotate-left me-1 opacity-75"></i> Tài khoản đã truy cập gần đây:</div><div class="d-flex flex-column gap-1 mb-2">';
+            let html = '<div class="text-dark fw-bold mb-2" style="font-size: 13.5px;"><i class="fa-solid fa-clock-rotate-left me-1 text-primary"></i> Tài khoản đã truy cập gần đây:</div><div class="d-flex flex-column gap-2 mb-2">';
             
             savedAccounts.forEach((acc) => {
                 html += `
                 <div class="d-flex align-items-center justify-content-between saved-acc-item" onclick="selectSavedAccount('${acc.mssv}')">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 38px; height: 38px; background-color: #154c79; font-size: 16px;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 38px; height: 38px; background-color: #049cd8; border: 2px solid #1e293b; font-size: 16px;">
                             <i class="fa-solid fa-user-graduate"></i>
                         </div>
                         <div style="line-height: 1.2; text-align: left;">
                             <div class="fw-bold text-dark" style="font-size: 15px;">${acc.name}</div>
-                            <div class="text-secondary" style="font-size: 12px; margin-top: 2px;">${acc.mssv}</div>
+                            <div class="text-secondary fw-semibold" style="font-size: 12px; margin-top: 2px;">${acc.mssv}</div>
                         </div>
                     </div>
                     <button class="btn-close-acc" onclick="removeSavedAccount('${acc.mssv}', event)" title="Xóa">
@@ -647,7 +1301,7 @@ body {
                     </button>
                 </div>`;
             });
-            html += '</div><hr class="mt-2 mb-4 opacity-25" style="border-color: #cbd5e1;">'; 
+            html += '</div><hr class="mt-2 mb-3 opacity-25" style="border-color: #94a3b8;">'; 
             container.html(html);
         }
 
@@ -668,9 +1322,8 @@ body {
     try {
         response = typeof res === 'string' ? JSON.parse(res) : res;
     } catch(err) {
-        // Bắt lỗi nếu máy chủ trả về dạng text (Lỗi máy chủ)
         $('#userAuthError').removeClass('d-none').text(res); 
-        btn.html('Đăng nhập hệ thống').prop('disabled', false); 
+        btn.html('🚀 Đăng nhập hệ thống').prop('disabled', false); 
         return;
     }
                 if (response.success) {
@@ -697,11 +1350,11 @@ body {
                     window.location.href = targetUrl;
                 } else {
                     $('#userAuthError').removeClass('d-none').text(response.message); 
-                    btn.html('Đăng nhập hệ thống').prop('disabled', false); 
+                    btn.html('🚀 Đăng nhập hệ thống').prop('disabled', false); 
                 }
             }, function() { 
                 $('#userAuthError').removeClass('d-none').text("Lỗi kết nối máy chủ!"); 
-                btn.html('Đăng nhập hệ thống').prop('disabled', false); 
+                btn.html('🚀 Đăng nhập hệ thống').prop('disabled', false); 
             });
         }
     </script>
@@ -732,23 +1385,18 @@ body {
 </script>
 <script>
     (function() {
-        // 1. CHỈ CẦN THAY ĐỔI THỜI GIAN Ở ĐÂY
         const startMaintenance = new Date(2026, 10, 15, 12, 00);  
         const endMaintenance   = new Date(2026, 10, 15, 15, 38); 
-        // Hàm tạo chuỗi định dạng
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
 
-        // Mặc định là trang bảo trì
         let maintenancePage = "Baotri.html"; 
         const now = new Date();
 
-        // Kiểm tra tài khoản từ localStorage
         let currentUserData = localStorage.getItem('currentUser');
         if (currentUserData) {
             try {
                 let userObj = JSON.parse(currentUserData);
-                // Tài khoản quản trị sẽ được điều hướng sang webduphong.html
                 if (userObj.mssv === "51.01.108.008" || userObj.mssv === "5101108008") {
                     maintenancePage = "loginle29.html";
                 }
@@ -763,7 +1411,6 @@ body {
                 textShow: endTimeStr
             }));
             
-            // Thêm ID để tránh tạo trùng iframe
             if (!document.getElementById('maintenanceIframe')) {
                 const iframe = document.createElement('iframe');
                 iframe.id = 'maintenanceIframe';
@@ -773,14 +1420,11 @@ body {
                 document.body.style.overflow = 'hidden'; 
             }
         }
-        // Đã xóa phần else để không xung đột dữ liệu
     })();
 </script>
 <script>
     (function() {
         const now = new Date();
-        
-        // 1. KIỂM TRA THỨ TRONG TUẦN
         const currentDay = now.getDay();
         const daysToMaintain = []; 
         
@@ -794,10 +1438,8 @@ body {
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
 
-        // Mặc định là trang bảo trì chung
         let maintenancePage = "Baotri.html"; 
 
-        // Kiểm tra tài khoản admin từ localStorage
         let currentUserData = localStorage.getItem('currentUser');
         if (currentUserData) {
             try {
