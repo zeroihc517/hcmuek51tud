@@ -210,7 +210,135 @@ function saveEditRow() {
 
        
 
-        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        // =========================================================
+// XỬ LÝ MENU CHUỘT PHẢI TÙY CHỈNH
+// =========================================================
+let lastRightClickedInput = null;
+let savedSelectionText = "";
+let rightClickedLinkUrl = "";
+
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+
+    const menu = document.getElementById('customContextMenu');
+    if (!menu) return;
+
+    // 1. Lưu lại vùng văn bản đang được bôi đen (nếu có)
+    const selection = window.getSelection();
+    savedSelectionText = selection ? selection.toString() : "";
+
+    // 2. Kiểm tra xem người dùng có đang chuột phải vào ô nhập liệu (input/textarea) không
+    const target = e.target;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        lastRightClickedInput = target;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+            savedSelectionText = target.value.substring(target.selectionStart, target.selectionEnd);
+        }
+    } else {
+        lastRightClickedInput = null;
+    }
+
+    // 3. Kiểm tra xem có đang chuột phải trúng thẻ liên kết <a> hay không
+    const anchorEl = target.closest('a');
+    rightClickedLinkUrl = (anchorEl && anchorEl.href && !anchorEl.href.startsWith('javascript:')) 
+        ? anchorEl.href 
+        : window.location.href;
+
+    // Bật/Tắt trạng thái mờ cho nút Sao chép và Dán
+    const btnCopy = document.getElementById('ctxCopy');
+    const btnPaste = document.getElementById('ctxPaste');
+
+    if (savedSelectionText.trim() !== "") {
+        btnCopy.classList.remove('disabled');
+    } else {
+        btnCopy.classList.add('disabled');
+    }
+
+    if (lastRightClickedInput) {
+        btnPaste.classList.remove('disabled');
+    } else {
+        btnPaste.classList.add('disabled');
+    }
+
+    // 4. Tính toán tọa độ hiển thị để menu không bị tràn ra ngoài mép màn hình
+    menu.classList.remove('d-none');
+    const menuWidth = menu.offsetWidth;
+    const menuHeight = menu.offsetHeight;
+    const winWidth = window.innerWidth;
+    const winHeight = window.innerHeight;
+
+    let posX = e.clientX;
+    let posY = e.clientY;
+
+    if (posX + menuWidth > winWidth) posX = winWidth - menuWidth - 10;
+    if (posY + menuHeight > winHeight) posY = winHeight - menuHeight - 10;
+
+    menu.style.left = posX + 'px';
+    menu.style.top = posY + 'px';
+});
+
+// Ẩn menu khi click chuột trái ra ngoài hoặc cuộn trang
+document.addEventListener('click', function(e) {
+    const menu = document.getElementById('customContextMenu');
+    if (menu && !menu.contains(e.target)) {
+        menu.classList.add('d-none');
+    }
+});
+window.addEventListener('scroll', function() {
+    const menu = document.getElementById('customContextMenu');
+    if (menu) menu.classList.add('d-none');
+}, true);
+
+// Gắn sự kiện cho 4 nút chức năng
+$(document).ready(function() {
+    // 1. Sao chép
+    $('#ctxCopy').on('click', function() {
+        $('#customContextMenu').addClass('d-none');
+        if (savedSelectionText) {
+            navigator.clipboard.writeText(savedSelectionText).then(() => {
+                alert("Đã sao chép văn bản!");
+            }).catch(() => {
+                document.execCommand('copy');
+            });
+        }
+    });
+
+    // 2. Dán
+    $('#ctxPaste').on('click', async function() {
+        $('#customContextMenu').addClass('d-none');
+        if (!lastRightClickedInput) return;
+
+        try {
+            const text = await navigator.clipboard.readText();
+            lastRightClickedInput.focus();
+
+            if (lastRightClickedInput.tagName === 'INPUT' || lastRightClickedInput.tagName === 'TEXTAREA') {
+                const start = lastRightClickedInput.selectionStart;
+                const end = lastRightClickedInput.selectionEnd;
+                const val = lastRightClickedInput.value;
+                lastRightClickedInput.value = val.slice(0, start) + text + val.slice(end);
+                lastRightClickedInput.selectionStart = lastRightClickedInput.selectionEnd = start + text.length;
+                $(lastRightClickedInput).trigger('input'); // Kích hoạt sự kiện cập nhật live preview nếu có
+            } else if (lastRightClickedInput.isContentEditable) {
+                document.execCommand('insertText', false, text);
+            }
+        } catch (err) {
+            alert("Trình duyệt chặn quyền đọc Clipboard tự động, vui lòng dùng tổ hợp phím Ctrl + V!");
+        }
+    });
+
+    // 3. Tải lại trang
+    $('#ctxReload').on('click', function() {
+        $('#customContextMenu').addClass('d-none');
+        location.reload();
+    });
+
+    // 4. Mở tab mới
+    $('#ctxNewTab').on('click', function() {
+        $('#customContextMenu').addClass('d-none');
+        window.open(rightClickedLinkUrl || window.location.href, '_blank');
+    });
+});
         document.addEventListener('keydown', function(e) {
             if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
             if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) { e.preventDefault(); return false; }

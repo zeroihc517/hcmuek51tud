@@ -4006,3 +4006,86 @@ body.dark-mode .course-hub-card .progress {
 body.dark-mode .course-hub-card .progress-bar {
     background: linear-gradient(90deg, #059669, #38bdf8) !important;
 }
+/* =========================================================
+   MENU CHUỘT PHẢI TÙY CHỈNH (CUSTOM CONTEXT MENU)
+   ========================================================= */
+.custom-context-menu {
+    position: fixed;
+    z-index: 999999;
+    width: 225px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 12px 30px rgba(15, 76, 129, 0.18);
+    user-select: none;
+    animation: ctxFadeIn 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ctxFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.custom-context-menu .ctx-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.custom-context-menu .ctx-item i {
+    width: 18px;
+    text-align: center;
+    color: #0f4c81;
+    font-size: 15px;
+}
+
+.custom-context-menu .ctx-item:hover {
+    background-color: #e8f1f8;
+    color: #0f4c81;
+}
+
+.custom-context-menu .ctx-item.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.custom-context-menu .ctx-shortcut {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 500;
+    color: #94a3b8;
+}
+
+.custom-context-menu .ctx-divider {
+    height: 1px;
+    background-color: #e2e8f0;
+    margin: 5px 8px;
+}
+
+/* Tương thích Dark Mode */
+body.dark-mode .custom-context-menu {
+    background: #131c30;
+    border-color: #334155;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+body.dark-mode .custom-context-menu .ctx-item {
+    color: #f8fafc;
+}
+body.dark-mode .custom-context-menu .ctx-item i {
+    color: #38bdf8;
+}
+body.dark-mode .custom-context-menu .ctx-item:hover {
+    background-color: #1e293b;
+    color: #38bdf8;
+}
+body.dark-mode .custom-context-menu .ctx-divider {
+    background-color: #1e293b;
+}
