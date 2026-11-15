@@ -1521,10 +1521,14 @@ headHtml += `<th style="width: 130px;" class="text-center">Tiến độ</th><th 
                     return; 
                 }
                 
-                // 2. Trích xuất thông tin giảng viên
+             // 2. Trích xuất thông tin giảng viên
 let textToCheck = fullRowText.replace(/\s+/g, '');
-if (/mãhọcphần|họcphần|giảngviênphụtrách|emailgiảngviên/.test(textToCheck) && !textToCheck.includes('mụctiêu')) { 
-    let info = row.filter(cell => String(cell).trim() !== "").join(" <span class='mx-2 text-black-50'>|</span> "); 
+if (/mãhọcphần|họcphần|giảngviênphụtrách|emailgiảngviên/.test(textToCheck)) { 
+    let info = row.filter(cell => String(cell).trim() !== "")
+                  .map(cell => String(cell).replace(/mục tiêu/gi, '').trim()) // Xóa chữ "mục tiêu" (không phân biệt hoa thường)
+                  .filter(cell => cell !== "") // Loại bỏ các ô nếu sau khi xóa bị rỗng
+                  .join(" <span class='mx-2 text-black-50'>|</span> "); 
+    
     if(info) instructorInfos.push(info); 
     return; 
 }
