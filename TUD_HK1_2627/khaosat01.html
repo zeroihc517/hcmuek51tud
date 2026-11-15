@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Khảo sát Trải nghiệm Học tập | Khoa Toán & Tin học</title>
+    <title>Khảo sát Chào mừng Ngày 20/11 | Khoa Toán & Tin học</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -264,13 +264,17 @@
     </style>
 </head>
 <body>
+    <!-- 🎵 NHẠC NỀN -->
+    <audio id="bgMusic" loop autoplay style="display:none;">
+        <source src="nhacnen2.mp3" type="audio/mp4">
+    </audio>
 
     <div class="survey-container">
         <div id="formState">
             <!-- Header -->
             <div class="header-card">
-                <div class="brand-icon"><i class="fa-solid fa-chart-pie"></i></div>
-                <h3 class="fw-bold mb-3">Khảo sát Trải nghiệm Học tập</h3>
+                <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                <h3 class="fw-bold mb-3">Khảo sát Chào mừng Ngày Nhà giáo 20/11</h3>
                 <p class="mb-0 text-light opacity-75" style="font-size: 18px;">Khoa Toán & Tin học - Trường ĐH Sư phạm TP.HCM</p>
             </div>
             
@@ -280,55 +284,55 @@
                 <div class="question-block">
                     <div class="question-title">
                         <span class="q-num">1</span>
-                        Bạn thường học vào ban đêm và thường kết thúc lúc mấy giờ?
+                        Bạn dự định làm gì để tri ân thầy cô nhân ngày 20/11 năm nay?
                     </div>
                     <div class="options-grid">
                         <label class="option-card">
-                            <input type="radio" name="q1" value="Trước 20h">
-                            <div class="app-icon bg-blue"><i class="fa-solid fa-cloud-sun"></i></div>
-                            <div class="option-text">Trước 20:00</div>
+                            <input type="radio" name="q1" value="Tặng hoa tươi">
+                            <div class="app-icon bg-blue"><i class="fa-solid fa-seedling"></i></div>
+                            <div class="option-text">Tặng hoa tươi</div>
                             <div class="radio-circle"></div>
                         </label>
                         <label class="option-card">
-                            <input type="radio" name="q1" value="21h">
-                            <div class="app-icon bg-indigo"><i class="fa-solid fa-moon"></i></div>
-                            <div class="option-text">Khoảng 21:00</div>
+                            <input type="radio" name="q1" value="Gửi thiệp chúc mừng">
+                            <div class="app-icon bg-indigo"><i class="fa-solid fa-envelope-open-text"></i></div>
+                            <div class="option-text">Gửi thiệp chúc mừng</div>
                             <div class="radio-circle"></div>
                         </label>
                         <label class="option-card">
-                            <input type="radio" name="q1" value="22h">
-                            <div class="app-icon bg-purple"><i class="fa-regular fa-clock"></i></div>
-                            <div class="option-text">Khoảng 22:00</div>
+                            <input type="radio" name="q1" value="Nhắn tin/Gọi điện">
+                            <div class="app-icon bg-purple"><i class="fa-solid fa-phone"></i></div>
+                            <div class="option-text">Nhắn tin/Gọi điện</div>
                             <div class="radio-circle"></div>
                         </label>
                         <label class="option-card">
-                            <input type="radio" name="q1" value="23h">
-                            <div class="app-icon bg-darkblue"><i class="fa-solid fa-book-open"></i></div>
-                            <div class="option-text">Khoảng 23:00</div>
+                            <input type="radio" name="q1" value="Về thăm trường">
+                            <div class="app-icon bg-darkblue"><i class="fa-solid fa-school"></i></div>
+                            <div class="option-text">Về thăm trường cũ</div>
                             <div class="radio-circle"></div>
                         </label>
                         <label class="option-card">
-                            <input type="radio" name="q1" value="0h">
-                            <div class="app-icon" style="background: #312e81;"><i class="fa-solid fa-mug-hot"></i></div>
-                            <div class="option-text">Khoảng 00:00</div>
+                            <input type="radio" name="q1" value="Tặng quà lưu niệm">
+                            <div class="app-icon" style="background: #312e81;"><i class="fa-solid fa-gift"></i></div>
+                            <div class="option-text">Tặng quà lưu niệm</div>
                             <div class="radio-circle"></div>
                         </label>
                         <label class="option-card">
-                            <input type="radio" name="q1" value="1h">
-                            <div class="app-icon" style="background: #1e1b4b;"><i class="fa-regular fa-lightbulb"></i></div>
-                            <div class="option-text">Khoảng 01:00</div>
+                            <input type="radio" name="q1" value="Tham gia văn nghệ">
+                            <div class="app-icon" style="background: #1e1b4b;"><i class="fa-solid fa-music"></i></div>
+                            <div class="option-text">Tham gia văn nghệ</div>
                             <div class="radio-circle"></div>
                         </label>
                         <label class="option-card">
-                            <input type="radio" name="q1" value="2h">
-                            <div class="app-icon" style="background: #0f172a;"><i class="fa-solid fa-star-and-crescent"></i></div>
-                            <div class="option-text">Khoảng 02:00</div>
+                            <input type="radio" name="q1" value="Học tập thật tốt">
+                            <div class="app-icon" style="background: #0f172a;"><i class="fa-solid fa-book-open-reader"></i></div>
+                            <div class="option-text">Cố gắng học tập thật tốt</div>
                             <div class="radio-circle"></div>
                         </label>
                         <label class="option-card">
-                            <input type="radio" name="q1" value="Lười học">
-                            <div class="app-icon bg-orange"><i class="fa-solid fa-bed"></i></div>
-                            <div class="option-text">Không học buổi tối</div>
+                            <input type="radio" name="q1" value="Chưa có dự định">
+                            <div class="app-icon bg-orange"><i class="fa-regular fa-face-thinking"></i></div>
+                            <div class="option-text">Chưa có dự định</div>
                             <div class="radio-circle"></div>
                         </label>
                     </div>
@@ -338,87 +342,87 @@
                 <div class="question-block">
                     <div class="question-title mb-4">
                         <span class="q-num">2</span>
-                        Thói quen và phương pháp tự học (ngoài giờ lên lớp) của bạn như thế nào?
+                        Kỷ niệm và lời tri ân gửi đến quý thầy cô giáo của bạn?
                     </div>
 
-                    <!-- Ý 1: Số giờ học -->
-                    <label class="sub-question-label">2.1 Mỗi ngày bạn dành bao nhiêu tiếng để tự học?</label>
-                    <input type="text" id="q2_1" class="form-control-custom mb-4" placeholder="Ví dụ: Khoảng 2 - 3 tiếng">
+                    <!-- Ý 1 -->
+                    <label class="sub-question-label">2.1 Kỷ niệm đáng nhớ nhất của bạn với thầy/cô là gì?</label>
+                    <input type="text" id="q2_1" class="form-control-custom mb-4" placeholder="Ví dụ: Lần được điểm 10, một lời khuyên của thầy...">
 
-                    <!-- Ý 2: Độ tập trung -->
-                    <label class="sub-question-label">2.2 Cứ mỗi lần học, bạn duy trì tập trung được bao lâu?</label>
-                    <input type="text" id="q2_2" class="form-control-custom mb-4" placeholder="Ví dụ: 45 phút, sau đó nghỉ giải lao 5 phút">
+                    <!-- Ý 2 -->
+                    <label class="sub-question-label">2.2 Ai là người thầy/cô để lại ấn tượng sâu sắc nhất cho bạn?</label>
+                    <input type="text" id="q2_2" class="form-control-custom mb-4" placeholder="Ví dụ: Cô A dạy Giải tích, Thầy B cố vấn học tập...">
 
-                    <!-- Ý 3: Tự luận phương pháp -->
-                    <label class="sub-question-label">2.3 Bạn có thể chia sẻ thêm về phương pháp học của mình không?</label>
-                    <textarea id="q2_3" class="form-control-custom" placeholder="Ví dụ: Mình thường nghe nhạc Lo-fi lúc học, note bài bằng Notion, học theo kiểu Pomodoro..." style="min-height: 100px;"></textarea>
+                    <!-- Ý 3 -->
+                    <label class="sub-question-label">2.3 Bạn đã sẵn sàng tiếp nối ngọn lửa tri thức mà thầy cô đã thắp lên, để viết tiếp hành trình của một người giáo viên tương lai chưa?</label>
+                    <textarea id="q2_3" class="form-control-custom" placeholder="Ví dụ: Có..." style="min-height: 100px;"></textarea>
                 </div>
 
                 <!-- CÂU 3 -->
                 <div class="question-block">
                     <div class="question-title">
                         <span class="q-num">3</span>
-                        Theo bạn, việc học nhóm hay tự học cá nhân mang lại hiệu quả cao hơn?
+                        Theo bạn, món quà nào mang lại ý nghĩa tinh thần lớn nhất cho thầy cô?
                     </div>
                     <div class="options-grid mb-4">
                         <label class="option-card">
-                            <input type="radio" name="q3" value="Tự học cá nhân">
-                            <div class="app-icon bg-indigo"><i class="fa-solid fa-user"></i></div>
-                            <div class="option-text">Tự học cá nhân</div>
+                            <input type="radio" name="q3" value="Sự trưởng thành">
+                            <div class="app-icon bg-indigo"><i class="fa-solid fa-user-graduate"></i></div>
+                            <div class="option-text">Sự trưởng thành của học trò</div>
                             <div class="radio-circle"></div>
                         </label>
                         <label class="option-card">
-                            <input type="radio" name="q3" value="Học nhóm">
-                            <div class="app-icon bg-orange"><i class="fa-solid fa-users"></i></div>
-                            <div class="option-text">Học nhóm</div>
+                            <input type="radio" name="q3" value="Lời tri ân">
+                            <div class="app-icon bg-orange"><i class="fa-solid fa-comment-dots"></i></div>
+                            <div class="option-text">Những lời tri ân chân thành</div>
                             <div class="radio-circle"></div>
                         </label>
                         <label class="option-card">
-                            <input type="radio" name="q3" value="Kết hợp">
-                            <div class="app-icon bg-green"><i class="fa-solid fa-people-arrows"></i></div>
-                            <div class="option-text">Kết hợp cả hai</div>
+                            <input type="radio" name="q3" value="Sự kết nối">
+                            <div class="app-icon bg-green"><i class="fa-solid fa-handshake"></i></div>
+                            <div class="option-text">Sự kết nối, về thăm trường</div>
                             <div class="radio-circle"></div>
                         </label>
                     </div>
-                    <textarea id="q3_text" class="form-control-custom" placeholder="Chia sẻ thêm lý do hoặc đề xuất phương pháp học của bạn... (Không bắt buộc)"></textarea>
+                    <textarea id="q3_text" class="form-control-custom" placeholder="Chia sẻ thêm lý do hoặc kể về một kỷ niệm tặng quà của bạn... (Không bắt buộc)"></textarea>
                 </div>
 
                 <!-- CÂU 4 -->
                 <div class="question-block">
                     <div class="question-title mb-3">
                         <span class="q-num">4</span>
-                        Bạn có đề xuất thêm tính năng hoặc muốn cải thiện điều gì ở website này không?
+                       Hãy viết một lời chúc chân thành gửi đến quý thầy cô nhân ngày 20/11:
                     </div>
                     <div class="alert alert-warning border-0 rounded-4 mb-4" style="background-color: #fffbeb; color: #b45309;">
                         <i class="fa-solid fa-circle-exclamation me-2"></i>
-                        Vui lòng <b>không</b> đề cập đến tình trạng tải chậm từ 11h-16h, do đây là giới hạn máy chủ của Google Scripts.
+                       Hiền tài là nguyên khí của quốc gia
                     </div>
-                    <textarea id="q4_text" class="form-control-custom" placeholder="Nhập ý kiến đóng góp của bạn tại đây..."></textarea>
+                    <textarea id="q4_text" class="form-control-custom" placeholder="Nhập ý tưởng đóng góp của bạn tại đây..."></textarea>
                 </div>
 
                 <!-- CÂU 5 -->
                 <div class="question-block">
                     <div class="question-title">
                         <span class="q-num">5</span>
-                        Nếu được quay ngược thời gian, bạn có tiếp tục chọn và học tập tại Trường Đại học Sư phạm TP.HCM không? Chúc bạn luôn vui vẻ, học tập thật tốt và có thật nhiều kỷ niệm đẹp tại mái trường này!
+                        Cảm xúc của bạn khi ngày Nhà giáo Việt Nam 20/11 đang đến gần? Chúc bạn và quý thầy cô có một ngày lễ thật ấm áp và ý nghĩa!
                     </div>
                     <div class="options-grid">
                         <label class="option-card">
-                            <input type="radio" name="q5" value="Có">
-                            <div class="app-icon bg-red"><i class="fa-solid fa-heart"></i></div>
-                            <div class="option-text">Có, chắc chắn!</div>
+                            <input type="radio" name="q5" value="Háo hức">
+                            <div class="app-icon bg-red"><i class="fa-solid fa-face-smile-beam"></i></div>
+                            <div class="option-text">Rất háo hức, mong chờ</div>
                             <div class="radio-circle"></div>
                         </label>
                         <label class="option-card">
-                            <input type="radio" name="q5" value="Không">
-                            <div class="app-icon bg-gray"><i class="fa-solid fa-heart-crack"></i></div>
-                            <div class="option-text">Không, mình hối hận rồi</div>
+                            <input type="radio" name="q5" value="Bồi hồi">
+                            <div class="app-icon bg-blue"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                            <div class="option-text">Bồi hồi, nhớ trường cũ</div>
                             <div class="radio-circle"></div>
                         </label>
                         <label class="option-card">
-                            <input type="radio" name="q5" value="Phân vân">
-                            <div class="app-icon bg-blue"><i class="fa-regular fa-face-thinking"></i><i class="fa-solid fa-question"></i></div>
-                            <div class="option-text">Cũng chưa biết nữa...</div>
+                            <input type="radio" name="q5" value="Bình thường">
+                            <div class="app-icon bg-gray"><i class="fa-solid fa-face-meh"></i></div>
+                            <div class="option-text">Bình thường</div>
                             <div class="radio-circle"></div>
                         </label>
                     </div>
@@ -437,137 +441,141 @@
                 <i class="fa-regular fa-circle-check"></i>
             </div>
             <h3 class="fw-bold mb-3" style="font-size: 32px;">Chân thành cảm ơn bạn!</h3>
-            <p class="text-muted mb-4" style="font-size: 18px; line-height: 1.6;">Những ý kiến đóng góp của bạn rất quý giá để Khoa tiếp tục cải thiện hệ thống và trải nghiệm học tập.</p>
+            <p class="text-muted mb-4" style="font-size: 18px; line-height: 1.6;">Những chia sẻ và lời chúc tốt đẹp của bạn sẽ được gửi đến quý thầy cô Khoa Toán & Tin học.</p>
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
+        // Tự động phát nhạc nền khi người dùng tương tác với trang (do trình duyệt thường chặn autoplay)
+        document.body.addEventListener('click', function() {
+            let audio = document.getElementById('bgMusic');
+            if (audio && audio.paused) {
+                audio.play().catch(e => console.log("Audio play failed:", e));
+            }
+        }, { once: true });
+
         // Xử lý logic chọn radio button và UI đổi màu
         document.querySelectorAll('input[type="radio"]').forEach(radio => {
             radio.addEventListener('change', function() {
-                // Xóa class 'selected' ở tất cả các thẻ label cùng nhóm câu hỏi
                 let block = this.closest('.question-block');
                 block.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
-                
-                // Thêm class 'selected' vào label chứa radio đang chọn
                 this.closest('.option-card').classList.add('selected');
             });
         });
 
         // Hàm Submit
         function submitSurvey() {
-    // Lấy dữ liệu
-    let q1 = document.querySelector('input[name="q1"]:checked')?.value;
-    
-    // Xử lý 3 câu tự luận của câu 2
-    let q2_1 = document.getElementById('q2_1').value.trim();
-    let q2_2 = document.getElementById('q2_2').value.trim();
-    let q2_3 = document.getElementById('q2_3').value.trim();
-    
-    let q3 = document.querySelector('input[name="q3"]:checked')?.value;
-    let q3_text = document.getElementById('q3_text').value.trim();
-    let q4 = document.getElementById('q4_text').value.trim();
-    let q5 = document.querySelector('input[name="q5"]:checked')?.value;
+            // Lấy dữ liệu
+            let q1 = document.querySelector('input[name="q1"]:checked')?.value;
+            
+            // Xử lý 3 câu tự luận của câu 2
+            let q2_1 = document.getElementById('q2_1').value.trim();
+            let q2_2 = document.getElementById('q2_2').value.trim();
+            let q2_3 = document.getElementById('q2_3').value.trim();
+            
+            let q3 = document.querySelector('input[name="q3"]:checked')?.value;
+            let q3_text = document.getElementById('q3_text').value.trim();
+            let q4 = document.getElementById('q4_text').value.trim();
+            let q5 = document.querySelector('input[name="q5"]:checked')?.value;
 
-    // Validate dữ liệu bắt buộc (Đảm bảo nhập ít nhất phần 2.1 và 2.2)
-    if (!q1 || !q2_1 || !q2_2 || !q3 || !q5) {
-        alert("Vui lòng trả lời đầy đủ các câu hỏi trắc nghiệm và câu 2.1, 2.2!");
-        return;
-    }
+            // Validate dữ liệu bắt buộc
+            if (!q1 || !q2_1 || !q2_2 || !q3 || !q5) {
+                alert("Vui lòng trả lời đầy đủ các câu hỏi trắc nghiệm và câu 2.1, 2.2!");
+                return;
+            }
 
-    // Gộp 3 phần của câu 2 lại thành 1 chuỗi
-    let q2_combined = `Thời gian/ngày: ${q2_1} | Tập trung: ${q2_2} | Phương pháp: ${q2_3 || 'Không có'}`;
+            // Gộp 3 phần của câu 2 lại thành 1 chuỗi
+            let q2_combined = `Kỷ niệm: ${q2_1} | Thầy cô ấn tượng: ${q2_2} | Lời chúc: ${q2_3 || 'Không có'}`;
 
-    // Đổi trạng thái Nút
-    let btn = document.getElementById('btnSubmitSurvey');
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi dữ liệu...';
-    btn.disabled = true;
+            // Đổi trạng thái Nút
+            let btn = document.getElementById('btnSubmitSurvey');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i> Đang gửi dữ liệu...';
+            btn.disabled = true;
 
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwy2gc4Dnyw3qe0nr7GXabFDps4cCoFXNE9vmXJQzbWRYeZMIx9aji1bdM9Bp42dPiS/exec';
-    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || { mssv: "Khách", name: "Ẩn danh" };
+            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwy2gc4Dnyw3qe0nr7GXabFDps4cCoFXNE9vmXJQzbWRYeZMIx9aji1bdM9Bp42dPiS/exec';
+            let currentUser = JSON.parse(localStorage.getItem('currentUser')) || { mssv: "Khách", name: "Ẩn danh" };
 
-    // ---------------------------------------------------------
-    // BỔ SUNG LOGIC CHUYỂN DỮ LIỆU SANG HỆ THỐNG Q&A
-    // ---------------------------------------------------------
-    
-    // 1. Format lại nội dung các câu hỏi xuống dòng
-    let qText = `Khảo sát tháng 8:
+            // ---------------------------------------------------------
+            // BỔ SUNG LOGIC CHUYỂN DỮ LIỆU SANG HỆ THỐNG Q&A
+            // ---------------------------------------------------------
+            
+            let qText = `Khảo sát 20/11:
 Câu 1: ${q1}
 Câu 2: ${q2_combined}
 Câu 3: ${q3}${q3_text ? ' - ' + q3_text : ''}
 Câu 4: ${q4 || 'Không có'}
 Câu 5: ${q5}`;
 
-    // 2. Format tiêu đề (Badge) chuẩn của hệ thống Q&A
-    let qaTopic = "Hệ thống";
-    let finalQaPayload = `<span class="badge mb-2 shadow-sm" style="background-color: #f1f5f9; color: #475569; font-size: 12.5px; border: 1px solid #e2e8f0;"><i class="fa-solid fa-tag me-1" style="color: #0f4c81;"></i> ${qaTopic}</span>\n\n${qText}`;
+            let qaTopic = "Sự kiện 20/11";
+            let finalQaPayload = `<span class="badge mb-2 shadow-sm" style="background-color: #f1f5f9; color: #475569; font-size: 12.5px; border: 1px solid #e2e8f0;"><i class="fa-solid fa-tag me-1" style="color: #0f4c81;"></i> ${qaTopic}</span>
 
-    // 3. Gửi Request song song sang bảng Q&A
-    $.ajax({
-        url: SCRIPT_URL, // Đảm bảo SCRIPT_URL này là URL trỏ đến Hub xử lý chung
-        method: "POST",
-        data: JSON.stringify({ 
-            action: "submitQuestion", 
-            mssv: currentUser.mssv, 
-            question: finalQaPayload 
-        }),
-        contentType: "text/plain;charset=utf-8"
-    });
-    // ---------------------------------------------------------
+${qText}`;
 
-    // Gói dữ liệu Khảo sát gốc
-    let payload = {
-        action: "submitSurvey",
-        mssv: currentUser.mssv,
-        name: currentUser.name,
-        q1_time: q1,
-        q2_duration: q2_combined,
-        q3_method: q3,
-        q3_method_detail: q3_text,
-        q4_feedback: q4,
-        q5_rewind: q5
-    };
+            $.ajax({
+                url: SCRIPT_URL, 
+                method: "POST",
+                data: JSON.stringify({ 
+                    action: "submitQuestion", 
+                    mssv: currentUser.mssv, 
+                    question: finalQaPayload 
+                }),
+                contentType: "text/plain;charset=utf-8"
+            });
+            // ---------------------------------------------------------
 
-    $.ajax({
-        url: SCRIPT_URL,
-        method: "POST",
-        data: JSON.stringify(payload),
-        contentType: "text/plain;charset=utf-8",
-        success: function(response) {
-            if (currentUser && currentUser.mssv !== "Khách") {
-                localStorage.setItem('survey_done_' + currentUser.mssv, 'true');
-            }
+            // Gói dữ liệu Khảo sát gốc (Giữ nguyên tên key để không lỗi server cũ)
+            let payload = {
+                action: "submitSurvey",
+                mssv: currentUser.mssv,
+                name: currentUser.name,
+                q1_time: q1,
+                q2_duration: q2_combined,
+                q3_method: q3,
+                q3_method_detail: q3_text,
+                q4_feedback: q4,
+                q5_rewind: q5
+            };
 
-            // Chuyển UI
-            document.getElementById('formState').style.display = 'none';
-            document.getElementById('successState').style.display = 'block';
+            $.ajax({
+                url: SCRIPT_URL,
+                method: "POST",
+                data: JSON.stringify(payload),
+                contentType: "text/plain;charset=utf-8",
+                success: function(response) {
+                    if (currentUser && currentUser.mssv !== "Khách") {
+                        localStorage.setItem('survey_done_' + currentUser.mssv, 'true');
+                    }
 
-            // Quay về trang chủ
-            let countdown = 4;
-            let successState = document.getElementById('successState');
-            let redirectMsg = document.createElement('p');
-            redirectMsg.className = "text-primary fw-bold mt-4";
-            redirectMsg.style.fontSize = "18px";
-            redirectMsg.innerHTML = `Hệ thống sẽ chuyển hướng sau <span id="redirCount">${countdown}</span> giây...`;
-            successState.appendChild(redirectMsg);
+                    // Chuyển UI
+                    document.getElementById('formState').style.display = 'none';
+                    document.getElementById('successState').style.display = 'block';
 
-            let timer = setInterval(function() {
-                countdown--;
-                document.getElementById('redirCount').innerText = countdown;
-                if (countdown <= 0) {
-                    clearInterval(timer);
-                    window.location.href = "../appliedmathematics.html"; 
+                    // Quay về trang chủ
+                    let countdown = 4;
+                    let successState = document.getElementById('successState');
+                    let redirectMsg = document.createElement('p');
+                    redirectMsg.className = "text-primary fw-bold mt-4";
+                    redirectMsg.style.fontSize = "18px";
+                    redirectMsg.innerHTML = `Hệ thống sẽ chuyển hướng sau <span id="redirCount">${countdown}</span> giây...`;
+                    successState.appendChild(redirectMsg);
+
+                    let timer = setInterval(function() {
+                        countdown--;
+                        document.getElementById('redirCount').innerText = countdown;
+                        if (countdown <= 0) {
+                            clearInterval(timer);
+                            window.location.href = "../login.html"; 
+                        }
+                    }, 1000);
+                },
+                error: function() {
+                    alert("Lỗi kết nối máy chủ! Vui lòng kiểm tra lại mạng hoặc thử lại sau.");
+                    btn.innerHTML = 'Gửi Khảo Sát <i class="fa-solid fa-paper-plane ms-3"></i>';
+                    btn.disabled = false;
                 }
-            }, 1000);
-        },
-        error: function() {
-            alert("Lỗi kết nối máy chủ! Vui lòng kiểm tra lại mạng hoặc thử lại sau.");
-            btn.innerHTML = 'Gửi Khảo Sát <i class="fa-solid fa-paper-plane ms-3"></i>';
-            btn.disabled = false;
+            });
         }
-    });
-}
     </script>
 </body>
 </html>
