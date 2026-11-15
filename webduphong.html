@@ -100,17 +100,18 @@
     <!-- Thông tin người dùng (Được đẩy xuống góc dưới tự động nhờ flex: 1 của sidebar-content) -->
 <!-- Đổi p-3 thành py-2 px-3 -->
 <div id="sidebarUserInfo" class="py-2 px-3 border-top position-relative d-none">
-    <div class="d-flex align-items-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; user-select: none;">
+    <!-- Thêm justify-content-center vào đây -->
+    <div class="d-flex align-items-center justify-content-center gap-2" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer; user-select: none;">
            <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0 overflow-hidden" style="width: 38px; height: 38px; background-color: #94a3b8; font-size: 16px;">
                 <i class="fa-solid fa-user" id="sidebarAvatarIcon"></i>
                 <img id="sidebarAvatarImg" src="" class="w-100 h-100 d-none" style="object-fit: cover;">
             </div>
- <div class="user-text text-end d-none d-md-block">
+            <!-- Đổi text-end thành text-start để chữ hiển thị đẹp hơn khi nằm giữa -->
+            <div class="user-text text-start d-none d-md-block">
                 <div class="fw-bold" id="sidebarUserName" style="color: #0f4c81; font-size: 13.5px; line-height: 1.2;">Tên SV</div>
                 <div class="text-muted small" id="sidebarUserMSSV" style="font-size: 11px;">MSSV</div>
             </div>
-            
-        </div>
+    </div>
         
         <!-- Chuông thông báo cá nhân -->
         <div class="position-absolute" style="top: 50%; right: 5px; transform: translateY(-50%); cursor: pointer; z-index: 10;" onclick="openPersonalNotifications()">
@@ -118,15 +119,23 @@
             <span id="personalNotificationBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 9px; padding: 3px 5px;">0</span>
         </div>
         
-        <!-- Dropdown Menu -->
+      <!-- Dropdown Menu -->
         <div class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-3" style="width: 260px; border-radius: 16px; margin-top: 15px; z-index: 1050;">
             <div class="text-center mb-3 mt-1">
                 <span id="popoverUserTitle" class="fw-bold" style="color: #4b5563; font-size: 14px;">Tên - MSSV</span>
             </div>
             <hr class="text-muted mb-2 mt-0" style="opacity: 0.15;">
-            <!-- Giữ nguyên các nút chức năng bên trong menu dropdown của bạn -->
+            <button id="btnAdminLoginToggle" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px;" onclick="openAdminModal()">
+                <i class="fa-solid fa-user-shield text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Dành cho bản quản trị
+            </button>
             <button class="dropdown-item py-2 mb-1 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadProfileView()">
                 <i class="fa-solid fa-address-card text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Hồ sơ của tôi
+            </button>
+            <button id="btnAdminManageUsers" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #e61d4a; border-radius: 8px; font-size: 14px;" onclick="loadAdminUserManageView()">
+                <i class="fa-solid fa-users-gear text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý Thành viên
+            </button>
+            <button id="btnAdminMasterTkb" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadAdminMasterTkbView()">
+                <i class="fa-solid fa-table-list text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý MasterTKB
             </button>
             <button class="dropdown-item py-2 mb-4 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="openChangePasswordModal()">
                 <i class="fa-solid fa-ellipsis text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Đổi mật khẩu
@@ -135,6 +144,7 @@
                 Đăng xuất
             </button>
         </div>
+    
     </div>
     <!-- Các menu liên kết -->
     <div class="sidebar-content" id="navbarLinks">
