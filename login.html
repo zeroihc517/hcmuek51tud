@@ -378,7 +378,21 @@ body {
                 <input type="password" id="txtUserPass" class="form-control form-control-modern" placeholder="Mật khẩu (Mặc định: 123)">
                 <i class="fa-solid fa-lock"></i>
             </div>
-            <small class="text-danger text-center d-block d-none mb-3 fw-bold" id="userAuthError"></small>
+            <div class="d-flex justify-content-center gap-4 mb-3">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="interfaceOption" id="interface1" value="appliedmathematics.html" checked>
+                <label class="form-check-label fw-bold" style="color: #154c79;" for="interface1">
+                    Giao diện 1
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="interfaceOption" id="interface2" value="appliedmathematics2.html">
+                <label class="form-check-label fw-bold" style="color: #154c79;" for="interface2">
+                    Giao diện 2
+                </label>
+            </div>
+        </div>
+        <small class="text-danger text-center d-block d-none mb-3 fw-bold" id="userAuthError"></small>
             <button type="button" class="btn w-100 btn-login-modern mt-2" onclick="loginStudentPage()" id="btnLoginStudent">
                 Đăng nhập hệ thống
             </button>
@@ -588,7 +602,8 @@ body {
                 try {
                     let userData = JSON.parse(currentUser);
                     if (userData && userData.mssv) {
-                        window.location.replace("appliedmathematics.html"); 
+                        let preferredUrl = localStorage.getItem('preferredInterface') || "appliedmathematics.html";
+                        window.location.replace(preferredUrl); 
                         return;
                     }
                 } catch (e) {
@@ -677,7 +692,9 @@ body {
                     if (savedAccounts.length > 3) savedAccounts.pop(); 
                     localStorage.setItem('savedAccounts', JSON.stringify(savedAccounts));
 
-                    window.location.href = "appliedmathematics.html";
+                    let targetUrl = $('input[name="interfaceOption"]:checked').val() || "appliedmathematics.html";
+                    localStorage.setItem('preferredInterface', targetUrl);
+                    window.location.href = targetUrl;
                 } else {
                     $('#userAuthError').removeClass('d-none').text(response.message); 
                     btn.html('Đăng nhập hệ thống').prop('disabled', false); 
