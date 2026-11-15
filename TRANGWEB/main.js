@@ -277,76 +277,88 @@ function pingOnlineStatus() {
         method: "GET", 
         dataType: "json", 
         cache: false,
-        success: function(res) { 
-            if (res && res.list) { 
-                
-                // PHÁT ÂM THANH VÀ THÔNG BÁO BẰNG WINDOW.ALERT
-                if (currentUser && currentUser.mssv === "51.01.108.008") {
-                    if (typeof cachedOnlineList !== 'undefined' && cachedOnlineList.length > 0) {
-                        let oldUsersMap = {};
-                        let newUsersMap = {};
-                        
-                        cachedOnlineList.forEach(u => {
-                            if (u !== "Khách" && u.includes("|")) {
-                                let parts = u.split("|");
-                                oldUsersMap[parts[0].trim()] = parts[1]; // Trim bảo vệ khoảng trắng
-                            }
-                        });
-                        
-                        res.list.forEach(u => {
-                            if (u !== "Khách" && u.includes("|")) {
-                                let parts = u.split("|");
-                                newUsersMap[parts[0].trim()] = parts[1]; // Trim bảo vệ khoảng trắng
-                            }
-                        });
-                        
-                        let hasJoin = false;
-                        let hasLeave = false;
-                        let joinMessages = []; 
-                        let leaveMessages = [];
+        
 
-                        // 1. Kiểm tra người mới vào
-                        for (let mssv in newUsersMap) {
-                            if (!oldUsersMap[mssv]) {
-                                if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
-                                let fullName = newUsersMap[mssv];
-                                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
-                                joinMessages.push(`${shortName} đã tham gia`);
-                                hasJoin = true;
-                            }
+             success: function(res) { 
+            // 1. Nếu server đang kẹt khóa (busy), bỏ qua nhịp này để tránh xóa nhầm chân trang
+            if (!res || res.busy || !Array.isArray(res.list)) return;
+
+            // Khởi tạo bộ nhớ trạng thái thông báo (tránh báo lặp 2 lần)
+            window.notifiedUserStates = window.notifiedUserStates || {};
+
+            if (currentUser && currentUser.mssv === "51.01.108.008") {
+                if (typeof cachedOnlineList !== 'undefined' && cachedOnlineList.length > 0) {
+                    let oldUsersMap = {};
+                    let newUsersMap = {};
+                    
+                    cachedOnlineList.forEach(u => {
+                        if (u !== "Khách" && u.includes("|")) {
+                            let parts = u.split("|");
+                            oldUsersMap[parts[0].trim()] = parts[1];
                         }
-
-                        // 2. Kiểm tra người vừa rời đi
-                        for (let mssv in oldUsersMap) {
-                            if (!newUsersMap[mssv]) {
-                                if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
-                                let fullName = oldUsersMap[mssv];
-                                let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
-                                leaveMessages.push(`${shortName} đã rời`);
-                                hasLeave = true;
-                            }
+                    });
+                    
+                    res.list.forEach(u => {
+                        if (u !== "Khách" && u.includes("|")) {
+                            let parts = u.split("|");
+                            newUsersMap[parts[0].trim()] = parts[1];
                         }
+                    });
+                    
+                    let hasJoin = false;
+                    let hasLeave = false;
+                    let joinMessages = []; 
+                    let leaveMessages = [];
 
-                        if (hasJoin) {
-                            let joinSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3');
-                            joinSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
-                            joinMessages.forEach(msg => window.alert(msg)); 
-                        } 
-                        if (hasLeave) {
-                            let leaveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2868/2868-preview.mp3');
-                            leaveSound.play().catch(e => console.log("Trình duyệt chặn phát âm thanh:", e));
-                            leaveMessages.forEach(msg => window.alert(msg));
+                    // 1. Kiểm tra người mới vào
+                    for (let mssv in newUsersMap) {
+                        if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
+                        if (!oldUsersMap[mssv] && window.notifiedUserStates[mssv] !== 'online') {
+                            let fullName = newUsersMap[mssv];
+                            let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
+                            joinMessages.push(`${shortName} đã tham gia`);
+                            window.notifiedUserStates[mssv] = 'online';
+                            hasJoin = true;
                         }
                     }
-                }
 
-                // Cập nhật dữ liệu mới vào RAM
-                cachedOnlineList = res.list;
-                cachedOnlineCount = res.count;
-                
-                // Vẽ lại UI
-                renderOnlineFooterUI();
-            } 
+                    // 2. Kiểm tra người vừa rời đi
+                    for (let mssv in oldUsersMap) {
+                        if (mssv === "51.01.108.008" || mssv === "5101108008") continue;
+                        if (!newUsersMap[mssv] && window.notifiedUserStates[mssv] !== 'offline') {
+                            let fullName = oldUsersMap[mssv];
+                            let shortName = fullName.trim().split(/\s+/).slice(-2).join(' ');
+                            leaveMessages.push(`${shortName} đã rời`);
+                            window.notifiedUserStates[mssv] = 'offline';
+                            hasLeave = true;
+                        }
+                    }
+
+                    if (hasJoin) {
+                        let joinSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2866/2866-preview.mp3');
+                        joinSound.play().catch(e => {});
+                        joinMessages.forEach(msg => window.alert(msg)); 
+                    } 
+                    if (hasLeave) {
+                        let leaveSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2868/2868-preview.mp3');
+                        leaveSound.play().catch(e => {});
+                        leaveMessages.forEach(msg => window.alert(msg));
+                    }
+                } else {
+                    // Lần đầu tải trang: ghi nhận trạng thái online ban đầu để không báo nhầm
+                    res.list.forEach(u => {
+                        if (u !== "Khách" && u.includes("|")) {
+                            let mssv = u.split("|")[0].trim();
+                            window.notifiedUserStates[mssv] = 'online';
+                        }
+                    });
+                }
+            }
+
+            // Cập nhật dữ liệu mới vào RAM và vẽ lại chân trang
+            cachedOnlineList = res.list;
+            cachedOnlineCount = res.count;
+            renderOnlineFooterUI();
         },
         complete: function() {
             activePingRequest = null; // Giải phóng request sau khi vẽ xong
@@ -2163,21 +2175,26 @@ function initGlobalApp() {
     $('.app-container, .mobile-header').css('display', '');
     setTimeout(pingOnlineStatus, 1000); 
     
-    // --- BẮT ĐẦU FIX: THEO DÕI THAO TÁC CỦA NGƯỜI DÙNG ---
-    window.lastUserActionTime = Date.now();
-    $(document).on('mousemove keydown scroll click touchstart', function() {
-        window.lastUserActionTime = Date.now(); // Cập nhật lại thời gian mỗi khi có cử động
-    });
+    // --- BẮT ĐẦU: PING LIÊN TỤC 30 GIÂY BẤT CHẤP CHUYỂN TAB (WEB WORKER) ---
+    const workerCode = `
+        setInterval(function() {
+            self.postMessage('tick');
+        }, 15000);
+    `;
+    const blob = new Blob([workerCode], { type: 'application/javascript' });
+    const pingWorker = new Worker(URL.createObjectURL(blob));
+    
+    pingWorker.onmessage = function() {
+        pingOnlineStatus(); // Luôn gọi cập nhật mỗi 30 giây miễn là web còn mở
+    };
 
-    // PING THÔNG MINH: Chỉ báo online nếu sinh viên có đụng vào máy trong vòng 10 phút qua
-    setInterval(function() {
-        let now = Date.now();
-        // 10 * 60 * 1000 = 10 phút (Tính bằng mili-giây)
-        if (now - window.lastUserActionTime < 10 * 60 * 1000) {
+    // Cập nhật ngay lập tức khi người dùng vừa quay lại tab web
+    document.addEventListener("visibilitychange", function() {
+        if (!document.hidden) {
             pingOnlineStatus();
         }
-    }, 30000);
-    // --- KẾT THÚC FIX ---
+    });
+    // --- KẾT THÚC ---
     
     setInterval(function() {
         if (!$('#qaSection').hasClass('d-none')) {
