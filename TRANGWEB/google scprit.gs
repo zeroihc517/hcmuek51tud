@@ -669,7 +669,8 @@ function pingPresence(uuid, mssv, lastView) {
   var lock = LockService.getScriptLock();
   var onlineList = [];
   
-  if (lock.tryLock(2000)) {
+  // Tăng thời gian chờ khóa lên 5000ms (5 giây)
+  if (lock.tryLock(5000)) {
     try {
       var props = PropertiesService.getScriptProperties();
       var now = Date.now();
@@ -690,7 +691,7 @@ function pingPresence(uuid, mssv, lastView) {
           try {
             var data = JSON.parse(allProps[key]);
 
-            if (now - data.time > 60000) { 
+            if (now - data.time > 35000) { 
               keysToDelete.push(key); 
             } else { 
               if (onlineList.indexOf(data.mssv) === -1) {
@@ -706,10 +707,12 @@ function pingPresence(uuid, mssv, lastView) {
     } finally {
       lock.releaseLock();
     }
+    return { count: onlineList.length, list: onlineList };
+  } else {
+    // Nếu server đang bận xử lý request khác, báo busy để Frontend bỏ qua nhịp này, KHÔNG xóa chân trang
+    return { busy: true };
   }
-  return { count: onlineList.length, list: onlineList };
 }
-
 function updateLastActive(mssv, lastView) {
   try {
     var sheet = ss.getSheetByName("Users");
