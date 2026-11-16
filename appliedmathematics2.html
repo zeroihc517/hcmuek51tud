@@ -14,52 +14,395 @@
 </head>
 <body class="hide-hidden-posts">
 
-<!-- OVERLAY LOADING TOÀN TRANG -->
-<div id="globalScreenLoader" class="d-flex flex-column align-items-center justify-content-center" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background-color: #f8fafc; z-index: 10500; transition: opacity 0.3s ease;">
-    
-    <!-- VẼ TRỰC TIẾP SVG ĐA GIÁC ĐỀU 12 ĐỈNH -->
-    <div class="polygon-loader-container mb-4">
-        <svg viewBox="0 0 200 200" width="180" height="180" class="dodecagon-svg">
-            <!-- 1. Viền đa giác nối 12 đỉnh -->
-            <polygon points="100,20 140,30.7 169.3,60 180,100 169.3,140 140,169.3 100,180 60,169.3 30.7,140 20,100 30.7,60 60,30.7" fill="none" stroke="#94a3b8" stroke-width="1.5"/>
-            
-            <!-- 2. Chữ hiển thị A1 -> A12 -->
-            <g font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#475569" text-anchor="middle" dominant-baseline="central">
-                <text x="100" y="4">A<tspan font-size="10" dy="3">1</tspan></text>
-                <text x="149" y="15">A<tspan font-size="10" dy="3">2</tspan></text>
-                <text x="185" y="51">A<tspan font-size="10" dy="3">3</tspan></text>
-                <text x="195" y="100">A<tspan font-size="10" dy="3">4</tspan></text>
-                <text x="185" y="149">A<tspan font-size="10" dy="3">5</tspan></text>
-                <text x="149" y="185">A<tspan font-size="10" dy="3">6</tspan></text>
-                <text x="100" y="196">A<tspan font-size="10" dy="3">7</tspan></text>
-                <text x="51" y="185">A<tspan font-size="10" dy="3">8</tspan></text>
-                <text x="15" y="149">A<tspan font-size="10" dy="3">9</tspan></text>
-                <text x="5" y="100">A<tspan font-size="10" dy="3">10</tspan></text>
-                <text x="15" y="51">A<tspan font-size="10" dy="3">11</tspan></text>
-                <text x="51" y="15">A<tspan font-size="10" dy="3">12</tspan></text>
+<!-- OVERLAY LOADING TOÀN TRANG (CỐ ĐỊNH KHUNG HÌNH & THANH CHẠY ĐỀU 5 GIÂY) -->
+<style>
+    #globalScreenLoader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: radial-gradient(circle at 50% 35%, #ffffff 0%, #e0f2fe 45%, #ede9fe 80%, #fce7f3 100%);
+        background-size: 200% 200%;
+        animation: bgAuroraPulse 7s ease-in-out infinite alternate;
+        z-index: 10500;
+        transition: opacity 0.4s ease;
+        overflow: hidden;
+    }
+
+    @keyframes bgAuroraPulse {
+        0% { background-position: 0% 0%; }
+        100% { background-position: 100% 100%; }
+    }
+
+    /* Lưới tọa độ hình học ở nền */
+    .math-blueprint-grid {
+        position: absolute;
+        inset: 0;
+        background-image: 
+            linear-gradient(to right, rgba(14, 165, 233, 0.08) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(168, 85, 247, 0.08) 1px, transparent 1px);
+        background-size: 40px 40px;
+        mask-image: radial-gradient(circle at 50% 45%, black 35%, transparent 85%);
+        -webkit-mask-image: radial-gradient(circle at 50% 45%, black 35%, transparent 85%);
+        pointer-events: none;
+    }
+
+    /* Sân khấu Đa giác 12 đỉnh KHỔNG LỒ (Đứng yên vững chắc) */
+    .mega-polygon-stage {
+        position: relative;
+        width: 290px;
+        height: 290px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3;
+    }
+
+    /* Sóng xung kích (Shockwave) tỏa ra từ tâm */
+    .shockwave-ring {
+        position: absolute;
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        border: 2.5px solid rgba(14, 165, 233, 0.65);
+        box-shadow: 0 0 18px rgba(168, 85, 247, 0.45);
+        animation: expandShockwave 2.6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+        pointer-events: none;
+    }
+    .shockwave-ring.delay-1 {
+        animation-delay: 1.3s;
+        border-color: rgba(236, 72, 153, 0.65);
+    }
+
+    @keyframes expandShockwave {
+        0% {
+            transform: scale(0.5);
+            opacity: 0.95;
+        }
+        100% {
+            transform: scale(2.55);
+            opacity: 0;
+        }
+    }
+
+    .dodecagon-svg {
+        width: 285px;
+        height: 285px;
+        overflow: visible;
+        z-index: 4;
+        filter: drop-shadow(0 14px 30px rgba(79, 70, 229, 0.25));
+    }
+
+    /* Đa giác lõi xoay ngược */
+    .inner-poly-spin {
+        transform-origin: 100px 100px;
+        animation: spinPolyCW 12s linear infinite;
+    }
+    .mid-poly-spin {
+        transform-origin: 100px 100px;
+        animation: spinPolyCCW 18s linear infinite;
+    }
+
+    @keyframes spinPolyCW { to { transform: rotate(360deg); } }
+    @keyframes spinPolyCCW { to { transform: rotate(-360deg); } }
+
+    /* Luồng sáng chạy dọc viền đa giác 12 cạnh */
+    .poly-energy-border {
+        stroke-dasharray: 95 45;
+        animation: flowEdge 2.2s linear infinite;
+    }
+
+    @keyframes flowEdge {
+        to { stroke-dashoffset: -140; }
+    }
+
+    /* Tia laser nối tâm ra 12 đỉnh */
+    .radial-beam {
+        stroke-dasharray: 85;
+        stroke-dashoffset: 85;
+        animation: beamPulse 1.8s ease-in-out infinite;
+        animation-delay: calc(var(--i) * 0.15s);
+    }
+
+    @keyframes beamPulse {
+        0%, 100% { stroke-dashoffset: 85; opacity: 0.15; }
+        50% { stroke-dashoffset: 0; opacity: 0.85; }
+    }
+
+    /* 12 Đỉnh bùng sáng mạnh */
+    .glow-dot {
+        fill: var(--color);
+        transform-box: fill-box;
+        transform-origin: center;
+        animation: megaDotGlow 1.8s infinite cubic-bezier(0.34, 1.56, 0.64, 1);
+        animation-delay: calc(var(--i) * 0.15s);
+    }
+
+    @keyframes megaDotGlow {
+        0%, 100% {
+            transform: scale(1);
+            filter: drop-shadow(0 0 3px var(--color));
+        }
+        50% {
+            transform: scale(2.2);
+            filter: drop-shadow(0 0 10px var(--color)) drop-shadow(0 0 20px var(--color));
+        }
+    }
+
+    /* Nhãn A1 -> A12 sáng nhịp theo đỉnh */
+    .vertex-text {
+        font-family: 'Inter', sans-serif;
+        font-size: 11px;
+        font-weight: 800;
+        fill: #1e293b;
+        animation: labelHighlight 1.8s infinite ease-in-out;
+        animation-delay: calc(var(--i) * 0.15s);
+    }
+
+    @keyframes labelHighlight {
+        0%, 100% { fill: #334155; }
+        50% { fill: #e11d48; }
+    }
+
+    /* Thẻ chào mừng nổi bật, đứng yên vững chắc */
+    .mega-holo-card {
+        position: relative;
+        z-index: 3;
+        padding: 3px;
+        border-radius: 24px;
+        background: linear-gradient(120deg, #0ea5e9, #6366f1, #ec4899, #f59e0b, #10b981, #0ea5e9);
+        background-size: 300% 300%;
+        animation: gradientSlide 3.5s linear infinite;
+        box-shadow: 0 22px 50px -10px rgba(79, 70, 229, 0.28);
+        max-width: 92vw;
+        width: 550px;
+    }
+
+    @keyframes gradientSlide {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .mega-card-body {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 21px;
+        padding: 24px 32px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Vệt sáng lướt qua thẻ */
+    .mega-card-body::after {
+        content: "";
+        position: absolute;
+        top: 0; left: -100%;
+        width: 50%; height: 100%;
+        background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+        transform: skewX(-25deg);
+        animation: cardShine 3.2s infinite ease-in-out;
+        pointer-events: none;
+    }
+
+    @keyframes cardShine {
+        0%, 55% { left: -100%; }
+        100% { left: 160%; }
+    }
+
+    .mega-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 18px;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #ffffff;
+        background: linear-gradient(90deg, #0f4c81, #7c3aed, #e11d48);
+        background-size: 200% auto;
+        animation: gradientSlide 3s linear infinite;
+        box-shadow: 0 5px 15px rgba(124, 58, 237, 0.3);
+        margin-bottom: 12px;
+    }
+
+    .mega-title {
+        font-size: 1.42rem;
+        font-weight: 900;
+        line-height: 1.38;
+        background: linear-gradient(90deg, #0f4c81, #2563eb, #9333ea, #e11d48, #ea580c);
+        background-size: 250% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradientSlide 3.5s linear infinite;
+    }
+
+    #countdownNumber {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 9px;
+        margin: 0 4px;
+        border-radius: 10px;
+        font-family: 'Chakra Petch', sans-serif;
+        font-size: 20px;
+        font-weight: 800;
+        color: #ffffff;
+        background: linear-gradient(135deg, #e11d48, #f43f5e);
+        box-shadow: 0 4px 14px rgba(225, 29, 72, 0.45);
+        animation: tickBounce 1s infinite;
+    }
+
+    @keyframes tickBounce {
+        0%, 100% { transform: scale(1); }
+        25% { transform: scale(1.2); }
+    }
+
+    .mega-progress-track {
+        width: 100%;
+        height: 9px;
+        background: #e2e8f0;
+        border-radius: 99px;
+        overflow: hidden;
+        padding: 1.5px;
+    }
+
+    /* Chạy tuyến tính (linear) từ từ đều đặn trong 5.2 giây */
+    .mega-progress-fill {
+        height: 100%;
+        width: 0%;
+        border-radius: 99px;
+        background: linear-gradient(90deg, #0ea5e9, #6366f1, #ec4899, #f59e0b);
+        background-size: 200% 100%;
+        box-shadow: 0 0 12px rgba(236, 72, 153, 0.55);
+        animation: megaFillLinear 5.2s linear forwards, gradientSlide 1.8s linear infinite;
+    }
+
+    @keyframes megaFillLinear {
+        0% { width: 0%; }
+        100% { width: 100%; }
+    }
+</style>
+
+<div id="globalScreenLoader" class="d-flex flex-column align-items-center justify-content-center">
+    <div class="math-blueprint-grid"></div>
+
+    <!-- SÂN KHẤU ĐA GIÁC 12 ĐỈNH TO & RỰC RỠ -->
+    <div class="mega-polygon-stage mb-3">
+        <div class="shockwave-ring"></div>
+        <div class="shockwave-ring delay-1"></div>
+
+        <svg viewBox="-20 -20 240 240" class="dodecagon-svg">
+            <defs>
+                <linearGradient id="megaPolyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#0ea5e9" />
+                    <stop offset="33%" stop-color="#8b5cf6" />
+                    <stop offset="66%" stop-color="#ec4899" />
+                    <stop offset="100%" stop-color="#f59e0b" />
+                </linearGradient>
+                <radialGradient id="megaCoreGrad" cx="35%" cy="35%" r="65%">
+                    <stop offset="0%" stop-color="#38bdf8" />
+                    <stop offset="50%" stop-color="#4f46e5" />
+                    <stop offset="100%" stop-color="#e11d48" />
+                </radialGradient>
+            </defs>
+
+            <!-- 12 Tia năng lượng bắn từ tâm ra đỉnh -->
+            <g stroke="url(#megaPolyGrad)" stroke-width="1.5">
+                <line x1="100" y1="100" x2="100" y2="16" class="radial-beam" style="--i: 0;" />
+                <line x1="100" y1="100" x2="142" y2="27.3" class="radial-beam" style="--i: 1;" />
+                <line x1="100" y1="100" x2="172.7" y2="58" class="radial-beam" style="--i: 2;" />
+                <line x1="100" y1="100" x2="184" y2="100" class="radial-beam" style="--i: 3;" />
+                <line x1="100" y1="100" x2="172.7" y2="142" class="radial-beam" style="--i: 4;" />
+                <line x1="100" y1="100" x2="142" y2="172.7" class="radial-beam" style="--i: 5;" />
+                <line x1="100" y1="100" x2="100" y2="184" class="radial-beam" style="--i: 6;" />
+                <line x1="100" y1="100" x2="58" y2="172.7" class="radial-beam" style="--i: 7;" />
+                <line x1="100" y1="100" x2="27.3" y2="142" class="radial-beam" style="--i: 8;" />
+                <line x1="100" y1="100" x2="16" y2="100" class="radial-beam" style="--i: 9;" />
+                <line x1="100" y1="100" x2="27.3" y2="58" class="radial-beam" style="--i: 10;" />
+                <line x1="100" y1="100" x2="58" y2="27.3" class="radial-beam" style="--i: 11;" />
             </g>
 
-            <!-- 3. Các chấm tròn đại diện cho 12 đỉnh (sẽ tự động phát sáng) -->
-            <circle cx="100" cy="20" r="3.5" class="glow-dot" style="--i: 0; --color: #ef4444;" />
-            <circle cx="140" cy="30.7" r="3.5" class="glow-dot" style="--i: 1; --color: #f97316;" />
-            <circle cx="169.3" cy="60" r="3.5" class="glow-dot" style="--i: 2; --color: #eab308;" />
-            <circle cx="180" cy="100" r="3.5" class="glow-dot" style="--i: 3; --color: #84cc16;" />
-            <circle cx="169.3" cy="140" r="3.5" class="glow-dot" style="--i: 4; --color: #22c55e;" />
-            <circle cx="140" cy="169.3" r="3.5" class="glow-dot" style="--i: 5; --color: #10b981;" />
-            <circle cx="100" cy="180" r="3.5" class="glow-dot" style="--i: 6; --color: #06b6d4;" />
-            <circle cx="60" cy="169.3" r="3.5" class="glow-dot" style="--i: 7; --color: #0ea5e9;" />
-            <circle cx="30.7" cy="140" r="3.5" class="glow-dot" style="--i: 8; --color: #3b82f6;" />
-            <circle cx="20" cy="100" r="3.5" class="glow-dot" style="--i: 9; --color: #6366f1;" />
-            <circle cx="30.7" cy="60" r="3.5" class="glow-dot" style="--i: 10; --color: #a855f7;" />
-            <circle cx="60" cy="30.7" r="3.5" class="glow-dot" style="--i: 11; --color: #d946ef;" />
+            <!-- Đa giác lớp giữa xoay ngược -->
+            <polygon points="100,36 132,44.6 155.4,68 164,100 155.4,132 132,155.4 100,164 68,155.4 44.6,132 36,100 44.6,68 68,44.6" 
+                     fill="none" stroke="url(#megaPolyGrad)" stroke-width="1.3" stroke-dasharray="5 5" stroke-opacity="0.65" class="mid-poly-spin" />
+
+            <!-- Đa giác lớp trong xoay xuôi -->
+            <polygon points="100,56 122,61.9 138.1,78 144,100 138.1,122 122,138.1 100,144 78,138.1 61.9,122 56,100 61.9,78 78,61.9" 
+                     fill="none" stroke="#ec4899" stroke-width="1.2" stroke-dasharray="3 4" stroke-opacity="0.6" class="inner-poly-spin" />
+
+            <!-- Đa giác chính 12 đỉnh -->
+            <polygon points="100,16 142,27.3 172.7,58 184,100 172.7,142 142,172.7 100,184 58,172.7 27.3,142 16,100 27.3,58 58,27.3" 
+                     fill="rgba(255, 255, 255, 0.72)" stroke="#cbd5e1" stroke-width="1.5" />
+
+            <!-- Luồng sáng màu chạy quanh viền đa giác -->
+            <polygon points="100,16 142,27.3 172.7,58 184,100 172.7,142 142,172.7 100,184 58,172.7 27.3,142 16,100 27.3,58 58,27.3" 
+                     fill="none" stroke="url(#megaPolyGrad)" stroke-width="3" stroke-linecap="round" class="poly-energy-border" />
+
+            <!-- Lõi trung tâm APMA -->
+            <circle cx="100" cy="100" r="27" fill="url(#megaCoreGrad)" />
+            <circle cx="100" cy="100" r="31" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-opacity="0.85" />
+            <text x="100" y="101" font-family="'Chakra Petch', sans-serif" font-size="13.5" font-weight="800" fill="#ffffff" text-anchor="middle" dominant-baseline="central" letter-spacing="1.2">APMA</text>
+
+            <!-- Nhãn A1 -> A12 -->
+            <g text-anchor="middle" dominant-baseline="central">
+                <text x="100" y="-5" class="vertex-text" style="--i: 0;">A<tspan font-size="8.5" dy="2.5">1</tspan></text>
+                <text x="152.5" y="9" class="vertex-text" style="--i: 1;">A<tspan font-size="8.5" dy="2.5">2</tspan></text>
+                <text x="191" y="47.5" class="vertex-text" style="--i: 2;">A<tspan font-size="8.5" dy="2.5">3</tspan></text>
+                <text x="205" y="100" class="vertex-text" style="--i: 3;">A<tspan font-size="8.5" dy="2.5">4</tspan></text>
+                <text x="191" y="152.5" class="vertex-text" style="--i: 4;">A<tspan font-size="8.5" dy="2.5">5</tspan></text>
+                <text x="152.5" y="191" class="vertex-text" style="--i: 5;">A<tspan font-size="8.5" dy="2.5">6</tspan></text>
+                <text x="100" y="205" class="vertex-text" style="--i: 6;">A<tspan font-size="8.5" dy="2.5">7</tspan></text>
+                <text x="47.5" y="191" class="vertex-text" style="--i: 7;">A<tspan font-size="8.5" dy="2.5">8</tspan></text>
+                <text x="9" y="152.5" class="vertex-text" style="--i: 8;">A<tspan font-size="8.5" dy="2.5">9</tspan></text>
+                <text x="-5" y="100" class="vertex-text" style="--i: 9;">A<tspan font-size="8.5" dy="2.5">10</tspan></text>
+                <text x="9" y="47.5" class="vertex-text" style="--i: 10;">A<tspan font-size="8.5" dy="2.5">11</tspan></text>
+                <text x="47.5" y="9" class="vertex-text" style="--i: 11;">A<tspan font-size="8.5" dy="2.5">12</tspan></text>
+            </g>
+
+            <!-- 12 Đỉnh phát sáng Neon -->
+            <circle cx="100" cy="16" r="4.5" class="glow-dot" style="--i: 0; --color: #ef4444;" />
+            <circle cx="142" cy="27.3" r="4.5" class="glow-dot" style="--i: 1; --color: #f97316;" />
+            <circle cx="172.7" cy="58" r="4.5" class="glow-dot" style="--i: 2; --color: #eab308;" />
+            <circle cx="184" cy="100" r="4.5" class="glow-dot" style="--i: 3; --color: #84cc16;" />
+            <circle cx="172.7" cy="142" r="4.5" class="glow-dot" style="--i: 4; --color: #22c55e;" />
+            <circle cx="142" cy="172.7" r="4.5" class="glow-dot" style="--i: 5; --color: #10b981;" />
+            <circle cx="100" cy="184" r="4.5" class="glow-dot" style="--i: 6; --color: #06b6d4;" />
+            <circle cx="58" cy="172.7" r="4.5" class="glow-dot" style="--i: 7; --color: #0ea5e9;" />
+            <circle cx="27.3" cy="142" r="4.5" class="glow-dot" style="--i: 8; --color: #3b82f6;" />
+            <circle cx="16" cy="100" r="4.5" class="glow-dot" style="--i: 9; --color: #6366f1;" />
+            <circle cx="27.3" cy="58" r="4.5" class="glow-dot" style="--i: 10; --color: #a855f7;" />
+            <circle cx="58" cy="27.3" r="4.5" class="glow-dot" style="--i: 11; --color: #ec4899;" />
         </svg>
     </div>
-    
-    <h5 class="fw-bold mb-2 mt-2" style="color: #0f4c81; letter-spacing: 0.5px;">Chào mừng bạn đến vùng trời "Analysis và Phản ví dụ"</h5>
-    <small class="text-muted fw-bold mb-4" style="font-size: 15px;">Bạn vui lòng chờ trong <span id="countdownNumber" style="color: #e61d4a; font-size: 18px;">5</span> giây nữa...</small>
 
-    <div class="loader-progress-bar">
-        <div class="loader-progress-value"></div>
+    <!-- Thẻ chào mừng -->
+    <div class="mega-holo-card">
+        <div class="mega-card-body">
+            <div class="mega-badge">
+                <i class="fa-solid fa-sparkles fa-beat"></i>
+                <span>Khoa Toán - Tin học • APMA</span>
+            </div>
+
+            <h5 class="mega-title mb-3">
+                Chào mừng bạn đến vùng trời<br>“Analysis và Phản ví dụ”
+            </h5>
+
+            <p class="text-secondary fw-bold mb-3" style="font-size: 15px;">
+                Vui lòng chờ trong <span id="countdownNumber">5</span> giây nữa...
+            </p>
+
+            <div class="mega-progress-track">
+                <div class="mega-progress-fill"></div>
+            </div>
+        </div>
     </div>
 </div>
     <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
