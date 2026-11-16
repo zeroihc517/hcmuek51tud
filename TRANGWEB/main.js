@@ -218,12 +218,17 @@ function pingOnlineStatus() {
             try {
                 let userObj = JSON.parse(savedUser);
                 mssvParam = userObj.mssv + "|" + userObj.name + "|" + (isAdmin ? "1" : "0"); 
-               const allowedRenLuyen = ["51.01.108.008"]; // Thay MSSV của người kia vào đây
-                if (allowedRenLuyen.includes(userObj.mssv)) {
-                    $('#btnNavRenLuyen').removeClass('d-none');
-                } else {
-                    $('#btnNavRenLuyen').addClass('d-none');
-                }
+               // Mọi sinh viên đăng nhập đều thấy khung gpaNavContainer (chứa nút Kết quả)
+$('#gpaNavContainer').removeClass('d-none').addClass('d-flex');
+$('#btnNavGPA').removeClass('d-none');
+
+// Riêng nút Rèn luyện chỉ hiện cho danh sách MSSV chỉ định
+const allowedRenLuyen = ["51.01.108.008"]; // Thêm MSSV của người thứ 2 vào mảng này
+if (allowedRenLuyen.includes(userObj.mssv)) {
+    $('#btnNavRenLuyen').removeClass('d-none');
+} else {
+    $('#btnNavRenLuyen').addClass('d-none');
+}
             } catch(e) {
                 mssvParam = "Khách"; 
                 $('#gpaNavContainer').addClass('d-none');
