@@ -88,9 +88,7 @@
   
   <!-- Logo & Brand -->
     <div class="sidebar-brand">
-        <button class="menu-toggle d-lg-none" id="btnToggleMenuMobile" onclick="document.getElementById('sidebarMenu').classList.toggle('show'); document.getElementById('sidebarOverlay').classList.toggle('show');" style="background:none; border:none; color:white;">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
+        
         <div class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></div>
         <div>
             <h6>Cộng đồng</h6>
@@ -107,10 +105,10 @@
                 <img id="sidebarAvatarImg" src="" class="w-100 h-100 d-none" style="object-fit: cover;">
             </div>
             <!-- Đổi text-end thành text-start để chữ hiển thị đẹp hơn khi nằm giữa -->
-            <div class="user-text text-start d-none d-md-block">
-                <div class="fw-bold" id="sidebarUserName" style="color: #0f4c81; font-size: 13.5px; line-height: 1.2;">Tên SV</div>
-                <div class="text-muted small" id="sidebarUserMSSV" style="font-size: 11px;">MSSV</div>
-            </div>
+          <div class="user-text text-start">
+    <div class="fw-bold" id="sidebarUserName" style="color: #0f4c81; font-size: 13.5px; line-height: 1.2;">Tên SV</div>
+    <div class="text-muted small" id="sidebarUserMSSV" style="font-size: 11px;">MSSV</div>
+</div>
     </div>
         
         <!-- Chuông thông báo cá nhân -->
@@ -151,10 +149,10 @@
         <div class="course-list">
             <button class="btn-course active" id="btnNavThongBao" onclick="loadDataByHocPhan('Thông báo', this)"><i class="fa-solid fa-bell"></i> Thông báo</button>
             <button class="btn-course" id="btnNavTKB" onclick="loadTKBView()"><i class="fa-solid fa-calendar"></i> Lịch học</button>
-            <div id="gpaNavContainer" class="d-none d-lg-flex flex-column gap-2">
-                <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()"><i class="fa-solid fa-clipboard-check"></i> Kết quả</button>
-                <button class="btn-course" id="btnNavRenLuyen" onclick="loadRenLuyenView()"><i class="fa-solid fa-medal"></i> Rèn luyện</button>
-            </div>
+            <div id="gpaNavContainer" class="d-flex flex-column gap-2">
+    <button class="btn-course" id="btnNavGPA" onclick="loadGPAView()"><i class="fa-solid fa-clipboard-check"></i> Kết quả</button>
+    <button class="btn-course" id="btnNavRenLuyen" onclick="loadRenLuyenView()"><i class="fa-solid fa-medal"></i> Rèn luyện</button>
+</div>
             <button class="btn-course" id="btnNavShareCode" onclick="openShareCodeSection()"><i class="fa-solid fa-laptop-code"></i> Tiện ích <span id="shareCodeSidebarBadge" class="badge-new-qa d-none">Mới</span></button>
             <button class="btn-course" id="btnNavHocPhanHub" onclick="openCourseHubView(this)"><i class="fa-solid fa-layer-group"></i> Học phần <span class="badge rounded-pill ms-1" style="background: rgba(15, 76, 129, 0.12); color: #0f4c81; font-size: 11px;" id="totalCoursesBadge">All</span></button>
         </div>
