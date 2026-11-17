@@ -269,7 +269,7 @@ function openQASection() {
     resetNavActive(); 
     $('#btnNavShareCode').addClass('active'); 
     $('#qaSection').removeClass('d-none'); 
-    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - Giải đáp thắc mắc");
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Tiện ích - Giải đáp thắc mắc");
     updateSystemUrl('view', 'qa'); // Đổi URL thành ?view=qa
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
     if (currentUser) { $('#txtMSSV').val(currentUser.mssv).prop('readonly', true).css({ 'background-color': '#e9ecef', 'cursor': 'not-allowed' }); } 
@@ -790,7 +790,7 @@ function openShareCodeSection() {
     $('#shareContentView').addClass('d-none');
     $('#groupLinksView').addClass('d-none');
     
-    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận");
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Tiện ích");
     
     // Nếu không có tham số category trên URL thì mới trở về danh mục Thảo luận tổng
     let urlParams = new URLSearchParams(window.location.search);
@@ -808,9 +808,9 @@ function backToShareCategories() {
     $('#shareContentView').addClass('d-none');
 $('#groupLinksView').addClass('d-none');
     $('#shareCategoryView').removeClass('d-none');
-    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận");
-    // Phục hồi lại đường link Thảo luận chung (?view=thaoluan)
-    updateSystemUrl('view', 'thaoluan');
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Tiện ích");
+    // Phục hồi lại đường link Thảo luận chung (?view=tienich)
+    updateSystemUrl('view', 'tienich');
 }
 
 // 1. Hai biến lưu tạm thông tin môn học sinh viên muốn mở
@@ -867,7 +867,7 @@ window.executeOpenShareCategory = function(categoryName, lang) {
     $('#currentShareTitle').text(categoryName);
     $('#shareCategoryView').addClass('d-none');
     $('#shareContentView').removeClass('d-none');
-    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - Không gian Code - " + categoryName);
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Tiện ích - Không gian Code - " + categoryName);
     
     let cleanCategory = categoryName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/gi, "d").replace(/[^a-zA-Z0-9]/g, "");
     let cleanPath = window.location.pathname;
@@ -1174,7 +1174,7 @@ window.openShareCodeDetail = function(index) {
     let item = window.shareCodeList[index];
     if(!item) return;
 	if (typeof window.setDetailedView === 'function') {
-        window.setDetailedView(`Thảo luận - Không gian Code - ${currentShareCategory} - Mã bài: ${item.maBai}`);
+        window.setDetailedView(`Tiện ích - Không gian Code - ${currentShareCategory} - Mã bài: ${item.maBai}`);
     }
     let questionFormatted = formatCodeBlocks(item.codeContent);
     let threadHtml = item.answer.trim() !== "" ? parseThread(item.answer, item.rowIndex) : '';
@@ -1251,7 +1251,7 @@ window.openShareCodeDetail = function(index) {
 window.backToShareCodeList = function() {
     $('#shareCodeDetailWrapper').addClass('d-none');
     $('#shareCodeListWrapper').removeClass('d-none');
-	if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - Không gian Code - " + currentShareCategory);
+	if (typeof window.setDetailedView === 'function') window.setDetailedView("Tiện ích - Không gian Code - " + currentShareCategory);
 };
 // Hàm xử lý gửi bình luận / góp ý trong phần Share Code
 window.sendShareCodeReply = function(rowIndex) { 
@@ -1558,7 +1558,7 @@ window.openGroupLinksSection = function() {
         overlay.classList.remove('show'); 
     }
 
-    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - Nhóm học tập");
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Tiện ích - Nhóm học tập");
 
     cancelEditGroupLink();
     loadGroupLinks();
@@ -3056,7 +3056,18 @@ window.openDirectWeb = function(safeFileUrl, title, sheetName, stableKey) {
     ];
     window.lastActiveSectionBeforeDirectWeb = sectionIds.find(id => $(id).length && !$(id).hasClass('d-none')) || '#shareCodeSection';
 
-    // 4. Ẩn thanh điều hướng và section hiện tại
+    // 4. GHI NHẬN LỊCH SỬ TRUY CẬP (BỔ SUNG MỚI)
+    if (typeof window.setDetailedView === 'function') {
+        if (window.lastActiveSectionBeforeDirectWeb === '#shareCodeSection') {
+            window.setDetailedView(`Tiện ích - ${title}`);
+        } else if (typeof currentSheetName !== 'undefined' && currentSheetName !== "") {
+            window.setDetailedView(`${currentSheetName} - ${title}`);
+        } else {
+            window.setDetailedView(title);
+        }
+    }
+
+    // 5. Ẩn thanh điều hướng và section hiện tại
     $('#sidebarMenu').addClass('d-none');
     $(window.lastActiveSectionBeforeDirectWeb).addClass('d-none');
     
@@ -3133,7 +3144,17 @@ window.backToCourseTable = function() {
     $('#sidebarMenu').removeClass('d-none');
     let targetSection = window.lastActiveSectionBeforeDirectWeb || '#shareCodeSection';
     $(targetSection).removeClass('d-none');
+
+    // KHÔI PHỤC LẠI LỊCH SỬ TRUY CẬP KHI BẤM TRỞ LẠI (BỔ SUNG MỚI)
+    if (typeof window.setDetailedView === 'function') {
+        if (targetSection === '#shareCodeSection') {
+            window.setDetailedView("Tiện ích");
+        } else if (typeof currentSheetName !== 'undefined' && currentSheetName !== "") {
+            window.setDetailedView(currentSheetName);
+        }
+    }
 };
+
 window.toggleOneCompiler = function(btn, isShow) {
     let sidebar = $(btn).closest('#iframeSidebar, #latexSidebar'); 
     
