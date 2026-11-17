@@ -769,285 +769,364 @@ $.ajax({
             
             currentSheetTotalRows = data.length;
 window.currentSubjectData = data;
-            // ==========================================
-            // XỬ LÝ RIÊNG: GIAO DIỆN THÔNG BÁO (HỌC THUẬT & RÈN LUYỆN)
-            // ==========================================
-            if (sheetName.toLowerCase() === 'thông báo') {
-                let mainHtml = `
-<div class="tb-list-container shadow-sm mb-4">
+           if (sheetName.toLowerCase() === 'thông báo') {
+ let mainHtml = `
+<div class="tb-list-container shadow-sm mb-4 bg-white">
     <div class="tb-header-blue">
         <div class="d-flex align-items-center"><i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo mới</div>
-        <div class="ms-auto d-flex gap-2">
-            <!-- NÚT ĐĂNG BÀI DÀNH CHO SINH VIÊN -->
-            <button class="btn btn-sm text-white fw-bold px-3" style="background: #10b981; border-radius: 4px;" onclick="openStudentAddTbModal()"><i class="fa-solid fa-plus me-1"></i>Đăng bài</button>
-            <input type="text" id="tbSearchInput" class="form-control form-control-sm border-0" placeholder="Tìm kiếm thông báo..." style="width: 220px; border-radius: 4px;" onkeyup="if(event.key === 'Enter') searchThongBao()">
-            <button class="btn btn-sm text-white fw-bold px-3" style="background: #e61d4a; border-radius: 4px;" onclick="searchThongBao()">Tìm kiếm</button>
+        <div class="ms-auto d-flex gap-2 flex-wrap">
+            <button class="btn btn-sm text-white fw-bold px-3" style="background: #10b981; border-radius: 6px;" onclick="openStudentAddTbModal()"><i class="fa-solid fa-plus me-1"></i>Đăng bài</button>
+            <input type="text" id="tbSearchInput" class="form-control form-control-sm border-0" placeholder="Tìm kiếm thông báo..." style="width: 220px; border-radius: 6px;" onkeyup="searchThongBao()">
+            <button class="btn btn-sm text-white fw-bold px-3" style="background: #e61d4a; border-radius: 6px;" onclick="searchThongBao()">Tìm kiếm</button>
         </div>
     </div>
     
     <div class="tb-list-body">
-        <!-- KHU VỰC THÔNG BÁO HỆ THỐNG NẰM TRÊN CÙNG -->
         <div id="tbItemsHeThong" class="mb-4"></div>
 
         <div class="row g-4">
-            <div class="col-md-6 tb-section-block" id="tbSectionHocThuat">
-                <div class="tb-section-heading ht border-bottom pb-2 mb-3"><i class="fa-solid fa-book-open-reader me-2"></i> Không gian học thuật & Nghiên cứu khoa học</div>
-                <div class="tb-section-items" id="tbItemsHocThuat"></div>
+            <!-- CỘT 1: HỌC THUẬT -->
+            <div class="col-md-6 tb-section-block d-flex flex-column" id="tbSectionHocThuat">
+                <div class="tb-section-heading ht border-bottom pb-2 mb-2 d-flex justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-book-open-reader me-2"></i> Không gian học thuật & Nghiên cứu khoa học</span>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill" id="countHocThuatBadge" style="font-size: 12px;">0</span>
+                </div>
+                <div class="tb-section-items flex-grow-1" id="tbItemsHocThuat"></div>
+                <div id="paginationHocThuat" class="mt-auto pt-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="min-height: 48px;"></div>
             </div>
             
-            <div class="col-md-6 tb-section-block" id="tbSectionRenLuyen">
-                <div class="tb-section-heading rl border-bottom pb-2 mb-3"><i class="fa-solid fa-person-running me-2"></i> Hoạt động Rèn luyện</div>
-                <div class="tb-section-items" id="tbItemsRenLuyen"></div>
+            <!-- CỘT 2: RÈN LUYỆN -->
+            <div class="col-md-6 tb-section-block d-flex flex-column" id="tbSectionRenLuyen">
+                <div class="tb-section-heading rl border-bottom pb-2 mb-2 d-flex justify-content-between align-items-center">
+                    <span><i class="fa-solid fa-person-running me-2"></i> Hoạt động Rèn luyện</span>
+                    <span class="badge bg-success-subtle text-success rounded-pill" id="countRenLuyenBadge" style="font-size: 12px;">0</span>
+                </div>
+                <div class="tb-section-items flex-grow-1" id="tbItemsRenLuyen"></div>
+                <div id="paginationRenLuyen" class="mt-auto pt-3 d-flex justify-content-between align-items-center flex-wrap gap-2" style="min-height: 48px;"></div>
             </div>
         </div>
     </div>
-</div>
-`;
-// ... (Phần code bên dưới giữ nguyên) ...
+</div>`;
 
-               let detailData = [];
-               let hocThuatItemsHtml = '';
-               let renLuyenItemsHtml = '';
-               let heThongItemsHtml = '';
+    let detailData = [];
+    let heThongItemsHtml = '';
+    
+    // Mảng lưu danh sách HTML từng thẻ thông báo để phân trang
+    window.tbListArrays = {
+        HocThuat: [],
+        RenLuyen: []
+    };
+    window.tbCurrentPage = {
+        HocThuat: 1,
+        RenLuyen: 1
+    };
+    const TB_ITEMS_PER_PAGE = 10;
 
-               // --- TÍNH MÃ ĐỊNH DANH ĐỘC LẬP TỪ DƯỚI LÊN (CŨ NHẤT BẮT ĐẦU TỪ 0001) ---
-               let yearPrefix = new Date().getFullYear().toString().slice(-2); // "26" cho năm 2026
-               let htCounter = 0;
-               let rlCounter = 0;
-               let adCounter = 0; // Bộ đếm riêng cho HỆ THỐNG (Admin)
-               let tbCodesMap = {};
+    // --- TÍNH MÃ ĐỊNH DANH ĐỘC LẬP TỪ DƯỚI LÊN ---
+    let yearPrefix = new Date().getFullYear().toString().slice(-2);
+    let htCounter = 0, rlCounter = 0, adCounter = 0;
+    let tbCodesMap = {};
 
-               // Duyệt từ dưới lên trên bảng dữ liệu Google Sheets để đếm số thứ tự tăng dần từ 0001
-               for (let i = data.length - 1; i >= 1; i--) {
-                   let rowC7 = String(data[i][6] || '').toLowerCase();
-                   let isHeThong = rowC7.includes('hệ thống');
-                   let isRenLuyen = rowC7.includes('rèn luyện');
-                   let code = "";
-                   
-                   if (isHeThong) {
-                       adCounter++;
-                       code = `${yearPrefix}AD${String(adCounter).padStart(4, '0')}`; // Mã AD260001 cho Hệ thống
-                   } else if (isRenLuyen) {
-                       rlCounter++;
-                       code = `${yearPrefix}RL${String(rlCounter).padStart(4, '0')}`; // Mã RL260001 cho Rèn luyện
-                   } else {
-                       htCounter++;
-                       code = `${yearPrefix}HT${String(htCounter).padStart(4, '0')}`; // Mã HT260001 cho Học thuật
-                   }
-                   tbCodesMap[i] = code;
-               }
-const regexNgayDang = /ĐĂNG=((?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4})/i;
-    const regexCapNhat = /UPDATE=((?:\d{2}:\d{2}\s)?\d{2}\/\d{2}\/\d{4})/i;
-    const regexUrl = /(https?:\/\/[^\s<"]+)/g;
-    const regexUrlNgoai = /(https?:\/\/[^\s]+)/g;
-    const regexTheP = /<\/?(p|div)[^>]*>/gi;
-    const regexNbsp = /&nbsp;/gi;
-    const regexBr = /(<br\s*\/?>|\n)+/gi;
-data.forEach((row, rowIndex) => {
-        if (rowIndex === 0) return; 
-        
+    for (let i = data.length - 1; i >= 1; i--) {
+        let rowC7 = String(data[i][6] || '').toLowerCase();
+        let isHeThong = rowC7.includes('hệ thống');
+        let isRenLuyen = rowC7.includes('rèn luyện');
+        if (isHeThong) { adCounter++; tbCodesMap[i] = `${yearPrefix}AD${String(adCounter).padStart(4, '0')}`; }
+        else if (isRenLuyen) { rlCounter++; tbCodesMap[i] = `${yearPrefix}RL${String(rlCounter).padStart(4, '0')}`; }
+        else { htCounter++; tbCodesMap[i] = `${yearPrefix}HT${String(htCounter).padStart(4, '0')}`; }
+    }
+
+    data.forEach((row, rowIndex) => {
+        if (rowIndex === 0) return;
         let c1 = String(row[0] || '').trim();
         let c2 = String(row[1] || '').trim();
         let c3 = String(row[2] || '').trim();
         if (c1 === '' && c2 === '' && c3 === '') return;
-        // --- CODE MỚI: BÓC TÁCH NGƯỜI ĐĂNG VÀ ĐẨY LÊN GÓC PHẢI ---
+
         let posterHtml = "";
         c3 = c3.replace(/\[POSTER:(.*?)\|(.*?)\]/g, function(match, pMssv, pName) {
-            let shortName = getNaturalShortName(pName); 
+            let shortName = getNaturalShortName(pName);
             let displayMssv = pMssv;
-            
             let isSystemAdminAcc = currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
-            
-            if (!isSystemAdminAcc && (!currentUser || currentUser.mssv !== pMssv)) {
-                if (pMssv.length > 6) {
-                    displayMssv = pMssv.substring(0, 2) + '***' + pMssv.substring(pMssv.length - 3);
-                }
+            if (!isSystemAdminAcc && (!currentUser || currentUser.mssv !== pMssv) && pMssv.length > 6) {
+                displayMssv = pMssv.substring(0, 2) + '***' + pMssv.substring(pMssv.length - 3);
             }
-            // Tạo huy hiệu Người đăng, class 'ms-auto' sẽ tự động đẩy khối này sang góc bên phải màn hình
             posterHtml = `<span class="tb-date-text ms-auto" style="background: #f8fafc; border: 1px solid #cbd5e1; color: #475569;"><i class="fa-solid fa-user-pen me-1"></i>Người đăng: <b class="text-dark">${shortName}</b> (${displayMssv})</span>`;
-            return ``; // Xóa thẻ này khỏi nội dung văn bản c3
+            return ``;
         });
-        
+
         let c3_raw = c3;
-    let c4_raw = String(row[3] || '').trim(); 
-    let c5 = String(row[4] || '').trim();
-    let c6 = String(row[5] || '').trim();
-    let c7 = String(row[6] || '').trim();
-    let c7_raw = c7; 
+        let c4_raw = String(row[3] || '').trim();
+        let c5 = String(row[4] || '').trim();
+        let c6 = String(row[5] || '').trim();
+        let c7 = String(row[6] || '').trim();
+        let c7_raw = c7;
 
-    let publishDate = null;
-    let c4_display = c4_raw; 
-    let dateMatch = c4_raw.match(/(?:(\d{1,2}):(\d{2}))?\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        let publishDate = null;
+        let c4_display = c4_raw;
+        let dateMatch = c4_raw.match(/(?:(\d{1,2}):(\d{2}))?\s*(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+        if (dateMatch) {
+            let hour = dateMatch[1] ? parseInt(dateMatch[1]) : 0;
+            let minute = dateMatch[2] ? parseInt(dateMatch[2]) : 0;
+            let day = parseInt(dateMatch[3]);
+            let month = parseInt(dateMatch[4]) - 1;
+            let year = parseInt(dateMatch[5]);
+            publishDate = new Date(year, month, day, hour, minute, 0);
+            c4_display = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
+        }
 
-    if (dateMatch) {
-        let hour = dateMatch[1] ? parseInt(dateMatch[1]) : 0;
-        let minute = dateMatch[2] ? parseInt(dateMatch[2]) : 0;
-        let day = parseInt(dateMatch[3]);
-        let month = parseInt(dateMatch[4]) - 1;
-        let year = parseInt(dateMatch[5]);
-        publishDate = new Date(year, month, day, hour, minute, 0);
-        c4_display = `${String(day).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`;
-    }
-let now = new Date(); 
-    // Sinh viên không được vẽ bài tương lai. Admin thì vẽ hết để dùng CSS ẩn/hiện tức thì
-    if (publishDate && publishDate > now && (!isAdmin || adminShowHidden)) {
-        return; 
-    }
-    
-    let c4 = c4_display; 
-    let isNew = /^new$/i.test(c1) || c1.toLowerCase().includes('new');
-    let isPending = /^pending$/i.test(c1) || c1.toLowerCase().includes('pending');
-    
-    // Kiểm tra định danh tài khoản Admin thực sự (không phụ thuộc vào việc bật/tắt công cụ quản trị)
-    let isRealAdmin = currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
-    
-    if (isPending && !isRealAdmin) {
-        return; // Chặn: Không render bài PENDING cho người dùng thường (Nhưng Admin thì luôn thấy)
-    }
-    let isHeThong = c7_raw.toLowerCase().includes('hệ thống');
-    let isRenLuyen = c7_raw.toLowerCase().includes('rèn luyện');
-    
-    let deadlineTime = extractDeadline(c3);
+        let now = new Date();
+        if (publishDate && publishDate > now && (!isAdmin || adminShowHidden)) return;
 
-    if (isNew) {
-        if (deadlineTime) {
-            if (now.getTime() > deadlineTime) isNew = false;
-        } else {
-            if (publishDate) {
+        let c4 = c4_display;
+        let isNew = /^new$/i.test(c1) || c1.toLowerCase().includes('new');
+        let isPending = /^pending$/i.test(c1) || c1.toLowerCase().includes('pending');
+        let isRealAdmin = currentUser && (currentUser.mssv === "51.01.108.008" || currentUser.mssv === "5101108008");
+        if (isPending && !isRealAdmin) return;
+
+        let isHeThong = c7_raw.toLowerCase().includes('hệ thống');
+        let isRenLuyen = c7_raw.toLowerCase().includes('rèn luyện');
+        let deadlineTime = extractDeadline(c3);
+
+        if (isNew) {
+            if (deadlineTime) {
+                if (now.getTime() > deadlineTime) isNew = false;
+            } else if (publishDate) {
                 let diffDays = (now.getTime() - publishDate.getTime()) / (1000 * 60 * 60 * 24);
                 if (diffDays > 15) isNew = false;
             }
         }
-    }
 
-    // Kiểm tra trạng thái ẩn bài
-    let hideTime = extractDeadline(c7_raw);
-    let isHidden = (hideTime && now.getTime() > hideTime);
-    let isFuturePost = (publishDate && publishDate > now);
+        let hideTime = extractDeadline(c7_raw);
+        let isHidden = (hideTime && now.getTime() > hideTime);
+        let isFuturePost = (publishDate && publishDate > now);
+        let hiddenClassAttr = (isHidden || isFuturePost) ? 'is-hidden-post' : '';
 
-    // Gán class nhận diện bài ẩn/hẹn giờ
-    let hiddenClassAttr = (isHidden || isFuturePost) ? 'is-hidden-post' : '';
+        let dlStrRegex = /(?:DEADLINE\s*=\s*|Hết hạn(?: lúc\s*)?)\d{1,2}:\d{2}\s*(?:Ngày\s*)?\d{1,2}\/\d{1,2}\/\d{2,4}/ig;
+        c3 = c3.replace(dlStrRegex, '').replace(/<[^\/>][^>]*>\s*<\/[^>]+>/g, '').trim();
+        c7 = c7_raw.replace(dlStrRegex, '').trim();
+        if (isHeThong) c7 = c7.replace(/hệ thống/ig, '').trim();
+        else if (isRenLuyen) c7 = c7.replace(/rèn luyện/ig, '').trim();
+        c7 = c7.replace(/^[:\-,\s|]+/, '').replace(/[:\-,\s|]+$/, '').trim();
 
-    let dlStrRegex = /(?:DEADLINE\s*=\s*|Hết hạn(?: lúc\s*)?)\d{1,2}:\d{2}\s*(?:Ngày\s*)?\d{1,2}\/\d{1,2}\/\d{2,4}/ig;
-    c3 = c3.replace(dlStrRegex, '').replace(/<[^\/>][^>]*>\s*<\/[^>]+>/g, '').trim();
+        let assignedTbCode = tbCodesMap[rowIndex] || "";
+        detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew, isHidden, tbCode: assignedTbCode, deadlineTime: deadlineTime, posterHtml: posterHtml };
 
-    c7 = c7_raw.replace(dlStrRegex, '').trim();
-    if (isHeThong) c7 = c7.replace(/hệ thống/ig, '').trim();
-    else if (isRenLuyen) c7 = c7.replace(/rèn luyện/ig, '').trim();
-    c7 = c7.replace(/^[:\-,\s|]+/, '').replace(/[:\-,\s|]+$/, '').trim();
+        if (isHidden && !isAdmin) return;
 
-    let assignedTbCode = tbCodesMap[rowIndex] || "";
-    
-   // Đính kèm posterHtml vào data để truyền sang trang chi tiết
-    detailData[rowIndex] = { c1, c2, c3, c4, c5, c6, c7, isNew, isHidden, tbCode: assignedTbCode, deadlineTime: deadlineTime, posterHtml: posterHtml };
-
-    // Bỏ qua không vẽ ra danh sách bên ngoài nếu bài bị ẩn và không phải Admin
-if (isHidden && !isAdmin) {
-        return; 
-    }
-
-    let dateDisplay = `
-    <div class="d-inline-flex gap-2 flex-wrap">
-        <span class="tb-date-text"><i class="fa-regular fa-calendar"></i> Ngày đăng: ${c4 || 'Gần đây'}</span>
-        ${c5 ? `<span class="tb-date-text text-success"><i class="fa-solid fa-clock-rotate-left"></i> Ngày cập nhật: ${c5}</span>` : ''}
-    </div>`;
-
-    let badgeHtml = isNew ? `<div class="tb-badge-new">Mới</div>` : '';
-    if (isPending && isRealAdmin) {
-        badgeHtml += `<div class="tb-badge-new bg-warning text-dark ms-1 shadow-sm"><i class="fa-solid fa-hourglass-half"></i> Chờ duyệt</div>`;
-    }
-    let countdownHtml = '';
-    if (deadlineTime) {
-        countdownHtml = `
-        <div class="tb-countdown tb-countdown-list" data-deadline="${deadlineTime}">
-            <i class="fa-solid fa-spinner fa-spin"></i> Đang tính toán...
+        let dateDisplay = `
+        <div class="d-inline-flex gap-2 flex-wrap">
+            <span class="tb-date-text"><i class="fa-regular fa-calendar"></i> Ngày đăng: ${c4 || 'Gần đây'}</span>
+            ${c5 ? `<span class="tb-date-text text-success"><i class="fa-solid fa-clock-rotate-left"></i> Ngày cập nhật: ${c5}</span>` : ''}
         </div>`;
-    }
 
-    let adminHtml = '';
-  if (isAdmin) {
-        let sheetRowIndex = rowIndex + 1;
-        const escapeJS = (str) => String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, "");
-        let ec1 = escapeJS(c1); let ec2 = escapeJS(c2); let ec3 = escapeJS(c3_raw); 
-        let ec4 = escapeJS(c4); let ec5 = escapeJS(c5); let ec6 = escapeJS(c6); let ec7 = escapeJS(c7_raw);
-        
-        // Hiện nút Duyệt bài nếu trạng thái đang là PENDING
-        let approveBtn = isPending ? `<button class="btn btn-sm btn-primary py-0 px-3 fw-bold ms-2" onclick="approveThongBao(${sheetRowIndex}, this)"><i class="fa-solid fa-check-circle me-1"></i>Duyệt bài</button>` : '';
+        let badgeHtml = isNew ? `<div class="tb-badge-new">Mới</div>` : '';
+        if (isPending && isRealAdmin) {
+            badgeHtml += `<div class="tb-badge-new bg-warning text-dark ms-1 shadow-sm"><i class="fa-solid fa-hourglass-half"></i> Chờ duyệt</div>`;
+        }
+        let countdownHtml = deadlineTime ? `<div class="tb-countdown tb-countdown-list" data-deadline="${deadlineTime}"><i class="fa-solid fa-spinner fa-spin"></i> Đang tính toán...</div>` : '';
 
-        adminHtml = `
-<div class="mt-2 admin-action-col d-none" onclick="event.stopPropagation();">
-    <div class="d-flex flex-wrap gap-1">
-        <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
-        <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
-        <button class="btn btn-sm btn-outline-success py-0 px-2 fw-bold" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button>
-        <button class="btn btn-sm btn-outline-warning py-0 px-2 fw-bold" onclick="openEditRowModal(${sheetRowIndex}, '${ec1}', '${ec2}', '${ec3}', '${ec4}', '${ec5}', '${ec6}', '${ec7}')"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn btn-sm btn-outline-danger py-0 px-2 fw-bold" onclick="deleteRowItem(${sheetRowIndex})"><i class="fa-solid fa-trash"></i></button>
-        ${approveBtn}
-    </div>
-</div>`;
-    }
-
-// --- THÊM ĐOẠN NÀY ĐỂ TÍNH TOÁN KÉO THẢ CHO THÔNG BÁO ---
-    let sheetRowIndexDrag = rowIndex + 1;
-    let isDragEnabled = window.isAdminActionsEnabled ? 'true' : 'false';
-    let dragStyleTb = window.isAdminActionsEnabled ? 'cursor: grab;' : 'cursor: pointer;';
-    let dragAttrTb = (isAdmin && window.innerWidth >= 992) ? ` draggable="${isDragEnabled}" ondragstart="handleDragStart(event, ${sheetRowIndexDrag})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndexDrag}, '${currentSheetName}')" style="${dragStyleTb}"` : 'style="cursor: pointer;"';
-
-    if (isHeThong) {
-        heThongItemsHtml += `
-        <div class="border-animation mb-4 ${hiddenClassAttr} drag-handle-row" ${dragAttrTb}>
-            <div class="alert shadow-sm border-0 position-relative" role="alert" style="background: linear-gradient(to right, #fff5f5, #ffffff);" onclick="viewThongBaoDetail(${rowIndex})">
-                <div class="d-flex align-items-start gap-3">                <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
-                    <i class="fa-solid fa-triangle-exclamation fs-4 fa-fade"></i>
+        let adminHtml = '';
+        if (isAdmin) {
+            let sheetRowIndex = rowIndex + 1;
+            const escapeJS = (str) => String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "\\n").replace(/\r/g, "");
+            let ec1 = escapeJS(c1), ec2 = escapeJS(c2), ec3 = escapeJS(c3_raw), ec4 = escapeJS(c4), ec5 = escapeJS(c5), ec6 = escapeJS(c6), ec7 = escapeJS(c7_raw);
+            let approveBtn = isPending ? `<button class="btn btn-sm btn-primary py-0 px-3 fw-bold ms-2" onclick="approveThongBao(${sheetRowIndex}, this)"><i class="fa-solid fa-check-circle me-1"></i>Duyệt bài</button>` : '';
+            adminHtml = `
+            <div class="mt-2 admin-action-col ${window.isAdminActionsEnabled ? '' : 'd-none'}" onclick="event.stopPropagation();">
+                <div class="d-flex flex-wrap gap-1">
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Lên" onclick="moveRowItem(${sheetRowIndex}, 'up')"><i class="fa-solid fa-arrow-up"></i></button>
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" title="Xuống" onclick="moveRowItem(${sheetRowIndex}, 'down')"><i class="fa-solid fa-arrow-down"></i></button>
+                    <button class="btn btn-sm btn-outline-success py-0 px-2 fw-bold" onclick="openInsertRowModal(${sheetRowIndex})"><i class="fa-solid fa-plus"></i></button>
+                    <button class="btn btn-sm btn-outline-warning py-0 px-2 fw-bold" onclick="openEditRowModal(${sheetRowIndex}, '${ec1}', '${ec2}', '${ec3}', '${ec4}', '${ec5}', '${ec6}', '${ec7}')"><i class="fa-solid fa-pen"></i></button>
+                    <button class="btn btn-sm btn-outline-danger py-0 px-2 fw-bold" onclick="deleteRowItem(${sheetRowIndex})"><i class="fa-solid fa-trash"></i></button>
+                    ${approveBtn}
                 </div>
-                <div class="flex-grow-1 mt-1">
-                    <div class="fw-bold text-danger mb-1" style="font-size: 18px; text-transform: uppercase;">[NHIỆM VỤ HỆ THỐNG] ${c2} ${badgeHtml}</div>
-                    <div class="tb-item-dates" style="font-size: 13.5px; color: #64748b;">
-                        ${dateDisplay} ${countdownHtml}
+            </div>`;
+        }
+
+        let sheetRowIndexDrag = rowIndex + 1;
+        let isDragEnabled = window.isAdminActionsEnabled ? 'true' : 'false';
+        let dragStyleTb = window.isAdminActionsEnabled ? 'cursor: grab;' : 'cursor: pointer;';
+        let dragAttrTb = (isAdmin && window.innerWidth >= 992) ? ` draggable="${isDragEnabled}" ondragstart="handleDragStart(event, ${sheetRowIndexDrag})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndexDrag}, '${currentSheetName}')" style="${dragStyleTb}"` : 'style="cursor: pointer;"';
+
+        if (isHeThong) {
+            heThongItemsHtml += `
+            <div class="border-animation mb-4 ${hiddenClassAttr} drag-handle-row" ${dragAttrTb}>
+                <div class="alert shadow-sm border-0 position-relative" role="alert" style="background: linear-gradient(to right, #fff5f5, #ffffff);" onclick="viewThongBaoDetail(${rowIndex})">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                            <i class="fa-solid fa-triangle-exclamation fs-4 fa-fade"></i>
+                        </div>
+                        <div class="flex-grow-1 mt-1">
+                            <div class="fw-bold text-danger mb-1" style="font-size: 18px; text-transform: uppercase;">[NHIỆM VỤ HỆ THỐNG] ${c2} ${badgeHtml}</div>
+                            <div class="tb-item-dates" style="font-size: 13.5px; color: #64748b;">${dateDisplay} ${countdownHtml}</div>
+                        </div>
                     </div>
+                    ${isAdmin ? `<div class="mt-3 text-end pt-2 border-top">${adminHtml}</div>` : ''}
                 </div>
+            </div>`;
+        } else {
+          let itemObj = {
+    searchStr: `${assignedTbCode} ${c2} ${c4} ${c5} ${c7}`.toLowerCase(),
+    isHiddenPost: (isHidden || isFuturePost),
+    html: `
+    <div class="tb-list-item ${hiddenClassAttr} drag-handle-row d-flex align-items-center" 
+         onclick="viewThongBaoDetail(${rowIndex})" 
+         style="height: ${isAdmin && window.isAdminActionsEnabled ? '118px' : '88px'}; padding: 10px 8px; border-bottom: 1px solid #f1f5f9; transition: background 0.15s; ${window.isAdminActionsEnabled ? 'cursor: grab;' : 'cursor: pointer;'}"
+         onmouseover="this.style.background='#f8fafc'"
+         onmouseout="this.style.background='transparent'"
+         ${isAdmin && window.innerWidth >= 992 ? `draggable="${window.isAdminActionsEnabled ? 'true' : 'false'}" ondragstart="handleDragStart(event, ${rowIndex + 1})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${rowIndex + 1}, '${currentSheetName}')"` : ''}>
+        
+        <div class="tb-icon-wrapper flex-shrink-0">
+            <i class="fa-solid fa-bell"></i>
+            ${badgeHtml}
+        </div>
+        
+        <div class="tb-item-info flex-grow-1 d-flex flex-column justify-content-center" style="min-width: 0;">
+           <div class="tb-item-title" title="${c2.replace(/"/g, '&quot;')}" 
+     style="font-size: 15.5px; font-weight: 600; line-height: 1.4; max-height: 2.8em; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; text-overflow: ellipsis !important; word-break: break-word;">
+    ${c2}
+</div>
+            <div class="tb-item-dates d-flex align-items-center gap-2 mt-1 overflow-hidden" style="font-size: 12.5px; white-space: nowrap;">
+                ${dateDisplay}
+                ${countdownHtml}
             </div>
-            ${isAdmin ? `<div class="mt-3 text-end pt-2 border-top">${adminHtml}</div>` : ''}
+            ${adminHtml}
+        </div>
+    </div>`
+};
+
+            if (isRenLuyen) window.tbListArrays.RenLuyen.push(itemObj);
+            else window.tbListArrays.HocThuat.push(itemObj);
+        }
+    });
+
+    window.thongBaoData = detailData;
+
+    // --- HÀM RENDER PHÂN TRANG CHUYÊN NGHIỆP ---
+    window.renderThongBaoPage = function(type, page = 1) {
+        window.tbCurrentPage[type] = page;
+        let keyword = ($('#tbSearchInput').val() || '').toLowerCase().trim();
+        let rawList = window.tbListArrays[type] || [];
+
+        // Lọc theo từ khóa tìm kiếm và trạng thái Ẩn/Hiện của Admin
+        let filteredList = rawList.filter(item => {
+            if (item.isHiddenPost && !window.adminShowHidden) return false;
+            if (keyword !== '' && !item.searchStr.includes(keyword)) return false;
+            return true;
+        });
+
+        let totalItems = filteredList.length;
+        $(`#count${type}Badge`).text(`${totalItems} tin`);
+
+        let container = $(`#tbItems${type}`);
+        let pagContainer = $(`#pagination${type}`);
+
+        if (totalItems === 0) {
+            let emptyMsg = keyword !== '' 
+                ? `Không tìm thấy thông báo nào khớp với "${$('#tbSearchInput').val()}".` 
+                : (type === 'RenLuyen' ? 'Chưa có hoạt động rèn luyện nào.' : 'Chưa có thông báo học thuật nào.');
+            container.html(`<div class="text-muted text-center py-4 bg-light rounded border border-dashed">${emptyMsg}</div>`);
+            pagContainer.html('');
+            return;
+        }
+
+        let totalPages = Math.ceil(totalItems / TB_ITEMS_PER_PAGE);
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+        window.tbCurrentPage[type] = page;
+
+        let startIndex = (page - 1) * TB_ITEMS_PER_PAGE;
+        let endIndex = Math.min(startIndex + TB_ITEMS_PER_PAGE, totalItems);
+        let pageItems = filteredList.slice(startIndex, endIndex);
+
+        container.html(pageItems.map(i => i.html).join(''));
+        applyKaTeX(`tbItems${type}`);
+
+        // Nếu chỉ có 1 trang (<= 10 thông báo), ẩn thanh chuyển trang cho gọn
+        if (totalPages <= 1) {
+            pagContainer.html(`<small class="text-muted fw-semibold">Hiển thị ${totalItems} / ${totalItems} thông báo</small>`);
+            return;
+        }
+
+        // Tạo nút số trang thông minh (VD: 1 ... 4 5 6 ... 12)
+        let pageBtnsHtml = '';
+        let addPageBtn = (p, label = p, isActive = false, isDisabled = false) => {
+            let activeStyle = isActive 
+                ? 'background-color: #0f4c81; color: #ffffff; border-color: #0f4c81;' 
+                : 'background-color: #ffffff; color: #334155; border-color: #cbd5e1;';
+            return `<button type="button" class="btn btn-sm fw-bold shadow-sm px-2.5" 
+                        style="${activeStyle} border-radius: 6px; min-width: 32px; font-size: 13px; transition: all 0.2s;" 
+                        ${isDisabled ? 'disabled' : `onclick="renderThongBaoPage('${type}', ${p}); document.getElementById('tbSection${type}').scrollIntoView({behavior: 'smooth', block: 'nearest'});"`}>
+                        ${label}
+                    </button>`;
+        };
+
+        // Nút Trước
+        pageBtnsHtml += addPageBtn(page - 1, '<i class="fa-solid fa-chevron-left"></i>', false, page === 1);
+
+        // Các nút số trang
+        let delta = 1;
+        let range = [];
+        for (let i = Math.max(2, page - delta); i <= Math.min(totalPages - 1, page + delta); i++) {
+            range.push(i);
+        }
+        if (page - delta > 2) range.unshift('...');
+        if (page + delta < totalPages - 1) range.push('...');
+        range.unshift(1);
+        if (totalPages > 1) range.push(totalPages);
+
+        range.forEach(item => {
+            if (item === '...') {
+                pageBtnsHtml += `<span class="px-1 text-muted fw-bold">...</span>`;
+            } else {
+                pageBtnsHtml += addPageBtn(item, item, item === page, false);
+            }
+        });
+
+        // Nút Sau
+        pageBtnsHtml += addPageBtn(page + 1, '<i class="fa-solid fa-chevron-right"></i>', false, page === totalPages);
+
+        pagContainer.html(`
+            <small class="text-muted fw-semibold">Hiển thị <b>${startIndex + 1}–${endIndex}</b> / <b>${totalItems}</b></small>
+            <div class="d-flex align-items-center gap-1">${pageBtnsHtml}</div>
+        `);
+    };
+
+    // Cập nhật lại hàm tìm kiếm thông báo để tương thích với phân trang
+    window.searchThongBao = function() {
+        renderThongBaoPage('HocThuat', 1);
+        renderThongBaoPage('RenLuyen', 1);
+    };
+
+    // Cập nhật lại hàm Ẩn/Hiện của Admin để vẽ lại đúng số trang
+    window.toggleAdminShowHidden = function() {
+        window.adminShowHidden = !window.adminShowHidden;
+        let btn = $('#btnToggleHiddenPosts');
+
+        if (window.adminShowHidden) {
+            $('body').removeClass('hide-hidden-posts');
+            btn.html('<i class="fa-solid fa-eye-slash me-1"></i> Ẩn');
+            btn.removeClass('btn-secondary text-white').addClass('btn-info text-dark');
+        } else {
+            $('body').addClass('hide-hidden-posts');
+            btn.html('<i class="fa-solid fa-eye me-1"></i> Hiện');
+            btn.removeClass('btn-info text-dark').addClass('btn-secondary text-white');
+        }
+        renderThongBaoPage('HocThuat', 1);
+        renderThongBaoPage('RenLuyen', 1);
+    };
+
+    let detailHtml = `
+    <div id="tbDetailContainer" class="d-none">
+        <div class="tb-detail-box shadow-sm">
+            <div class="tb-header-blue" style="cursor: pointer;" onclick="backToThongBaoList()">
+                <i class="fa-solid fa-arrow-left me-2"></i> Trở lại <span class="mx-2">|</span> <i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo chi tiết
+            </div>
+            <div class="tb-detail-body" id="tbDetailContent"></div>
         </div>
     </div>`;
-}
-else {
-        let itemHtml = `
-       <div class="tb-list-item ${hiddenClassAttr} drag-handle-row" onclick="viewThongBaoDetail(${rowIndex})" ${dragAttrTb}>
-            <div class="tb-icon-wrapper">
-                <i class="fa-solid fa-bell"></i>
-                ${badgeHtml}
-            </div>
-            <div class="tb-item-info">
-                <div class="tb-item-title" style="font-size: 17px; font-weight: 600;">${c2}</div>
-                <div class="tb-item-dates d-flex align-items-center flex-wrap gap-3" style="font-size: 13px;">
-                    ${dateDisplay}
-                    ${countdownHtml}
-                </div>
-                ${adminHtml}
-            </div>
-        </div>`;
-        
-        if (isRenLuyen) renLuyenItemsHtml += itemHtml;
-        else hocThuatItemsHtml += itemHtml;
-    }
-});
-
-                if (!hocThuatItemsHtml) hocThuatItemsHtml = '<div class="text-muted text-center py-4">Chưa có thông báo học thuật nào.</div>';
-                if (!renLuyenItemsHtml) renLuyenItemsHtml = '<div class="text-muted text-center py-4">Chưa có hoạt động rèn luyện nào.</div>';
-
-                window.thongBaoData = detailData;
-
-                let detailHtml = `
-                <div id="tbDetailContainer" class="d-none">
-                    <div class="tb-detail-box shadow-sm">
-                        <div class="tb-header-blue" style="cursor: pointer;" onclick="backToThongBaoList()">
-                            <i class="fa-solid fa-arrow-left me-2"></i> Trở lại <span class="mx-2">|</span> <i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo chi tiết
-                        </div>
-                        <div class="tb-detail-body" id="tbDetailContent"></div>
-                    </div>
-                </div>
-                `;
 
                 if (!window.tbDetailFunctionsInjected) {
                     window.viewThongBaoDetail = function(index) {
@@ -1468,9 +1547,8 @@ if (heThongItemsHtml === '') {
 } else {
     $('#tbItemsHeThong').removeClass('d-none');
 }
-$('#tbItemsHeThong').html(heThongItemsHtml);
-$('#tbItemsHocThuat').html(hocThuatItemsHtml);
-$('#tbItemsRenLuyen').html(renLuyenItemsHtml);
+renderThongBaoPage('HocThuat', 1);
+renderThongBaoPage('RenLuyen', 1);
 renderDeadlinesOnNoticePage();
 applyKaTeX('customViewWrapper');
 $('#loadingStatus').addClass('d-none');
