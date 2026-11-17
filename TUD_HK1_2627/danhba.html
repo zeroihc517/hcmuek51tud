@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh bạ Phòng ban, Trung tâm & Khoa - HCMUE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Chakra+Petch:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-navy: #0f4c81;
+            --primary-blue: #154c79;
+            --accent-emerald: #10b981;
+            --accent-cyan: #0ea5e9;
+            --bg-page: #f0f4f8;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-light: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-page);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.06) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.06) 0px, transparent 50%);
+            color: var(--text-dark);
+            padding-bottom: 50px;
+            overflow-x: hidden;
+        }
+
+        /* =========================================================
+           1. HIỆU ỨNG INTRO AURORA & LƯỚI TỌA ĐỘ GIỐNG WEB APMA
+           ========================================================= */
+        #apmaIntroOverlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 35%, #ffffff 0%, #e0f2fe 45%, #ede9fe 80%, #fce7f3 100%);
+            background-size: 200% 200%;
+            animation: auroraShift 4s ease-in-out infinite alternate;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.45s;
+        }
+
+        #apmaIntroOverlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        @keyframes auroraShift {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        .blueprint-bg {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(to right, rgba(15, 76, 129, 0.07) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(16, 185, 129, 0.07) 1px, transparent 1px);
+            background-size: 36px 36px;
+            mask-image: radial-gradient(circle at 50% 45%, black 35%, transparent 80%);
+            -webkit-mask-image: radial-gradient(circle at 50% 45%, black 35%, transparent 80%);
+            pointer-events: none;
+        }
+
+        .intro-holo-box {
+            position: relative;
+            z-index: 2;
+            padding: 3px;
+            border-radius: 22px;
+            background: linear-gradient(120deg, #0f4c81, #0ea5e9, #10b981, #6366f1, #0f4c81);
+            background-size: 300% 300%;
+            animation: holoFlow 3s linear infinite;
+            box-shadow: 0 20px 45px -10px rgba(15, 76, 129, 0.25);
+            max-width: 90vw;
+            width: 440px;
+        }
+
+        @keyframes holoFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .intro-holo-inner {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(18px);
+            border-radius: 19px;
+            padding: 26px 28px;
+            text-align: center;
+        }
+
+        .intro-hexagon-badge {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 14px auto;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #0f4c81, #10b981);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            box-shadow: 0 10px 22px rgba(15, 76, 129, 0.28);
+            animation: pulseFloat 1.6s ease-in-out infinite;
+        }
+
+        @keyframes pulseFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-5px) scale(1.05); }
+        }
+
+        .intro-title {
+            font-family: 'Chakra Petch', sans-serif;
+            font-weight: 800;
+            font-size: 1.35rem;
+            background: linear-gradient(90deg, #0f4c81, #0284c7, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .intro-bar-track {
+            width: 100%;
+            height: 7px;
+            background: #e2e8f0;
+            border-radius: 99px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .intro-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 99px;
+            background: linear-gradient(90deg, #0f4c81, #0ea5e9, #10b981);
+            animation: fillFast 1.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes fillFast {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        /* =========================================================
+           2. HEADER KÍNH MỜ (GLASSMORPHISM) & BỘ LỌC GỌN ĐẸP
+           ========================================================= */
+        .directory-header {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(203, 213, 225, 0.8);
+            padding: 14px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(15, 76, 129, 0.05);
+        }
+
+        .search-box-wrap {
+            position: relative;
+        }
+        .search-box-wrap i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-navy);
+            font-size: 14px;
+        }
+        .search-box-wrap input {
+            padding-left: 40px;
+            height: 40px;
+            border-radius: 50px;
+            border: 1.5px solid #cbd5e1;
+            background: #f8fafc;
+            font-size: 13.5px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .search-box-wrap input:focus {
+            background: #ffffff;
+            border-color: var(--primary-navy);
+            box-shadow: 0 0 0 3px rgba(15, 76, 129, 0.12);
+        }
+
+        .filter-pills {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 2px;
+        }
+        .filter-pills::-webkit-scrollbar { height: 3px; }
+        .filter-pills::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .btn-filter-cat {
+            border-radius: 50px;
+            padding: 6px 14px;
+            font-size: 12.5px;
+            font-weight: 700;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #475569;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .btn-filter-cat:hover {
+            background: #e0f2fe;
+            color: var(--primary-navy);
+            border-color: #7dd3fc;
+        }
+        .btn-filter-cat.active {
+            background: linear-gradient(135deg, #0f4c81, #155e95);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 4px 10px rgba(15, 76, 129, 0.22);
+        }
+
+        /* Tiêu đề nhóm */
+        .group-heading {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--primary-navy);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 22px 0 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .group-heading::after {
+            content: "";
+            flex: 1;
+            height: 1.5px;
+            background: linear-gradient(90deg, #cbd5e1, transparent);
+        }
+
+        /* =========================================================
+           3. THẺ PHÒNG BAN SIÊU GỌN (3 - 4 THẺ / HÀNG) & HIỆU ỨNG XUẤT HIỆN
+           ========================================================= */
+        @keyframes cardPopUp {
+            0% { opacity: 0; transform: translateY(14px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .dept-col {
+            animation: cardPopUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .dept-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-top: 3.5px solid var(--primary-navy);
+            border-radius: 14px;
+            padding: 14px 16px;
+            height: 100%;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, 0.035);
+            transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .dept-card.cat-center {
+            border-top-color: var(--accent-emerald);
+        }
+
+        .dept-card.cat-faculty {
+            border-top-color: var(--accent-cyan);
+        }
+
+        .dept-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(15, 76, 129, 0.11);
+            border-color: #93c5fd;
+        }
+
+        .dept-title {
+            font-size: 14.5px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.35;
+            margin-bottom: 3px;
+        }
+
+        .dept-subtitle {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 7px;
+            font-size: 12.8px;
+            line-height: 1.4;
+            color: #1e293b;
+        }
+        .info-row i.row-icon {
+            color: var(--primary-navy);
+            width: 14px;
+            text-align: center;
+            font-size: 12.5px;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+
+        /* Nút Copy Gọn */
+        .copyable-text {
+            cursor: pointer;
+            padding: 1px 5px;
+            margin: -1px -5px;
+            border-radius: 5px;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            word-break: break-word;
+        }
+        .copyable-text:hover {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+        .copy-hint-icon {
+            font-size: 10.5px;
+            color: #94a3b8;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+        .copyable-text:hover .copy-hint-icon {
+            opacity: 1;
+            color: #0369a1;
+        }
+
+        /* Pill Số nhánh nhỏ gọn */
+        .ext-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            font-weight: 700;
+            font-size: 11.5px;
+            padding: 1px 7px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.15s;
+            user-select: none;
+        }
+        .ext-pill:hover {
+            background-color: #0f4c81;
+            color: #ffffff;
+            border-color: #0f4c81;
+            transform: scale(1.06);
+        }
+
+        .btn-copy-all {
+            width: 26px;
+            height: 26px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 7px;
+            font-size: 11.5px;
+            color: #64748b;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            transition: all 0.15s;
+        }
+        .btn-copy-all:hover {
+            background: #0f4c81;
+            color: #ffffff;
+            border-color: #0f4c81;
+        }
+
+        /* Nút xổ Chức năng chính */
+        .btn-func-toggle {
+            background: none;
+            border: none;
+            padding: 4px 0 0 0;
+            margin-top: auto;
+            font-size: 12px;
+            font-weight: 700;
+            color: #0f4c81;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            width: fit-content;
+            transition: color 0.2s;
+        }
+        .btn-func-toggle:hover {
+            color: #059669;
+        }
+        .btn-func-toggle i {
+            transition: transform 0.25s ease;
+            font-size: 10.5px;
+        }
+        .btn-func-toggle[aria-expanded="true"] i {
+            transform: rotate(180deg);
+        }
+
+        .func-box {
+            margin-top: 8px;
+            padding: 9px 11px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-emerald);
+            font-size: 12px;
+            color: #334155;
+            line-height: 1.5;
+        }
+        .func-box ul {
+            margin: 0;
+            padding-left: 15px;
+        }
+
+        /* Toast thông báo Copy */
+        .copy-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 9px 16px;
+            border-radius: 50px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.22);
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(15px);
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .copy-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MÀN HÌNH CHÀO MỪNG INTRO GIỐNG WEB APMA -->
+    <div id="apmaIntroOverlay">
+        <div class="blueprint-bg"></div>
+        <div class="intro-holo-box">
+            <div class="intro-holo-inner">
+                <div class="intro-hexagon-badge">
+                    <i class="fa-solid fa-address-book"></i>
+                </div>
+                <div class="badge rounded-pill mb-2 px-3 py-1" style="background: #e0f2fe; color: #0f4c81; font-size: 11px; font-weight: 800; letter-spacing: 0.8px;">
+                    HCMUE • TRA CỨU NHANH
+                </div>
+                <div class="intro-title">DANH BẠ PHÒNG BAN & KHOA</div>
+                <div class="text-muted small fw-semibold">Chạm để sao chép nhanh SĐT, số nhánh & Email</div>
+                <div class="intro-bar-track">
+                    <div class="intro-bar-fill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thanh Tìm kiếm & Bộ lọc -->
+    <div class="directory-header">
+        <div class="container-fluid px-3 px-md-4">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-5 col-lg-4">
+                    <div class="search-box-wrap">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchDeptInput" class="form-control" placeholder="Tìm tên phòng, khoa, nhánh (141, 111), email..." onkeyup="filterDepartments()">
+                    </div>
+                </div>
+                <div class="col-md-7 col-lg-8">
+                    <div class="filter-pills" id="categoryFilterBar">
+                        <button class="btn-filter-cat active" onclick="selectCategory('all', this)">Tất cả (44 đơn vị)</button>
+                        <button class="btn-filter-cat" onclick="selectCategory('Phòng chức năng & Phục vụ đào tạo', this)">Phòng chức năng (10)</button>
+                        <button class="btn-filter-cat" onclick="selectCategory('Trung tâm, Viện, Thư viện & Đơn vị trực thuộc', this)">Trung tâm, Thư viện & Đoàn thể (11)</button>
+                        <button class="btn-filter-cat" onclick="selectCategory('Các Khoa và Tổ trực thuộc', this)">Các Khoa & Tổ (23)</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Khu vực hiển thị danh sách thẻ (Lưới 3-4 cột trên màn hình lớn) -->
+    <div class="container-fluid px-3 px-md-4 mt-1" id="directoryContainer"></div>
+
+    <!-- Thông báo Copy nổi -->
+    <div id="copyToast" class="copy-toast">
+        <i class="fa-solid fa-circle-check text-success fs-6"></i>
+        <span id="copyToastText">Đã sao chép!</span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const DEPARTMENT_DATA = [
+            // ============================================================
+            // I. CÁC PHÒNG CHỨC NĂNG & PHỤC VỤ ĐÀO TẠO
+            // ============================================================
+            {
+                category: "Phòng chức năng & Phục vụ đào tạo",
+                name: "1. Phòng Công nghệ Thông tin",
+                tags: "CNTT · email sinh viên · tài khoản đăng ký học phần · wifi",
+                address: "Nhà A, tầng 5, P.503 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["166"] }],
+                emails: ["phongcntt@hcmue.edu.vn"],
+                website: "",
+                functions: [
+                    "Quản lý email của sinh viên được cấp theo tên miền của Trường.",
+                    "Quản lý trang thông tin điện tử; hỗ trợ tài khoản sinh viên trên hệ thống đăng ký học phần.",
+                    "Phụ trách kỹ thuật phòng máy chủ và hệ thống mạng trung tâm."
+                ]
+            },
+            {
+                category: "Phòng chức năng & Phục vụ đào tạo",
+                name: "2. Phòng Công tác chính trị & HSSV",
+                tags: "CTCT&HSSV · học bổng · miễn giảm học phí · thẻ SV · xác nhận",
+                address: "Nhà A, tầng 1, P.108, P.109, P.110 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["127", "128", "143"] }],
+                emails: ["hopthusinhvien@hcmue.edu.vn"],
+                website: "https://ctsv.hcmue.edu.vn",
+                functions: [
+                    "Xét cấp học bổng (kể cả học bổng tài trợ); miễn, giảm học phí.",
+                    "Tiếp nhận, lưu trữ hồ sơ và cấp thẻ sinh viên; xét tiến độ học tập.",
+                    "Xác nhận, chứng thực giấy tờ sinh viên; theo dõi phát triển Đảng; tư vấn việc làm."
+                ]
+            },
+            {
+                category: "Phòng chức năng & Phục vụ đào tạo",
+                name: "3. Phòng Đào tạo",
+                tags: "PĐT · học vụ · đăng ký học phần · TKB · song ngành · tốt nghiệp",
+                address: "Nhà A, tầng 1, P.106, P.107 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["141", "142"] }],
+                emails: ["phongdt@hcmue.edu.vn"],
+                website: "",
+                functions: [
+                    "Xây dựng kế hoạch năm học, thời khóa biểu, tổ chức đăng ký học phần.",
+                    "Tổ chức xét tuyển học cùng lúc hai chương trình (song ngành).",
+                    "Triển khai kế hoạch thực tập, xét tốt nghiệp và cấp văn bằng, chứng nhận tốt nghiệp."
+                ]
+            },
+            {
+                category: "Phòng chức năng & Phục vụ đào tạo",
+                name: "4. Phòng Hợp tác Quốc tế",
+                tags: "HTQT · học bổng nước ngoài · trao đổi sinh viên",
+                address: "Nhà A, tầng 1, P.111 (280 ADV)",
+                phones: [{ number: "(028) 38391080", extensions: ["172", "173"] }],
+                emails: ["phonghtqt@hcmue.edu.vn"],
+                website: "https://phonghtqt.hcmue.edu.vn",
+                functions: [
+                    "Hỗ trợ dịch thuật, tổ chức sự kiện trong và ngoài nước.",
+                    "Thông báo học bổng từ các trường, doanh nghiệp đối tác nước ngoài; giao lưu văn hóa."
+                ]
+            },
+            {
+                category: "Phòng chức năng & Phục vụ đào tạo",
+                name: "5. Phòng KHCN & Môi trường – Tạp chí KH",
+                tags: "KHCN&MT · nghiên cứu khoa học sinh viên · NCKH",
+                address: "Nhà A, tầng 1, P.112 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["177"] }],
+                emails: ["phongkhcn@hcmue.edu.vn", "tapchikhoahoc@hcmue.edu.vn"],
+                website: "",
+                functions: [
+                    "Xét duyệt đề tài, cấp kinh phí, theo dõi tiến độ NCKH sinh viên.",
+                    "Tổ chức Hội nghị Sinh viên NCKH và khen thưởng NCKH cấp Trường, cấp Bộ."
+                ]
+            },
+            {
+                category: "Phòng chức năng & Phục vụ đào tạo",
+                name: "6. Phòng Kế hoạch – Tài chính",
+                tags: "KHTC · học phí · lệ phí · chi trả học bổng HBKKHT",
+                address: "Nhà A, tầng 2, P.205 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["136", "137", "138", "139", "140"] }],
+                emails: ["phongkhtc@hcmue.edu.vn", "hocphi@hcmue.edu.vn"],
+                website: "https://phongkhtc.hcmue.edu.vn",
+                functions: [
+                    "Thu học phí, lệ phí theo phương thức không dùng tiền mặt.",
+                    "Cấp phát HBKKHT và chi trả các chế độ, chính sách hỗ trợ sinh viên."
+                ]
+            },
+            {
+                category: "Phòng chức năng & Phục vụ đào tạo",
+                name: "7. Phòng Quản trị – Thiết bị",
+                tags: "QTTB · giảng đường · mượn micro · bãi giữ xe · căn tin",
+                address: "Nhà C, tầng trệt, P.004, P.005, P.006 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["197", "198"] }],
+                emails: ["phongqttb@hcmue.edu.vn"],
+                website: "",
+                functions: [
+                    "Quản lý giảng đường, phòng họp; cho mượn amply, micro, thiết bị trình chiếu.",
+                    "Quản lý dịch vụ căn tin, bãi giữ xe tại 280 An Dương Vương và 222 Lê Văn Sỹ."
+                ]
+            },
+            {
+                category: "Phòng chức năng & Phục vụ đào tạo",
+                name: "8. Phòng Sau Đại học",
+                tags: "SĐH · thạc sĩ · tiến sĩ · bổ sung kiến thức",
+                address: "Nhà C, tầng 1, P.102, P.103, P.104 (280 ADV)",
+                phones: [
+                    { number: "(028) 38391077", extensions: [] },
+                    { number: "(028) 38352020", extensions: ["181", "182", "183", "184"] }
+                ],
+                emails: ["phongsdh@hcmue.edu.vn"],
+                website: "https://phongsdh.hcmue.edu.vn",
+                functions: [
+                    "Tư vấn chiêu sinh, tiếp nhận hồ sơ bổ sung kiến thức và tuyển sinh thạc sĩ, tiến sĩ.",
+                    "Quản lý đào tạo trình độ thạc sĩ và tiến sĩ."
+                ]
+            },
+            {
+                category: "Phòng chức năng & Phục vụ đào tạo",
+                name: "9. Phòng Thanh tra Đào tạo",
+                tags: "TTĐT · khiếu nại · tố cáo · phản ánh đào tạo",
+                address: "Nhà A, tầng 2, P.209 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["160"] }],
+                emails: ["phongthanhtra@hcmue.edu.vn"],
+                website: "https://phongttdt.hcmue.edu.vn",
+                functions: [
+                    "Tiếp nhận và giải quyết phản ánh liên quan đến công tác đào tạo.",
+                    "Tiếp nhận và giải quyết đơn thư khiếu nại, tố cáo của sinh viên."
+                ]
+            },
+            {
+                category: "Phòng chức năng & Phục vụ đào tạo",
+                name: "10. Phòng Khảo thí & Đảm bảo chất lượng",
+                tags: "KT&ĐBCL · bảng điểm · phúc khảo · miễn ngoại ngữ tin học",
+                address: "Nhà A, tầng 2, P.202, P.206 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["146", "147", "218", "219"] }],
+                emails: ["phongkhaothi@hcmue.edu.vn"],
+                website: "https://phongkhaothi.hcmue.edu.vn",
+                functions: [
+                    "Cấp giấy chứng nhận điểm; tiếp nhận và hoàn trả giấy tờ liên quan đến điểm thi.",
+                    "Tiếp nhận chứng chỉ; xét miễn các học phần ngoại ngữ và tin học."
+                ]
+            },
+
+            // ============================================================
+            // II. TRUNG TÂM, VIỆN, THƯ VIỆN & ĐƠN VỊ TRỰC THUỘC
+            // ============================================================
+            {
+                category: "Trung tâm, Viện, Thư viện & Đơn vị trực thuộc",
+                name: "11. Thư viện Trường ĐH Sư phạm TP.HCM",
+                tags: "Thư viện · mượn sách · giáo trình · phòng đọc",
+                address: "Tòa nhà Thư viện – Nhà làm việc GS, tầng 1–7 (280 ADV)",
+                phones: [
+                    { number: "GĐ: (028) 35261042", rawCopy: "(028) 35261042", extensions: [] },
+                    { number: "(028) 38352020", extensions: ["231", "232", "233"] },
+                    { number: "(028) 38308905", extensions: ["234"] }
+                ],
+                emails: ["thuvien@hcmue.edu.vn"],
+                website: "https://lib.hcmue.edu.vn",
+                functions: [
+                    "Nhánh 231: Hướng dẫn TT · 232: Phòng đọc · 233: Nghiệp vụ · 234: Dịch vụ TT.",
+                    "Cung cấp tài liệu, giáo trình, khai thác nguồn tài nguyên số và triển lãm sách."
+                ]
+            },
+            {
+                category: "Trung tâm, Viện, Thư viện & Đơn vị trực thuộc",
+                name: "12. Trạm Y tế",
+                tags: "Y tế · khám sức khỏe · cấp cứu · bảo hiểm y tế · BHYT",
+                address: "Nhà A, tầng trệt, P.011 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["152"] }],
+                emails: ["tramyte@hcmue.edu.vn"],
+                website: "",
+                functions: [
+                    "Khám sức khỏe đầu khóa, khám cấp cứu, khám bệnh và cấp phát thuốc thông thường.",
+                    "Làm thẻ và phát thẻ bảo hiểm y tế (BHYT)."
+                ]
+            },
+            {
+                category: "Trung tâm, Viện, Thư viện & Đơn vị trực thuộc",
+                name: "13. Trường Trung học Thực hành – ĐHSP",
+                tags: "THTH · dự giờ · thực tập sư phạm · NCKH học sinh",
+                address: "Nhà J, tầng trệt (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["115", "116", "117", "118"] }],
+                emails: ["truongthth@hcmue.edu.vn"],
+                website: "https://thth.hcmue.edu.vn",
+                functions: [
+                    "Hỗ trợ học sinh NCKH; dự giờ tìm hiểu hoạt động dạy và học.",
+                    "Phối hợp hoạt động trong công tác Đoàn."
+                ]
+            },
+            {
+                category: "Trung tâm, Viện, Thư viện & Đơn vị trực thuộc",
+                name: "14. Nhà xuất bản ĐH Sư phạm TP.HCM",
+                tags: "NXB · giáo trình · sách chuyên khảo · in ấn",
+                address: "Nhà A: P.007 (trệt), P.114 (tầng 1), P.212 (tầng 2)",
+                phones: [{ number: "(028) 39381382", extensions: [] }],
+                emails: ["nxb@hcmue.edu.vn"],
+                website: "https://nxbdhsp.edu.vn",
+                functions: [
+                    "In ấn giáo trình phục vụ sinh viên các hệ đào tạo.",
+                    "Xuất bản và phát hành sách trong và ngoài trường."
+                ]
+            },
+            {
+                category: "Trung tâm, Viện, Thư viện & Đơn vị trực thuộc",
+                name: "15. Ký túc xá",
+                tags: "KTX · nội trú · chỗ ở · 351A Lạc Long Quân",
+                address: "351A Lạc Long Quân, P. Hoà Bình, TP.HCM",
+                phones: [{ number: "(028) 38650758", extensions: [] }],
+                emails: ["ktx@hcmue.edu.vn"],
+                website: "",
+                functions: [
+                    "Tiếp nhận sinh viên, bố trí chỗ ở và quản lý sinh viên nội trú.",
+                    "Tổ chức các hoạt động ngoại khóa rèn luyện kỹ năng cho sinh viên nội trú."
+                ]
+            },
+            {
+                category: "Trung tâm, Viện, Thư viện & Đơn vị trực thuộc",
+                name: "16. Viện Nghiên cứu Giáo dục",
+                tags: "Viện NCGD · bài giảng điện tử · phương pháp NCKH",
+                address: "115 Hai Bà Trưng, P. Sài Gòn, TP.HCM",
+                phones: [{ number: "(028) 38224813", extensions: [] }],
+                emails: ["vienncgd@hcmue.edu.vn"],
+                website: "https://www.ier.edu.vn",
+                functions: [
+                    "Tổ chức các lớp bồi dưỡng Phương pháp NCKH Giáo dục, Thiết kế bài giảng điện tử.",
+                    "Bồi dưỡng Phương pháp học tập hiệu quả cho sinh viên bậc Đại học."
+                ]
+            },
+            {
+                category: "Trung tâm, Viện, Thư viện & Đơn vị trực thuộc",
+                name: "17. Trung tâm Phát triển kỹ năng sư phạm",
+                tags: "PTKNSP · tập giảng · kiến tập · thực tập sư phạm · STEM",
+                address: "Nhà A, tầng 2, P.201 (280 ADV)",
+                phones: [{ number: "(028) 38397868", extensions: ["169", "170"] }],
+                emails: ["trungtamptknsp@hcmue.edu.vn"],
+                website: "https://trungtamptknsp.hcmue.edu.vn",
+                functions: [
+                    "Tổ chức tập giảng, kiến tập, thực tập giảng tại phòng học thông minh, phòng học ảo.",
+                    "Đào tạo kỹ năng phần mềm dạy học, phương pháp dạy học tích hợp, STEM..."
+                ]
+            },
+            {
+                category: "Trung tâm, Viện, Thư viện & Đơn vị trực thuộc",
+                name: "18. Trung tâm Tin học",
+                tags: "TT Tin học · tin học cơ bản · chứng chỉ tin học · MOS · IC3",
+                address: "Dãy A, P.004–005 (280 ADV) | Ghi danh: 221 Nguyễn Văn Cừ",
+                phones: [{ number: "(028) 38392549", extensions: [] }],
+                emails: ["trungtamtinhoc@hcmue.edu.vn"],
+                website: "https://thsp.hcmue.edu.vn",
+                functions: [
+                    "Giảng dạy chương trình Tin học cơ bản cho sinh viên năm 1 toàn Trường.",
+                    "Đào tạo Tin học văn phòng, Tin học ứng dụng và ứng dụng CNTT trong dạy học."
+                ]
+            },
+            {
+                category: "Trung tâm, Viện, Thư viện & Đơn vị trực thuộc",
+                name: "19. Trung tâm Ngoại ngữ",
+                tags: "TT Ngoại ngữ · chứng chỉ ngoại ngữ · IELTS · TOEIC · VSTEP · HSK",
+                address: "Dãy nhà B, tầng 6, P.601, P.602, P.608 (280 ADV)",
+                phones: [{ number: "(028) 38355084", extensions: [] }],
+                emails: ["trungtamnn@hcmue.edu.vn"],
+                website: "https://ttnnsp.edu.vn",
+                functions: [
+                    "Giảng dạy và tổ chức thi cấp chứng chỉ năng lực ngoại ngữ 6 bậc Việt Nam.",
+                    "Luyện thi và tổ chức thi chứng chỉ quốc tế: TOEFL, TOEIC, IELTS, HSK, DELF, DALF, N1–N5..."
+                ]
+            },
+            {
+                category: "Trung tâm, Viện, Thư viện & Đơn vị trực thuộc",
+                name: "20. Đoàn Thanh niên & Hội Sinh viên Trường",
+                tags: "Đoàn Trường · Hội Sinh viên · sổ đoàn · tình nguyện",
+                address: "Nhà A, tầng trệt, P.001 (280 ADV)",
+                phones: [
+                    { number: "Đoàn: (028) 38352020", rawCopy: "(028) 38352020", extensions: ["145"] },
+                    { number: "HSV: (028) 38352020", rawCopy: "(028) 38352020", extensions: ["208"] }
+                ],
+                emails: ["vpdoantn@hcmue.edu.vn", "vphoisinhvien@hcmue.edu.vn"],
+                website: "https://youth.hcmue.edu.vn",
+                functions: [
+                    "Nhánh 145: Văn phòng Đoàn Thanh niên · Nhánh 208: Văn phòng Hội Sinh viên.",
+                    "Tổ chức phong trào sinh viên, chiến dịch tình nguyện, quản lý sổ đoàn và CLB–Đội–Nhóm."
+                ]
+            },
+            {
+                category: "Trung tâm, Viện, Thư viện & Đơn vị trực thuộc",
+                name: "21. Trung tâm Hỗ trợ SV & Phát triển khởi nghiệp",
+                tags: "CSAED · việc làm · nhà trọ · khởi nghiệp · CTV sự kiện",
+                address: "Nhà A, tầng 1, P.101 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["168"] }],
+                emails: ["csaed@hcmue.edu.vn"],
+                website: "https://csaed.hcmue.edu.vn",
+                functions: [
+                    "Hỗ trợ đời sống sinh viên: giới thiệu việc làm, thông tin học bổng, giới thiệu chỗ trọ.",
+                    "Tập huấn kỹ năng thực hành xã hội, khởi nghiệp; tuyển CTV hỗ trợ sự kiện Trường."
+                ]
+            },
+
+            // ============================================================
+            // III. CÁC KHOA VÀ TỔ TRỰC THUỘC TẠI CƠ SỞ CHÍNH
+            // ============================================================
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "1. Khoa Công nghệ Thông tin",
+                tags: "CNTT · Khoa Công nghệ thông tin · COMP",
+                address: "Nhà B, tầng 5, P.506, P.507 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["209", "210"] }],
+                emails: ["khoacntt@hcmue.edu.vn"],
+                website: "https://khoacntt.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa CNTT."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "2. Khoa Toán – Tin học",
+                tags: "Toán – Tin học · APMA · MATH · Sư phạm Toán · Toán Ứng dụng",
+                address: "Nhà B, tầng 5, P.503 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["111"] }],
+                emails: ["khoatoantin@hcmue.edu.vn"],
+                website: "https://khoatoantin.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ, NCKH ngành Toán Ứng dụng & Sư phạm Toán."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "3. Khoa Vật lý",
+                tags: "Khoa Vật lý · PHYS",
+                address: "Nhà B, tầng 5, P.504, P.509 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["109", "110"] }],
+                emails: ["khoavatly@hcmue.edu.vn"],
+                website: "https://khoavatly.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Vật lý."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "4. Khoa Hóa học",
+                tags: "Khoa Hóa học · CHEM",
+                address: "Nhà B, tầng 5, P.505, P.508 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["107", "108"] }],
+                emails: ["khoahoahoc@hcmue.edu.vn"],
+                website: "https://khoahoa.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Hóa học."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "5. Khoa Sinh học",
+                tags: "Khoa Sinh học · BIOL",
+                address: "Nhà B, tầng 5, P.501, P.502 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["113", "114"] }],
+                emails: ["khoasinhhoc@hcmue.edu.vn"],
+                website: "https://khoasinh.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Sinh học."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "6. Khoa Ngữ văn",
+                tags: "Khoa Ngữ văn · LITE",
+                address: "Nhà B, tầng 4, P.403 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["105", "106"] }],
+                emails: ["khoanguvan@hcmue.edu.vn"],
+                website: "https://khoanguvan.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Ngữ văn."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "7. Khoa Lịch sử",
+                tags: "Khoa Lịch sử · HIST",
+                address: "Nhà B, tầng 4, P.408, P.409 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["123", "124"] }],
+                emails: ["khoalichsu@hcmue.edu.vn"],
+                website: "https://khoalichsu.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Lịch sử."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "8. Khoa Địa lý",
+                tags: "Khoa Địa lý · GEOG",
+                address: "Nhà B, tầng 4, P.407, P.410 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["121", "122"] }],
+                emails: ["khoadialy@hcmue.edu.vn"],
+                website: "https://khoadialy.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Địa lý."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "9. Khoa Tiếng Anh",
+                tags: "Khoa Tiếng Anh · ENGL",
+                address: "Nhà B, tầng 6, P.603, P.607 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["102", "119"] }],
+                emails: ["khoatienganh@hcmue.edu.vn"],
+                website: "https://khoaanh.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Tiếng Anh."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "10. Khoa Tiếng Pháp",
+                tags: "Khoa Tiếng Pháp · FREN",
+                address: "Nhà A, tầng 4, P.409, P.412 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["151"] }],
+                emails: ["khoatiengphap@hcmue.edu.vn"],
+                website: "https://khoaphap.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Tiếng Pháp."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "11. Khoa Tiếng Nga",
+                tags: "Khoa Tiếng Nga · RUSS",
+                address: "Nhà A, tầng 4, P.405, P.407 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["129", "130"] }],
+                emails: ["khoatiengnga@hcmue.edu.vn"],
+                website: "https://khoatiengnga.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Tiếng Nga."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "12. Khoa Tiếng Trung",
+                tags: "Khoa Tiếng Trung · CHIN",
+                address: "Nhà A, tầng 4, P.408, P.410, P.411 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["131", "150", "153"] }],
+                emails: ["khoatiengtrung@hcmue.edu.vn"],
+                website: "https://khoatrung.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Tiếng Trung."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "13. Khoa Tiếng Hàn Quốc",
+                tags: "Khoa Tiếng Hàn Quốc · KORE",
+                address: "Nhà C, tầng 6, P.604, P.606 (280 ADV)",
+                phones: [{ number: "(028) 38303247", extensions: ["222", "223"] }],
+                emails: ["khoatienghan@hcmue.edu.vn"],
+                website: "https://khoatienghan.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Tiếng Hàn Quốc."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "14. Khoa Tiếng Nhật",
+                tags: "Khoa Tiếng Nhật · JAPA",
+                address: "Nhà C, tầng 6, P.607, P.609 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["174"] }],
+                emails: ["khoatiengnhat@hcmue.edu.vn"],
+                website: "https://khoatiengnhat.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Tiếng Nhật."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "15. Khoa Khoa học Giáo dục",
+                tags: "Khoa Khoa học Giáo dục · EDUC",
+                address: "Nhà B, tầng 4, P.401, P.402 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["103", "104"] }],
+                emails: ["khoakhgd@hcmue.edu.vn"],
+                website: "https://khoakhgd.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Khoa học Giáo dục."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "16. Khoa Tâm lý học",
+                tags: "Khoa Tâm lý học · PSYC",
+                address: "Nhà A, tầng 4, P.402 (VP Khoa), P.403 (BCN) (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["216", "217"] }],
+                emails: ["khoatlh@hcmue.edu.vn"],
+                website: "",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Tâm lý học."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "17. Khoa Giáo dục Chính trị",
+                tags: "Khoa Giáo dục Chính trị · POLI · Triết học · Tư tưởng HCM · Lịch sử Đảng",
+                address: "Nhà B, tầng 4, P.411 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["125", "126"] }],
+                emails: ["khoagdct@hcmue.edu.vn"],
+                website: "https://khoagdct.hcmue.edu.vn",
+                functions: ["Phụ trách các học phần Lý luận chính trị chung và đào tạo ngành Giáo dục Chính trị."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "18. Khoa Giáo dục Đặc biệt",
+                tags: "Khoa Giáo dục Đặc biệt · SPEC",
+                address: "Nhà A, tầng 3, P.301, P.302 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["163", "164"] }],
+                emails: ["khoagddb@hcmue.edu.vn"],
+                website: "https://khoagddb.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Giáo dục Đặc biệt."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "19. Khoa Giáo dục Tiểu học",
+                tags: "Khoa Giáo dục Tiểu học · PRIM",
+                address: "Nhà A, tầng 3, P.308, P.309, P.310 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["134", "135"] }],
+                emails: ["khoagdth@hcmue.edu.vn"],
+                website: "https://khoagdth.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Giáo dục Tiểu học."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "20. Khoa Giáo dục Mầm non",
+                tags: "Khoa Giáo dục Mầm non · PRES",
+                address: "Nhà A, tầng 3, P.306, P.307 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["133"] }],
+                emails: ["khoagdmn@hcmue.edu.vn"],
+                website: "https://khoagdmn.hcmue.edu.vn",
+                functions: ["Văn phòng Khoa phụ trách đào tạo, học vụ và công tác sinh viên Khoa Giáo dục Mầm non."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "21. Khoa Giáo dục Quốc phòng",
+                tags: "Khoa Giáo dục Quốc phòng · MILI · GDQP-AN",
+                address: "Nhà C, tầng 1, P.106, P.108 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["165", "167"] }],
+                emails: ["khoagdqp@hcmue.edu.vn"],
+                website: "https://khoagdqp.hcmue.edu.vn",
+                functions: ["Phụ trách giảng dạy và quản lý các học phần Giáo dục Quốc phòng và An ninh."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "22. Khoa Giáo dục Thể chất",
+                tags: "Khoa Giáo dục Thể chất · PHYL · GDTC · Nhà thi đấu",
+                address: "Nhà thi đấu TDTT, tầng 1 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["155", "156"] }],
+                emails: ["khoagdtc@hcmue.edu.vn"],
+                website: "https://khoagdtc.hcmue.edu.vn",
+                functions: ["Phụ trách giảng dạy các học phần Giáo dục Thể chất và hoạt động thể thao."]
+            },
+            {
+                category: "Các Khoa và Tổ trực thuộc",
+                name: "23. Tổ Giáo dục Nữ công",
+                tags: "Tổ Giáo dục Nữ công · DOMS · Giáo dục đời sống · làm bánh · trang điểm",
+                address: "Nhà H, tầng 1, P.103, P.104, P.105 (280 ADV)",
+                phones: [{ number: "(028) 38352020", extensions: ["159"] }],
+                emails: ["togdnc@hcmue.edu.vn"],
+                website: "",
+                functions: [
+                    "Giảng dạy nhóm học phần tự chọn Giáo dục đời sống (nền tảng): chế biến món ăn, làm bánh Âu, hoa giấy nhún, trang điểm ứng dụng, cắt may, tỉa rau củ..."
+                ]
+            }
+        ];
+
+        let activeCategory = 'all';
+        let toastTimeout = null;
+
+        // Tắt hiệu ứng Intro mượt mà sau 1.4s
+        window.addEventListener('DOMContentLoaded', () => {
+            filterDepartments();
+            setTimeout(() => {
+                const intro = document.getElementById('apmaIntroOverlay');
+                if (intro) intro.classList.add('fade-out');
+            }, 1350);
+        });
+
+        function copyText(text, label) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('copyToast');
+                const toastText = document.getElementById('copyToastText');
+                toastText.innerHTML = `Đã sao chép ${label}: <strong>${text}</strong>`;
+                toast.classList.add('show');
+
+                if (toastTimeout) clearTimeout(toastTimeout);
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2200);
+            }).catch(() => {
+                alert("Đã sao chép: " + text);
+            });
+        }
+
+        function selectCategory(cat, btn) {
+            activeCategory = cat;
+            document.querySelectorAll('.btn-filter-cat').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterDepartments();
+        }
+
+        function filterDepartments() {
+            const keyword = document.getElementById('searchDeptInput').value.toLowerCase().trim();
+            const container = document.getElementById('directoryContainer');
+
+            const filtered = DEPARTMENT_DATA.filter(dept => {
+                const matchCat = (activeCategory === 'all') || (dept.category === activeCategory);
+                const phoneStr = dept.phones.map(p => `${p.number} ${p.extensions.join(' ')}`).join(' ');
+                const fullText = `${dept.name} ${dept.tags} ${dept.address} ${phoneStr} ${dept.emails.join(' ')} ${dept.website} ${dept.functions.join(' ')}`.toLowerCase();
+                const matchKey = !keyword || fullText.includes(keyword);
+                return matchCat && matchKey;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5 my-4 bg-white rounded-4 border">
+                        <i class="fa-regular fa-folder-open fs-1 text-muted mb-3"></i>
+                        <h6 class="fw-bold text-secondary">Không tìm thấy đơn vị phù hợp</h6>
+                        <p class="text-muted small m-0">Thử tìm với từ khóa khác (ví dụ: Toán, Đào tạo, 141, học phí, BHYT...).</p>
+                    </div>`;
+                return;
+            }
+
+            const grouped = {};
+            filtered.forEach(item => {
+                if (!grouped[item.category]) grouped[item.category] = [];
+                grouped[item.category].push(item);
+            });
+
+            let html = '';
+            let cardUid = 0;
+
+            for (const [catName, items] of Object.entries(grouped)) {
+                let borderClass = '';
+                if (catName.includes('Trung tâm')) borderClass = 'cat-center';
+                else if (catName.includes('Khoa')) borderClass = 'cat-faculty';
+
+                html += `<div class="group-heading"><i class="fa-solid fa-building-columns"></i> ${catName} <span class="badge bg-primary-subtle text-primary rounded-pill ms-1" style="font-size:11.5px;">${items.length}</span></div>`;
+                // Chia lưới 1 cột mobile, 2 cột tablet, 3 cột laptop, 4 cột màn hình rộng (xl)
+                html += `<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3">`;
+
+                items.forEach((dept, idx) => {
+                    cardUid++;
+                    const collapseId = `funcCollapse_${cardUid}`;
+                    const animDelay = Math.min(idx * 0.03, 0.45);
+
+                    const phonesHtml = dept.phones.map(p => {
+                        const copyPhoneVal = p.rawCopy || p.number;
+                        const extHtml = p.extensions && p.extensions.length > 0
+                            ? `<span class="text-muted" style="font-size:11.5px;">· Nhánh</span> ` + p.extensions.map(ext =>
+                                `<span class="ext-pill" title="Bấm sao chép ${copyPhoneVal} - Nhánh ${ext}" onclick="copyText('${copyPhoneVal} - Nhánh ${ext}', 'SĐT & Nhánh')">${ext}</span>`
+                              ).join(' ')
+                            : '';
+
+                        return `
+                        <div class="info-row">
+                            <i class="fa-solid fa-phone row-icon"></i>
+                            <div class="d-flex align-items-center flex-wrap gap-1">
+                                <span class="copyable-text fw-semibold" title="Bấm sao chép SĐT" onclick="copyText('${copyPhoneVal}', 'Số điện thoại')">
+                                    ${p.number} <i class="fa-regular fa-copy copy-hint-icon"></i>
+                                </span>
+                                ${extHtml}
+                            </div>
+                        </div>`;
+                    }).join('');
+
+                    const emailsHtml = dept.emails.map(em => `
+                        <span class="copyable-text" title="Bấm sao chép Email" onclick="copyText('${em}', 'Email')">
+                            ${em} <i class="fa-regular fa-copy copy-hint-icon"></i>
+                        </span>
+                    `).join('');
+
+                    const websiteHtml = dept.website ? `
+                        <div class="info-row">
+                            <i class="fa-solid fa-globe row-icon"></i>
+                            <a href="${dept.website}" target="_blank" class="text-decoration-none fw-semibold text-truncate" style="color: #0284c7; max-width: 85%;">
+                                ${dept.website.replace(/^https?:\/\//, '')} <i class="fa-solid fa-arrow-up-right-from-square ms-1" style="font-size: 10px;"></i>
+                            </a>
+                        </div>` : '';
+
+                    const allPhonesSummary = dept.phones.map(p => `${p.number}${p.extensions.length ? ' (Nhánh ' + p.extensions.join(', ') + ')' : ''}`).join(' | ');
+                    const fullCopySummary = `${dept.name}\nĐịa chỉ: ${dept.address}\nSĐT: ${allPhonesSummary}\nEmail: ${dept.emails.join(', ')}`;
+
+                    const funcListHtml = dept.functions.map(f => `<li>${f}</li>`).join('');
+
+                    html += `
+                    <div class="col dept-col" style="animation-delay: ${animDelay}s;">
+                        <div class="dept-card ${borderClass}">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <div style="min-width: 0;">
+                                    <div class="dept-title">${dept.name}</div>
+                                    <div class="dept-subtitle" title="${dept.tags}">${dept.tags}</div>
+                                </div>
+                                <button class="btn-copy-all flex-shrink-0" title="Sao chép trọn bộ thông tin" onclick="copyText('${fullCopySummary}', 'thông tin ${dept.name}')">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                            </div>
+
+                            <!-- Địa chỉ -->
+                            <div class="info-row">
+                                <i class="fa-solid fa-location-dot row-icon"></i>
+                                <span class="copyable-text" title="Bấm sao chép địa chỉ" onclick="copyText('${dept.address}', 'Địa chỉ')">
+                                    ${dept.address} <i class="fa-regular fa-copy copy-hint-icon"></i>
+                                </span>
+                            </div>
+
+                            <!-- Điện thoại & Nhánh -->
+                            ${phonesHtml}
+
+                            <!-- Email -->
+                            <div class="info-row">
+                                <i class="fa-regular fa-envelope row-icon"></i>
+                                <div class="d-flex flex-column gap-1">${emailsHtml}</div>
+                            </div>
+
+                            <!-- Website -->
+                            ${websiteHtml}
+
+                            <!-- Chức năng chính -->
+                            <button class="btn-func-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false">
+                                Chức năng chính <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                            <div class="collapse" id="${collapseId}">
+                                <div class="func-box">
+                                    <ul>${funcListHtml}</ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+
+                html += `</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
