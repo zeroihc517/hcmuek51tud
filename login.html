@@ -130,7 +130,7 @@ body {
 }
 
 /* =========================================================
-   CỘT TRÁI: MINIGAME KHỦNG LONG + WIDGET TOÁN HỌC + LỜI CHÀO
+   CỘT TRÁI: WIDGET TOÁN HỌC + LỜI CHÀO + GAME MINESWEEPER
 ========================================================= */
 .left-visual-container {
     position: absolute;
@@ -185,16 +185,53 @@ body {
     border: 1px solid #bae6fd;
 }
 
-#dinoMiniCanvas {
+/* GIAO DIỆN GAME DÒ MÌN (MINESWEEPER) */
+.minesweeper-grid {
+    display: grid;
+    gap: 2px;
+    background: #cbd5e1;
+    border: 2px solid #94a3b8;
+    border-radius: 8px;
+    padding: 3px;
     width: 100%;
-    height: 175px;
-    background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 84%, #e0e7ff 84%, #c7d2fe 100%);
-    border-radius: 14px;
-    border: 1.5px solid #cbd5e1;
-    display: block;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+.ms-cell {
+    aspect-ratio: 1;
+    background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
     cursor: pointer;
     user-select: none;
+    box-shadow: 0 2px 0 #94a3b8;
+    transition: background 0.1s;
 }
+.ms-cell:active:not(.revealed) {
+    box-shadow: none;
+    transform: translateY(2px);
+}
+.ms-cell.revealed {
+    background: #ffffff;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+    cursor: default;
+}
+.ms-cell.mine { background: #fecdd3; border-color: #f43f5e; }
+
+.ms-cell[data-num="1"] { color: #2563eb; }
+.ms-cell[data-num="2"] { color: #16a34a; }
+.ms-cell[data-num="3"] { color: #dc2626; }
+.ms-cell[data-num="4"] { color: #7c3aed; }
+.ms-cell[data-num="5"] { color: #9a3412; }
+.ms-cell[data-num="6"] { color: #0d9488; }
+.ms-cell[data-num="7"] { color: #000000; }
+.ms-cell[data-num="8"] { color: #52525b; }
 
 .game-controls-bar {
     display: flex;
@@ -605,31 +642,33 @@ body {
         Trình duyệt không hỗ trợ phát âm thanh.
     </audio>
 
-    <!-- NÚT MỞ GAME TRÊN MOBILE/TABLET[cite: 3] -->
+    <!-- NÚT MỞ GAME TRÊN MOBILE/TABLET -->
     <button class="mobile-game-toggle" type="button" data-bs-toggle="modal" data-bs-target="#mobileGameModal">
-        🦖 Chơi Khủng Long
+        💣 Chơi Dò Mìn
     </button>
 
-    <!-- NÚT ĐIỀU KHIỂN BẬT / TẮT NHẠC NỀN[cite: 3] -->
+    <!-- NÚT ĐIỀU KHIỂN BẬT / TẮT NHẠC NỀN -->
     <button class="audio-control-btn" id="btnAudioControl" onclick="toggleAudio()" title="Bật/Tắt nhạc nền">
         <i class="fa-solid fa-music" id="audioIcon"></i>
         <span id="audioStatusText">Nhạc nền</span>
     </button>
 
-    <!-- KHUNG BÊN TRÁI: TRÒ CHƠI KHỦNG LONG + WIDGET TOÁN HỌC + HỘP THOẠI -->
+    <!-- KHUNG BÊN TRÁI: TRÒ CHƠI DÒ MÌN + WIDGET TOÁN HỌC + HỘP THOẠI -->
     <div class="left-visual-container">
-        <!-- Mini Game Dino Runner -->
+        <!-- Mini Game Minesweeper -->
         <div class="glass-holo-panel">
             <div class="game-header">
-                <span class="game-title-badge">🦖 DINO VƯỢT XƯƠNG RỒNG</span>
-                <span class="game-score-box">HI:<span id="dinoHighScore">0000</span> | <span id="dinoScore">0000</span></span>
+                <span class="game-title-badge">💣 DÒ MÌN TOÁN HỌC</span>
+                <span class="game-score-box">ĐIỂM:<span id="msScore">0000</span> | MÌN: <span id="msMinesLeft">08</span></span>
             </div>
-            <canvas id="dinoMiniCanvas" width="320" height="175"></canvas>
+            
+            <div id="msGridDesktop" class="minesweeper-grid" oncontextmenu="event.stopPropagation(); return false;"></div>
+            
             <div class="game-controls-bar">
-                <button type="button" class="btn-game-play" id="btnStartDinoGame" onclick="startDinoGame()">
-                    ▶ Chơi ngay
+                <button type="button" class="btn-game-play" id="btnStartMsGame" onclick="startMsGameDesktop()">
+                    🔄 Chơi lại
                 </button>
-                <span class="game-hint-text">Bấm khung hoặc Space / ↑</span>
+                <span class="game-hint-text">Trái: Mở | Phải: Cắm cờ</span>
             </div>
         </div>
 
@@ -698,7 +737,7 @@ body {
             </div>
 
             <div class="card-body px-4 pb-4 pt-2">
-                <!-- Nơi hiển thị tài khoản đã lưu[cite: 3] -->
+                <!-- Nơi hiển thị tài khoản đã lưu -->
                 <div id="savedAccountsContainer" class="mb-2"></div>
 
                 <div class="input-group-icon mb-3 mt-2">
@@ -727,7 +766,7 @@ body {
         </div>
     </div>
 
-    <!-- KHUNG THÔNG BÁO BÊN PHẢI[cite: 3] -->
+    <!-- KHUNG THÔNG BÁO BÊN PHẢI -->
     <div id="maintenanceBanner" class="maintenance-banner-premium" style="display: none;">
         <div class="marquee-wrapper" id="marqueeWrapper">
             <div class="maintenance-text">
@@ -741,27 +780,32 @@ body {
         </div>
     </div>
 
-    <!-- MODAL CHƠI GAME TRÊN MÀN HÌNH NHỎ[cite: 3] -->
+    <!-- MODAL CHƠI GAME TRÊN MÀN HÌNH NHỎ -->
     <div class="modal fade" id="mobileGameModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content" style="border-radius: 24px; border: 2px solid #6366f1; background: #f8fafc;">
                 <div class="modal-header border-0 pb-1">
-                    <h6 class="modal-title fw-bold" style="color: #0f4c81;">🦖 DINO VƯỢT XƯƠNG RỒNG</h6>
+                    <h6 class="modal-title fw-bold" style="color: #0f4c81;">💣 DÒ MÌN TOÁN HỌC</h6>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-center pt-1">
-                    <p class="small text-muted mb-2">Chạm vào khung bên dưới để Khủng long nhảy qua xương rồng nhé!</p>
+                    <p class="small text-muted mb-2">Chạm để mở ô. Bật cắm cờ để đánh dấu bom.</p>
                     <div class="fw-bold text-primary mb-2" style="font-family: 'Chakra Petch', sans-serif; font-size: 13px;">
-                        HI: <span id="mobileDinoHighScore">0000</span> | ĐIỂM: <span id="mobileDinoScore">0000</span>
+                        ĐIỂM: <span id="mobileMsScore">0000</span> | MÌN: <span id="mobileMsMinesLeft">08</span>
                     </div>
-                    <canvas id="mobileDinoCanvas" width="310" height="200" style="width:100%; border-radius:16px; border:1.5px solid #cbd5e1; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 84%, #e0e7ff 84%, #c7d2fe 100%);"></canvas>
-                    <button type="button" class="btn text-white fw-bold rounded-pill px-4 mt-3" style="background: linear-gradient(90deg, #0ea5e9, #6366f1);" onclick="startMobileDinoGame()">▶ Bắt đầu / Nhảy</button>
+                    <div class="d-flex justify-content-center mb-2">
+                        <button id="mobileFlagToggle" class="btn btn-sm btn-outline-danger fw-bold rounded-pill px-3" onclick="toggleMobileFlagMode()">🚩 Chế độ Cắm cờ: TẮT</button>
+                    </div>
+                    
+                    <div id="msGridMobile" class="minesweeper-grid" oncontextmenu="event.stopPropagation(); return false;" style="width: 100%; max-width: 320px; margin: 0 auto;"></div>
+                    
+                    <button type="button" class="btn text-white fw-bold rounded-pill px-4 mt-3" style="background: linear-gradient(90deg, #0ea5e9, #6366f1);" onclick="startMsGameMobile()">🔄 Chơi lại</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- PHẦN MODAL CẢNH BÁO SOI CODE[cite: 3] -->
+    <!-- PHẦN MODAL CẢNH BÁO SOI CODE -->
     <div class="modal fade" id="tauntSourceModal" tabindex="-1" aria-hidden="true" style="z-index: 10900;">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 24px; overflow: hidden;">
@@ -790,7 +834,7 @@ body {
         </div>
     </div>
 
-    <!-- CHÂN TRANG[cite: 3] -->
+    <!-- CHÂN TRANG -->
     <div style="position: fixed; bottom: 10px; width: 100%; text-align: center; color: #475569; font-size: 12.5px; font-weight: 700; z-index: 10; left: 0; pointer-events: none; letter-spacing: 0.2px;">
         &copy;2026 Applied Mathematics - Kế thừa và phát triển từ dự án của Nhóm 2 – 12T2 – CBT K32 (HHB, TBC, LTPV, TCN)
     </div>
@@ -798,7 +842,7 @@ body {
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- TỰ ĐỘNG PHÁT NHẠC (AUTO PLAY SCRIPT)[cite: 3] -->
+    <!-- TỰ ĐỘNG PHÁT NHẠC (AUTO PLAY SCRIPT) -->
     <script>
         const audio = document.getElementById('bgMusic');
         const audioBtn = document.getElementById('btnAudioControl');
@@ -850,348 +894,218 @@ body {
         });
     </script>
 
-    <!-- SCRIPT MINIGAME KHỦNG LONG CHROME DINO RUNNER[cite: 3] -->
+    <!-- SCRIPT MINIGAME DÒ MÌN TOÁN HỌC -->
     <script>
-        function createChromeDinoGame(canvasId, scoreId, highScoreId, btnId) {
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) return null;
-            const ctx = canvas.getContext('2d');
+        window.mobileFlagMode = false;
+
+        function toggleMobileFlagMode() {
+            window.mobileFlagMode = !window.mobileFlagMode;
+            const btn = document.getElementById('mobileFlagToggle');
+            if (window.mobileFlagMode) {
+                btn.classList.remove('btn-outline-danger');
+                btn.classList.add('btn-danger');
+                btn.innerHTML = '🚩 Chế độ Cắm cờ: BẬT';
+            } else {
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-outline-danger');
+                btn.innerHTML = '🚩 Chế độ Cắm cờ: TẮT';
+            }
+        }
+
+        function createMinesweeper(containerId, scoreId, minesLeftId, rows, cols, totalMines, isMobile) {
+            const container = document.getElementById(containerId);
             const scoreEl = document.getElementById(scoreId);
-            const highScoreEl = document.getElementById(highScoreId);
-            const btnEl = btnId ? document.getElementById(btnId) : null;
+            const minesLeftEl = document.getElementById(minesLeftId);
+            if (!container) return null;
 
-            const groundY = canvas.height - 28;
-            let state = 'idle';
+            let grid = [];
             let score = 0;
-            let highScore = parseInt(localStorage.getItem('apmaDinoHighScore') || '0', 10);
-            let gameSpeed = 2.5;
-            let frameCount = 0;
+            let minesLeft = totalMines;
+            let gameOver = false;
+            let firstClick = true;
 
-            const dino = {
-                x: 34,
-                y: groundY - 34,
-                w: 30,
-                h: 34,
-                vy: 0,
-                gravity: 0.44,
-                jumpPower: -9.5,
-                isGrounded: true
-            };
+            function init() {
+                container.innerHTML = '';
+                container.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+                grid = [];
+                score = 0;
+                minesLeft = totalMines;
+                gameOver = false;
+                firstClick = true;
+                if (scoreEl) scoreEl.textContent = '0000';
+                if (minesLeftEl) minesLeftEl.textContent = minesLeft.toString().padStart(2, '0');
 
-            let obstacles = [];
-            let clouds = [
-                { x: 90, y: 28, speed: 0.35 },
-                { x: 240, y: 44, speed: 0.25 }
-            ];
-            let groundDots = [20, 75, 130, 195, 250, 305];
-            let nextSpawnIn = 105;
+                for (let r = 0; r < rows; r++) {
+                    let row = [];
+                    for (let c = 0; c < cols; c++) {
+                        let cell = document.createElement('div');
+                        cell.className = 'ms-cell';
+                        
+                        // Prevent context menu & stop bubbling to avoid Anti-cheat Trigger
+                        cell.oncontextmenu = (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (!gameOver) toggleFlag(r, c);
+                        };
 
-            function formatScore(num) {
-                return Math.floor(num).toString().padStart(4, '0');
+                        // Handle click
+                        cell.addEventListener('mousedown', (e) => {
+                            if (gameOver) return;
+                            if (e.button === 2) {
+                                // Right click handled by oncontextmenu safely
+                            } else if (e.button === 0) {
+                                if (isMobile && window.mobileFlagMode) {
+                                    toggleFlag(r, c);
+                                } else {
+                                    reveal(r, c);
+                                }
+                            }
+                        });
+
+                        container.appendChild(cell);
+                        row.push({
+                            el: cell,
+                            mine: false,
+                            revealed: false,
+                            flagged: false,
+                            neighborMines: 0
+                        });
+                    }
+                    grid.push(row);
+                }
             }
 
-            if (highScoreEl) highScoreEl.textContent = formatScore(highScore);
+            function placeMines(firstR, firstC) {
+                let placed = 0;
+                while (placed < totalMines) {
+                    let r = Math.floor(Math.random() * rows);
+                    let c = Math.floor(Math.random() * cols);
+                    // Safe zone around first click (3x3 area)
+                    if (!grid[r][c].mine && (Math.abs(r - firstR) > 1 || Math.abs(c - firstC) > 1)) {
+                        grid[r][c].mine = true;
+                        placed++;
+                    }
+                }
+                
+                // Calculate numbers
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        if (!grid[r][c].mine) {
+                            let count = 0;
+                            for (let dr = -1; dr <= 1; dr++) {
+                                for (let dc = -1; dc <= 1; dc++) {
+                                    let nr = r + dr, nc = c + dc;
+                                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc].mine) {
+                                        count++;
+                                    }
+                                }
+                            }
+                            grid[r][c].neighborMines = count;
+                        }
+                    }
+                }
+            }
 
-            function drawCuteDino(x, y, isDead, legPhase) {
-                ctx.save();
-                ctx.translate(x, y);
-
-                ctx.fillStyle = isDead ? '#ef4444' : '#4f46e5';
-                ctx.strokeStyle = '#1e293b';
-                ctx.lineWidth = 1.8;
-
-                ctx.beginPath();
-                ctx.roundRect(0, 14, 9, 10, 3);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.beginPath();
-                ctx.roundRect(6, 10, 16, 17, 5);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.fillStyle = '#c7d2fe';
-                ctx.fillRect(14, 14, 6, 10);
-
-                ctx.fillStyle = isDead ? '#ef4444' : '#4f46e5';
-                ctx.beginPath();
-                ctx.roundRect(11, 0, 19, 14, 5);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.fillStyle = '#fb7185';
-                ctx.beginPath();
-                ctx.arc(21, 9, 2.2, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.fillStyle = '#ffffff';
-                if (isDead) {
-                    ctx.font = 'bold 9px sans-serif';
-                    ctx.fillText('×', 22, 7);
+            function toggleFlag(r, c) {
+                let cellData = grid[r][c];
+                if (cellData.revealed) return;
+                
+                cellData.flagged = !cellData.flagged;
+                if (cellData.flagged) {
+                    cellData.el.textContent = '🚩';
+                    minesLeft--;
                 } else {
-                    ctx.beginPath();
-                    ctx.arc(24, 5, 2.2, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.fillStyle = '#1e293b';
-                    ctx.fillRect(24.5, 4, 1.2, 1.2);
+                    cellData.el.textContent = '';
+                    minesLeft++;
+                }
+                if (minesLeftEl) minesLeftEl.textContent = minesLeft.toString().padStart(2, '0');
+            }
+
+            function reveal(r, c) {
+                let cellData = grid[r][c];
+                if (cellData.revealed || cellData.flagged) return;
+
+                if (firstClick) {
+                    placeMines(r, c);
+                    firstClick = false;
                 }
 
-                ctx.strokeStyle = '#1e293b';
-                ctx.beginPath();
-                ctx.moveTo(22, 16);
-                ctx.lineTo(26, 16);
-                ctx.lineTo(26, 19);
-                ctx.stroke();
+                cellData.revealed = true;
+                cellData.el.classList.add('revealed');
 
-                ctx.fillStyle = '#3730a3';
-                if (!dino.isGrounded || isDead) {
-                    ctx.fillRect(9, 27, 4, 6);
-                    ctx.fillRect(16, 27, 4, 6);
-                } else if (legPhase === 0) {
-                    ctx.fillRect(9, 27, 4, 7);
-                    ctx.fillRect(16, 27, 4, 3);
-                } else {
-                    ctx.fillRect(9, 27, 4, 3);
-                    ctx.fillRect(16, 27, 4, 7);
-                }
-
-                ctx.restore();
-            }
-
-            function drawObstacle(ob) {
-                ctx.save();
-                if (ob.type === 'bird') {
-                    ctx.font = '20px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(Math.floor(frameCount / 14) % 2 === 0 ? '🦅' : '🕊️', ob.x + ob.w / 2, ob.y + 18);
-                } else {
-                    ctx.fillStyle = '#0ea5e9';
-                    ctx.strokeStyle = '#0f4c81';
-                    ctx.lineWidth = 1.8;
-
-                    ctx.beginPath();
-                    ctx.roundRect(ob.x + 6, ob.y, 10, ob.h, 4);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.roundRect(ob.x, ob.y + 8, 6, 10, 3);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    ctx.beginPath();
-                    ctx.roundRect(ob.x + 16, ob.y + 5, 6, 11, 3);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    ctx.fillStyle = '#f43f5e';
-                    ctx.beginPath();
-                    ctx.arc(ob.x + 11, ob.y - 2, 3, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.restore();
-            }
-
-            function drawEnvironment() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                ctx.fillStyle = 'rgba(224, 242, 254, 0.95)';
-                clouds.forEach(c => {
-                    ctx.beginPath();
-                    ctx.roundRect(c.x, c.y, 34, 10, 5);
-                    ctx.roundRect(c.x + 8, c.y - 5, 18, 10, 5);
-                    ctx.fill();
-                });
-
-                ctx.strokeStyle = '#6366f1';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(0, groundY);
-                ctx.lineTo(canvas.width, groundY);
-                ctx.stroke();
-
-                ctx.fillStyle = '#818cf8';
-                groundDots.forEach(gx => {
-                    ctx.fillRect(gx, groundY + 6, 6, 2.5);
-                    ctx.fillRect(gx + 14, groundY + 12, 4, 2);
-                });
-            }
-
-            function jump() {
-                if (state === 'idle' || state === 'gameover') {
-                    resetAndStart();
+                if (cellData.mine) {
+                    cellData.el.classList.add('mine');
+                    cellData.el.textContent = '💣';
+                    endGame(false);
                     return;
                 }
-                if (dino.isGrounded) {
-                    dino.vy = dino.jumpPower;
-                    dino.isGrounded = false;
-                }
-            }
 
-            function spawnObstacle() {
-                const canSpawnBird = score > 200 && Math.random() > 0.72;
-                if (canSpawnBird) {
-                    const highBird = Math.random() > 0.5;
-                    obstacles.push({
-                        type: 'bird',
-                        x: canvas.width + 10,
-                        y: highBird ? groundY - 46 : groundY - 24,
-                        w: 24,
-                        h: 20
-                    });
+                score += 10;
+                if (scoreEl) scoreEl.textContent = score.toString().padStart(4, '0');
+
+                if (cellData.neighborMines > 0) {
+                    cellData.el.textContent = cellData.neighborMines;
+                    cellData.el.dataset.num = cellData.neighborMines;
                 } else {
-                    const isTall = Math.random() > 0.5;
-                    const h = isTall ? 28 : 22;
-                    obstacles.push({
-                        type: 'cactus',
-                        x: canvas.width + 10,
-                        y: groundY - h,
-                        w: 22,
-                        h: h
-                    });
-                }
-            }
-
-            function update() {
-                if (state !== 'playing') return;
-                frameCount++;
-
-                clouds.forEach(c => {
-                    c.x -= c.speed;
-                    if (c.x < -40) c.x = canvas.width + 20;
-                });
-                for (let i = 0; i < groundDots.length; i++) {
-                    groundDots[i] -= gameSpeed;
-                    if (groundDots[i] < -20) groundDots[i] = canvas.width + 10;
-                }
-
-                dino.vy += dino.gravity;
-                dino.y += dino.vy;
-                if (dino.y >= groundY - dino.h) {
-                    dino.y = groundY - dino.h;
-                    dino.vy = 0;
-                    dino.isGrounded = true;
-                }
-
-                nextSpawnIn--;
-                if (nextSpawnIn <= 0) {
-                    spawnObstacle();
-                    nextSpawnIn = Math.max(75, Math.floor(105 + Math.random() * 55 - gameSpeed * 3));
-                }
-
-                for (let i = obstacles.length - 1; i >= 0; i--) {
-                    const ob = obstacles[i];
-                    ob.x -= gameSpeed;
-
-                    const hit =
-                        dino.x + 6 < ob.x + ob.w - 5 &&
-                        dino.x + dino.w - 6 > ob.x + 5 &&
-                        dino.y + 5 < ob.y + ob.h - 4 &&
-                        dino.y + dino.h - 4 > ob.y + 4;
-
-                    if (hit) {
-                        state = 'gameover';
-                        if (score > highScore) {
-                            highScore = Math.floor(score);
-                            localStorage.setItem('apmaDinoHighScore', highScore.toString());
-                            if (highScoreEl) highScoreEl.textContent = formatScore(highScore);
+                    // Flood fill for 0
+                    for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                            let nr = r + dr, nc = c + dc;
+                            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                                reveal(nr, nc);
+                            }
                         }
-                        if (btnEl) btnEl.textContent = '🔄 Chơi lại';
-                        renderFrame();
-                        return;
-                    }
-
-                    if (ob.x + ob.w < -10) {
-                        obstacles.splice(i, 1);
                     }
                 }
-
-                score += 0.12;
-                gameSpeed = Math.min(4.8, 2.5 + score * 0.0015);
-                if (scoreEl) scoreEl.textContent = formatScore(score);
-
-                renderFrame();
-                requestAnimationFrame(update);
+                checkWin();
             }
 
-            function renderFrame() {
-                drawEnvironment();
-                obstacles.forEach(drawObstacle);
-                const legPhase = Math.floor(frameCount / 9) % 2;
-                drawCuteDino(dino.x, dino.y, state === 'gameover', legPhase);
-
-                if (state === 'idle') {
-                    ctx.fillStyle = '#0f4c81';
-                    ctx.font = 'bold 12.5px Inter, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('Bấm vào đây hoặc nhấn Space để nhảy!', canvas.width / 2 + 12, 68);
-                } else if (state === 'gameover') {
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
-                    ctx.beginPath();
-                    ctx.roundRect(canvas.width / 2 - 95, 42, 190, 54, 12);
-                    ctx.fill();
-                    ctx.strokeStyle = '#6366f1';
-                    ctx.lineWidth = 1.8;
-                    ctx.stroke();
-
-                    ctx.fillStyle = '#e11d48';
-                    ctx.font = '800 13.5px Inter, sans-serif';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('ÚI! ĐỤNG VẬT CẢN RỒI', canvas.width / 2, 65);
-                    ctx.fillStyle = '#475569';
-                    ctx.font = 'bold 11.5px Inter, sans-serif';
-                    ctx.fillText('Bấm để chơi lại ngay 🦖', canvas.width / 2, 84);
+            function checkWin() {
+                let unrevealedSafe = 0;
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        if (!grid[r][c].mine && !grid[r][c].revealed) {
+                            unrevealedSafe++;
+                        }
+                    }
+                }
+                if (unrevealedSafe === 0) {
+                    endGame(true);
                 }
             }
 
-            function resetAndStart() {
-                score = 0;
-                gameSpeed = 2.5;
-                obstacles = [];
-                dino.y = groundY - dino.h;
-                dino.vy = 0;
-                dino.isGrounded = true;
-                nextSpawnIn = 95;
-                if (scoreEl) scoreEl.textContent = '0000';
-                if (btnEl) btnEl.textContent = '⬆ Nhảy (Space)';
-                state = 'playing';
-                update();
+            function endGame(win) {
+                gameOver = true;
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        let cellData = grid[r][c];
+                        if (cellData.mine) {
+                            if (!cellData.flagged) {
+                                cellData.el.textContent = '💣';
+                                cellData.el.classList.add(win ? 'revealed' : 'mine');
+                            }
+                        } else if (cellData.flagged) {
+                            cellData.el.textContent = '❌'; // wrong flag
+                        }
+                    }
+                }
+                setTimeout(() => {
+                    alert(win ? '🎉 XUẤT SẮC! Bạn đã rà phá toàn bộ bom!' : '💥 BÙM! Bạn đạp trúng bom rồi, thử lại nhé!');
+                }, 100);
             }
 
-            canvas.addEventListener('mousedown', (e) => {
-                e.preventDefault();
-                jump();
-            });
-            canvas.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                jump();
-            }, { passive: false });
-
-            renderFrame();
-            return { jump, resetAndStart };
+            init();
+            return { init };
         }
 
-        let desktopDinoGame, mobileDinoGame;
-        function startDinoGame() {
-            if (desktopDinoGame) desktopDinoGame.jump();
-        }
-        function startMobileDinoGame() {
-            if (mobileDinoGame) mobileDinoGame.jump();
-        }
-
-        window.addEventListener('keydown', function(e) {
-            const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
-            if (activeTag === 'input' || activeTag === 'textarea') return;
-
-            if (e.code === 'Space' || e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (desktopDinoGame) desktopDinoGame.jump();
-            }
-        });
+        let desktopMsGame, mobileMsGame;
+        function startMsGameDesktop() { if (desktopMsGame) desktopMsGame.init(); }
+        function startMsGameMobile() { if (mobileMsGame) mobileMsGame.init(); }
 
         document.addEventListener('DOMContentLoaded', function() {
-            desktopDinoGame = createChromeDinoGame('dinoMiniCanvas', 'dinoScore', 'dinoHighScore', 'btnStartDinoGame');
-            mobileDinoGame = createChromeDinoGame('mobileDinoCanvas', 'mobileDinoScore', 'mobileDinoHighScore', null);
+            // Khởi tạo Dò mìn (5 dòng, 10 cột, 8 trái bom)
+            desktopMsGame = createMinesweeper('msGridDesktop', 'msScore', 'msMinesLeft', 5, 10, 8, false);
+            mobileMsGame = createMinesweeper('msGridMobile', 'mobileMsScore', 'mobileMsMinesLeft', 5, 10, 8, true);
 
             let banner = document.getElementById('maintenanceBanner');
             if (banner) banner.style.display = 'flex';
@@ -1204,7 +1118,7 @@ body {
                 }
             }
 
-            // Animation Gõ lời chào[cite: 3]
+            // Animation Gõ lời chào
             const codeLines = [
                 "✨ Chào mừng bạn đến với vùng trời \"Analysis và Phản ví dụ\"!",
                 "🎓 Chúc bạn học tập thật tốt, luôn vui vẻ và có thật nhiều kỷ niệm đẹp trong những năm tháng đại học!",
@@ -1397,7 +1311,7 @@ body {
 <script>
     (function() {
         const startMaintenance = new Date(2026, 10, 16, 12, 00);  
-        const endMaintenance   = new Date(2026, 10, 16, 12, 10); 
+        const endMaintenance   = new Date(2026, 10, 16, 12, 01); 
         const pad = (n) => n.toString().padStart(2, '0');
         const endTimeStr = `${pad(endMaintenance.getHours())}:${pad(endMaintenance.getMinutes())} Ngày ${pad(endMaintenance.getDate())}/${pad(endMaintenance.getMonth() + 1)}/${endMaintenance.getFullYear()}`;
 
@@ -1480,6 +1394,5 @@ body {
         }
     })();
 </script>
-
 </body>
 </html>
