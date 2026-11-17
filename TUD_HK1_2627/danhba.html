@@ -46,7 +46,69 @@
             justify-content: center;
             transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.45s;
         }
+/* =========================================================
+   MENU CHUỘT PHẢI TÙY CHỈNH (ĐỒNG BỘ WEB APMA)
+   ========================================================= */
+.custom-context-menu {
+    position: fixed;
+    z-index: 999999;
+    width: 225px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 6px;
+    box-shadow: 0 12px 30px rgba(15, 76, 129, 0.18);
+    user-select: none;
+    animation: ctxFadeIn 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
+@keyframes ctxFadeIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.custom-context-menu .ctx-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.custom-context-menu .ctx-item i {
+    width: 18px;
+    text-align: center;
+    color: #0f4c81;
+    font-size: 15px;
+}
+
+.custom-context-menu .ctx-item:hover {
+    background-color: #e8f1f8;
+    color: #0f4c81;
+}
+
+.custom-context-menu .ctx-item.disabled {
+    opacity: 0.45;
+    pointer-events: none;
+}
+
+.custom-context-menu .ctx-shortcut {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 500;
+    color: #94a3b8;
+}
+
+.custom-context-menu .ctx-divider {
+    height: 1px;
+    background-color: #e2e8f0;
+    margin: 5px 8px;
+}
         #apmaIntroOverlay.fade-out {
             opacity: 0;
             visibility: hidden;
@@ -504,7 +566,30 @@
 
     <!-- Khu vực hiển thị danh sách thẻ (Lưới 3-4 cột trên màn hình lớn) -->
     <div class="container-fluid px-3 px-md-4 mt-1" id="directoryContainer"></div>
-
+<!-- MENU CHUỘT PHẢI TÙY CHỈNH -->
+<div id="customContextMenu" class="custom-context-menu d-none">
+    <div class="ctx-item" id="ctxCopy">
+        <i class="fa-regular fa-copy"></i>
+        <span>Sao chép</span>
+        <small class="ctx-shortcut">Ctrl+C</small>
+    </div>
+    <div class="ctx-item" id="ctxPaste">
+        <i class="fa-regular fa-paste"></i>
+        <span>Dán</span>
+        <small class="ctx-shortcut">Ctrl+V</small>
+    </div>
+    <div class="ctx-divider"></div>
+    <div class="ctx-item" id="ctxReload">
+        <i class="fa-solid fa-rotate-right"></i>
+        <span>Tải lại trang</span>
+        <small class="ctx-shortcut">F5</small>
+    </div>
+    <div class="ctx-item" id="ctxNewTab">
+        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+        <span>Mở tab mới</span>
+        <small class="ctx-shortcut">Ctrl+T</small>
+    </div>
+</div>
     <!-- Thông báo Copy nổi -->
     <div id="copyToast" class="copy-toast">
         <i class="fa-solid fa-circle-check text-success fs-6"></i>
@@ -1215,6 +1300,145 @@
 
             container.innerHTML = html;
         }
+// =========================================================
+// CHẶN PHÍM TẮT XEM MÃ NGUỒN & DEVTOOLS (GIỐNG WEB APMA)
+// =========================================================
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'F12' || e.keyCode === 123) { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) { e.preventDefault(); return false; }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c' || e.keyCode === 67)) { e.preventDefault(); return false; }
+    if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) { e.preventDefault(); return false; }
+    if (e.ctrlKey && (e.key === 'S' || e.key === 's' || e.keyCode === 83)) { e.preventDefault(); return false; }
+});
+
+// =========================================================
+// XỬ LÝ MENU CHUỘT PHẢI TÙY CHỈNH
+// =========================================================
+let lastRightClickedInput = null;
+let savedSelectionText = "";
+let rightClickedTargetUrl = "";
+
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+
+    const menu = document.getElementById('customContextMenu');
+    if (!menu) return;
+
+    // 1. Lưu vùng văn bản đang bôi đen (hoặc text trong phần tử copyable)
+    const selection = window.getSelection();
+    savedSelectionText = selection ? selection.toString() : "";
+
+    // 2. Kiểm tra ô nhập liệu (như thanh tìm kiếm)
+    const target = e.target;
+    if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+        lastRightClickedInput = target;
+        if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+            savedSelectionText = target.value.substring(target.selectionStart, target.selectionEnd);
+        }
+    } else {
+        lastRightClickedInput = null;
+    }
+
+    // 3. Nếu chuột phải trực tiếp lên thẻ <a> (Website phòng ban) hoặc vùng copyable
+    const anchorEl = target.closest('a');
+    if (anchorEl && anchorEl.href && !anchorEl.href.startsWith('javascript:')) {
+        rightClickedTargetUrl = anchorEl.href;
+    } else {
+        rightClickedTargetUrl = window.location.href;
+    }
+
+    if (!savedSelectionText.trim()) {
+        const copyableEl = target.closest('.copyable-text, .ext-pill');
+        if (copyableEl) {
+            savedSelectionText = copyableEl.innerText.trim();
+        }
+    }
+
+    // 4. Bật/tắt trạng thái nút Sao chép và Dán
+    const btnCopy = document.getElementById('ctxCopy');
+    const btnPaste = document.getElementById('ctxPaste');
+
+    if (savedSelectionText.trim() !== "") {
+        btnCopy.classList.remove('disabled');
+    } else {
+        btnCopy.classList.add('disabled');
+    }
+
+    if (lastRightClickedInput) {
+        btnPaste.classList.remove('disabled');
+    } else {
+        btnPaste.classList.add('disabled');
+    }
+
+    // 5. Hiển thị menu đúng tọa độ chuột & chống tràn viền màn hình
+    menu.classList.remove('d-none');
+    const menuWidth = menu.offsetWidth;
+    const menuHeight = menu.offsetHeight;
+    const winWidth = window.innerWidth;
+    const winHeight = window.innerHeight;
+
+    let posX = e.clientX;
+    let posY = e.clientY;
+
+    if (posX + menuWidth > winWidth) posX = winWidth - menuWidth - 10;
+    if (posY + menuHeight > winHeight) posY = winHeight - menuHeight - 10;
+
+    menu.style.left = posX + 'px';
+    menu.style.top = posY + 'px';
+});
+
+// Ẩn menu khi click ra ngoài hoặc cuộn trang
+document.addEventListener('click', function(e) {
+    const menu = document.getElementById('customContextMenu');
+    if (menu && !menu.contains(e.target)) {
+        menu.classList.add('d-none');
+    }
+});
+
+window.addEventListener('scroll', function() {
+    const menu = document.getElementById('customContextMenu');
+    if (menu) menu.classList.add('d-none');
+}, true);
+
+// Gắn sự kiện cho 4 nút chức năng
+document.getElementById('ctxCopy').addEventListener('click', function() {
+    document.getElementById('customContextMenu').classList.add('d-none');
+    if (savedSelectionText) {
+        copyText(savedSelectionText.trim(), 'văn bản');
+    }
+});
+
+document.getElementById('ctxPaste').addEventListener('click', async function() {
+    document.getElementById('customContextMenu').classList.add('d-none');
+    if (!lastRightClickedInput) return;
+
+    try {
+        const text = await navigator.clipboard.readText();
+        lastRightClickedInput.focus();
+
+        if (lastRightClickedInput.tagName === 'INPUT' || lastRightClickedInput.tagName === 'TEXTAREA') {
+            const start = lastRightClickedInput.selectionStart;
+            const end = lastRightClickedInput.selectionEnd;
+            const val = lastRightClickedInput.value;
+            lastRightClickedInput.value = val.slice(0, start) + text + val.slice(end);
+            lastRightClickedInput.selectionStart = lastRightClickedInput.selectionEnd = start + text.length;
+            lastRightClickedInput.dispatchEvent(new Event('keyup'));
+        }
+    } catch (err) {
+        alert("Trình duyệt chặn quyền đọc Clipboard tự động, vui lòng dùng tổ hợp phím Ctrl + V!");
+    }
+});
+
+document.getElementById('ctxReload').addEventListener('click', function() {
+    document.getElementById('customContextMenu').classList.add('d-none');
+    location.reload();
+});
+
+document.getElementById('ctxNewTab').addEventListener('click', function() {
+    document.getElementById('customContextMenu').classList.add('d-none');
+    window.open(rightClickedTargetUrl || window.location.href, '_blank');
+});
     </script>
 </body>
 </html>
