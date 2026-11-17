@@ -3739,14 +3739,27 @@ window.autoFillThoiGian = function() {
 window.groupStudyCache = [];
 
 window.openGroupStudyListModal = function() {
-	if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView("Đặt lịch hẹn");
+    if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView("Đặt lịch hẹn");
     if (!currentUser) { alert("Vui lòng đăng nhập để xem lịch học nhóm!"); return; }
+    
+    // BẬT CỜ ĐANG TẢI ĐỂ KHÓA HÀM RENDER KHÔNG GHI ĐÈ CHỮ "CHƯA CÓ LỊCH"
+    window.isLoadingGroupStudy = true;
+    window.groupStudyCache = [];
+    
+    $('#groupStudyListBody').html(`
+        <tr>
+            <td colspan="5" class="text-center py-5 text-muted">
+                <i class="fa-solid fa-spinner fa-spin fs-2 mb-2" style="color: #0f4c81;"></i><br>
+                <span class="fw-bold" style="color: #0f4c81;">Đang tải danh sách lịch hẹn...</span>
+            </td>
+        </tr>
+    `);
+
     $('#groupStudyListModal').modal('show');
     
-    // Tự động load Dropdown bộ lọc và đồng bộ với TKB bên ngoài
+    // Đồng bộ bộ lọc Năm học / Học kỳ / Tuần (lúc này renderGroupStudyTable sẽ bị chặn nhờ cờ trên)
     buildGsListFilters();
     
-    // Tải danh sách user về máy để có cơ sở dữ liệu dò Tên sinh viên nếu chưa có
     if (!window.allUsersDataForSearch || window.allUsersDataForSearch.length === 0) {
         $.ajax({
             url: SCRIPT_URL + "?action=getAllUsers",
@@ -3836,26 +3849,28 @@ window.onGsListHocKyChange = function() {
 }
 
 window.loadGroupStudyList = function() {
-    // Nếu đã có cache thì render ngay lập tức để không bị chờ
-    if (window.groupStudyCache && window.groupStudyCache.length > 0) {
-        renderGroupStudyTable();
-    } else {
-        $('#groupStudyListBody').html('<tr><td colspan="5" class="text-muted py-4"><i class="fa-solid fa-spinner fa-spin me-2"></i>Đang tải danh sách...</td></tr>');
-    }
+    window.isLoadingGroupStudy = true;
+    $('#groupStudyListBody').html(`
+        <tr>
+            <td colspan="5" class="text-center py-5 text-muted">
+                <i class="fa-solid fa-spinner fa-spin fs-2 mb-2" style="color: #0f4c81;"></i><br>
+                <span class="fw-bold" style="color: #0f4c81;">Đang tải dữ liệu tuần học...</span>
+            </td>
+        </tr>
+    `);
     
-    // Vẫn gọi lên server để kéo dữ liệu mới nhất (chạy ngầm)
     postToGAS({ action: "getGroupStudy" }, function(res) {
         let data = typeof res === 'string' ? JSON.parse(res) : res;
-        window.groupStudyCache = data;
-        renderGroupStudyTable(); // Tự động làm mới bảng nếu có thay đổi
+        window.groupStudyCache = data || [];
+        
+        // TẮT CỜ ĐANG TẢI VÀ CHO PHÉP VẼ DỮ LIỆU THẬT
+        window.isLoadingGroupStudy = false;
+        renderGroupStudyTable(); 
     }, function() {
-        // Chỉ báo lỗi nếu không có dữ liệu cache nào
-        if (!window.groupStudyCache || window.groupStudyCache.length === 0) {
-            $('#groupStudyListBody').html('<tr><td colspan="5" class="text-danger py-4">Lỗi kết nối máy chủ!</td></tr>');
-        }
+        window.isLoadingGroupStudy = false;
+        $('#groupStudyListBody').html('<tr><td colspan="5" class="text-danger py-4 text-center fw-bold"><i class="fa-solid fa-triangle-exclamation me-2"></i>Lỗi kết nối máy chủ!</td></tr>');
     });
 };
-
 window.saveGroupStudy = function() {
     let mon = $('#gsMon').val().trim();
     let thu = $('#gsThu').val();
@@ -3904,8 +3919,15 @@ window.saveGroupStudy = function() {
 
 function renderGroupStudyTable() {
     let tbody = $('#groupStudyListBody');
-    if (!window.groupStudyCache || window.groupStudyCache.length === 0) {
-        tbody.html('<tr><td colspan="5" class="text-muted py-4">Hiện tại chưa có lịch học nhóm nào.</td></tr>');
+    if (window.isLoadingGroupStudy) {
+        tbody.html(`
+            <tr>
+                <td colspan="5" class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-spinner fa-spin fs-2 mb-2" style="color: #0f4c81;"></i><br>
+                    <span class="fw-bold" style="color: #0f4c81;">Đang tải danh sách lịch hẹn...</span>
+                </td>
+            </tr>
+        `);
         return;
     }
 
