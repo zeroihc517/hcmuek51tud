@@ -954,24 +954,35 @@ window.currentSubjectData = data;
         let dragStyleTb = window.isAdminActionsEnabled ? 'cursor: grab;' : 'cursor: pointer;';
         let dragAttrTb = (isAdmin && window.innerWidth >= 992) ? ` draggable="${isDragEnabled}" ondragstart="handleDragStart(event, ${sheetRowIndexDrag})" ondragover="handleDragOver(event)" ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event, ${sheetRowIndexDrag}, '${currentSheetName}')" style="${dragStyleTb}"` : 'style="cursor: pointer;"';
 
-        if (isHeThong) {
+if (isHeThong) {
             heThongItemsHtml += `
-            <div class="border-animation mb-4 ${hiddenClassAttr} drag-handle-row" ${dragAttrTb}>
-                <div class="alert shadow-sm border-0 position-relative" role="alert" style="background: linear-gradient(to right, #fff5f5, #ffffff);" onclick="viewThongBaoDetail(${rowIndex})">
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
-                            <i class="fa-solid fa-triangle-exclamation fs-4 fa-fade"></i>
-                        </div>
-                        <div class="flex-grow-1 mt-1">
-                            <div class="fw-bold text-danger mb-1" style="font-size: 18px; text-transform: uppercase;">[NHIỆM VỤ HỆ THỐNG] ${c2} ${badgeHtml}</div>
-                            <div class="tb-item-dates" style="font-size: 13.5px; color: #64748b;">${dateDisplay} ${countdownHtml}</div>
+            <div class="col-12 col-lg-6 ${hiddenClassAttr} drag-handle-row" ${dragAttrTb}>
+                <div class="position-relative d-flex align-items-center p-3 shadow-sm h-100" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-radius: 12px; border: 1px solid #fde68a; border-left: 5px solid #f59e0b !important; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 10px 15px -3px rgba(245, 158, 11, 0.2)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)';" onclick="viewThongBaoDetail(${rowIndex})">
+                    
+                    <!-- Icon Hệ thống -->
+                    <div class="flex-shrink-0 me-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 48px; height: 48px; background: linear-gradient(135deg, #fef08a 0%, #fde047 100%); color: #b45309; border: 2px solid #ffffff;">
+                            <i class="fa-solid fa-bullhorn fs-5 fa-shake"></i>
                         </div>
                     </div>
-                    ${isAdmin ? `<div class="mt-3 text-end pt-2 border-top">${adminHtml}</div>` : ''}
+                    
+                    <!-- Nội dung -->
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="fw-bold mb-1 text-truncate" style="font-size: 15.5px; color: #92400e;">
+                            <span class="badge bg-danger me-2 shadow-sm" style="font-size: 11px; letter-spacing: 0.5px; vertical-align: middle;">HỆ THỐNG</span>
+                            <span style="vertical-align: middle;" title="${c2.replace(/"/g, '&quot;')}">${c2}</span> ${badgeHtml}
+                        </div>
+                        <div class="tb-item-dates d-flex align-items-center flex-wrap gap-2 mt-1" style="font-size: 12px; color: #b45309;">
+                            ${dateDisplay} 
+                            ${countdownHtml ? `<span class="border-start ps-2 border-warning">${countdownHtml}</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    <!-- Nút Admin (nếu có) -->
+                    ${isAdmin ? `<div class="ms-3 ps-3 border-start border-warning">${adminHtml}</div>` : ''}
                 </div>
             </div>`;
-        } else {
-          let itemObj = {
+        } else {          let itemObj = {
     searchStr: `${assignedTbCode} ${c2} ${c4} ${c5} ${c7}`.toLowerCase(),
     isHiddenPost: (isHidden || isFuturePost),
     html: `
@@ -1545,11 +1556,12 @@ window.loadThongBaoComments = function(tbCode) {
 }
 $('#customViewWrapper').html(customViewHtml).removeClass('d-none'); // Nhớ xóa class d-none ở đây
 
-// Bật các khu vực lên
+// Bật các khu vực lên và đổ dữ liệu HTML vào
+// Bật các khu vực lên và đổ dữ liệu HTML vào (Hiển thị dạng lưới Grid chia cột)
 if (heThongItemsHtml === '') {
-    $('#tbItemsHeThong').addClass('d-none');
+    $('#tbItemsHeThong').addClass('d-none').html('');
 } else {
-    $('#tbItemsHeThong').removeClass('d-none');
+    $('#tbItemsHeThong').removeClass('d-none').html(`<div class="row g-3">${heThongItemsHtml}</div>`);
 }
 renderThongBaoPage('HocThuat', 1);
 renderThongBaoPage('RenLuyen', 1);
