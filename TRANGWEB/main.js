@@ -26,13 +26,17 @@ function resetNavActive() {
 $('#customHtmlSection').addClass('d-none');
 }
 
-// Thay đổi hàm loadTongHopView để không gọi lại dữ liệu nếu đã có
 function loadTongHopView() {
     document.title = "Tổng hợp Link | Học nhóm APMA Khoa Toán";
     resetNavActive(); 
     $('#btnNavTongHop').addClass('active'); 
     $('#tongHopSection').removeClass('d-none');
     
+    // THÊM DÒNG NÀY ĐỂ GHI NHẬN LỊCH SỬ TRUY CẬP:
+    if (typeof window.setDetailedView === 'function') {
+        window.setDetailedView("Tiện ích - Tổng hợp Link");
+    }
+
     updateSystemUrl('view', 'weblinks'); // Đổi URL thành ?view=weblinks
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
 }
@@ -6098,7 +6102,7 @@ window.loadDatLichHenView = function() {
     $('#btnNavShareCode').addClass('active');
     $('#datLichPageTitle').html('<i class="fa-solid fa-calendar-check"></i> TEMP & Kỳ thi');
     
-    if (typeof window.setDetailedView === 'function') window.setDetailedView("Thảo luận - TEMP");
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Tiện ích - TEMP");
     updateSystemUrl('view', 'temp'); 
     $('#filterDatLichNoiDung').removeClass('d-none').val(''); // Hiện đầy đủ bộ lọc
 
@@ -6954,14 +6958,14 @@ $(document).ready(function() {
                 if (window.currentDatLichMode === 'kythi') {
                     window.setDetailedView("Kỳ thi");
                 } else {
-                    window.setDetailedView("Thảo luận - TEMP");
+                    window.setDetailedView("Tiện ích - TEMP");
                 }
             } else if (!$('#shareCodeSection').hasClass('d-none')) {
                 // Nếu đóng khi đang ở trang Thảo luận ShareCode
                 if (!$('#shareContentView').hasClass('d-none')) {
-                    window.setDetailedView("Thảo luận - Không gian Code - " + currentShareCategory);
+                    window.setDetailedView("Tiện ích - Không gian Code - " + currentShareCategory);
                 } else {
-                    window.setDetailedView("Thảo luận");
+                    window.setDetailedView("Tiện ích");
                 }
             } else if (typeof currentSheetName !== 'undefined') {
                 // Mặc định trả về tên môn học
