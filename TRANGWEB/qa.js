@@ -3019,11 +3019,12 @@ window.openCustomHtml = function(fileUrl, title) {
         }
     };
 };
+window.lastActiveSectionBeforeDirectWeb = null;
 
 window.openDirectWeb = function(safeFileUrl, title, sheetName, stableKey) {
-    // --- FIX LỖI: Bắt quả tang Đồng hồ đang chạy thì ép dùng Iframe ---
+    // 1. Nếu đồng hồ đếm ngược đang chạy thì chuyển sang dùng Modal Iframe
     if (typeof isTimerActive === 'function' && isTimerActive()) {
-        if(window.innerWidth < 992) { 
+        if (window.innerWidth < 992) { 
             $('#sidebarMenu').removeClass('show'); 
             $('#sidebarOverlay').removeClass('show'); 
         }
@@ -3033,28 +3034,35 @@ window.openDirectWeb = function(safeFileUrl, title, sheetName, stableKey) {
         }
     }
 
-    // --- BỔ SUNG: Tự động lưu tiến độ Đang học ---
+    // 2. Tự động lưu tiến độ Đang học (nếu mở từ bảng học phần)
     if (sheetName && stableKey) {
         let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
         let progVal = localStorage.getItem(`prog_${mssv}_${sheetName}_${stableKey}`) || 'white';
         if (progVal === 'white') {
             localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, 'yellow');
             let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
-            if(outerSelect.length) {
+            if (outerSelect.length) {
                 outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
             }
             if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
         }
     }
-    // ----------------------------------------------
 
-    // 1. Ẩn toàn bộ hệ thống gốc để dọn đường
+    // 3. Ghi nhớ section nào đang mở (Tiện ích, Học phần, Thông báo...) trước khi ẩn
+    const sectionIds = [
+        '#shareCodeSection', '#courseSection', '#courseHubSection', 
+        '#tongHopSection', '#qaSection', '#tkbSection', 
+        '#gpaSection', '#renLuyenSection', '#profileSection', '#datLichSection'
+    ];
+    window.lastActiveSectionBeforeDirectWeb = sectionIds.find(id => $(id).length && !$(id).hasClass('d-none')) || '#shareCodeSection';
+
+    // 4. Ẩn thanh điều hướng và section hiện tại
     $('#sidebarMenu').addClass('d-none');
-    $('#courseSection').addClass('d-none');
+    $(window.lastActiveSectionBeforeDirectWeb).addClass('d-none');
     
     let fullScreenContainer = $('#customHtmlSection');
     
-    // 2. Ép khung bao phủ toàn màn hình, không trừa 1px nào
+    // 5. Bung toàn màn hình cho khung chứa trang web nhúng
     fullScreenContainer.removeClass('d-none').css({
         'position': 'fixed',
         'top': '0',
@@ -3069,10 +3077,7 @@ window.openDirectWeb = function(safeFileUrl, title, sheetName, stableKey) {
         'flex-direction': 'column' 
     });
     
-    // 3. Thanh Header thu nhỏ tối đa, DÍNH CHẶT lên mép trên và XÓA LỀ DƯỚI
     let headerEl = fullScreenContainer.find('header.top-header');
-    
-    // Xóa class margin mặc định của Bootstrap
     headerEl.removeClass('d-none mb-4').css({
         'display': 'flex',
         'align-items': 'center',
@@ -3087,9 +3092,9 @@ window.openDirectWeb = function(safeFileUrl, title, sheetName, stableKey) {
         'border': 'none',        
         'border-radius': '0',
         'box-shadow': '0 2px 5px rgba(0,0,0,0.1)',
-        'margin': '0' // Xóa mọi lề
+        'margin': '0'
     }).html(`
-        <button onclick="backToCourseTable()" class="btn btn-light fw-bold shadow-sm d-flex align-items-center gap-2" style="border-radius: 50px; padding: 4px 14px; font-size: 13px; border: none; background: #ffffff; color: #0f4c81; cursor: pointer;">
+        <button type="button" onclick="backToCourseTable()" class="btn btn-light fw-bold shadow-sm d-flex align-items-center gap-2" style="border-radius: 50px; padding: 4px 14px; font-size: 13px; border: none; background: #ffffff; color: #0f4c81; cursor: pointer;">
             <i class="fa-solid fa-arrow-left"></i> Trở lại
         </button>
         <h6 class="m-0 fw-bold text-white text-truncate" style="font-size: 14px; letter-spacing: 0.5px;">
@@ -3097,9 +3102,6 @@ window.openDirectWeb = function(safeFileUrl, title, sheetName, stableKey) {
         </h6>
     `);
 
-    $('#btnFloatingBack').remove();
-
-    // 4. Khung Iframe hiển thị Web nương theo Flexbox, lấp đầy chỗ trống còn lại
     $('#customHtmlContent').removeClass('bg-white rounded border shadow-sm p-3 p-md-4').css({
         'flex-grow': '1',        
         'width': '100%',
@@ -3120,19 +3122,18 @@ window.openDirectWeb = function(safeFileUrl, title, sheetName, stableKey) {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
+
 window.backToCourseTable = function() {
     let fullScreenContainer = $('#customHtmlSection');
     fullScreenContainer.addClass('d-none').attr('style', '');
-    
-    // Trả lại class mb-4 cho trạng thái gốc
     fullScreenContainer.find('header.top-header').attr('style', '').html('').addClass('mb-4');
-    
     $('#customHtmlContent').attr('style', '').addClass('bg-white rounded border shadow-sm p-3 p-md-4').html('');
     
+    // Khôi phục lại thanh điều hướng và đúng section đã mở trước đó (VD: #shareCodeSection)
     $('#sidebarMenu').removeClass('d-none');
-    $('#courseSection').removeClass('d-none');
+    let targetSection = window.lastActiveSectionBeforeDirectWeb || '#shareCodeSection';
+    $(targetSection).removeClass('d-none');
 };
-
 window.toggleOneCompiler = function(btn, isShow) {
     let sidebar = $(btn).closest('#iframeSidebar, #latexSidebar'); 
     
