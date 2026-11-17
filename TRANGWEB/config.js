@@ -229,7 +229,12 @@ function makeCleanParam(str) {
 function resolveContextTargetUrl(target) {
     const baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
 
-    // 1. Nếu là thẻ <a> có href hợp lệ
+    // 0. CHẶN MỞ TAB MỚI CHO CÁC BÀI HỌC / TÀI LIỆU BÊN TRONG DANH MỤC HỌC PHẦN
+    if (target.closest('#tableWrapper, #minigameWrapper, #mockExamWrapper')) {
+        return null; // Trả về null để vô hiệu hóa nút "Mở tab mới"
+    }
+
+    // 1. Nếu là thẻ <a> có href hợp lệ (ngoài vùng bài học)
     const anchorEl = target.closest('a');
     if (anchorEl && anchorEl.href && !anchorEl.href.startsWith('javascript:')) {
         return anchorEl.href;
@@ -284,16 +289,6 @@ function resolveContextTargetUrl(target) {
         return `${baseUrl}?view=profile`;
     }
 
-    // 7. Nếu chuột phải vào bài học / tài liệu trong bảng học phần có link (Drive, Youtube, Web...)
-    const clickableEl = target.closest('[onclick]');
-    if (clickableEl) {
-        const onclickAttr = clickableEl.getAttribute('onclick') || "";
-        const urlMatch = onclickAttr.match(/(?:openDocumentViewer|openDirectWeb)\(['"](https?:\/\/[^'"]+|[^'"]+\.html[^'"]*)['"]/);
-        if (urlMatch && urlMatch[1]) {
-            return urlMatch[1];
-        }
-    }
-
     // Mặc định nếu bấm ở vùng trống: trả về URL trang hiện tại
     return window.location.href;
 }
@@ -322,9 +317,10 @@ document.addEventListener('contextmenu', function(e) {
     // 3. Phân tích và lấy đường dẫn đích chính xác của phần tử đang chuột phải
     rightClickedTargetUrl = resolveContextTargetUrl(target);
 
-    // Bật/tắt nút Sao chép và Dán
+    // Bật/tắt nút Sao chép, Dán và Mở tab mới
     const btnCopy = document.getElementById('ctxCopy');
     const btnPaste = document.getElementById('ctxPaste');
+    const btnNewTab = document.getElementById('ctxNewTab');
 
     if (savedSelectionText.trim() !== "") {
         btnCopy.classList.remove('disabled');
@@ -336,6 +332,13 @@ document.addEventListener('contextmenu', function(e) {
         btnPaste.classList.remove('disabled');
     } else {
         btnPaste.classList.add('disabled');
+    }
+
+    // Khóa nút Mở tab mới nếu đang chuột phải vào bài học trong học phần
+    if (rightClickedTargetUrl === null) {
+        btnNewTab.classList.add('disabled');
+    } else {
+        btnNewTab.classList.remove('disabled');
     }
 
     // 4. Hiển thị menu đúng tọa độ chuột
@@ -354,7 +357,6 @@ document.addEventListener('contextmenu', function(e) {
     menu.style.left = posX + 'px';
     menu.style.top = posY + 'px';
 });
-
 // Ẩn menu khi click ra ngoài hoặc cuộn trang
 document.addEventListener('click', function(e) {
     const menu = document.getElementById('customContextMenu');
