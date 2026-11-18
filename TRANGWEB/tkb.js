@@ -1390,12 +1390,58 @@ function saveUnifiedTkb() {
     }, function() { alert("Lỗi kết nối máy chủ khi lưu khối lịch học!"); btn.html(originalText).prop('disabled', false); });
 }
 
-// Các hàm phụ trợ gọi lưu/xóa một môn (Giữ lại từ bản gốc)
+// Hàm phụ trợ kiểm tra xem sự kiện có diễn ra đúng 1 lần duy nhất hay không
+function isSingleOccurrenceEvent(course) {
+    if (!course) return true;
+    
+    // Nếu không có ngày bắt đầu hoặc ngày kết thúc -> xem như 1 lần
+    if (!course.ngayBatDau || !course.ngayKetThuc) return true;
+    
+    // Nếu ngày bắt đầu trùng ngày kết thúc -> diễn ra đúng 1 ngày
+    if (course.ngayBatDau.trim() === course.ngayKetThuc.trim()) return true;
+
+    let sDate = parseDateString(course.ngayBatDau);
+    let eDate = parseDateString(course.ngayKetThuc);
+    
+    if (sDate && eDate) {
+        let skipDates = (course.ngayNgoaiLe || "").split(',').map(d => d.trim()).filter(Boolean);
+        let targetDayOfWeek = course.thu === 8 ? 0 : course.thu - 1;
+        let occurrenceCount = 0;
+        let cur = new Date(sDate);
+
+        // Đếm số buổi học thực tế trong khoảng thời gian (trừ ngày ngoại lệ)
+        while (cur <= eDate) {
+            if (cur.getDay() === targetDayOfWeek) {
+                if (!skipDates.includes(formatDateDDMMYYYY(cur))) {
+                    occurrenceCount++;
+                }
+            }
+            // Nếu có từ 2 buổi trở lên thì dừng đếm ngay (đây là sự kiện lặp)
+            if (occurrenceCount > 1) return false;
+            cur.setDate(cur.getDate() + 1);
+        }
+        
+        // Nếu đếm được <= 1 buổi thì là sự kiện diễn ra đúng 1 lần
+        return occurrenceCount <= 1;
+    }
+
+    return true;
+}
+
 function promptSavePersonalTkb() {
     let targetRowIndex = $('#uTkbRowIndex').val().trim();
     if (targetRowIndex !== '') {
         let originalCourse = globalTkbData.find(c => String(c.sheetRowIndex) === targetRowIndex);
         let originalThu = originalCourse ? originalCourse.thu : (parseInt($('#uTkbThu').val()) || 2);
+        
+        // KIỂM TRA: Nếu sự kiện chỉ diễn ra đúng 1 lần -> Mặc định 'all' và lưu thẳng, không hiện bảng hỏi
+        if (isSingleOccurrenceEvent(originalCourse)) {
+            pendingEventAction = { type: 'edit', rowIndex: targetRowIndex, thu: originalThu, scope: 'all', targetDate: '' };
+            executeSavePersonalTkb();
+            return;
+        }
+
+        // Nếu là sự kiện lặp lại nhiều lần -> Hiện bảng hỏi phạm vi như bình thường
         pendingEventAction = { type: 'edit', rowIndex: targetRowIndex, thu: originalThu };
         $('#eventScopeModal').modal('show');
     } else {
@@ -1403,7 +1449,6 @@ function promptSavePersonalTkb() {
         executeSavePersonalTkb();
     }
 }
-
 function executeSavePersonalTkb() {
     let targetRowIndex = $('#uTkbRowIndex').val().trim(); 
     let isEditMode = targetRowIndex !== '';
