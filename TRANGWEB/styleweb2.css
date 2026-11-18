@@ -4089,3 +4089,46 @@ body.dark-mode .custom-context-menu .ctx-item:hover {
 body.dark-mode .custom-context-menu .ctx-divider {
     background-color: #1e293b;
 }
+/* =========================================================
+   FIX GIAO DIỆN DANH SÁCH THÔNG BÁO TRÊN ĐIỆN THOẠI (< 768px)
+   ========================================================= */
+@media (max-width: 767.98px) {
+    /* 1. Gỡ bỏ chiều cao cố định 88px để khung tự giãn theo nội dung */
+    #tbItemsHocThuat .tb-list-item,
+    #tbItemsRenLuyen .tb-list-item {
+        height: auto !important;
+        min-height: 76px !important;
+        padding: 12px 6px !important;
+        align-items: flex-start !important;
+    }
+
+    /* 2. Cho phép tiêu đề hiển thị tự nhiên không bị cắt mất chữ */
+    #tbItemsHocThuat .tb-item-title,
+    #tbItemsRenLuyen .tb-item-title {
+        max-height: none !important;
+        -webkit-line-clamp: unset !important;
+        display: block !important;
+        font-size: 14.5px !important;
+    }
+
+    /* 3. Cho phép ngày đăng, ngày cập nhật và đồng hồ tự động rớt dòng */
+    #tbItemsHocThuat .tb-item-dates,
+    #tbItemsRenLuyen .tb-item-dates {
+        white-space: normal !important;
+        flex-wrap: wrap !important;
+        overflow: visible !important;
+        gap: 6px !important;
+    }
+
+    /* 4. Thu gọn lề 2 bên khung chứa trên màn hình nhỏ */
+    .tb-list-body {
+        padding: 12px 12px !important;
+    }
+
+    /* 5. Đưa thanh phân trang xuống dòng gọn gàng trên mobile */
+    #paginationHocThuat,
+    #paginationRenLuyen {
+        justify-content: center !important;
+        text-align: center !important;
+    }
+}
