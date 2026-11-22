@@ -5478,13 +5478,14 @@ function refreshCurrentCourseData() {
         currentSheetName = 'Thông báo';
     }
     
-    // Xóa cache cục bộ của sheet hiện tại trên cả RAM và SessionStorage
     if (window.boNhoDemHocPhan && window.boNhoDemHocPhan[currentSheetName]) {
         delete window.boNhoDemHocPhan[currentSheetName];
         sessionStorage.setItem('boNhoDemHocPhan_Cache', JSON.stringify(window.boNhoDemHocPhan));
     }
     
-    // Gọi tải lại dữ liệu học phần/thông báo hiện tại
+    if (typeof fetchLearningDataFromServer === 'function') {
+        fetchLearningDataFromServer();
+    }
     loadDataByHocPhan(currentSheetName);
 }
 // 1. CƠ SỞ DỮ LIỆU CÁC MÔN HỌC MẪU (ĐÃ PHÂN CHIA NĂM HỌC VÀ HỌC KỲ)
@@ -6450,23 +6451,12 @@ window.openLatexContentViewer = function(rowIndex) {
     let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
     
     // Khôi phục Tiến độ và Tự động chuyển sang Đang học (yellow) nếu chưa học
-        let progVal = localStorage.getItem(`prog_${mssv}_${currentSheetName}_${stableKey}`) || 'white';
+    // Khôi phục Tiến độ và Tự động chuyển sang Đang học (yellow) + lưu lên Sheet
+    let progVal = autoMarkLessonInProgress(currentSheetName, stableKey);
+    $('#latexProgressSelect').val(progVal).css('background-color', getProgressColor(progVal));
         
         // BẢO VỆ: Chỉ tự động chuyển sang "Đang học" nếu trạng thái thực sự là "Chưa học"
-        if (progVal === 'white' || !progVal) {
-            progVal = 'yellow';
-            localStorage.setItem(`prog_${mssv}_${currentSheetName}_${stableKey}`, 'yellow');
-            
-            // Cập nhật thẻ Select ở bảng bên ngoài giao diện
-            let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
-            if(outerSelect.length) {
-                outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
-            }
-            
-            // Gửi ngầm dữ liệu lên Google Sheets
-            if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
-        }
-        
+               
         $('#latexProgressSelect').val(progVal).css('background-color', getProgressColor(progVal));
     
     // Khôi phục Ghi chú
@@ -7025,15 +7015,18 @@ window.updateSidebarProgress = function(selectEl, isLatex = false) {
     let val = $(selectEl).val();
     $(selectEl).css('background-color', getProgressColor(val));
     
-    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
-    localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, val);
+   let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    let progKey = `prog_${mssv}_${sheetName}_${stableKey}`;
+    localStorage.setItem(progKey, val);
     
     let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
-    if(outerSelect.length) {
+    if (outerSelect.length) {
         outerSelect.val(val).css('background-color', getProgressColor(val));
     }
     
-    if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+  if (typeof saveSingleProgressToServer === 'function') {
+    saveSingleProgressToServer(sheetName, progKey, val, false);
+}
 };
 
 window.saveSidebarNote = function(isLatex = false) {
@@ -7077,7 +7070,7 @@ window.saveSidebarNote = function(isLatex = false) {
     }
     
     setTimeout(() => $(statusId).html(''), 3000);
-    if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+  if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer(sheetName);
 };
 
 window.loadSidebarCodeSnippets = function(isLatex = false) {

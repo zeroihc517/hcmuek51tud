@@ -2056,16 +2056,7 @@ function getProgressColor(val) {
     return '#ffffff';                       // Trắng (Chưa học)
 }
 
-// 2. Hàm lưu trạng thái tiến độ
-function updateProgress(selectEl, sheetName, rowIndex) {
-    let val = $(selectEl).val();
-    $(selectEl).css('background-color', getProgressColor(val));
-    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
-    localStorage.setItem(`prog_${mssv}_${sheetName}_${rowIndex}`, val);
-    
-    // Đẩy lên Server
-    syncLearningDataToServer();
-}
+
 // --- BỘ SOẠN THẢO RICH TEXT CHO GHI CHÚ CÁ NHÂN ---
 $(document).ready(function() {
     tinymce.init({
@@ -2148,7 +2139,7 @@ window.savePersonalNote = function() {
     }
     $('#personalNoteModal').modal('hide');
     
-    if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+    if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer(sheetName);
 };
 
 // 3. Hàm Xóa Ghi chú cá nhân
@@ -2173,24 +2164,83 @@ window.deletePersonalNote = function() {
     .attr('title', 'Thêm ghi chú');
         $('#personalNoteModal').modal('hide');
         
-        if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
+    if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer(sheetName);
     }
 };
 
 
-// 6. Hàm TẢI dữ liệu từ Google Sheets về máy khi sinh viên Đăng nhập
+window.saveSingleProgressToServer = function(sheetName, progKey, progVal, protectGreen = false) {
+    if (!currentUser || currentUser.isGuest || !currentUser.mssv || !sheetName) return;
+
+    postToGAS({
+        action: "updateSingleProgress",
+        mssv: currentUser.mssv,
+        hocPhan: sheetName,
+        progKey: progKey,
+        progVal: progVal,
+        protectGreen: protectGreen
+    }, function(res) {
+        console.log("[DEBUG] Lưu tiến độ đơn:", res);
+    }, function(err) {
+        console.error("[DEBUG] Lỗi kết nối GAS:", err);
+        alert("Lỗi kết nối máy chủ: Không thể lưu tiến độ!");
+    });
+};
+
+// 1. Nhấn vào bài -> Tự chuyển sang "Còn học" & luôn đồng bộ lên Sheet nếu chưa sync trong phiên
+window.autoMarkLessonInProgress = function(sheetName, stableKey) {
+    if (!sheetName || !stableKey) return 'white';
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    let progKey = `prog_${mssv}_${sheetName}_${stableKey}`;
+    let progVal = localStorage.getItem(progKey) || 'white';
+
+    if (progVal === 'white' || !progVal) {
+        progVal = 'yellow';
+        localStorage.setItem(progKey, 'yellow');
+
+        let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
+        if (outerSelect.length) {
+            outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
+        }
+        saveSingleProgressToServer(sheetName, progKey, 'yellow', true);
+    } else if (progVal === 'yellow') {
+        window._syncedYellowKeys = window._syncedYellowKeys || new Set();
+        if (!window._syncedYellowKeys.has(progKey)) {
+            window._syncedYellowKeys.add(progKey);
+            saveSingleProgressToServer(sheetName, progKey, 'yellow', true);
+        }
+    }
+    return progVal;
+};
+
+// 2. Kéo tiến độ từ Sheet về và cập nhật TRỰC TIẾP vào các ô Tiến độ đang hiện (không gây chớp/đóng chương)
 function fetchLearningDataFromServer() {
     if (!currentUser || currentUser.isGuest) return;
 
     $.ajax({
-        url: SCRIPT_URL + "?action=getLearningData&mssv=" + currentUser.mssv,
+        url: SCRIPT_URL + "?action=getLearningData&mssv=" + encodeURIComponent(currentUser.mssv) + "&_=" + Date.now(),
         method: "GET",
         dataType: "json",
+        cache: false,
         success: function(res) {
             if (res && Object.keys(res).length > 0) {
                 if (res.progress) {
+                    let mssv = currentUser.mssv;
                     for (let key in res.progress) {
-                        localStorage.setItem(key, res.progress[key]);
+                        let val = res.progress[key];
+                        localStorage.setItem(key, val);
+
+                        // Nếu đang mở đúng môn học đó -> cập nhật thẳng vào ô <select> trên màn hình
+                        if (typeof currentSheetName !== 'undefined' && currentSheetName) {
+                            let prefix = `prog_${mssv}_${currentSheetName}_`;
+                            if (key.startsWith(prefix)) {
+                                let stableKey = key.substring(prefix.length);
+                                let sel = $(`select[onchange*="'${stableKey}'"]`);
+                                if (sel.length && sel.val() !== val) {
+                                    sel.val(val).css('background-color', getProgressColor(val));
+                                }
+                            }
+                        }
                     }
                 }
                 if (res.notes) {
@@ -2198,45 +2248,64 @@ function fetchLearningDataFromServer() {
                         localStorage.setItem(key, JSON.stringify(res.notes[key]));
                     }
                 }
-                
-                // THÊM ĐIỀU KIỆN KHÔNG RENDER LẠI NẾU ĐANG Ở TRANG THÔNG BÁO
-                if (!$('#courseSection').hasClass('d-none') && typeof currentSheetName !== 'undefined' && currentSheetName.toLowerCase() !== 'thông báo') {
-                    loadDataByHocPhan(currentSheetName);
+                if (!$('#courseHubSection').hasClass('d-none') && typeof renderCourseHubCards === 'function') {
+                    renderCourseHubCards();
                 }
             }
         }
     });
 }
 
-// 7. Hàm GỬI dữ liệu từ máy lên Google Sheets (Chạy ngầm)
-function syncLearningDataToServer() {
+// 3. Tự động đồng bộ tiến độ mỗi khi chuyển quay lại tab trình duyệt này
+document.addEventListener("visibilitychange", function() {
+    if (!document.hidden && typeof fetchLearningDataFromServer === 'function') {
+        fetchLearningDataFromServer();
+    }
+});
+function syncLearningDataToServer(targetSheetName) {
     if (!currentUser || currentUser.isGuest) return;
-    
+    let sheetName = targetSheetName || (typeof currentSheetName !== 'undefined' ? currentSheetName : '');
+    if (!sheetName) return;
+
     let mssv = currentUser.mssv;
-    let learningData = { progress: {}, notes: {} };
-    
-    // Gom tất cả các ghi chú và tiến độ của user này trên máy
+    let progObj = {};
+    let noteObj = {};
+    let progPrefix = `prog_${mssv}_${sheetName}_`;
+    let notePrefix = `note_${mssv}_${sheetName}_`;
+
     for (let i = 0; i < localStorage.length; i++) {
         let key = localStorage.key(i);
-        if (key && key.startsWith(`prog_${mssv}_`)) {
-            learningData.progress[key] = localStorage.getItem(key);
-        } else if (key && key.startsWith(`note_${mssv}_`)) {
-            learningData.notes[key] = JSON.parse(localStorage.getItem(key));
+        if (key && key.startsWith(progPrefix)) {
+            progObj[key] = localStorage.getItem(key);
+        } else if (key && key.startsWith(notePrefix)) {
+            try {
+                noteObj[key] = JSON.parse(localStorage.getItem(key));
+            } catch (e) {}
         }
     }
-    
-    // Đẩy ngầm lên server (không làm phiền giao diện người dùng)
+
     postToGAS({
         action: "saveLearningData",
         mssv: mssv,
-        dataStr: JSON.stringify(learningData)
+        hocPhan: sheetName,
+        progressStr: JSON.stringify(progObj),
+        notesStr: JSON.stringify(noteObj)
     }, function(res) {
-        console.log("Đã đồng bộ lên đám mây:", res);
+        console.log("[DEBUG] Đồng bộ môn " + sheetName + ":", res);
     }, function(err) {
-        console.error("Lỗi đồng bộ:", err);
+        console.error("[DEBUG] Lỗi kết nối GAS:", err);
     });
 }
 
+function updateProgress(selectEl, sheetName, rowIndex) {
+    let val = $(selectEl).val();
+    $(selectEl).css('background-color', getProgressColor(val));
+    let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
+    let progKey = `prog_${mssv}_${sheetName}_${rowIndex}`;
+    localStorage.setItem(progKey, val);
+
+    saveSingleProgressToServer(sheetName, progKey, val, false);
+}
 // ========================================================
 // TÍNH NĂNG RÀNG BUỘC TOÀN MÀN HÌNH & CHẶN MỞ TAB MỚI (V5)
 // ========================================================
@@ -2645,7 +2714,11 @@ window.saveSidebarNote = function() {
 
 // 3. Hàm mở tài liệu (Sửa lại để truyền ĐÚNG data-sheet và data-key vào Sidebar)
 window.openDocumentViewer = function(url, title, sheetName, stableKey) {
-    if (url.includes('test.upcoder.xyz') || url.includes('upcoder.xyz')) {
+    let currentProgVal = 'white';
+    if (sheetName && stableKey) {
+        currentProgVal = autoMarkLessonInProgress(sheetName, stableKey);
+    }
+if (url.includes('test.upcoder.xyz') || url.includes('upcoder.xyz')) {
         window.open(url, '_blank');
         return; 
     }
@@ -2691,21 +2764,8 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
     if (sheetName && stableKey) {
         $('#iframeSidebar').attr('data-sheet', sheetName).attr('data-key', stableKey);
         let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
-        
-        let progVal = localStorage.getItem(`prog_${mssv}_${sheetName}_${stableKey}`) || 'white';
-        
-        // BẢO VỆ: Tránh đè trạng thái "Đã học" (green) do sinh viên đã xác nhận
-        if (progVal === 'white' || !progVal) {
-            progVal = 'yellow';
-            localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, 'yellow');
-            let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
-            if(outerSelect.length) {
-                outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
-            }
-            if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
-        }
 
-        $('#sidebarProgressSelect').val(progVal).css('background-color', getProgressColor(progVal));
+        $('#sidebarProgressSelect').val(currentProgVal).css('background-color', getProgressColor(currentProgVal));
         
         let noteData = JSON.parse(localStorage.getItem(`note_${mssv}_${sheetName}_${stableKey}`));
         let content = noteData && noteData.content ? noteData.content : '';
@@ -3034,18 +3094,9 @@ window.openDirectWeb = function(safeFileUrl, title, sheetName, stableKey) {
         }
     }
 
-    // 2. Tự động lưu tiến độ Đang học (nếu mở từ bảng học phần)
+   // 2. Tự động lưu tiến độ Đang học lên cả trình duyệt và Google Sheets
     if (sheetName && stableKey) {
-        let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
-        let progVal = localStorage.getItem(`prog_${mssv}_${sheetName}_${stableKey}`) || 'white';
-        if (progVal === 'white') {
-            localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, 'yellow');
-            let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
-            if (outerSelect.length) {
-                outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
-            }
-            if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
-        }
+        autoMarkLessonInProgress(sheetName, stableKey);
     }
 
     // 3. Ghi nhớ section nào đang mở (Tiện ích, Học phần, Thông báo...) trước khi ẩn
@@ -4284,7 +4335,11 @@ window.updatePersonalNotificationBell = function() {
 
 // ĐẶT ĐOẠN CODE NÀY Ở DƯỚI CÙNG CỦA FILE main.js
 window.openDocumentViewer = function(url, title, sheetName, stableKey) {
-    if (url.includes('test.upcoder.xyz') || url.includes('upcoder.xyz')) {
+    let currentProgVal = 'white';
+    if (sheetName && stableKey) {
+        currentProgVal = autoMarkLessonInProgress(sheetName, stableKey);
+    }
+if (url.includes('test.upcoder.xyz') || url.includes('upcoder.xyz')) {
         window.open(url, '_blank');
         return; 
     }
@@ -4362,21 +4417,8 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
     if (sheetName && stableKey) {
         $('#iframeSidebar').attr('data-sheet', sheetName).attr('data-key', stableKey);
         let mssv = (currentUser && currentUser.mssv) ? currentUser.mssv : 'guest';
-        
-        let progVal = localStorage.getItem(`prog_${mssv}_${sheetName}_${stableKey}`) || 'white';
-        
-        // BẢO VỆ: Tránh đè trạng thái "Đã học" (green) do sinh viên đã xác nhận
-        if (progVal === 'white' || !progVal) {
-            progVal = 'yellow';
-            localStorage.setItem(`prog_${mssv}_${sheetName}_${stableKey}`, 'yellow');
-            let outerSelect = $(`select[onchange*="'${stableKey}'"]`);
-            if(outerSelect.length) {
-                outerSelect.val('yellow').css('background-color', getProgressColor('yellow'));
-            }
-            if (typeof syncLearningDataToServer === 'function') syncLearningDataToServer();
-        }
 
-        $('#sidebarProgressSelect').val(progVal).css('background-color', getProgressColor(progVal));
+        $('#sidebarProgressSelect').val(currentProgVal).css('background-color', getProgressColor(currentProgVal));
         
         let noteData = JSON.parse(localStorage.getItem(`note_${mssv}_${sheetName}_${stableKey}`));
         let content = noteData && noteData.content ? noteData.content : '';
@@ -4385,6 +4427,7 @@ window.openDocumentViewer = function(url, title, sheetName, stableKey) {
     } else {
         $('#iframeSidebar').removeAttr('data-sheet').removeAttr('data-key');
     }
+
     
     $('#docLoading').show();
     $('#docViewerIframe').attr('src', embedUrl);

@@ -145,6 +145,7 @@ case "uploadAvatarFile":
   result = uploadAvatarFile(payload.mssv, payload.base64Data, payload.mimeType, payload.fileName); 
   break;
   case "saveLearningData": result = saveLearningData(payload.mssv, payload.dataStr); break;
+  case "updateSingleProgress": result = updateSingleProgress(payload.mssv, payload.progKey, payload.progVal, payload.protectGreen); break;
       case "deleteDeadlineUser": result = deleteDeadlineUser(payload.rowIndex, payload.mssv); break;
       case "editChatMessage": result = editChatMessage(payload.rowIndex, payload.mssv, payload.newMessage); break;
       case "changePassword": result = changePassword(payload.mssv, payload.oldPassword, payload.newPassword); break;
@@ -2664,6 +2665,55 @@ function saveLearningData(mssv, dataStr) {
   
   return "Đã đồng bộ tiến độ và ghi chú lên hệ thống!";
 }
+function updateSingleProgress(mssv, progKey, progVal, protectGreen) {
+  if (!mssv || !progKey) return "Thiếu dữ liệu!";
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(10000)) return "Hệ thống đang bận, thử lại sau!";
+
+  try {
+    var sheet = ss.getSheetByName("LearningData");
+    if (!sheet) {
+      sheet = ss.insertSheet("LearningData");
+      sheet.appendRow(["MSSV", "DataJSON"]);
+      sheet.getRange("A1:B1").setFontWeight("bold").setBackground("#0f4c81").setFontColor("white");
+    }
+
+    var data = sheet.getDataRange().getValues();
+    var targetRow = -1;
+    var learningData = { progress: {}, notes: {} };
+
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === String(mssv).trim()) {
+        targetRow = i + 1;
+        try {
+          var parsed = JSON.parse(data[i][1]);
+          if (parsed && typeof parsed === 'object') {
+            learningData.progress = parsed.progress || {};
+            learningData.notes = parsed.notes || {};
+          }
+        } catch (e) {}
+        break;
+      }
+    }
+
+    if (protectGreen && learningData.progress[progKey] === 'green') {
+      return "Giữ nguyên trạng thái Đã xong!";
+    }
+
+    learningData.progress[progKey] = progVal;
+    var jsonStr = JSON.stringify(learningData);
+
+    if (targetRow !== -1) {
+      sheet.getRange(targetRow, 2).setValue(jsonStr);
+    } else {
+      sheet.appendRow([mssv, jsonStr]);
+    }
+    SpreadsheetApp.flush(); // Ép ghi xuống Sheet ngay lập tức
+    return "Đã lưu tiến độ lên Sheet thành công!";
+  } finally {
+    lock.releaseLock();
+  }
+}
 
 function bulkAddTKBUser(mssv, schedules) {
   var sheetName = getTkbSheetName(mssv);
@@ -3084,3 +3134,4 @@ function deletePrivateMsg(rowIndex) {
   sheet.deleteRow(rowIndex);
   return "Đã xóa toàn bộ luồng hội thoại này!";
 }
+
