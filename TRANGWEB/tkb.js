@@ -2475,9 +2475,9 @@ function updateFooterActionButtons(subjectKey) {
             <button type="button" class="btn text-white px-3 fw-bold shadow-sm" style="background-color: #0f4c81;" onclick="saveSystemTkbSelection('personal')" id="btnSavePersonalTkbMode">
                 <i class="fa-solid fa-copy me-1"></i> Sao chép (Cá nhân)
             </button>
-            <button type="button" class="btn text-white px-3 fw-bold shadow-sm ${subject.classes.length === 1 ? '' : 'd-none'}" style="background-color: #0f4c81; border: 1px solid #ffffff;" onclick="saveSystemTkbSelection('system')" id="btnSaveSystemTkb">
+            <!-- <button type="button" class="btn text-white px-3 fw-bold shadow-sm ${subject.classes.length === 1 ? '' : 'd-none'}" style="background-color: #0f4c81; border: 1px solid #ffffff;" onclick="saveSystemTkbSelection('system')" id="btnSaveSystemTkb">
                 <i class="fa-solid fa-cloud-arrow-down me-1"></i> Đồng bộ (Hệ thống)
-            </button>
+            </button> -->
         `;
         $('#sysFooterActions').html(defaultBtnsHtml);
     }
