@@ -7969,6 +7969,18 @@ function escapeNoticeChatHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+function formatNoticeChatMessage(rawText) {
+    // 1. Khử mã độc HTML trước
+    let safeText = escapeNoticeChatHtml(rawText);
+
+    // 2. Tự động nhận diện link http:// hoặc https:// và bọc thành thẻ <a>
+    return safeText.replace(/(https?:\/\/[^\s<]+)/gi, function(match) {
+        // Tách dấu câu dính ở cuối link (nếu có) như dấu chấm, phẩy, ngoặc...
+        let cleanUrl = match.replace(/[.,;!?)]+$/, '');
+        let trailing = match.slice(cleanUrl.length);
+        return `<a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: underline; word-break: break-all;">${cleanUrl}</a>${trailing}`;
+    });
+}
 // Hàm rút gọn thời gian từ "dd/MM/yyyy HH:mm:ss" sang "[HH:mm:ss dd/MM]" giống mẫu
 function formatNoticeChatTime(rawTime) {
     let str = String(rawTime || '').trim();
@@ -8045,7 +8057,7 @@ try { localStorage.setItem('notice_chat_cache', JSON.stringify(latestTen)); } ca
                     ${avatarHtml}
                     <div class="notice-chat-content-wrap">
                         <span class="notice-chat-author ${isAuthorAdmin ? 'is-admin' : ''}">${displayAuthor}:</span>
-                        <span class="notice-chat-msg">${escapeNoticeChatHtml(item.message)}</span>
+                      <span class="notice-chat-msg">${formatNoticeChatMessage(item.message)}</span>
                     </div>
                     ${actionBtns}
                 </div>`;
