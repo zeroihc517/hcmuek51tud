@@ -6140,44 +6140,57 @@ window.loadDatLichHenView = function() {
     loadDatLichData();
 };
 
-function populateExamCourseFormSelect() {
-    let sel = $('#selExamCourseForm');
-    if (!sel.length) return;
-    let html = '';
+// Hàm dùng chung: tạo danh sách Học phần gom nhóm theo Năm học - Học kỳ, giữ nguyên thứ tự gốc
+function buildExamCourseOptionsHtml(includeAll, includeOther) {
+    let html = includeAll ? '<option value="">-- Tất cả học phần --</option>' : '';
+
     if (typeof SYSTEM_COURSE_DATABASE !== 'undefined') {
-        let uniqueCourses = [...new Set(SYSTEM_COURSE_DATABASE.map(c => c.name.trim()))].sort();
-        uniqueCourses.forEach(name => {
-            html += `<option value="${name}">${name}</option>`;
+        let grouped = {};
+        let seenNames = new Set();
+
+        // Duyệt đúng thứ tự gốc trong SYSTEM_COURSE_DATABASE (không sort)
+        SYSTEM_COURSE_DATABASE.forEach(c => {
+            let cleanName = (c.name || '').replace(/\t/g, '').trim();
+            if (!cleanName || seenNames.has(cleanName)) return;
+            seenNames.add(cleanName);
+
+            let groupKey = `${c.namHoc || 'Khác'} - ${c.hocKy || ''}`.trim();
+            if (!grouped[groupKey]) grouped[groupKey] = [];
+            grouped[groupKey].push({ code: c.code, name: cleanName });
         });
+
+        for (let groupKey in grouped) {
+            html += `<optgroup label="🎓 ${groupKey}">`;
+            grouped[groupKey].forEach(c => {
+                html += `<option value="${c.name}">${c.code} - ${c.name}</option>`;
+            });
+            html += `</optgroup>`;
+        }
     }
-    html += `<option value="KHAC">-- Học phần / Chủ đề khác --</option>`;
-    sel.html(html);
+
+    if (includeOther) {
+        html += `<optgroup label="📌 Khác"><option value="KHAC">-- Học phần / Chủ đề khác --</option></optgroup>`;
+    }
+    return html;
 }
 
-window.toggleExamCourseOther = function() {
-    if ($('#selExamCourseForm').val() === 'KHAC') {
-        $('#txtDatLichNoiDungKhac').removeClass('d-none').focus();
-    } else {
-        $('#txtDatLichNoiDungKhac').addClass('d-none').val('');
-    }
-};
-
-window.currentExamStatusFilter = 'all';
-
-// 1. Đổ danh sách học phần vào ô lọc #filterExamCourse
+// 1. Đổ vào ô lọc ngoài danh sách (#filterExamCourse)
 function populateExamCourseFilter() {
     let select = $('#filterExamCourse');
     if (!select.length) return;
-    let html = '<option value="">-- Tất cả học phần / Nội dung --</option>';
-    
-    if (typeof SYSTEM_COURSE_DATABASE !== 'undefined') {
-        let uniqueCourses = [...new Set(SYSTEM_COURSE_DATABASE.map(c => c.name.trim()))].sort();
-        uniqueCourses.forEach(name => {
-            html += `<option value="${name}">${name}</option>`;
-        });
-    }
-    select.html(html);
+    select.html(buildExamCourseOptionsHtml(true, false));
 }
+
+// 2. Đổ vào ô chọn môn trong Form tạo/sửa (#selExamCourseForm)
+function populateExamCourseFormSelect() {
+    let sel = $('#selExamCourseForm');
+    if (!sel.length) return;
+    sel.html(buildExamCourseOptionsHtml(false, true));
+}
+
+window.currentExamStatusFilter = 'all';
+
+
 
 // 2. Tải dữ liệu từ Google Sheets (giữ nguyên API cũ)
 function loadDatLichData() {
@@ -8291,3 +8304,14 @@ window.deleteNoticePublicChat = function(rowIndex) {
     });
 };
 
+// Tự động hiện ô nhập khi chọn "-- Học phần / Chủ đề khác --"
+$(document).on('change', '#selExamCourseForm', function() {
+    if ($(this).val() === 'KHAC') {
+        $('#txtDatLichNoiDungKhac')
+            .removeClass('d-none')
+            .attr('placeholder', 'Nhập tên học phần / chủ đề khác...')
+            .focus();
+    } else {
+        $('#txtDatLichNoiDungKhac').addClass('d-none').val('');
+    }
+});
