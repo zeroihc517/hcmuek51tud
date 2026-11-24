@@ -3335,49 +3335,6 @@
 </div>
 
        </div>
-<h6 class="text-muted fw-bold mb-3"><i class="fa-solid fa-code me-2"></i>Chat</h6>
-<div id="publicNoticeChatBox" class="notice-shoutbox-card mb-4">
-        <div class="notice-shoutbox-marquee">
-            <span class="badge bg-danger flex-shrink-0"><i class="fa-solid fa-comments me-1"></i>CHAT CHUNG</span>
-            <div class="overflow-hidden flex-grow-1">
-                <div class="notice-shoutbox-marquee-track">
-                    Chào mừng các bạn đến với Phòng Chat chung APMA Khoa Toán - Tin học • Trao đổi lịch sự, hỗ trợ nhau học tập nhé! • Hiển thị 10 tin nhắn mới nhất.
-                </div>
-            </div>
-            <button type="button" class="btn btn-sm btn-light py-0 px-2 border flex-shrink-0" onclick="loadNoticePublicChat(true)" title="Làm mới khung chat">
-                <i class="fa-solid fa-rotate-right text-primary" style="font-size: 12px;"></i>
-            </button>
-        </div>
-
-        <div id="noticeChatMessages" class="notice-shoutbox-list">
-            <div class="text-center text-muted small py-3">
-                <i class="fa-solid fa-spinner fa-spin me-1"></i> Đang tải tin nhắn...
-            </div>
-        </div>
-
-        <div class="notice-shoutbox-inputbar">
-            <input type="text" id="txtNoticeChatInput" class="form-control" maxlength="300"
-                   placeholder="Nhập tin nhắn trao đổi chung... (Nhấn Enter để gửi)"
-                   onkeydown="if(event.key === 'Enter'){ event.preventDefault(); sendNoticePublicChat(); }">
-            <button type="button" id="btnSendNoticeChat" class="btn text-white fw-bold px-3 flex-shrink-0"
-                    style="background-color: #0f4c81; border-radius: 8px; height: 38px;"
-                    onclick="sendNoticePublicChat()">
-                <i class="fa-solid fa-paper-plane me-1"></i> Gửi
-            </button>
-            <button type="button" class="btn-notice-emoji" id="btnToggleNoticeEmoji"
-                    onclick="toggleNoticeEmojiPopup(event)" title="Chọn icon / biểu cảm">
-                😄
-            </button>
-
-            <div id="noticeEmojiPopup" class="notice-emoji-popup d-none">
-                <div class="d-flex justify-content-between align-items-center mb-2 pb-1 border-bottom">
-                    <span class="fw-bold small text-primary"><i class="fa-regular fa-face-smile me-1"></i>Chọn Icon nhanh</span>
-                    <button type="button" class="btn-close" style="font-size: 10px;" onclick="$('#noticeEmojiPopup').addClass('d-none')"></button>
-                </div>
-                <div class="notice-emoji-grid" id="noticeEmojiGrid"></div>
-            </div>
-        </div>
-    </div>
 
 </div>
 
