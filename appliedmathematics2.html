@@ -3265,12 +3265,20 @@
     </div>
 </div>
 
+<!-- Thẻ 6: Không gian Code (Mở Iframe có mật khẩu) -->
+<div class="col">
+    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #0f4c81;" onclick="openKhongGianCodeIframe()">
+        <div class="icon-box position-relative">
+            <i class="fa-solid fa-code" style="color: #0f4c81;"></i>
+        </div>
+        <div class="card-text-wrapper">
+            <h5>Không gian Code</h5>
+            <p class="card-desc">Chia sẻ mã nguồn các môn lập trình</p>
+        </div>
     </div>
+</div>
 
-   
-
-    </div>
-
+       </div>
 <div id="publicNoticeChatBox" class="notice-shoutbox-card mb-4">
         <div class="notice-shoutbox-marquee">
             <span class="badge bg-danger flex-shrink-0"><i class="fa-solid fa-comments me-1"></i>CHAT CHUNG</span>
@@ -3313,7 +3321,9 @@
             </div>
         </div>
     </div>
+
 </div>
+
 
  
 <!-- MÀN HÌNH 3: KHU VỰC CHIA SẺ NHÓM HỌC TẬP -->
@@ -5707,5 +5717,35 @@ $(document).ready(function() {
 </script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+    window.openKhongGianCodeIframe = function() {
+        let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+        let isAdminAcc = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
+
+        // Admin 51.01.108.008 mở thẳng không cần mật khẩu
+        if (isAdminAcc) {
+            openDirectWeb('TUD_HK1_2627/khonggiancode.html', 'Không gian Code');
+            return;
+        }
+
+        // Sinh viên khác -> hiện bảng nhập mật khẩu
+        $('#txtCodeSpacePass').val('').removeClass('is-invalid');
+        $('#codeSpaceAuthError').addClass('d-none');
+        $('#codeSpaceAuthModal').modal('show');
+        setTimeout(() => $('#txtCodeSpacePass').focus(), 400);
+    };
+
+    window.verifyKhongGianCodePass = function() {
+        let pass = $('#txtCodeSpacePass').val().trim();
+        if (pass !== "HANHPHUC") {
+            $('#codeSpaceAuthError').removeClass('d-none');
+            $('#txtCodeSpacePass').addClass('is-invalid');
+            setTimeout(() => $('#txtCodeSpacePass').removeClass('is-invalid'), 1000);
+            return;
+        }
+        $('#codeSpaceAuthModal').modal('hide');
+        openDirectWeb('TUD_HK1_2627/khonggiancode.html', 'Không gian Code');
+    };
+</script>
 </body>
 </html>
