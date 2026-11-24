@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Không gian Code | Học nhóm APMA Khoa Toán</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="../TRANGWEB/styleweb.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <style>
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+        .code-page-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+.badge-new-qa {
+    background-color: #e61d4a;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 50px;
+    box-shadow: 0 2px 6px rgba(230, 29, 74, 0.35);
+    animation: pulseNewBadge 1.5s infinite;
+}
+@keyframes pulseNewBadge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+    </style>
+</head>
+<body>
+<div id="codeEditorContainer" class="d-none"></div>
+    <!-- Toast Thông báo -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 99999;">
+        <div id="autoToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body fw-bold" style="font-size: 15px;"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <div class="code-page-wrapper">
+        <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+            <div class="d-flex align-items-center gap-3">
+               
+                <div class="page-title m-0"><i class="fa-solid fa-code text-primary me-2"></i>Không gian Code</div>
+            </div>
+            <div id="userBadge" class="fw-bold text-primary small"></div>
+        </header>
+
+        <!-- MÀN HÌNH 1: CHỌN 4 HỌC PHẦN CODE -->
+        <div id="shareCategoryView">
+            <h6 class="text-muted fw-bold mb-3"><i class="fa-solid fa-laptop-code me-2"></i>Chọn học phần chia sẻ mã nguồn</h6>
+            <div class="row row-cols-2 row-cols-lg-4 g-4 mb-4">
+                <!-- Thẻ 1: Lập trình nâng cao -->
+                <div class="col">
+                    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #0f4c81;" onclick="openShareCategory('Lập trình nâng cao', 'cpp')">
+                        <div class="icon-box position-relative">
+                            <i class="fa-solid fa-code" style="color: #0f4c81;"></i>
+                            <span id="badge-share-laptrinhnangcao" class="badge-new-qa badge-sharecode-cat d-none" style="position: absolute; top: -5px; right: -25px; padding: 2px 6px;">Mới</span>
+                        </div>
+                        <div class="card-text-wrapper">
+                            <h5>Lập trình nâng cao</h5>
+                            <p class="card-desc">Mã HP: COMP1013</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thẻ 2: Cấu trúc dữ liệu -->
+                <div class="col">
+                    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #0f4c81;" onclick="openShareCategory('Cấu trúc dữ liệu', 'cpp')">
+                        <div class="icon-box position-relative">
+                            <i class="fa-solid fa-network-wired" style="color: #0f4c81;"></i>
+                            <span id="badge-share-cautrucdulieu" class="badge-new-qa badge-sharecode-cat d-none" style="position: absolute; top: -5px; right: -25px; padding: 2px 6px;">Mới</span>
+                        </div>
+                        <div class="card-text-wrapper">
+                            <h5>Cấu trúc dữ liệu</h5>
+                            <p class="card-desc">Mã HP: COMP1016</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thẻ 3: Lập trình Hướng đối tượng -->
+                <div class="col">
+                    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #0f4c81;" onclick="openShareCategory('Lập trình hướng đối tượng', 'cpp')">
+                        <div class="icon-box position-relative">
+                            <i class="fa-solid fa-cubes" style="color: #0f4c81;"></i>
+                            <span id="badge-share-laptrinhhuongdoituong" class="badge-new-qa badge-sharecode-cat d-none" style="position: absolute; top: -5px; right: -25px; padding: 2px 6px;">Mới</span>
+                        </div>
+                        <div class="card-text-wrapper">
+                            <h5>Lập trình hướng đối tượng</h5>
+                            <p class="card-desc">Mã HP: COMP1017</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thẻ 4: Lập trình Python -->
+                <div class="col">
+                    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #0f4c81;" onclick="openShareCategory('Lập trình Python', 'python')">
+                        <div class="icon-box position-relative">
+                            <i class="fa-brands fa-python" style="color: #0f4c81;"></i>
+                            <span id="badge-share-laptrinhpython" class="badge-new-qa badge-sharecode-cat d-none" style="position: absolute; top: -5px; right: -25px; padding: 2px 6px;">Mới</span>
+                        </div>
+                        <div class="card-text-wrapper">
+                            <h5>Lập trình Python</h5>
+                            <p class="card-desc">Mã HP: COMP1804</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH 2: KHU VỰC SHARE CODE CỦA MÔN HỌC -->
+        <div id="shareContentView" class="d-none">
+            <div class="d-flex align-items-center mb-4">
+                <button class="btn btn-light fw-bold shadow-sm me-3 border" onclick="backToShareCategories()">
+                    <i class="fa-solid fa-arrow-left"></i> Trở lại
+                </button>
+                <h5 class="fw-bold m-0 text-primary" id="currentShareTitle">Tên môn học</h5>
+            </div>
+
+            <div class="instructor-card border-start-0 bg-white p-4 rounded shadow-sm mb-4" style="border-top: 4px solid #0f4c81;">
+                <h6 class="mb-3 text-primary fw-bold" id="shareCodeFormTitle"><i class="fa-solid fa-pen-nib me-2"></i>Soạn thảo Code mới</h6>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-5">
+                        <input type="text" id="txtMSSVShareCode" class="form-control p-2.5 fw-bold" placeholder="Nhập MSSV/Email">
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" id="txtMaBai" class="form-control p-2.5 fw-bold" placeholder="Nhập Mã bài (Ví dụ: B01)">
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold"><i class="fa-solid fa-align-left me-1"></i> Nội dung / Mô tả thắc mắc:</label>
+                    <textarea id="txtShareCodeDescription" class="form-control" rows="3" placeholder="Nhập đề bài, mô tả thuật toán hoặc thắc mắc cần giải đáp về đoạn code này..."></textarea>
+                </div>
+
+                <div id="shareCodeEditorContainer" class="mb-3" style="height: 250px; border: 1px solid #ced4da; border-radius: 8px;"></div>
+
+                <button class="btn fw-bold px-4 py-2 text-white" onclick="sendShareCode()" id="btnSubmitShareCode" style="background: #0f4c81; border:none;">
+                    <i class="fa-solid fa-share-nodes me-2"></i> Chia sẻ Code này
+                </button>
+                <button class="btn fw-bold px-4 py-2 btn-light border d-none" onclick="cancelEditShareCode()" id="btnCancelEditCode">Hủy sửa</button>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3 mt-4">
+                <h5 class="fw-bold m-0" style="color: #0f4c81;">Các đoạn Code đã chia sẻ</h5>
+                <div class="d-flex gap-2">
+                    <div class="input-group input-group-sm" style="width: 220px;">
+                        <input type="text" id="txtSearchShareCode" class="form-control" placeholder="Tìm mã bài..." onkeyup="if(event.key === 'Enter') searchShareCode()">
+                        <button class="btn text-white fw-bold" onclick="searchShareCode()" style="background: #0f4c81; border: none;"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    </div>
+                    <button class="btn btn-sm btn-light border" onclick="loadShareCodeData()"><i class="fa-solid fa-rotate-right"></i></button>
+                </div>
+            </div>
+
+            <div id="shareCodeLoadingStatus" class="pulse-loader d-none text-center py-4">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+            <div id="shareCodeListArea"></div>
+        </div>
+    </div>
+
+    <!-- MODAL BẢO MẬT KHÔNG GIAN CODE -->
+    <div class="modal fade" id="codeSpaceAuthModal" tabindex="-1" aria-hidden="true" style="z-index: 1080;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+                <div class="modal-header text-white" style="background-color: #0f4c81;">
+                    <h6 class="modal-title m-0 fw-bold"><i class="fa-solid fa-user-secret me-2"></i>Xác thực Truy cập</h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="mb-3">
+                        <div class="mx-auto d-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 75px; height: 75px; background-color: #f1f5f9; color: #0f4c81; font-size: 32px; border: 2px dashed #cbd5e1;">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <h5 class="fw-bold text-primary mb-2">Câu đố bảo mật</h5>
+                        <p class="text-muted mb-0" style="font-size: 15px;">Trong thế giới Toán học, nếu XA giúp ta xây dựng lý thuyết, thì XV giúp ta phá bỏ những kết luận ngộ nhận. X ở đây là gì?</p>
+                        <p class="text-muted fw-bold mt-2" style="font-size: 15px;">Nhập đáp án để mở khóa:</p>
+                    </div>
+                    <div class="form-floating mb-2 text-start">
+                        <input type="password" id="txtCodeSpacePass" class="form-control fw-bold text-center" placeholder="Nhập mật khẩu..." onkeypress="if(event.key === 'Enter') verifyCodeSpacePassword()">
+                        <label for="txtCodeSpacePass">Đáp án của bạn</label>
+                    </div>
+                    <small class="text-danger fw-bold d-none" id="codeSpaceAuthError"><i class="fa-solid fa-triangle-exclamation me-1"></i>Đáp án chưa chính xác!</small>
+                </div>
+                <div class="modal-footer border-0 bg-light d-flex justify-content-center pb-4 gap-2">
+                    <button type="button" class="btn btn-light fw-bold px-4 shadow-sm" data-bs-dismiss="modal" style="border-radius: 50px; border: 1.5px solid #cbd5e1;">Quay lại</button>
+                    <button type="button" class="btn text-white fw-bold px-4 shadow-sm" style="background-color: #0f4c81; border-radius: 50px;" onclick="verifyCodeSpacePassword()">
+                        <i class="fa-solid fa-key me-1"></i> Mở khóa
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.2/ace.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+    <!-- Khai báo hàm rỗng chống lỗi do không nhúng main.js, TinyMCE và Xulyxacthuc.js -->
+    <script>
+        window.checkSessionExpiryOnLoad = function(){};
+        window.initInactivityTracker = function(){};
+        window.updateSystemUrl = function(){};
+        window.tinymce = { init: function(){}, get: function(){ return null; } };
+    </script>
+
+    <!-- Kế thừa trực tiếp từ config.js và qa.js -->
+    <script src="../TRANGWEB/config.js"></script>
+    <script src="../TRANGWEB/qa.js"></script>
+
+    <!-- Khởi chạy riêng cho trang Không gian Code -->
+    <script>
+        // Tắt quét tin nhắn riêng trên trang này để đỡ tốn request
+        window.checkPrivateMessages = function(){};
+
+        $(document).ready(function() {
+            isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+            if (currentUser && !currentUser.isGuest) {
+                $('#txtMSSVShareCode').val(currentUser.mssv).prop('readonly', true).css('background-color', '#e9ecef');
+                $('#userBadge').html(`<i class="fa-solid fa-user-circle me-1"></i> ${currentUser.name} (${currentUser.mssv})`);
+            }
+
+            // Quét chữ "Mới" cho 4 môn
+            checkNewShareCodeGlobal();
+            setInterval(checkNewShareCodeGlobal, 15000);
+        });
+    </script>
+</body>
+</html>
