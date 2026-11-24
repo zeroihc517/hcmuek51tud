@@ -782,7 +782,7 @@ window.currentSubjectData = data;
         <span class="badge bg-danger flex-shrink-0"><i class="fa-solid fa-comments me-1"></i>CHAT CHUNG</span>
         <div class="overflow-hidden flex-grow-1">
             <div class="notice-shoutbox-marquee-track">
-                Chào mừng các bạn đến với Phòng Chat chung APMA Khoa Toán - Tin học • Trao đổi lịch sự, hỗ trợ nhau học tập nhé! • Hiển thị 10 tin nhắn mới nhất.
+                Chào mừng các bạn đến với Phòng Chat chung APMA Khoa Toán - Tin học • Trao đổi lịch sự, hỗ trợ nhau học tập nhé!
             </div>
         </div>
         <button type="button" class="btn btn-sm btn-light py-0 px-2 border flex-shrink-0" onclick="loadNoticePublicChat(true)" title="Làm mới khung chat">
