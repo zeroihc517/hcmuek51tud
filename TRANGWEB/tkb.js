@@ -2011,10 +2011,91 @@ function filterAndRenderTKB() {
   // =======================================================================
 // MODULE ĐỒNG BỘ TKB HỆ THỐNG - BẢN FIX MỚI NHẤT
 // =======================================================================
+
 let globalSystemCourses = [];
 let userRegisteredCourseIds = [];
 let groupedSystemCourses = {};
 let currentSysSubjectKey = "";
+let currentSysRegMode = "theo_ke_hoach"; // Mặc định: Đăng ký theo kế hoạch
+
+// 1. Phân loại học phần vào 1 trong 3 tab: 'gdqp_an' | 'ngoai_ke_hoach' | 'theo_ke_hoach'
+function getCourseRegCategory(course) {
+    let loai = String(course.loaiDK || "").trim().toLowerCase();
+    let ghiChu = String(course.ghiChu || "").trim().toLowerCase();
+    let maHP = String(course.id || "").trim().toUpperCase();
+    let tenMon = String(course.mon || "").trim().toLowerCase();
+
+    // Ưu tiên nhận diện GDQP-AN
+    if (
+        loai.includes("gdqp") || loai.includes("quốc phòng") || loai.includes("quoc phong") ||
+        ghiChu.includes("[gdqp]") ||
+        maHP.includes("MILI") ||
+        tenMon.includes("quốc phòng") || tenMon.includes("quân sự") || tenMon.includes("chiến đấu bộ binh")
+    ) {
+        return "gdqp_an";
+    }
+
+    // Nhận diện Ngoài kế hoạch
+   // Nhận diện Ngoài kế hoạch
+    if (
+        loai.includes("nkh") || loai.includes("ngoài") || loai.includes("ngoai") ||
+        ghiChu.includes("[nkh]") || ghiChu.includes("ngoài kế hoạch")
+    ) {
+        return "ngoai_ke_hoach";
+    }
+
+    // Mặc định: Theo kế hoạch
+    return "theo_ke_hoach";
+}
+
+// 2. Kiểm tra môn học (trong tab Theo kế hoạch) là Tự chọn hay Bắt buộc
+function isSubjectElective(classes) {
+    // Ưu tiên kiểm tra ghi chú ở Cột Q (loaiDK) hoặc Cột P (ghiChu)
+    for (let c of classes) {
+        let loai = String(c.loaiDK || "").trim().toLowerCase();
+        let ghiChu = String(c.ghiChu || "").trim().toLowerCase();
+        if (loai.includes("tc") || loai.includes("tự chọn") || loai.includes("tu chon") || ghiChu.includes("[tc]")) {
+            return true;
+        }
+        if (loai.includes("bb") || loai.includes("bắt buộc") || loai.includes("bat buoc")) {
+            return false;
+        }
+    }
+
+    // Nếu Cột Q để trống -> Tự động tra trong SYSTEM_COURSE_DATABASE (main.js)
+    if (typeof SYSTEM_COURSE_DATABASE !== 'undefined' && classes.length > 0) {
+        let sampleId = String(classes[0].id || "").toUpperCase();
+        let sampleName = getBaseSubjectName(classes[0].mon);
+        let found = SYSTEM_COURSE_DATABASE.find(db =>
+            (db.code && sampleId.includes(db.code.toUpperCase())) ||
+            (db.name && getBaseSubjectName(db.name) === sampleName)
+        );
+        if (found && String(found.type || "").endsWith("_tc")) {
+            return true;
+        }
+    }
+
+    return false; // Mặc định là Bắt buộc
+}
+
+// 3. Chuyển đổi qua lại giữa các nút Radio
+window.onChangeSysRegMode = function(mode) {
+    currentSysRegMode = mode;
+
+    $('#lblRegModeKH').toggleClass('active', mode === 'theo_ke_hoach');
+    $('#lblRegModeNKH').toggleClass('active', mode === 'ngoai_ke_hoach');
+    $('#lblRegModeGDQP').toggleClass('active', mode === 'gdqp_an');
+
+    if (mode === 'theo_ke_hoach') {
+        $('#sysRegSectionTitle').html('<i class="fa-solid fa-calendar-check me-2"></i>Đăng ký theo kế hoạch');
+    } else if (mode === 'ngoai_ke_hoach') {
+        $('#sysRegSectionTitle').html('<i class="fa-solid fa-layer-group me-2 text-warning"></i>Đăng ký ngoài kế hoạch');
+    } else {
+        $('#sysRegSectionTitle').html('<i class="fa-solid fa-shield-halved me-2 text-success"></i>Giáo dục Quốc phòng - An ninh (GDQP-AN)');
+    }
+
+    renderSystemCoursesList();
+};
 
 function buildSystemFilters() {
     let nHocs = [...new Set(globalConfigHK.map(item => item[0]))];
@@ -2030,11 +2111,18 @@ function buildSystemFilters() {
 }
 
 function openSystemTkbModal() {
-	if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView("Đồng bộ học phần");
-    // Đảm bảo bật Màn hình 1, ẩn Màn hình 2
+    if (typeof updateTkbDetailedView === 'function') updateTkbDetailedView("Đồng bộ học phần");
+
     $('#sysScreen2').addClass('d-none');
     $('#sysFooterActions').addClass('d-none');
     $('#sysScreen1').removeClass('d-none');
+    $('#sysSearchCourseInput').val('');
+
+    currentSysRegMode = 'theo_ke_hoach';
+    $('#regModeKeHoach').prop('checked', true);
+    $('#lblRegModeKH').addClass('active');
+    $('#lblRegModeNKH, #lblRegModeGDQP').removeClass('active');
+    $('#sysRegSectionTitle').html('<i class="fa-solid fa-calendar-check me-2"></i>Đăng ký theo kế hoạch');
 
     $('#systemTkbModal').modal('show');
     $('#systemSubjectsContainer').html('<tr><td colspan="3" class="text-center text-muted py-4"><i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải danh sách học phần...</td></tr>');
@@ -2043,20 +2131,19 @@ function openSystemTkbModal() {
         url: SCRIPT_URL + "?action=getSystemTKBList&mssv=" + currentUser.mssv,
         method: "GET", 
         dataType: "json",
-success: function(data) {
-    globalSystemCourses = data.allCourses || [];
-    // Ép kiểu tất cả ID về dạng String và xóa khoảng trắng thừa
-    userRegisteredCourseIds = (data.registeredIds || []).map(id => String(id).trim());
-    
-    buildSystemFilters();
+        success: function(data) {
+            globalSystemCourses = data.allCourses || [];
+            userRegisteredCourseIds = (data.registeredIds || []).map(id => String(id).trim());
+            
+            buildSystemFilters();
 
-    let currentMainNH = $('#namHocSelect').val();
-    let currentMainHK = $('#hocKySelect').val();
-    
-    if (currentMainNH) $('#sysNamHocFilter').val(currentMainNH);
-    if (currentMainHK) $('#sysHocKyFilter').val(currentMainHK);
+            let currentMainNH = $('#namHocSelect').val();
+            let currentMainHK = $('#hocKySelect').val();
+            
+            if (currentMainNH) $('#sysNamHocFilter').val(currentMainNH);
+            if (currentMainHK) $('#sysHocKyFilter').val(currentMainHK);
 
-    renderSystemCoursesList();
+            renderSystemCoursesList();
         },
         error: function() {
             $('#systemSubjectsContainer').html('<tr><td colspan="3"><div class="alert alert-danger m-0 text-center">Lỗi khi tải dữ liệu hệ thống! Vui lòng thử lại sau.</div></td></tr>');
@@ -2064,38 +2151,87 @@ success: function(data) {
     });
 }
 
-// HÀM RENDER MÀN HÌNH 1: DANH SÁCH MÔN HỌC (ĐÃ FIX LỖI MẤT BADGE KHI QUAY LẠI)
+// 4. Hàm Render Màn hình 1 (Tự ẩn/hiện GDQP-AN + Tách Bắt buộc & Tự chọn)
 function renderSystemCoursesList() {
     let container = $('#systemSubjectsContainer');
     let filterNH = $('#sysNamHocFilter').val(); 
     let filterHK = $('#sysHocKyFilter').val();
+    let keyword = ($('#sysSearchCourseInput').val() || "").trim().toLowerCase();
     
-    let filteredCourses = globalSystemCourses.filter(c => {
+    // Lọc theo Năm học & Học kỳ trước để biết kỳ này có GDQP-AN không
+    let semesterFiltered = globalSystemCourses.filter(c => {
         let matchNH = filterNH === "" || c.namHoc === filterNH;
         let matchHK = filterHK === "" || c.hocKy === filterHK;
         return matchNH && matchHK;
     });
 
+    // Tự động ẩn/hiện ô GDQP-AN
+    let hasGDQPInSemester = semesterFiltered.some(c => getCourseRegCategory(c) === 'gdqp_an');
+    if (hasGDQPInSemester) {
+        $('#lblRegModeGDQP').removeClass('d-none');
+    } else {
+        $('#lblRegModeGDQP').addClass('d-none');
+        if (currentSysRegMode === 'gdqp_an') {
+            currentSysRegMode = 'theo_ke_hoach';
+            $('#regModeKeHoach').prop('checked', true);
+            $('#lblRegModeKH').addClass('active');
+            $('#lblRegModeNKH, #lblRegModeGDQP').removeClass('active');
+            $('#sysRegSectionTitle').html('<i class="fa-solid fa-calendar-check me-2"></i>Đăng ký theo kế hoạch');
+        }
+    }
+
+    // Lọc tiếp theo từ khóa tìm kiếm
+    let baseFiltered = semesterFiltered.filter(c => {
+        return keyword === "" || 
+               String(c.mon || "").toLowerCase().includes(keyword) || 
+               String(c.id || "").toLowerCase().includes(keyword);
+    });
+
+    // Đếm số môn cho từng Badge
+    let setKH = new Set();
+    let setNKH = new Set();
+    let setGDQP = new Set();
+    baseFiltered.forEach(c => {
+        let baseName = getBaseSubjectName(c.mon);
+        let cat = getCourseRegCategory(c);
+        if (cat === 'gdqp_an') setGDQP.add(baseName);
+        else if (cat === 'ngoai_ke_hoach') setNKH.add(baseName);
+        else setKH.add(baseName);
+    });
+    $('#badgeCountKH').text(setKH.size);
+    $('#badgeCountNKH').text(setNKH.size);
+    $('#badgeCountGDQP').text(setGDQP.size);
+
+    // Lọc đúng danh sách của tab Radio đang chọn
+    let filteredCourses = baseFiltered.filter(c => getCourseRegCategory(c) === currentSysRegMode);
+
     if (filteredCourses.length === 0) {
-        container.html(`<tr><td colspan="3" class="text-center text-muted py-5"><i class="fa-regular fa-folder-open fs-2 mb-2"></i><br>Hệ thống hiện chưa có môn học nào.</td></tr>`);
+        let emptyMap = {
+            'theo_ke_hoach': 'Không có học phần nào thuộc diện <b>Đăng ký theo kế hoạch</b>.',
+            'ngoai_ke_hoach': 'Không có học phần nào thuộc diện <b>Đăng ký ngoài kế hoạch</b>.',
+            'gdqp_an': 'Không có học phần nào thuộc diện <b>GDQP-AN</b>.'
+        };
+        container.html(`<tr><td colspan="3" class="text-center text-muted py-5"><i class="fa-regular fa-folder-open fs-2 mb-2"></i><br>${emptyMap[currentSysRegMode]}</td></tr>`);
         return;
     }
 
-let mergedClasses = {};
-    
+    // Gom các ca học cùng Mã lớp HP
+    let mergedClasses = {};
     filteredCourses.forEach(course => {
         let rawHt = course.hinhThuc || "";
         let extractedUrl = checkAndExtractUrl(rawHt);
         let cleanHt = extractedUrl ? rawHt.replace(extractedUrl, '').trim() : rawHt.trim();
+        let cleanGhiChu = String(course.ghiChu || "").replace(/\[(nkh|gdqp|tc)\]/ig, "").trim();
 
         if (!mergedClasses[course.id]) {
             mergedClasses[course.id] = {
                 id: course.id, mon: course.mon, gv: course.gv,
                 phongList: [], thoiGianList: [], rawSchedules: [], hinhThucList: [], 
-                thoiGianPhongList: [], // Danh sách chuỗi Thứ | Tiết | Phòng
+                thoiGianPhongList: [],
                 hinhThuc: "", ngayBatDau: course.ngayBatDau, ngayKetThuc: course.ngayKetThuc,
                 ngayNgoaiLe: course.ngayNgoaiLe || "",
-                ghiChu: course.ghiChu || ""
+                ghiChu: cleanGhiChu,
+                loaiDK: course.loaiDK || ""
             };
             if (cleanHt) mergedClasses[course.id].hinhThucList.push(cleanHt);
         } else {
@@ -2105,7 +2241,6 @@ let mergedClasses = {};
             let newEnd = parseDateString(course.ngayKetThuc);
             if (newStart && (!currentStart || newStart < currentStart)) mergedClasses[course.id].ngayBatDau = course.ngayBatDau;
             if (newEnd && (!currentEnd || newEnd > currentEnd)) mergedClasses[course.id].ngayKetThuc = course.ngayKetThuc;
-            
             if (cleanHt && !mergedClasses[course.id].hinhThucList.includes(cleanHt)) {
                 mergedClasses[course.id].hinhThucList.push(cleanHt);
             }
@@ -2115,8 +2250,6 @@ let mergedClasses = {};
             ? "Thời gian tự do (VLE)" 
             : `Thứ ${course.thu} (Tiết ${course.tietBd}-${course.tietBd + course.soTiet - 1})`;
 
-        // --- ĐỊNH DẠNG: Thứ 2 | Tiết 1-3 | Phòng A.313 ---
-       // Định dạng chuẩn: Thứ 2 | Tiết 1-3 | Phòng A.313
         let isVle = (!course.thu || !course.tietBd || isNaN(course.tietBd));
         let timeRoomStr = "";
 
@@ -2127,8 +2260,6 @@ let mergedClasses = {};
             let tietEnd = parseInt(course.tietBd) + parseInt(course.soTiet || 1) - 1;
             let tietStr = `Tiết ${course.tietBd}-${tietEnd}`;
             let phongStr = course.phong ? `Phòng ${course.phong}` : "";
-
-            // Ghép lại và ngăn cách bằng dấu gạch đứng " | "
             timeRoomStr = [thuStr, tietStr, phongStr].filter(Boolean).join(' | ');
         }
 
@@ -2137,7 +2268,6 @@ let mergedClasses = {};
             mergedClasses[course.id].rawSchedules.push({ thu: course.thu, tietBd: course.tietBd, soTiet: course.soTiet });
         }
         if (!mergedClasses[course.id].phongList.includes(course.phong)) mergedClasses[course.id].phongList.push(course.phong);
-        
         if (!mergedClasses[course.id].thoiGianPhongList.includes(timeRoomStr)) {
             mergedClasses[course.id].thoiGianPhongList.push(timeRoomStr);
         }
@@ -2147,13 +2277,12 @@ let mergedClasses = {};
         let classObj = mergedClasses[id];
         let htList = classObj.hinhThucList;
         let hasNonVle = htList.some(ht => !ht.toUpperCase().includes('VLE'));
-        if (hasNonVle) {
-            htList = htList.filter(ht => !ht.toUpperCase().includes('VLE'));
-        }
+        if (hasNonVle) htList = htList.filter(ht => !ht.toUpperCase().includes('VLE'));
         classObj.hinhThuc = htList.join('<br>');
     }
+
+    // Gom các lớp cùng Tên môn học
     groupedSystemCourses = {};
-    // ...
     for (let id in mergedClasses) {
         let c = mergedClasses[id];
         let subjectName = getBaseSubjectName(c.mon); 
@@ -2163,23 +2292,21 @@ let mergedClasses = {};
         groupedSystemCourses[subjectName].classes.push(c);
     }
 
-    let html = '';
-    let globalClaimedTkbRows = []; // BẢN VÁ: Lưu vết các dòng đã được nhận diện
+    let globalClaimedTkbRows = [];
 
-    for (let key in groupedSystemCourses) {
+    // Hàm tạo HTML cho từng dòng môn học
+    const buildSubjectRowHtml = (key, borderAccent) => {
         let subject = groupedSystemCourses[key];
         let syncedCount = 0; 
         let copiedCount = 0;
 
         subject.classes.forEach(c => {
             let cleanClassId = String(c.id).trim();
-
             if (userRegisteredCourseIds.some(id => String(id).trim() === cleanClassId)) {
                 syncedCount++;
             } else {
                 let isCopied = globalTkbData.some(tkb => {
                     if (tkb.isSystem) return false;
-                    
                     let hasValidClassId = tkb.classId && String(tkb.classId).trim() !== "";
                     if (hasValidClassId) {
                         if (String(tkb.classId).trim() === cleanClassId) {
@@ -2195,13 +2322,10 @@ let mergedClasses = {};
                                 let isVle = (c.hinhThuc || '').toUpperCase().includes('VLE');
                                 let matchTime = isVle || (tkb.thu == sch.thu && tkb.tietBd == sch.tietBd && tkb.soTiet == sch.soTiet);
                                 let matchDate = (tkb.ngayBatDau === c.ngayBatDau) && (tkb.ngayKetThuc === c.ngayKetThuc);
-                                
-                                // BẢN VÁ: Không bỏ qua check Giảng viên cho VLE nữa
                                 let matchGv = true;
                                 let tkbGv = String(tkb.gv || "").replace(/-/g, '').trim().toLowerCase();
                                 let cGv = String(c.gv || "").replace(/-/g, '').trim().toLowerCase();
                                 if (cGv !== "" && tkbGv !== "" && cGv !== tkbGv) matchGv = false;
-                                
                                 if (matchTime && matchDate && matchGv) {
                                     if (!globalClaimedTkbRows.includes(tkb.sheetRowIndex)) {
                                         globalClaimedTkbRows.push(tkb.sheetRowIndex);
@@ -2222,15 +2346,58 @@ let mergedClasses = {};
         if (syncedCount > 0) badgeHtml += `<span class="badge bg-primary ms-2" title="Đã đồng bộ"><i class="fa-solid fa-link"></i> ${syncedCount}</span>`;
         if (copiedCount > 0) badgeHtml += `<span class="badge bg-success ms-2" title="Đã sao chép"><i class="fa-solid fa-copy"></i> ${copiedCount}</span>`;
 
-        html += `
+        return `
         <tr style="cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''" onclick="openSubjectDetail('${key}')">
-            <td class="text-start fw-bold text-primary align-middle" style="font-size: 15.5px; border-left: 4px solid #0f4c81;">
+            <td class="text-start fw-bold text-primary align-middle" style="font-size: 15.5px; border-left: 4px solid ${borderAccent};">
                 <i class="fa-solid fa-folder-open me-2 text-warning"></i> ${subject.displayName} ${badgeHtml}
             </td>
             <td class="text-center align-middle"><span class="badge bg-secondary" style="font-size: 13.5px;">${subject.classes.length} lớp</span></td>
             <td class="text-center align-middle"><button class="btn btn-sm btn-light border text-primary fw-bold">Xem lớp <i class="fa-solid fa-chevron-right ms-1"></i></button></td>
-        </tr>
-        `;
+        </tr>`;
+    };
+
+    let html = '';
+
+    // Nếu đang ở tab "Đăng ký theo kế hoạch" -> Tách 2 nhóm: Bắt buộc & Tự chọn
+   if (currentSysRegMode === 'theo_ke_hoach' || currentSysRegMode === 'ngoai_ke_hoach') {
+        let batBuocKeys = [];
+        let tuChonKeys = [];
+
+        for (let key in groupedSystemCourses) {
+            if (isSubjectElective(groupedSystemCourses[key].classes)) {
+                tuChonKeys.push(key);
+            } else {
+                batBuocKeys.push(key);
+            }
+        }
+
+        let bbBorder = currentSysRegMode === 'theo_ke_hoach' ? '#0f4c81' : '#f59e0b';
+        let tcBorder = currentSysRegMode === 'theo_ke_hoach' ? '#0ea5e9' : '#fb923c';
+
+        if (batBuocKeys.length > 0) {
+            html += `
+            <tr class="sys-subgroup-row sys-subgroup-bb">
+                <td colspan="3" class="text-start fw-bold py-2 px-3">
+                    <i class="fa-solid fa-bookmark me-2"></i>Bắt buộc <span class="badge rounded-pill bg-primary ms-1">${batBuocKeys.length} môn</span>
+                </td>
+            </tr>`;
+            batBuocKeys.forEach(key => { html += buildSubjectRowHtml(key, bbBorder); });
+        }
+
+        if (tuChonKeys.length > 0) {
+            html += `
+            <tr class="sys-subgroup-row sys-subgroup-tc">
+                <td colspan="3" class="text-start fw-bold py-2 px-3">
+                    <i class="fa-solid fa-list-check me-2"></i>Tự chọn <span class="badge rounded-pill bg-info text-dark ms-1">${tuChonKeys.length} môn</span>
+                </td>
+            </tr>`;
+            tuChonKeys.forEach(key => { html += buildSubjectRowHtml(key, tcBorder); });
+        }
+    } else {
+        // Tab GDQP-AN -> Hiện bình thường
+        for (let key in groupedSystemCourses) {
+            html += buildSubjectRowHtml(key, '#16a34a');
+        }
     }
     
     container.html(html);

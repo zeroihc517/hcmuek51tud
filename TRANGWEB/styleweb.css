@@ -4382,3 +4382,153 @@ body.dark-mode .custom-context-menu .ctx-divider {
         text-align: center !important;
     }
 }
+/* =========================================================
+   PHÂN LOẠI ĐĂNG KÝ THEO KẾ HOẠCH / NGOÀI KẾ HOẠCH
+   ========================================================= */
+.sys-reg-mode-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 18px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+}
+
+.sys-reg-radio-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    border-radius: 50px;
+    border: 1.5px solid #cbd5e1;
+    background: #ffffff;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.2s ease;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: #334155;
+    margin: 0;
+}
+
+.sys-reg-radio-item input[type="radio"] {
+    display: none;
+}
+
+.sys-radio-dot {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.sys-radio-dot::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #0f4c81;
+    transform: scale(0);
+    transition: transform 0.2s ease;
+}
+
+.sys-reg-radio-item:hover {
+    border-color: #0f4c81;
+    background: #eff6ff;
+}
+
+.sys-reg-radio-item.active {
+    border-color: #0f4c81;
+    background: #e8f1f8;
+    color: #0f4c81;
+    box-shadow: 0 2px 8px rgba(15, 76, 129, 0.12);
+}
+
+.sys-reg-radio-item.active .sys-radio-dot {
+    border-color: #0f4c81;
+}
+
+.sys-reg-radio-item.active .sys-radio-dot::after {
+    transform: scale(1);
+}
+
+/* Khung tiêu đề kiểu Fieldset giống hệ thống đào tạo */
+.sys-reg-fieldset {
+    position: relative;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 20px 16px 16px 16px;
+    background: #ffffff;
+    margin-top: 10px;
+}
+
+.sys-reg-legend {
+    position: absolute;
+    top: -13px;
+    left: 18px;
+    background: #ffffff;
+    padding: 0 12px;
+    font-weight: 800;
+    font-size: 15.5px;
+    color: #0f4c81;
+    letter-spacing: 0.2px;
+}
+
+/* Tương thích Dark Mode */
+body.dark-mode .sys-reg-mode-bar {
+    background: #0b0f19 !important;
+    border-color: #1e293b !important;
+}
+body.dark-mode .sys-reg-radio-item {
+    background: #131c30 !important;
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+}
+body.dark-mode .sys-reg-radio-item.active {
+    background: #172554 !important;
+    border-color: #38bdf8 !important;
+    color: #38bdf8 !important;
+}
+body.dark-mode .sys-reg-radio-item.active .sys-radio-dot {
+    border-color: #38bdf8 !important;
+}
+body.dark-mode .sys-reg-radio-item.active .sys-radio-dot::after {
+    background: #38bdf8 !important;
+}
+body.dark-mode .sys-reg-fieldset,
+body.dark-mode .sys-reg-legend {
+    background: #131c30 !important;
+    border-color: #334155 !important;
+    color: #38bdf8 !important;
+}
+/* Hàng tiêu đề phân nhóm Bắt buộc / Tự chọn trong Đồng bộ học phần */
+.sys-subgroup-row td {
+    font-size: 14.5px;
+    letter-spacing: 0.2px;
+    user-select: none;
+}
+.sys-subgroup-bb td {
+    background-color: #e8f1f8 !important;
+    color: #0f4c81 !important;
+    border-top: 2px solid #0f4c81 !important;
+}
+.sys-subgroup-tc td {
+    background-color: #ecfeff !important;
+    color: #0369a1 !important;
+    border-top: 2px solid #0ea5e9 !important;
+}
+body.dark-mode .sys-subgroup-bb td {
+    background-color: #172554 !important;
+    color: #93c5fd !important;
+}
+body.dark-mode .sys-subgroup-tc td {
+    background-color: #083344 !important;
+    color: #67e8f9 !important;
+}

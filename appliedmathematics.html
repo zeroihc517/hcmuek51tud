@@ -3921,10 +3921,11 @@
             
             <div class="modal-body p-4">
                 
-                <!-- MÀN HÌNH 1: DANH SÁCH MÔN HỌC (GOM NHÓM) -->
+              <!-- MÀN HÌNH 1: DANH SÁCH MÔN HỌC (GOM NHÓM & TÁCH THEO KẾ HOẠCH) -->
 <div id="sysScreen1">
+    <!-- Hàng 1: Bộ lọc Năm học, Học kỳ, Tìm kiếm & Làm mới -->
     <div class="row g-3 mb-3 align-items-center">
-        <div class="col-md-5">
+        <div class="col-md-3">
             <div class="select-floating-box">
                 <label>Năm học</label>
                 <select class="form-select" id="sysNamHocFilter" onchange="renderSystemCoursesList()">
@@ -3932,12 +3933,21 @@
                 </select>
             </div>
         </div>
-        <div class="col-md-5">
+        <div class="col-md-3">
             <div class="select-floating-box">
                 <label>Học kỳ</label>
                 <select class="form-select" id="sysHocKyFilter" onchange="renderSystemCoursesList()">
                     <option value="">-- Tất cả học kỳ --</option>
                 </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="select-floating-box">
+                <label>Tìm kiếm nhanh</label>
+                <input type="text" class="form-control" id="sysSearchCourseInput"
+                       placeholder="Nhập tên học phần hoặc mã lớp..."
+                       style="height: 44px; border-radius: 50px; padding-left: 18px;"
+                       oninput="renderSystemCoursesList()">
             </div>
         </div>
         <div class="col-md-2 text-end" style="padding-top: 6px;">
@@ -3948,26 +3958,57 @@
             </button>
         </div>
     </div>
-                    
-                    <div class="table-responsive border rounded" style="max-height: calc(100vh - 230px); overflow-y: auto; -webkit-overflow-scrolling: touch;">
-                        <table class="table table-hover table-bordered align-middle m-0 bg-white system-tkb-table" style="font-size: 14.5px;">
-                            <thead class="text-center" style="position: sticky; top: 0; z-index: 10;">
-                                <tr>
-                                    <th>Tên Học Phần</th>
-                                    <th style="width: 15%;">Số lớp mở</th>
-                                    <th style="width: 15%;">Thao tác</th>
-                                </tr>
-                            </thead>
-                            <tbody id="systemSubjectsContainer">
-                                <tr>
-                                    <td colspan="3" class="text-center py-5 text-muted">
-                                        <i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải dữ liệu hệ thống...
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+
+    <!-- Hàng 2: Thanh Radio chọn chế độ Đăng ký (3 mục) -->
+<div class="sys-reg-mode-bar mb-3">
+    <label class="sys-reg-radio-item active" id="lblRegModeKH">
+        <input type="radio" name="sysRegMode" id="regModeKeHoach" value="theo_ke_hoach" checked onchange="onChangeSysRegMode(this.value)">
+        <span class="sys-radio-dot"></span>
+        <span class="sys-radio-text">Đăng ký theo kế hoạch</span>
+        <span class="badge rounded-pill bg-primary ms-1" id="badgeCountKH">0</span>
+    </label>
+
+    <label class="sys-reg-radio-item" id="lblRegModeNKH">
+        <input type="radio" name="sysRegMode" id="regModeNgoaiKeHoach" value="ngoai_ke_hoach" onchange="onChangeSysRegMode(this.value)">
+        <span class="sys-radio-dot"></span>
+        <span class="sys-radio-text">Đăng ký ngoài kế hoạch</span>
+        <span class="badge rounded-pill bg-secondary ms-1" id="badgeCountNKH">0</span>
+    </label>
+
+    <label class="sys-reg-radio-item d-none" id="lblRegModeGDQP">
+    <input type="radio" name="sysRegMode" id="regModeGDQP" value="gdqp_an" onchange="onChangeSysRegMode(this.value)">
+    <span class="sys-radio-dot"></span>
+    <span class="sys-radio-text">GDQP-AN</span>
+    <span class="badge rounded-pill bg-success ms-1" id="badgeCountGDQP">0</span>
+</label>
+</div>
+
+    <!-- Hàng 3: Khung chứa bảng có tiêu đề động (Fieldset style) -->
+    <div class="sys-reg-fieldset">
+        <div class="sys-reg-legend" id="sysRegSectionTitle">
+            <i class="fa-solid fa-calendar-check me-2"></i>Đăng ký theo kế hoạch
+        </div>
+
+        <div class="table-responsive border rounded" style="max-height: calc(100vh - 320px); overflow-y: auto; -webkit-overflow-scrolling: touch;">
+            <table class="table table-hover table-bordered align-middle m-0 bg-white system-tkb-table" style="font-size: 14.5px;">
+                <thead class="text-center" style="position: sticky; top: 0; z-index: 10;">
+                    <tr>
+                        <th>Tên Học Phần</th>
+                        <th style="width: 15%;">Số lớp mở</th>
+                        <th style="width: 15%;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="systemSubjectsContainer">
+                    <tr>
+                        <td colspan="3" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i><br>Đang tải dữ liệu hệ thống...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
                 <!-- MÀN HÌNH 2: DANH SÁCH CÁC LỚP TRONG 1 MÔN -->
                 <div id="sysScreen2" class="d-none">
