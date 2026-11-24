@@ -2291,7 +2291,12 @@ if (hasMockExamCards) {
 if (instructorInfos.length > 0) { 
     let listContent = ""; 
     instructorInfos.forEach(info => { 
-        listContent += `<div class="col-12 col-md-6 mb-2 d-flex align-items-start"><i class="fa-solid fa-check text-primary mt-1 me-2"></i> <span style="font-size: 15px; font-weight: 500; color: var(--text-main);">${info}</span></div>`; 
+        let formattedInfo = formatInstructorEmailWithCopy(info);
+        listContent += `
+            <div class="col-12 col-md-6 mb-2 d-flex align-items-center">
+                <i class="fa-solid fa-check text-primary me-2 flex-shrink-0"></i> 
+                <span style="font-size: 15px; font-weight: 500; color: var(--text-main);">${formattedInfo}</span>
+            </div>`; 
     }); 
     $('#instructorListContainer').html(listContent);
     $('#instructorWrapper').removeClass('d-none'); 
@@ -8358,3 +8363,63 @@ $(document).on('change', '#selExamCourseForm', function() {
         $('#txtDatLichNoiDungKhac').addClass('d-none').val('');
     }
 });
+
+// Hàm sao chép nhanh Email Giảng viên trong danh mục học phần
+window.copyInstructorEmail = function(email, btnElement) {
+    if (!email) return;
+    const cleanEmail = email.trim();
+
+    const onCopySuccess = () => {
+        if (btnElement) {
+            const originalHTML = btnElement.innerHTML;
+            btnElement.classList.remove('btn-outline-primary');
+            btnElement.classList.add('btn-success', 'text-white');
+            btnElement.innerHTML = '<i class="fa-solid fa-check"></i> Đã chép';
+
+            setTimeout(() => {
+                btnElement.classList.remove('btn-success', 'text-white');
+                btnElement.classList.add('btn-outline-primary');
+                btnElement.innerHTML = originalHTML;
+            }, 2000);
+        }
+        // Tận dụng luôn hàm alert Toast có sẵn của hệ thống
+        alert(`Đã sao chép email: ${cleanEmail}`);
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(cleanEmail).then(onCopySuccess).catch(() => fallbackCopyText(cleanEmail, onCopySuccess));
+    } else {
+        fallbackCopyText(cleanEmail, onCopySuccess);
+    }
+};
+
+function fallbackCopyText(text, callback) {
+    const tempInput = document.createElement('input');
+    tempInput.value = text;
+    document.body.appendChild(tempInput);
+    tempInput.select();
+    document.execCommand('copy');
+    document.body.removeChild(tempInput);
+    if (callback) callback();
+}
+
+// Hàm tự động bóc tách email trong chuỗi thông tin giảng viên và gắn nút Copy
+function formatInstructorEmailWithCopy(rawHtml) {
+    if (!rawHtml) return '';
+    // Bỏ qua nếu đã có thẻ <a> để tránh trùng lặp
+    const emailRegex = /(?<!mailto:|">|\w)([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)(?![^<]*<\/a>)/gi;
+    return rawHtml.replace(emailRegex, (email) => {
+        return `
+            <span class="d-inline-flex align-items-center gap-2 flex-wrap">
+                <a href="mailto:${email}" class="text-decoration-none fw-bold" style="color: #0f4c81;" title="Gửi email">${email}</a>
+                <button type="button" 
+                        class="btn btn-sm btn-outline-primary py-0 px-2 fw-bold shadow-sm" 
+                        style="font-size: 12px; border-radius: 6px; transition: all 0.2s;" 
+                        onclick="copyInstructorEmail('${email}', this)" 
+                        title="Sao chép địa chỉ email">
+                    <i class="fa-regular fa-copy"></i> 
+                </button>
+            </span>
+        `;
+    });
+}
