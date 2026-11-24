@@ -2303,7 +2303,6 @@ function initGlobalApp() {
         }
         
         // Cập nhật huy hiệu cho ShareCode cực mượt
-        checkNewShareCodeGlobal(); 
         checkNewDatLichGlobal();
     }, 2000);
 
@@ -2338,7 +2337,6 @@ function initGlobalApp() {
 
     loadWebLinks();
     checkNewQA(); 
-    checkNewShareCodeGlobal();
 	checkNewDatLichGlobal();
     fetchAndRenderCategories();
     renderUserInfo();

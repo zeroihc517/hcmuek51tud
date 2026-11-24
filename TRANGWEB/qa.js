@@ -73,9 +73,8 @@ window.isDatLichNew = false; // THÊM MỚI
 window.isKyThiNew = false;
 
 function updateSidebarThaoLuanBadge() {
-    // 1. Huy hiệu cho thẻ Thảo Luận tổng ở thanh Sidebar
-    // Bổ sung: Có bài TEMP mới hoặc Kỳ thi mới đều báo sáng
-    if (window.isQAUnanswered || window.isShareCodeNew || window.isDatLichNew || window.isKyThiNew) {
+    // 1. Huy hiệu cho thẻ Tiện ích tổng ở thanh Sidebar (Đã bỏ window.isShareCodeNew)
+    if (window.isQAUnanswered || window.isDatLichNew || window.isKyThiNew) {
         $('#shareCodeSidebarBadge').removeClass('d-none');
     } else {
         $('#shareCodeSidebarBadge').addClass('d-none');
@@ -85,8 +84,7 @@ function updateSidebarThaoLuanBadge() {
     if (window.isQAUnanswered) { $('#qaInsideBadge').removeClass('d-none'); } 
     else { $('#qaInsideBadge').addClass('d-none'); }
     
-    // 3. Huy hiệu thẻ TEMP bên trong mục Thảo Luận
-    // Bổ sung: Báo sáng khi có bài TEMP hoặc bài Kỳ thi mới
+    // 3. Huy hiệu thẻ TEMP bên trong mục Tiện ích
     if (window.isDatLichNew || window.isKyThiNew) { 
         $('#datLichInsideBadge').removeClass('d-none'); 
     } else { 
@@ -817,27 +815,8 @@ $('#groupLinksView').addClass('d-none');
 window.pendingShareCategory = "";
 window.pendingShareLang = "";
 
-// 2. Hàm khi click vào môn học
+// 2. Hàm khi click vào môn học (Đã tắt yêu cầu nhập mật khẩu)
 window.openShareCategory = function(categoryName, lang) {
-    let activeUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-    let isAdminAcc = activeUser && (activeUser.mssv === "51.01.108.008" || activeUser.mssv === "5101108008");
-
-    if (!isAdminAcc) {
-        // Lưu tạm thông tin môn học lại
-        window.pendingShareCategory = categoryName;
-        window.pendingShareLang = lang;
-        
-        // Reset form và hiển thị Bảng Modal xịn xò
-        $('#txtCodeSpacePass').val('').removeClass('is-invalid');
-        $('#codeSpaceAuthError').addClass('d-none');
-        $('#codeSpaceAuthModal').modal('show');
-        
-        // Chờ modal mở lên xong mới tự động focus vào ô nhập chữ
-        setTimeout(() => $('#txtCodeSpacePass').focus(), 400);
-        return; // Dừng tại đây chờ người dùng nhập
-    }
-
-    // Nếu là Admin thì mở thẳng luôn, không cần hỏi
     executeOpenShareCategory(categoryName, lang);
 };
 
@@ -1109,7 +1088,9 @@ window.shareCodeList = newMyCodes.concat(newOtherCodes, oldCodes);
                     let authorCleanMssv = item.rawAuthor.replace(/\./g, "");
                     let isMyCode = (myCleanMssv !== "" && authorCleanMssv === myCleanMssv);
                     
-                    let newBadgeHtml = item.isNew ? `<span class="badge-new-qa position-absolute shadow-sm" style="top: 12px; left: 12px; z-index: 10; font-size: 11px;">Mới</span>` : '';
+                    let newBadgeHtml = item.isNew 
+    ? `<span class="badge-new-qa position-absolute shadow-sm" style="top: 12px; left: 12px; z-index: 10; padding: 2px 8px;">Mới</span>` 
+    : '';
                     
                     // Thêm nhãn "Của bạn" vào góc phải
                     let myBadgeHtml = isMyCode 
