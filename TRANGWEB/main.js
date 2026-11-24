@@ -6123,17 +6123,16 @@ window.datLichCache = [];
 window.currentDatLichMode = 'all'; // Biến theo dõi đang mở chế độ nào
 
 window.loadDatLichHenView = function() {
-    window.currentDatLichMode = 'temp'; // Chỉ dùng 1 mode duy nhất
+    window.currentDatLichMode = 'kythi';
     resetNavActive(); 
     $('#datLichSection').removeClass('d-none');
     
-    document.title = "TEMP | Học nhóm APMA Khoa Toán";
+    document.title = "Phòng thi & Kiểm tra | Học nhóm APMA Khoa Toán";
     $('#btnNavShareCode').addClass('active');
-    $('#datLichPageTitle').html('<i class="fa-solid fa-calendar-check"></i> TEMP & Kỳ thi');
+    $('#datLichPageTitle').html('<i class="fa-solid fa-file-signature text-danger"></i> Phòng thi & Kiểm tra');
     
-    if (typeof window.setDetailedView === 'function') window.setDetailedView("Tiện ích - TEMP");
-    updateSystemUrl('view', 'temp'); 
-    $('#filterDatLichNoiDung').removeClass('d-none').val(''); // Hiện đầy đủ bộ lọc
+    if (typeof window.setDetailedView === 'function') window.setDetailedView("Tiện ích - Kỳ thi");
+    updateSystemUrl('view', 'temp');
 
     if(window.innerWidth < 992) { sidebar.classList.remove('show'); overlay.classList.remove('show'); }
     
@@ -6141,9 +6140,54 @@ window.loadDatLichHenView = function() {
     loadDatLichData();
 };
 
-// 2. Tải dữ liệu từ Google Sheets
+function populateExamCourseFormSelect() {
+    let sel = $('#selExamCourseForm');
+    if (!sel.length) return;
+    let html = '';
+    if (typeof SYSTEM_COURSE_DATABASE !== 'undefined') {
+        let uniqueCourses = [...new Set(SYSTEM_COURSE_DATABASE.map(c => c.name.trim()))].sort();
+        uniqueCourses.forEach(name => {
+            html += `<option value="${name}">${name}</option>`;
+        });
+    }
+    html += `<option value="KHAC">-- Học phần / Chủ đề khác --</option>`;
+    sel.html(html);
+}
+
+window.toggleExamCourseOther = function() {
+    if ($('#selExamCourseForm').val() === 'KHAC') {
+        $('#txtDatLichNoiDungKhac').removeClass('d-none').focus();
+    } else {
+        $('#txtDatLichNoiDungKhac').addClass('d-none').val('');
+    }
+};
+
+window.currentExamStatusFilter = 'all';
+
+// 1. Đổ danh sách học phần vào ô lọc #filterExamCourse
+function populateExamCourseFilter() {
+    let select = $('#filterExamCourse');
+    if (!select.length) return;
+    let html = '<option value="">-- Tất cả học phần / Nội dung --</option>';
+    
+    if (typeof SYSTEM_COURSE_DATABASE !== 'undefined') {
+        let uniqueCourses = [...new Set(SYSTEM_COURSE_DATABASE.map(c => c.name.trim()))].sort();
+        uniqueCourses.forEach(name => {
+            html += `<option value="${name}">${name}</option>`;
+        });
+    }
+    select.html(html);
+}
+
+// 2. Tải dữ liệu từ Google Sheets (giữ nguyên API cũ)
 function loadDatLichData() {
-    $('#datLichTableBody').html('<tr><td colspan="3" class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin fs-2 mb-2"></i><br>Đang tải danh sách...</td></tr>');
+    populateExamCourseFilter();
+    $('#examCardsGrid').html(`
+        <div class="col-12 text-center py-5 text-muted">
+            <i class="fa-solid fa-spinner fa-spin fs-2 mb-2 text-primary"></i><br>
+            Đang tải danh sách kỳ thi...
+        </div>
+    `);
     
     $.ajax({
         url: SCRIPT_URL + "?action=getDatLichHenData",
@@ -6154,101 +6198,176 @@ function loadDatLichData() {
             renderDatLichTable();
         },
         error: function() {
-            $('#datLichTableBody').html('<tr><td colspan="3" class="text-center text-danger py-5"><i class="fa-solid fa-triangle-exclamation fs-3 mb-2"></i><br>Không thể tải dữ liệu!</td></tr>');
+            $('#examCardsGrid').html(`
+                <div class="col-12 text-center text-danger py-5">
+                    <i class="fa-solid fa-triangle-exclamation fs-3 mb-2"></i><br>
+                    Không thể tải dữ liệu!
+                </div>
+            `);
         }
     });
 }
 
-window.toggleDatLichKhac = function() {
-    let val = $('#selDatLichNoiDung').val();
-    if (val === 'Khác') {
-        $('#txtDatLichNoiDungKhac').removeClass('d-none').focus().attr('placeholder', 'Ghi rõ nội dung...');
-    } else if (val === 'Kỳ thi') {
-        $('#txtDatLichNoiDungKhac').removeClass('d-none').focus().attr('placeholder', 'Nhập tên học phần (VD: Đại số tuyến tính)...');
-    } else {
-        $('#txtDatLichNoiDungKhac').addClass('d-none').val('');
-    }
+// 3. Chuyển tab trạng thái (Tất cả / Đang diễn ra / Sắp tới / Luyện lại)
+window.filterExamStatus = function(status, btnEl) {
+    window.currentExamStatusFilter = status;
+    $('.exam-tab-btn').removeClass('active');
+    if (btnEl) $(btnEl).addClass('active');
+    renderExamCards();
 };
 
-// Cập nhật hàm Render Bảng
-function renderDatLichTable() {
-    let tbody = $('#datLichTableBody');
-    let data = window.datLichCache;
+// 4. Hàm nhận diện trạng thái dựa trên tiêu đề (tương thích dữ liệu cũ)
+function detectExamStatus(item) {
+    let t = (item.title || "").toLowerCase();
+    if (t.includes("sắp diễn ra") || t.includes("sắp mở") || t.includes("chưa mở")) return 'upcoming';
+    if (t.includes("đã kết thúc") || t.includes("luyện lại") || t.includes("ôn tập")) return 'ended';
+    return 'live'; // Mặc định là Đang diễn ra
+}
 
-    if (!data || data.length === 0) {
-        tbody.html('<tr><td colspan="4" class="text-center py-5 text-muted"><i class="fa-regular fa-calendar-xmark fs-2 mb-2"></i><br>Chưa có bài đăng nào.</td></tr>');
+// 5. Render danh sách thẻ vào #examCardsGrid
+function renderDatLichTable() {
+    renderExamCards();
+}
+
+window.renderExamCards = function() {
+    let grid = $('#examCardsGrid');
+    let data = window.datLichCache || [];
+
+    // Đếm số lượng cho từng tab trạng thái
+    let cntAll = data.length, cntLive = 0, cntUpcoming = 0, cntEnded = 0;
+    data.forEach(item => {
+        let st = detectExamStatus(item);
+        if (st === 'live') cntLive++;
+        else if (st === 'upcoming') cntUpcoming++;
+        else cntEnded++;
+    });
+    $('#cntExamAll').text(cntAll);
+    $('#cntExamLive').text(cntLive);
+    $('#cntExamUpcoming').text(cntUpcoming);
+    $('#cntExamEnded').text(cntEnded);
+
+    // Lọc theo Tab, Học phần và Từ khóa tìm kiếm
+    let statusFilter = window.currentExamStatusFilter || 'all';
+    let courseFilter = ($('#filterExamCourse').val() || '').toLowerCase().trim();
+    let keyword = ($('#txtSearchExam').val() || '').toLowerCase().trim();
+
+    let filtered = data.map((item, idx) => ({ item, originalIndex: idx })).filter(({ item }) => {
+        let st = detectExamStatus(item);
+        let noiDung = (item.noiDung || "").toLowerCase();
+        let title = (item.title || "").toLowerCase();
+        let author = (item.authorName || "").toLowerCase();
+
+        let matchStatus = (statusFilter === 'all' || st === statusFilter);
+        let matchCourse = (courseFilter === '' || noiDung.includes(courseFilter) || title.includes(courseFilter));
+        let matchKeyword = (keyword === '' || title.includes(keyword) || noiDung.includes(keyword) || author.includes(keyword));
+
+        return matchStatus && matchCourse && matchKeyword;
+    });
+
+    if (filtered.length === 0) {
+        grid.html(`
+            <div class="col-12 text-center py-5 text-muted bg-white rounded-4 border">
+                <i class="fa-regular fa-folder-open fs-1 mb-2 opacity-50"></i><br>
+                Chưa có kỳ thi / bài đăng nào phù hợp.
+            </div>
+        `);
         return;
     }
 
     let html = '';
-    data.forEach((item, index) => {
-        let isOwnerOrAdmin = isAdmin || (currentUser && currentUser.mssv && (currentUser.mssv === item.mssv || currentUser.mssv === "51.01.108.008"));
-        
-        let actionButtons = '';
-        if (isOwnerOrAdmin) {
-            actionButtons = `
-                <button class="btn btn-sm btn-outline-warning py-1 px-3 fw-bold me-1" onclick="editDatLichPost(${index})"><i class="fa-solid fa-pen me-1"></i>Sửa</button>
-                <button class="btn btn-sm btn-outline-danger py-1 px-3 fw-bold" onclick="deleteDatLichPost('${item.rowIndex}')"><i class="fa-solid fa-trash me-1"></i>Xóa</button>
-            `;
-        } else {
-            actionButtons = `<span class="badge bg-light text-muted border"><i class="fa-solid fa-lock me-1"></i>Khóa</span>`;
-        }
+    filtered.forEach(({ item, originalIndex }) => {
+        let st = detectExamStatus(item);
+        let noiDung = item.noiDung || "Kỳ thi";
+        let isKyThi = noiDung.startsWith('Kỳ thi');
+        let courseLabel = noiDung.startsWith('Kỳ thi - ') ? noiDung.substring(9) : noiDung;
 
-        let shortAuthorName = getNaturalShortName(item.authorName);
-        let timeHtml = item.updateTime ? `<div class="text-muted small mt-1"><i class="fa-solid fa-clock-rotate-left me-1"></i>Cập nhật: ${item.updateTime}</div>` : '';
-        let noiDung = item.noiDung || "Đặt lịch hẹn";
-
-        // Xử lý an toàn tiêu đề
+        // Badge trạng thái & nút hành động
+        let statusBadge = '', actionMainBtn = '';
         let safeTitle = (item.title || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
-        
-        // --- PHÂN LOẠI CÁCH MỞ LINK DỰA VÀO CHẾ ĐỘ HIỆN TẠI ---
-        let safeNoiDung = (noiDung || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
-        let linkHtml = '';
-        
-        if (noiDung.startsWith('Kỳ thi')) {
-            // Mở Iframe và đổi icon thành màn hình
-            linkHtml = `<a href="javascript:void(0)" onclick="if(typeof setDetailedView === 'function') setDetailedView('${safeNoiDung} - ${safeTitle}'); openDocumentViewer('${item.url}', '${safeTitle}');" class="fw-bold text-decoration-none fs-6" style="color: #0f4c81;" title="Bấm để làm bài">
-                <i class="fa-solid fa-desktop me-2" style="font-size: 13px;"></i>${item.title}
-            </a>`;
+        let safeNoiDung = noiDung.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+
+        let openClickAction = isKyThi
+            ? `if(typeof setDetailedView === 'function') setDetailedView('${safeNoiDung} - ${safeTitle}'); openDocumentViewer('${item.url}', '${safeTitle}');`
+            : `if(typeof setDetailedView === 'function') setDetailedView('TEMP - ${safeNoiDung} - ${safeTitle}'); window.open('${item.url}', '_blank');`;
+
+        if (st === 'live') {
+            statusBadge = `<span class="exam-badge-live"><i class="fa-solid fa-circle fa-beat me-1" style="font-size: 8px;"></i> ĐANG DIỄN RA</span>`;
+            actionMainBtn = `<button class="btn btn-sm text-white fw-bold px-3 rounded-pill shadow-sm" style="background: linear-gradient(135deg, #e61d4a, #be123c);" onclick="${openClickAction}"><i class="fa-solid fa-play me-1"></i> ${isKyThi ? 'Vào thi ngay' : 'Mở ngay'}</button>`;
+        } else if (st === 'upcoming') {
+            statusBadge = `<span class="badge rounded-pill bg-warning text-dark px-3 py-1"><i class="fa-solid fa-hourglass-half me-1"></i> SẮP DIỄN RA</span>`;
+            actionMainBtn = `<button class="btn btn-sm btn-secondary fw-bold px-3 rounded-pill" disabled><i class="fa-solid fa-lock me-1"></i> Chưa mở</button>`;
         } else {
-            // Mở Tab Mới và đổi icon thành mở link
-            linkHtml = `<a href="${item.url}" target="_blank" onclick="if(typeof setDetailedView === 'function') setDetailedView('TEMP - ${safeNoiDung} - ${safeTitle}');" class="fw-bold text-decoration-none fs-6" style="color: #0f4c81;" title="Bấm để mở liên kết">
-                <i class="fa-solid fa-arrow-up-right-from-square me-2" style="font-size: 13px;"></i>${item.title}
-            </a>`;
+            statusBadge = `<span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-3 py-1"><i class="fa-solid fa-rotate-left me-1"></i> LUYỆN LẠI</span>`;
+            actionMainBtn = `<button class="btn btn-sm text-white fw-bold px-3 rounded-pill shadow-sm" style="background: #0f4c81;" onclick="${openClickAction}"><i class="fa-solid fa-book-open me-1"></i> Xem lại</button>`;
         }
+
+        // Quyền Sửa / Xóa
+        let isOwnerOrAdmin = isAdmin || (currentUser && currentUser.mssv && (currentUser.mssv === item.mssv || currentUser.mssv === "51.01.108.008"));
+        let ownerBtns = isOwnerOrAdmin ? `
+            <button class="btn btn-sm btn-outline-warning rounded-circle" style="width:32px; height:32px;" title="Sửa" onclick="editDatLichPost(${originalIndex})"><i class="fa-solid fa-pen"></i></button>
+            <button class="btn btn-sm btn-outline-danger rounded-circle" style="width:32px; height:32px;" title="Xóa" onclick="deleteDatLichPost('${item.rowIndex}')"><i class="fa-solid fa-trash"></i></button>
+        ` : '';
+
+        let shortAuthor = getNaturalShortName(item.authorName);
 
         html += `
-        <tr>
-            <td style="padding-left: 20px;">
-                ${linkHtml}
-                ${timeHtml}
-            </td>
-            <td>
-                <span class="badge bg-light text-dark border border-secondary" style="font-size: 12.5px;"><i class="fa-solid fa-tag me-1 text-primary"></i> ${noiDung}</span>
-            </td>
-            <td>
-                <span class="fw-bold text-dark">${shortAuthorName}</span>
-                <span class="text-muted small ms-1">(${maskMSSV(item.mssv)})</span>
-            </td>
-            <td class="text-center">${actionButtons}</td>
-        </tr>`;
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="exam-card-modern status-${st} h-100 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    ${statusBadge}
+                    <span class="badge rounded-pill" style="background: #e0f2fe; color: #0f4c81; font-size: 11.5px;">
+                        ${isKyThi ? 'Phòng thi' : 'Liên kết'}
+                    </span>
+                </div>
+
+                <div class="exam-course-tag mb-1">
+                    <i class="fa-solid fa-book-open me-1"></i> ${courseLabel}
+                </div>
+                <h5 class="exam-card-title mb-3">${item.title}</h5>
+
+                <div class="exam-meta-grid mb-3">
+                    <div class="exam-meta-item">
+                        <i class="fa-solid fa-clock-rotate-left text-primary"></i>
+                        <span>Cập nhật: <strong>${item.updateTime || 'Gần đây'}</strong></span>
+                    </div>
+                    <div class="exam-meta-item">
+                        <i class="fa-solid fa-desktop text-danger"></i>
+                        <span>Hình thức: <strong>${isKyThi ? 'Làm trực tiếp (Iframe)' : 'Mở liên kết ngoài'}</strong></span>
+                    </div>
+                </div>
+
+                <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center gap-2">
+                    <small class="text-muted fw-semibold">
+                        <i class="fa-solid fa-user-pen me-1"></i> ${shortAuthor}
+                    </small>
+                    <div class="d-flex gap-1 align-items-center">
+                        ${ownerBtns}
+                        ${actionMainBtn}
+                    </div>
+                </div>
+            </div>
+        </div>`;
     });
-    tbody.html(html);
-	searchDatLich();
-}
+
+    grid.html(html);
+};
+
+// Giữ lại hàm cũ để tránh lỗi nếu chỗ khác có gọi
+window.searchDatLich = function() {
+    renderExamCards();
+};
+
 function openFormDatLich() {
     if (!currentUser || currentUser.isGuest) {
-        alert("Vui lòng đăng nhập để tạo bài đăng!");
+        alert("Vui lòng đăng nhập để tạo kỳ thi!");
         return;
     }
+    populateExamCourseFormSelect();
     $('#datLichRowIndex, #txtDatLichTen, #txtDatLichUrl, #txtDatLichNoiDungKhac').val('');
-
-    $('#selDatLichNoiDung').removeClass('d-none').val('Đặt lịch hẹn');
-    $('#selDatLichNoiDung option[value="Kỳ thi"]').show(); // Cho phép chọn Kỳ thi
+    $('#selExamStatusForm').val('live');
     $('#txtDatLichNoiDungKhac').addClass('d-none');
-    $('#selDatLichNoiDung').prev('label').html('Nội dung <span class="text-danger">*</span>');
 
-    $('#formDatLichTitle').html('<i class="fa-solid fa-plus me-2"></i>Tạo bài đăng mới');
+    $('#formDatLichTitle').html('<i class="fa-solid fa-file-circle-plus me-2"></i>Tạo kỳ thi mới');
     $('#formDatLichArea').removeClass('d-none');
     $('html, body').animate({ scrollTop: $('#formDatLichArea').offset().top - 80 }, 300);
 }
@@ -6262,53 +6381,60 @@ function editDatLichPost(index) {
     let item = window.datLichCache[index];
     if (!item) return;
 
+    populateExamCourseFormSelect();
     $('#datLichRowIndex').val(item.rowIndex);
-    $('#txtDatLichTen').val(item.title);
     $('#txtDatLichUrl').val(item.url);
 
-    let nd = item.noiDung || "Đặt lịch hẹn";
+    // Tách trạng thái ra khỏi tiêu đề khi đổ lại vào form sửa
+    let rawTitle = item.title || "";
+    let statusVal = detectExamStatus(item);
+    let cleanTitle = rawTitle.replace(/^\[(Sắp diễn ra|Luyện lại)\]\s*/i, '').trim();
+    $('#txtDatLichTen').val(cleanTitle);
+    $('#selExamStatusForm').val(statusVal);
 
-    $('#selDatLichNoiDung').removeClass('d-none');
-    $('#selDatLichNoiDung option[value="Kỳ thi"]').show();
-    $('#selDatLichNoiDung').prev('label').html('Nội dung <span class="text-danger">*</span>');
+    // Đổ học phần
+    let nd = item.noiDung || "";
+    let tenHP = nd.startsWith('Kỳ thi - ') ? nd.substring(9).trim() : nd.trim();
+    let hasOption = $(`#selExamCourseForm option[value="${tenHP.replace(/"/g, '\\"')}"]`).length > 0;
 
-    let defaultOptions = ["Kỳ thi", "Đặt lịch hẹn", "Chia sẻ Minh Chứng Rèn luyện", "Chia sẻ Hoạt động Rèn luyện"];
-    
-    if (nd.startsWith('Kỳ thi')) {
-        $('#selDatLichNoiDung').val('Kỳ thi');
-        let tenHP = nd.startsWith('Kỳ thi - ') ? nd.substring(9) : '';
-        $('#txtDatLichNoiDungKhac').removeClass('d-none').val(tenHP).attr('placeholder', 'Nhập tên học phần (VD: Đại số tuyến tính)...');
-    } else if (defaultOptions.includes(nd)) {
-        $('#selDatLichNoiDung').val(nd);
+    if (hasOption) {
+        $('#selExamCourseForm').val(tenHP);
         $('#txtDatLichNoiDungKhac').addClass('d-none').val('');
     } else {
-        $('#selDatLichNoiDung').val('Khác');
-        $('#txtDatLichNoiDungKhac').removeClass('d-none').val(nd).attr('placeholder', 'Ghi rõ nội dung...');
+        $('#selExamCourseForm').val('KHAC');
+        $('#txtDatLichNoiDungKhac').removeClass('d-none').val(tenHP);
     }
 
-    $('#formDatLichTitle').html('<i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa bài đăng');
+    $('#formDatLichTitle').html('<i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa kỳ thi');
     $('#formDatLichArea').removeClass('d-none');
     $('html, body').animate({ scrollTop: $('#formDatLichArea').offset().top - 80 }, 300);
 }
+
 function saveDatLichPost() {
     let rowIndex = $('#datLichRowIndex').val().trim();
-    let title = $('#txtDatLichTen').val().trim();
+    let rawTitle = $('#txtDatLichTen').val().trim();
     let url = $('#txtDatLichUrl').val().trim();
+    let statusVal = $('#selExamStatusForm').val();
     
-    let noiDung = $('#selDatLichNoiDung').val();
-    if (noiDung === 'Kỳ thi') {
-        let tenHP = $('#txtDatLichNoiDungKhac').val().trim();
-        if (!tenHP) { alert("Vui lòng nhập Tên học phần!"); $('#txtDatLichNoiDungKhac').focus(); return; }
-        noiDung = "Kỳ thi - " + tenHP;
-    } else if (noiDung === 'Khác') {
-        noiDung = $('#txtDatLichNoiDungKhac').val().trim();
-        if (!noiDung) { alert("Vui lòng ghi rõ nội dung khác!"); $('#txtDatLichNoiDungKhac').focus(); return; }
-    }
+    let selectedCourse = $('#selExamCourseForm').val();
+    let tenHP = (selectedCourse === 'KHAC') ? $('#txtDatLichNoiDungKhac').val().trim() : selectedCourse;
 
-    if (!title || !url) { alert("Vui lòng nhập đầy đủ Tên bài đăng và URL!"); return; }
+    if (!rawTitle || !url || !tenHP) {
+        alert("Vui lòng nhập đầy đủ Tên kỳ thi, Học phần và Đường dẫn đề thi!");
+        return;
+    }
     if (!url.match(/^https?:\/\//i)) url = 'https://' + url;
 
-    // ... Giữ nguyên phần còn lại của hàm gửi API ...
+    // Gắn nhãn trạng thái để đồng bộ với 3 tab lọc mà không cần thêm cột trên Sheet
+    let finalTitle = rawTitle;
+    if (statusVal === 'upcoming' && !rawTitle.toLowerCase().includes('sắp diễn ra')) {
+        finalTitle = `[Sắp diễn ra] ${rawTitle}`;
+    } else if (statusVal === 'ended' && !rawTitle.toLowerCase().includes('luyện lại')) {
+        finalTitle = `[Luyện lại] ${rawTitle}`;
+    }
+
+    let noiDung = "Kỳ thi - " + tenHP;
+
     let btn = $('#btnSaveDatLich');
     let originalText = btn.html();
     btn.html('<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang lưu...').prop('disabled', true);
@@ -6317,7 +6443,7 @@ function saveDatLichPost() {
     let payload = {
         action: isEdit ? "editDatLichHen" : "addDatLichHen",
         rowIndex: rowIndex, mssv: currentUser.mssv, authorName: currentUser.name,
-        title: title, url: url, noiDung: noiDung
+        title: finalTitle, url: url, noiDung: noiDung
     };
 
     postToGAS(payload, function(res) {
@@ -6330,6 +6456,7 @@ function saveDatLichPost() {
         btn.html(originalText).prop('disabled', false);
     });
 }
+
 // 6. Xóa bài đăng
 function deleteDatLichPost(rowIndex) {
     if (!confirm("Bạn có chắc chắn muốn xóa bài đăng lịch hẹn này không?")) return;

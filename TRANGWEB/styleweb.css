@@ -4758,3 +4758,106 @@ body.dark-mode .sys-subgroup-tc td {
 
 .notice-chat-edit-btn { color: #f59e0b; }
 .notice-chat-del-btn { color: #ef4444; }
+
+/* ==========================================
+   GIAO DIỆN PHÒNG THI TRỰC TUYẾN (EXAM HUB)
+   ========================================== */
+.exam-tab-btn {
+    background: #f1f5f9;
+    color: #475569;
+    font-weight: 700;
+    font-size: 13.5px;
+    border-radius: 50px;
+    padding: 7px 16px;
+    border: 1.5px solid transparent;
+    transition: all 0.2s ease;
+}
+.exam-tab-btn:hover {
+    background: #e2e8f0;
+    color: #0f4c81;
+}
+.exam-tab-btn.active {
+    background: #0f4c81 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(15, 76, 129, 0.2);
+}
+
+.exam-card-modern {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 14px rgba(15, 76, 129, 0.04);
+}
+.exam-card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 26px rgba(15, 76, 129, 0.12);
+}
+
+/* Viền nhấn theo trạng thái */
+.exam-card-modern.status-live { border-top: 4px solid #e61d4a; }
+.exam-card-modern.status-upcoming { border-top: 4px solid #f59e0b; }
+.exam-card-modern.status-ended { border-top: 4px solid #10b981; }
+
+.exam-badge-live {
+    display: inline-flex;
+    align-items: center;
+    background: #fff1f2;
+    color: #e61d4a;
+    border: 1px solid #fecdd3;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 50px;
+    letter-spacing: 0.4px;
+}
+
+.exam-course-tag {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #0f4c81;
+}
+.exam-card-title {
+    font-size: 16.5px;
+    font-weight: 800;
+    color: #1e293b;
+    line-height: 1.4;
+}
+
+.exam-meta-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px dashed #cbd5e1;
+    font-size: 13.5px;
+    color: #475569;
+}
+.exam-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.exam-meta-item i { width: 16px; text-align: center; }
+
+/* Tương thích Dark Mode */
+body.dark-mode .exam-toolbar,
+body.dark-mode .exam-card-modern {
+    background: #131c30 !important;
+    border-color: #1e293b !important;
+}
+body.dark-mode .exam-card-title { color: #f8fafc !important; }
+body.dark-mode .exam-course-tag { color: #38bdf8 !important; }
+body.dark-mode .exam-meta-grid {
+    background: #0b0f19 !important;
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+}
+body.dark-mode .exam-tab-btn {
+    background: #1e293b;
+    color: #cbd5e1;
+}

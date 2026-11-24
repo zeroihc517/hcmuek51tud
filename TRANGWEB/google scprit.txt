@@ -880,7 +880,8 @@ function getChatMessages() {
   if (!sheet || sheet.getLastRow() <= 1) return [];
   
   var lastRow = sheet.getLastRow();
-  var startRow = Math.max(2, lastRow - 50); 
+  // Chỉ lấy tối đa 10 tin nhắn mới nhất
+  var startRow = Math.max(2, lastRow - 9); 
   var numRows = lastRow - startRow + 1;
   
   var data = sheet.getRange(startRow, 1, numRows, 4).getDisplayValues();
@@ -898,6 +899,21 @@ function getChatMessages() {
   return result;
 }
 
+function deleteChatMessage(rowIndex, mssv) {
+  var sheet = ss.getSheetByName("ChatHistory");
+  if (!sheet) return "Lỗi: Không tìm thấy dữ liệu.";
+  var row = Number(rowIndex); 
+  var savedMssv = String(sheet.getRange(row, 2).getValue()).trim();
+  var reqMssv = String(mssv).trim();
+  
+  // Chính chủ hoặc Admin mới được xóa
+  if (savedMssv !== reqMssv && reqMssv !== "51.01.108.008" && reqMssv !== "5101108008") {
+    return "Lỗi: Bạn không có quyền xóa tin nhắn này.";
+  }
+  sheet.deleteRow(row);
+  return "Đã xóa tin nhắn.";
+}
+
 function editChatMessage(rowIndex, mssv, newMessage) {
   var sheet = ss.getSheetByName("ChatHistory");
   if (!sheet) return "Lỗi: Không tìm thấy dữ liệu.";
@@ -908,15 +924,7 @@ function editChatMessage(rowIndex, mssv, newMessage) {
   return "Đã cập nhật tin nhắn.";
 }
 
-function deleteChatMessage(rowIndex, mssv) {
-  var sheet = ss.getSheetByName("ChatHistory");
-  if (!sheet) return "Lỗi: Không tìm thấy dữ liệu.";
-  var row = Number(rowIndex); 
-  var savedMssv = sheet.getRange(row, 2).getValue();
-  if (String(savedMssv).trim() !== String(mssv).trim()) return "Lỗi: Bạn không có quyền xóa tin nhắn này.";
-  sheet.deleteRow(row);
-  return "Đã xóa tin nhắn.";
-}
+
 
 // ==========================================
 // CÁC HÀM GET DỮ LIỆU & QUẢN LÝ (WEB/HỌC PHẦN/QA)
