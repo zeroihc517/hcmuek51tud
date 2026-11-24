@@ -7797,7 +7797,7 @@ function getCourseHubMeta(courseName) {
     else if (lower.includes('phương trình vi phân')) { icon = 'fa-wave-square'; code = 'MATH1817'; }
     else if (lower.includes('trí tuệ nhân tạo')) { icon = 'fa-brain'; code = 'COMP1314'; }
     else if (lower.includes('hồ chí minh') ) { icon = 'fa-landmark'; code = 'POLI2005'; }
- else if (lower.includes('lịch sử đẳng') ) { icon = 'fa-landmark'; code = 'POLI2006'; }
+ else if (lower.includes('lịch sử đảng') ) { icon = 'fa-landmark'; code = 'POLI2006'; }
 
     else if (lower.includes('quốc phòng')) { icon = 'fa-shield-halved'; code = 'MILI'; }
     else if (lower.includes('năm 1')) { icon = 'fa-folder-tree'; code = 'YEAR 1'; }
