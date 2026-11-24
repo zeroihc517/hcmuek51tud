@@ -433,7 +433,7 @@ function renderSidebarCategories() {
         let lowerName = name.trim().toLowerCase();
         
         // Bỏ qua các sheet dữ liệu hệ thống ẩn
-if (lowerName === 'deadlines_admin' || lowerName === 'deadlines_status' || lowerName === 'tkb_admin' || lowerName === 'khaosat' || lowerName === 'weblinks_personal' || lowerName === 'registrationhistory' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'datlichhen' || lowerName === 'learningdata' || lowerName === 'groupstudybooking'  || lowerName === 'gpa_data'  || lowerName === 'mastertkbassignees' || lowerName === 'exercisequestions' || lowerName === 'sharecode' || lowerName === 'renLuyen_data' || lowerName === 'grouplinks' || lowerName === 'renluyen_data' || lowerName === 'exercise_status' || lowerName === 'privatemessages' ) return;
+if (lowerName === 'deadlines_admin' || lowerName === 'deadlines_status' || lowerName === 'tkb_admin' || lowerName === 'khaosat' || lowerName === 'weblinks_personal' || lowerName === 'userregisteredcourses' || lowerName === 'mastertkb' || lowerName === 'datlichhen' || lowerName === 'learningdata' || lowerName === 'groupstudybooking'  || lowerName === 'gpa_data'  || lowerName === 'mastertkbassignees' || lowerName === 'exercisequestions' || lowerName === 'sharecode' || lowerName === 'renLuyen_data' || lowerName === 'grouplinks' || lowerName === 'renluyen_data' || lowerName === 'exercise_status' || lowerName === 'privatemessages' || lowerName === 'chathistory'  || lowerName === 'mastertkbassignees' ) return;
 
 
         if (lowerName !== 'thông báo') {
@@ -774,7 +774,9 @@ $.ajax({
             currentSheetTotalRows = data.length;
 window.currentSubjectData = data;
            if (sheetName.toLowerCase() === 'thông báo') {
+			   
  let mainHtml = `
+
 <div class="tb-list-container shadow-sm mb-4 bg-white">
     <div class="tb-header-blue">
         <div class="d-flex align-items-center"><i class="fa-solid fa-globe me-2"></i> Tin tức - Thông báo mới</div>
@@ -811,6 +813,7 @@ window.currentSubjectData = data;
         </div>
     </div>
 </div>`;
+
 
     let detailData = [];
     let heThongItemsHtml = '';
@@ -1566,6 +1569,7 @@ if (heThongItemsHtml === '') {
 renderThongBaoPage('HocThuat', 1);
 renderThongBaoPage('RenLuyen', 1);
 renderDeadlinesOnNoticePage();
+initNoticePublicChat();
 applyKaTeX('customViewWrapper');
 $('#loadingStatus').addClass('d-none');
 let urlTb = urlParamsTemp.get('tb');
@@ -2336,6 +2340,19 @@ function initGlobalApp() {
     }
 
     loadWebLinks();
+// Tải ngầm trước 10 tin nhắn chat chung ngay khi mở web
+$.ajax({
+    url: SCRIPT_URL + "?action=getChatMessages&_=" + Date.now(),
+    method: "GET",
+    dataType: "json",
+    success: function(data) {
+        if (Array.isArray(data)) {
+            let latestTen = data.slice(-10);
+            try { localStorage.setItem('notice_chat_cache', JSON.stringify(latestTen)); } catch (e) {}
+            if ($('#noticeChatMessages').length) renderNoticeChatList(latestTen, true);
+        }
+    }
+});
     checkNewQA(); 
 	checkNewDatLichGlobal();
     fetchAndRenderCategories();
@@ -4911,6 +4928,7 @@ function quickMarkDone(sheetRowIndex, event) {
         });
     } else {
         renderDeadlinesOnNoticePage();
+		
     }
 }
 // Ghi đè hàm tải dữ liệu Link
@@ -7664,7 +7682,7 @@ window.renderCourseHubCards = function() {
 
     (globalCategories || []).forEach((name) => {
         let lowerName = name.trim().toLowerCase();
-        if (['thông báo', 'deadlines_admin', 'deadlines_status', 'tkb_admin', 'khaosat', 'weblinks_personal', 'registrationhistory', 'userregisteredcourses', 'mastertkb', 'datlichhen', 'learningdata', 'groupstudybooking', 'gpa_data', 'exercisequestions', 'sharecode', 'renluyen_data', 'grouplinks', 'exercise_status', 'privatemessages'].includes(lowerName)) {
+        if (['thông báo', 'deadlines_admin', 'deadlines_status', 'tkb_admin', 'khaosat', 'weblinks_personal', 'registrationhistory', 'userregisteredcourses', 'mastertkb', 'datlichhen', 'learningdata', 'groupstudybooking', 'gpa_data', 'exercisequestions', 'sharecode', 'renluyen_data', 'grouplinks', 'exercise_status', , 'chathistory', 'mastertkbassignees', 'privatemessages'].includes(lowerName)) {
             return;
         }
         if ((lowerName === 'users' || lowerName === 'cauhinhhocky') && !isAdmin) return;
@@ -7840,3 +7858,297 @@ loadDataByHocPhan = function(sheetName, element) {
         $('#btnBackToCourseHub').addClass('d-none').removeClass('d-inline-flex');
     }
 };
+
+// =========================================================
+// KHUNG CHAT CHUNG TRANG THÔNG BÁO (TỐI ĐA 10 TIN MỚI NHẤT)
+// =========================================================
+window.noticeChatPollInterval = null;
+window.lastNoticeChatHash = "";
+
+const NOTICE_CHAT_EMOJIS = [
+    // Cảm xúc vui
+    '😀','😁','😂','🤣','😊','🥰','😍','😎',
+    '🤩','🤔','🤨','😮','😱','😭','😤','🤬',
+    '😴','🤯','🥳','🥺','🤡','👻','💀','🫡',
+    // Cử chỉ & Phản hồi
+    '👍','👎','👏','🙏','🤝','💪','✌️','👌',
+    '❤️','🔥','✨','🎉','💯','✅','❌','⚠️',
+    // Học tập & Toán - Tin
+    '📚','📝','💻','🧮','📐','📊','🧠','🎓',
+    '⏰','📅','📌','📢','🚀','☕','🧋','🍳'
+];
+
+window.initNoticePublicChat = function() {
+// Hiện ngay lập tức từ bộ nhớ đệm (không phải đợi load)
+    try {
+        let cached = JSON.parse(localStorage.getItem('notice_chat_cache') || '[]');
+        if (Array.isArray(cached) && cached.length > 0) {
+            renderNoticeChatList(cached, true);
+        }
+    } catch (e) {}
+    // 1. Đổ danh sách Icon vào popup
+    let gridEl = $('#noticeEmojiGrid');
+    if (gridEl.length && gridEl.children().length === 0) {
+        let emojiHtml = NOTICE_CHAT_EMOJIS.map(em =>
+            `<span class="notice-emoji-item" onclick="insertNoticeChatEmoji('${em}')">${em}</span>`
+        ).join('');
+        gridEl.html(emojiHtml);
+    }
+
+    // 2. Khóa ô nhập nếu là Khách
+    if (!currentUser || currentUser.isGuest) {
+        $('#txtNoticeChatInput').prop('disabled', true).attr('placeholder', 'Vui lòng đăng nhập sinh viên để tham gia chat chung...');
+        $('#btnSendNoticeChat, #btnToggleNoticeEmoji').prop('disabled', true);
+    }
+
+    // 3. Đảm bảo có từ điển Avatar (window.allUsersMap) rồi mới tải tin nhắn
+    let loadAvatarMap = new Promise((resolve) => {
+        if (window.allUsersMap) {
+            resolve();
+        } else {
+            $.ajax({
+                url: SCRIPT_URL + "?action=getAllUsers",
+                method: "GET",
+                dataType: "json",
+                success: function(users) {
+                    window.allUsersMap = {};
+                    (users || []).forEach(u => {
+                        let cleanMssv = String(u.mssv).replace(/\./g, "").trim();
+                        window.allUsersMap[u.mssv] = u;
+                        window.allUsersMap[cleanMssv] = u;
+                    });
+                    resolve();
+                },
+                error: () => resolve()
+            });
+        }
+    });
+
+    loadAvatarMap.then(() => {
+        loadNoticePublicChat(true);
+    });
+
+    // 4. Tự động cập nhật mỗi 12 giây (chỉ chạy khi khung chat đang hiển thị trên màn hình)
+    if (window.noticeChatPollInterval) clearInterval(window.noticeChatPollInterval);
+    window.noticeChatPollInterval = setInterval(() => {
+        if (!document.hidden && $('#publicNoticeChatBox').length && $('#publicNoticeChatBox').is(':visible') && !$('#shareCategoryView').hasClass('d-none')) {
+            loadNoticePublicChat(false);
+        }
+    }, 3000);
+};
+
+window.toggleNoticeEmojiPopup = function(e) {
+    if (e) e.stopPropagation();
+    $('#noticeEmojiPopup').toggleClass('d-none');
+};
+
+window.insertNoticeChatEmoji = function(emoji) {
+    let input = document.getElementById('txtNoticeChatInput');
+    if (!input || input.disabled) return;
+    let start = input.selectionStart || input.value.length;
+    let end = input.selectionEnd || input.value.length;
+    input.value = input.value.substring(0, start) + emoji + input.value.substring(end);
+    input.selectionStart = input.selectionEnd = start + emoji.length;
+    input.focus();
+};
+
+// Đóng popup emoji khi bấm ra ngoài
+$(document).on('click', function(e) {
+    if (!$(e.target).closest('#noticeEmojiPopup, #btnToggleNoticeEmoji').length) {
+        $('#noticeEmojiPopup').addClass('d-none');
+    }
+});
+
+// Hàm chống XSS cho nội dung tin nhắn
+function escapeNoticeChatHtml(str) {
+    return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// Hàm rút gọn thời gian từ "dd/MM/yyyy HH:mm:ss" sang "[HH:mm:ss dd/MM]" giống mẫu
+function formatNoticeChatTime(rawTime) {
+    let str = String(rawTime || '').trim();
+    let m = str.match(/(\d{1,2})\/(\d{1,2})\/\d{4}\s+(\d{1,2}:\d{2}:\d{2})/);
+    if (m) return `[${m[3]} ${m[1]}/${m[2]}]`;
+    return str ? `[${str}]` : '';
+}
+
+window.loadNoticePublicChat = function(forceScroll) {
+    $.ajax({
+        url: SCRIPT_URL + "?action=getChatMessages&_=" + Date.now(),
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            if (!Array.isArray(data)) return;
+
+            let latestTen = data.slice(-10);
+try { localStorage.setItem('notice_chat_cache', JSON.stringify(latestTen)); } catch (e) {}
+            let newHash = JSON.stringify(latestTen);
+            if (!forceScroll && newHash === window.lastNoticeChatHash) return;
+            window.lastNoticeChatHash = newHash;
+
+            let box = $('#noticeChatMessages');
+            if (latestTen.length === 0) {
+                box.html('<div class="text-center text-muted small py-4"><i class="fa-regular fa-comments fs-4 d-block mb-1 opacity-50"></i>Chưa có tin nhắn nào. Hãy gửi lời chào đầu tiên nhé!</div>');
+                return;
+            }
+
+            let activeMssvClean = (currentUser && currentUser.mssv) ? String(currentUser.mssv).replace(/\./g, "").trim() : "";
+            let isSysAdmin = (activeMssvClean === "5101108008");
+            const avatarColors = ['#0f4c81', '#10b981', '#e61d4a', '#f59e0b', '#8b5cf6', '#0ea5e9'];
+
+            let html = '';
+            latestTen.forEach(item => {
+                let rawMssv = String(item.mssv || '').trim();
+                let cleanMssv = rawMssv.replace(/\./g, "").trim();
+                let isAuthorAdmin = (cleanMssv === "5101108008");
+                let isMine = (activeMssvClean !== "" && activeMssvClean === cleanMssv);
+
+                let shortName = item.name ? getNaturalShortName(item.name) : rawMssv;
+                let displayAuthor = isAuthorAdmin
+                    ? `${shortName} <span class="badge bg-danger ms-1" style="font-size: 9.5px;">Admin</span>`
+                    : `${escapeNoticeChatHtml(shortName)}${isMine ? ' <span class="text-success small">(Bạn)</span>' : ''}`;
+
+                let userObj = window.allUsersMap ? (window.allUsersMap[rawMssv] || window.allUsersMap[cleanMssv]) : null;
+                let avatarUrl = (userObj && userObj.avatar) ? String(userObj.avatar).trim() : (isMine && currentUser.avatar ? currentUser.avatar : '');
+                let avatarHtml = '';
+
+                if (avatarUrl) {
+                    if (avatarUrl.includes("drive.google.com/file/d/")) {
+                        let mId = avatarUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+                        if (mId && mId[1]) avatarUrl = `https://drive.google.com/thumbnail?id=${mId[1]}&sz=w100`;
+                    }
+                    avatarHtml = `<img src="${avatarUrl}" class="notice-chat-avatar" alt="avt">`;
+                } else {
+                    let firstChar = (shortName || 'S').charAt(0).toUpperCase();
+                    let bg = avatarColors[firstChar.charCodeAt(0) % avatarColors.length];
+                    avatarHtml = `<span class="notice-chat-avatar" style="background-color: ${bg}; border: none;">${firstChar}</span>`;
+                }
+
+                let editBtn = (isMine && item.rowIndex)
+                    ? `<button type="button" class="notice-chat-edit-btn" onclick="startEditNoticeChat(${item.rowIndex}, this)" data-msg="${escapeNoticeChatHtml(item.message)}" title="Chỉnh sửa tin nhắn"><i class="fa-solid fa-pen"></i></button>`
+                    : '';
+
+                let delBtn = ((isMine || isSysAdmin) && item.rowIndex)
+                    ? `<button type="button" class="notice-chat-del-btn" onclick="deleteNoticePublicChat(${item.rowIndex})" title="Xóa tin nhắn"><i class="fa-solid fa-trash-can"></i></button>`
+                    : '';
+
+                let actionBtns = (editBtn || delBtn) ? `<div class="notice-chat-actions">${editBtn}${delBtn}</div>` : '';
+
+                html += `
+                <div class="notice-chat-row">
+                    <span class="notice-chat-time">${formatNoticeChatTime(item.time)}</span>
+                    ${avatarHtml}
+                    <div class="notice-chat-content-wrap">
+                        <span class="notice-chat-author ${isAuthorAdmin ? 'is-admin' : ''}">${displayAuthor}:</span>
+                        <span class="notice-chat-msg">${escapeNoticeChatHtml(item.message)}</span>
+                    </div>
+                    ${actionBtns}
+                </div>`;
+            });
+
+            box.html(html);
+            if (typeof applyKaTeX === 'function') applyKaTeX('noticeChatMessages');
+            box.scrollTop(box[0].scrollHeight);
+        }
+    });
+};
+
+window.editingNoticeChatRowIndex = null;
+
+window.startEditNoticeChat = function(rowIndex, btnEl) {
+    let rawMsg = $(btnEl).attr('data-msg') || '';
+    // Giải mã HTML entity về text gốc
+    let decodedMsg = $('<textarea/>').html(rawMsg).text();
+
+    window.editingNoticeChatRowIndex = rowIndex;
+    $('#txtNoticeChatInput').val(decodedMsg).focus();
+    $('#btnSendNoticeChat')
+        .html('<i class="fa-solid fa-check me-1"></i> Lưu sửa')
+        .css('background-color', '#f59e0b');
+
+    // Hiện nút Hủy sửa nếu chưa có
+    if ($('#btnCancelEditNoticeChat').length === 0) {
+        $('#btnSendNoticeChat').after(`
+            <button type="button" id="btnCancelEditNoticeChat" class="btn btn-light border fw-bold px-2 flex-shrink-0"
+                    style="border-radius: 8px; height: 38px;" onclick="cancelEditNoticeChat()" title="Hủy chỉnh sửa">
+                <i class="fa-solid fa-xmark text-danger"></i>
+            </button>
+        `);
+    }
+};
+
+window.cancelEditNoticeChat = function() {
+    window.editingNoticeChatRowIndex = null;
+    $('#txtNoticeChatInput').val('');
+    $('#btnSendNoticeChat')
+        .html('<i class="fa-solid fa-paper-plane me-1"></i> Gửi')
+        .css('background-color', '#0f4c81');
+    $('#btnCancelEditNoticeChat').remove();
+};
+window.sendNoticePublicChat = function() {
+    if (!currentUser || currentUser.isGuest) {
+        alert("Vui lòng đăng nhập để gửi tin nhắn!");
+        return;
+    }
+
+    let input = $('#txtNoticeChatInput');
+    let msg = input.val().trim();
+    if (!msg) return;
+// Nếu đang ở chế độ CHỈNH SỬA tin nhắn
+    if (window.editingNoticeChatRowIndex !== null) {
+        let targetRow = window.editingNoticeChatRowIndex;
+        cancelEditNoticeChat();
+        $('#noticeEmojiPopup').addClass('d-none');
+
+        postToGAS({
+            action: "editChatMessage",
+            rowIndex: targetRow,
+            mssv: currentUser.mssv,
+            newMessage: msg
+        }, function() {
+            loadNoticePublicChat(true);
+        }, function() {
+            alert("Lỗi kết nối máy chủ, không thể cập nhật tin nhắn!");
+        });
+        return;
+    }
+    let btn = $('#btnSendNoticeChat');
+    let oldHtml = btn.html();
+    btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i>');
+    input.prop('disabled', true);
+    $('#noticeEmojiPopup').addClass('d-none');
+
+    postToGAS({
+        action: "sendChat",
+        mssv: currentUser.mssv,
+        name: currentUser.name || currentUser.mssv,
+        message: msg
+    }, function() {
+        input.val('').prop('disabled', false).focus();
+        btn.prop('disabled', false).html(oldHtml);
+        loadNoticePublicChat(true);
+    }, function() {
+        alert("Lỗi kết nối máy chủ, không thể gửi tin nhắn!");
+        input.prop('disabled', false);
+        btn.prop('disabled', false).html(oldHtml);
+    });
+};
+
+window.deleteNoticePublicChat = function(rowIndex) {
+    if (!confirm("Bạn muốn xóa tin nhắn này?")) return;
+    postToGAS({
+        action: "deleteChatMessage",
+        rowIndex: rowIndex,
+        mssv: currentUser.mssv
+    }, function(res) {
+        loadNoticePublicChat(true);
+    }, function() {
+        alert("Lỗi kết nối máy chủ!");
+    });
+};
+

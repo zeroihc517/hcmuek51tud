@@ -789,7 +789,7 @@ function openShareCodeSection() {
     $('#groupLinksView').addClass('d-none');
     
     if (typeof window.setDetailedView === 'function') window.setDetailedView("Tiện ích");
-    
+    if (typeof initNoticePublicChat === 'function') initNoticePublicChat();
     // Nếu không có tham số category trên URL thì mới trở về danh mục Thảo luận tổng
     let urlParams = new URLSearchParams(window.location.search);
     if (!urlParams.get('category')) {

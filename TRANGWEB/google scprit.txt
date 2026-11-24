@@ -144,8 +144,12 @@ case "deleteGroupLink": result = deleteGroupLink(payload.rowIndex, payload.mssv)
 case "uploadAvatarFile": 
   result = uploadAvatarFile(payload.mssv, payload.base64Data, payload.mimeType, payload.fileName); 
   break;
-  case "saveLearningData": result = saveLearningData(payload.mssv, payload.dataStr); break;
-  case "updateSingleProgress": result = updateSingleProgress(payload.mssv, payload.progKey, payload.progVal, payload.protectGreen); break;
+  case "saveLearningData": 
+  result = saveLearningData(payload.mssv, payload.hocPhan, payload.progressStr, payload.notesStr); 
+  break;
+case "updateSingleProgress": 
+  result = updateSingleProgress(payload.mssv, payload.hocPhan, payload.progKey, payload.progVal, payload.protectGreen); 
+  break;
       case "deleteDeadlineUser": result = deleteDeadlineUser(payload.rowIndex, payload.mssv); break;
       case "editChatMessage": result = editChatMessage(payload.rowIndex, payload.mssv, payload.newMessage); break;
       case "changePassword": result = changePassword(payload.mssv, payload.oldPassword, payload.newPassword); break;
@@ -1373,7 +1377,6 @@ function getSystemTKBList(mssv) {
   var data = masterSheet.getDataRange().getDisplayValues();
   var allCourses = [];
   
-  // Vòng lặp đọc đến cột N (index 13: Học Kỳ) để lấy dữ liệu lọc
   for (var i = 1; i < data.length; i++) {
     if (data[i][0]) {
       allCourses.push({
@@ -1388,10 +1391,11 @@ function getSystemTKBList(mssv) {
         gv: data[i][8],
         ngayBatDau: data[i][10] || "", // Cột K
         ngayKetThuc: data[i][11] || "", // Cột L
-        namHoc: data[i][12] || "",      // Cột M (Dùng cho dropdown Lọc Năm Học)
-        hocKy: data[i][13] || "",        // Cột N (Dùng cho dropdown Lọc Học Kỳ)
-        ngayNgoaiLe: data[i][14] || "",
-        ghiChu: data[i][15] || ""
+        namHoc: data[i][12] || "",      // Cột M
+        hocKy: data[i][13] || "",       // Cột N
+        ngayNgoaiLe: data[i][14] || "", // Cột O
+        ghiChu: data[i][15] || "",      // Cột P
+        loaiDK: data[i][16] || ""       // Cột Q: Phân loại (KH / NKH)
       });
     }
   }
@@ -1411,6 +1415,7 @@ function getSystemTKBList(mssv) {
   
   return { allCourses: allCourses, registeredIds: registeredIds };
 }
+
 function logRegistrationHistory(mssv, actionType, details) {
   try {
     var sheet = ss.getSheetByName("RegistrationHistory");
@@ -2622,96 +2627,173 @@ function forceCalendarAuth() {
 // ==========================================
 function getLearningData(mssv) {
   var sheet = ss.getSheetByName("LearningData");
-  if (!sheet) return {}; // Nếu chưa có Sheet thì trả về Object rỗng
+  if (!sheet || sheet.getLastRow() <= 1) return { progress: {}, notes: {} };
   
   var data = sheet.getDataRange().getValues();
+  var mergedProgress = {};
+  var mergedNotes = {};
+  
   for (var i = 1; i < data.length; i++) {
     if (String(data[i][0]).trim() === String(mssv).trim()) {
-      try {
-        return JSON.parse(data[i][1]); // Trả về dạng JSON Object
-      } catch(e) {
-        return {};
+      // Đọc cột C (ProgressJSON)
+      if (data[i][2]) {
+        try {
+          var pObj = JSON.parse(data[i][2]);
+          for (var pk in pObj) mergedProgress[pk] = pObj[pk];
+        } catch(e) {}
+      }
+      // Đọc cột D (NotesJSON)
+      if (data[i][3]) {
+        try {
+          var nObj = JSON.parse(data[i][3]);
+          for (var nk in nObj) mergedNotes[nk] = nObj[nk];
+        } catch(e) {}
       }
     }
   }
-  return {};
+  return { progress: mergedProgress, notes: mergedNotes };
 }
-
-function saveLearningData(mssv, dataStr) {
-  var sheet = ss.getSheetByName("LearningData");
-  // Tự động tạo Sheet nếu chưa có
-  if (!sheet) {
-    sheet = ss.insertSheet("LearningData");
-    sheet.appendRow(["MSSV", "DataJSON"]);
-    sheet.getRange("A1:B1").setFontWeight("bold").setBackground("#0f4c81").setFontColor("white");
-  }
-  
-  var data = sheet.getDataRange().getValues();
-  var found = false;
-  
-  // Tìm sinh viên để ghi đè dữ liệu mới nhất
-  for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]).trim() === String(mssv).trim()) {
-      sheet.getRange(i + 1, 2).setValue(dataStr);
-      found = true;
-      break;
-    }
-  }
-  
-  // Chưa có thì tạo dòng mới
-  if (!found) {
-    sheet.appendRow([mssv, dataStr]);
-  }
-  
-  return "Đã đồng bộ tiến độ và ghi chú lên hệ thống!";
-}
-function updateSingleProgress(mssv, progKey, progVal, protectGreen) {
-  if (!mssv || !progKey) return "Thiếu dữ liệu!";
+function saveLearningData(mssv, hocPhan, progressStr, notesStr) {
+  if (!mssv || !hocPhan) return "Lỗi: Thiếu MSSV hoặc Tên học phần!";
   var lock = LockService.getScriptLock();
-  if (!lock.tryLock(10000)) return "Hệ thống đang bận, thử lại sau!";
+  if (!lock.tryLock(10000)) return "Lỗi: Hệ thống đang bận, vui lòng thử lại!";
 
   try {
     var sheet = ss.getSheetByName("LearningData");
     if (!sheet) {
       sheet = ss.insertSheet("LearningData");
-      sheet.appendRow(["MSSV", "DataJSON"]);
-      sheet.getRange("A1:B1").setFontWeight("bold").setBackground("#0f4c81").setFontColor("white");
+      sheet.appendRow(["MSSV", "HocPhan", "ProgressJSON", "NotesJSON"]);
+      sheet.getRange("A1:D1").setFontWeight("bold").setBackground("#0f4c81").setFontColor("white");
+    }
+
+    var pStr = progressStr || "{}";
+    var nStr = notesStr || "{}";
+    var data = sheet.getDataRange().getValues();
+    var found = false;
+
+    for (var i = 1; i < data.length; i++) {
+      if (String(data[i][0]).trim() === String(mssv).trim() &&
+          String(data[i][1]).trim() === String(hocPhan).trim()) {
+        sheet.getRange(i + 1, 3, 1, 2).setValues([[pStr, nStr]]);
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      sheet.appendRow([mssv, hocPhan, pStr, nStr]);
+    }
+    SpreadsheetApp.flush();
+    return "Đã đồng bộ dữ liệu môn " + hocPhan + " lên hệ thống!";
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function updateSingleProgress(mssv, hocPhan, progKey, progVal, protectGreen) {
+  if (!mssv || !hocPhan || !progKey) return "Lỗi: Thiếu dữ liệu tiến độ!";
+  var lock = LockService.getScriptLock();
+  if (!lock.tryLock(10000)) return "Lỗi: Hệ thống đang bận, thử lại sau!";
+
+  try {
+    var sheet = ss.getSheetByName("LearningData");
+    if (!sheet) {
+      sheet = ss.insertSheet("LearningData");
+      sheet.appendRow(["MSSV", "HocPhan", "ProgressJSON", "NotesJSON"]);
+      sheet.getRange("A1:D1").setFontWeight("bold").setBackground("#0f4c81").setFontColor("white");
     }
 
     var data = sheet.getDataRange().getValues();
     var targetRow = -1;
-    var learningData = { progress: {}, notes: {} };
+    var progressObj = {};
 
     for (var i = 1; i < data.length; i++) {
-      if (String(data[i][0]).trim() === String(mssv).trim()) {
+      if (String(data[i][0]).trim() === String(mssv).trim() &&
+          String(data[i][1]).trim() === String(hocPhan).trim()) {
         targetRow = i + 1;
         try {
-          var parsed = JSON.parse(data[i][1]);
-          if (parsed && typeof parsed === 'object') {
-            learningData.progress = parsed.progress || {};
-            learningData.notes = parsed.notes || {};
-          }
+          if (data[i][2]) progressObj = JSON.parse(data[i][2]);
         } catch (e) {}
         break;
       }
     }
 
-    if (protectGreen && learningData.progress[progKey] === 'green') {
+    if (protectGreen && progressObj[progKey] === 'green') {
       return "Giữ nguyên trạng thái Đã xong!";
     }
 
-    learningData.progress[progKey] = progVal;
-    var jsonStr = JSON.stringify(learningData);
+    progressObj[progKey] = progVal;
+    var pStr = JSON.stringify(progressObj);
 
     if (targetRow !== -1) {
-      sheet.getRange(targetRow, 2).setValue(jsonStr);
+      sheet.getRange(targetRow, 3).setValue(pStr);
     } else {
-      sheet.appendRow([mssv, jsonStr]);
+      sheet.appendRow([mssv, hocPhan, pStr, "{}"]);
     }
-    SpreadsheetApp.flush(); // Ép ghi xuống Sheet ngay lập tức
-    return "Đã lưu tiến độ lên Sheet thành công!";
+    SpreadsheetApp.flush();
+    return "Đã lưu tiến độ môn " + hocPhan + " thành công!";
   } finally {
     lock.releaseLock();
+  }
+}
+
+function migrateLearningDataToPerCourse() {
+  var sheet = ss.getSheetByName("LearningData");
+  if (!sheet || sheet.getLastRow() <= 1) return;
+
+  var oldData = sheet.getDataRange().getValues();
+  // Nếu đã là cấu trúc mới 4 cột rồi thì dừng
+  if (String(oldData[0][1]).trim() === "HocPhan") return;
+
+  var newRows = [];
+  for (var i = 1; i < oldData.length; i++) {
+    var mssv = String(oldData[i][0]).trim();
+    if (!mssv || !oldData[i][1]) continue;
+
+    var parsed = {};
+    try { parsed = JSON.parse(oldData[i][1]); } catch(e) { continue; }
+
+    var coursesMap = {};
+    var progPrefix = "prog_" + mssv + "_";
+    var notePrefix = "note_" + mssv + "_";
+
+    if (parsed.progress) {
+      for (var pk in parsed.progress) {
+        if (pk.indexOf(progPrefix) === 0) {
+          var rest = pk.substring(progPrefix.length);
+          var courseName = rest.split("_")[0] || "Khác";
+          if (!coursesMap[courseName]) coursesMap[courseName] = { progress: {}, notes: {} };
+          coursesMap[courseName].progress[pk] = parsed.progress[pk];
+        }
+      }
+    }
+
+    if (parsed.notes) {
+      for (var nk in parsed.notes) {
+        if (nk.indexOf(notePrefix) === 0) {
+          var restN = nk.substring(notePrefix.length);
+          var courseNameN = restN.split("_")[0] || "Khác";
+          if (!coursesMap[courseNameN]) coursesMap[courseNameN] = { progress: {}, notes: {} };
+          coursesMap[courseNameN].notes[nk] = parsed.notes[nk];
+        }
+      }
+    }
+
+    for (var cName in coursesMap) {
+      newRows.push([
+        mssv,
+        cName,
+        JSON.stringify(coursesMap[cName].progress),
+        JSON.stringify(coursesMap[cName].notes)
+      ]);
+    }
+  }
+
+  sheet.clearContents();
+  sheet.appendRow(["MSSV", "HocPhan", "ProgressJSON", "NotesJSON"]);
+  sheet.getRange("A1:D1").setFontWeight("bold").setBackground("#0f4c81").setFontColor("white");
+  if (newRows.length > 0) {
+    sheet.getRange(2, 1, newRows.length, 4).setValues(newRows);
   }
 }
 
