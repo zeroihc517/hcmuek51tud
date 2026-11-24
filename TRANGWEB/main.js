@@ -485,7 +485,7 @@ for (const [groupName, html] of Object.entries(groupHtml)) {
       function fetchAndRenderCategories() {
     // 1. Danh sách gõ sẵn (Load tức thì)
     let hardcodedCategories = [ 
-	'Toán rời rạc', 'Lập trình Python', 'Trí tuệ nhân tạo', 'Lịch sử Đảng',
+	'Độ đo và tích phân', 'Phương trình vi phân và đạo hàm riêng', 'Toán rời rạc', 'Lập trình Python', 'Trí tuệ nhân tạo', 'Lịch sử Đảng',
         'Hình học vi phân', 
         'Cấu trúc đại số', 
         'Cấu trúc dữ liệu', 
