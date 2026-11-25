@@ -2067,9 +2067,7 @@
     </div>
 </div>
 <div id="datLichSection" class="d-none">
-   
-
- <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3" id="datLichTopHeader">
         <div class="d-flex align-items-center">
             <button class="btn btn-light fw-bold shadow-sm me-3" onclick="openShareCodeSection()">
                 <i class="fa-solid fa-arrow-left"></i> Trở lại
@@ -2079,18 +2077,18 @@
             </div>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
-                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
+            <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm"
+                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;"
                     onclick="loadDatLichData()">
                 <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
             </button>
-            <button class="btn text-white fw-bold shadow-sm" style="background-color: #e61d4a; border-radius: 8px;" onclick="openFormDatLich()">
+            <button id="btnOpenFormDatLich" class="btn text-white fw-bold shadow-sm" style="background-color: #e61d4a; border-radius: 8px;" onclick="openFormDatLich()">
                 <i class="fa-solid fa-plus me-1"></i> Tạo kỳ thi mới
             </button>
         </div>
     </header>
 
-    <!-- Khung tạo/chỉnh sửa Kỳ thi (Ẩn mặc định) -->
+    <!-- Khung tạo/chỉnh sửa (Ẩn mặc định) -->
     <div id="formDatLichArea" class="data-card p-4 mb-4 d-none" style="border-top: 4px solid #e61d4a;">
         <h5 class="fw-bold text-danger mb-3" id="formDatLichTitle">
             <i class="fa-solid fa-file-circle-plus me-2"></i>Tạo kỳ thi mới
@@ -2098,15 +2096,13 @@
         <input type="hidden" id="datLichRowIndex" value="">
         <div class="row g-3">
             <div class="col-md-4">
-                <label class="form-label fw-bold small">Tên kỳ thi / Đề thi <span class="text-danger">*</span></label>
+                <label class="form-label fw-bold small" id="lblDatLichTen">Tên kỳ thi / Đề thi <span class="text-danger">*</span></label>
                 <input type="text" id="txtDatLichTen" class="form-control fw-bold" placeholder="VD: Thi thử Giữa kỳ - Đề số 01...">
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-bold small">Học phần <span class="text-danger">*</span></label>
-                <select id="selExamCourseForm" class="form-select fw-bold border-primary-subtle" onchange="toggleExamCourseOther()">
-                    <!-- JS tự đổ danh sách môn học từ SYSTEM_COURSE_DATABASE -->
-                </select>
-                <input type="text" id="txtDatLichNoiDungKhac" class="form-control mt-2 d-none" placeholder="Nhập tên học phần khác...">
+                <label class="form-label fw-bold small" id="lblDatLichCourse">Học phần <span class="text-danger">*</span></label>
+                <select id="selExamCourseForm" class="form-select fw-bold border-primary-subtle" onchange="toggleExamCourseOther()"></select>
+                <input type="text" id="txtDatLichNoiDungKhac" class="form-control mt-2 d-none" placeholder="Nhập tên học phần / chủ đề khác...">
             </div>
             <div class="col-md-2">
                 <label class="form-label fw-bold small">Trạng thái <span class="text-danger">*</span></label>
@@ -2117,7 +2113,7 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-bold small">Đường dẫn đề thi (URL) <span class="text-danger">*</span></label>
+                <label class="form-label fw-bold small" id="lblDatLichUrl">Đường dẫn đề thi (URL) <span class="text-danger">*</span></label>
                 <input type="text" id="txtDatLichUrl" class="form-control" placeholder="https://...">
             </div>
         </div>
@@ -2129,45 +2125,43 @@
         </div>
     </div>
 
-   <!-- Thanh Thống kê + Bộ lọc Trạng thái -->
-<div class="exam-toolbar bg-white p-3 rounded-4 border shadow-sm mb-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
-        <!-- 3 Tab Trạng thái -->
-        <div class="exam-status-tabs d-flex flex-wrap gap-2">
-            <button class="btn exam-tab-btn active" data-status="all" onclick="filterExamStatus('all', this)">
-                <i class="fa-solid fa-layer-group me-1"></i> Tất cả <span class="badge bg-secondary ms-1" id="cntExamAll">0</span>
-            </button>
-            <button class="btn exam-tab-btn" data-status="live" onclick="filterExamStatus('live', this)">
-                <i class="fa-solid fa-circle text-danger fa-beat me-1" style="font-size: 9px;"></i> Đang diễn ra <span class="badge bg-danger ms-1" id="cntExamLive">0</span>
-            </button>
-            <button class="btn exam-tab-btn" data-status="upcoming" onclick="filterExamStatus('upcoming', this)">
-                <i class="fa-solid fa-hourglass-half text-warning me-1"></i> Sắp tới <span class="badge bg-warning text-dark ms-1" id="cntExamUpcoming">0</span>
-            </button>
-            <button class="btn exam-tab-btn" data-status="ended" onclick="filterExamStatus('ended', this)">
-                <i class="fa-solid fa-box-archive text-success me-1"></i> Luyện lại <span class="badge bg-success ms-1" id="cntExamEnded">0</span>
-            </button>
-        </div>
-
-        <!-- Lọc Môn học & Tìm kiếm -->
-        <div class="d-flex flex-wrap gap-2 align-items-center">
-            <select id="filterExamCourse" class="form-select form-select-sm fw-bold border-primary-subtle" style="width: 210px; border-radius: 50px;" onchange="renderExamCards()">
-                <option value="">-- Tất cả học phần --</option>
-                <!-- JS tự đổ từ SYSTEM_COURSE_DATABASE -->
-            </select>
-            <div class="input-group input-group-sm" style="width: 220px;">
-                <input type="text" id="txtSearchExam" class="form-control border-primary-subtle" placeholder="Tìm tên kỳ thi..." style="border-radius: 50px 0 0 50px;" onkeyup="renderExamCards()">
-                <button class="btn text-white" style="background: #0f4c81; border-radius: 0 50px 50px 0;" onclick="renderExamCards()">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+    <!-- Thanh Thống kê + Bộ lọc Trạng thái -->
+    <div class="exam-toolbar bg-white p-3 rounded-4 border shadow-sm mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="exam-status-tabs d-flex flex-wrap gap-2">
+                <button class="btn exam-tab-btn active" data-status="all" onclick="filterExamStatus('all', this)">
+                    <i class="fa-solid fa-layer-group me-1"></i> Tất cả <span class="badge bg-secondary ms-1" id="cntExamAll">0</span>
                 </button>
+                <button class="btn exam-tab-btn" data-status="live" onclick="filterExamStatus('live', this)">
+                    <i class="fa-solid fa-circle text-danger fa-beat me-1" id="icoTabLive" style="font-size: 9px;"></i>
+                    <span id="lblTabLive">Đang diễn ra</span> <span class="badge bg-danger ms-1" id="cntExamLive">0</span>
+                </button>
+                <button class="btn exam-tab-btn" data-status="upcoming" onclick="filterExamStatus('upcoming', this)">
+                    <i class="fa-solid fa-hourglass-half text-warning me-1"></i>
+                    <span id="lblTabUpcoming">Sắp tới</span> <span class="badge bg-warning text-dark ms-1" id="cntExamUpcoming">0</span>
+                </button>
+                <button class="btn exam-tab-btn" data-status="ended" onclick="filterExamStatus('ended', this)">
+                    <i class="fa-solid fa-box-archive text-success me-1" id="icoTabEnded"></i>
+                    <span id="lblTabEnded">Luyện lại</span> <span class="badge bg-success ms-1" id="cntExamEnded">0</span>
+                </button>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <select id="filterExamCourse" class="form-select form-select-sm fw-bold border-primary-subtle" style="width: 210px; border-radius: 50px;" onchange="renderExamCards()">
+                    <option value="">-- Tất cả học phần --</option>
+                </select>
+                <div class="input-group input-group-sm" style="width: 220px;">
+                    <input type="text" id="txtSearchExam" class="form-control border-primary-subtle" placeholder="Tìm kiếm..." style="border-radius: 50px 0 0 50px;" onkeyup="renderExamCards()">
+                    <button class="btn text-white" id="btnSearchDatLich" style="background: #0f4c81; border-radius: 0 50px 50px 0;" onclick="renderExamCards()">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Lưới Thẻ Kỳ Thi (Thay thế cho Table cũ) -->
-<div class="row g-4" id="examCardsGrid">
-   
-</div>
+    <!-- Lưới Thẻ -->
+    <div class="row g-4" id="examCardsGrid"></div>
 
 </div>
 
@@ -3336,6 +3330,19 @@
         <div class="card-text-wrapper">
             <h5>Kỳ thi</h5>
             <p class="card-desc">Phòng thi thử & Kiểm tra định kỳ</p>
+        </div>
+    </div>
+</div>
+<!-- Thẻ: Cuộc họp trực tuyến -->
+<div class="col">
+    <div class="link-card-modern" style="cursor:pointer; border-bottom: 4px solid #6366f1;" onclick="loadDatLichHenView('cuochop')">
+        <div class="icon-box position-relative">
+            <i class="fa-solid fa-video" style="color: #6366f1;"></i>
+            <span id="cuocHopInsideBadge" class="badge-new-qa d-none" style="position: absolute; top: -5px; right: -25px; padding: 2px 6px; background-color: #6366f1;">LIVE</span>
+        </div>
+        <div class="card-text-wrapper">
+            <h5>Cuộc họp</h5>
+            <p class="card-desc">Phòng họp nhóm, Meet & Thảo luận</p>
         </div>
     </div>
 </div>
@@ -5621,7 +5628,8 @@ async function initSystemUrlRouter() {
         else if (viewParam === 'gpa') loadGPAView();
         else if (viewParam === 'profile') loadProfileView();
         else if (viewParam === 'qa') openQASection();
-        else if (viewParam === 'datlich' || viewParam === 'temp') loadDatLichHenView('temp');
+        else if (viewParam === 'cuochop') loadDatLichHenView('cuochop');
+else if (viewParam === 'datlich' || viewParam === 'temp' || viewParam === 'kythi') loadDatLichHenView('kythi');
         else if (viewParam === 'renluyen') loadRenLuyenView();
 	else if (viewParam === 'hocphan') {
             if (typeof openCourseHubView === 'function') openCourseHubView();
