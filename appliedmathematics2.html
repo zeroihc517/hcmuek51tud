@@ -2089,30 +2089,35 @@
     </header>
 
     <!-- Khung tạo/chỉnh sửa (Ẩn mặc định) -->
+   <!-- Khung tạo/chỉnh sửa (Ẩn mặc định) -->
     <div id="formDatLichArea" class="data-card p-4 mb-4 d-none" style="border-top: 4px solid #e61d4a;">
         <h5 class="fw-bold text-danger mb-3" id="formDatLichTitle">
             <i class="fa-solid fa-file-circle-plus me-2"></i>Tạo kỳ thi mới
         </h5>
         <input type="hidden" id="datLichRowIndex" value="">
         <div class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-4" id="datLichTenGroup">
                 <label class="form-label fw-bold small" id="lblDatLichTen">Tên kỳ thi / Đề thi <span class="text-danger">*</span></label>
                 <input type="text" id="txtDatLichTen" class="form-control fw-bold" placeholder="VD: Thi thử Giữa kỳ - Đề số 01...">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-3" id="datLichCourseGroup">
                 <label class="form-label fw-bold small" id="lblDatLichCourse">Học phần <span class="text-danger">*</span></label>
                 <select id="selExamCourseForm" class="form-select fw-bold border-primary-subtle" onchange="toggleExamCourseOther()"></select>
                 <input type="text" id="txtDatLichNoiDungKhac" class="form-control mt-2 d-none" placeholder="Nhập tên học phần / chủ đề khác...">
             </div>
-            <div class="col-md-2">
+            <div class="col-md-2" id="datLichStatusGroup">
                 <label class="form-label fw-bold small">Trạng thái <span class="text-danger">*</span></label>
-                <select id="selExamStatusForm" class="form-select fw-bold border-danger-subtle">
+                <select id="selExamStatusForm" class="form-select fw-bold border-danger-subtle" onchange="toggleDatLichTimeInput()">
                     <option value="live">🔴 Đang diễn ra</option>
                     <option value="upcoming">⏳ Sắp diễn ra</option>
                     <option value="ended">📦 Luyện lại</option>
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4 d-none" id="datLichStartTimeGroup">
+                <label class="form-label fw-bold small" id="lblDatLichStartTime">Thời gian bắt đầu <span class="text-danger">*</span></label>
+                <input type="datetime-local" id="txtDatLichStartTime" class="form-control fw-bold border-primary-subtle">
+            </div>
+            <div class="col-md-3" id="datLichUrlGroup">
                 <label class="form-label fw-bold small" id="lblDatLichUrl">Đường dẫn đề thi (URL) <span class="text-danger">*</span></label>
                 <input type="text" id="txtDatLichUrl" class="form-control" placeholder="https://...">
             </div>
