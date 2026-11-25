@@ -65,31 +65,28 @@ window.copyShareCodeDirect = function(index, btnElement) {
         alert('Trình duyệt không hỗ trợ copy tự động!');
     });
 };
-// Biến lưu trạng thái toàn cục
-// Thêm biến theo dõi Đặt lịch hẹn
+
 window.isQAUnanswered = false;
 window.isShareCodeNew = false;
-window.isDatLichNew = false; // THÊM MỚI
+window.isDatLichNew = false;
 window.isKyThiNew = false;
+window.isCuocHopNew = false;
 
 function updateSidebarThaoLuanBadge() {
-    // 1. Huy hiệu cho thẻ Tiện ích tổng ở thanh Sidebar (Đã bỏ window.isShareCodeNew)
-    if (window.isQAUnanswered || window.isDatLichNew || window.isKyThiNew) {
+    if (window.isQAUnanswered || window.isDatLichNew || window.isKyThiNew || window.isCuocHopNew) {
         $('#shareCodeSidebarBadge').removeClass('d-none');
     } else {
         $('#shareCodeSidebarBadge').addClass('d-none');
     }
 
-    // 2. Huy hiệu thẻ Q&A bên trong
-    if (window.isQAUnanswered) { $('#qaInsideBadge').removeClass('d-none'); } 
-    else { $('#qaInsideBadge').addClass('d-none'); }
-    
-    // 3. Huy hiệu thẻ TEMP bên trong mục Tiện ích
-    if (window.isDatLichNew || window.isKyThiNew) { 
-        $('#datLichInsideBadge').removeClass('d-none'); 
-    } else { 
-        $('#datLichInsideBadge').addClass('d-none'); 
-    }
+    if (window.isQAUnanswered) $('#qaInsideBadge').removeClass('d-none');
+    else $('#qaInsideBadge').addClass('d-none');
+
+    if (window.isKyThiNew || window.isDatLichNew) $('#datLichInsideBadge').removeClass('d-none');
+    else $('#datLichInsideBadge').addClass('d-none');
+
+    if (window.isCuocHopNew) $('#cuocHopInsideBadge').removeClass('d-none');
+    else $('#cuocHopInsideBadge').addClass('d-none');
 }
 
 function checkNewDatLichGlobal() {
@@ -100,25 +97,26 @@ function checkNewDatLichGlobal() {
         success: function(data) {
             if (!data || data.length === 0) {
                 window.isKyThiNew = false;
+                window.isCuocHopNew = false;
                 window.isDatLichNew = false;
                 updateSidebarThaoLuanBadge();
                 return;
             }
 
             let nowTime = new Date().getTime();
-            let oneDayMs = 24 * 60 * 60 * 1000; 
-            let hasNewTemp = false;
+            let oneDayMs = 24 * 60 * 60 * 1000;
             let hasNewKyThi = false;
+            let hasNewCuocHop = false;
 
             data.forEach(item => {
                 let time = item.updateTime || '';
-                let noiDung = item.noiDung || '';
+                let noiDung = (item.noiDung || '').trim();
                 let title = (item.title || "").toLowerCase();
                 let postDate = null;
-                
-                let match2 = time.match(/(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/); 
-                let match1 = time.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/); 
-                
+
+                let match2 = time.match(/(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+                let match1 = time.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+
                 if (match2) {
                     postDate = new Date(parseInt(match2[5]), parseInt(match2[4]) - 1, parseInt(match2[3]), parseInt(match2[1]), parseInt(match2[2]), 0);
                 } else if (match1) {
@@ -127,23 +125,21 @@ function checkNewDatLichGlobal() {
                     postDate = new Date(parseInt(match1[3]), parseInt(match1[2]) - 1, parseInt(match1[1]), h, m, 0);
                 }
 
-                let isNew = false;
-                if (postDate && (nowTime - postDate.getTime() <= oneDayMs)) {
-                    isNew = true;
-                } else if (title.includes("đang diễn ra") || title.includes("hôm nay") || title.includes("chưa kết thúc")) {
-                    isNew = true;
-                }
+                let isEndedOrUpcoming = title.includes("đã kết thúc") || title.includes("luyện lại") || title.includes("sắp diễn ra") || title.includes("sắp họp");
+                let isNew = !isEndedOrUpcoming && (
+                    (postDate && (nowTime - postDate.getTime() <= oneDayMs)) ||
+                    title.includes("đang diễn ra") || title.includes("đang họp") || title.includes("hôm nay")
+                );
 
-                // TÌM VÀ THAY THẾ ĐOẠN NÀY:
                 if (isNew) {
-                    // Đổi từ (noiDung === 'Kỳ thi') thành (noiDung.startsWith('Kỳ thi'))
-                    if (noiDung.startsWith('Kỳ thi')) hasNewKyThi = true;
-                    else hasNewTemp = true;
+                    if (noiDung.startsWith('Cuộc họp')) hasNewCuocHop = true;
+                    else hasNewKyThi = true;
                 }
             });
 
             window.isKyThiNew = hasNewKyThi;
-            window.isDatLichNew = hasNewTemp;
+            window.isCuocHopNew = hasNewCuocHop;
+            window.isDatLichNew = false;
             updateSidebarThaoLuanBadge();
         }
     });

@@ -278,7 +278,8 @@ function resolveContextTargetUrl(target) {
         if (onclickAttr.includes('loadTongHopView')) return `${baseUrl}?view=weblinks`;
         if (onclickAttr.includes('openQASection')) return `${baseUrl}?view=qa`;
         if (onclickAttr.includes('openGroupLinksSection')) return `${baseUrl}?view=grouplinks`;
-        if (onclickAttr.includes('loadDatLichHenView')) return `${baseUrl}?view=temp`;
+       if (onclickAttr.includes("loadDatLichHenView('cuochop')")) return `${baseUrl}?view=cuochop`;
+if (onclickAttr.includes('loadDatLichHenView')) return `${baseUrl}?view=kythi`;
         const catMatch = onclickAttr.match(/openShareCategory\(['"]([^'"]+)['"]/);
         if (catMatch) return `${baseUrl}?view=sharecode&category=${makeCleanParam(catMatch[1])}`;
     }
