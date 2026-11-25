@@ -1954,38 +1954,56 @@
   
         </table>
     </div>
-</div><!-- KHU VỰC TỔNG HỢP LINK -->
+</div>
+<!-- KHU VỰC TỔNG HỢP LINK -->
 <div id="tongHopSection" class="d-none">
     <header class="top-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-<div class="d-flex align-items-center">
-            <!-- Thêm nút trở lại -->
+        <div class="d-flex align-items-center">
             <button class="btn btn-light fw-bold shadow-sm me-3" onclick="openShareCodeSection()">
                 <i class="fa-solid fa-arrow-left"></i> Trở lại
             </button>
-<div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
-                  </div>
-        
+            <div class="page-title"><i class="fa-solid fa-link"></i> Tổng hợp các liên kết quan trọng</div>
+        </div>
 
-<div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
-                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 6px 18px; font-size: 14px;" 
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <!-- Ô tìm kiếm nhanh link -->
+            <div class="th-search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="txtSearchWebLinks" placeholder="Tìm tên hoặc mô tả link..." oninput="filterWebLinks()">
+            </div>
+
+            <button class="btn btn-sm fw-bold d-inline-flex align-items-center gap-2 shadow-sm" 
+                    style="background-color: #ffffff; color: #0f172a; border: 1.5px solid #94a3b8; border-radius: 50px; padding: 7px 16px; font-size: 13.5px;" 
                     onclick="loadWebLinks()">
-                <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 15px;"></i> Làm mới
+                <i class="fa-solid fa-clock-rotate-left" style="color: #2563eb; font-size: 14px;"></i> Làm mới
             </button>
-        <!-- Nút gọi Modal thêm link cá nhân (Đã đổi sang màu chủ đạo #0f4c81) -->
-        <button class="btn text-white fw-bold shadow-sm d-none" id="btnAddPersonalLink" onclick="openAddWebLinkModal()" style="background-color: #0f4c81; border-radius: 8px;">
-            <i class="fa-solid fa-plus me-2"></i>Thêm Link Của Tôi
-        </button>
-</div>
+
+            <button class="btn text-white fw-bold shadow-sm d-none" id="btnAddPersonalLink" onclick="openAddWebLinkModal()" 
+                    style="background-color: #0f4c81; border-radius: 50px; padding: 7px 18px; font-size: 13.5px;">
+                <i class="fa-solid fa-plus me-1"></i> Thêm Link Của Tôi
+            </button>
+        </div>
     </header>
-    
-    <!-- Phân chia khu vực Link Hệ thống và Link Cá nhân -->
-    <h6 class="fw-bold text-muted mb-3 mt-2" id="titleGlobalLinks" style="display:none;"><i class="fa-solid fa-globe me-2"></i>Liên kết từ Hệ thống</h6>
-    <div class="row row-cols-2 row-cols-lg-5 g-4 mb-4" id="webLinksContainer"></div>
-    
-    <!-- Tiêu đề Góc liên kết của tôi (Đã đổi chữ sang màu xanh #0f4c81) -->
-    <h6 class="fw-bold mb-3 mt-4 border-top pt-4" id="titlePersonalLinks" style="display:none; color: #0f4c81;"><i class="fa-solid fa-star me-2"></i>Góc liên kết của tôi</h6>
-    <div class="row row-cols-2 row-cols-lg-5 g-4" id="personalLinksContainer"></div>
+
+    <!-- Nhóm 1: Liên kết Hệ thống -->
+    <div class="th-section-heading" id="titleGlobalLinks" style="display:none;">
+        <div class="th-heading-left">
+            <span class="th-heading-icon"><i class="fa-solid fa-globe"></i></span>
+            <span>Liên kết từ Hệ thống</span>
+        </div>
+        <span class="th-count-pill" id="countGlobalLinks">0</span>
+    </div>
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 mb-4 th-links-grid" id="webLinksContainer"></div>
+
+    <!-- Nhóm 2: Liên kết Cá nhân -->
+    <div class="th-section-heading th-heading-personal mt-4 pt-4 border-top" id="titlePersonalLinks" style="display:none;">
+        <div class="th-heading-left">
+            <span class="th-heading-icon"><i class="fa-solid fa-star"></i></span>
+            <span>Góc liên kết của tôi</span>
+        </div>
+        <span class="th-count-pill" id="countPersonalLinks">0</span>
+    </div>
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3 th-links-grid" id="personalLinksContainer"></div>
 </div>
 
 <!-- MODAL 1: THÊM LIÊN KẾT CÁ NHÂN -->
