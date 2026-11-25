@@ -5623,6 +5623,10 @@ async function initSystemUrlRouter() {
         else if (viewParam === 'qa') openQASection();
         else if (viewParam === 'datlich' || viewParam === 'temp') loadDatLichHenView('temp');
         else if (viewParam === 'renluyen') loadRenLuyenView();
+        else if (viewParam === 'coursehub' || viewParam === 'hocphan' || viewParam === 'courses') {
+            await waitForCategories();
+            openCourseHubView(document.getElementById('btnNavHocPhanHub'));
+        }
         else if (viewParam === 'sharecode' || viewParam === 'tienich') {
             openShareCodeSection();
             if (categoryParam) {
@@ -5634,7 +5638,7 @@ async function initSystemUrlRouter() {
             }
         }
         return;
-    } 
+    }
     
     // 3. Mở trang Học phần môn học
     if (courseParam) {
