@@ -5014,114 +5014,157 @@ function loadWebLinks() {
 
 window.personalLinksCache = [];
 
-// 1. CẬP NHẬT HÀM RENDER LINK (Lưu data vào Cache để gọi an toàn)
-function renderWebLinks(data) { 
+// Tách tên miền gọn gàng để hiện dưới chân thẻ
+function getCleanDomain(url) {
+    if (!url || url === '#') return 'Liên kết';
+    try {
+        return new URL(url).hostname.replace(/^www\./, '');
+    } catch (e) {
+        return 'Mở liên kết';
+    }
+}
+
+// Bộ màu điểm nhấn hài hòa cho các thẻ hệ thống
+const TH_CARD_PALETTE = [
+    { accent: '#0f4c81', soft: '#e8f1f8' }, // Navy chủ đạo
+    { accent: '#0284c7', soft: '#e0f2fe' }, // Xanh dương
+    { accent: '#059669', soft: '#d1fae5' }, // Xanh ngọc
+    { accent: '#7c3aed', soft: '#ede9fe' }, // Tím
+    { accent: '#d97706', soft: '#fef3c7' }  // Hổ phách
+];
+
+function renderWebLinks(data) {
     let globalData = data?.global || (Array.isArray(data) ? data : []);
     let personalData = data?.personal || [];
-
-    // Lưu vào bộ nhớ tạm
     window.personalLinksCache = personalData;
 
-    let isSystemAdmin = currentUser && (String(currentUser.mssv).trim() === "51.01.108.008" || String(currentUser.mssv).trim() === "5101108008");
+    let isSystemAdmin = currentUser && (
+        String(currentUser.mssv).trim() === "51.01.108.008" ||
+        String(currentUser.mssv).trim() === "5101108008"
+    );
 
-    if (!globalData.length && !personalData.length && !isSystemAdmin) { 
-        $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào.</div>'); 
-        return; 
-    } 
+    if (!globalData.length && !personalData.length && !isSystemAdmin) {
+        $('#webLinksContainer').html('<div class="col-12 text-center text-muted py-5"><i class="fa-solid fa-link-slash fs-1 mb-3"></i><br>Chưa có đường link nào.</div>');
+        return;
+    }
 
-    $('#titleGlobalLinks').show();
-    let globalHtml = ''; 
+    // 1. LINK HỆ THỐNG
+    $('#titleGlobalLinks').css('display', 'flex');
+    let globalHtml = '';
+    let globalCount = 0;
 
-    // Admin Card Special
     if (isSystemAdmin) {
+        globalCount += 2;
         globalHtml += `
-        <div class="col mb-3">
-            <a href="https://docs.google.com/spreadsheets/d/13bQ6y0fn8n9Ah4OKQeQ9xOVJxXXnXRLjaIxTQPx-eGo/edit?usp=sharing" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #0f4c81; background: #f8fafc;">
-                <div class="link-card-badge bg-danger shadow-sm">ADMIN ONLY</div>
-                <div class="icon-box"><i class="fa-solid fa-database" style="color: #0f4c81;"></i></div>
-                <div class="card-text-wrapper">
-                    <h5>Cơ sở dữ liệu</h5>
-                    <p class="card-desc">Quản lý hệ thống toàn diện</p>
+        <div class="col th-link-col">
+            <a href="https://docs.google.com/spreadsheets/d/13bQ6y0fn8n9Ah4OKQeQ9xOVJxXXnXRLjaIxTQPx-eGo/edit?usp=sharing" target="_blank" class="th-link-card is-admin-card">
+                <div class="th-icon-wrap"><i class="fa-solid fa-database"></i></div>
+                <div class="th-card-content">
+                    <div class="th-card-title-row">
+                        <h5 class="th-card-title">Cơ sở dữ liệu</h5>
+                        <span class="th-admin-pill">ADMIN</span>
+                    </div>
+                    <p class="th-card-desc">Quản lý hệ thống toàn diện</p>
                 </div>
             </a>
         </div>
-        <div class="col mb-3">
-            <a href="https://discord.com/channels/1516957936650555623/1544962594089992215" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #464eb8; background: #f8fafc;">
-                <div class="link-card-badge bg-danger shadow-sm">ADMIN ONLY</div>
-                <div class="icon-box"><i class="fa-brands fa-microsoft" style="color: #464eb8;"></i></div>
-                <div class="card-text-wrapper">
-                    <h5>Discord</h5>
-                    <p class="card-desc">Không gian làm việc quản trị</p>
+        <div class="col th-link-col">
+            <a href="https://discord.com/channels/1516957936650555623/1544962594089992215" target="_blank" class="th-link-card is-admin-card">
+                <div class="th-icon-wrap"><i class="fa-brands fa-discord"></i></div>
+                <div class="th-card-content">
+                    <div class="th-card-title-row">
+                        <h5 class="th-card-title">Discord</h5>
+                        <span class="th-admin-pill">ADMIN</span>
+                    </div>
+                    <p class="th-card-desc">Không gian làm việc quản trị</p>
                 </div>
             </a>
         </div>`;
     }
 
-    // Link Hệ Thống
     if (globalData && globalData.length > 0) {
-        globalData.forEach(row => { 
+        globalData.forEach(row => {
             let title = row.title || row[0] || 'Liên kết';
             let desc = row.desc || row[1] || '';
             let url = row.url || row[2] || '#';
             let iconClass = row.icon || row[3] || 'fa-solid fa-link';
-            let descHtml = desc ? `<p class="card-desc">${desc}</p>` : '';
+            let descHtml = desc ? `<p class="th-card-desc">${desc}</p>` : '';
+            globalCount++;
 
             globalHtml += `
-            <div class="col mb-3"> 
-                <a href="${url}" target="_blank" class="link-card-modern" style="border-bottom: 4px solid var(--primary-color);">
-                    <div class="icon-box"><i class="${iconClass}" style="color: var(--primary-color);"></i></div>
-                    <div class="card-text-wrapper">
-                        <h5>${title}</h5>
-                        ${descHtml} 
+            <div class="col th-link-col">
+                <a href="${url}" target="_blank" class="th-link-card">
+                    <div class="th-icon-wrap"><i class="${iconClass}"></i></div>
+                    <div class="th-card-content">
+                        <div class="th-card-title-row">
+                            <h5 class="th-card-title">${title}</h5>
+                            <i class="fa-solid fa-arrow-up-right-from-square th-open-arrow"></i>
+                        </div>
+                        ${descHtml}
                     </div>
                 </a>
             </div>`;
         });
     }
-    $('#webLinksContainer').html(globalHtml); 
 
-    // Link Cá Nhân (Đã đồng bộ màu viền, icon và chữ sang #0f4c81)
-    if (currentUser) {
-        $('#titlePersonalLinks').show();
+    $('#countGlobalLinks').text(`${globalCount} liên kết`);
+    $('#webLinksContainer').html(globalHtml);
+
+    // 2. LINK CÁ NHÂN
+    if (currentUser && !currentUser.isGuest) {
+        $('#titlePersonalLinks').css('display', 'flex');
+        $('#countPersonalLinks').text(`${personalData.length} liên kết`);
         let personalHtml = '';
-        
+
         if (personalData && personalData.length > 0) {
             personalData.forEach((row, index) => {
                 let title = row.title || 'Liên kết';
                 let desc = row.desc || '';
-                let descHtml = desc ? `<p class="card-desc">${desc}</p>` : '';
-                let url = row.url || '#'; 
+                let descHtml = desc ? `<p class="th-card-desc">${desc}</p>` : '';
+                let url = row.url || '#';
                 let iconClass = row.icon || 'fa-solid fa-link';
 
                 personalHtml += `
-                <div class="col mb-3 position-relative"> 
-                    <div class="position-absolute d-flex gap-1" style="top: 8px; right: 12px; z-index: 20;">
-                        <button type="button" class="btn btn-sm btn-warning text-white shadow-sm" style="border-radius: 50%; width: 28px; height: 28px; padding: 0;" onclick="openEditPersonalLinkByIndex(${index}, event)" title="Chỉnh sửa liên kết">
-                            <i class="fa-solid fa-pen" style="font-size: 11px;"></i>
-                        </button>
-                        <button type="button" class="btn btn-sm btn-danger shadow-sm" style="border-radius: 50%; width: 28px; height: 28px; padding: 0;" onclick="deletePersonalLink('${row.rowIndex}', event)" title="Xóa liên kết này">
-                            <i class="fa-solid fa-trash" style="font-size: 11px;"></i>
-                        </button>
-                    </div>
-                    
-                    <a href="${url}" target="_blank" class="link-card-modern" style="border-bottom: 4px solid #0f4c81;">
-                        <div class="icon-box"><i class="${iconClass}" style="color: #0f4c81;"></i></div>
-                        <div class="card-text-wrapper">
-                            <h5 style="color: #0f4c81;">${title}</h5>
-                            ${descHtml} 
+                <div class="col th-link-col">
+                    <a href="${url}" target="_blank" class="th-link-card">
+                        <div class="th-icon-wrap"><i class="${iconClass}"></i></div>
+                        <div class="th-card-content">
+                            <div class="th-card-title-row">
+                                <h5 class="th-card-title">${title}</h5>
+                                <i class="fa-solid fa-arrow-up-right-from-square th-open-arrow"></i>
+                            </div>
+                            ${descHtml}
+                            <div class="th-card-actions" onclick="event.preventDefault(); event.stopPropagation();">
+                                <button type="button" class="th-act-btn btn-edit" onclick="openEditPersonalLinkByIndex(${index}, event)" title="Chỉnh sửa">
+                                    <i class="fa-solid fa-pen"></i>
+                                </button>
+                                <button type="button" class="th-act-btn btn-del" onclick="deletePersonalLink('${row.rowIndex}', event)" title="Xóa">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
                     </a>
                 </div>`;
             });
         } else {
-            personalHtml = `<div class="col-12 text-center text-muted small py-3 w-100"><i class="fa-solid fa-inbox me-2"></i>Bạn chưa thêm liên kết cá nhân nào.</div>`;
+            personalHtml = `<div class="col-12 text-center text-muted small py-4 bg-white rounded-3 border w-100"><i class="fa-solid fa-inbox me-2"></i>Bạn chưa thêm liên kết cá nhân nào.</div>`;
         }
         $('#personalLinksContainer').html(personalHtml);
     } else {
         $('#titlePersonalLinks').hide();
         $('#personalLinksContainer').html('');
     }
+
+    if ($('#txtSearchWebLinks').val()) filterWebLinks();
 }
+// Hàm lọc nhanh link theo từ khóa
+window.filterWebLinks = function() {
+    let kw = ($('#txtSearchWebLinks').val() || '').toLowerCase().trim();
+    $('#webLinksContainer .th-link-col, #personalLinksContainer .th-link-col').each(function() {
+        let text = $(this).text().toLowerCase();
+        $(this).toggleClass('d-none', kw !== '' && !text.includes(kw));
+    });
+};
 // 2. HÀM MỞ MODAL SỬA VÀ ĐỔ DỮ LIỆU CŨ VÀO FORM
 function openEditPersonalLink(rowIndex, title, desc, url, icon) {
     $('#editPWebLinkRowIndex').val(rowIndex);
