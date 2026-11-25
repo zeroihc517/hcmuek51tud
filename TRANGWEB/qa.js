@@ -103,7 +103,7 @@ function checkNewDatLichGlobal() {
                 return;
             }
 
-            let nowTime = new Date().getTime();
+            let nowTime = Date.now();
             let oneDayMs = 24 * 60 * 60 * 1000;
             let hasNewKyThi = false;
             let hasNewCuocHop = false;
@@ -111,27 +111,42 @@ function checkNewDatLichGlobal() {
             data.forEach(item => {
                 let time = item.updateTime || '';
                 let noiDung = (item.noiDung || '').trim();
-                let title = (item.title || "").toLowerCase();
-                let postDate = null;
+                let rawTitle = (item.title || "").trim();
+                let titleLower = rawTitle.toLowerCase();
 
-                let match2 = time.match(/(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-                let match1 = time.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+                if (titleLower.includes("đã kết thúc") || titleLower.includes("luyện lại")) return;
 
-                if (match2) {
-                    postDate = new Date(parseInt(match2[5]), parseInt(match2[4]) - 1, parseInt(match2[3]), parseInt(match2[1]), parseInt(match2[2]), 0);
-                } else if (match1) {
-                    let h = match1[4] ? parseInt(match1[4]) : 0;
-                    let m = match1[5] ? parseInt(match1[5]) : 0;
-                    postDate = new Date(parseInt(match1[3]), parseInt(match1[2]) - 1, parseInt(match1[1]), h, m, 0);
+                // Kiểm tra thẻ hẹn giờ [Sắp họp|HH:mm DD/MM/YYYY]
+                let schedMatch = rawTitle.match(/^\[(Sắp họp|Sắp diễn ra)(?:\|(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4}))?\]/i);
+                let isLiveNow = false;
+
+                if (schedMatch) {
+                    if (schedMatch[2] && schedMatch[4]) {
+                        let startTs = new Date(
+                            parseInt(schedMatch[6], 10),
+                            parseInt(schedMatch[5], 10) - 1,
+                            parseInt(schedMatch[4], 10),
+                            parseInt(schedMatch[2], 10),
+                            parseInt(schedMatch[3], 10),
+                            0
+                        ).getTime();
+                        if (nowTime >= startTs) isLiveNow = true;
+                    }
+                } else {
+                    let postDate = null;
+                    let match2 = time.match(/(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+                    let match1 = time.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
+                    if (match2) {
+                        postDate = new Date(parseInt(match2[5]), parseInt(match2[4]) - 1, parseInt(match2[3]), parseInt(match2[1]), parseInt(match2[2]), 0);
+                    } else if (match1) {
+                        postDate = new Date(parseInt(match1[3]), parseInt(match1[2]) - 1, parseInt(match1[1]), match1[4] ? parseInt(match1[4]) : 0, match1[5] ? parseInt(match1[5]) : 0, 0);
+                    }
+                    if ((postDate && (nowTime - postDate.getTime() <= oneDayMs)) || titleLower.includes("đang diễn ra") || titleLower.includes("đang họp")) {
+                        isLiveNow = true;
+                    }
                 }
 
-                let isEndedOrUpcoming = title.includes("đã kết thúc") || title.includes("luyện lại") || title.includes("sắp diễn ra") || title.includes("sắp họp");
-                let isNew = !isEndedOrUpcoming && (
-                    (postDate && (nowTime - postDate.getTime() <= oneDayMs)) ||
-                    title.includes("đang diễn ra") || title.includes("đang họp") || title.includes("hôm nay")
-                );
-
-                if (isNew) {
+                if (isLiveNow) {
                     if (noiDung.startsWith('Cuộc họp')) hasNewCuocHop = true;
                     else hasNewKyThi = true;
                 }
@@ -144,6 +159,7 @@ function checkNewDatLichGlobal() {
         }
     });
 }
+
 // 1. Kiểm tra Q&A có câu hỏi mới chưa trả lời
 function checkNewQA() { 
     $.ajax({ 

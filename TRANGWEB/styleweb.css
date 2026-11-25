@@ -5348,3 +5348,23 @@ body.dark-mode .meeting-meta-grid {
     border-color: #312e81 !important;
     color: #cbd5e1 !important;
 }
+.meeting-countdown-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+    padding: 3px 10px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+    width: fit-content;
+}
+
+body.dark-mode .meeting-countdown-pill {
+    background: #451a03 !important;
+    color: #fcd34d !important;
+    border-color: #92400e !important;
+}

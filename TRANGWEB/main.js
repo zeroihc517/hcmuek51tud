@@ -6396,10 +6396,80 @@ window.filterExamStatus = function(status, btnEl) {
     renderExamCards();
 };
 
+// Ẩn/hiện ô nhập Thời gian bắt đầu khi chọn trạng thái "Sắp họp" / "Sắp diễn ra"
+window.toggleDatLichTimeInput = function() {
+    let statusVal = $('#selExamStatusForm').val();
+    let isMeeting = (window.currentDatLichMode === 'cuochop');
+
+    if (statusVal === 'upcoming') {
+        $('#datLichStartTimeGroup').removeClass('d-none');
+        $('#lblDatLichStartTime').html(isMeeting
+            ? 'Thời gian bắt đầu họp <span class="text-danger">*</span>'
+            : 'Thời gian mở đề (Tùy chọn)');
+
+        // Chia lại 2 hàng cân đối: Hàng 1 (6 + 6), Hàng 2 (4 + 4 + 4)
+        $('#datLichTenGroup').attr('class', 'col-md-6');
+        $('#datLichCourseGroup').attr('class', 'col-md-6');
+        $('#datLichStatusGroup').attr('class', 'col-md-4');
+        $('#datLichStartTimeGroup').attr('class', 'col-md-4');
+        $('#datLichUrlGroup').attr('class', 'col-md-4');
+
+        // Gợi ý sẵn thời điểm gần nhất (tròn 30 phút tiếp theo) nếu ô đang trống
+        if (!$('#txtDatLichStartTime').val()) {
+            let d = new Date(Date.now() + 30 * 60 * 1000);
+            d.setSeconds(0, 0);
+            let pad = n => String(n).padStart(2, '0');
+            $('#txtDatLichStartTime').val(`${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`);
+        }
+    } else {
+        $('#datLichStartTimeGroup').addClass('d-none');
+        // Trả lại 1 hàng gọn như ban đầu: 4 + 3 + 2 + 3 = 12
+        $('#datLichTenGroup').attr('class', 'col-md-4');
+        $('#datLichCourseGroup').attr('class', 'col-md-3');
+        $('#datLichStatusGroup').attr('class', 'col-md-2');
+        $('#datLichUrlGroup').attr('class', 'col-md-3');
+    }
+};
+
+// Bóc tách thông tin hẹn giờ từ tiêu đề: [Sắp họp|HH:mm DD/MM/YYYY]
+function parseScheduledStartInfo(title) {
+    let raw = String(title || "").trim();
+    let match = raw.match(/^\[(Sắp họp|Sắp diễn ra)(?:\|(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4}))?\]\s*/i);
+    if (!match) {
+        return { hasUpcomingTag: false, scheduledDate: null, formattedTime: "", inputVal: "" };
+    }
+    if (match[2] && match[4]) {
+        let hh = parseInt(match[2], 10);
+        let min = parseInt(match[3], 10);
+        let dd = parseInt(match[4], 10);
+        let mm = parseInt(match[5], 10);
+        let yyyy = parseInt(match[6], 10);
+        let d = new Date(yyyy, mm - 1, dd, hh, min, 0);
+        let pad = n => String(n).padStart(2, '0');
+        return {
+            hasUpcomingTag: true,
+            scheduledDate: d,
+            formattedTime: `${pad(hh)}:${pad(min)} - ${pad(dd)}/${pad(mm)}/${yyyy}`,
+            inputVal: `${yyyy}-${pad(mm)}-${pad(dd)}T${pad(hh)}:${pad(min)}`
+        };
+    }
+    return { hasUpcomingTag: true, scheduledDate: null, formattedTime: "", inputVal: "" };
+}
+
 function detectExamStatus(item) {
     let t = (item.title || "").toLowerCase();
-    if (t.includes("sắp diễn ra") || t.includes("sắp họp") || t.includes("sắp mở") || t.includes("chưa mở")) return 'upcoming';
     if (t.includes("đã kết thúc") || t.includes("luyện lại") || t.includes("ôn tập")) return 'ended';
+
+    let sched = parseScheduledStartInfo(item.title);
+    if (sched.hasUpcomingTag) {
+        // Tới thời điểm hẹn -> tự động chuyển sang "live" (Đang họp / Đang diễn ra)
+        if (sched.scheduledDate && Date.now() >= sched.scheduledDate.getTime()) {
+            return 'live';
+        }
+        return 'upcoming';
+    }
+
+    if (t.includes("sắp diễn ra") || t.includes("sắp họp") || t.includes("sắp mở") || t.includes("chưa mở")) return 'upcoming';
     return 'live';
 }
 
@@ -6407,12 +6477,46 @@ function renderDatLichTable() {
     renderExamCards();
 }
 
+// Bộ đếm ngược real-time cho các thẻ "Sắp họp" / "Sắp diễn ra"
+if (!window.datLichAutoSwitchInterval) {
+    window.datLichAutoSwitchInterval = setInterval(function() {
+        if ($('#datLichSection').hasClass('d-none')) return;
+
+        let now = Date.now();
+        let needRerender = false;
+
+        $('.meeting-countdown-pill').each(function() {
+            let startTs = parseInt($(this).attr('data-start-ts'), 10);
+            if (!startTs) return;
+
+            let diff = startTs - now;
+            if (diff <= 0) {
+                needRerender = true;
+            } else {
+                let days = Math.floor(diff / 86400000);
+                let hrs = Math.floor((diff % 86400000) / 3600000);
+                let mins = Math.floor((diff % 3600000) / 60000);
+                let secs = Math.floor((diff % 60000) / 1000);
+                let pad = n => String(n).padStart(2, '0');
+                let text = days > 0
+                    ? `Bắt đầu sau: ${days} ngày ${pad(hrs)}:${pad(mins)}:${pad(secs)}`
+                    : `Bắt đầu sau: ${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+                $(this).html(`<i class="fa-solid fa-hourglass-half fa-spin-slow"></i> ${text}`);
+            }
+        });
+
+        if (needRerender) {
+            renderExamCards();
+            if (typeof checkNewDatLichGlobal === 'function') checkNewDatLichGlobal();
+        }
+    }, 1000);
+}
+
 window.renderExamCards = function() {
     let grid = $('#examCardsGrid');
     let allData = window.datLichCache || [];
     let isMeetingMode = (window.currentDatLichMode === 'cuochop');
 
-    // TÁCH RẠCH RÒI DỮ LIỆU: Cuộc họp vs Kỳ thi (dùng chung 1 Sheet)
     let modeEntries = allData
         .map((item, idx) => ({ item, originalIndex: idx }))
         .filter(({ item }) => {
@@ -6421,7 +6525,6 @@ window.renderExamCards = function() {
             return isMeetingMode ? itemIsMeeting : !itemIsMeeting;
         });
 
-    // Đếm số lượng cho 4 tab theo đúng mode hiện tại
     let cntAll = modeEntries.length, cntLive = 0, cntUpcoming = 0, cntEnded = 0;
     modeEntries.forEach(({ item }) => {
         let st = detectExamStatus(item);
@@ -6434,7 +6537,6 @@ window.renderExamCards = function() {
     $('#cntExamUpcoming').text(cntUpcoming);
     $('#cntExamEnded').text(cntEnded);
 
-    // Lọc theo Tab, Học phần/Chủ đề và Từ khóa
     let statusFilter = window.currentExamStatusFilter || 'all';
     let courseFilter = ($('#filterExamCourse').val() || '').toLowerCase().trim();
     let keyword = ($('#txtSearchExam').val() || '').toLowerCase().trim();
@@ -6464,8 +6566,11 @@ window.renderExamCards = function() {
     let html = '';
     filtered.forEach(({ item, originalIndex }) => {
         let st = detectExamStatus(item);
+        let sched = parseScheduledStartInfo(item.title);
+        let cleanTitle = (item.title || "").replace(/^\[(Sắp diễn ra|Sắp họp|Luyện lại|Đã kết thúc)(?:\|[^\]]+)?\]\s*/i, '').trim();
+
         let noiDung = item.noiDung || (isMeetingMode ? "Cuộc họp" : "Kỳ thi");
-        let safeTitle = (item.title || "").replace(/'/g, "\\'").replace(/"/g, "&quot;");
+        let safeTitle = cleanTitle.replace(/'/g, "\\'").replace(/"/g, "&quot;");
         let safeNoiDung = noiDung.replace(/'/g, "\\'").replace(/"/g, "&quot;");
         let shortAuthor = getNaturalShortName(item.authorName);
 
@@ -6476,10 +6581,8 @@ window.renderExamCards = function() {
         ` : '';
 
         if (isMeetingMode) {
-            // ================= RENDER THẺ CUỘC HỌP =================
             let topicLabel = noiDung.startsWith('Cuộc họp - ') ? noiDung.substring(11) : noiDung;
             let platform = detectMeetingPlatform(item.url);
-            let cleanTitle = (item.title || "").replace(/^\[(Sắp họp|Sắp diễn ra|Đã kết thúc)\]\s*/i, '').trim();
             let joinAction = `if(typeof setDetailedView === 'function') setDetailedView('Cuộc họp - ${safeTitle}'); window.open('${item.url}', '_blank');`;
 
             let statusBadge = '', actionMainBtn = '';
@@ -6487,12 +6590,26 @@ window.renderExamCards = function() {
                 statusBadge = `<span class="meeting-badge-live"><i class="fa-solid fa-circle fa-beat me-1" style="font-size: 8px;"></i> ĐANG HỌP</span>`;
                 actionMainBtn = `<button class="btn btn-sm text-white fw-bold px-3 rounded-pill shadow-sm" style="background: linear-gradient(135deg, #4f46e5, #6366f1);" onclick="${joinAction}"><i class="fa-solid fa-video me-1"></i> Tham gia ngay</button>`;
             } else if (st === 'upcoming') {
-                statusBadge = `<span class="badge rounded-pill bg-warning text-dark px-3 py-1"><i class="fa-regular fa-calendar-clock me-1"></i> SẮP HỌP</span>`;
+                statusBadge = `<span class="badge rounded-pill bg-warning text-dark px-3 py-1"><i class="fa-regular fa-clock me-1"></i> SẮP HỌP</span>`;
                 actionMainBtn = `<button class="btn btn-sm btn-outline-primary fw-bold px-3 rounded-pill" onclick="${joinAction}"><i class="fa-solid fa-door-open me-1"></i> Phòng chờ</button>`;
             } else {
                 statusBadge = `<span class="badge rounded-pill bg-secondary-subtle text-secondary border px-3 py-1"><i class="fa-solid fa-flag-checkered me-1"></i> ĐÃ KẾT THÚC</span>`;
                 actionMainBtn = `<button class="btn btn-sm btn-outline-secondary fw-bold px-3 rounded-pill" onclick="${joinAction}"><i class="fa-solid fa-file-lines me-1"></i> Xem lại</button>`;
             }
+
+            let timeInfoHtml = sched.scheduledDate
+                ? `<div class="exam-meta-item">
+                        <i class="fa-regular fa-calendar-check" style="color: #6366f1;"></i>
+                        <span>Bắt đầu: <strong>${sched.formattedTime}</strong></span>
+                   </div>
+                   ${st === 'upcoming'
+                        ? `<div class="meeting-countdown-pill" data-start-ts="${sched.scheduledDate.getTime()}"><i class="fa-solid fa-hourglass-half"></i> Đang tính...</div>`
+                        : `<div class="exam-meta-item"><i class="fa-solid fa-circle-check text-success"></i><span>Trạng thái: <strong class="text-success">Đã đến giờ họp</strong></span></div>`
+                   }`
+                : `<div class="exam-meta-item">
+                        <i class="fa-solid fa-clock-rotate-left" style="color: #6366f1;"></i>
+                        <span>Cập nhật: <strong>${item.updateTime || 'Gần đây'}</strong></span>
+                   </div>`;
 
             html += `
             <div class="col-12 col-md-6 col-lg-4">
@@ -6510,10 +6627,7 @@ window.renderExamCards = function() {
                     <h5 class="exam-card-title mb-3">${cleanTitle}</h5>
 
                     <div class="meeting-meta-grid mb-3">
-                        <div class="exam-meta-item">
-                            <i class="fa-solid fa-clock-rotate-left" style="color: #6366f1;"></i>
-                            <span>Cập nhật: <strong>${item.updateTime || 'Gần đây'}</strong></span>
-                        </div>
+                        ${timeInfoHtml}
                         <div class="exam-meta-item">
                             <i class="fa-solid fa-arrow-up-right-from-square" style="color: #059669;"></i>
                             <span>Hình thức: <strong>Họp trực tuyến (${platform.name})</strong></span>
@@ -6535,7 +6649,6 @@ window.renderExamCards = function() {
                 </div>
             </div>`;
         } else {
-            // ================= RENDER THẺ KỲ THI (GIỮ PHONG CÁCH PHÒNG THI) =================
             let isKyThi = noiDung.startsWith('Kỳ thi');
             let courseLabel = noiDung.startsWith('Kỳ thi - ') ? noiDung.substring(9) : noiDung;
             let openClickAction = isKyThi
@@ -6554,6 +6667,17 @@ window.renderExamCards = function() {
                 actionMainBtn = `<button class="btn btn-sm text-white fw-bold px-3 rounded-pill shadow-sm" style="background: #0f4c81;" onclick="${openClickAction}"><i class="fa-solid fa-book-open me-1"></i> Xem lại</button>`;
             }
 
+            let examTimeHtml = sched.scheduledDate
+                ? `<div class="exam-meta-item">
+                        <i class="fa-regular fa-calendar-check text-primary"></i>
+                        <span>Mở đề lúc: <strong>${sched.formattedTime}</strong></span>
+                   </div>
+                   ${st === 'upcoming' ? `<div class="meeting-countdown-pill" data-start-ts="${sched.scheduledDate.getTime()}"><i class="fa-solid fa-hourglass-half"></i> Đang tính...</div>` : ''}`
+                : `<div class="exam-meta-item">
+                        <i class="fa-solid fa-clock-rotate-left text-primary"></i>
+                        <span>Cập nhật: <strong>${item.updateTime || 'Gần đây'}</strong></span>
+                   </div>`;
+
             html += `
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="exam-card-modern status-${st} h-100 d-flex flex-column">
@@ -6567,13 +6691,10 @@ window.renderExamCards = function() {
                     <div class="exam-course-tag mb-1">
                         <i class="fa-solid fa-book-open me-1"></i> ${courseLabel}
                     </div>
-                    <h5 class="exam-card-title mb-3">${item.title}</h5>
+                    <h5 class="exam-card-title mb-3">${cleanTitle}</h5>
 
                     <div class="exam-meta-grid mb-3">
-                        <div class="exam-meta-item">
-                            <i class="fa-solid fa-clock-rotate-left text-primary"></i>
-                            <span>Cập nhật: <strong>${item.updateTime || 'Gần đây'}</strong></span>
-                        </div>
+                        ${examTimeHtml}
                         <div class="exam-meta-item">
                             <i class="fa-solid fa-desktop text-danger"></i>
                             <span>Hình thức: <strong>${isKyThi ? 'Làm trực tiếp (Iframe)' : 'Mở liên kết ngoài'}</strong></span>
@@ -6596,12 +6717,11 @@ window.renderExamCards = function() {
 
     grid.html(html);
 };
-// Giữ lại hàm cũ để tránh lỗi nếu chỗ khác có gọi
+
 window.searchDatLich = function() {
     renderExamCards();
 };
 
-// Cấu hình lại nhãn & tùy chọn Form theo chế độ Kỳ thi / Cuộc họp
 function configureDatLichFormUI(isEdit) {
     let isMeeting = (window.currentDatLichMode === 'cuochop');
     if (isMeeting) {
@@ -6612,12 +6732,12 @@ function configureDatLichFormUI(isEdit) {
                 ? '<i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh sửa cuộc họp'
                 : '<i class="fa-solid fa-video me-2"></i>Tạo cuộc họp mới');
         $('#lblDatLichTen').html('Tiêu đề cuộc họp <span class="text-danger">*</span>');
-        $('#txtDatLichTen').attr('placeholder', 'VD: Họp phân công Đồ án OOP - 20h00 tối nay...');
+        $('#txtDatLichTen').attr('placeholder', 'VD: Họp phân công Đồ án OOP...');
         $('#lblDatLichCourse').html('Chủ đề / Học phần <span class="text-danger">*</span>');
         $('#lblDatLichUrl').html('Link phòng họp (Meet / Zoom / Teams) <span class="text-danger">*</span>');
         $('#selExamStatusForm').html(`
             <option value="live">🟢 Đang họp</option>
-            <option value="upcoming">📅 Sắp họp</option>
+            <option value="upcoming">📅 Sắp họp (Hẹn giờ tự mở)</option>
             <option value="ended">📁 Đã kết thúc</option>
         `);
         $('#btnSaveDatLich').css('background-color', '#6366f1').html('<i class="fa-solid fa-floppy-disk me-1"></i> Lưu cuộc họp');
@@ -6634,12 +6754,13 @@ function configureDatLichFormUI(isEdit) {
         $('#lblDatLichUrl').html('Đường dẫn đề thi (URL) <span class="text-danger">*</span>');
         $('#selExamStatusForm').html(`
             <option value="live">🔴 Đang diễn ra</option>
-            <option value="upcoming">⏳ Sắp diễn ra</option>
+            <option value="upcoming">⏳ Sắp diễn ra (Hẹn giờ tự mở)</option>
             <option value="ended">📦 Luyện lại</option>
         `);
         $('#btnSaveDatLich').css('background-color', '#0f4c81').html('<i class="fa-solid fa-floppy-disk me-1"></i> Lưu kỳ thi');
     }
 }
+
 function openFormDatLich() {
     let isMeeting = (window.currentDatLichMode === 'cuochop');
     if (!currentUser || currentUser.isGuest) {
@@ -6649,9 +6770,10 @@ function openFormDatLich() {
     populateExamCourseFormSelect();
     configureDatLichFormUI(false);
 
-    $('#datLichRowIndex, #txtDatLichTen, #txtDatLichUrl, #txtDatLichNoiDungKhac').val('');
+    $('#datLichRowIndex, #txtDatLichTen, #txtDatLichUrl, #txtDatLichNoiDungKhac, #txtDatLichStartTime').val('');
     $('#selExamStatusForm').val('live');
     $('#txtDatLichNoiDungKhac').addClass('d-none');
+    toggleDatLichTimeInput();
 
     $('#formDatLichArea').removeClass('d-none');
     $('html, body').animate({ scrollTop: $('#formDatLichArea').offset().top - 80 }, 300);
@@ -6659,14 +6781,13 @@ function openFormDatLich() {
 
 function closeFormDatLich() {
     $('#formDatLichArea').addClass('d-none');
-    $('#datLichRowIndex, #txtDatLichTen, #txtDatLichUrl, #txtDatLichNoiDungKhac').val('');
+    $('#datLichRowIndex, #txtDatLichTen, #txtDatLichUrl, #txtDatLichNoiDungKhac, #txtDatLichStartTime').val('');
 }
 
 function editDatLichPost(index) {
     let item = window.datLichCache[index];
     if (!item) return;
 
-    let isMeeting = (window.currentDatLichMode === 'cuochop');
     populateExamCourseFormSelect();
     configureDatLichFormUI(true);
 
@@ -6674,10 +6795,14 @@ function editDatLichPost(index) {
     $('#txtDatLichUrl').val(item.url);
 
     let rawTitle = item.title || "";
+    let sched = parseScheduledStartInfo(rawTitle);
     let statusVal = detectExamStatus(item);
-    let cleanTitle = rawTitle.replace(/^\[(Sắp diễn ra|Sắp họp|Luyện lại|Đã kết thúc)\]\s*/i, '').trim();
+    let cleanTitle = rawTitle.replace(/^\[(Sắp diễn ra|Sắp họp|Luyện lại|Đã kết thúc)(?:\|[^\]]+)?\]\s*/i, '').trim();
+
     $('#txtDatLichTen').val(cleanTitle);
     $('#selExamStatusForm').val(statusVal);
+    $('#txtDatLichStartTime').val(sched.inputVal || '');
+    toggleDatLichTimeInput();
 
     let nd = item.noiDung || "";
     let tenHP = nd.startsWith('Cuộc họp - ')
@@ -6703,6 +6828,7 @@ function saveDatLichPost() {
     let rawTitle = $('#txtDatLichTen').val().trim();
     let url = $('#txtDatLichUrl').val().trim();
     let statusVal = $('#selExamStatusForm').val();
+    let startTimeVal = $('#txtDatLichStartTime').val();
 
     let selectedCourse = $('#selExamCourseForm').val();
     let tenHP = (selectedCourse === 'KHAC') ? $('#txtDatLichNoiDungKhac').val().trim() : selectedCourse;
@@ -6711,24 +6837,35 @@ function saveDatLichPost() {
         alert(`Vui lòng nhập đầy đủ tiêu đề, ${isMeeting ? 'chủ đề' : 'học phần'} và đường dẫn!`);
         return;
     }
+    if (isMeeting && statusVal === 'upcoming' && !startTimeVal) {
+        alert("Vui lòng chọn thời gian bắt đầu cuộc họp!");
+        $('#txtDatLichStartTime').focus();
+        return;
+    }
     if (!url.match(/^https?:\/\//i)) url = 'https://' + url;
+
+    let formattedStart = "";
+    if (statusVal === 'upcoming' && startTimeVal) {
+        let [datePart, timePart] = startTimeVal.split('T');
+        let [yyyy, mm, dd] = datePart.split('-');
+        formattedStart = `${timePart} ${dd}/${mm}/${yyyy}`;
+    }
 
     let finalTitle = rawTitle;
     if (isMeeting) {
-        if (statusVal === 'upcoming' && !rawTitle.toLowerCase().includes('sắp họp')) {
-            finalTitle = `[Sắp họp] ${rawTitle}`;
-        } else if (statusVal === 'ended' && !rawTitle.toLowerCase().includes('đã kết thúc')) {
+        if (statusVal === 'upcoming') {
+            finalTitle = formattedStart ? `[Sắp họp|${formattedStart}] ${rawTitle}` : `[Sắp họp] ${rawTitle}`;
+        } else if (statusVal === 'ended') {
             finalTitle = `[Đã kết thúc] ${rawTitle}`;
         }
     } else {
-        if (statusVal === 'upcoming' && !rawTitle.toLowerCase().includes('sắp diễn ra')) {
-            finalTitle = `[Sắp diễn ra] ${rawTitle}`;
-        } else if (statusVal === 'ended' && !rawTitle.toLowerCase().includes('luyện lại')) {
+        if (statusVal === 'upcoming') {
+            finalTitle = formattedStart ? `[Sắp diễn ra|${formattedStart}] ${rawTitle}` : `[Sắp diễn ra] ${rawTitle}`;
+        } else if (statusVal === 'ended') {
             finalTitle = `[Luyện lại] ${rawTitle}`;
         }
     }
 
-    // Tiền tố phân loại trên cùng Sheet DatLichHen
     let noiDung = (isMeeting ? "Cuộc họp - " : "Kỳ thi - ") + tenHP;
 
     let btn = $('#btnSaveDatLich');
@@ -6768,6 +6905,8 @@ function deleteDatLichPost(rowIndex) {
         alert("Lỗi kết nối khi gửi yêu cầu xóa!");
     });
 }
+
+
 window.adminShowHidden = false; // Mặc định ban đầu CHỈ hiện bài công khai (Góc nhìn Sinh viên)
 
 window.toggleAdminShowHidden = function() {
