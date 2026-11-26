@@ -1,9 +1,10 @@
-const CACHE_NAME = 'apma-app-v1';
+const CACHE_NAME = 'apma-app-v2';
 const STATIC_ASSETS = [
   './',
   './appliedmathematics.html',
   './login.html',
   './TRANGWEB/styleweb.css',
+  './TRANGWEB/styleweb2.css',
   './TRANGWEB/config.js',
   './TRANGWEB/Xulyxacthuc.js',
   './TRANGWEB/tkb.js',
