@@ -71,14 +71,17 @@ window.isShareCodeNew = false;
 window.isDatLichNew = false;
 window.isKyThiNew = false;
 window.isCuocHopNew = false;
+window.isDatLichRecentForNav = false; // Biến riêng cho nút Tiện ích (chỉ bật trong 24h)
 
 function updateSidebarThaoLuanBadge() {
-    if (window.isQAUnanswered || window.isDatLichNew || window.isKyThiNew || window.isCuocHopNew) {
+    // Nút Tiện ích trên Navbar: chỉ hiện "Mới" khi có Q&A chưa trả lời hoặc Kỳ thi/Cuộc họp mới trong 24h
+    if (window.isQAUnanswered || window.isDatLichRecentForNav) {
         $('#shareCodeSidebarBadge').removeClass('d-none');
     } else {
         $('#shareCodeSidebarBadge').addClass('d-none');
     }
 
+    // Các thẻ bên trong Tiện ích vẫn hiện bình thường
     if (window.isQAUnanswered) $('#qaInsideBadge').removeClass('d-none');
     else $('#qaInsideBadge').addClass('d-none');
 
@@ -99,6 +102,7 @@ function checkNewDatLichGlobal() {
                 window.isKyThiNew = false;
                 window.isCuocHopNew = false;
                 window.isDatLichNew = false;
+                window.isDatLichRecentForNav = false;
                 updateSidebarThaoLuanBadge();
                 return;
             }
@@ -107,6 +111,7 @@ function checkNewDatLichGlobal() {
             let oneDayMs = 24 * 60 * 60 * 1000;
             let hasNewKyThi = false;
             let hasNewCuocHop = false;
+            let hasRecentForNav = false;
 
             data.forEach(item => {
                 let time = item.updateTime || '';
@@ -116,9 +121,9 @@ function checkNewDatLichGlobal() {
 
                 if (titleLower.includes("đã kết thúc") || titleLower.includes("luyện lại")) return;
 
-                // Kiểm tra thẻ hẹn giờ [Sắp họp|HH:mm DD/MM/YYYY]
                 let schedMatch = rawTitle.match(/^\[(Sắp họp|Sắp diễn ra)(?:\|(\d{1,2}):(\d{2})\s+(\d{1,2})\/(\d{1,2})\/(\d{4}))?\]/i);
                 let isLiveNow = false;
+                let isWithinOneDay = false;
 
                 if (schedMatch) {
                     if (schedMatch[2] && schedMatch[4]) {
@@ -130,7 +135,10 @@ function checkNewDatLichGlobal() {
                             parseInt(schedMatch[3], 10),
                             0
                         ).getTime();
-                        if (nowTime >= startTs) isLiveNow = true;
+                        if (nowTime >= startTs) {
+                            isLiveNow = true;
+                            if (nowTime - startTs <= oneDayMs) isWithinOneDay = true;
+                        }
                     }
                 } else {
                     let postDate = null;
@@ -141,25 +149,32 @@ function checkNewDatLichGlobal() {
                     } else if (match1) {
                         postDate = new Date(parseInt(match1[3]), parseInt(match1[2]) - 1, parseInt(match1[1]), match1[4] ? parseInt(match1[4]) : 0, match1[5] ? parseInt(match1[5]) : 0, 0);
                     }
-                    if ((postDate && (nowTime - postDate.getTime() <= oneDayMs)) || titleLower.includes("đang diễn ra") || titleLower.includes("đang họp")) {
-                        isLiveNow = true;
+
+                    // Thẻ bên trong: vẫn hiện LIVE miễn là chưa kết thúc / luyện lại
+                    isLiveNow = true;
+
+                    // Nút Tiện ích bên ngoài: chỉ bật nếu đăng trong vòng 24 giờ
+                    if (postDate && (nowTime - postDate.getTime() <= oneDayMs)) {
+                        isWithinOneDay = true;
                     }
                 }
 
                 if (isLiveNow) {
                     if (noiDung.startsWith('Cuộc họp')) hasNewCuocHop = true;
                     else hasNewKyThi = true;
+
+                    if (isWithinOneDay) hasRecentForNav = true;
                 }
             });
 
             window.isKyThiNew = hasNewKyThi;
             window.isCuocHopNew = hasNewCuocHop;
             window.isDatLichNew = false;
+            window.isDatLichRecentForNav = hasRecentForNav;
             updateSidebarThaoLuanBadge();
         }
     });
 }
-
 // 1. Kiểm tra Q&A có câu hỏi mới chưa trả lời
 function checkNewQA() { 
     $.ajax({ 
