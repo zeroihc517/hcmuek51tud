@@ -505,7 +505,7 @@
             <button id="btnAdminMasterTkb" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="loadAdminMasterTkbView()">
                 <i class="fa-solid fa-table-list text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Quản lý MasterTKB
             </button>
-<button id="btnInstallApp" class="dropdown-item py-2 mb-1 d-none align-items-center gap-3 fw-bold" style="color: #10b981; border-radius: 8px; font-size: 14px;" onclick="triggerInstallApp()">
+<button id="btnInstallApp" class="dropdown-item py-2 mb-3 d-flex align-items-center gap-3 fw-bold" style="color: #10b981; border-radius: 8px; font-size: 14px;" onclick="triggerInstallApp()">
     <i class="fa-solid fa-download text-success" style="font-size: 16px; width: 20px; text-align: center;"></i> Tải ứng dụng về máy
 </button>
 
@@ -5817,7 +5817,6 @@ if (isIos && !isStandalone) {
     }
 }
 
-// Hàm xử lý khi người dùng bấm nút "Tải ứng dụng về máy"
 window.triggerInstallApp = async function() {
     if (deferredPrompt) {
         deferredPrompt.prompt();
@@ -5826,8 +5825,10 @@ window.triggerInstallApp = async function() {
             document.getElementById('btnInstallApp')?.classList.add('d-none');
         }
         deferredPrompt = null;
-    } else if (isIos) {
-        alert('Trên iPhone/iPad:\n1. Nhấn vào biểu tượng Chia sẻ (ô vuông có mũi tên đi lên) ở thanh dưới cùng của Safari.\n2. Kéo xuống và chọn "Thêm vào Màn hình chính" (Add to Home Screen).');
+    } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+        alert('Cách tải ứng dụng trên iPhone/iPad:\n1. Nhấn biểu tượng Chia sẻ (ô vuông có mũi tên lên) ở thanh dưới cùng của Safari.\n2. Chọn "Thêm vào Màn hình chính" (Add to Home Screen).');
+    } else {
+        alert('Cách cài đặt ứng dụng về máy:\n• Trên máy tính (Chrome/Edge): Nhấn dấu 3 chấm (⋮) góc trên phải → Lưu và chia sẻ → Cài đặt trang này làm ứng dụng.\n• Trên điện thoại Android: Nhấn dấu 3 chấm (⋮) góc trên phải → Thêm vào màn hình chính / Cài đặt ứng dụng.');
     }
 };
 
