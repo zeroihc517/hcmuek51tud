@@ -11,15 +11,7 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
-<!-- Cấu hình PWA & Mobile App -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0f4c81">
 
-<!-- Hỗ trợ cài đặt toàn màn hình trên iPhone / iPad (iOS Safari) -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="APMA Toán">
-<link rel="apple-touch-icon" href="TRANGWEB/icons/icon-192.png">
 </head>
 <body class="hide-hidden-posts">
 
@@ -490,9 +482,7 @@
             <button class="dropdown-item py-2 mb-4 d-flex align-items-center gap-3 fw-bold" style="color: #0f4c81; border-radius: 8px; font-size: 14px;" onclick="openChangePasswordModal()">
                 <i class="fa-solid fa-ellipsis text-secondary" style="font-size: 16px; width: 20px; text-align: center;"></i> Đổi mật khẩu
             </button>
-<button id="btnInstallApp" class="dropdown-item py-2 mb-3 d-flex align-items-center gap-3 fw-bold" style="color: #10b981; border-radius: 8px; font-size: 14px;" onclick="triggerInstallApp()">
-    <i class="fa-solid fa-download text-success" style="font-size: 16px; width: 20px; text-align: center;"></i> Tải ứng dụng về máy
-</button>
+
             <button class="btn w-100 fw-bold" onclick="logoutStudent()" style="border: 1.5px solid #0f4c81; color: #0f4c81; border-radius: 25px; font-size: 14px; padding: 8px 0; background-color: transparent; transition: all 0.2s;">
                 Đăng xuất
             </button>
@@ -5757,59 +5747,6 @@ $(document).ready(function() {
         openDirectWeb('TUD_HK1_2627/khonggiancode.html', 'Không gian Code');
     };
 </script>
-<script>
-// Đăng ký Service Worker
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('PWA sẵn sàng:', reg.scope))
-            .catch(err => console.error('Lỗi đăng ký SW:', err));
-    });
-}
 
-// Bắt sự kiện cài đặt App (Chrome, Edge, Android)
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    const btn = document.getElementById('btnInstallApp');
-    if (btn) {
-        btn.classList.remove('d-none');
-        btn.classList.add('d-flex');
-    }
-});
-
-// Hiện nút hướng dẫn riêng cho iPhone/iPad (Safari không hỗ trợ beforeinstallprompt)
-const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-if (isIos && !isStandalone) {
-    const btn = document.getElementById('btnInstallApp');
-    if (btn) {
-        btn.classList.remove('d-none');
-        btn.classList.add('d-flex');
-    }
-}
-
-window.triggerInstallApp = async function() {
-    if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-            document.getElementById('btnInstallApp')?.classList.add('d-none');
-        }
-        deferredPrompt = null;
-    } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
-        alert('Cách tải ứng dụng trên iPhone/iPad:\n1. Nhấn biểu tượng Chia sẻ (ô vuông có mũi tên lên) ở thanh dưới cùng của Safari.\n2. Chọn "Thêm vào Màn hình chính" (Add to Home Screen).');
-    } else {
-        alert('Cách cài đặt ứng dụng về máy:\n• Trên máy tính (Chrome/Edge): Nhấn dấu 3 chấm (⋮) góc trên phải → Lưu và chia sẻ → Cài đặt trang này làm ứng dụng.\n• Trên điện thoại Android: Nhấn dấu 3 chấm (⋮) góc trên phải → Thêm vào màn hình chính / Cài đặt ứng dụng.');
-    }
-};
-
-// Ẩn nút sau khi đã cài xong
-window.addEventListener('appinstalled', () => {
-    const btn = document.getElementById('btnInstallApp');
-    if (btn) btn.classList.add('d-none');
-});
-</script>
 </body>
 </html>
